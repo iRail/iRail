@@ -1,0 +1,31 @@
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ *
+ */
+ 
+ 
+DISCLAIMER.
+
+As read on multiple sites, including http://blog.tuinslak.org/2010/06/stopping-irail-be/ the NMBS / SNCB forbids the use of this website/webapp as of 12th June 2010.
+I have complied the the NMBS / SNCB request to stop the website, and therefore the code has become useless to me.
+This is why I have decided to open source it using Git. 
+
+As you can clearly see, this is a very simple data scraping website, stripping off all layout, and inserting my own. Nothing fancy. At all. 
+
+This is open sourced due to popular demand.
+
+I strongly discourage hosting this website anywhere. The NMBS / SNCB WILL SUE YOU. Use the official website instead.
+
+I am NOT responsible if this website, or a part of this website, is actually accessible through a browser. I am only showing you HOW I did it. 
+
+See LICENSE for additional information.
+
+Yeri Tiete aka Tuinslak
+
+http://yeri.be
+http://yeri.be/twitter
+
+17/06/2010
+
+EOF

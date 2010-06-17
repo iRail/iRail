@@ -1,4 +1,12 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
+ 
+ 
 $from = $_COOKIE["from"];
 $to = $_COOKIE["to"];
 $lang = $_COOKIE["language"];
@@ -8,21 +16,21 @@ $lang = $_COOKIE["language"];
 $special = 0;
 
 switch($lang) {
-case "EN":	$txt_from = "From:";
+case "EN":		$txt_from = "From:";
                 $txt_to = "To:";
                 $txt_date = "Date:";
                 $txt_time = "Time:";
-		$txt_arrive = "Arrival";
-		$txt_depart = "Departure";
-		$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+				$txt_arrive = "Arrival";
+				$txt_depart = "Departure";
+				$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
                 break;
-case "NL":	$txt_from = "Van:";
+case "NL":		$txt_from = "Van:";
                 $txt_to = "Naar:";
                 $txt_date = "Datum:";
                 $txt_time = "Tijd:";
                 $txt_arrive = "Aankomst";
                 $txt_depart = "Vertrek";
-		$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+				$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
                 break;
 case "FR":      $txt_from = "De:";
                 $txt_to = "Vers:";
@@ -30,7 +38,7 @@ case "FR":      $txt_from = "De:";
                 $txt_time = "Heure:";
                 $txt_arrive = "Arriv&#233;e";
                 $txt_depart = "D&#233;part";
-		$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+				$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
                 break;
 case "DE":      $txt_from = "Von:";
                 $txt_to = "Nach:";
@@ -38,15 +46,15 @@ case "DE":      $txt_from = "Von:";
                 $txt_time = "Uhrzeit:";
                 $txt_arrive = "Ankunft";
                 $txt_depart = "Abfahrt";
-		$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+				$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
                 break;
-default:	$txt_from = "From:";
+default:		$txt_from = "From:";
                 $txt_to = "To:";
                 $txt_date = "Date:";
                 $txt_time = "Time:";
                 $txt_arrive = "Arrival";
                 $txt_depart = "Departure";
-		$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+				$txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
                 break;
 }
 

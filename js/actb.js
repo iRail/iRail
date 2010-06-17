@@ -1,3 +1,5 @@
+/* iRail by Tuinslak / yeri.be */
+
 function actb(obj,ca){
 	/* ---- Public Variables ---- */
 	this.actb_timeOut = -1; // Autocomplete Timeout in ms (-1: autocomplete never time out)

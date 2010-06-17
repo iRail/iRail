@@ -1,3 +1,5 @@
+/* iRail by Tuinslak / yeri.be */
+
 /* Event Functions */
 
 // Add an event to the obj given

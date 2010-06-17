@@ -1,0 +1,18 @@
+/*
+ * iRail website by Tuinslak - 2008
+ * http://yeri.be - http://irail.be
+ * read the DISCLAIMER !
+ *
+ */
+
+INSTALL 
+
+o	rename _htaccess to .htacces
+o	ln -s HAFAS hafas	 (on Linux/Unix webservers, NMBS isn't very consistent with its capital usage)
+
+o	do not touch the double images in /img/ directory. These are needed to prevent 404s. Yes I'm aware it's a mess. 
+
+
+Should be it
+
+No support given whatsoever

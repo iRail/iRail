@@ -1,4 +1,13 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
+ 
+// international query page
+
 if($from == "" || $to == "" || $from == $to) {
 	header('Location: ..');
 }

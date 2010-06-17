@@ -1,17 +1,26 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
+ 
+// international page
+ 
 $from = $_COOKIE["intfrom"];
 $to = $_COOKIE["intto"];
 $lang = $_COOKIE["language"];
 
 switch($lang) {
-case "EN":	$txt_from = "From:";
+case "EN":		$txt_from = "From:";
                 $txt_to = "To:";
                 $txt_date = "Date:";
                 $txt_time = "Time:";
-		$txt_arrive = "Arrival";
-		$txt_depart = "Departure";
+				$txt_arrive = "Arrival";
+				$txt_depart = "Departure";
                 break;
-case "NL":	$txt_from = "Van:";
+case "NL":		$txt_from = "Van:";
                 $txt_to = "Naar:";
                 $txt_date = "Datum:";
                 $txt_time = "Tijd:";
