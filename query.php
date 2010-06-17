@@ -1,4 +1,13 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
+ 
+// National query page
+
 if($from == "" || $to == "" || $from == $to) {
 	header('Location: ..');
 }
@@ -14,20 +23,20 @@ $lang = $_COOKIE["language"];
 
 switch($lang) {
 case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-		$txt_warn = "Warning: additional information available on the official website.";
-		break;
+			$txt_warn = "Warning: additional information available on the official website.";
+			break;
 case "NL":	$url = "http://hari.b-holding.be/hafas/bin/query.exe/nn?";
-		$txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
-		break;
-case "FR":      $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
-                $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
-		break;
-case "DE":      $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
-                $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
-		break;
+			$txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
+			break;
+case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
+            $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
+			break;
+case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
+            $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
+			break;
 default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-		$txt_warn = "Warning: additional information available on the official website.";
-		break;
+			$txt_warn = "Warning: additional information available on the official website.";
+			break;
 }
 
 // Debug - variable content

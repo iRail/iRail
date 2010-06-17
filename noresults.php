@@ -1,36 +1,42 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
 $lang = $_COOKIE["language"];
 
 switch($lang) {
 case "EN":      $txt_nok = "No reply. Most likely an invalid station name.";
-		$txt_msg = 'An error occured because the NMBS/SNCB site did not provide the expected information. <br />
-			Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
-			You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br /> 
-			So make sure you picked a recent date.';
+				$txt_msg = 'An error occured because the NMBS/SNCB site did not provide the expected information. <br />
+				Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
+				You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br /> 
+				So make sure you picked a recent date.';
                 break;
 case "NL":      $txt_nok = "Geen antwoord. Gebruikte u een geldige stationsnaam?";
                 $txt_msg = 'Er is een fout opgetreden omdat de NMBS website niet het verwachte antwoord gaf. <br />
-			U dient er zeker van te zijn dat u de volledige stationsnaam gebruikt (b.v. Brussel Centraal; inclusief Centraal). <br /><br />
-			U dient er ook bewust van te zijn dat de NMBS website alleen data in een nabije toekomst of verleden ondersteunt.<br />
-			Gebruik dus recente data.';
-		break;
+				U dient er zeker van te zijn dat u de volledige stationsnaam gebruikt (b.v. Brussel Centraal; inclusief Centraal). <br /><br />
+				U dient er ook bewust van te zijn dat de NMBS website alleen data in een nabije toekomst of verleden ondersteunt.<br />
+				Gebruik dus recente data.';
+				break;
 case "FR":      $txt_nok = "Pas de r&#233;ponse. Probablement un nom de gare incorrect.";
                 $txt_msg = 'Le site de la SNCB n\'a pas envoy&#233; la r&#233;ponse attendue. <br />
-			Introduisez le nom complet de la gare (p.e. Bruxelles Central, Bruxelles-Midi, et non Bruxelles tout court)<br /><br />
-			Le site de la SNCB accepte aussi bien les dates &#224; venir que les dates futures, &#224; condition qu\'elles sont proches dans le temps.';
-		break;
+				Introduisez le nom complet de la gare (p.e. Bruxelles Central, Bruxelles-Midi, et non Bruxelles tout court)<br /><br />
+				Le site de la SNCB accepte aussi bien les dates &#224; venir que les dates futures, &#224; condition qu\'elles sont proches dans le temps.';
+				break;
 case "DE":      $txt_nok = "Keine Antwort. Wahrscheinlich falscher Stationname.";
                 $txt_msg = 'An error occured because the NMBS/SNCB site did not provide the expected information. <br />
-                        Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
-                        You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br />
-                        So make sure you picked a recent date.';
-		break;
+                Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
+                You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br />
+                So make sure you picked a recent date.';
+				break;
 default:        $txt_nok = "No reply. Most likely an invalid station name.";
                 $txt_msg = 'An error occured because the NMBS/SNCB site did not provide the expected information. <br />
-                        Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
-                        You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br /> 
-                        So make sure you picked a recent date.';
-		break;
+                Make sure you gave the full station name (e.g. Brussels Central; including Central). <br /><br />
+                You should also know that the NMBS/SNCB website only supoorts queries in the recent future or past.<br /> 
+                So make sure you picked a recent date.';
+				break;
 }
 ?>
 

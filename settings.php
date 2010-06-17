@@ -1,18 +1,27 @@
 <?php
+/*
+ * iRail by Tuinslak
+ * http://yeri.be / http://irail.be
+ * WARNING: read DISCLAIMER
+ *
+ */
+
+// Settings page
+
 $lang = "";
 
 $lang = $_COOKIE["language"];
 
 switch($lang) {
-case "EN":	$txt_lang = "Language:";
+case "EN":		$txt_lang = "Language:";
                 break;
-case "NL":	$txt_lang = "Taal:";
+case "NL":		$txt_lang = "Taal:";
                 break;
 case "FR":      $txt_lang = "Langue:";
                 break;
 case "DE":      $txt_lang = "Sprache:";
                 break;
-default:	$txt_lang = "Language:";
+default:		$txt_lang = "Language:";
                 break;
 }
 ?>
