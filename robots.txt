@@ -1,0 +1,22 @@
+# NMBS / SNCB Route Planner
+# 
+# http://irail.be
+#
+# robots.txt
+# http://tuinslak.be
+#
+
+User-agent: *
+
+# Sitemap
+Sitemap: http://irail.be/sitemap.xml.gz
+
+# Directories
+Disallow: /a/
+Disallow: /backup/
+Disallow: /js/
+Disallow: /old/
+Disallow: /dev/
+Disallow: /sitemap/
+Disallow: /light.php
+
