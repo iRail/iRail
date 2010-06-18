@@ -12,6 +12,7 @@
 $maintenance = 0;
 
 if($maintenance == 0) {
+	// edit URL to match domain/site
 	header('Location: http://irail.be/national');
 }else{
 	echo "Site currently down for maintenance. <br />We apologise for any inconvience this may cause.";
