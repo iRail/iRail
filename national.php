@@ -63,7 +63,7 @@ default:		$txt_from = "From:";
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-<link href="mobile.css" rel="stylesheet" type="text/css" />
+<link href="css/mobile.css" rel="stylesheet" type="text/css" />
 <link rel="apple-touch-icon" href="./img/irail.png" />
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
 <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">

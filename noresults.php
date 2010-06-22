@@ -44,7 +44,7 @@ default:        $txt_nok = "No reply. Most likely an invalid station name.";
 <html>
 <head>
 <link rel="apple-touch-icon" href="./img/irail.png" />
-<link href="mobile.css" rel="stylesheet" type="text/css" />
+<link href="css/mobile.css" rel="stylesheet" type="text/css" />
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
 <title>
 iRail - Error

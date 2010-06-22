@@ -1,0 +1,70 @@
+/* iRail by Tuinslak / yeri.be */
+
+table {
+	border-width: 0px 0px 0px 0px;
+	border-spacing: 10px;
+	border-style: outset outset outset outset;
+	border-color: gray gray gray gray;
+	border-collapse: separate;
+	background-color: white;
+}
+
+form {
+  display: inline;
+  margin: -10px -10px -10px 0;
+  padding: 0px;
+}
+
+td {
+	border-width: 0px 0px 0px 0px;
+	padding: 1px 1px 1px 1px;
+	border-style: dotted dotted dotted dotted;
+	border-color: blue blue blue blue;
+	background-color: white;
+	-moz-border-radius: 6px 6px 6px 6px;
+}
+
+a:visited {
+  text-decoration: none;
+  color:#999999;
+}
+
+a:active {
+  text-decoration: none;
+  color:#999999;
+}
+
+a:hover {
+  text-decoration: underline;
+  color:#999999;
+}
+
+.anchorTop {
+  top: 0;
+}
+
+body {
+  margin: 0px;
+  font-family: Helvetica;
+  font-size: 16px;
+  color: #555;
+  background-color: #FFFFFF
+}
+
+body[orient="profile"] .container {
+  height: 416px;
+}
+
+body[orient="landscape"] .container {
+  height: 268px;
+}
+
+body[orient="landscape"] .toolbar {
+  font-size: 20px;
+}
+
+input, select {
+  font-size: 16px;
+  margin-top: 15px
+
+}
