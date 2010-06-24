@@ -18,7 +18,6 @@ RewriteRule ^int$			international.php		[NC,L]
 RewriteRule ^iresults$			iquery.php			[NC,L]
 RewriteRule ^national$			national.php			[NC,L]
 RewriteRule ^nat$			national.php			[NC,L]
-RewriteRule . 				index.php 			[NC,L]
 
 </IfModule>
 
