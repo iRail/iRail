@@ -4,6 +4,7 @@ Options FollowSymLinks
 <IfModule mod_rewrite.c>
 
 RewriteEngine On
+RewriteBase /
 RewriteRule ^index$			index.php			[NC,L]
 RewriteRule ^index.htm$			index.php			[NC,L]
 RewriteRule ^index.html$		index.php			[NC,L]
