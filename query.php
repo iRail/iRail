@@ -96,8 +96,8 @@ $tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"\
 $body = $tmp_body[0];
 $tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"Weitere Funktionen\">",$body);
 $body = $tmp_body[0];
-$body = str_replace("http://hari.b-holding.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body); 
-$body = str_replace('<a href="http://hari.b-holding.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-holding.be/hafas/bin/stboard.exe', $body);
+$body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body); 
+$body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
 
 // Find if there's a warning icon
 if(strstr($body, "/icon_warning.gif")) {
