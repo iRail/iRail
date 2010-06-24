@@ -11,14 +11,12 @@
 // other = output msg 
 $maintenance = 0;
 
-// get domain + vars
-include 'include/domain.php';
-
 if($maintenance == 0) {
 	// edit URL to match domain/site
-	header('Location: $national');
+	header('Location: national');
 }else{
 	echo "Site currently down for maintenance. <br />We apologise for any inconvience this may cause.";
+	return;
 }
 
 ?>
