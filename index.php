@@ -11,11 +11,18 @@
 // other = output msg 
 $maintenance = 0;
 
-if($maintenance == 0) {
-	// edit URL to match domain/site
-	header('Location: http://irail.be/national');
+// get domain (dev or not ?)
+$domain = str_replace("www.","",$_SERVER['HTTP_HOST']);
+
+if($domain == "irail.be" || $domain == "irail.nl") {
+	if($maintenance == 0) {
+		// edit URL to match domain/site
+		header('Location: http://irail.be/national');
+	}else{
+		echo "Site currently down for maintenance. <br />We apologise for any inconvience this may cause.";
+	}
 }else{
-	echo "Site currently down for maintenance. <br />We apologise for any inconvience this may cause.";
+	header('Location: national.php');
 }
 
 ?>
