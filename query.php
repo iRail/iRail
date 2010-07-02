@@ -32,8 +32,7 @@ $lang = $_COOKIE["language"];
 
 // set text
 switch($lang) {
-case "EN": 	//$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-			$url = "http://blog.tuinslak.org/?";
+case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
 			$txt_late = "Warning: train is delayed.";
 			break;
@@ -167,6 +166,9 @@ if($down != 1) {
 <th>Changes </th>
 <th>Products</th>
 </tr>';
+
+<tr>
+<td conspan="9">
 }
 
 $footer = "</table>";
@@ -184,7 +186,7 @@ if($late == 1) {
 }
 
 echo "<form name=\"return\" method=\"post\" action=\"..\">";
-echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div>";
+echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div></td></tr></table>";
 
 
 
