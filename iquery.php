@@ -33,20 +33,20 @@ $lang = $_COOKIE["language"];
 // set text
 switch($lang) {
 case "EN": 	$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
-		$txt_warn = "Warning: additional information available on the official website.";
-		break;
+			$txt_warn = "Warning: additional information available on the official website.";
+			break;
 case "NL":	$url = "http://plannerint.b-rail.be/bin/query.exe/nn?L=b-rail";
-		$txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
-		break;
-case "FR":      $url = "http://plannerint.b-rail.be/bin/query.exe/f?L=b-rail";
-                $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
-		break;
-case "DE":      $url = "http://plannerint.b-rail.be/bin/query.exe/d?L=b-rail";
-                $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
-		break;
+			$txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
+			break;
+case "FR":  $url = "http://plannerint.b-rail.be/bin/query.exe/f?L=b-rail";
+            $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
+			break;
+case "DE":  $url = "http://plannerint.b-rail.be/bin/query.exe/d?L=b-rail";
+            $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
+			break;
 default:	$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
-		$txt_warn = "Warning: additional information available on the official website.";
-		break;
+			$txt_warn = "Warning: additional information available on the official website.";
+			break;
 }
 
 // Debug - variable content

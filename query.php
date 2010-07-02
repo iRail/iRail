@@ -32,8 +32,7 @@ $lang = $_COOKIE["language"];
 
 // set text
 switch($lang) {
-case "EN": 	//$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-			$url = "http://blog.tuinslak.org/?";
+case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
 			$txt_late = "Warning: train is delayed.";
 			break;
