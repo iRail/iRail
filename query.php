@@ -83,7 +83,10 @@ $data .= "start=submit";
 $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 
 // Debug - HTTP POST result
-//echo $post;
+//echo $post . "<br />";
+echo $url . "<br />";
+echo $data . "<br />";
+echo $request_options . "<br />";
 
 $body = http_parse_message($post)->body; 
 
