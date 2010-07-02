@@ -1,4 +1,4 @@
 <?php
 $c = `cd ../ && git whatchanged`;
-echo $c;
+echo "<pre> . $c . "</pre>";
 ?>
