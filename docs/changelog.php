@@ -1,3 +1,4 @@
 <?php
-echo `../git whatchanged`;
+$c `cd ../ && git whatchanged`;
+echo $c;
 ?>
