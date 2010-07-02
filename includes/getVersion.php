@@ -1,3 +1,3 @@
 <?php
-$irailVersion = `cd .. && git rev-parse --short HEAD`;
+$irailVersion = `git rev-parse --short HEAD`;
 ?>
