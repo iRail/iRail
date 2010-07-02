@@ -80,7 +80,7 @@ $data .= "&timesel=" . $_POST["timesel"];
 $data .= "&";
 $data .= "start=submit";
 
-$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+$post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
