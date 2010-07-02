@@ -1,3 +1,3 @@
 <?php
-$irailChangelog = `cd .. && git whatchanged`
+$irailChangelog = `git whatchanged`
 ?>
