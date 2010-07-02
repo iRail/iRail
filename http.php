@@ -1,6 +1,6 @@
 <?php
 include 'includes/getUA.php';
-include 'includes/getVersion.php';
+//include 'includes/getVersion.php';
 
 $url = "http://blog.tuinslak.org";
 
