@@ -168,10 +168,10 @@ if($down != 1) {
 <th>Duration </th>
 <th>Changes </th>
 <th>Products</th>
-</tr>';
+</tr>
 
 <tr>
-<td conspan="9">
+<td conspan="9">';
 }
 
 $footer = "</table>";
