@@ -1,6 +1,7 @@
 <?php
-$v = `cd .. && git rev-parse --short HEAD`;
-$c = `cd .. && git whatchanged`;
-echo "<pre>Git version: " . $v . "</pre><br /><br />Changelog: <br />";
-echo "<pre>" . $c . "</pre>";
+include '../includes/getVersion.php';
+include '../includes/getChangelog.php';
+
+echo "<pre>Git version: " . $irailVersion . "</pre><br /><br />";
+echo "<pre>Git changelog: <br />" . $irailChangelog . "</pre>";
 ?>
