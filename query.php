@@ -8,19 +8,29 @@
  
 // National query page
 
+// includes
+include 'includes/getUA.php';
+
+// if bad stations, return
 if($from == "" || $to == "" || $from == $to) {
 	header('Location: ..');
 }
 
+// save stations in cookies
 setcookie("from", $_POST['from'], time()+60*60*24*360);
 setcookie("to", $_POST['to'], time()+60*60*24*360);
 
-$request_options = array(referer => "http://irail.be/", 
+// prepare HTTP request
+$request_options = array(
+			referer => "http://irail.be/", 
 			timeout => "30",
-			useragent => "iRail by Tuinslak", 
-			);
+			useragent => $irailAgent, 
+		);
+
+// get lang from cookie
 $lang = $_COOKIE["language"];
 
+// set text
 switch($lang) {
 case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
