@@ -98,10 +98,11 @@ $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 // cut off the junk we don't want 
 $tmp_body = explode("<ul class=\"hafasButtons\" title=\"Further options\">",$body);
 $body = $tmp_body[0];
-$tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"\">",$body);
+$tmp_body = explode("<ul class=\"hafasButtons\" title=\"\">",$body);
 $body = $tmp_body[0];
 $tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"Weitere Funktionen\">",$body);
 $body = $tmp_body[0];
+// replace invalid b-rail shizzle
 $body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
 $body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);  
 $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
@@ -118,6 +119,7 @@ if(strstr($body, "/rt_late_normal_overview.gif")) {
 	$late = 1;
 }
 
+// output error if nmbs site is down down down and down !
 if($down == 1) {
 	$body = "<br />NMBS/SNCB site currently unavailable. Please retry in a few minutes.";
 }
