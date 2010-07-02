@@ -90,14 +90,18 @@ $body = str_replace("<td ", "<td NOWRAP ", $body);
 $body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
 //$body = str_replace("/hafas/", "./hafas/", $body);
 $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
-$tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"Further options\">",$body);
+// cut off the junk we don't want 
+$tmp_body = explode("<ul class=\"hafasButtons\" title=\"Further options\">",$body);
 $body = $tmp_body[0];
 $tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"\">",$body);
 $body = $tmp_body[0];
 $tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"Weitere Funktionen\">",$body);
 $body = $tmp_body[0];
-$body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body); 
+$body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
+$body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);  
 $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
+$body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
+
 
 // Find if there's a warning icon
 if(strstr($body, "/icon_warning.gif")) {
@@ -116,6 +120,7 @@ $header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="css/query.css" rel="stylesheet" type="text/css" />
 <link rel="apple-touch-icon" href="./img/irail.png" />
+<link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
 <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 <script type="application/x-javascript">
