@@ -13,6 +13,8 @@ $request_options = array(
 
 $data = "?iRailTest";
 
+echo $irailVersion;
+
 $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 
 ?>
