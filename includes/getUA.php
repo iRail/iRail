@@ -1,5 +1,7 @@
 <?php
 include 'getVersion.php';
-$irailAgent = "iRail.be by Yeri 'Tuinslak' Tiete (yeri.be); Git version " . $irailVersion;
+echo $irailVersion;
+
+$irailAgent = "iRail.be by Yeri 'Tuinslak' Tiete (yeri.be); Git version: " . $irailVersion;
 ?>
 
