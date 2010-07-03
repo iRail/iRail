@@ -32,8 +32,7 @@ $lang = $_COOKIE["language"];
 
 // set text
 switch($lang) {
-case "EN": 	//$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
-	$url = "http://blog.tuinslak.org/?";
+case "EN": 	$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
 			$txt_warn = "Warning: additional information available on the official website.";
 			break;
 case "NL":	$url = "http://plannerint.b-rail.be/bin/query.exe/nn?L=b-rail";
