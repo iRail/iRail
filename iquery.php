@@ -32,7 +32,8 @@ $lang = $_COOKIE["language"];
 
 // set text
 switch($lang) {
-case "EN": 	$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
+case "EN": 	//$url = "http://plannerint.b-rail.be/bin/query.exe/en?L=b-rail";
+	$url = "http://blog.tuinslak.org/?";
 			$txt_warn = "Warning: additional information available on the official website.";
 			break;
 case "NL":	$url = "http://plannerint.b-rail.be/bin/query.exe/nn?L=b-rail";
@@ -74,8 +75,8 @@ $data .= "start=submit";
 $post = http_post_data($url, $data, $request_options) or die("NMBS/SNCB website timeout. Please refresh.");
 
 // Debug - HTTP POST result
-echo $irailAgent . "<br />";
-echo $post . "<br />";
+//echo $irailAgent . "<br />";
+//echo $post . "<br />";
 //echo $url . "<br />";
 //echo $data . "<br />";
 //echo $request_options . "<br />";
