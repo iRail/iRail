@@ -84,9 +84,9 @@ $post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-echo $url . "<br />";
-echo $data . "<br />";
-print_r( $request_options . "<br />");
+//echo $url . "<br />";
+//echo $data . "<br />";
+//print_r( $request_options . "<br />");
 
 $body = http_parse_message($post)->body; 
 
