@@ -112,7 +112,7 @@ $tmp_body = explode("<ul class=\"hafasButtons\" title=\"Further options\">",$bod
 $body = $tmp_body[0];
 $tmp_body = explode("<ul class=\"hafasButtons\" title=\"\">",$body);
 $body = $tmp_body[0];
-$tmp_body = explode("<table class=\"hafasButtons\" cellspacing=\"0\" summary=\"Weitere Funktionen\">",$body);
+$tmp_body = explode("<ul class=\"hafasButtons\" title=\"Weitere Funktionen\">",$body);
 $body = $tmp_body[0];
 // replace invalid b-rail shizzle
 $body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
