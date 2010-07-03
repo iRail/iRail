@@ -819,7 +819,6 @@ if(date('i') >= '50' && date('i') <= '59') {
 </div>
 </td>
 </tr>
-<tr><td colspan="3"><br /></td></tr>
 <tr>
 <td colspan="3">
 <table width="100%" border="0" align="center" style="text-align:center;">
