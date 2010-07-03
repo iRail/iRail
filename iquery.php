@@ -24,7 +24,7 @@ setcookie("intto", $_POST['to'], time()+60*60*24*360);
 $request_options = array(
 			referer => "http://irail.be/", 
 			timeout => "30",
-			useragent => $irailAgent, 
+			//useragent => $irailAgent, 
 		);
 			
 // get lang from cookie
@@ -83,7 +83,7 @@ $body = http_parse_message($post)->body;
 
 // check if nmbs planner is down
 if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
-        $down = 1;
+    $down = 1;
 }else{
 	$down = 0;
 }
