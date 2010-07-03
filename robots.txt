@@ -17,3 +17,4 @@ Disallow: /includes/
 Disallow: save.php
 Disallow: noresults.php
 Disallow: noresults
+Disallow: *.php$
