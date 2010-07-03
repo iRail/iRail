@@ -166,7 +166,7 @@ if($down != 1) {
 <td></td>
 <th>Duration </th>
 <th>Changes </th>
-<th>Products</th>
+<th>Transportation</th>
 </tr>
 
 <tr>
