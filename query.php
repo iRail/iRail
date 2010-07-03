@@ -186,8 +186,8 @@ if($late == 1) {
 }
 }
 
-echo "<form name=\"return\" method=\"post\" action=\"..\">";
-echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div>";
+echo "<td colspan=\"9\"><form name=\"return\" method=\"post\" action=\"..\">";
+echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div></td></tr></table>";
 
 
 
