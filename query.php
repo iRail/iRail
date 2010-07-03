@@ -172,8 +172,7 @@ if($down != 1) {
 <th>Duration </th>
 <th>Changes </th>
 <th>Transportation</th>
-</tr>
-' 
+</tr>'; 
 }
 
 echo $header;
