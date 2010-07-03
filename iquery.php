@@ -138,11 +138,11 @@ $header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 </head><body>
 ';
 
-$footer = "</table>";
+//$footer = "</table>";
 
 echo $header;
 echo $body;
-echo $footer;
+//echo $footer;
 
 if($warning == 1) {
 	echo "<p style=\"margin:20px;\"><img src=\"./hafas/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p>";

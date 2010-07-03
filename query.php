@@ -143,7 +143,6 @@ $header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <title>iRail - Results</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="css/query.css" rel="stylesheet" type="text/css" />
-<link href="css/mobile.css" rel="stylesheet" type="text/css" />
 <link rel="apple-touch-icon" href="./img/irail.png" />
 <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
