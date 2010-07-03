@@ -24,7 +24,7 @@ setcookie("intto", $_POST['to'], time()+60*60*24*360);
 $request_options = array(
 			referer => "http://irail.be/", 
 			timeout => "30",
-			//useragent => $irailAgent, 
+			useragent => "$irailAgent", 
 		);
 			
 // get lang from cookie
