@@ -24,7 +24,7 @@ setcookie("intto", $_POST['to'], time()+60*60*24*360);
 $request_options = array(
 			referer => "http://irail.be/", 
 			timeout => "30",
-			useragent => "irail", 
+			useragent => $irailVersion, 
 		);
 			
 // get lang from cookie
@@ -74,7 +74,8 @@ $data .= "start=submit";
 $post = http_post_data($url, $data, $request_options) or die("NMBS/SNCB website timeout. Please refresh.");
 
 // Debug - HTTP POST result
-echo $post;
+echo $irailVersion . "<br />";
+echo $post . "<br />";
 //echo $url . "<br />";
 //echo $data . "<br />";
 //echo $request_options . "<br />";
