@@ -9,13 +9,11 @@
 User-agent: *
 
 # Sitemap
-#Sitemap: http://irail.be/sitemap.xml.gz
 
 # Directories
-Disallow: /a/
-Disallow: /backup/
-Disallow: /old/
-Disallow: /dev/
-Disallow: /sitemap/
-Disallow: /light.php
 Disallow: /docs/
+Disallow: _htaccess
+Disallow: /includes/
+Disallow: save.php
+Disallow: noresults.php
+Disallow: noresults
