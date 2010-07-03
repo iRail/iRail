@@ -173,6 +173,7 @@ if($down != 1) {
 <th>Changes </th>
 <th>Transportation</th>
 </tr>
+' 
 }
 
 echo $header;
