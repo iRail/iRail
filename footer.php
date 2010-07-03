@@ -5,5 +5,5 @@ include 'includes/getVersion.php';
 data retrieved from <a href="http://www.b-rail.be/" target="_blank">(B)</a>; 
 Version: 
 <?php 
-echo $irailVersion . "."; 
-?></p>
+echo $irailVersion; 
+?>.</p>
