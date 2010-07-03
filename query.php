@@ -108,12 +108,17 @@ $body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
 //$body = str_replace("/hafas/", "./hafas/", $body);
 $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 // cut off the junk we don't want 
+$tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
+$body = $tmp_body[0];
+/*
+// old site
 $tmp_body = explode("<ul class=\"hafasButtons\" title=\"Further options\">",$body);
 $body = $tmp_body[0];
 $tmp_body = explode("<ul class=\"hafasButtons\" title=\"\">",$body);
 $body = $tmp_body[0];
 $tmp_body = explode("<ul class=\"hafasButtons\" title=\"Weitere Funktionen\">",$body);
 $body = $tmp_body[0];
+*/
 // replace invalid b-rail shizzle
 $body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
 $body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);  
@@ -168,16 +173,10 @@ if($down != 1) {
 <th>Changes </th>
 <th>Transportation</th>
 </tr>
-
-<tr>
-<td conspan="9">';
 }
-
-$footer = "</table>";
 
 echo $header;
 echo $body;
-echo $footer;
 
 if($warning == 1) {
 	echo "<p style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p>";
