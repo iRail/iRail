@@ -6,6 +6,5 @@ data from <a href="http://www.b-rail.be/" target="_blank">(B)</a>;
 version: <a href="changelog">
 <?php 
 $irailVersion = str_replace("\n", "", $irailVersion);
-
 echo $irailVersion; 
 ?></a>.</p>
