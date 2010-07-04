@@ -7,3 +7,4 @@ document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.
 var pageTracker = _gat._getTracker("UA-263695-8");
 pageTracker._trackPageview();
 </script>
+<!-- End of Google Analytics -->
