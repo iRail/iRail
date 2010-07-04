@@ -1,5 +1,15 @@
+#
+# iRail.be .htaccess file
+#
+# by Yeri 'Tuinslak' Tiete	(yeri.be)
+#
+# move to the root folder 
+#
+
 Options -Indexes
-Options FollowSymLinks
+Options -FollowSymLinks
+
+# mod rewrite, I like sexy looking URLs
 
 <IfModule mod_rewrite.c>
 
