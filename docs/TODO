@@ -8,7 +8,6 @@
 o	clean up css and put it in .css file
 o	get rid of station list in national.php and international.php
 o	get list of international stations for international.php
-o	use decent file names (iquery <-> query)
 o	remove redundant code
 o	python sitemap generator is broken, find other one
 o	learn to actually write decent code 
