@@ -8,3 +8,7 @@ version: <a href="changelog">
 $irailVersion = str_replace("\n", "", $irailVersion);
 echo $irailVersion; 
 ?></a>.</p>
+
+<?php
+include 'includes/googleAnalytics.php';
+?>

@@ -823,11 +823,5 @@ if(date('i') >= '50' && date('i') <= '59') {
 include 'footer.php';
 ?>
 </div></div></div>
-
-<?php
-include 'ga.inc.php';
-?>
-
 </body>
 </html>
-

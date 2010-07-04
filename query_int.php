@@ -152,9 +152,5 @@ if($warning == 1) {
 echo "<form name=\"return\" method=\"post\" action=\"international\">";
 echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div>";
 
-
-
-include 'ga.inc.php';
-
 echo "<br /></body></html>";
 ?>

@@ -79,11 +79,5 @@ iRail - Settings
 include 'footer.php';
 ?>
 </div></div></div>
-
-<?php
-include 'ga.inc.php';
-?>
-
 </body>
 </html>
-
