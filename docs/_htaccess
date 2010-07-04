@@ -7,7 +7,7 @@
 #
 
 Options -Indexes
-Options -FollowSymLinks
+Options FollowSymLinks
 
 # mod rewrite, I like sexy looking URLs
 
