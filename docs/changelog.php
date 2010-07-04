@@ -26,7 +26,7 @@ echo "<pre>iRail Git changelog: <br /><br />" . $irailChangelog . "</pre>";
 ?>
 
 <?php
-include '../ga.inc.php';
+include '../includes/googleAnalytics.php';
 ?>
 
 </body>
