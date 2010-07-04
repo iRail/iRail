@@ -5,7 +5,6 @@
  *
  */
  
-o	fix scraping part, NMBS changed the output file, not enough stuff gets removed 
 o	clean up css and put it in .css file
 o	get rid of station list in national.php and international.php
 o	get list of international stations for international.php
