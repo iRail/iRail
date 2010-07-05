@@ -132,7 +132,7 @@ if(strstr($body, "/icon_warning.gif")) {
 }
 
 // Find if trains are late... AGAIN !!!!
-if(strstr($body, "/rt_late_normal_overview.gif") || $body, "/rt_late_critical_overview_2.gif")) {
+if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_critical_overview_2.gif")) {
 	$late = 1;
 }
 
