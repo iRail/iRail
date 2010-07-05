@@ -45,12 +45,12 @@ case "NL":	$url = "http://hari.b-holding.be/hafas/bin/query.exe/nn?";
 case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
             $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
             $txt_late = "Attention: train a du retard.";
-            $txt_alt = "Attention: itin&#233;raire alternatif est disponible."
+            $txt_alt = "Attention: itin&#233;raire alternatif est disponible.";
 			break;
 case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
             $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
             $txt_late = "Achtung: Zug verz&#246;gert sich.";
-            $txt_alt = "Achtung: alternative Route verf&#252;gbar ist."
+            $txt_alt = "Achtung: alternative Route verf&#252;gbar ist.";
 			break;
 default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
