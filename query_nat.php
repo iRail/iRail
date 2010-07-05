@@ -188,19 +188,19 @@ if($down != 1) {
 echo $header;
 echo $body;
 
-echo "<tr><td colspan=\"9\">";
+echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:12px;\">";
 
 if($warning == 1) {
-	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div>";
+	echo "<img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn <br />";
 }
 if($late == 1) {
-	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div>";
+	echo "<img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late <br />";
 }
 if($alt_route == 1) {
-	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Alternative route icon\" /> $txt_alt </div>";
+	echo "<img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Alternative route icon\" /> $txt_alt <br />";
 }
 
-echo "</td></tr>";
+echo "</div></td></tr>";
 
 }
 
