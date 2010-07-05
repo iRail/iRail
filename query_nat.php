@@ -179,10 +179,10 @@ echo $header;
 echo $body;
 
 if($warning == 1) {
-	echo "<p style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p>";
+	echo "<td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p></td>";
 }
 if($late == 1) {
-	echo "<p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </p>";
+	echo "<td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </p></td>";
 }
 }
 
