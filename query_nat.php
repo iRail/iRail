@@ -35,22 +35,27 @@ switch($lang) {
 case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
 			$txt_late = "Warning: train is delayed.";
+			$txt_alt = "Warning: alternative route available.";
 			break;
 case "NL":	$url = "http://hari.b-holding.be/hafas/bin/query.exe/nn?";
 			$txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
 			$txt_late = "Opgelet: trein heeft vertraging.";
+			$txt_alt = "Opgelet: alternatieve route beschikbaar.";
 			break;
 case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
             $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
             $txt_late = "Attention: train a du retard.";
+            $txt_alt = "Attention: itin&#233;raire alternatif est disponible."
 			break;
 case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
             $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
             $txt_late = "Achtung: Zug verz&#246;gert sich.";
+            $txt_alt = "Achtung: alternative Route verf&#252;gbar ist."
 			break;
 default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
 			$txt_late = "Warning: train is delayed.";
+			$txt_alt = "Warning: alternative route available.";
 			break;
 }
 
@@ -136,6 +141,11 @@ if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_crit
 	$late = 1;
 }
 
+// Find if an alternative route is available (due to lateness...)
+if(strstr($body, "/rt_late_alternative_overview.gif")) {
+	$alt_route = 1;
+}
+
 // output error if nmbs site is down down down and down !
 if($down == 1) {
 	$body = "<br />NMBS/SNCB site currently unavailable. Please retry in a few minutes.";
@@ -184,6 +194,10 @@ if($warning == 1) {
 if($late == 1) {
 	echo "<td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </p></td>";
 }
+if($alt_route == 1) {
+	echo "<td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </p></td>";
+}
+
 }
 
 echo "<td colspan=\"9\"><form name=\"return\" method=\"post\" action=\"..\">";
