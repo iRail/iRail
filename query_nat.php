@@ -200,7 +200,7 @@ if($alt_route == 1) {
 
 }
 
-echo "<td colspan=\"9\"><form name=\"return\" method=\"post\" action=\"..\">";
+echo "<tr><td colspan=\"9\"><form name=\"return\" method=\"post\" action=\"..\">";
 echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div></td></tr></table>";
 
 echo "<br /></body></html>";
