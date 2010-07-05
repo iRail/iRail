@@ -189,13 +189,13 @@ echo $header;
 echo $body;
 
 if($warning == 1) {
-	echo "<tr><td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
 }
 if($late == 1) {
-	echo "<tr><td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </p></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
 }
 if($alt_route == 1) {
-	echo "<tr><td colspan=\"9\"><p style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </p></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
 }
 
 }
