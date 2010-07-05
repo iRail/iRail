@@ -50,7 +50,7 @@ case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
 case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
             $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
             $txt_late = "Achtung: Zug verz&#246;gert sich.";
-            $txt_alt = "Achtung: alternative Route verf&#252;gbar ist.";
+            $txt_alt = "Achtung: eine alternative Route ist verf&#252;gbar.";
 			break;
 default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 			$txt_warn = "Warning: additional information available on the official website.";
@@ -189,13 +189,13 @@ echo $header;
 echo $body;
 
 if($warning == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
 }
 if($late == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
 }
 if($alt_route == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
 }
 
 }
