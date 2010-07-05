@@ -70,19 +70,26 @@ echo "h: " . $h . "<br />";
 echo "m: " . $m . "<br />";
 */
 
+// Create time vars
 $time = $h . $m;
 $date = $d . $mo . $y;
+// Create google map vars without [B] stuff (edit: new nmbs site doesn't use [B] anymore!)
 $m_from = $_POST["from"];
 $m_to = $_POST["to"];
 
+// Correct Brussels South/Midi to use "-" instead of space; else = error
+if(strtoupper($_POST["from"]) == "BRUSSEL MIDI") {
+	$_POST["from"] = "BRUSSEL-MIDI";
+}
+if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
+	$_POST["from"] = "BRUSSEL-ZUID";
+}
+
+
 $data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
-//$data .= "from=" . $_POST["from"] . "[B]";
-$data .= "" . $_POST["from"] . "";
-//$date .= "&typefrom=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA";
+$data .= $_POST["from"];
 $data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
-//$data .= "&to=" . $_POST["to"] . "[B]";
-$data .= "" . $_POST["to"] . "";
-//$date .= "&typeto=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA";
+$data .= $_POST["to"];
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
 $data .= "&timesel=" . $_POST["timesel"];
@@ -93,8 +100,8 @@ $post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-echo $url . "<br />";
-echo $data . "<br />";
+//echo $url . "<br />";
+//echo $data . "<br />";
 
 $body = http_parse_message($post)->body; 
 
