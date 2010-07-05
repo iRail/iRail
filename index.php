@@ -18,7 +18,7 @@ $dev = 0;
 // get current domain
 $domain = str_replace("www.","",$_SERVER['HTTP_HOST']);
 
-if($dev == 0 && && $domain != "irail.be" && $domain != "irail.nl") {
+if($dev == 0 && $domain != "irail.be" && $domain != "irail.nl") {
 	header('Location: http://irail.be');
 }
 
