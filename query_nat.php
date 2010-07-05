@@ -75,10 +75,14 @@ $date = $d . $mo . $y;
 $m_from = $_POST["from"];
 $m_to = $_POST["to"];
 
-$data = "from=" . $_POST["from"] . "[B]";
-$date .= "&typefrom=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA";
-$data .= "&to=" . $_POST["to"] . "[B]";
-$date .= "&typeto=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA";
+$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
+//$data .= "from=" . $_POST["from"] . "[B]";
+$data .= "" . $_POST["from"] . "";
+//$date .= "&typefrom=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA";
+$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
+//$data .= "&to=" . $_POST["to"] . "[B]";
+$data .= "" . $_POST["to"] . "";
+//$date .= "&typeto=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA";
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
 $data .= "&timesel=" . $_POST["timesel"];
