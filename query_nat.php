@@ -49,7 +49,7 @@ case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
 			break;
 case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
             $txt_warn = "Achtung: Befragen Sie ein offizielles Netz f&#252;r Baustelleninfos.";
-            $txt_late = "Achtung: Zug verz&#246;gert sich.";
+            $txt_late = "Achtung: Zug wird verz&#246;gert.";
             $txt_alt = "Achtung: eine alternative Route ist verf&#252;gbar.";
 			break;
 default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
@@ -89,7 +89,7 @@ $post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-//echo $url . "<br />";
+echo $url . "<br />";
 //echo $data . "<br />";n
 
 $body = http_parse_message($post)->body; 
@@ -153,20 +153,20 @@ if($down == 1) {
 
 
 $header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html lang="en">
-<head>
-<title>iRail - Results</title>
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<link href="css/query.css" rel="stylesheet" type="text/css" />
-<link rel="apple-touch-icon" href="./img/irail.png" />
-<link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
-<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
-<script type="application/x-javascript">
-	addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false);
-	function hideAddressBar() { window.scrollTo(0, 1); }
-</script>
-</head><body>';
+			<html lang="en">
+			<head>
+			<title>iRail - Results</title>
+			<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+			<link href="css/query.css" rel="stylesheet" type="text/css" />
+			<link rel="apple-touch-icon" href="./img/irail.png" />
+			<link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
+			<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+			<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+			<script type="application/x-javascript">
+			addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false);
+			function hideAddressBar() { window.scrollTo(0, 1); }
+			</script>
+		   </head><body>';
 
 if($down != 1) {
 	$header .= '
@@ -188,15 +188,19 @@ if($down != 1) {
 echo $header;
 echo $body;
 
+echo "<tr><td colspan=\"9\">";
+
 if($warning == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
+	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div>";
 }
 if($late == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
+	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div>";
 }
 if($alt_route == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
+	echo "<div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Alternative route icon\" /> $txt_alt </div>";
 }
+
+echo "</td></tr>";
 
 }
 
