@@ -170,32 +170,32 @@ $header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
 if($down != 1) {
 	$header .= '
-<div class="anchorTop">
-<table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
-<tr>
-<td></td>
-<th>Station </th>
-<th>Date </th>
-<td></td>
-<th>Time </th>
-<td></td>
-<th>Duration </th>
-<th>Changes </th>
-<th>Transportation</th>
-</tr>'; 
-}
+		<div class="anchorTop">
+		<table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
+		<tr>
+		<td></td>
+		<th>Station </th>
+		<th>Date </th>
+		<td></td>
+		<th>Time </th>
+		<td></td>
+		<th>Duration </th>
+		<th>Changes </th>
+		<th>Transportation</th>
+		</tr>'; 
+	}
 
 echo $header;
 echo $body;
 
 if($warning == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </div></td></tr>";
 }
 if($late == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_normal_overview.gif\" alt=\"Late icon\" /> $txt_late </div></td></tr>";
 }
 if($alt_route == 1) {
-	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:-2;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
+	echo "<tr><td colspan=\"9\"><div style=\"margin:20px;font-size:10px;\"><img src=\"./HAFAS/img/rt_late_alternative_overview.gif\" alt=\"Late icon\" /> $txt_alt </div></td></tr>";
 }
 
 }
