@@ -69,12 +69,26 @@ default:		$txt_from = "From:";
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
 <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
 <meta name="language" content="en"> 
-<META NAME="DESCRIPTION" CONTENT="NMBS/SNCB iPhone train route planner.">
+<META NAME="DESCRIPTION" CONTENT="NMBS/SNCB mobile iPhone train route planner.">
 <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=" />
 <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 <title>
 iRail
 </title>
+
+<script type="application/x-javascript">
+
+if (navigator.userAgent.indexOf('iPhone') != -1) {
+        addEventListener("load", function() {
+                setTimeout(hideURLbar, 0);
+        }, false);
+}
+
+function hideURLbar() {
+        window.scrollTo(0, 1);
+}
+
+</script>
 
 <script language="javascript" type="application/x-javascript"> function switch_station() {
       var tmp = "";
