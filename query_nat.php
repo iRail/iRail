@@ -111,6 +111,22 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 	$down = 0;
 }
 
+// Check if nmbs site asks for additional station info (brugge, aalst, asse, …)
+if(stristr($body, "Bevestig uw keuze") {
+	$data = "";
+	$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
+	$data .= $_POST["from"];
+	$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
+	$data .= $_POST["to"];
+	$data .= "&date=" . $date;
+	$data .= "&time=" . $time;
+	$data .= "&timesel=" . $_POST["timesel"];
+	$data .= "&";
+	$data .= "start=bevestig";
+	$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+	$body = http_parse_message($post)->body;
+}
+
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
@@ -120,7 +136,6 @@ if($body == "" && $down == 0) {
 $body = str_replace("<img ", "<img border=\"0\" ", $body);
 $body = str_replace("<td ", "<td NOWRAP ", $body);
 $body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
-//$body = str_replace("/hafas/", "./hafas/", $body);
 $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 // cut off the junk we don't want 
 $tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
