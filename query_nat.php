@@ -84,6 +84,11 @@ if(strtoupper($_POST["from"]) == "BRUSSEL MIDI") {
 if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
 	$_POST["from"] = "BRUSSEL-ZUID";
 }
+// Fix Asse
+if(strtoupper($_POST["from"]) == "ASSE") {
+	$_POST["from"] = "ASSE [B]";
+}
+
 
 
 $data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
