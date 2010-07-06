@@ -92,9 +92,9 @@ if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
 
 
 $data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
-$data .= "" . $_POST["from"] + " [B]";
+$data .= "&from=" . $_POST["from"] + " [B]";
 $data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
-$data .= "" . $_POST["to"] + " [B]";
+$data .= "&to=" . $_POST["to"] + " [B]";
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
 $data .= "&timesel=" . $_POST["timesel"];
