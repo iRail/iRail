@@ -41,15 +41,15 @@ $Rec_Data = curl_exec($ch);
  $Final_Out=ob_get_clean();
  echo $Final_Out;
  curl_close($ch);
-} 
+ 
  
 	
 	
-	echo $url;
+/*	echo $url;
 	echo $data;
 	echo "<br /><br /><br /><br />";
 	echo $body;
-
+*/
 
 
 
