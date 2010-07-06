@@ -13,7 +13,7 @@ $maintenance = 0;
 
 // set dev mode on/off
 // if dev is false, redirect to http://irail.be 
-$dev = 1;
+$dev = 0;
 
 // get current domain
 $domain = str_replace("www.","",$_SERVER['HTTP_HOST']);
