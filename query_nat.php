@@ -101,8 +101,8 @@ $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB we
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-echo $url . "<br />";
-echo $data . "<br />";
+//echo $url . "<br />";
+//echo $data . "<br />";
 
 $body = http_parse_message($post)->body; 
 
@@ -112,31 +112,6 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 }else{
 	$down = 0;
 }
-
-// Check if nmbs site asks for additional station info (brugge, aalst, asse, …)
-/*
-if(stristr($body, "Bevestig uw keuze")) {
-	$data = "";
-	$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
-	$data .= $_POST["from"];
-	$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
-	$data .= $_POST["to"];
-	$data .= "&date=" . $date;
-	$data .= "&time=" . $time;
-	$data .= "&timesel=" . $_POST["timesel"];
-	$data .= "&";
-	$data .= "start=bevestig";
-	
-	$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
-	
-	$body = http_parse_message($post)->body;
-	
-	echo $url;
-	echo $data;
-	echo "<br /><br /><br /><br />";
-	echo $body;
-}
-*/
 
 $body = strstr($body, "<!-- infotravaux-->");
 
