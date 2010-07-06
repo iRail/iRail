@@ -130,6 +130,7 @@ if(stristr($body, "Bevestig uw keuze")) {
 	
 	$body = http_parse_message($post)->body;
 	
+	echo $url;
 	echo $data;
 	echo "<br /><br /><br /><br />";
 	echo $body;
