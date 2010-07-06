@@ -76,20 +76,6 @@ default:		$txt_from = "From:";
 iRail
 </title>
 
-<script type="application/x-javascript">
-
-if (navigator.userAgent.indexOf('iPhone') != -1) {
-        addEventListener("load", function() {
-                setTimeout(hideURLbar, 0);
-        }, false);
-}
-
-function hideURLbar() {
-        window.scrollTo(0, 1);
-}
-
-</script>
-
 <script language="javascript" type="application/x-javascript"> function switch_station() {
       var tmp = "";
       tmp = document.getElementById("from").value;
