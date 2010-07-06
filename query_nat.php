@@ -119,8 +119,8 @@ $tmp_body = $body;
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
-	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1";
-	$tmp_url = stristr($tmp_body, "\"";
+	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1");
+	$tmp_url = stristr($tmp_body, "\"");
 	echo $tmp_url;
 }
 	
