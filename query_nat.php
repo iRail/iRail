@@ -101,8 +101,8 @@ $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB we
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-//echo $url . "<br />";
-//echo $data . "<br />";
+echo $url . "<br />";
+echo $data . "<br />";
 
 $body = http_parse_message($post)->body; 
 
@@ -114,6 +114,7 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 }
 
 // Check if nmbs site asks for additional station info (brugge, aalst, asse, …)
+/*
 if(stristr($body, "Bevestig uw keuze")) {
 	$data = "";
 	$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
@@ -135,6 +136,7 @@ if(stristr($body, "Bevestig uw keuze")) {
 	echo "<br /><br /><br /><br />";
 	echo $body;
 }
+*/
 
 $body = strstr($body, "<!-- infotravaux-->");
 
