@@ -127,6 +127,10 @@ if(stristr($body, "Bevestig uw keuze")) {
 	$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 	
 	$body = http_parse_message($post)->body;
+	
+	echo $data;
+	echo "<br /><br /><br /><br />";
+	echo $body;
 }
 
 $body = strstr($body, "<!-- infotravaux-->");
