@@ -37,8 +37,9 @@ $Rec_Data = curl_exec($ch);
  //$Temp_Output = ereg_replace (' +', ' ', trim($Temp_Output));
  //$Temp_Output = ereg_replace("[\r\t\n]","",$Temp_Output);
  //$Temp_Output = substr($Temp_Output,307,200);
- echo $Temp_Output;
+ echo "<pre>" . $Temp_Output . "</pre>";
  $Final_Out=ob_get_clean();
+ echo "<br /><br /><br /><br /><br /><br /><br /><br />";
  echo $Final_Out;
  curl_close($ch);
  
