@@ -105,8 +105,8 @@ $post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-//echo $url . "<br />";
-//echo $data . "<br />";
+echo $url . "<br />";
+echo $data . "<br />";
 
 $body = http_parse_message($post)->body; 
 
