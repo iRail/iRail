@@ -113,11 +113,21 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 	$down = 0;
 }
 
+// tmp body in case of special stationnames (http://yeri.be/cc)
+$tmp_body = $body;
+
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
-	header('Location: noresults');
-}else{
+	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1";
+	$tmp_url = stristr($tmp_body, "\"";
+	echo $tmp_url;
+}
+	
+	
+	
+//	header('Location: noresults');
+
 
 $body = str_replace("<img ", "<img border=\"0\" ", $body);
 $body = str_replace("<td ", "<td NOWRAP ", $body);
@@ -214,8 +224,6 @@ if($warning == 1 || $late == 1 || $alt_route == 1) {
 	}
 
 echo "</div></td></tr>";
-
-}
 
 }
 
