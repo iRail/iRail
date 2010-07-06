@@ -25,7 +25,7 @@ $url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 	
 $ch = curl_init("http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1&ident=k4.0538412.1278427697&OK");
 curl_setopt($ch, CURLOPT_POST      ,1);
-curl_setopt($ch, CURLOPT_POSTFIELDS    , "");
+curl_setopt($ch, CURLOPT_POSTFIELDS    , "__utmb=1.4.10.1278422421; __utmz=1.1278422421.7.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmc=1");
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION  ,1);
 curl_setopt($ch, CURLOPT_HEADER      ,0);  // DO NOT RETURN HTTP HEADERS
 curl_setopt($ch, CURLOPT_RETURNTRANSFER  ,1);  // RETURN THE CONTENTS OF THE CALL
