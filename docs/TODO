@@ -9,8 +9,8 @@ o	clean up css and put it in .css file
 o	get rid of station list in national.php and international.php
 o	get list of international stations for international.php
 o	remove redundant code
-o	python sitemap generator is broken, find other one
-o	learn to actually write decent code 
+o	python sitemap generator is broken, find other one (?)
+o	align center or something, check effect on iPad.
 o	make sure to not get sued :(
 
 Keep in mind, work in progress. Website was never completely finished (and hard to do without an API)
