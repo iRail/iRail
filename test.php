@@ -14,6 +14,10 @@ if(true) {
 	$data .= "&";
 	$data .= "start=bevestig";
 	
+	$url .= $data;
+	
+	$data =	"__utma=1.1333636757.1252318191.1254576431.1255378610.7; __utmb=1.4.10.1278422421; __utmz=1.1278422421.7.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmc=1"
+	
 	$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 	
 	$body = http_parse_message($post)->body;
