@@ -89,19 +89,18 @@ if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
 //	$_POST["from"] = "ASSE [B]";
 //}
 
-
-/*
-$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;"; //GA&REQ0JourneyStopsS0G=";
-$data .= "&from=" . $_POST["from"] + " [B]";
-$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;"; //GA&REQ0JourneyStopsZ0G=";
-$data .= "&to=" . $_POST["to"] + " [B]";
+$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
+$data .= $_POST["from"];
+$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
+$data .= $_POST["to"];
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
 $data .= "&timesel=" . $_POST["timesel"];
 $data .= "&";
 $data .= "start=submit";
-*/
 
+
+/*
 $data = "from=" . $_POST["from"] . "[B]";
 $date .= "&typefrom=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA";
 $data .= "&to=" . $_POST["to"] . "[B]";
@@ -111,7 +110,7 @@ $data .= "&time=" . $time;
 $data .= "&timesel=" . $_POST["timesel"];
 $data .= "&";
 $data .= "start=submit";
-
+*/
 
 $post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 
