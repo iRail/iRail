@@ -84,10 +84,6 @@ if(strtoupper($_POST["from"]) == "BRUSSEL MIDI") {
 if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
 	$_POST["from"] = "BRUSSEL-ZUID";
 }
-// Fix Asse
-//if(strtoupper($_POST["from"]) == "ASSE") {
-//	$_POST["from"] = "ASSE [B]";
-//}
 
 $data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
 $data .= $_POST["from"];
@@ -99,25 +95,12 @@ $data .= "&timesel=" . $_POST["timesel"];
 $data .= "&";
 $data .= "start=submit";
 
-
-/*
-$data = "from=" . $_POST["from"] . "[B]";
-$date .= "&typefrom=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA";
-$data .= "&to=" . $_POST["to"] . "[B]";
-$date .= "&typeto=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA";
-$data .= "&date=" . $date;
-$data .= "&time=" . $time;
-$data .= "&timesel=" . $_POST["timesel"];
-$data .= "&";
-$data .= "start=submit";
-*/
-
-$post = http_post_data($url, $data, $request_options); //or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 
 // Debug - HTTP POST result
 //echo $post . "<br />";
-echo $url . "<br />";
-echo $data . "<br />";
+//echo $url . "<br />";
+//echo $data . "<br />";
 
 $body = http_parse_message($post)->body; 
 
