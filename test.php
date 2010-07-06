@@ -5,9 +5,9 @@ $url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
 if(true) {
 	$data = "";
 	$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
-	$data .= $_POST["from"];
+	$data .= "aalst";
 	$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
-	$data .= $_POST["to"];
+	$data .= "vilvoorde";
 	$data .= "&date=" . $date;
 	$data .= "&time=" . $time;
 	$data .= "&timesel=" . $_POST["timesel"];
