@@ -25,6 +25,8 @@ $request_options = array(
 			referer => "http://irail.be/", 
 			timeout => "30",
 			useragent => $irailAgent, 
+			cookiestore => "/tmp/irail/";
+			cookiesession => false;
 		);
 
 // get lang from cookie
