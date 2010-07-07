@@ -10,6 +10,7 @@ INSTALL
 o	rename _htaccess to .htacces
 o	ln -s HAFAS hafas	 (on Linux/Unix webservers, NMBS isn't very consistent with its capital usage)
 o	make sure you have PECL-HTTP (dev-php5/pecl-http) installed for PHP
+o	PHP 5.3.x needed (for stristr reverse thingie)
 o	do not touch the double images in /img/ directory. These are needed to prevent 404s. Yes I'm aware it's a mess. 
 
 

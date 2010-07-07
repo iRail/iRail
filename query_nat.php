@@ -25,8 +25,6 @@ $request_options = array(
 			referer => "http://irail.be/", 
 			timeout => "30",
 			useragent => $irailAgent, 
-			cookiestore => "/tmp/irail/",
-			cookiesession => false,
 		);
 
 // get lang from cookie
@@ -120,8 +118,9 @@ $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
 	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1");
-	$tmp_url = stristr($tmp_body, "\"", true);
-	$tmp_url = "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=2" . $tmp_url;
+	$tmp_url = stristr($tmp_body, "\"");
+	str_replace("seqnr=1", "seqnr=2", $tmp_url); 
+//	$tmp_url = "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=2" . $tmp_url;
 	echo $tmp_url;
 }
 	
