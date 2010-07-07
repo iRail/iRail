@@ -118,10 +118,15 @@ $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
 	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1");
+	// requires php 5.3 !! 
 	$tmp_url = stristr($tmp_body, "\"", true);
 	$tmp_url = str_replace("seqnr=1", "seqnr=2", $tmp_url); 
-//	$tmp_url = "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=2" . $tmp_url;
 	echo $tmp_url;
+	
+	$post = http_post_data($tmp_url, "", $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+	$body = http_parse_message($post)->body;
+	echo $body;
+	return;
 }
 	
 	
