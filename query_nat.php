@@ -111,12 +111,20 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 	$down = 0;
 }
 
+// TEST Stations !!
+
 // tmp body in case of special stationnames (http://yeri.be/cc)
 $tmp_body = $body;
 
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
+	// redirect to no results page
+	header('Location: noresults');
+	
+	/*
+	// doesn't work .. :(
+	
 	$tmp_body = stristr($tmp_body, "http://hari.b-rail.be/HAFAS/bin/query.exe/nn?seqnr=1");
 	// requires php 5.3 !! 
 	$tmp_url = stristr($tmp_body, "\"", true);
@@ -127,12 +135,9 @@ if($body == "" && $down == 0) {
 	$body = http_parse_message($post)->body;
 	echo $body;
 	return;
+	
+	*/
 }
-	
-	
-	
-//	header('Location: noresults');
-
 
 $body = str_replace("<img ", "<img border=\"0\" ", $body);
 $body = str_replace("<td ", "<td NOWRAP ", $body);
@@ -141,21 +146,11 @@ $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 // cut off the junk we don't want 
 $tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
 $body = $tmp_body[0];
-/*
-// old site
-$tmp_body = explode("<ul class=\"hafasButtons\" title=\"Further options\">",$body);
-$body = $tmp_body[0];
-$tmp_body = explode("<ul class=\"hafasButtons\" title=\"\">",$body);
-$body = $tmp_body[0];
-$tmp_body = explode("<ul class=\"hafasButtons\" title=\"Weitere Funktionen\">",$body);
-$body = $tmp_body[0];
-*/
 // replace invalid b-rail shizzle
 $body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
 $body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);  
 $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
 $body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
-
 
 // Find if there's a warning icon
 if(strstr($body, "/icon_warning.gif")) {
