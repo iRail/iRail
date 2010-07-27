@@ -4,6 +4,14 @@
  * read the DISCLAIMER !
  *
  */
+
+Urgent:
+
+o	Fix stations such as Mechelen and Mechelen-NEKKERSPOEL
+		=> NMBS shows intermediate page
+			=> see http://yeri.be/cc
+
+Normal:
  
 o	clean up css and put it in .css file
 o	get rid of station list in national.php and international.php
@@ -13,5 +21,6 @@ o	python sitemap generator is broken, find other one (?)
 o	align center or something, check effect on iPad.
 o	make sure to not get sued :(
 o	veranda font for people with bad eye sight
+o	use cURL instead of http_post
 
 Keep in mind, work in progress. Website was never completely finished (and hard to do without an API)
