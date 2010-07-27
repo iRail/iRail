@@ -1,0 +1,11 @@
+I just made some tests with some stations and I have results for all of them. I have no negative feedback yet, so all seem good!
+
+The only problem is the speed. With the URL way, all was done in maybe 2 seconds max and now it can take 10sec, that's why I really need a server.
+
+I have a friend from France that open-sourced his train application and all the PHP scripts.
+
+http://code.google.com/p/horaires-ter-sncf/source/browse/#svn/webservice/lib
+
+As I have no php knowledge, I cannot help, but maybe you will find some intresting stuff there.
+
+Christophe
