@@ -4,3 +4,7 @@ asse
 aalst
 brugge
 mechelen
+brussel-zuid
+mortsel
+
+# actually, any station that has an alternatieve name (mechelen <-> mechelen-nekkerspoel e.g.)
