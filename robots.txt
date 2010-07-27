@@ -12,7 +12,6 @@ User-agent: *
 
 # Directories
 Disallow: /docs/
-Disallow: _htaccess
 Disallow: /includes/
 Disallow: save.php
 Disallow: noresults.php
