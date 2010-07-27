@@ -18,11 +18,13 @@ $dev = 0;
 // get current domain
 $domain = str_replace("www.","",$_SERVER['HTTP_HOST']);
 
+// redirect to irail site instead of dev.irail.be
 if($dev == 0 && $domain != "irail.be" && $domain != "irail.nl") {
 	header('Location: http://irail.be');
 	return;
 }
 
+// redirect to main page (nat); else display error message 
 if($maintenance == 0) {
 	// edit URL to match domain/site
 	header('Location: national');
