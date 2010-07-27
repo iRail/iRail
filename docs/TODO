@@ -8,7 +8,7 @@
 Urgent:
 
 o	Fix stations such as Mechelen and Mechelen-NEKKERSPOEL
-		=> NMBS shows intermediate page
+		=> NMBS shows intermediate page >> can no longer use "$stationName [B]"; [B] gives errors now
 			=> see http://yeri.be/cc
 
 Normal:
