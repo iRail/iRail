@@ -1,4 +1,4 @@
-/* iRail by Tuinslak / yeri.be */
+/* iRail */
 
 function actb(obj,ca){
 	/* ---- Public Variables ---- */

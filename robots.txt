@@ -3,7 +3,6 @@
 # http://irail.be
 #
 # robots.txt
-# http://tuinslak.be
 #
 
 User-agent: *
