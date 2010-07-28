@@ -1,4 +1,4 @@
-NMBS XML interfaec
+NMBS XML interface
 
 Just found this out while digging through HAFAS:
 
