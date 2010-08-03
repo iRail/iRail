@@ -716,7 +716,7 @@ switch($lang) {
                                         <tr>
                                             <td><?php echo $txt_to; ?></td>
                                             <td colspan="2"><input name="to" type="text" id="to" AUTOCOMPLETE="OFF" value="<?php echo $to; ?>"/>
-                                                <script>var obj = actb(document.getElementById('to'),data); </script>
+                                                <script type="text/javascript" language="javascript">var obj = actb(document.getElementById('to'),data); </script>
                                                 <script language="javascript" type="text/javascript"> function reset_to() {
                                                 document.getElementById("to").value = "";
                                             }</script>
@@ -728,136 +728,35 @@ switch($lang) {
                                             <td><?php echo $txt_date; ?></td>
                                             <td colspan="2">
                                                 <select NAME="d">
-                                                    <option VALUE="01" <?php if(date('d') == '01') {
-                                                        echo "SELECTED";
-                                                            } ?> >01</option>
-                                                    <option VALUE="02" <?php if(date('d') == '02') {
-                                                        echo "SELECTED";
-                                                            } ?> >02</option>
-                                                    <option VALUE="03" <?php if(date('d') == '03') {
-                                                        echo "SELECTED";
-                                                            } ?> >03</option>
-                                                    <option VALUE="04" <?php if(date('d') == '04') {
-                                                        echo "SELECTED";
-                                                            } ?> >04</option>
-                                                    <option VALUE="05" <?php if(date('d') == '05') {
-                                                        echo "SELECTED";
-                                                            } ?> >05</option>
-                                                    <option VALUE="06" <?php if(date('d') == '06') {
-                                                        echo "SELECTED";
-                                                            } ?> >06</option>
-                                                    <option VALUE="07" <?php if(date('d') == '07') {
-                                                        echo "SELECTED";
-                                                            } ?> >07</option>
-                                                    <option VALUE="08" <?php if(date('d') == '08') {
-                                                        echo "SELECTED";
-                                                            } ?> >08</option>
-                                                    <option VALUE="09" <?php if(date('d') == '09') {
-                                                        echo "SELECTED";
-                                                            } ?> >09</option>
-                                                    <option VALUE="10" <?php if(date('d') == '10') {
-                                                        echo "SELECTED";
-                                                            } ?> >10</option>
-                                                    <option VALUE="11" <?php if(date('d') == '11') {
-                                                        echo "SELECTED";
-                                                            } ?> >11</option>
-                                                    <option VALUE="12" <?php if(date('d') == '12') {
-                                                        echo "SELECTED";
-                                                            } ?> >12</option>
-                                                    <option VALUE="13" <?php if(date('d') == '13') {
-                                                        echo "SELECTED";
-                                                            } ?> >13</option>
-                                                    <option VALUE="14" <?php if(date('d') == '14') {
-                                                        echo "SELECTED";
-                                                            } ?> >14</option>
-                                                    <option VALUE="15" <?php if(date('d') == '15') {
-                                                        echo "SELECTED";
-                                                            } ?> >15</option>
-                                                    <option VALUE="16" <?php if(date('d') == '16') {
-                                                        echo "SELECTED";
-                                                            } ?> >16</option>
-                                                    <option VALUE="17" <?php if(date('d') == '17') {
-                                                        echo "SELECTED";
-                                                            } ?> >17</option>
-                                                    <option VALUE="18" <?php if(date('d') == '18') {
-                                                        echo "SELECTED";
-                                                            } ?> >18</option>
-                                                    <option VALUE="19" <?php if(date('d') == '19') {
-                                                        echo "SELECTED";
-                                                            } ?> >19</option>
-                                                    <option VALUE="20" <?php if(date('d') == '20') {
-                                                        echo "SELECTED";
-                                                            } ?> >20</option>
-                                                    <option VALUE="21" <?php if(date('d') == '21') {
-                                                        echo "SELECTED";
-                                                            } ?> >21</option>
-                                                    <option VALUE="22" <?php if(date('d') == '22') {
-                                                        echo "SELECTED";
-                                                            } ?> >22</option>
-                                                    <option VALUE="23" <?php if(date('d') == '23') {
-                                                        echo "SELECTED";
-                                                            } ?> >23</option>
-                                                    <option VALUE="24" <?php if(date('d') == '24') {
-                                                        echo "SELECTED";
-                                                            } ?> >24</option>
-                                                    <option VALUE="25" <?php if(date('d') == '25') {
-                                                        echo "SELECTED";
-                                                            } ?> >25</option>
-                                                    <option VALUE="26" <?php if(date('d') == '26') {
-                                                        echo "SELECTED";
-                                                            } ?> >26</option>
-                                                    <option VALUE="27" <?php if(date('d') == '27') {
-                                                        echo "SELECTED";
-                                                            } ?> >27</option>
-                                                    <option VALUE="28" <?php if(date('d') == '28') {
-                                                        echo "SELECTED";
-                                                            } ?> >28</option>
-                                                    <option VALUE="29" <?php if(date('d') == '29') {
-                                                        echo "SELECTED";
-                                                            } ?> >29</option>
-                                                    <option VALUE="30" <?php if(date('d') == '30') {
-                                                        echo "SELECTED";
-                                                            } ?> >30</option>
-                                                    <option VALUE="31" <?php if(date('d') == '31') {
-                                                        echo "SELECTED";
-                                                            } ?> >31</option>
+                                                    <?php
+                                                    for($i = 1; $i <= 31; $i++) {
+                                                        if($i < 10) {
+                                                            $number = "0" . $i;
+                                                        }else {
+                                                            $number = $i;
+                                                        }
+                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        if(date('d') == $number) {
+                                                            echo "SELECTED";
+                                                        }
+                                                        echo ">".$number."</option>";
+                                                    }
+                                                    ?>
                                                 </select>/<select NAME="mo">
-                                                    <option VALUE="01" <?php if(date('m') == '01') {
-                                                        echo "SELECTED";
-                                                            } ?> >01</option>
-                                                    <option VALUE="02" <?php if(date('m') == '02') {
-                                                        echo "SELECTED";
-                                                            } ?> >02</option>
-                                                    <option VALUE="03" <?php if(date('m') == '03') {
-                                                        echo "SELECTED";
-                                                            } ?> >03</option>
-                                                    <option VALUE="04" <?php if(date('m') == '04') {
-                                                        echo "SELECTED";
-                                                            } ?> >04</option>
-                                                    <option VALUE="05" <?php if(date('m') == '05') {
-                                                        echo "SELECTED";
-                                                            } ?> >05</option>
-                                                    <option VALUE="06" <?php if(date('m') == '06') {
-                                                        echo "SELECTED";
-                                                            } ?> >06</option>
-                                                    <option VALUE="07" <?php if(date('m') == '07') {
-                                                        echo "SELECTED";
-                                                            } ?> >07</option>
-                                                    <option VALUE="08" <?php if(date('m') == '08') {
-                                                        echo "SELECTED";
-                                                            } ?> >08</option>
-                                                    <option VALUE="09" <?php if(date('m') == '09') {
-                                                        echo "SELECTED";
-                                                            } ?> >09</option>
-                                                    <option VALUE="10" <?php if(date('m') == '10') {
-                                                        echo "SELECTED";
-                                                            } ?> >10</option>
-                                                    <option VALUE="11" <?php if(date('m') == '11') {
-                                                        echo "SELECTED";
-                                                            } ?> >11</option>
-                                                    <option VALUE="12" <?php if(date('m') == '12') {
-                                                        echo "SELECTED";
-                                                            } ?> >12</option>
+                                                    <?php
+                                                    for($i = 1; $i <= 12; $i++) {
+                                                        if($i < 10) {
+                                                            $number = "0" . $i;
+                                                        }else {
+                                                            $number = $i;
+                                                        }
+                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        if(date('m') == $number) {
+                                                            echo "SELECTED";
+                                                        }
+                                                        echo ">".$number."</option>";
+                                                    }
+                                                    ?>
                                                 </select>/<select NAME="y">
                                                     <!-- OPGELET: VALUE IS BELANGRIJK... ! ;) -->
                                                     <option VALUE="<?php echo date('y'); ?>" <?php if(date('y') == '10') {
@@ -878,98 +777,38 @@ switch($lang) {
                                                     }else {
                                                         $hour = date('H');
                                                     }
+                                                    for($i = 0; $i < 24; $i++) {
+                                                        if($i < 10) {
+                                                            $number = "0" . $i;
+                                                        }else {
+                                                            $number = $i;
+                                                        }
+                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        if($hour == $number) {
+                                                            echo "SELECTED";
+                                                        }
+                                                        echo ">".$number."</option>";
+                                                    }
                                                     ?>
-                                                    <option VALUE="00" <?php if($hour == '00') {
+                                                </select>:<select NAME="m">
+                                                    <option VALUE="00" <?php if(date('i') >= '50' && date('i') <= '59') {
                                                         echo "SELECTED";
                                                             } ?> >00</option>
-                                                    <option VALUE="01" <?php if($hour == '01') {
+                                                    <option VALUE="10" <?php if(date('i') >= '00' && date('i') <= '09') {
                                                         echo "SELECTED";
-                                                            } ?> >01</option>
-                                                    <option VALUE="02" <?php if($hour == '02') {
+                                                            } ?> >10</option>
+                                                    <option VALUE="20" <?php if(date('i') >= '10' && date('i') <= '19') {
                                                         echo "SELECTED";
-                                                            } ?> >02</option>
-                                                    <option VALUE="03" <?php if($hour == '03') {
+                                                            } ?> >20</option>
+                                                    <option VALUE="30" <?php if(date('i') >= '20' && date('i') <= '29') {
                                                         echo "SELECTED";
-                                                            } ?> >03</option>
-                                                    <OPTION VALUE="04" <?php if($hour == '04') {
+                                                            } ?> >30</option>
+                                                    <option VALUE="40" <?php if(date('i') >= '30' && date('i') <= '39') {
                                                         echo "SELECTED";
-                                                            } ?> >04</OPTION>
-                                                    <OPTION VALUE="05" <?php if($hour == '05') {
+                                                            } ?> >40</option>
+                                                    <option VALUE="50" <?php if(date('i') >= '40' && date('i') <= '49') {
                                                         echo "SELECTED";
-                                                            } ?> >05</OPTION>
-                                                    <OPTION VALUE="06" <?php if($hour == '06') {
-                                                        echo "SELECTED";
-                                                            } ?> >06</OPTION>
-                                                    <OPTION VALUE="07" <?php if($hour == '07') {
-                                                        echo "SELECTED";
-                                                            } ?> >07</OPTION>
-                                                    <OPTION VALUE="08" <?php if($hour == '08') {
-                                                        echo "SELECTED";
-                                                            } ?> >08</OPTION>
-                                                    <OPTION VALUE="09" <?php if($hour == '09') {
-                                                        echo "SELECTED";
-                                                            } ?> >09</OPTION>
-                                                    <OPTION VALUE="10" <?php if($hour == '10') {
-                                                        echo "SELECTED";
-                                                            } ?> >10</OPTION>
-                                                    <OPTION VALUE="11" <?php if($hour == '11') {
-                                                        echo "SELECTED";
-                                                            } ?> >11</OPTION>
-                                                    <OPTION VALUE="12" <?php if($hour == '12') {
-                                                        echo "SELECTED";
-                                                            } ?> >12</OPTION>
-                                                    <OPTION VALUE="13" <?php if($hour == '13') {
-                                                        echo "SELECTED";
-                                                            } ?> >13</OPTION>
-                                                    <OPTION VALUE="14" <?php if($hour == '14') {
-                                                        echo "SELECTED";
-                                                            } ?> >14</OPTION>
-                                                    <OPTION VALUE="15" <?php if($hour == '15') {
-                                                        echo "SELECTED";
-                                                            } ?> >15</OPTION>
-                                                    <OPTION VALUE="16" <?php if($hour == '16') {
-                                                        echo "SELECTED";
-                                                            } ?> >16</OPTION>
-                                                    <OPTION VALUE="17" <?php if($hour == '17') {
-                                                        echo "SELECTED";
-                                                            } ?> >17</OPTION>
-                                                    <OPTION VALUE="18" <?php if($hour == '18') {
-                                                        echo "SELECTED";
-                                                            } ?> >18</OPTION>
-                                                    <OPTION VALUE="19" <?php if($hour == '19') {
-                                                        echo "SELECTED";
-                                                            } ?> >19</OPTION>
-                                                    <OPTION VALUE="20" <?php if($hour == '20') {
-                                                        echo "SELECTED";
-                                                            } ?> >20</OPTION>
-                                                    <OPTION VALUE="21" <?php if($hour == '21') {
-                                                        echo "SELECTED";
-                                                            } ?> >21</OPTION>
-                                                    <OPTION VALUE="22" <?php if($hour == '22') {
-                                                        echo "SELECTED";
-                                                            } ?> >22</OPTION>
-                                                    <OPTION VALUE="23" <?php if($hour == '23') {
-                                                        echo "SELECTED";
-                                                            } ?> >23</OPTION>
-                                                </select>:<select NAME="m">
-                                                    <OPTION VALUE="00" <?php if(date('i') >= '50' && date('i') <= '59') {
-                                                        echo "SELECTED";
-                                                            } ?> >00</OPTION>
-                                                    <OPTION VALUE="10" <?php if(date('i') >= '00' && date('i') <= '09') {
-                                                        echo "SELECTED";
-                                                            } ?> >10</OPTION>
-                                                    <OPTION VALUE="20" <?php if(date('i') >= '10' && date('i') <= '19') {
-                                                        echo "SELECTED";
-                                                            } ?> >20</OPTION>
-                                                    <OPTION VALUE="30" <?php if(date('i') >= '20' && date('i') <= '29') {
-                                                        echo "SELECTED";
-                                                            } ?> >30</OPTION>
-                                                    <OPTION VALUE="40" <?php if(date('i') >= '30' && date('i') <= '39') {
-                                                        echo "SELECTED";
-                                                            } ?> >40</OPTION>
-                                                    <OPTION VALUE="50" <?php if(date('i') >= '40' && date('i') <= '49') {
-                                                        echo "SELECTED";
-                                                            } ?> >50</OPTION>
+                                                            } ?> >50</option>
                                                 </select>
                                             </td>
                                         </tr>
