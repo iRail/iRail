@@ -21,7 +21,6 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 
-
 $from = $_COOKIE["from"];
 $to = $_COOKIE["to"];
 $lang = $_COOKIE["language"];

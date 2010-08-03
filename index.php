@@ -28,13 +28,13 @@ $maintenance = 0;
 
 // set dev mode on/off
 // if dev is false, redirect to http://irail.be 
-$dev = 0;
+$notIrailDotBe = 1;
 
 // get current domain
 $domain = str_replace("www.","",$_SERVER['HTTP_HOST']);
 
 // redirect to irail site instead of dev.irail.be
-if($dev == 0 && $domain != "irail.be" && $domain != "irail.nl") {
+if($notIrailDotBe == 0 && $domain != "irail.be" && $domain != "irail.nl") {
 	header('Location: http://irail.be');
 	return;
 }
