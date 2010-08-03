@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>iRail.be API</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+      <h1>Welcome developer</h1>
+      <p>This is the unofficial API for the SNCF/NMBS in Belgium. If you want to implement train schedules in your application you're at the right place.</p>
+      <h1>Usage</h1>
+      <h2>1. List all stations</h2>
+      <p>Request: irail.be/api/stations.php</p>
+      <p>Response: </p>
+      <pre>
+        &lt;stations&gt;
+            &lt;station&gt;
+                GENT SINT PIETERS
+            &lt;/station&gt;
+            ...
+        &lt;/stations&gt;
+      </pre>
+
+      <h2>2. Trainschedule</h2>
+      <p>Request: http://www.irail.be/api/trains.php?to=STATION1&amp;from=STATION2  |||OPTIONAL: &amp;date=01-01-10&amp;time=15:40&amp;results=4&amp;lang=NL</p>
+      <p>STATION1 and 2 should be all capitals, like in the stations.php file</p>
+      <p>Response: </p>
+      <pre>
+        &lt;connections&gt;
+            &lt;connection&gt;
+                &lt;departure&gt;
+                    &lt;station&gt;
+                        HARELBEKE
+                    &lt;/station&gt;
+                    &lt;time&gt;
+                        17:24
+                    &lt;/time&gt;
+                    &lt;date&gt;
+                        03/08/10
+                    &lt;/date&gt;
+                &lt;/departure&gt;
+                &lt;arrival&gt;
+                    &lt;station&gt;
+                        GENT SINT PIETERS
+                    &lt;/station&gt;
+                    &lt;time&gt;
+                        17:51
+                    &lt;/time&gt;
+                    &lt;date&gt;
+                        03/08/10
+                    &lt;/date&gt;
+                &lt;/arrival&gt;
+                &lt;duration&gt;
+                    0:27
+                &lt;/duration&gt;
+                &lt;delay&gt;
+                    1 or 0
+                &lt;/delay&gt;
+            &lt;/connection&gt;
+            ...
+        &lt;/connections&gt;
+      </pre>
+  </body>
+</html>
