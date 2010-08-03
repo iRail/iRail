@@ -30,7 +30,7 @@ if($time == "") {
     $time = date("Hi");
 }
 
-// if bad stations, return
+// if bad stations, redirect
 if($from == "" || $to == "" || $from == $to) {
     header('Location: ..');
 }
@@ -95,7 +95,7 @@ $m_to = $to;
 if(strtoupper($from) == "BRUSSEL MIDI") {
     $from = "BRUSSEL-MIDI";
 }
-if(strtoupper($_POST["from"]) == "BRUSSEL ZUID") {
+if(strtoupper($from) == "BRUSSEL ZUID") {
     $from = "BRUSSEL-ZUID";
 }
 
@@ -172,16 +172,32 @@ $connections = preg_split("/infotravaux/", $body);
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 echo "<connections>";
 foreach($connections as $i => $value) {
+    if($i == 0){
+        continue;
+    }
+    //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
+    //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
+    //0:14
+    //</td>
+    //
+    $matches = array();
+    //DBG: echo $value;
+    //$doll is a nonused var
+    $doll = preg_match("/.*(\d\d:\d\d).{6}(\d\d:\d\d).*/is", $value, $matches);
+    $time_dep = $matches[1];
+    $time_arr = $matches[2];
+    $doll = preg_match("/\s(\d:\d\d)/is", $value, $matches);
+    $duration = $matches[1];
     echo "<connection>";
     echo "<departure>";
     echo "<station>";
     echo $from;
     echo "</station>";
     echo "<time>";
-
+    echo $time_dep;
     echo "</time>";
     echo "<date>";
-    echo $value . "<br/>"; //→ TODO: Strip value in chunks with meaningful information
+    echo $date;
     echo "</date>";
     echo "</departure>";
 
@@ -190,15 +206,23 @@ foreach($connections as $i => $value) {
     echo $to;
     echo "</station>";
     echo "<time>";
-
+    echo $time_arr;
     echo "</time>";
     echo "<date>";
-
+    echo $date;
     echo "</date>";
     echo "</arrival>";
 
+    echo "<duration>";
+    echo $duration;
+    echo "</duration>";
+
+    echo "<delay>";
+    echo $late;
+    echo "</delay>";
+
     echo "</connection>";
-    
+
 }
 echo "</connections>";
 ?>
