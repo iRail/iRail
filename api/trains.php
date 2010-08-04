@@ -1,7 +1,7 @@
 <?php
 /*
     Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-    Copyright 2010 Pieter Colpaert (pieterc aŧ member.fsf.org - http://bonsansnom.wordpress.com)
+    Copyright 2010 Pieter Colpaert (pieter@irail.be - http://bonsansnom.wordpress.com)
 
 	This file is part of iRail.
 
@@ -204,6 +204,12 @@ foreach($connections as $i => $value) {
     //0:14
     //</td>
     //
+
+    //trains: title="IR  4139"
+    // ==> regex: .{8}
+    $trains = array();
+    $doll = preg_match("/.*title=\"(.{8})\".*/si", $value, $trains);
+
     $matches = array();
     //DBG: echo $value;
     //$doll is a nonused var
@@ -244,6 +250,15 @@ foreach($connections as $i => $value) {
     echo "<delay>";
     echo $late;
     echo "</delay>";
+
+    echo "<trains>";
+    foreach($trains as $i => $train){
+        if($i == 0){
+            continue;
+        }
+        echo "<train>". $train . "</train>";
+    }
+    echo "</trains>";
 
     echo "</connection>";
 
