@@ -83,7 +83,7 @@ switch($lang) {
             iRail - International
         </title>
 
-        <script language="javascript" type="application/x-javascript"> function switch_station() {
+        <script language="javascript" type="text/javascript"> function switch_station() {
             var tmp = "";
             tmp = document.getElementById("from").value;
             document.getElementById("from").value = document.getElementById("to").value;
