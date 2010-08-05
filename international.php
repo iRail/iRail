@@ -100,7 +100,7 @@ switch($lang) {
 <?php
 //this bit generates the stations list
 include("stationlist.php");
-generate_js_array();
+generate_js_array($stations);
 ?>
         </script>
     </head>

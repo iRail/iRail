@@ -591,10 +591,11 @@ $stations = array(  'AALST',
 /*
  * This function will generate a javascript array called data
  */
-function generate_js_array() {
-    echo "var data= new array(";
+function generate_js_array($stations) {
+    echo "var data= new Array(";
+
     foreach($stations as $i => $value) {
-        echo $value;
+        echo "\"" . $value . "\"";
         if($i < count($stations) -1) {
             echo ",";
         }

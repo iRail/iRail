@@ -194,11 +194,8 @@ $connectionnumber = 0;
 $connections = preg_split("/infotravaux/", $body);
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "<connections>";
+echo "\n<connections>\n";
 foreach($connections as $i => $value) {
-    if($i == 0){
-        continue;
-    }
     //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
     //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
     //0:14
@@ -208,7 +205,7 @@ foreach($connections as $i => $value) {
     //trains: title="IR  4139"
     // ==> regex: .{8}
     $trains = array();
-    $doll = preg_match("/.*title=\"(.{8})\".*/si", $value, $trains);
+    $doll = preg_match_all("/title=\"(.{8})\"/si", $value, $trains);
 
     $matches = array();
     //DBG: echo $value;
@@ -218,49 +215,49 @@ foreach($connections as $i => $value) {
     $time_arr = $matches[2];
     $doll = preg_match("/\s(\d:\d\d)/is", $value, $matches);
     $duration = $matches[1];
-    echo "<connection>";
-    echo "<departure>";
-    echo "<station>";
-    echo $from;
-    echo "</station>";
-    echo "<time>";
-    echo $time_dep;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</departure>";
-
-    echo "<arrival>";
-    echo "<station>";
-    echo $to;
-    echo "</station>";
-    echo "<time>";
-    echo $time_arr;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</arrival>";
-
-    echo "<duration>";
-    echo $duration;
-    echo "</duration>";
-
-    echo "<delay>";
-    echo $late;
-    echo "</delay>";
-
-    echo "<trains>";
-    foreach($trains as $i => $train){
-        if($i == 0){
-            continue;
-        }
-        echo "<train>". $train . "</train>";
+    if($duration == ""){ //If this is not a valid connection, let's skip this chunk
+        continue;
     }
-    echo "</trains>";
+    echo "<connection>\n";
+    echo "<departure>\n";
+    echo "<station>\n";
+    echo $from;
+    echo "\n</station>\n";
+    echo "<time>\n";
+    echo $time_dep;
+    echo "\n</time>\n";
+    echo "<date>\n";
+    echo $date;
+    echo "\n</date>\n";
+    echo "</departure>\n";
 
-    echo "</connection>";
+    echo "<arrival>\n";
+    echo "<station>\n";
+    echo $to;
+    echo "\n</station>\n";
+    echo "<time>\n";
+    echo $time_arr;
+    echo "\n</time>\n";
+    echo "<date>\n";
+    echo $date;
+    echo "\n</date>\n";
+    echo "</arrival>\n";
+
+    echo "<duration>\n";
+    echo $duration;
+    echo "\n</duration>\n";
+
+    echo "<delay>\n";
+    echo $late;
+    echo "\n</delay>\n";
+
+    echo "<trains>\n";
+    foreach($trains[1] as $i => $train){
+        echo "<train>". $train . "</train>\n";
+    }
+    echo "</trains>\n";
+
+    echo "</connection>\n";
 
 }
 echo "</connections>";
