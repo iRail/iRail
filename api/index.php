@@ -27,8 +27,8 @@
           <i>Some rights reserved - CC By-Sa - <img src="http://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-sa.png" width="88" height="33" alt="Creative Commons Attribution, Share alike"/></i>
       </p>
   </body>
-</html>
 <?php
 // GA stats; try to include it in most files please
 include '../includes/googleAnalytics.php';
 ?>
+</html>
