@@ -24,7 +24,7 @@
  */
 //this is the entire array of stations in Belgium
 
-include "../stationlist.php";
+include "../includes/stationlist.php";
 //make the damn document ;-)
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";

@@ -181,6 +181,8 @@ if(strstr($body, "/icon_warning.gif")) {
 // Find if trains are late... AGAIN !!!!
 if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_critical_overview_2.gif")) {
     $late = 1;
+}else{
+    $late = 0;
 }
 
 // Find if an alternative route is available (due to lateness...)

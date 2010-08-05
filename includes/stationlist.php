@@ -593,10 +593,10 @@ $stations = array(  'AALST',
  */
 function generate_js_array($stations) {
     echo "var data= new Array(";
-
+    $nOfStations = count($stations);
     foreach($stations as $i => $value) {
         echo "\"" . $value . "\"";
-        if($i < count($stations) -1) {
+        if($i < $nOfStations -1) {
             echo ",";
         }
     }
