@@ -28,3 +28,7 @@
       </p>
   </body>
 </html>
+<?php
+// GA stats; try to include it in most files please
+include '../includes/googleAnalytics.php';
+?>
