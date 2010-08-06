@@ -11,7 +11,7 @@
       <h2>1. List all stations</h2>
       <p>Request: http://api.irail.be/stations.php</p>
       <h2>2. Trainschedule</h2>
-      <p>Request: http://api.irail.be/trains.php?to=STATION1&amp;from=STATION2  |||OPTIONAL: &amp;date=01-01-10&amp;time=15:40&amp;results=4&amp;lang=NL</p>
+      <p>Request: http://api.irail.be/trains.php?to=STATION1&amp;from=STATION2  |||OPTIONAL: &amp;date=010110&amp;time=1540&amp;lang=NL&amp;timesel=depart or arrive</p>
       <h1>More up to date information on our official wiki</h1>
       <p><a href="http://wiki.github.com/Tuinslak/iRail/api">here (http://wiki.github.com/Tuinslak/iRail/api)</a></p>
       <h1>Grab the code</h1>

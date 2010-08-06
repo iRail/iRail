@@ -37,9 +37,14 @@ $date = $_GET["date"];
 $time = $_GET["time"];
 $results = $_GET["results"];
 $lang = $_GET["lang"];
+$timesel = $_GET["timesel"];
 
 if($lang == "") {
     $lang = "EN";
+}
+
+if($timesel == ""){
+    $timesel = "depart";
 }
 
 if($results == "") {
@@ -129,7 +134,7 @@ $data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=select
 $data .= $to;
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
-$data .= "&timesel=" . "depart";
+$data .= "&timesel=" . $timesel;
 $data .= "&";
 $data .= "start=submit";
 
