@@ -608,6 +608,6 @@ function generate_js_array($stations) {
  */
 
 function get_timestamp(){
-    return "050810";
+    return "060810";
 }
 ?>

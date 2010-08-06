@@ -25,12 +25,13 @@
 //this is the entire array of stations in Belgium
 
 include "../includes/stationlist.php";
+include "../includes/coordinates.php";
 //make the damn document ;-)
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 echo "<stations timestamp=\"". get_timestamp() ."\">";
 foreach ($stations as $i => $value) {
-    echo "<station>";
+    echo "<station location=\"". $coordinates[$value] ."\">";
     echo $value;
     echo "</station>";
 }
