@@ -38,9 +38,19 @@ $time = $_GET["time"];
 $results = $_GET["results"];
 $lang = $_GET["lang"];
 $timesel = $_GET["timesel"];
+$trainsonly = $_GET["trainsonly"];
 
 if($lang == "") {
     $lang = "EN";
+}
+
+if($trainsonly != "0" && $trainsonly != "1"){
+    $trainsonly = "0";
+}
+if($trainsonly == "0"){
+    $trainsonly = "3%3A1111111111111111";
+}else if($trainsonly == "1"){
+    $trainsonly = "1%3A0111111000000000";
 }
 
 if($timesel == ""){
@@ -135,6 +145,7 @@ $data .= $to;
 $data .= "&date=" . $date;
 $data .= "&time=" . $time;
 $data .= "&timesel=" . $timesel;
+$data .= "&REQ0JourneyProduct_prod_list=" . $trainsonly;
 $data .= "&";
 $data .= "start=submit";
 
