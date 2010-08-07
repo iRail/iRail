@@ -187,9 +187,7 @@ $tmp_body = $body;
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
-    //DEBUG:
-    echo "body EMPTY";
-    //header('Location: noresults');//TODO: put error instead
+    echo "<error>Something went terribly wrong. Please contact pieter@irail.be, or post an issue on our github page</error>";
 }
 
 $body = str_replace("<img ", "<img border=\"0\" ", $body);
