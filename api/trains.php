@@ -112,24 +112,6 @@ switch($lang) {
         break;
 }
 
-// Debug - variable content
-/*
-echo $from . "<br />";
-echo $to . "<br />";
-echo "d: " . $d . "<br />";
-echo "mo: " . $mo . "<br />";
-echo "y: " . $y . "<br />";
-echo "h: " . $h . "<br />";
-echo "m: " . $m . "<br />";
-*/
-
-// Create time vars
-//$time = $h . $m;
-//$date = $d . $mo . $y;
-// Create google map vars without [B] stuff (edit: new nmbs site doesn't use [B] anymore!)
-$m_from = $from;
-$m_to = $to;
-
 // Correct Brussels South/Midi to use "-" instead of space; else = error
 if(strtoupper($from) == "BRUSSEL MIDI") {
     $from = "BRUSSEL-MIDI";
@@ -172,6 +154,14 @@ if($matches[1] != ""){
     $post = http_post_data($passthrough_url, null, $request_options);
     $body = http_parse_message($post)->body;
 }
+
+// Create google map vars without [B] stuff (edit: new nmbs site doesn't use [B] anymore!)
+//Pieter additions: in the API, we might not use the official names, so we're going to scrape these vars as well
+$dummy=preg_match("/screennowrap\">(.*?)<\/span>.*screennowrap\">(.*?)<\/span>/is", $body, $matches);
+//strip off trailing [B] if any.
+$from = preg_replace("/ \[B\]/", "", $matches[1]);
+$to = preg_replace("/ \[B\]/", "", $matches[2]);
+
 // check if nmbs planner is down
 if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
     $down = 1;
@@ -183,7 +173,6 @@ if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
 
 // tmp body in case of special stationnames (http://yeri.be/cc)
 $tmp_body = $body;
-
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
@@ -198,14 +187,14 @@ $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 $tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
 $body = $tmp_body[0];
 // replace invalid b-rail shizzle
-$body = str_replace("http://hari.b-rail.be/HAFAS/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
-$body = str_replace("http://hari.b-rail.be/hafas/bin/query.exe", "http://maps.google.be/?saddr=Station $m_from&daddr=Station $m_to\" target='_blank' id=\"",$body);
 $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
 $body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
 
 // Find if there's a warning icon
 if(strstr($body, "/icon_warning.gif")) {
     $warning = 1;
+}else{
+    $warning = 0;
 }
 
 // Find if trains are late... AGAIN !!!!
@@ -218,6 +207,8 @@ if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_crit
 // Find if an alternative route is available (due to lateness...)
 if(strstr($body, "/rt_late_alternative_overview.gif")) {
     $alt_route = 1;
+}else{
+    $alt_route = 0;
 }
 
 // Find connections
