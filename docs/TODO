@@ -4,14 +4,9 @@
  *
  */
 
-Urgent:
+urgent:
+o       Use issues page as a todo list instead.
 
-o	Fix stations such as Mechelen and Mechelen-NEKKERSPOEL
-		=> NMBS shows intermediate page >> can no longer use "$stationName [B]"; [B] gives errors now
-			=> see http://yeri.be/cc + see errorStations.txt
-
-Normal:
- 
 o	clean up css and put it in .css file
 o	get list of international stations for international.php
 o	python sitemap generator is broken, find other one (?)
@@ -20,5 +15,6 @@ o	make sure to not get sued :(
 o	veranda font for people with bad eye sight
 o	use cURL instead of http_post
 o	get decent icons -.-
+
 
 Keep in mind, work in progress. Website was never completely finished (and hard to do without an API)
