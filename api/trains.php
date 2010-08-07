@@ -58,7 +58,7 @@ if($timesel == ""){
 }
 
 if($results == "") {
-    $results = 1;
+    $results = 4;
 }
 
 if($date == "") {
@@ -158,6 +158,20 @@ $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB we
 
 $body = http_parse_message($post)->body;
 
+//This code fixes most hated issue #2 →→ You can buy me a beer in Ghent at anytime if you leave me a message at +32484155429
+$dummy = preg_match("/(query\.exe\/en\?seqnr=1&ident=.*?).OK.focus\" id=\"formular\"/si", $body, $matches);
+if($matches[1] != ""){
+    //DEBUG:echo $matches[1];
+    //scrape the date & time layout from $body
+    preg_match("/value=\"(.., ..\/..\/..)\" onblur=\"checkWeekday/si", $body, $datelay);
+    $datelay[1]= urlencode($datelay[1]);
+    preg_match("/name=\"REQ0JourneyTime\" value=\"(..:..)\"/si", $body, $timelay);
+    $timelay[1] = urlencode($timelay[1]);
+    $passthrough_url = "http://hari.b-rail.be/HAFAS/bin/".$matches[1] . "&queryPageDisplayed=yes&REQ0JourneyStopsS0A=1%26fromTypeStation%3Dhidden&REQ0JourneyStopsS0K=S-0N1&REQ0JourneyStopsZ0A=1%26toTypeStation%3Dhidden&REQ0JourneyStopsZ0K=S-1N1&REQ0JourneyDate=". $datelay[1] ."&wDayExt0=Ma|Di|Wo|Do|Vr|Za|Zo&REQ0JourneyTime=". $timelay[1] ."&REQ0HafasSearchForw=1&REQ0JourneyProduct_prod_list=". $trainsonly ."&start=Submit";
+    //DEBUG:echo "\n". $passthrough_url;
+    $post = http_post_data($passthrough_url, null, $request_options);
+    $body = http_parse_message($post)->body;
+}
 // check if nmbs planner is down
 if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
     $down = 1;
@@ -173,7 +187,9 @@ $tmp_body = $body;
 $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
-    header('Location: noresults');//TODO: put error instead
+    //DEBUG:
+    echo "body EMPTY";
+    //header('Location: noresults');//TODO: put error instead
 }
 
 $body = str_replace("<img ", "<img border=\"0\" ", $body);
