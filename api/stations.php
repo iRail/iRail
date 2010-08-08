@@ -23,7 +23,8 @@
 	source available at http://github.com/Tuinslak/iRail
  */
 //this is the entire array of stations in Belgium
-
+//set content type in the header to XML
+header('Content-Type: text/xml');
 include "../includes/stationlist.php";
 include "../includes/coordinates.php";
 //make the damn document ;-)
