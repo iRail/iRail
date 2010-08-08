@@ -22,7 +22,8 @@
 	
 	source available at http://github.com/Tuinslak/iRail
  */
-
+//set content type in the header to XML
+header('Content-Type: text/xml');
 // National api query
 include "../includes/getUA.php"; //→useragent
 
@@ -217,7 +218,7 @@ $connectionnumber = 0;
 $connections = preg_split("/infotravaux/", $body);
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "\n<connections>\n";
+echo "<connections>";
 foreach($connections as $i => $value) {
     //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
     //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
@@ -241,46 +242,46 @@ foreach($connections as $i => $value) {
     if($duration == ""){ //If this is not a valid connection, let's skip this chunk
         continue;
     }
-    echo "<connection>\n";
-    echo "<departure>\n";
-    echo "<station>\n";
+    echo "<connection>";
+    echo "<departure>";
+    echo "<station>";
     echo $from;
-    echo "\n</station>\n";
-    echo "<time>\n";
+    echo "</station>";
+    echo "<time>";
     echo $time_dep;
-    echo "\n</time>\n";
-    echo "<date>\n";
+    echo "</time>";
+    echo "<date>";
     echo $date;
-    echo "\n</date>\n";
-    echo "</departure>\n";
+    echo "</date>";
+    echo "</departure>";
 
-    echo "<arrival>\n";
-    echo "<station>\n";
+    echo "<arrival>";
+    echo "<station>";
     echo $to;
-    echo "\n</station>\n";
-    echo "<time>\n";
+    echo "</station>";
+    echo "<time>";
     echo $time_arr;
-    echo "\n</time>\n";
-    echo "<date>\n";
+    echo "</time>";
+    echo "<date>";
     echo $date;
-    echo "\n</date>\n";
-    echo "</arrival>\n";
+    echo "</date>";
+    echo "</arrival>";
 
-    echo "<duration>\n";
+    echo "<duration>";
     echo $duration;
-    echo "\n</duration>\n";
+    echo "</duration>";
 
-    echo "<delay>\n";
+    echo "<delay>";
     echo $late;
-    echo "\n</delay>\n";
+    echo "</delay>";
 
-    echo "<trains>\n";
+    echo "<trains>";
     foreach($trains[1] as $i => $train){
-        echo "<train>". $train . "</train>\n";
+        echo "<train>". $train . "</train>";
     }
-    echo "</trains>\n";
+    echo "</trains>";
 
-    echo "</connection>\n";
+    echo "</connection>";
 
 }
 echo "</connections>";
