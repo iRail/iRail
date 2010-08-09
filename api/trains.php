@@ -144,7 +144,7 @@ $post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB we
 $body = http_parse_message($post)->body;
 
 //This code fixes most hated issue #2 →→ You can buy me a beer in Ghent at anytime if you leave me a message at +32484155429
-$dummy = preg_match("/(query\.exe\/en\?seqnr=1&ident=.*?).OK.focus\" id=\"formular\"/si", $body, $matches);
+$dummy = preg_match("/(query\.exe\/..\?seqnr=1&ident=.*?).OK.focus\" id=\"formular\"/si", $body, $matches);
 if($matches[1] != "") {
     //DEBUG:echo $matches[1];
     //scrape the date & time layout from $body
