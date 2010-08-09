@@ -21,9 +21,11 @@
 	http://blog.irail.be - http://irail.be
 	
 	source available at http://github.com/Tuinslak/iRail
- */
+*/
 //set content type in the header to XML
 header('Content-Type: text/xml');
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+echo "<?xml-stylesheet type=\"text/xsl\" href=\"xmlstylesheets/trains.xsl\" ?>";
 // National api query
 include "../includes/getUA.php"; //→useragent
 
@@ -45,16 +47,16 @@ if($lang == "") {
     $lang = "EN";
 }
 
-if($trainsonly != "0" && $trainsonly != "1"){
+if($trainsonly != "0" && $trainsonly != "1") {
     $trainsonly = "0";
 }
-if($trainsonly == "0"){
+if($trainsonly == "0") {
     $trainsonly = "3%3A1111111111111111";
-}else if($trainsonly == "1"){
+}else if($trainsonly == "1") {
     $trainsonly = "1%3A0111111000000000";
 }
 
-if($timesel == ""){
+if($timesel == "") {
     $timesel = "depart";
 }
 
@@ -143,7 +145,7 @@ $body = http_parse_message($post)->body;
 
 //This code fixes most hated issue #2 →→ You can buy me a beer in Ghent at anytime if you leave me a message at +32484155429
 $dummy = preg_match("/(query\.exe\/en\?seqnr=1&ident=.*?).OK.focus\" id=\"formular\"/si", $body, $matches);
-if($matches[1] != ""){
+if($matches[1] != "") {
     //DEBUG:echo $matches[1];
     //scrape the date & time layout from $body
     preg_match("/value=\"(.., ..\/..\/..)\" onblur=\"checkWeekday/si", $body, $datelay);
@@ -178,111 +180,110 @@ $body = strstr($body, "<!-- infotravaux-->");
 
 if($body == "" && $down == 0) {
     echo "<error>Something went terribly wrong. Please contact pieter@irail.be, or post an issue on our github page</error>";
-}
-
-$body = str_replace("<img ", "<img border=\"0\" ", $body);
-$body = str_replace("<td ", "<td NOWRAP ", $body);
-$body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
-$body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
+}else {
+    $body = str_replace("<img ", "<img border=\"0\" ", $body);
+    $body = str_replace("<td ", "<td NOWRAP ", $body);
+    $body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
+    $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
 // cut off the junk we don't want
-$tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
-$body = $tmp_body[0];
+    $tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
+    $body = $tmp_body[0];
 // replace invalid b-rail shizzle
-$body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
-$body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
+    $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
+    $body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
 
 // Find if there's a warning icon
-if(strstr($body, "/icon_warning.gif")) {
-    $warning = 1;
-}else{
-    $warning = 0;
-}
+    if(strstr($body, "/icon_warning.gif")) {
+        $warning = 1;
+    }else {
+        $warning = 0;
+    }
 
 // Find if trains are late... AGAIN !!!!
-if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_critical_overview_2.gif")) {
-    $late = 1;
-}else{
-    $late = 0;
-}
+    if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_critical_overview_2.gif")) {
+        $late = 1;
+    }else {
+        $late = 0;
+    }
 
 // Find if an alternative route is available (due to lateness...)
-if(strstr($body, "/rt_late_alternative_overview.gif")) {
-    $alt_route = 1;
-}else{
-    $alt_route = 0;
-}
+    if(strstr($body, "/rt_late_alternative_overview.gif")) {
+        $alt_route = 1;
+    }else {
+        $alt_route = 0;
+    }
 
 // Find connections
-$connectionnumber = 0;
+    $connectionnumber = 0;
 
-$connections = preg_split("/infotravaux/", $body);
+    $connections = preg_split("/infotravaux/", $body);
 
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "<connections>";
-foreach($connections as $i => $value) {
-    //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
-    //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
-    //0:14
-    //</td>
-    //
+    echo "<connections>";
+    foreach($connections as $i => $value) {
+        //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
+        //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
+        //0:14
+        //</td>
+        //
 
-    //trains: title="IR  4139"
-    // ==> regex: .{8}
-    $trains = array();
-    $doll = preg_match_all("/title=\"(.{8})\"/si", $value, $trains);
+        //trains: title="IR  4139"
+        // ==> regex: .{8}
+        $trains = array();
+        $doll = preg_match_all("/title=\"(.{8})\"/si", $value, $trains);
 
-    $matches = array();
-    //DBG: echo $value;
-    //$doll is a nonused var
-    $doll = preg_match("/.*(\d\d:\d\d).{6}(\d\d:\d\d).*/is", $value, $matches);
-    $time_dep = $matches[1];
-    $time_arr = $matches[2];
-    $doll = preg_match("/\s(\d:\d\d)/is", $value, $matches);
-    $duration = $matches[1];
-    if($duration == ""){ //If this is not a valid connection, let's skip this chunk
-        continue;
+        $matches = array();
+        //DBG: echo $value;
+        //$doll is a nonused var
+        $doll = preg_match("/.*(\d\d:\d\d).{6}(\d\d:\d\d).*/is", $value, $matches);
+        $time_dep = $matches[1];
+        $time_arr = $matches[2];
+        $doll = preg_match("/\s(\d:\d\d)/is", $value, $matches);
+        $duration = $matches[1];
+        if($duration == "") { //If this is not a valid connection, let's skip this chunk
+            continue;
+        }
+        echo "<connection>";
+        echo "<departure>";
+        echo "<station>";
+        echo $from;
+        echo "</station>";
+        echo "<time>";
+        echo $time_dep;
+        echo "</time>";
+        echo "<date>";
+        echo $date;
+        echo "</date>";
+        echo "</departure>";
+
+        echo "<arrival>";
+        echo "<station>";
+        echo $to;
+        echo "</station>";
+        echo "<time>";
+        echo $time_arr;
+        echo "</time>";
+        echo "<date>";
+        echo $date;
+        echo "</date>";
+        echo "</arrival>";
+
+        echo "<duration>";
+        echo $duration;
+        echo "</duration>";
+
+        echo "<delay>";
+        echo $late;
+        echo "</delay>";
+
+        echo "<trains>";
+        foreach($trains[1] as $i => $train) {
+            echo "<train>". $train . "</train>";
+        }
+        echo "</trains>";
+
+        echo "</connection>";
+
     }
-    echo "<connection>";
-    echo "<departure>";
-    echo "<station>";
-    echo $from;
-    echo "</station>";
-    echo "<time>";
-    echo $time_dep;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</departure>";
-
-    echo "<arrival>";
-    echo "<station>";
-    echo $to;
-    echo "</station>";
-    echo "<time>";
-    echo $time_arr;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</arrival>";
-
-    echo "<duration>";
-    echo $duration;
-    echo "</duration>";
-
-    echo "<delay>";
-    echo $late;
-    echo "</delay>";
-
-    echo "<trains>";
-    foreach($trains[1] as $i => $train){
-        echo "<train>". $train . "</train>";
-    }
-    echo "</trains>";
-
-    echo "</connection>";
-
+    echo "</connections>";
 }
-echo "</connections>";
 ?>
