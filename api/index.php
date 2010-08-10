@@ -3,6 +3,8 @@
   <head>
     <title>iRail.be API</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="apple-touch-icon" href="http://irail.be/img/irail.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="http://irail.be/img/favicon.ico"/>
   </head>
   <body>
       <h1>Welcome developer</h1>
