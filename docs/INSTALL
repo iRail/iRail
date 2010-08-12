@@ -4,11 +4,4 @@
  *
  */
 
-INSTALL 
-
-o	rename _htaccess to .htacces
-o	ln -s HAFAS hafas	 (on Linux/Unix webservers, NMBS isn't very consistent with its capital usage)
-o	make sure you have PECL-HTTP (dev-php5/pecl-http) installed for PHP
-o	htaccess only works on Apache. If someone can make rewrite rules for nginx ? 
-
-Should be it
+http://project.irail.be/cgi-bin/trac.fcgi/wiki/InstallingTheCode
