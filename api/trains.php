@@ -19,18 +19,31 @@
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
 	http://blog.irail.be - http://irail.be
-	
+
 	source available at http://github.com/Tuinslak/iRail
 */
+
+/*
+ * READ THIS:
+ *
+ * This file contains the most dirty code I've every written.
+ * This is a demo file and just contains how we should get railway information.
+ * In september this file will not be needed anymore
+ *
+ * Yours sincerely,
+ * Pieter Colpaert
+ */
+
 //set content type in the header to XML
 header('Content-Type: text/xml');
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+/*echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 echo "<?xml-stylesheet type=\"text/xsl\" href=\"xmlstylesheets/trains.xsl\" ?>";
+*/
 // National api query
 include "../includes/getUA.php"; //→useragent
 
-//get the GET vars
 
+$url="http://hari.b-rail.be/Hafas/bin/extxml.exe";
 //required vars, output error messages if empty
 $from = $_GET["from"];
 $to = $_GET["to"];
@@ -51,26 +64,34 @@ if($trainsonly != "0" && $trainsonly != "1") {
     $trainsonly = "0";
 }
 if($trainsonly == "0") {
-    $trainsonly = "3%3A1111111111111111";
+    $trainsonly = "1111111111111111";
 }else if($trainsonly == "1") {
-    $trainsonly = "1%3A0111111000000000";
+    $trainsonly = "0111111000000000";
 }
 
 if($timesel == "") {
     $timesel = "depart";
 }
 
-if($results == "") {
-    $results = 4;
+if($results == "" || $results > 6 || $results < 1) {
+    $results = 6;
 }
 
 if($date == "") {
     $date = date("dmy");
 }
 
+//reform date to wanted structure
+preg_match("/(..)(..)(..)/si",$date, $m);
+$date = "20" . $m[3] . $m[2] . $m[1];
+
 if($time == "") {
     $time = date("Hi");
 }
+
+//reform time to wanted structure
+preg_match("/(..)(..)/si",$time, $m);
+$time = $m[1] . ":" . $m[2];
 
 // if bad stations, redirect
 if($from == "" || $to == "" || $from == $to) {
@@ -85,163 +106,81 @@ $request_options = array(
         useragent => $irailAgent,
 );
 
+//first we're going to try to get the right internal ID's for the stations
+$postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
+<ReqC ver="1.1" prod="irail" lang="EN">
+<LocValReq id="from" maxNr="1">
+<ReqLoc match="'. $from.'" type="ST"/>
+</LocValReq>
+<LocValReq id="to" maxNr="1">
+<ReqLoc match="'. $to.'" type="ST"/>
+</LocValReq>
+</ReqC>';
 
-// set text
-switch($lang) {
-    case "EN": 	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-        $txt_warn = "Warning: additional information available on the official website.";
-        $txt_late = "Warning: train is delayed.";
-        $txt_alt = "Warning: alternative route available.";
-        break;
-    case "NL":	$url = "http://hari.b-holding.be/hafas/bin/query.exe/nn?";
-        $txt_warn = "Opgelet: er is belangrijke werfinfo op de offici&#235;le website.";
-        $txt_late = "Opgelet: trein heeft vertraging.";
-        $txt_alt = "Opgelet: alternatieve route beschikbaar.";
-        break;
-    case "FR":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/f?";
-        $txt_warn = "Attention: consultez le site web officiel pour des infos chantier importante.";
-        $txt_late = "Attention: train a du retard.";
-        $txt_alt = "Attention: itin&#233;raire alternatif est disponible.";
-        break;
-    case "DE":  $url = "http://hari.b-holding.be/hafas/bin/query.exe/d?";
-        $txt_warn = "Achtung! Es gibt wichtige Informationen vor Ort auf der offiziellen Webseite!";
-        $txt_late = "Achtung! Zug verz&#246;gert sich!";
-        $txt_alt = "Achtung! eine alternatieve Route ist verf&#252;gbar!";
-        break;
-    default:	$url = "http://hari.b-holding.be/hafas/bin/query.exe/en?";
-        $txt_warn = "Warning: additional information available on the official website.";
-        $txt_late = "Warning: train is delayed.";
-        $txt_alt = "Warning: alternative route available.";
-        break;
-}
+$post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+$idbody = http_parse_message($post)->body;
+//get id's of the stations out of it to use in the real request
+preg_match_all("/externalId=\"(.*?)\"/si", $idbody,$matches);
+$idfrom = $matches[1][0];
+$idto = $matches[1][1];
 
-// Correct Brussels South/Midi to use "-" instead of space; else = error
-if(strtoupper($from) == "BRUSSEL MIDI") {
-    $from = "BRUSSEL-MIDI";
-}
-if(strtoupper($from) == "BRUSSEL ZUID") {
-    $from = "BRUSSEL-ZUID";
-}
+//Now let's use these Id's to get the information we need
+$postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
+<ReqC ver="1.1" prod="irail" lang="'. $lang .'">
+<ConReq>
+<Start min="10">
+<Station externalId="'. $idfrom .'" distance="0">
+</Station>
+<Prod prod="'. $trainsonly .'">
+</Prod>
+</Start>
+<Dest min="10">
+<Station externalId="'. $idto .'" distance="0">
+</Station>
+</Dest>
+<Via>
+</Via>
+<ReqT time="'. $time .'" date="'. $date .'" a="0">
+</ReqT>
+<RFlags b="0" f="'. $results .'">
+</RFlags>
+<GISParameters>
+<Front>
+</Front>
+<Back>
+</Back>
+</GISParameters>
+</ConReq>
+</ReqC>';
 
-$data = "&REQ0JourneyStopsS0A=1&fromTypeStation=select&REQ0JourneyStopsS0F=selectStationAttribute;GA&REQ0JourneyStopsS0G=";
-$data .= $from;
-$data .= "&REQ0JourneyStopsZ0A=1&toTypeStation=select&REQ0JourneyStopsZ0F=selectStationAttribute;GA&REQ0JourneyStopsZ0G=";
-$data .= $to;
-$data .= "&date=" . $date;
-$data .= "&time=" . $time;
-$data .= "&timesel=" . $timesel;
-$data .= "&REQ0JourneyProduct_prod_list=" . $trainsonly;
-$data .= "&";
-$data .= "start=submit";
 
-$post = http_post_data($url, $data, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
-
-// Debug - HTTP POST result
-//echo $post . "<br />";
-//echo $url . "<br />";
-//echo $data . "<br />";
-
+$post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 $body = http_parse_message($post)->body;
+//DBG: echo $body;
 
-//This code fixes most hated issue #2 →→ You can buy me a beer in Ghent at anytime if you leave me a message at +32484155429
-$dummy = preg_match("/(query\.exe\/..\?seqnr=1&ident=.*?).OK.focus\" id=\"formular\"/si", $body, $matches);
-if($matches[1] != "") {
-    //DEBUG:echo $matches[1];
-    //scrape the date & time layout from $body
-    preg_match("/value=\"(.., ..\/..\/..)\" onblur=\"checkWeekday/si", $body, $datelay);
-    $datelay[1]= urlencode($datelay[1]);
-    preg_match("/name=\"REQ0JourneyTime\" value=\"(..:..)\"/si", $body, $timelay);
-    $timelay[1] = urlencode($timelay[1]);
-    $passthrough_url = "http://hari.b-rail.be/HAFAS/bin/".$matches[1] . "&queryPageDisplayed=yes&REQ0JourneyStopsS0A=1%26fromTypeStation%3Dhidden&REQ0JourneyStopsS0K=S-0N1&REQ0JourneyStopsZ0A=1%26toTypeStation%3Dhidden&REQ0JourneyStopsZ0K=S-1N1&REQ0JourneyDate=". $datelay[1] ."&wDayExt0=Ma|Di|Wo|Do|Vr|Za|Zo&REQ0JourneyTime=". $timelay[1] ."&REQ0HafasSearchForw=1&REQ0JourneyProduct_prod_list=". $trainsonly ."&start=Submit";
-    //DEBUG:echo "\n". $passthrough_url;
-    $post = http_post_data($passthrough_url, null, $request_options);
-    $body = http_parse_message($post)->body;
-}
+//output
 
-// Create google map vars without [B] stuff (edit: new nmbs site doesn't use [B] anymore!)
-//Pieter additions: in the API, we might not use the official names, so we're going to scrape these vars as well
-$dummy=preg_match("/screennowrap\">(.*?)<\/span>.*screennowrap\">(.*?)<\/span>/is", $body, $matches);
-//strip off trailing [B] if any.
-$from = preg_replace("/ \[B\]/", "", $matches[1]);
-$to = preg_replace("/ \[B\]/", "", $matches[2]);
-
-// check if nmbs planner is down
-if(strstr($body, "[Serverconnection]") && strstr($body, "[Server]")) {
-    $down = 1;
-}else {
-    $down = 0;
-}
-
-// TEST Stations !!
-
-// tmp body in case of special stationnames (http://yeri.be/cc)
-$tmp_body = $body;
-$body = strstr($body, "<!-- infotravaux-->");
-
-if($body == "" && $down == 0) {
-    echo "<error>Something went terribly wrong. Please contact pieter@irail.be, or post an issue on our github page</error>";
-}else {
-    $body = str_replace("<img ", "<img border=\"0\" ", $body);
-    $body = str_replace("<td ", "<td NOWRAP ", $body);
-    $body = str_replace("/hafas/img/hafas/", "/hafas/", $body);
-    $body = str_replace("type=\"checkbox\"", "type=\"HIDDEN\"", $body);
-// cut off the junk we don't want
-    $tmp_body = explode("<td NOWRAP colspan=\"12\">", $body);
-    $body = $tmp_body[0];
-// replace invalid b-rail shizzle
-    $body = str_replace('<a href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/HAFAS/bin/stboard.exe', $body);
-    $body = str_replace('<a href="http://hari.b-rail.be/hafas/bin/stboard.exe', '<a target="_blank" href="http://hari.b-rail.be/hafas/bin/stboard.exe', $body);
-
-// Find if there's a warning icon
-    if(strstr($body, "/icon_warning.gif")) {
-        $warning = 1;
-    }else {
-        $warning = 0;
-    }
-
-// Find if trains are late... AGAIN !!!!
-    if(strstr($body, "/rt_late_normal_overview.gif") || strstr($body, "/rt_late_critical_overview_2.gif")) {
-        $late = 1;
-    }else {
-        $late = 0;
-    }
-
-// Find if an alternative route is available (due to lateness...)
-    if(strstr($body, "/rt_late_alternative_overview.gif")) {
-        $alt_route = 1;
-    }else {
-        $alt_route = 0;
-    }
+preg_match("/..(..)(..)(..)/si",$date, $m);
+$date = $m[3] . $m[2] . $m[1];
 
 // Find connections
     $connectionnumber = 0;
 
-    $connections = preg_split("/infotravaux/", $body);
-
+    preg_match_all("/<Connection .*?>(.*?)<\/Connection>/si", $body, $matches);
+    $connections = $matches[1];
     echo "<connections>";
     foreach($connections as $i => $value) {
-        //times: <td NOWRAP class="sepline">23:22<br />23:36</td>
-        //duration: <td NOWRAP headers="hafasOVDuration" class="sepline nowrap center borderright">
-        //0:14
-        //</td>
-        //
 
-        //trains: title="IR  4139"
-        // ==> regex: .{8}
-        $trains = array();
-        $doll = preg_match_all("/title=\"(.{8})\"/si", $value, $trains);
+        preg_match("/<Dep getIn=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
+        $time_dep = $m[1];
+        preg_match("/<Arr getOut=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
+        $time_arr = $m[1];
 
-        $matches = array();
-        //DBG: echo $value;
-        //$doll is a nonused var
-        $doll = preg_match("/.*(\d\d:\d\d).{6}(\d\d:\d\d).*/is", $value, $matches);
-        $time_dep = $matches[1];
-        $time_arr = $matches[2];
-        $doll = preg_match("/\s(\d:\d\d)/is", $value, $matches);
+        //needs fixing: in some cases the train is not 7 chars
+        preg_match_all("/<Attribute type=\"NAME\"><AttributeVariant type=\"NORMAL\"><Text>(.*?)<\/Text>/si", $value, $trains);
+        
+        preg_match("/<Duration><Time>00d0(.:..):00<\/Time>/is", $value, $matches);
         $duration = $matches[1];
-        if($duration == "") { //If this is not a valid connection, let's skip this chunk
-            continue;
-        }
         echo "<connection>";
         echo "<departure>";
         echo "<station>";
@@ -272,18 +211,18 @@ if($body == "" && $down == 0) {
         echo "</duration>";
 
         echo "<delay>";
-        echo $late;
+        echo preg_match("/HAS_DELAYINFO/si", $value);
         echo "</delay>";
 
         echo "<trains>";
         foreach($trains[1] as $i => $train) {
-            echo "<train>". $train . "</train>";
+            echo "<train>". $train ."</train>";
         }
         echo "</trains>";
 
         echo "</connection>";
 
     }
+
     echo "</connections>";
-}
 ?>
