@@ -1,5 +1,5 @@
 <?php
-/* 	Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
+/* 	Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
 	
 	This file is part of iRail.
 
@@ -21,24 +21,6 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 
-// Settings page iRail
-
-$lang = "";
-
-$lang = $_COOKIE["language"];
-
-switch($lang) {
-case "EN":		$txt_lang = "Language:";
-                break;
-case "NL":		$txt_lang = "Taal:";
-                break;
-case "FR":      $txt_lang = "Langue:";
-                break;
-case "DE":      $txt_lang = "Sprache:";
-                break;
-default:		$txt_lang = "Language:";
-                break;
-}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -60,12 +42,12 @@ iRail - Settings
 <body>
 <div class="container">
 <div class="toolbar anchorTop">
-	<div class="title"><a href="..">Settings</a> </div>
+	<div class="title"><a href="..">About</a> </div>
 	<div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings" /></a></div>
 <br />
   <div class="toolbar">  
 	<div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
-	Saved in a cookie! Yum.
+	iRail project.
 	</div>
 
 <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
@@ -74,17 +56,22 @@ iRail - Settings
 <td>
 <table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF" style="color:#000000";>
 <tr>
-<td width="100"><?php echo $txt_lang; ?></td>
-<td colspan="2"><SELECT NAME="lang">
-<OPTION VALUE="EN" <?php if($lang == "EN") { echo "SELECTED"; } ?> >English</OPTION>
-<OPTION VALUE="NL" <?php if($lang == "NL") { echo "SELECTED"; } ?> >Nederlands</OPTION>
-<OPTION VALUE="FR" <?php if($lang == "FR") { echo "SELECTED"; } ?> >Fran&#231;ais</OPTION>
-<OPTION VALUE="DE" <?php if($lang == "DE") { echo "SELECTED"; } ?> >Deutsch</OPTION>
-</SELECT></td>
+<td width="100">
+The iRail <a href="http://project.irail.be" target="_blank">project<a/> <br /><br />
+by Yeri "<a href="http://yeri.be" target="_blank">Tuinslak</a>" Tiete, 
+<a href="http://bonsansnom.wordpress.com/" target="_blank">Pieter Colpaert</a>, 
+Christophe Versieux, 
+and others.
+<br /><br />
+</td>
 </tr>
 <tr><td colspan="3"><br /></td></tr>
 <tr>
-<td colspan="3"><div style="text-align:center;"><input type="submit" name="submit" value="Save!"></div></td>
+<td colspan="3"><div style="text-align:center;">
+<FORM>
+<INPUT type="button" value="Back" onClick="location.href='..'">
+</FORM>
+</div></td>
 </tr>
 </table>
 </td>
