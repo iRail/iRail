@@ -54,7 +54,6 @@ body[orient="landscape"] .toolbar {
 }
 
 .center {
-
   position: absolute;
   top: 40px;
   bottom: 40px;
@@ -162,4 +161,17 @@ a:hover {
 .footer a:active {
   text-decoration: none;
   color:#FFFFFF;
+}
+
+#about {
+  font-size: 80%;
+}
+
+#about_s {
+  font-size: 60%;
+}
+
+#about_vs {
+  font-size: 50%;
+  margin-left:20px;
 }
