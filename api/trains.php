@@ -36,9 +36,8 @@
 
 //set content type in the header to XML
 header('Content-Type: text/xml');
-/*echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 echo "<?xml-stylesheet type=\"text/xsl\" href=\"xmlstylesheets/trains.xsl\" ?>";
-*/
 // National api query
 include "../includes/getUA.php"; //→useragent
 
