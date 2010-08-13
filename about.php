@@ -59,7 +59,7 @@ iRail - About
 
 <center>
 
-<p id="about">The iRail project (<a href="http://project.irail.be" target="_blank">project.irail.be<a/>) </p>
+<p id="about">Project iRail (<a href="http://project.irail.be" target="_blank">project.irail.be<a/>) </p>
 
 <table bgcolor="#FFFFFF" style="color:#000000";>
 <tr><td>
@@ -70,7 +70,7 @@ iRail - About
 <li id="about_vs">Yeri "<a href="http://yeri.be" target="_blank">Tuinslak</a>" Tiete,</li> 
 <li id="about_vs"><a href="http://bonsansnom.wordpress.com/" target="_blank">Pieter Colpaert</a>,</li> 
 <li id="about_vs">Christophe Versieux,</li> 
-<li id="about_vs">and others.</li>
+<li id="about_vs">and many others.</li>
 
 
 </td>
