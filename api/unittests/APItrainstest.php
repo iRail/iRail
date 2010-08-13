@@ -1,7 +1,7 @@
 <?php
 include "../../includes/stationlist.php";
 /*
-for safety reasons, commented
+//	for safety reasons, commented
 echo "failures for ".date("d-m-y H:i"). ":<br/>";
 $failures = 0;
 foreach($stations as $i => $value) {
