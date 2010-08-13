@@ -122,18 +122,21 @@ $idbody = http_parse_message($post)->body;
 preg_match_all("/externalId=\"(.*?)\"/si", $idbody,$matches);
 $idfrom = $matches[1][0];
 $idto = $matches[1][1];
-
+//Get real from and to from this
+preg_match_all("/id=\"...?.?\"><Station name=\"(.*?)\"/si", $idbody,$matches);
+$from = $matches[1][0];
+$to = $matches[1][1];
 //Now let's use these Id's to get the information we need
 $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
 <ReqC ver="1.1" prod="irail" lang="'. $lang .'">
 <ConReq>
-<Start min="10">
+<Start min="0">
 <Station externalId="'. $idfrom .'" distance="0">
 </Station>
 <Prod prod="'. $trainsonly .'">
 </Prod>
 </Start>
-<Dest min="10">
+<Dest min="0">
 <Station externalId="'. $idto .'" distance="0">
 </Station>
 </Dest>
