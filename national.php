@@ -86,6 +86,7 @@ switch($lang) {
         <meta name="language" content="en"/>
         <meta NAME="DESCRIPTION" CONTENT="NMBS/SNCB mobile iPhone train route planner."/>
         <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=" />
+        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM" />
         <meta HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
         <title>
             iRail
