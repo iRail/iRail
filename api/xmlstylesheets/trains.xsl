@@ -4,10 +4,16 @@
     <xsl:template match="/">
         <html>
             <head>
-                <title>iRail.be : <xsl:value-of select="departure/station"/></title>
+                <title><xsl:text>iRail.be : </xsl:text><xsl:value-of select="/connections/connection[@id=1]/departure/station"/><xsl:text> - </xsl:text><xsl:value-of select="/connections/connection[@id=1]/arrival/station"/></title>
             </head>
             <body>
-                <xsl:apply-templates/>
+                <xsl:apply-templates/><br/>
+                <p>
+                    <xsl:text>© 2010 iRail.be - Yeri Tiete, Pieter Colpaert </xsl:text><a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors">and others</a>
+                    <br/>
+                    <xsl:text>No rights reserved. On API usage, feel free to attribute iRail.be</xsl:text>
+                </p>
+
             </body>
         </html>
     </xsl:template>
@@ -15,19 +21,23 @@
     <xsl:template match="connections">
         <table>
             <tr>
-                <td>From</td>
-                <td>Departure</td>
-                <td>To</td>
-                <td>Arrival</td>
-                <td>Duration</td>
-                <td>Delays</td>
-                <td>Trains used</td>
+                <td><xsl:text>#</xsl:text></td>
+                <td><xsl:text>Date</xsl:text></td>
+                <td><xsl:text>From</xsl:text></td>
+                <td><xsl:text>Departure</xsl:text></td>
+                <td><xsl:text>To</xsl:text></td>
+                <td><xsl:text>Arrival</xsl:text></td>
+                <td><xsl:text>Duration</xsl:text></td>
+                <td><xsl:text>Delays</xsl:text></td>
+                <td><xsl:text>Trains used</xsl:text></td>
             </tr>
             <xsl:apply-templates select="connection"/>
         </table>
     </xsl:template>
     <xsl:template match="connection">
         <tr>
+                <td><xsl:value-of select="@id"/></td>
+                <td><xsl:value-of select="departure/date"/></td>
                 <td><xsl:value-of select="departure/station"/></td>
                 <td><xsl:value-of select="departure/time"/></td>
                 <td><xsl:value-of select="arrival/station"/></td>

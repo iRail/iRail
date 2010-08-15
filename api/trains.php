@@ -32,7 +32,7 @@
  *
  * Yours sincerely,
  * Pieter Colpaert
- */
+*/
 
 //set content type in the header to XML
 header('Content-Type: text/xml');
@@ -162,69 +162,69 @@ $body = http_parse_message($post)->body;
 
 //output
 
-preg_match("/..(..)(..)(..)/si",$date, $m);
-$date = $m[3] . $m[2] . $m[1];
-
 // Find connections
-    $connectionnumber = 0;
+$connectionnumber = 0;
 
-    preg_match_all("/<Connection .*?>(.*?)<\/Connection>/si", $body, $matches);
-    $connections = $matches[1];
-    echo "<connections>";
-    foreach($connections as $i => $value) {
+preg_match_all("/<Connection .*?>(.*?)<\/Connection>/si", $body, $matches);
+$connections = $matches[1];
+echo "<connections>";
+foreach($connections as $i => $value) {
+    preg_match("/<Overview><Date>(.{8})<\/Date>/si", $value, $m);
+    $date = $m[1];
+    preg_match("/..(..)(..)(..)/si",$date, $m);
+    $date = $m[3] . $m[2] . $m[1];
+    preg_match("/<Dep getIn=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
+    $time_dep = $m[1];
+    preg_match("/<Arr getOut=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
+    $time_arr = $m[1];
 
-        preg_match("/<Dep getIn=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
-        $time_dep = $m[1];
-        preg_match("/<Arr getOut=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
-        $time_arr = $m[1];
+    //needs fixing: in some cases the train is not 7 chars
+    preg_match_all("/<Attribute type=\"NAME\"><AttributeVariant type=\"NORMAL\"><Text>(.*?)<\/Text>/si", $value, $trains);
 
-        //needs fixing: in some cases the train is not 7 chars
-        preg_match_all("/<Attribute type=\"NAME\"><AttributeVariant type=\"NORMAL\"><Text>(.*?)<\/Text>/si", $value, $trains);
-        
-        preg_match("/<Duration><Time>00d0(.:..):00<\/Time>/is", $value, $matches);
-        $duration = $matches[1];
-        echo "<connection>";
-        echo "<departure>";
-        echo "<station>";
-        echo $from;
-        echo "</station>";
-        echo "<time>";
-        echo $time_dep;
-        echo "</time>";
-        echo "<date>";
-        echo $date;
-        echo "</date>";
-        echo "</departure>";
+    preg_match("/<Duration><Time>00d0(.:..):00<\/Time>/is", $value, $matches);
+    $duration = $matches[1];
+    echo "<connection id=\"" . $i . "\">";
+    echo "<departure>";
+    echo "<station>";
+    echo $from;
+    echo "</station>";
+    echo "<time>";
+    echo $time_dep;
+    echo "</time>";
+    echo "<date>";
+    echo $date;
+    echo "</date>";
+    echo "</departure>";
 
-        echo "<arrival>";
-        echo "<station>";
-        echo $to;
-        echo "</station>";
-        echo "<time>";
-        echo $time_arr;
-        echo "</time>";
-        echo "<date>";
-        echo $date;
-        echo "</date>";
-        echo "</arrival>";
+    echo "<arrival>";
+    echo "<station>";
+    echo $to;
+    echo "</station>";
+    echo "<time>";
+    echo $time_arr;
+    echo "</time>";
+    echo "<date>";
+    echo $date;
+    echo "</date>";
+    echo "</arrival>";
 
-        echo "<duration>";
-        echo $duration;
-        echo "</duration>";
+    echo "<duration>";
+    echo $duration;
+    echo "</duration>";
 
-        echo "<delay>";
-        echo preg_match("/HAS_DELAYINFO/si", $value);
-        echo "</delay>";
+    echo "<delay>";
+    echo preg_match("/HAS_DELAYINFO/si", $value);
+    echo "</delay>";
 
-        echo "<trains>";
-        foreach($trains[1] as $i => $train) {
-            echo "<train>". $train ."</train>";
-        }
-        echo "</trains>";
-
-        echo "</connection>";
-
+    echo "<trains>";
+    foreach($trains[1] as $i => $train) {
+        echo "<train>". $train ."</train>";
     }
+    echo "</trains>";
 
-    echo "</connections>";
+    echo "</connection>";
+
+}
+
+echo "</connections>";
 ?>
