@@ -9,9 +9,9 @@
             <body>
                 <xsl:apply-templates/><br/>
                 <p>
-                    <xsl:text>© 2010 iRail.be - Yeri Tiete, Pieter Colpaert </xsl:text><a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors">and others</a>
+                    <xsl:text>© 2010 iRail.be - Yeri Tiete, Pieter Colpaert </xsl:text><a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors">and others</a><xsl:text>.</xsl:text>
                     <br/>
-                    <xsl:text>No rights reserved. On API usage, feel free to attribute iRail.be</xsl:text>
+                    <xsl:text>No rights reserved. On API usage, feel free to attribute </xsl:text><a href="http://project.irail.be/">iRail.be</a><xsl:text>.</xsl:text>
                 </p>
 
             </body>
