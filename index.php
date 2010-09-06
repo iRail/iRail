@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
-	http://blog.irail.be - http://irail.be
+	http://project.irail.be - http://irail.be
 	
 	source available at http://github.com/Tuinslak/iRail
 */

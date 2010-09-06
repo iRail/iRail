@@ -1,6 +1,6 @@
-# iRail by Tuinslak
+# iRail by Yeri Tiete, Pieter Colpaert, and others
 # 
-# http://irail.be
+# http://irail.be - http://project.irail.be
 #
 # robots.txt
 #
