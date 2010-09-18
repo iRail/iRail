@@ -8,7 +8,6 @@ class TripNode {
     private $platform;
     private $delay;
     private $unixtime;
-    private $date;
     private $station;
     private $vehicle;
     private $platformNormal; // This is a boolean to indicate whether the platform has changed recently

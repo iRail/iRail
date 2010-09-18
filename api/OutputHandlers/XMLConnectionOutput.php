@@ -14,13 +14,18 @@ class XMLConnectionOutput extends ConnectionOutput {
     }
 
     public function printAll(){
+        date_default_timezone_set("UTC");
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml -> createElement("connections");
         $rootNode -> setAttribute("version", "1.0");
-        $xml -> appendChild($rootNode);
-        foreach($this -> connections as $c){
-            $connection = $xml -> createElement("connection");
+        $rootNode -> setAttribute("timestamp", date("U"));
 
+        $xml -> appendChild($rootNode);
+        $conId = 0;
+        foreach($this -> connections as $c){
+            /* @var $c Connection */
+            $connection = $xml -> createElement("connection");
+            $connection -> setAttribute("id", $conId);
             //DEPART
             $departure = $xml -> createElement("departure");
             $departure -> setAttribute("delay",  $c ->getDepart() -> getDelay());
@@ -29,9 +34,10 @@ class XMLConnectionOutput extends ConnectionOutput {
             $station -> setAttribute("location", $c -> getDepart() -> getStation() -> getY() . " " .$c -> getDepart() -> getStation() -> getX()  );
 
             $time0 = $xml -> createElement("time", $c -> getDepart() -> getTime());
-            $time0 -> setAttribute("formatted", date("d-m-Y H:i:s", $c -> getDepart() -> getTime() ) );
+            $time0 -> setAttribute("formatted", date("Y-m-d\TH:i\Z", $c -> getDepart() -> getTime() ) );
 
             $platform = $xml -> createElement("platform", $c -> getDepart() -> getPlatform());
+            $platform -> setAttribute("normal", $c->getDepart()-> normalPlatform());
 
             $vehicle = $xml -> createElement("vehicle", $c -> getDepart() ->getVehicle() -> getId());
 
@@ -49,9 +55,11 @@ class XMLConnectionOutput extends ConnectionOutput {
             $station -> setAttribute("location", $c -> getArrival() -> getStation() -> getY() . " " .$c -> getArrival() -> getStation() -> getX()  );
 
             $time1 = $xml -> createElement("time", $c -> getArrival() -> getTime());
-            $time1 -> setAttribute("formatted", date("d-m-Y H:i:s", $c -> getArrival() -> getTime() ) );
+            //iso8601 standard for time: 2010-09-17T09:12Z
+            $time1 -> setAttribute("formatted", date("Y-m-d\TH:i\Z", $c -> getArrival() -> getTime() ) );
 
             $platform = $xml -> createElement("platform", $c -> getArrival() -> getPlatform());
+            $platform -> setAttribute("normal", $c->getArrival()-> normalPlatform());
 
             $vehicle = $xml -> createElement("vehicle", $c -> getArrival() ->getVehicle() -> getId());
 
@@ -71,6 +79,7 @@ class XMLConnectionOutput extends ConnectionOutput {
             $connection -> appendChild($duration);
 
             $rootNode -> appendChild($connection);
+            $conId ++;
         }
         echo $xml -> saveXML();
     }
