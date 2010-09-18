@@ -5,21 +5,14 @@
  *
  * @author pieterc
  */
-class Vehicle {
-    private $id;
-
-    function __construct($id) {
-        $this->id = $id;
-    }
-
-    //hard coded for now
-    function getTypeOfTransport(){
-        return "trains";
-    }
+abstract class Vehicle {
     
-    function getId(){
-        return $this->id;
-    }
+    abstract function getId();
 
+    abstract function hasCoordinates();
+    abstract function getCoordinates();
+
+    abstract function hasTraject();
+    abstract function getTraject();
 }
 ?>

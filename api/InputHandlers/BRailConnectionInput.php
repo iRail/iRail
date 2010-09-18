@@ -5,15 +5,15 @@
  * @author pieterc
  */
 
-include("Input.php");
+include("ConnectionInput.php");
 include("DataStructs/Connection.php");
 include("DataStructs/Station.php");
 include("DataStructs/TripNode.php");
 include("DataStructs/Via.php");
-include("DataStructs/Vehicle.php");
+include("DataStructs/BTrain.php");
 
 
-class BRailConnectionInput extends Input {
+class BRailConnectionInput extends ConnectionInput {
 
 
     /**
@@ -94,29 +94,50 @@ class BRailConnectionInput extends Input {
         foreach($xml -> ConRes -> ConnectionList -> Connection as $conn){
 
             $platform0 = $conn -> Overview ->Departure -> BasicStop -> Dep -> Platform -> Text;
-            $delay0 = 0;//NYImplemented
+
             $unixtime0 = $this->transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
             $nameStation0 = $conn -> Overview -> Departure -> BasicStop -> Station['name'];
             $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
             $locationY0 = $conn -> Overview -> Departure -> BasicStop -> Station['y'];
             $station0 = new Station($nameStation0, $locationX0, $locationY0);
-            $vehicle0 = new Vehicle("nyimplemented");
+            $vehicle0 = new BTrain("nyimplemented");
 
 
             $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
-            $delay1 = 0;//NYImplemented
+
             $unixtime1 = $this->transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
             $nameStation1 = $conn -> Overview -> Arrival -> BasicStop -> Station['name'];
             $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
             $locationY1 = $conn -> Overview -> Arrival -> BasicStop -> Station['y'];
             $station1 = new Station($nameStation1, $locationX1, $locationY1);
-            $vehicle1 = new Vehicle("nyimplemented");
+            $vehicle1 = new BTrain("nyimplemented");
 
-            $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0);
-            $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1);
+            //Delay or other wrongish stuff
+            $delay0 = 0;
+            $delay1 = 0;
+            $platformNormal0 = true;
+            $platformNormal1 = true;
+            if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO"){
+
+                $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
+                
+                //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
+                $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
+
+                if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)){
+                    $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
+                    $platformNormal0= false;
+                }
+                if(isset($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform-> Text)){
+                    $platform1 = $conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform -> Text;
+                    $platformNormal1 = false;
+                }
+            }
+
+            $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
+            $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 
             $vias = array();
-
 
             $duration = $this -> transformDuration($conn -> Overview -> Duration -> Time);
 
@@ -132,10 +153,11 @@ class BRailConnectionInput extends Input {
      * @param <type> $time -> in 00d15:24:00
      * @param <type> $date -> in 20100915
      * @return seconds since the Unix epoch
+     *
      */
     private function transformTime($time, $date){
         //I solved it with substrings. DateTime class is such a Pain In The Ass.
-        //No sh!t.
+        date_default_timezone_set("Europe/Brussels");
         $dayoffset = intval(substr($time,0,2));
         $hour = intval(substr($time, 3, 2));
         $minute = intval(substr($time, 6,2));
@@ -145,12 +167,17 @@ class BRailConnectionInput extends Input {
         $day = intval(substr($date,6,2));
         return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
     }
-
-    function transformDuration($time) {
+    /**
+     * This function transforms the brail formatted timestring and reformats it to seconds
+     * @param int $time
+     * @return int Duration in seconds
+     */
+    private function transformDuration($time) {
+        $days = intval(substr($time, 0,2));
         $hour = intval(substr($time, 3, 2));
         $minute = intval(substr($time, 6,2));
         $second = intval(substr($time, 9,2));
-        return $hour*3600 + $minute * 60 + $second;
+        return $days*24*3600 + $hour*3600 + $minute * 60 + $second;
     }
 
 }
