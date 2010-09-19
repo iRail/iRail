@@ -51,7 +51,12 @@ class BRailConnectionInput extends ConnectionInput {
 
         //for now
         $trainsonly = "1111111111111111";
-
+        $timeSel = 0;
+        if($request -> getTimeSel() == "depart"){
+            $timeSel = 0;
+        }else if ($request -> getTimeSel() == "arrive"){
+            $timeSel = 1;
+        }
         //now we're going to get the real data
         $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
 <ReqC ver="1.1" prod="irail" lang="'. $request -> getLang() .'">
@@ -68,9 +73,9 @@ class BRailConnectionInput extends ConnectionInput {
 </Dest>
 <Via>
 </Via>
-<ReqT time="'. $request -> getTime() .'" date="'. $request -> getDate() .'" a="0">
+<ReqT time="'. $request -> getTime() .'" date="'. $request -> getDate() .'" a="'. $timeSel  .'">
 </ReqT>
-<RFlags b="0" f="'. $request -> getResults() .'">
+<RFlags b="'. $request -> getResults() * $timeSel .'" f="'. $request -> getResults() * -($timeSel-1) .'">
 </RFlags>
 <GISParameters>
 <Front>
@@ -80,7 +85,6 @@ class BRailConnectionInput extends ConnectionInput {
 </GISParameters>
 </ConReq>
 </ReqC>';
-
         $post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
         return http_parse_message($post)->body;
     }
