@@ -49,7 +49,7 @@ include("../../includes/dbConfig.php");
 		echo "<td>" . $row->$api_c6 . "</td>";
 		echo "<td>" . $row->$api_c7 . "</td>";
 		echo "</tr>";
-	}
+	}
 ?>
 </table>
 </body>
