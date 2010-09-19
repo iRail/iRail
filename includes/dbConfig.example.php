@@ -1,5 +1,5 @@
 <?php
-/*  Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
+/*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
 	
     This file is part of iRail.
 
@@ -23,14 +23,18 @@
 
 // API DB config
 
-$api_user = "irail";		// db user
-$api_password = "password";	// passwd
-$apu_database = "irail";	// db name
-$api_table = "apilog";		// table name
-$api_c1 = "id";			// unique ID
-$api_c2 = "time";		// request unix time
-$api_c3 = "useragent";		// UA, if any
-$api_c4 = "from";		// from station
-$api_c5 = "to";			// to station
+$api_host = "localhost";		// db host
+$api_user = "irail";			// db user
+$api_password = "passwd";		// passwd
+$api_database = "irail";		// db name
+$api_table = "apilog";			// table name
+
+// database columns 
+
+$api_c1 = "id";					// unique ID
+$api_c2 = "time";				// request unix time
+$api_c3 = "useragent";			// UA, if any
+$api_c4 = "fromstation";		// from station
+$api_c5 = "tostation";			// to station
 
 ?>
