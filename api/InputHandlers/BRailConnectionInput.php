@@ -124,10 +124,16 @@ class BRailConnectionInput extends ConnectionInput {
             if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO"){
 
                 $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
-                
+                if($delay0 < 0){
+                    $delay0 = 0;
+                }
                 //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
                 $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
+                if($delay1 < 0){
+                    $delay1 = 0;
+                }
 
+                //TODO: doesn't work? Needs testing
                 if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)){
                     $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
                     $platformNormal0= false;
