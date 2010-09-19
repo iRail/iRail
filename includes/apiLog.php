@@ -61,6 +61,11 @@ function writeLog($ua, $from, $to) {
 		$ua = "-";
 	}
 	
+	$from = str_replace("'", "", $from);
+	$to = str_replace("'", "", $to);
+	$from = str_replace("\"", "", $from);
+	$to = str_replace("\"", "", $to);
+	
 	// connect to db
 	try {
 		mysql_pconnect($api_host, $api_user, $api_password);
