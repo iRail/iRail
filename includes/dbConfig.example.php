@@ -36,5 +36,7 @@ $api_c2 = "time";				// request unix time
 $api_c3 = "useragent";			// UA, if any
 $api_c4 = "fromstation";		// from station
 $api_c5 = "tostation";			// to station
+$api_c6 = "errors";				// catch error output
+$api_c7 = "ip";					// request IP address
 
 ?>

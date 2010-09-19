@@ -233,5 +233,5 @@ echo "</connections>";
 include("../includes/apiLog.php");
 
 // Log request to database
-writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to);
+writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to, "none (trains.php)", $_SERVER['REMOTE_ADDR']);
 ?>
