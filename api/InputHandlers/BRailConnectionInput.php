@@ -137,7 +137,20 @@ class BRailConnectionInput extends ConnectionInput {
                     $platformNormal1 = false;
                 }
             }
-
+            $trains = array();
+            $j = 0;
+            foreach($conn -> ConSectionList -> ConSection as $connsection){
+                foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att){
+                    if($att -> Attribute["type"] == "NAME"){
+                        $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
+                        $j++;
+                        break;
+                    }
+                }
+            }
+            $vehicle0 = new BTrain($trains[0]);
+            $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
+            
             $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
             $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 

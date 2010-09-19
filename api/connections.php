@@ -87,10 +87,9 @@ try {
     $output -> printAll();
     // Log request to database
     writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (connections.php)", $_SERVER['REMOTE_ADDR']);
-
 }catch(Exception $e) {
-    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in connections.php: " . $e, $_SERVER['REMOTE_ADDR']);
-    echo $e->getMessage(); //error handling..
+    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in connections.php: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
+    echo "<error>" . $e->getMessage() . "</error>"; //error handling..
 }
 
 

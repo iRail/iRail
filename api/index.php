@@ -10,7 +10,7 @@
       <h1>Welcome developer</h1>
       <p>This is the unofficial API for the SNCB/NMBS in Belgium. If you want to implement train schedules in your application you're at the right place.</p>
       <h1>Usage</h1>
-      <p><a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/ApiSpecification">here (project.irail.be/cgi-bin/trac.fcgi/wiki/ApiSpecification)</a></p>
+      <p><a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/APIv1Draft">here</a></p>
       <h1>Grab the code</h1>
       <p>The code of this website is free and open source. It is licensed under the GPL v 3 and you can find it at github: </p>
       <p><a href="http://github.com/Tuinslak/iRail/">here (http://github.com/Tuinslak/iRail/)</a></p>
