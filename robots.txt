@@ -16,3 +16,16 @@ Disallow: save.php
 Disallow: noresults.php
 Disallow: noresults
 Disallow: *.php$
+Disallow: .gitignore
+Disallow: README
+Disallow: /nbproject/
+
+# API dir on dev.irail.be/api, else check api.irail.be/robots.txt
+
+Disallow: /api/README     
+Disallow: /api/unittests
+Disallow: /api/xmlstylesheets
+Disallow: /api/OutputHandlers
+Disallow: /api/InputHandlers
+Disallow: /api/DataStructs
+
