@@ -38,7 +38,7 @@
 
 // API access logging to database
 
-function writeLog($ua, $from, $to) {
+function writeLog($ua, $from, $to, $err, $ip) {
 	// include vars
 	include("../includes/dbConfig.php");
 
@@ -63,8 +63,11 @@ function writeLog($ua, $from, $to) {
 	
 	$from = str_replace("'", "", $from);
 	$to = str_replace("'", "", $to);
+	$err = str_replace("'", "", $err);
+	
 	$from = str_replace("\"", "", $from);
 	$to = str_replace("\"", "", $to);
+	$err = str_replace("\"", "", $err);
 	
 	// connect to db
 	try {
@@ -77,7 +80,7 @@ function writeLog($ua, $from, $to) {
 	
 	// insert in db
 	try {
-		$query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5) VALUES('$now', '$ua', '$from', '$to')";
+		$query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip')";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
