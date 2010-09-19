@@ -28,14 +28,11 @@
 
 header('Content-Type: text/xml');
 
-/*
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "<?xml-stylesheet type=\"text/xsl\" href=\"xmlstylesheets/trains.xsl\" ?>";
-*/
-
 include("DataStructs/ConnectionRequest.php");
 include("InputHandlers/BRailConnectionInput.php");
 include("OutputHandlers/XMLConnectionOutput.php");
+
+include("../includes/apiLog.php");
 
 
 $date = "";
@@ -44,20 +41,9 @@ $results = "";
 $lang = "";
 $timeSel = "";
 $typeOfTransport = "";
+
 //required vars, output error messages if empty
 extract($_GET);
-//$from = $_GET["from"];
-//$to = $_GET["to"];
-//
-////optional vars
-//$date = $_GET["date"];
-//$time = $_GET["time"];
-//$results = $_GET["results"];
-//$lang = $_GET["lang"];
-//$timeSel = $_GET["timesel"];
-//$typeOfTransport = $_GET["typeOfTransport"];
-
-
 
 if($lang == "") {
     $lang = "EN";
@@ -72,30 +58,40 @@ if($results == "" || $results > 6 || $results < 1) {
 }
 
 if($date == "") {
-    $date = "20" . date("ymd");
+    $date = date("dmy");
 }
+
+//TODO: move this to constructor of ConnectionRequest
+
+//reform date to needed train structure
+preg_match("/(..)(..)(..)/si",$date, $m);
+$date = "20" . $m[3] . $m[2] . $m[1];
 
 if($time == "") {
-    $time = date("H:i");
+    $time = date("Hi");
 }
 
-if($typeOfTransport == ""){
+//reform time to wanted structure
+preg_match("/(..)(..)/si",$time, $m);
+$time = $m[1] . ":" . $m[2];
+
+if($typeOfTransport == "") {
     $typeOfTransport = "train";
 }
-try{
+
+try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
     $input0 = new BRailConnectionInput();
-    $output = new XMLConnectionOutput($input0 -> execute($request));
+    $connections = $input0 -> execute($request);
+    $output = new XMLConnectionOutput($connections);
     $output -> printAll();
-}catch(Exception $e){
+    // Log request to database
+    writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (connections.php)", $_SERVER['REMOTE_ADDR']);
+
+}catch(Exception $e) {
+    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in connections.php: " . $e, $_SERVER['REMOTE_ADDR']);
     echo $e->getMessage(); //error handling..
 }
 
-// Yeri
-// logging includes 
-include("../includes/apiLog.php");
-
-// Log request to database
-writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to);
 
 ?>
