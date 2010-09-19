@@ -1,4 +1,26 @@
 <?php
+/*  Copyright 2010 Project iRail
+	
+    This file is part of iRail.
+
+    iRail is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    iRail is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with iRail.  If not, see <http://www.gnu.org/licenses/>.
+
+    http://project.irail.be - http://irail.be
+	
+    Source available at http://github.com/Tuinslak/iRail
+*/
+
 
 /**
  * This is the API request handler
@@ -66,8 +88,14 @@ try{
     $output = new XMLConnectionOutput($input0 -> execute($request));
     $output -> printAll();
 }catch(Exception $e){
-    echo $e->getMessage();//error handling..
+    echo $e->getMessage(); //error handling..
 }
 
+// Yeri
+// logging includes 
+include("../includes/apiLog.php");
+
+// Log request to database
+writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to);
 
 ?>

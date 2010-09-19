@@ -227,4 +227,11 @@ foreach($connections as $i => $value) {
 }
 
 echo "</connections>";
+
+// Yeri
+// logging includes 
+include("../includes/apiLog.php");
+
+// Log request to database
+writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to);
 ?>

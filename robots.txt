@@ -5,9 +5,11 @@
 # robots.txt
 #
 
-User-agent: *
-
 # Sitemap
+#Sitemap: http://irail.be/sitemap.xml.gz
+# Missing for now
+
+User-agent: *
 
 # Directories
 Disallow: /docs/
@@ -29,3 +31,4 @@ Disallow: /api/OutputHandlers
 Disallow: /api/InputHandlers
 Disallow: /api/DataStructs
 
+# 
