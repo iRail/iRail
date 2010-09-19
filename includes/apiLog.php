@@ -36,6 +36,9 @@
 	$api_c5 = "to";					// to station
 */
 
+// API MySQL logging
+// Documentation at http://project.irail.be/cgi-bin/trac.fcgi/wiki/ApiMySqlLogging
+
 // API access logging to database
 
 function writeLog($ua, $from, $to, $err, $ip) {

@@ -21,6 +21,9 @@
     Source available at http://github.com/Tuinslak/iRail
 */
 
+// API MySQL logging
+// Documentation at http://project.irail.be/cgi-bin/trac.fcgi/wiki/ApiMySqlLogging
+
 // API DB config
 
 $api_host = "localhost";		// db host
