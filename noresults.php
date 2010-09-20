@@ -99,7 +99,7 @@ iRail - Error
 </form>
 </tr></table>
 <?php
-include 'footer.php';
+include 'includes/footer.php';
 ?>
 </div></div></div>
 </body>

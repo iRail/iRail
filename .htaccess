@@ -27,7 +27,7 @@ RewriteRule ^intresults$		query_int.php                   [NC,L]
 RewriteRule ^noresults$                 noresults.php                   [NC,L]
 RewriteRule ^settings$     		settings.php        		[NC,L]
 RewriteRule ^save$			save.php			[NC,L]
-RewriteRule ^about$			about.php			[NC,L]
+RewriteRule ^about$			includes/about.php		[NC,L]
 RewriteRule ^changelog$			docs/changelog.php		[NC,L]
 
 </IfModule>
