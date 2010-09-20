@@ -24,19 +24,19 @@ class BTrain extends Vehicle {
     }
     
     function hasCoordinates(){
-        return $x != 0 && $y != 0;
+        return $this->x != 0 && $this->y != 0;
     }
     
     function getCoordinates(){
-        return $y . " " . $x;
+        return $this->y . " " . $this->x;
     }
 
     function hasTraject(){
-        return $traject != null;
+        return $this->traject != null;
     }
 
     function getTraject(){
-        return $traject;
+        return $this->traject;
     }
     
 }
