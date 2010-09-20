@@ -22,6 +22,8 @@
 */
 include 'getVersion.php';
 // add trailing "-" to prevent RH/Apache/NMBS error: HTTP header: invalid date
-// probably want to either add github url or some more credits
-$irailAgent = "iRail.be by Tuinslak and others; Git version: $irailVersion -";
+$irailAgent = "iRail.be by Project iRail (http://yeri.be/dx); Git version: $irailVersion -";
+
+// result example:
+// 85.12.6.130 - - [20/Sep/2010:14:57:58 +0200] "POST / HTTP/1.1" 200 119564 "http://irail.be/" "iRail.be by Project iRail (http://yeri.be/dx); Git version: 902542a"
 ?>
