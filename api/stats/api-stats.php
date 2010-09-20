@@ -1,5 +1,5 @@
 <html><head><title>iRail API MySQL (request) stats</title></head><body>
-<table><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>
+<center>
 <?php
 /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
 	
@@ -26,18 +26,55 @@
 // "Public" API stats page
 // to prevent giving MySQL access to *
 
+// vars
+$limit = 250;
+
 // include vars
 include("../../includes/dbConfig.php");
+
+if (empty($s)) {
+	$s = 0;
+}
+
+$count = 1 + $s ;
 
 	try {
 		mysql_pconnect($api_host, $api_user, $api_password);
 		mysql_select_db($api_database);
-		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7 FROM $api_table ORDER BY $api_c1 DESC";
+		$query = "SELECT COUNT($api_c1) FROM $api_table";
+		$result = mysql_query($query);
+		$numrows = mysql_result($result, 0);
+		
+		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
 		echo "Error connecting to the database.";
 	}
+	
+	$count++;
+	
+	if ($s>=1) { // bypass PREV link if s is 0
+		$prevs=($s-$limit);
+		print "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
+	}
+
+	// calculate number of pages needing links
+	$pages=intval($numrows/$limit);
+
+	if ($numrows%$limit) {
+		// has a page
+		$pages++;
+	}
+
+	// check to see if last page
+	if (!((($s+$limit)/$limit)==$pages) && $pages!=1) {
+		// not last page so give NEXT link
+		$news=$s+$limit;
+		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
+	}
+
+	echo "</center><table border=\"1\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
 	
 	while($row = mysql_fetch_object($result)) {
 		echo "<tr>";
@@ -50,6 +87,7 @@ include("../../includes/dbConfig.php");
 		echo "<td>" . $row->$api_c7 . "</td>";
 		echo "</tr>";
 	}
+
 ?>
 </table>
 </body>
