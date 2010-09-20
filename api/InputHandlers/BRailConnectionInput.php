@@ -25,7 +25,7 @@ class BRailConnectionInput extends ConnectionInput {
         include "../includes/getUA.php";
         $url="http://hari.b-rail.be/Hafas/bin/extxml.exe";
         $request_options = array(
-                "referer" => "http://irail.be/",
+                "referer" => "http://api.irail.be/",
                 "timeout" => "30",
                 "useragent" => $irailAgent,
         );
