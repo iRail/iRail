@@ -21,7 +21,7 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 
-include 'includes/getVersion.php';
+include '../includes/getVersion.php';
 ?>
 <p style="color:#999999;font-size:12px;position:absolute;left:10px;">made by <a href="about">iRail team</a>; 
 data from <a href="http://www.b-rail.be/" target="_blank">(B)</a>; 
@@ -32,5 +32,5 @@ echo $irailVersion;
 ?></a>.</p>
 
 <?php
-include 'includes/googleAnalytics.php';
+include '../includes/googleAnalytics.php';
 ?>

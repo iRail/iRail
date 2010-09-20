@@ -265,7 +265,7 @@ generate_js_array($stations);
                             </form>
                         </tr></table>
 <?php
-include 'footer.php';
+include 'includes/footer.php';
 ?>
                 </div></div></div>
     </body>
