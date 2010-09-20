@@ -67,7 +67,7 @@ iRail - About
 
 <li id="about_s"> API (<a href="http://api.irail.be" target="_blank">api.irail.be</a>) </li>
 <li id="about_s"> Created by: </li>
-<li id="about_vs">Yeri "<a href="http://yeri.be" target="_blank">Tuinslak</a>" Tiete,</li> 
+<li id="about_vs">Yeri Tiete (<a href="http://yeri.be/" target="_blank">Tuinslak</a>),</li> 
 <li id="about_vs"><a href="http://bonsansnom.wordpress.com/" target="_blank">Pieter Colpaert</a>,</li> 
 <li id="about_vs">Christophe Versieux,</li> 
 <li id="about_vs">and <a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors" target="_blank">many others</a>.</li>
