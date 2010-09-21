@@ -1,4 +1,39 @@
-<html><head><title>iRail API MySQL (request) stats</title></head><body>
+<html><head><title>iRail API MySQL (request) stats</title>
+<style type="text/css">
+table.s {
+	border-width: 1px;
+	border-spacing: ;
+	border-style: outset;
+	border-color: white;
+	border-collapse: collapse;
+	background-color: white;
+}
+table.s th {
+	border-width: 1px;
+	padding: 1px;
+	border-style: inset;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+table.s td {
+	border-width: 1px;
+	padding: 1px;
+	border-style: inset;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+</style>
+
+<table class="sample">
+<tr>
+	<th>Header</th>
+	<td>Content</td>
+</tr>
+</table>
+
+</head><body>
 <center>
 <?php
 /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
@@ -74,7 +109,7 @@ $count = 1 + $s ;
 		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
 	}
 
-	echo "</center><table style=\"border-width: 1px;	border-spacing: ; border-style: outset; border-color: white; border-collapse: collapse; background-color: white;\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
+	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
 	
 	while($row = mysql_fetch_object($result)) {
 		echo "<tr>";
