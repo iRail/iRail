@@ -74,7 +74,7 @@ $count = 1 + $s ;
 		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
 	}
 
-	echo "</center><table border=\"1\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
+	echo "</center><table style="border-width: 1px;	border-spacing: ; border-style: outset; border-color: white; border-collapse: collapse; background-color: white;"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
 	
 	while($row = mysql_fetch_object($result)) {
 		echo "<tr>";
