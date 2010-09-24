@@ -22,6 +22,10 @@ class BTrain extends Vehicle {
     function getId(){
         return "Be."."NMBS.".$this ->internalId;
     }
+
+    function getInternalId(){
+        return $this -> internalId;
+    }
     
     function hasCoordinates(){
         return $this->x != 0 && $this->y != 0;
