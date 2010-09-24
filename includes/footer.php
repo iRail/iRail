@@ -32,5 +32,5 @@ echo $irailVersion;
 ?></a>.</p>
 
 <?php
-include './googleAnalytics.php';
+include 'googleAnalytics.php';
 ?>
