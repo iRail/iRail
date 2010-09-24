@@ -145,14 +145,16 @@ class BRailConnectionInput extends ConnectionInput {
             }
             $trains = array();
             $j = 0;
-            //yay for bad code.
-            if(sizeof($conn -> ConSectionList) > 0 ) {
+            //yay for spaghetti code.
+            if(sizeof($conn -> ConSectionList -> ConSection) > 0 ) {
                 foreach($conn -> ConSectionList -> ConSection as $connsection) {
-                    foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
-                        if($att -> Attribute["type"] == "NAME") {
-                            $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
-                            $j++;
-                            break;
+                    if(sizeof($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute) > 0 ) {
+                        foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
+                            if($att -> Attribute["type"] == "NAME") {
+                                $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
+                                $j++;
+                                break;
+                            }
                         }
                     }
                 }
