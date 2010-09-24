@@ -52,9 +52,9 @@ class BRailConnectionInput extends ConnectionInput {
         //for now
         $trainsonly = "1111111111111111";
         $timeSel = 0;
-        if($request -> getTimeSel() == "depart"){
+        if($request -> getTimeSel() == "depart") {
             $timeSel = 0;
-        }else if ($request -> getTimeSel() == "arrive"){
+        }else if ($request -> getTimeSel() == "arrive") {
             $timeSel = 1;
         }
         //now we're going to get the real data
@@ -95,7 +95,7 @@ class BRailConnectionInput extends ConnectionInput {
         $connections = array();
         $i = 0;
         //echo $serverData ;
-        foreach($xml -> ConRes -> ConnectionList -> Connection as $conn){
+        foreach($xml -> ConRes -> ConnectionList -> Connection as $conn) {
 
             $platform0 = $conn -> Overview ->Departure -> BasicStop -> Dep -> Platform -> Text;
 
@@ -121,42 +121,45 @@ class BRailConnectionInput extends ConnectionInput {
             $delay1 = 0;
             $platformNormal0 = true;
             $platformNormal1 = true;
-            if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO"){
+            if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO") {
 
                 $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
-                if($delay0 < 0){
+                if($delay0 < 0) {
                     $delay0 = 0;
                 }
                 //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
                 $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
-                if($delay1 < 0){
+                if($delay1 < 0) {
                     $delay1 = 0;
                 }
 
                 //TODO: doesn't work? Needs testing
-                if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)){
+                if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)) {
                     $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
                     $platformNormal0= false;
                 }
-                if(isset($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform-> Text)){
+                if(isset($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform-> Text)) {
                     $platform1 = $conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform -> Text;
                     $platformNormal1 = false;
                 }
             }
             $trains = array();
             $j = 0;
-            foreach($conn -> ConSectionList -> ConSection as $connsection){
-                foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att){
-                    if($att -> Attribute["type"] == "NAME"){
-                        $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
-                        $j++;
-                        break;
+            //yay for bad code.
+            if(sizeof($conn -> ConSectionList) > 0 ) {
+                foreach($conn -> ConSectionList -> ConSection as $connsection) {
+                    foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
+                        if($att -> Attribute["type"] == "NAME") {
+                            $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
+                            $j++;
+                            break;
+                        }
                     }
                 }
             }
             $vehicle0 = new BTrain($trains[0]);
             $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
-            
+
             $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
             $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 
@@ -178,7 +181,7 @@ class BRailConnectionInput extends ConnectionInput {
      * @return seconds since the Unix epoch
      *
      */
-    private function transformTime($time, $date){
+    private function transformTime($time, $date) {
         //I solved it with substrings. DateTime class is such a Pain In The Ass.
         date_default_timezone_set("Europe/Brussels");
         $dayoffset = intval(substr($time,0,2));
