@@ -23,49 +23,28 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 
-/*
- * READ THIS:
- *
- * This file contains the most dirty code I've every written.
- * This is a demo file and just contains how we should get railway information.
- * In september this file will not be needed anymore
- *
- * Yours sincerely,
- * Pieter Colpaert
-*/
-
 //set content type in the header to XML
 header('Content-Type: text/xml');
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "<?xml-stylesheet type=\"text/xsl\" href=\"xmlstylesheets/trains.xsl\" ?>";
-// National api query
-include "../includes/getUA.php"; //→useragent
+
+include("DataStructs/ConnectionRequest.php");
+include("InputHandlers/BRailConnectionInput.php");
+include("OutputHandlers/OldAPIOutput.php");
+
+include("../includes/apiLog.php");
 
 
-$url="http://hari.b-rail.be/Hafas/bin/extxml.exe";
+$date = "";
+$time = "";
+$results = "";
+$lang = "";
+$timesel = "";
+$trainsonly = "";
+
 //required vars, output error messages if empty
-$from = $_GET["from"];
-$to = $_GET["to"];
-
-//optional vars
-$date = $_GET["date"];
-$time = $_GET["time"];
-$results = $_GET["results"];
-$lang = $_GET["lang"];
-$timesel = $_GET["timesel"];
-$trainsonly = $_GET["trainsonly"];
+extract($_GET);
 
 if($lang == "") {
     $lang = "EN";
-}
-
-if($trainsonly != "0" && $trainsonly != "1") {
-    $trainsonly = "0";
-}
-if($trainsonly == "0") {
-    $trainsonly = "1111111111111111";
-}else if($trainsonly == "1") {
-    $trainsonly = "0111111000000000";
 }
 
 if($timesel == "") {
@@ -80,7 +59,7 @@ if($date == "") {
     $date = date("dmy");
 }
 
-//reform date to wanted structure
+//reform date to needed train structure
 preg_match("/(..)(..)(..)/si",$date, $m);
 $date = "20" . $m[3] . $m[2] . $m[1];
 
@@ -92,146 +71,26 @@ if($time == "") {
 preg_match("/(..)(..)/si",$time, $m);
 $time = $m[1] . ":" . $m[2];
 
-// if bad stations, redirect
-if($from == "" || $to == "" || $from == $to) {
-    header('Location: ..');
+if($trainsonly == "") {
+    $trainsonly = "train";
+}else if($trainsonly == 1) {
+    $trainsonly = "train";
+}else {
+    $trainsonly = "all";
 }
 
-
-// prepare HTTP request
-$request_options = array(
-        referer => "http://irail.be/",
-        timeout => "30",
-        useragent => $irailAgent,
-);
-
-//first we're going to try to get the right internal ID's for the stations
-$postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="irail" lang="EN">
-<LocValReq id="from" maxNr="1">
-<ReqLoc match="'. $from.'" type="ST"/>
-</LocValReq>
-<LocValReq id="to" maxNr="1">
-<ReqLoc match="'. $to.'" type="ST"/>
-</LocValReq>
-</ReqC>';
-
-$post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
-$idbody = http_parse_message($post)->body;
-//get id's of the stations out of it to use in the real request
-preg_match_all("/externalId=\"(.*?)\"/si", $idbody,$matches);
-$idfrom = $matches[1][0];
-$idto = $matches[1][1];
-//Get real from and to from this
-preg_match_all("/id=\"...?.?\"><Station name=\"(.*?)\"/si", $idbody,$matches);
-$from = $matches[1][0];
-$to = $matches[1][1];
-//Now let's use these Id's to get the information we need
-$postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="irail" lang="'. $lang .'">
-<ConReq>
-<Start min="0">
-<Station externalId="'. $idfrom .'" distance="0">
-</Station>
-<Prod prod="'. $trainsonly .'">
-</Prod>
-</Start>
-<Dest min="0">
-<Station externalId="'. $idto .'" distance="0">
-</Station>
-</Dest>
-<Via>
-</Via>
-<ReqT time="'. $time .'" date="'. $date .'" a="0">
-</ReqT>
-<RFlags b="0" f="'. $results .'">
-</RFlags>
-<GISParameters>
-<Front>
-</Front>
-<Back>
-</Back>
-</GISParameters>
-</ConReq>
-</ReqC>';
-
-
-$post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
-$body = http_parse_message($post)->body;
-//DBG: echo $body;
-
-//output
-
-// Find connections
-$connectionnumber = 0;
-
-preg_match_all("/<Connection .*?>(.*?)<\/Connection>/si", $body, $matches);
-$connections = $matches[1];
-echo "<connections>";
-foreach($connections as $i => $value) {
-    preg_match("/<Overview><Date>(.{8})<\/Date>/si", $value, $m);
-    $date = $m[1];
-    preg_match("/..(..)(..)(..)/si",$date, $m);
-    $date = $m[3] . $m[2] . $m[1];
-    preg_match("/<Dep getIn=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
-    $time_dep = $m[1];
-    preg_match("/<Arr getOut=\"YES\">\s*<Time>00d(..:..):00<\/Time>/si", $value, $m);
-    $time_arr = $m[1];
-
-    //needs fixing: in some cases the train is not 7 chars
-    preg_match_all("/<Attribute type=\"NAME\"><AttributeVariant type=\"NORMAL\"><Text>(.*?)<\/Text>/si", $value, $trains);
-
-    preg_match("/<Duration><Time>00d0(.:..):00<\/Time>/is", $value, $matches);
-    $duration = $matches[1];
-    echo "<connection id=\"" . $i . "\">";
-    echo "<departure>";
-    echo "<station>";
-    echo $from;
-    echo "</station>";
-    echo "<time>";
-    echo $time_dep;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</departure>";
-
-    echo "<arrival>";
-    echo "<station>";
-    echo $to;
-    echo "</station>";
-    echo "<time>";
-    echo $time_arr;
-    echo "</time>";
-    echo "<date>";
-    echo $date;
-    echo "</date>";
-    echo "</arrival>";
-
-    echo "<duration>";
-    echo $duration;
-    echo "</duration>";
-
-    echo "<delay>";
-    echo preg_match("/HAS_DELAYINFO/si", $value);
-    echo "</delay>";
-
-    echo "<trains>";
-    foreach($trains[1] as $i => $train) {
-        echo "<train>". $train ."</train>";
-    }
-    echo "</trains>";
-
-    echo "</connection>";
-
+try {
+    $request = new ConnectionRequest($from, $to, $time, $date, $timesel, $results, $lang, $trainsonly);
+    $input = new BRailConnectionInput();
+    $connections = $input -> execute($request);
+    $output = new OldAPIOutput($connections);
+    $output -> printAll();
+    
+    // Log request to database
+    writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (trains.php)", $_SERVER['REMOTE_ADDR']);
+}catch(Exception $e) {
+    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in connections.php: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
+    echo "<error>" . $e->getMessage() . "</error>"; //error handling..
 }
 
-echo "</connections>";
-
-// Yeri
-// logging includes 
-include("../includes/apiLog.php");
-
-// Log request to database
-writeLog($_SERVER['HTTP_USER_AGENT'], $from, $to, "none (trains.php)", $_SERVER['REMOTE_ADDR']);
 ?>

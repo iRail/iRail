@@ -104,8 +104,6 @@ class BRailConnectionInput extends ConnectionInput {
             $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
             $locationY0 = $conn -> Overview -> Departure -> BasicStop -> Station['y'];
             $station0 = new Station($nameStation0, $locationX0, $locationY0);
-            $vehicle0 = new BTrain("nyimplemented");
-
 
             $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
 
@@ -114,7 +112,6 @@ class BRailConnectionInput extends ConnectionInput {
             $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
             $locationY1 = $conn -> Overview -> Arrival -> BasicStop -> Station['y'];
             $station1 = new Station($nameStation1, $locationX1, $locationY1);
-            $vehicle1 = new BTrain("nyimplemented");
 
             //Delay or other wrongish stuff
             $delay0 = 0;
@@ -146,7 +143,7 @@ class BRailConnectionInput extends ConnectionInput {
             $trains = array();
             $j = 0;
             //yay for spaghetti code.
-            if(sizeof($conn -> ConSectionList -> ConSection) > 0 ) {
+            if(isset($conn -> ConSectionList -> ConSection)) {
                 foreach($conn -> ConSectionList -> ConSection as $connsection) {
                     if(isset($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute)) {
                         foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
