@@ -12,6 +12,15 @@ include("DataStructs/TripNode.php");
 include("DataStructs/Via.php");
 include("DataStructs/BTrain.php");
 
+//or if accessed from mobile client
+
+include("ConnectionInput.php");
+include("api/DataStructs/Connection.php");
+include("api/DataStructs/Station.php");
+include("api/DataStructs/TripNode.php");
+include("api/DataStructs/Via.php");
+include("api/DataStructs/BTrain.php");
+
 
 class BRailConnectionInput extends ConnectionInput {
 
