@@ -33,7 +33,7 @@ include("includes/apiLog.php");
 error_reporting(1); // disable error reporting on this one
 
 $lang = "";
-
+$timesel = "";
 extract($_COOKIE);
 extract($_POST);
 // if bad stations, go back
@@ -53,8 +53,10 @@ if($lang == "") {
     $lang = "EN";
 }
 
-// is this part right ? only depart ?
-$timesel = "depart";
+if($timesel == ""){
+    $timesel = "depart";
+}
+
 $results = 6;
 
 if($time == "") {
