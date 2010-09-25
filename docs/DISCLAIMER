@@ -7,12 +7,8 @@
  
 DISCLAIMER.
 
-As read on multiple sites, including http://blog.tuinslak.org/2010/06/stopping-irail-be/ the NMBS / SNCB forbids the use of this website/webapp as of 12th June 2010.
-I have complied the the NMBS / SNCB request to stop the website for a little while until my lawyer replied.
-
-As you can clearly see, this is a very simple data scraping website, stripping off all layout, and inserting my own. Nothing fancy. At all. 
-
-This is open sourced due to popular demand.
+As read on multiple sites, including http://blog.tuinslak.org/2010/06/stopping-irail-be/ the NMBS / SNCB forbids the use of this website/API as of 12th June 2010.
+I have complied the the NMBS / SNCB request to stop the website for a little while until my lawyer replied and decided to put it back online and open source it under GPLv3.
 
 I strongly discourage hosting this website anywhere. The NMBS / SNCB might sue you. Use the official website (NMBS) instead.
 
@@ -26,5 +22,6 @@ http://yeri.be
 http://yeri.be/twitter
 
 04/07/2010
+updated 25/09/2010
 
 EOF
