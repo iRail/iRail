@@ -9,6 +9,7 @@
 include("ConnectionOutput.php");
 class XMLConnectionOutput extends ConnectionOutput {
     private $connections;
+
     function __construct($c) {
         $this -> connections = $c;
     }
