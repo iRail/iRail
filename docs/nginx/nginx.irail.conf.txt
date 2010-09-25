@@ -1,0 +1,75 @@
+server {
+	listen   80;
+	# change with right server address
+	server_name  labs.irail.* lab.irail.*;
+
+	# logging
+	access_log  /var/log/nginx/irail.access.log;
+	error_log   /var/log/nginx/irail.error.log;
+
+	# rewrite rules
+	rewrite ^/national$		/national.php		last;
+	rewrite ^/index$		/index.php		last;
+	rewrite ^/Default.htm$		/index.php		last;
+	rewrite ^/index.html$		/index.php		last;
+	rewrite ^/nat$			/national.php		last;
+	rewrite ^/international$	/international.php	last;
+	rewrite ^/int$			/international.php	last;
+	rewrite ^/results$		/query_nat.php		last;
+	rewrite ^/intresults$		/query_int.php		last;
+	rewrite ^/noresults$		/noresults.php		last;
+	rewrite ^/settings$		/settings.php		last;
+	rewrite ^/save$			/save.php		last;
+	rewrite ^/about$		/includes/about.php	last;
+	rewrite ^/changelog$		/docs/changelog.php	last;
+
+	location / {
+		root   /var/www/iRail;
+		index  index.php index.html index.htm index.cgi;
+		fastcgi_index	index.php;
+	
+	location /nginx_status {
+		stub_status on;
+		access_log   off;
+		allow 127.0.0.0/24;
+		allow 85.12.6.0/24;
+		deny all;
+	}
+
+	autoindex off;
+	}
+
+	error_page  404  /404.html;
+	location = /404.html {
+		root   /var/www/;
+	}
+
+	# redirect server error pages to the static page /50x.html
+	#
+	error_page   500 502 503 504  /50x.html;
+	location = /50x.html {
+		root   /var/www/;
+	}
+
+	# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+	#
+	location ~* \.(php|cgi)$ {
+		root	/var/www/iRail;
+		include /etc/nginx/fastcgi_params;
+		keepalive_timeout 0;
+		fastcgi_param   SCRIPT_FILENAME	$document_root$fastcgi_script_name;
+		fastcgi_pass   127.0.0.1:9000;
+	}
+
+	# deny access to .htaccess files, if Apache's document root
+	# concurs with nginx's one
+	#
+	location ~ /\.ht {
+		deny  all;
+	}
+
+	location ~ /\.git {
+                deny  all;
+        }
+
+}
