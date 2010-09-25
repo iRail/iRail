@@ -130,7 +130,7 @@ generate_js_array($stations);
 
                     <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
                         <tr>
-                            <form name="search" method="post" action="results">
+                            <form name="search" method="post" action="query_nat.php">
                                 <td>
                                     <table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF" style="color:#000000";>
                                     <?php
