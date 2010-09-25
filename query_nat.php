@@ -30,7 +30,7 @@ include("api/OutputHandlers/MobileWebOutput.php");
 
 include("includes/apiLog.php");
 
-error_reporting(1); // disable error reporting on this one
+error_reporting(0); // disable error reporting on this one
 
 $lang = "";
 $timesel = "";
