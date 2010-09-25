@@ -18,15 +18,16 @@
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
 	http://project.irail.be - http://irail.be
-	
+
 	source available at http://github.com/Tuinslak/iRail
 */
- 
+
 // international query page
 
 // includesiRail
 include 'includes/getUA.php';
 
+extract($_POST);
 // check on wrong stations
 if($from == "" || $to == "" || $from == $to) {
 	header('Location: ..');
