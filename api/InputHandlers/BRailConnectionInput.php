@@ -24,13 +24,19 @@ include("api/DataStructs/BTrain.php");
 class BRailConnectionInput extends ConnectionInput {
 
 
+
     /**
      * This function will get the data from nmbs we need.
      * @param Request $request
      * @return <type>
      */
     protected function fetchData(Request $request) {
-        include "../includes/getUA.php";
+        try {
+            include "../includes/getUA.php";
+            include "includes/getUA.php";
+        }catch(Exception $e) {
+            //do nothing
+        }
         $url="http://hari.b-rail.be/Hafas/bin/extxml.exe";
         $request_options = array(
                 "referer" => "http://api.irail.be/",

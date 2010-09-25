@@ -44,6 +44,7 @@
 function writeLog($ua, $from, $to, $err, $ip) {
 	// include vars
 	include("../includes/dbConfig.php");
+	include("includes/dbConfig.php");
 
 	// debug
 	//echo $ua . " - " . $from . " - " . $to;

@@ -30,7 +30,12 @@ include("api/OutputHandlers/MobileWebOutput.php");
 
 include("includes/apiLog.php");
 
+error_reporting(0); //disable error reporting on this one
 
+$lang = "";
+
+extract($_COOKIE);
+extract($_POST);
 // if bad stations, go back
 if($from == "" || $to == "" || $from == $to) {
 	header('Location: ..');
@@ -40,13 +45,9 @@ if($from == "" || $to == "" || $from == $to) {
 setcookie("from", $_POST['from'], time()+60*60*24*360);
 setcookie("to", $_POST['to'], time()+60*60*24*360);
 
-// get lang from cookie
-$lang = $_COOKIE["language"];
-
-
 // Create time vars
-$time = $h . $m;
-$date = $d . $mo . $y;
+$time = $h . ":". $m;
+$date =  "20".$y. $mo .$d;
 
 if($lang == "") {
     $lang = "EN";
@@ -55,17 +56,11 @@ if($lang == "") {
 $timesel = "depart";
 $results = 6;
 
-//reform date to needed train structure
-preg_match("/(..)(..)(..)/si",$date, $m);
-$date = "20" . $m[3] . $m[2] . $m[1];
+
 
 if($time == "") {
-    $time = date("Hi");
+    $time = date("H:i");
 }
-
-//reform time to wanted structure
-preg_match("/(..)(..)/si",$time, $m);
-$time = $m[1] . ":" . $m[2];
 
 $typeOfTransport = "all";
 
