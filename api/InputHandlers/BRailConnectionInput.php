@@ -14,7 +14,6 @@ include("DataStructs/BTrain.php");
 
 //or if accessed from mobile client
 
-include("ConnectionInput.php");
 include("api/DataStructs/Connection.php");
 include("api/DataStructs/Station.php");
 include("api/DataStructs/TripNode.php");
