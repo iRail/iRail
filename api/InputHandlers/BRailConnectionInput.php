@@ -5,6 +5,8 @@
  * @author pieterc
  */
 
+error_reporting(0); // disable error reporting on this one
+
 include("ConnectionInput.php");
 include("DataStructs/Connection.php");
 include("DataStructs/Station.php");
