@@ -50,7 +50,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <th>Transportation</th>
 </tr>
 '. $this->getConnectionsOutput();
-    echo "</table> <input type=\"submit\" name=\"submit\" value=\"Back\">";
+    echo "<tr><td colspan=\"7\"><center><form name=\"return\" method=\"post\" action=\"national\"><input type=\"submit\" name=\"submit\" value=\"Back\"></center></td></tr></table>";
     include("includes/footer.php");
     echo '</body>
         </html>';
