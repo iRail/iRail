@@ -1,14 +1,16 @@
-	# rewrite rules
-	rewrite ^/national$		/national.php		last;
-	rewrite ^/index			/index.php		last;
-	rewrite ^/nat$			/national.php		last;
-	rewrite ^/international$	/international.php	last;
-	rewrite ^/int$			/international.php	last;
-	rewrite ^/results$		/query_nat.php		last;
-	rewrite ^/intresults$		/query_int.php		last;
-	rewrite ^/noresults$		/noresults.php		last;
-	rewrite ^/settings$		/settings.php		last;
-	rewrite ^/save			/save.php		last;
-	rewrite ^/about$		/includes/about.php	last;
-	rewrite ^/changelog		/docs/changelog.php	last;
+        # rewrite rules
+        rewrite ^/national$             /national.php           last;
+        rewrite ^/index$                /index.php              last;
+        rewrite ^/Default.htm$          /index.php              last;
+        rewrite ^/index.html$           /index.php              last;
+        rewrite ^/nat$                  /national.php           last;
+        rewrite ^/international$        /international.php      last;
+        rewrite ^/int$                  /international.php      last;
+        rewrite ^/results$              /query_nat.php          last;
+        rewrite ^/intresults$           /query_int.php          last;
+        rewrite ^/noresults$            /noresults.php          last;
+        rewrite ^/settings$             /settings.php           last;
+        rewrite ^/save$                 /save.php               last;
+        rewrite ^/about$                /includes/about.php     last;
+        rewrite ^/changelog$            /docs/changelog.php     last;
 
