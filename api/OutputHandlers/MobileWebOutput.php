@@ -14,8 +14,8 @@ class MobileWebOutput extends ConnectionOutput {
     }
 
     public function printAll() {
-        $this->printHeader();
-        
+        $this->printHeader();        
+        $this->printBody();
 
     }
 
@@ -35,6 +35,53 @@ addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false)
 function hideAddressBar() { window.scrollTo(0, 1); }
 </script>
 </head><body>';
+    }
+
+    private function printBody(){
+        echo '<body>
+<table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
+<tr>
+<th>Map</th>
+<th>Station </th>
+<th>Date </th>
+<th>Time </th>
+<th>Duration </th>
+<th>Delay</th>
+<th>Transportation</th>
+</tr>
+'. $this->getConnectionsOutput();
+    echo "</table> <input type=\"submit\" name=\"submit\" value=\"Back\">";
+    include("includes/footer.php");
+    echo '</body>
+        </html>';
+    }
+
+    private function getConnectionsOutput(){
+        $output= "";
+        foreach($connections as $con){
+
+            date_default_timezone_set("Europe/Brussels");
+            $output .= "<tr>";
+            $output .= "<td>". '<a href="http://maps.google.be/?saddr=Station '. $con -> getDepart() -> getStation() -> getName() . '&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="/HAFAS/img/icon_map.gif" width="14" height="14" alt="Local Map" /></a>' . "</td>";
+            $output .= "<td>". $con -> getDepart() -> getStation() -> getName() . "<br/>". $con -> getArrival() -> getStation() -> getName() . "</td>";
+            $output .= "<td>" . date("d/m/y", $con -> getDepart() -> getTime()) . "<br/>". date("d/m/y", $con -> getDepart() -> getTime()) ."</td>";
+
+            $minutes = $c -> getDuration()/60 % 60;
+            $hours = floor($c -> getDuration() / 3600);
+            if($minutes < 10){
+                $minutes = "0" . $minutes;
+            }
+            $output .= "<td>" . $hours. ":" . $minutes ."</td>";
+
+
+
+            $output .= "<td>" . $c ->getDepart() -> getDelay()/60 . "min</td>";
+
+            $output .= "<td>" . $c -> getDepart() -> getVehicle() -> getInternalId() ."</td>";
+
+            $output .= "</tr>";
+        }
+        return $output;
     }
 }
 ?>
