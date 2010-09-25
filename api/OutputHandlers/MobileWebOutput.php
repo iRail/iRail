@@ -16,7 +16,6 @@ class MobileWebOutput extends ConnectionOutput {
     public function printAll() {
         $this->printHeader();        
         $this->printBody();
-
     }
 
     private function printHeader() {
