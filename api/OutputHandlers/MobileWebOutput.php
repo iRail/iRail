@@ -5,7 +5,7 @@
  * @author pieterc
  */
 
-include("MobileWebOutput.php");
+include("ConnectionOutput.php");
 class MobileWebOutput extends ConnectionOutput {
     private $connections;
 
