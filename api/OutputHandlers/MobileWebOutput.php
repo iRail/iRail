@@ -77,7 +77,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
             }
             $output .= "<td>" . $hours. ":" . $minutes ."</td>";
 
-            $output .= "<td>" . $con ->getDepart() -> getDelay()/60 . "min</td>";
+            $output .= "<td>" . $con ->getDepart() -> getDelay()/60 . "m</td>";
 
             $output .= "<td>" . $con -> getDepart() -> getVehicle() -> getInternalId() ."</td>";
 
