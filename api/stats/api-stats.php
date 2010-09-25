@@ -1,38 +1,7 @@
 <html><head><title>iRail API MySQL (request) stats</title>
-<style type="text/css">
-table.s {
-	border-width: 1px;
-	border-spacing: ;
-	border-style: outset;
-	border-color: white;
-	border-collapse: collapse;
-	background-color: white;
-}
-table.s th {
-	border-width: 1px;
-	padding: 1px;
-	border-style: inset;
-	border-color: gray;
-	background-color: white;
-	-moz-border-radius: ;
-}
-table.s td {
-	border-width: 1px;
-	padding: 1px;
-	border-style: inset;
-	border-color: gray;
-	background-color: white;
-	-moz-border-radius: ;
-}
-</style>
-
-<table class="sample">
-<tr>
-	<th>Header</th>
-	<td>Content</td>
-</tr>
-</table>
-
+	<link href="http://irail.be/css/api_stats.css" rel="stylesheet" type="text/css" />
+    <link rel="apple-touch-icon" href="http://irail.be/img/irail.png" /></style>
+    <link rel="shortcut icon" type="image/x-icon" href="http://irail.be/img/favicon.ico"/>
 </head><body>
 <center>
 <?php

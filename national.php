@@ -125,12 +125,11 @@ generate_js_array($stations);
                 <div class="toolbar">
                     <div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
                         <?php echo date('l j/m/Y - H:i'); ?>
-            <!--	/<span style="color:red;font-weight:bold;">/ NMBS site has probs.</span> -->
                     </div>
 
                     <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
                         <tr>
-                            <form name="search" method="post" action="query_nat.php">
+                            <form name="search" method="post" action="results">
                                 <td>
                                     <table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF" style="color:#000000";>
                                     <?php

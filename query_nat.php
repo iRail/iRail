@@ -30,7 +30,7 @@ include("api/OutputHandlers/MobileWebOutput.php");
 
 include("includes/apiLog.php");
 
-error_reporting(0); //disable error reporting on this one
+error_reporting(0); // disable error reporting on this one
 
 $lang = "";
 
@@ -45,7 +45,7 @@ if($from == "" || $to == "" || $from == $to) {
 setcookie("from", $_POST['from'], time()+60*60*24*360);
 setcookie("to", $_POST['to'], time()+60*60*24*360);
 
-// Create time vars
+// create time vars
 $time = $h . ":". $m;
 $date =  "20".$y. $mo .$d;
 
@@ -53,10 +53,9 @@ if($lang == "") {
     $lang = "EN";
 }
 
+// is this part right ? only depart ?
 $timesel = "depart";
 $results = 6;
-
-
 
 if($time == "") {
     $time = date("H:i");
