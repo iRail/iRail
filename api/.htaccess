@@ -1,0 +1,27 @@
+#
+# iRail.be .htaccess file
+#
+# by Yeri 'Tuinslak' Tiete	(yeri.be)
+#
+# move to the API folder 
+#
+
+Options -Indexes
+Options +FollowSymLinks
+
+# mod rewrite, I like sexy looking URLs
+
+<IfModule mod_rewrite.c>
+
+RewriteEngine On
+RewriteBase /
+
+# API => domain/api
+RewriteRule ^api/connections/$          api/connections.php             [NC,L]
+RewriteRule ^api/stations/$             api/stations.php                [NC,L]
+
+# API => api.domain
+RewriteRule ^connections/$		connections.php			[NC,L]
+RewriteRule ^stations/$			stations.php			[NC,L]
+
+</IfModule>
