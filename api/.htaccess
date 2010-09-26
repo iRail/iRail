@@ -17,11 +17,12 @@ RewriteEngine On
 RewriteBase /api
 
 # API => domain/api
-#RewriteRule ^connections/$          api/connections.php             [NC,L]
-#RewriteRule ^stations/$             api/stations.php                [NC,L]
-
-# API => api.domain
 RewriteRule ^connections/$		connections.php			[NC,L]
 RewriteRule ^stations/$			stations.php			[NC,L]
+
+RewriteBase /
+# API => api.domain
+RewriteRule ^connections/$              connections.php                 [NC,L]
+RewriteRule ^stations/$                 stations.php                    [NC,L]
 
 </IfModule>
