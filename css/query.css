@@ -8,11 +8,14 @@ table {
     border-color: gray gray gray gray;
     border-collapse: separate;
     background-color: white;
+    text-align: center;
 }
+
 th{
     font-size: 12px;
     font-weight: normal;
 }
+
 tr.color0{
     background-color : #EEEEEE;
 }
