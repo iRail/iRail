@@ -51,20 +51,17 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 </tr>
 '. $this->getConnectionsOutput();
     echo "<tr><td colspan=\"7\"><center><form name=\"return\" method=\"post\" action=\"national\"><input type=\"submit\" name=\"submit\" value=\"Back\"></center></td></tr>";
-    echo "<tr><td colspan=\"7\">"; 
-    include("includes/footer.php"); 
-    echo "</td></tr>";
     echo "</table>";
     echo '</body>
         </html>';
     }
 
     private function getConnectionsOutput(){
+        date_default_timezone_set("Europe/Brussels");
         $output= "";
+        $index = 0;
         foreach($this->connections as $con){
-
-            date_default_timezone_set("Europe/Brussels");
-            $output .= "<tr>";
+            $output .= "<tr class=\"color". $index%2 ."\">";
             $output .= "<td>". '<a href="http://maps.google.be/?saddr=Station '. $con -> getDepart() -> getStation() -> getName() . '&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="/HAFAS/img/icon_map.gif" width="14" height="14" alt="Local Map" /></a>' . "</td>";
             $output .= "<td>". $con -> getDepart() -> getStation() -> getName() . "<br/>". $con -> getArrival() -> getStation() -> getName() . "</td>";
             $output .= "<td>" . date("d/m/y", $con -> getDepart() -> getTime()) . "<br/>". date("d/m/y", $con -> getArrival() -> getTime()) ."</td>";
@@ -84,6 +81,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
             $output .= "<td>" . $this -> getTrains($con) ."</td>";
 
             $output .= "</tr>";
+            $index ++;
         }
         return $output;
     }
