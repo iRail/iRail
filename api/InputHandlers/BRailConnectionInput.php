@@ -4,23 +4,13 @@
  *
  * @author pieterc
  */
-
-error_reporting(0); // disable error reporting on this one
-
+ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
 include("ConnectionInput.php");
-include("DataStructs/Connection.php");
-include("DataStructs/Station.php");
-include("DataStructs/TripNode.php");
-include("DataStructs/Via.php");
-include("DataStructs/BTrain.php");
-
-//or if accessed from mobile client
-
-include("api/DataStructs/Connection.php");
-include("api/DataStructs/Station.php");
-include("api/DataStructs/TripNode.php");
-include("api/DataStructs/Via.php");
-include("api/DataStructs/BTrain.php");
+include("Connection.php");
+include("Station.php");
+include("TripNode.php");
+include("Via.php");
+include("BTrain.php");
 
 
 class BRailConnectionInput extends ConnectionInput {
@@ -33,12 +23,7 @@ class BRailConnectionInput extends ConnectionInput {
      * @return <type>
      */
     protected function fetchData(Request $request) {
-        try {
-            include "../includes/getUA.php";
-            include "includes/getUA.php";
-        }catch(Exception $e) {
-            //do nothing
-        }
+        include "getUA.php";
         $url="http://hari.b-rail.be/Hafas/bin/extxml.exe";
         $request_options = array(
                 "referer" => "http://api.irail.be/",
