@@ -14,11 +14,11 @@ Options +FollowSymLinks
 <IfModule mod_rewrite.c>
 
 RewriteEngine On
-RewriteBase /
+RewriteBase /api
 
 # API => domain/api
-RewriteRule ^api/connections/$          api/connections.php             [NC,L]
-RewriteRule ^api/stations/$             api/stations.php                [NC,L]
+#RewriteRule ^connections/$          api/connections.php             [NC,L]
+#RewriteRule ^stations/$             api/stations.php                [NC,L]
 
 # API => api.domain
 RewriteRule ^connections/$		connections.php			[NC,L]
