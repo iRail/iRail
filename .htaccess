@@ -30,13 +30,5 @@ RewriteRule ^save$			save.php			[NC,L]
 RewriteRule ^about$			includes/about.php		[NC,L]
 RewriteRule ^changelog$			docs/changelog.php		[NC,L]
 
-# API => domain/api
-RewriteRule ^api/connections/$          api/connections.php             [NC,L]
-RewriteRule ^api/stations/$             api/stations.php                [NC,L]
-
-# API => api.domain
-RewriteRule ^connections/$		connections.php			[NC,L]
-RewriteRule ^stations/$			stations.php			[NC,L]
-
 </IfModule>
 
