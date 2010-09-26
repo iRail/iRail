@@ -152,26 +152,26 @@ class BRailConnectionInput extends ConnectionInput {
                                 break;
                             }
                         }
-                    }
-                    if($conn -> Overview -> Transfers > 0 && strcmp($connsection -> Arrival -> BasicStop -> Station['name'],  $conn -> Overview -> Arrival -> BasicStop -> Station['name']) != 0) {
-                        //current index for the train: j-1
-                        $departDelay = 0; //Todo: NYImplemented
-                        $connarray = $conn -> ConSectionList -> ConSection;
-                        $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
-                        $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
-                        $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
-                        $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
-                        $arrivalDelay = 0; //Todo: NYImplemented
-                        $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
-                        $vehiclev = new BTrain($trains[$j-1]);
 
-                        $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
+                        if($conn -> Overview -> Transfers > 0 && strcmp($connsection -> Arrival -> BasicStop -> Station['name'],  $conn -> Overview -> Arrival -> BasicStop -> Station['name']) != 0) {
+                            //current index for the train: j-1
+                            $departDelay = 0; //Todo: NYImplemented
+                            $connarray = $conn -> ConSectionList -> ConSection;
+                            $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
+                            $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
+                            $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                            $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
+                            $arrivalDelay = 0; //Todo: NYImplemented
+                            $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
+                            $vehiclev = new BTrain($trains[$j-1]);
 
-                        $connectionindex++;
+                            $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
+
+                            $connectionindex++;
+                        }
                     }
                 }
             }
-
             $vehicle0 = new BTrain($trains[0]);
             $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
 

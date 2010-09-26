@@ -46,6 +46,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <th>Time </th>
 <th>Duration </th>
 <th>Delay</th>
+<th>Transfers</th>
 <th>Transportation</th>
 </tr>
 '. $this->getConnectionsOutput();
@@ -78,11 +79,22 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 
             $output .= "<td>" . $con ->getDepart() -> getDelay()/60 . "m</td>";
 
-            $output .= "<td>" . $con -> getDepart() -> getVehicle() -> getInternalId() ."</td>";
+            $output .= "<td>" . sizeof($con -> getVias()) . "</td>";
+
+            $output .= "<td>" . $this -> getTrains($con) ."</td>";
 
             $output .= "</tr>";
         }
         return $output;
+    }
+
+    private function getTrains(Connection $con){
+        $out = "";
+        foreach($con -> getVias() as $v){
+            $out .= $v -> getVehicle() -> getInternalId() . "<br/>";
+        }
+        $out .= $con -> getArrival() -> getVehicle() -> getInternalId();
+        return $out;
     }
 }
 ?>
