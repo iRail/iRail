@@ -74,14 +74,14 @@ class OldAPIOutput implements Output {
 
             //TRAINS
             $trains = $xml -> createElement("trains");
-
-            $trainDep = $xml -> createElement("train", $c -> getDepart()-> getVehicle() -> getInternalId());
-            $trains -> appendChild($trainDep);
             
             foreach($c -> getVias() as $v) {
                 $train = $xml -> createElement("train", $v -> getVehicle() -> getInternalId());
                 $trains -> appendChild($train);
             }
+            
+            $trainArr = $xml -> createElement("train", $c -> getArrival()-> getVehicle() -> getInternalId());
+            $trains -> appendChild($trainArr);
 
             $connection -> appendChild($trains);
 

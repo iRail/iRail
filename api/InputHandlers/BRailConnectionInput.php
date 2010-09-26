@@ -12,10 +12,7 @@ include("TripNode.php");
 include("Via.php");
 include("BTrain.php");
 
-
 class BRailConnectionInput extends ConnectionInput {
-
-
 
     /**
      * This function will get the data from nmbs we need.
@@ -30,7 +27,6 @@ class BRailConnectionInput extends ConnectionInput {
                 "timeout" => "30",
                 "useragent" => $irailAgent,
         );
-
 
         //first request: Getting the id of the right stations
         $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
@@ -131,7 +127,6 @@ class BRailConnectionInput extends ConnectionInput {
                     $delay1 = 0;
                 }
 
-                //TODO: doesn't work? Needs testing
                 if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)) {
                     $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
                     $platformNormal0= false;
@@ -142,10 +137,13 @@ class BRailConnectionInput extends ConnectionInput {
                 }
             }
             $trains = array();
+            $vias = array();
             $j = 0;
+            $connectionindex = 0;
             //yay for spaghetti code.
             if(isset($conn -> ConSectionList -> ConSection)) {
                 foreach($conn -> ConSectionList -> ConSection as $connsection) {
+
                     if(isset($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute)) {
                         foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
                             if($att -> Attribute["type"] == "NAME") {
@@ -155,15 +153,32 @@ class BRailConnectionInput extends ConnectionInput {
                             }
                         }
                     }
+                    if($conn -> Overview -> Transfers > 0 && strcmp($connsection -> Arrival -> BasicStop -> Station['name'],  $conn -> Overview -> Arrival -> BasicStop -> Station['name']) != 0) {
+                        //current index for the train: j-1
+                        $departDelay = 0; //Todo: NYImplemented
+                        $connarray = $conn -> ConSectionList -> ConSection;
+                        $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
+                        $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
+                        $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                        $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
+                        $arrivalDelay = 0; //Todo: NYImplemented
+                        $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
+                        $vehiclev = new BTrain($trains[$j-1]);
+
+                        $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
+
+                        $connectionindex++;
+                    }
                 }
             }
+
             $vehicle0 = new BTrain($trains[0]);
             $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
 
             $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
             $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 
-            $vias = array();
+
 
             $duration = $this -> transformDuration($conn -> Overview -> Duration -> Time);
 

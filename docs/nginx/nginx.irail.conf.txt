@@ -1,6 +1,7 @@
+# Yeri Tiete - Tuinslak - http://yeri.be
 server {
 	listen   80;
-	# change with right server address
+	# what domains it should listen to, in this case lab(s).irail.*
 	server_name  labs.irail.* lab.irail.*;
 
 	# logging
@@ -22,6 +23,15 @@ server {
 	rewrite ^/save$			/save.php		last;
 	rewrite ^/about$		/includes/about.php	last;
 	rewrite ^/changelog$		/docs/changelog.php	last;
+
+	# API => domain/api
+	rewrite ^/api/connections/$	/api/connections.php	last;
+	rewrite ^/api/stations/$	/api/stations.php	last;
+
+	# API => api.domain
+	rewrite ^connections/$		connections.php		last;
+	rewrite ^stations/$		stations.php		last;
+	#
 
 	location / {
 		root   /var/www/iRail;
