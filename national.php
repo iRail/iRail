@@ -129,7 +129,7 @@ generate_js_array($stations);
 
                     <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
                         <tr>
-                            <form name="search" method="post" action="results">
+                            <form name="search" method="post" action="query_nat.php">
                                 <td>
                                     <table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF" style="color:#000000";>
                                     <?php
@@ -255,7 +255,7 @@ generate_js_array($stations);
                                             <td></td>
                                             <td colspan="2">
                                                 <input type="radio" name="timesel" value="depart" checked/><span style="font-weight:normal;font-size:18px;"><?php echo $txt_depart; ?></span>
-                                                <input type="radio" name="timesel" value="arrival"/><span style="font-weight:normal;font-size:18px;"><?php echo $txt_arrive; ?></span>
+                                                <input type="radio" name="timesel" value="arrive"/><span style="font-weight:normal;font-size:18px;"><?php echo $txt_arrive; ?></span>
                                             </td>
                                         </tr>
                                         <tr><td colspan="3"></td></tr>
