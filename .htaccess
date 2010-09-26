@@ -9,6 +9,8 @@
 Options -Indexes
 Options +FollowSymLinks
 
+AddDefaultCharset UTF-8
+
 # mod rewrite, I like sexy looking URLs
 
 <IfModule mod_rewrite.c>
