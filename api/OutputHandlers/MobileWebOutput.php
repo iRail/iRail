@@ -22,7 +22,7 @@ class MobileWebOutput extends ConnectionOutput {
         echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 <head>
-<title>iRail -'. $this->connections[0] -> getDepart() -> getStation() -> getName() . ' to ' . $this->connections[0] -> getArrival() -> getStation() -> getName() .'</title>
+<title>iRail - '. $this->connections[0] -> getDepart() -> getStation() -> getName() . ' to ' . $this->connections[0] -> getArrival() -> getStation() -> getName() .'</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="css/query.css" rel="stylesheet" type="text/css" />
 <link rel="apple-touch-icon" href="./img/irail.png" />
@@ -62,7 +62,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
         $index = 0;
         foreach($this->connections as $con){
             $output .= "<tr class=\"color". $index%2 ."\">";
-            $output .= "<!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported)-->";
+            $output .= "<!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->";
             $output .= "<td>". '<a href="http://maps.google.be/?saddr=Station '. $con -> getDepart() -> getStation() -> getName() . '&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>' . "</td>";
             $output .= "<td>". $con -> getDepart() -> getStation() -> getName() . "<br/>". $con -> getArrival() -> getStation() -> getName() . "</td>";
             $output .= "<td>" . date("d/m/y", $con -> getDepart() -> getTime()) . "<br/>". date("d/m/y", $con -> getArrival() -> getTime()) ."</td>";
