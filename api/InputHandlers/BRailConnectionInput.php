@@ -70,7 +70,7 @@ class BRailConnectionInput extends ConnectionInput {
         $timeSel = 0;
         if($request -> getTimeSel() == "depart") {
             $timeSel = 0;
-        }else if ($request -> getTimeSel() == "arrive") {
+        }else if (strcmp($request -> getTimeSel(), "arrive") == 0) {
             $timeSel = 1;
         }
         //now we're going to get the real data

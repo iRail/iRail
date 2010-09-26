@@ -17,7 +17,7 @@ class ConnectionRequest implements Request {
     private $lang;
     private $typeOfTransport;
 
-    function __construct($from, $to, $time, $date, $timeSel = "depart", $results = 6, $lang = "EN", $typeOfTransport = "all"){
+    function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $typeOfTransport = "all"){
         $this->results = $results;
         $this->from = $from;
         $this->to = $to;
