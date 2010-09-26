@@ -52,7 +52,6 @@
 057_pic.gif
 0_pic.gif
 1_pic.gif
-a.txt
 aut_pic.gif
 bus_pic.gif
 fuss_pic.gif
