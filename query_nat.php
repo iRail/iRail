@@ -72,9 +72,9 @@ try {
     $output -> printAll();
 
     // Log request to database
-    writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (iRail.be)", $_SERVER['REMOTE_ADDR']);
+    writeLog("Mobile site - " . $_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (iRail.be)", $_SERVER['REMOTE_ADDR']);
 }catch(Exception $e) {
-    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error on iRail.be: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
+    writeLog("Mobile site - " . $_SERVER['HTTP_USER_AGENT'],"", "", "Error on iRail.be: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
     echo "<error>" . $e->getMessage() . "</error>"; //error handling..
 }
 
