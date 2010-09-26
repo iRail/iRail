@@ -8,23 +8,19 @@
 class Via {
     private $vehicle;
     private $station;
-    private $timeBetween;
     private $arrivalTime;
     private $arrivalPlatform;
     private $departTime;
-    private $departDate;
     private $departPlatform;
     private $arrivalDelay;
     private $departDelay;
     
-    function __construct($vehicle, $station, $timeBetween, $arrivalTime, $arrivalPlatform, $departTime, $departDate, $departPlatform, $arrivalDelay, $departDelay) {
+    function __construct($vehicle, $station, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay) {
         $this->vehicle = $vehicle;
         $this->station = $station;
-        $this->timeBetween = $timeBetween;
         $this->arrivalTime = $arrivalTime;
         $this->arrivalPlatform = $arrivalPlatform;
         $this->departTime = $departTime;
-        $this->departDate = $departDate;
         $this->departPlatform = $departPlatform;
         $this->arrivalDelay = $arrivalDelay;
         $this->departDelay = $departDelay;
@@ -40,7 +36,7 @@ class Via {
     }
 
     public function getTimeBetween() {
-        return $this->timeBetween;
+        return $this->departTime - $this->arrivalTime;
     }
 
     public function getArrivalTime() {
@@ -53,10 +49,6 @@ class Via {
 
     public function getDepartTime() {
         return $this->departTime;
-    }
-
-    public function getDepartDate() {
-        return $this->departDate;
     }
 
     public function getDepartPlatform() {

@@ -14,7 +14,7 @@ class XMLConnectionOutput extends ConnectionOutput {
         $this -> connections = $c;
     }
 
-    public function printAll(){
+    public function printAll() {
         date_default_timezone_set("UTC");
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml -> createElement("connections");
@@ -23,7 +23,7 @@ class XMLConnectionOutput extends ConnectionOutput {
 
         $xml -> appendChild($rootNode);
         $conId = 0;
-        foreach($this -> connections as $c){
+        foreach($this -> connections as $c) {
             /* @var $c Connection */
             $connection = $xml -> createElement("connection");
             $connection -> setAttribute("id", $conId);
@@ -71,7 +71,46 @@ class XMLConnectionOutput extends ConnectionOutput {
             $connection -> appendChild($arrival);
 
             //VIAS
-            //NY Implemented
+            if(sizeof($c-> getVias()) > 0 ) {
+                $vias = $xml -> createElement("vias");
+                $vias -> setAttribute("number", sizeof($c -> getVias()));
+                $k = 0;
+                foreach($c -> getVias() as $v) {
+                    $via = $xml -> createElement("via");
+                    $via -> setAttribute("id", $k);
+
+                    $arrivalv = $xml -> createElement("arrival");
+                    $platformv = $xml -> createElement("platform", $v -> getArrivalPlatform());
+                    $timev = $xml -> createElement("time", date("U", $v -> getArrivalTime()));
+                    $timev -> setAttribute("formatted", date("Y-m-d\TH:i\Z", $v -> getArrivalTime()));
+                    $arrivalv-> appendChild($platformv);
+                    $arrivalv -> appendChild($timev);
+
+                    $departv = $xml -> createElement("departure");
+                    $platformv = $xml -> createElement("platform", $v -> getDepartPlatform());
+                    $timev = $xml -> createElement("time", date("U", $v -> getDepartTime()));
+                    $timev -> setAttribute("formatted", date("Y-m-d\TH:i\Z", $v -> getDepartTime()));
+                    $departv-> appendChild($platformv);
+                    $departv -> appendChild($timev);
+
+                    $timeBetween = $xml -> createElement("timeBetween", $v-> getTimeBetween());
+
+                    $stationv = $xml->createElement("station", $v -> getStation() -> getName());
+                    $stationv -> setAttribute("location", $v ->getStation() -> getY() . " " .$v ->getStation() -> getX() );
+
+                    $vehiclev = $xml -> createElement("vehicle", $v -> getVehicle() -> getId());
+
+                    $via -> appendChild($arrivalv);
+                    $via -> appendChild($departv);
+                    $via -> appendChild($timeBetween);
+                    $via -> appendChild($stationv);
+                    $via -> appendChild($vehiclev);
+
+                    $vias -> appendChild($via);
+                    $k++;
+                }
+                $connection -> appendChild($vias);
+            }
 
             //OTHER
             $duration = $xml -> createElement("duration", $c -> getDuration());
