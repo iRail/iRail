@@ -1,6 +1,7 @@
 /* iRail by Tuinslak / yeri.be */
 
 table {
+    width: 100%;
     border-width: 0px 0px 0px 0px;
     border-spacing: 0px;
     border-style: outset outset outset outset;
