@@ -23,28 +23,27 @@
 
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-<link href="css/mobile.css" rel="stylesheet" type="text/css" />
-<link rel="apple-touch-icon" href="./img/irail.png" />
-<link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
-<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-<title>
-iRail - About
-</title>
-<script type="application/x-javascript">
-	addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
-	function hideAddressBar() { window.scrollTo(0, 1); }
-</script>
+  <meta charset="utf-8">
+  <title>iRail - About</title>
+  <link href="css/mobile.css" rel="stylesheet">
+  <link rel="apple-touch-icon" href="./img/irail.png">
+  <link rel="shortcut icon" href="./img/favicon.ico">
+  <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <script>
+  	addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
+  	function hideAddressBar() { window.scrollTo(0, 1); }
+  </script>
 </head>
 
 <body>
 <div class="container">
 <div class="toolbar anchorTop">
 	<div class="title"><a href="..">About</a> </div>
-	<div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings" /></a></div>
-<br />
+	<div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings"></a></div>
+<br>
   <div class="toolbar">  
 	<div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
 	iRail project.
@@ -82,13 +81,13 @@ iRail - About
 
 </td>
 </tr>
-<tr><td colspan="3"><br /></td></tr>
+<tr><td colspan="3"><br></td></tr>
 <tr>
 <td colspan="3"><div style="text-align:center;">
 
-<FORM>
-<INPUT type="button" value="Back" onClick="location.href='..'">
-</FORM>
+<form>
+<input type="button" value="Back" onClick="location.href='..'">
+</form>
 
 </div></td>
 </tr>
