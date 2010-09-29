@@ -45,7 +45,7 @@ if($maintenance == 0) {
 	// edit URL to match domain/site
 	header('Location: national');
 }else{
-	echo "Site currently down for maintenance. <br />We apologise for any inconvience this may cause.";
+	echo "Site currently down for maintenance.<br>We apologise for any inconvenience this may cause.";
 	return;
 }
 

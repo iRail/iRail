@@ -37,7 +37,7 @@ switch($lang) {
         $txt_time = "Time:";
         $txt_arrive = "Arrival";
         $txt_depart = "Departure";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
         break;
     case "NL":		$txt_from = "Van:";
         $txt_to = "Naar:";
@@ -45,7 +45,7 @@ switch($lang) {
         $txt_time = "Tijd:";
         $txt_arrive = "Aankomst";
         $txt_depart = "Vertrek";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
         break;
     case "FR":      $txt_from = "De:";
         $txt_to = "Vers:";
@@ -53,7 +53,7 @@ switch($lang) {
         $txt_time = "Heure:";
         $txt_arrive = "Arriv&#233;e";
         $txt_depart = "D&#233;part";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
         break;
     case "DE":      $txt_from = "Von:";
         $txt_to = "Nach:";
@@ -61,7 +61,7 @@ switch($lang) {
         $txt_time = "Uhrzeit:";
         $txt_arrive = "Ankunft";
         $txt_depart = "Abfahrt";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
         break;
     default:		$txt_from = "From:";
         $txt_to = "To:";
@@ -69,45 +69,39 @@ switch($lang) {
         $txt_time = "Time:";
         $txt_arrive = "Arrival";
         $txt_depart = "Departure";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)' /> System down for maintenance.";
+        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
         break;
 }
 
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <link href="css/mobile.css" rel="stylesheet" type="text/css" />
-        <link rel="apple-touch-icon" href="./img/irail.png" />
-        <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico"/>
-        <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
-        <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner"/>
-        <meta name="language" content="en"/>
-        <meta NAME="DESCRIPTION" CONTENT="NMBS/SNCB mobile iPhone train route planner."/>
-        <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=" />
-        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM" />
-        <meta HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
-        <title>
-            iRail
-        </title>
+        <meta charset="utf-8">
+        <title>iRail</title>
+        <link href="css/mobile.css" rel="stylesheet">
+        <link rel="apple-touch-icon" href="./img/irail.png">
+        <link rel="shortcut icon" href="./img/favicon.ico">
+        <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+        <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
+        <meta name="description" CONTENT="NMBS/SNCB mobile iPhone train route planner.">
+        <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=">
+        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM">
+        <meta http-equiv="Cache-control" content="no-cache">
 
-        <script language="javascript" type="text/javascript">
+        <script>
             function switch_station() {
-                var tmp = "";
-                tmp = document.getElementById("from").value;
+                var tmp = document.getElementById("from").value;
                 document.getElementById("from").value = document.getElementById("to").value;
                 document.getElementById("to").value = tmp;
             }
-        </script>
-
-        <script type="application/x-javascript">
             addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
             function hideAddressBar() { window.scrollTo(0, 1); }
         </script>
-        <script language="javascript" type="text/javascript" src="./js/actb.js"></script>
-        <script language="javascript" type="text/javascript" src="./js/common.js"></script>
-        <script language="javascript" type="text/javascript">
+        <script src="./js/actb.js"></script>
+        <script src="./js/common.js"></script>
+        <script>
 <?php
 //this bit generates the stations list
 include("includes/stationlist.php");
@@ -119,9 +113,9 @@ generate_js_array($stations);
     <body>
         <div class="container">
             <div class="toolbar anchorTop">
-                <div class="title"><a href="..">iRail</a> </div>
-                <div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings" /></a></div>
-                <br />
+                <div class="title"><a href="/">iRail</a> </div>
+                <div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings"></a></div>
+                <br>
                 <div class="toolbar">
                     <div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
                         <?php echo date('l j/m/Y - H:i'); ?>
@@ -142,27 +136,28 @@ generate_js_array($stations);
                                         <tr>
                                             <td width="70"><?php echo $txt_from; ?></td>
                                             <td colspan="2">
-                                                <input name="from" type="text" id="from" AUTOCOMPLETE="OFF" value="<?php echo $from; ?>"/>
-                                                <script type="text/javascript" language="javascript">
+                                                <input name="from" type="text" id="from" AUTOCOMPLETE="OFF" value="<?php echo $from; ?>">
+                                                <script>
                                                     var obj = actb(document.getElementById('from'),data);
-                                                </script>
-                                                <script language="javascript" type="text/javascript"> function reset_from() {
-                                                    document.getElementById("from").value = "";
-                                                }</script>
-                                                <a href="#" onclick="javascript:reset_from()"><img src="img/x.png" alt="X" border="0" /></a>
+                                                    function reset_from() {
+                                                        document.getElementById("from").value = '';
+                                                    }</script>
+                                                <a href="#" onclick="javascript:reset_from()"><img src="img/x.png" alt="X" border="0"></a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><?php echo $txt_to; ?></td>
-                                            <td colspan="2"><input name="to" type="text" id="to" AUTOCOMPLETE="OFF" value="<?php echo $to; ?>"/>
-                                                <script type="text/javascript" language="javascript">var obj = actb(document.getElementById('to'),data); </script>
-                                                <script language="javascript" type="text/javascript"> function reset_to() {
-                                                document.getElementById("to").value = "";
-                                            }</script>
-                                                <a href="#" onclick="javascript:reset_to()"><img src="img/x.png" alt="X" border="0" /></a>
+                                            <td colspan="2"><input name="to" type="text" id="to" AUTOCOMPLETE="OFF" value="<?php echo $to; ?>">
+                                                <script>
+                                                    var obj = actb(document.getElementById('to'),data);
+                                                    function reset_to() {
+                                                        document.getElementById("to").value = "";
+                                                    }
+                                                </script>
+                                                <a href="#" onclick="javascript:reset_to()"><img src="img/x.png" alt="X" border="0"></a>
                                             </td>
                                         </tr>
-                                        <tr><td colspan="3"><br /></td></tr>
+                                        <tr><td colspan="3"><br></td></tr>
                                         <tr>
                                             <td><?php echo $txt_date; ?></td>
                                             <td colspan="2">
@@ -254,8 +249,8 @@ generate_js_array($stations);
                                         <tr>
                                             <td></td>
                                             <td colspan="2">
-                                                <input type="radio" name="timesel" value="depart" checked/><span style="font-weight:normal;font-size:18px;"><?php echo $txt_depart; ?></span>
-                                                <input type="radio" name="timesel" value="arrive"/><span style="font-weight:normal;font-size:18px;"><?php echo $txt_arrive; ?></span>
+                                                <input type="radio" name="timesel" value="depart" checked><span style="font-weight:normal;font-size:18px;"><?php echo $txt_depart; ?></span>
+                                                <input type="radio" name="timesel" value="arrive"><span style="font-weight:normal;font-size:18px;"><?php echo $txt_arrive; ?></span>
                                             </td>
                                         </tr>
                                         <tr><td colspan="3"></td></tr>
@@ -267,7 +262,7 @@ generate_js_array($stations);
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr><td colspan="3"><br /></td></tr>
+                                        <tr><td colspan="3"><br></td></tr>
                                         <tr>
                                             <td colspan="3">
                                                 <table width="100%" border="0" align="center" style="text-align:center;">

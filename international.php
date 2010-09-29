@@ -68,37 +68,37 @@ switch($lang) {
 
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
     <head>
-        <link href="css/mobile.css" rel="stylesheet" type="text/css" />
-        <link rel="apple-touch-icon" href="./img/irail.png" />
-        <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico"/>
-        <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
-        <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner"/>
-        <meta name="language" content="en"/>
-        <meta NAME="DESCRIPTION" CONTENT="NMBS/SNCB iPhone train route planner."/>
-        <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=" />
-        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM" />
-        <meta HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
-        <title>
-            iRail - International
-        </title>
+        <meta charset="utf-8">
+        <title>iRail - International</title>
+        <link href="css/mobile.css" rel="stylesheet">
+        <link rel="apple-touch-icon" href="./img/irail.png">
+        <link rel="shortcut icon" href="./img/favicon.ico">
+        <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+        <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
+        <meta name="language" content="en">
+        <meta name="description" content="NMBS/SNCB iPhone train route planner.">
+        <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=">
+        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM">
+        <meta http-equiv="Cache-control" content="no-cache">
 
-        <script language="javascript" type="text/javascript"> function switch_station() {
-            var tmp = "";
-            tmp = document.getElementById("from").value;
-            document.getElementById("from").value = document.getElementById("to").value;
-            document.getElementById("to").value = tmp;
-        }</script>
-
-        <script type="application/x-javascript">
-        addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
-        function hideAddressBar() { window.scrollTo(0, 1); }
+        <script>
+            function switch_station() {
+                var tmp = document.getElementById("from").value;
+                document.getElementById("from").value = document.getElementById("to").value;
+                document.getElementById("to").value = tmp;
+            }
         </script>
-        <script language="javascript" type="text/javascript" src="./js/actb.js"></script>
-        <script language="javascript" type="text/javascript" src="./js/common.js"></script>
-        <script language="javascript" type="text/javascript">
+
+        <script>
+            addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
+            function hideAddressBar() { window.scrollTo(0, 1); }
+        </script>
+        <script src="./js/actb.js"></script>
+        <script src="./js/common.js"></script>
+        <script>
 <?php
 //this bit generates the stations list
 include("includes/stationlist.php");
@@ -127,20 +127,24 @@ generate_js_array($stations);
                                            <tr>
                                             <td width="70"><?php echo $txt_from; ?></td>
                                             <td colspan="2"><input name="from" type="text" id="from" AUTOCOMPLETE="OFF" value="<?php echo $from; ?>"/>
-                                                <script language="javascript" type="text/javascript">var obj = actb(document.getElementById('from'),data); </script>
-                                                <script language="javascript" type="text/javascript"> function reset_from() {
-                                                document.getElementById("from").value = "";
-                                            }</script>
+                                                <script>
+                                                    var obj = actb(document.getElementById('from'),data);
+                                                    function reset_from() {
+                                                        document.getElementById("from").value = "";
+                                                    }
+                                                </script>
                                                 <a href="#" onclick="javascript:reset_from()"><img src="img/x.png" alt="X" border="0" /></a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><?php echo $txt_to; ?></td>
                                             <td colspan="2"><input name="to" type="text" id="to" AUTOCOMPLETE="OFF" value="<?php echo $to; ?>"/>
-                                                <script language="javascript" type="text/javascript">var obj = actb(document.getElementById('to'),data); </script>
-                                                <script language="javascript" type="text/javascript"> function reset_to() {
-                                            document.getElementById("to").value = "";
-                                        }</script>
+                                                <script>
+                                                    var obj = actb(document.getElementById('to'),data);
+                                                    function reset_to() {
+                                                        document.getElementById("to").value = "";
+                                                    }
+                                                </script>
                                                 <a href="#" onclick="javascript:reset_to()"><img src="img/x.png" alt="X" border="0" /></a>
                                             </td>
                                         </tr>
@@ -148,7 +152,7 @@ generate_js_array($stations);
                                         <tr>
                                             <td><?php echo $txt_date; ?></td>
                                             <td colspan="2">
-                                                <select NAME="d">
+                                                <select name="d">
                                                     <?php
                                                     for($i = 1; $i <= 31; $i++) {
                                                         if($i < 10) {
@@ -156,14 +160,14 @@ generate_js_array($stations);
                                                         }else {
                                                             $number = $i;
                                                         }
-                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        echo "<option value=\"". $number ."\"";
                                                         if(date('d') == $number) {
                                                             echo "SELECTED";
                                                         }
                                                         echo ">".$number."</option>";
                                                     }
                                                     ?>
-                                                </select>/<select NAME="mo">
+                                                </select>/<select name="mo">
                                                     <?php
                                                     for($i = 1; $i <= 12; $i++) {
                                                         if($i < 10) {
@@ -171,18 +175,18 @@ generate_js_array($stations);
                                                         }else {
                                                             $number = $i;
                                                         }
-                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        echo "<option value=\"". $number ."\"";
                                                         if(date('m') == $number) {
                                                             echo "SELECTED";
                                                         }
                                                         echo ">".$number."</option>";
                                                     }
                                                     ?>
-                                                </select>/<select NAME="y">
-                                                    <option VALUE="<?php echo date('y'); ?>" <?php if(date('y') == '10') {
+                                                </select>/<select name="y">
+                                                    <option value="<?php echo date('y'); ?>" <?php if(date('y') == '10') {
     echo "SELECTED";
 } ?> ><?php echo date('Y'); ?></option>
-                                                    <option VALUE="<?php echo date('y')+1; ?>" <?php if(date('y') == '11') {
+                                                    <option value="<?php echo date('y')+1; ?>" <?php if(date('y') == '11') {
     echo "SELECTED";
 } ?> ><?php echo date('Y')+1; ?></option>
                                                 </select></td>
@@ -203,30 +207,30 @@ generate_js_array($stations);
                                                         }else {
                                                             $number = $i;
                                                         }
-                                                        echo "<option VALUE=\"". $number ."\"";
+                                                        echo "<option value=\"". $number ."\"";
                                                         if($hour == $number) {
                                                             echo "SELECTED";
     }
     echo ">".$number."</option>";
 }
 ?>
-                                                </select>:<select NAME="m">
-                                                    <option VALUE="00" <?php if(date('i') >= '50' && date('i') <= '59') {
+                                                </select>:<select name="m">
+                                                    <option value="00" <?php if(date('i') >= '50' && date('i') <= '59') {
     echo "SELECTED";
 } ?> >00</option>
-                                                    <option VALUE="10" <?php if(date('i') >= '00' && date('i') <= '09') {
+                                                    <option value="10" <?php if(date('i') >= '00' && date('i') <= '09') {
     echo "SELECTED";
 } ?> >10</option>
-                                                    <option VALUE="20" <?php if(date('i') >= '10' && date('i') <= '19') {
+                                                    <option value="20" <?php if(date('i') >= '10' && date('i') <= '19') {
     echo "SELECTED";
 } ?> >20</option>
-                                                    <option VALUE="30" <?php if(date('i') >= '20' && date('i') <= '29') {
+                                                    <option value="30" <?php if(date('i') >= '20' && date('i') <= '29') {
     echo "SELECTED";
 } ?> >30</option>
-                                                    <option VALUE="40" <?php if(date('i') >= '30' && date('i') <= '39') {
+                                                    <option value="40" <?php if(date('i') >= '30' && date('i') <= '39') {
     echo "SELECTED";
 } ?> >40</option>
-                                                    <option VALUE="50" <?php if(date('i') >= '40' && date('i') <= '49') {
+                                                    <option value="50" <?php if(date('i') >= '40' && date('i') <= '49') {
     echo "SELECTED";
 } ?> >50</option>
                                                 </select>

@@ -91,11 +91,11 @@ $data .= "start=submit";
 $post = http_post_data($url, $data, $request_options) or die("NMBS/SNCB website timeout. Please refresh.");
 
 // Debug - HTTP POST result
-//echo $irailAgent . "<br />";
-//echo $post . "<br />";
-//echo $url . "<br />";
-//echo $data . "<br />";
-//echo $request_options . "<br />";
+//echo $irailAgent . "<br>";
+//echo $post . "<br>";
+//echo $url . "<br>";
+//echo $data . "<br>";
+//echo $request_options . "<br>";
 
 $body = http_parse_message($post)->body; 
 
@@ -153,21 +153,22 @@ if($down == 1) {
 }
 
 
-$header = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+$header = '<!DOCTYPE html>
 <html lang="en">
 <head>
-<title>iRail :: results</title>
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
-<link href="css/query.css" rel="stylesheet" type="text/css" />
-<link rel="apple-touch-icon" href="./img/irail.png" />
-<link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico">
-<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-<script type="application/x-javascript">
-	addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false);
-	function hideAddressBar() { window.scrollTo(0, 1); }
-</script>
-</head><body>
+  <meta charset="utf-8">
+  <title>iRail - Results</title>
+  <meta http-equiv="Cache-control" content="no-cache">
+  <link href="css/query.css" rel="stylesheet" >
+  <link rel="apple-touch-icon" href="./img/irail.png">
+  <link rel="shortcut icon" href="./img/favicon.ico">
+  <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <script>
+  	addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false);
+  	function hideAddressBar() { window.scrollTo(0, 1); }
+  </script>
+</head>
+<body>
 ';
 
 $footer = "</table>";
@@ -177,12 +178,12 @@ echo $body;
 echo $footer;
 
 if($warning == 1) {
-	echo "<p style=\"margin:20px;\"><img src=\"./hafas/img/icon_warning.gif\" alt=\"Warning icon\" /> $txt_warn </p>";
+	echo "<p style=\"margin:20px;\"><img src=\"./hafas/img/icon_warning.gif\" alt=\"Warning icon\"> $txt_warn </p>";
 }
 }
 
 echo "<form name=\"return\" method=\"post\" action=\"international\">";
-echo "<div style=\"font-weight: bold;text-align:center;\"><br /><input type=\"submit\" name=\"submit\" value=\"Back\"></div>";
+echo "<div style=\"font-weight: bold;text-align:center;\"><br><input type=\"submit\" name=\"submit\" value=\"Back\"></div>";
 
-echo "<br /></body></html>";
+echo "<br></body></html>";
 ?>

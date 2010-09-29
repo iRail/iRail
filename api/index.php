@@ -1,10 +1,10 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>iRail.be API</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="apple-touch-icon" href="http://irail.be/img/irail.png" />
-    <link rel="shortcut icon" type="image/x-icon" href="http://irail.be/img/favicon.ico"/>
+    <link rel="apple-touch-icon" href="http://irail.be/img/irail.png">
+    <link rel="shortcut icon" href="http://irail.be/img/favicon.ico">
   </head>
   <body>
       <h1>Welcome developer</h1>
