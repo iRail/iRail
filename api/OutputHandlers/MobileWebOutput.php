@@ -56,6 +56,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <th>Time </th>
 <th>Duration </th>
 <th>Delay</th>
+<th>Platform</th>
 <th>Transfers</th>
 <th>Transportation</th>
 </tr>
@@ -82,6 +83,8 @@ function hideAddressBar() { window.scrollTo(0, 1); }
             $output .= "<td>" . $hours. ":" . $minutes ."</td>";
 
             $output .= "<td>" . $con ->getDepart() -> getDelay()/60 . "m</td>";
+
+            $output .= "<td>" . $con -> getDepart() -> getPlatform() . "</td>";
 
             $output .= "<td>" . sizeof($con -> getVias()) . "</td>";
 
