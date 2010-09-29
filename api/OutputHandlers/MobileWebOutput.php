@@ -42,15 +42,15 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
 <tr><td>
-Map: <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
+<b>Map:</b> <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
 </td>
 <td>
-Date: '.date("d/m/y", $con -> getDepart() -> getTime()) .'
+<b>Date:</b> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
     </td>
     </tr>
     <tr><td>
-From: '.$con -> getDepart() -> getStation() -> getName() .'</td><td>
-To: '. $con -> getArrival() -> getStation() -> getName() . '</td></tr></table>
+<b>From:</b> '.$con -> getDepart() -> getStation() -> getName() .'</td><td>
+<b>To:</b> '. $con -> getArrival() -> getStation() -> getName() . '</td></tr></table>
 <table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
 <tr>
 <th>Time </th>

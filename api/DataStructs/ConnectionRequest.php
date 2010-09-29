@@ -18,6 +18,9 @@ class ConnectionRequest implements Request {
     private $typeOfTransport;
 
     function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $typeOfTransport = "all"){
+        if($from == "" || $to == ""){
+            throw new Exception("No stations specified");
+        }//TODO: check on input
         $this->results = $results;
         $this->from = $from;
         $this->to = $to;
