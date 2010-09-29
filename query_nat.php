@@ -36,7 +36,7 @@ $timesel = "";
 extract($_COOKIE);
 extract($_POST);
 // if bad stations, go back
-if($from == "" || $to == "" || $from == $to) {
+if(!isset($_POST["from"]) || !isset($_POST["to"]) || $from == $to) {
 	header('Location: ..');
 }
 
@@ -48,17 +48,17 @@ setcookie("to", $_POST['to'], time()+60*60*24*360);
 $time = $h . ":". $m;
 $date =  "20".$y. $mo .$d;
 
-if($lang == "") {
+if(!isset($_POST["lang"])) {
     $lang = "EN";
 }
 
-if($timesel == ""){
+if(!isset($_POST["timesel"])){
     $timesel = "depart";
 }
 
 $results = 6;
 
-if($time == "") {
+if(!isset($_POST["time"])) {
     $time = date("H:i");
 }
 
