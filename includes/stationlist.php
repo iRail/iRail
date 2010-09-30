@@ -589,18 +589,15 @@ $stations = array(  'AALST',
         'ZWIJNDRECHT');
 
 /*
- * This function will generate a javascript array called data
+ * This function will generate a JavaScript array called data
  */
 function generate_js_array($stations) {
-    echo "var data= new Array(";
-    $nOfStations = count($stations);
+    $output = 'var data=[';
     foreach($stations as $i => $value) {
-        echo "\"" . $value . "\"";
-        if($i < $nOfStations -1) {
-            echo ",";
-        }
+        $output .= '"' . $value . '",';
     }
-    echo ");";
+    $output = rtrim($output, ',') . '];';
+    echo $output;
 }
 
 /*
