@@ -24,7 +24,7 @@
 */
 
 //set content type in the header to XML
-header('Content-Type: text/xml');
+header('Content-Type: application/xml');
 
 include("DataStructs/ConnectionRequest.php");
 include("InputHandlers/BRailConnectionInput.php");
