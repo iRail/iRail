@@ -23,7 +23,7 @@
 
 include 'getVersion.php';
 ?>
-<p style="color:#999999;font-size:12px;position:relative;left:10px;top:-10px">made by <a href="about">iRail team</a>; 
+<p style="color:#999999;font-size:12px;padding:0 10px;">made by <a href="about">iRail team</a>; 
 data from <a href="http://www.b-rail.be/" target="_blank">(B)</a>; 
 version: <a href="changelog">
 <?php 
