@@ -159,9 +159,7 @@ $header = '<!DOCTYPE html>
   <meta charset="utf-8">
   <title>iRail - Results</title>
   <meta http-equiv="Cache-control" content="no-cache">
-  <link href="css/query.css" rel="stylesheet" >
-  <link rel="apple-touch-icon" href="./img/irail.png">
-  <link rel="shortcut icon" href="./img/favicon.ico">
+  <link href="/css/query.css" rel="stylesheet" >
   <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <script>
   	addEventListener(\'load\', function() { setTimeout(hideAddressBar, 0); }, false);

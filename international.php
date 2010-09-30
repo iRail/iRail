@@ -69,19 +69,14 @@ switch($lang) {
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <title>iRail - International</title>
-        <link href="css/mobile.css" rel="stylesheet">
-        <link rel="apple-touch-icon" href="./img/irail.png">
-        <link rel="shortcut icon" href="./img/favicon.ico">
+        <link href="/css/mobile.css" rel="stylesheet">
         <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
         <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
-        <meta name="language" content="en">
         <meta name="description" content="NMBS/SNCB iPhone train route planner.">
-        <meta name="verify-v1" content="CKTzWOdgOxi/n81oG7ycuF/h8UKhX9OAhfmOA0nQ+Ts=">
-        <meta name="google-site-verification" content="oQdbopNzGyVHyo2TTFTKQ_9_fcQWY12cs-9jjrm_-KM">
         <meta http-equiv="Cache-control" content="no-cache">
 
         <script>
@@ -96,8 +91,8 @@ switch($lang) {
             addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
             function hideAddressBar() { window.scrollTo(0, 1); }
         </script>
-        <script src="./js/actb.js"></script>
-        <script src="./js/common.js"></script>
+        <script src="/js/actb.js"></script>
+        <script src="/js/common.js"></script>
         <script>
 <?php
 //this bit generates the stations list
@@ -111,7 +106,7 @@ generate_js_array($stations);
         <div class="container">
             <div class="toolbar anchorTop">
                 <div class="title"><a href="international">iRail - International</a> </div>
-                <div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="./img/i.png" alt="Settings" /></a></div>
+                <div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="/img/i.png" alt="Settings" /></a></div>
                 <br />
                 <div class="toolbar">
                     <div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
@@ -133,7 +128,7 @@ generate_js_array($stations);
                                                         document.getElementById("from").value = "";
                                                     }
                                                 </script>
-                                                <a href="#" onclick="javascript:reset_from()"><img src="img/x.png" alt="X" border="0" /></a>
+                                                <a href="#" onclick="javascript:reset_from()"><img src="/img/x.png" alt="X" border="0" /></a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -145,7 +140,7 @@ generate_js_array($stations);
                                                         document.getElementById("to").value = "";
                                                     }
                                                 </script>
-                                                <a href="#" onclick="javascript:reset_to()"><img src="img/x.png" alt="X" border="0" /></a>
+                                                <a href="#" onclick="javascript:reset_to()"><img src="/img/x.png" alt="X" border="0" /></a>
                                             </td>
                                         </tr>
                                         <tr><td colspan="3"><br /></td></tr>
