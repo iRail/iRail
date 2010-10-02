@@ -1,41 +1,21 @@
 # Yeri Tiete - Tuinslak - http://yeri.be
 server {
 	listen   80;
-	# what domains it should listen to, in this case lab(s).irail.*
-	server_name  irail.be labs.irail.* lab.irail.* irail.* www.irail.*;
+	server_name  api.irail.be api.lab.irail.* api.irail.*;
 
 	# logging
 	access_log  /var/log/nginx/irail.access.log;
 	error_log   /var/log/nginx/irail.error.log;
 
 	# rewrite rules
-	rewrite ^/national$		/national.php		last;
-	rewrite ^/index$		/index.php		last;
-	rewrite ^/Default.htm$		/index.php		last;
-	rewrite ^/index.html$		/index.php		last;
-	rewrite ^/nat$			/national.php		last;
-	rewrite ^/international$	/international.php	last;
-	rewrite ^/int$			/international.php	last;
-	rewrite ^/results$		/query_nat.php		last;
-	rewrite ^/intresults$		/query_int.php		last;
-	rewrite ^/noresults$		/noresults.php		last;
-	rewrite ^/settings$		/settings.php		last;
-	rewrite ^/save$			/save.php		last;
-	rewrite ^/about$		/includes/about.php	last;
-	rewrite ^/changelog$		/docs/changelog.php	last;
-
-	# API => domain/api
-	rewrite ^/api/connections/$	/api/connections.php	last;
-	rewrite ^/api/stations/$	/api/stations.php	last;
-
 	# API => api.domain
-	rewrite ^connections/$		/connections.php	last;
-	rewrite ^stations/$		/stations.php		last;
+	rewrite ^/connections/$		/connections.php	last;
+	rewrite ^/stations/$		/stations.php		last;
 	#
 
 	location / {
-		root   /var/www/iRail;
-		index  index.php index.html index.htm index.cgi;
+		root   /var/www/iRail/api;
+		index  index.php index.html index.htm;
 		fastcgi_index	index.php;
 	
 	location /nginx_status {
@@ -46,10 +26,10 @@ server {
 		deny all;
 	}
 
-	location /api/stats {
+        location /stats {
 		auth_basic            "iRail API stats";
 		auth_basic_user_file  /var/www/iRail/api/stats/.htpasswd;
-	}
+        }
 
 	autoindex off;
 	}
@@ -69,7 +49,7 @@ server {
 	# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
 	#
 	location ~* \.(php|cgi)$ {
-		root	/var/www/iRail;
+		root	/var/www/iRail/api;
 		include /etc/nginx/fastcgi_params;
 		keepalive_timeout 0;
 		fastcgi_param   SCRIPT_FILENAME	$document_root$fastcgi_script_name;
