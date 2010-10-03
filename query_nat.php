@@ -58,10 +58,6 @@ if(!isset($_POST["timesel"])){
 
 $results = 6;
 
-if(!isset($_POST["time"])) {
-    $time = date("H:i");
-}
-
 $typeOfTransport = "all";
 
 try {
