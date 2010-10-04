@@ -40,7 +40,7 @@ if($notIrailDotBe == 0 && $domain != "irail.be" && $domain != "irail.nl") {
 	return;
 }
 
-// redirect to main page (nat); else display error message 
+// redirect to main page (national); else display error message 
 if($maintenance == 0) {
 	// edit URL to match domain/site
 	header('Location: national');
