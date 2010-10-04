@@ -144,7 +144,16 @@ switch($lang) {
             }
             $output .= "<td>" . $hours. ":" . $minutes ."</td>";
 
-            $output .= "<td>" . $con ->getDepart() -> getDelay()/60 . "m</td>";
+		// color delayed minutes in red, else print /
+		$tmp_delay = $con -> getDepart() -> getDelay()/60;
+
+		if($tmp_delay == 0) {
+			$delay_output = "/";
+		}else{
+			$delay_output = "<span style=\"color:red\">" . $tmp_delay . "</span>m";
+		}
+
+            $output .= "<td>" . $delay_output . "</td>";
 
             $output .= "<td>" . $con -> getDepart() -> getPlatform() . "</td>";
 
