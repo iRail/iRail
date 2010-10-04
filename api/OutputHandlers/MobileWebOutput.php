@@ -78,7 +78,7 @@ switch($lang) {
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
 <tr><td>
-Map: <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
+'. $txt_map .' <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
 </td><td> '. $txt_date .' '. date("d/m/y", $con -> getDepart() -> getTime()) .'
 </td></tr>
 <tr><td> '. $txt_from .'<b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
