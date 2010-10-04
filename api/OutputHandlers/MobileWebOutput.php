@@ -6,6 +6,38 @@
  */
 
 include("ConnectionOutput.php");
+
+// language settings
+$lang = $_COOKIE["language"];
+
+switch($lang) {
+    case "EN":		
+    	$txt_from = "From:";
+        $txt_to = "To:";
+        $txt_date = "Date:";
+        break;
+    case "NL":		
+    	$txt_from = "Van:";
+        $txt_to = "Naar:";
+        $txt_date = "Datum:";
+        break;
+    case "FR":      
+    	$txt_from = "De:";
+        $txt_to = "Vers:";
+        $txt_date = "Date:";
+        break;
+    case "DE":      
+    	$txt_from = "Von:";
+        $txt_to = "Nach:";
+        $txt_date = "Datum:";
+        break;
+    default:		
+    	$txt_from = "From:";
+        $txt_to = "To:";
+        $txt_date = "Date:";
+        break;
+//
+
 class MobileWebOutput extends ConnectionOutput {
     private $connections;
 
@@ -42,15 +74,12 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
 <tr><td>
-<b>Map:</b> <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
-</td>
-<td>
-<b>Date:</b> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
-    </td>
-    </tr>
-    <tr><td>
-<b>From:</b> '.$con -> getDepart() -> getStation() -> getName() .'</td><td>
-<b>To:</b> '. $con -> getArrival() -> getStation() -> getName() . '</td></tr></table>
+Map: <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
+</td><td>
+<?php $txt_date ?> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
+</td></tr>
+<tr><td> <?php $txt_from ?><b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
+<td><?php $txt_to ?><b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
 <table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
 <tr>
 <th>Time </th>
