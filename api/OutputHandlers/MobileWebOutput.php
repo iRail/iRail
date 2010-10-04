@@ -46,30 +46,60 @@ switch($lang) {
         $txt_to = "To:";
         $txt_date = "Date:";
         $txt_map = "Map:";
+	$txt_time = "Time:";
+	$txt_duration = "Duration:";
+	$txt_delay = "Delay:";
+	$txt_platform = "Platform:";
+	$txt_transfers = "Transfers:";
+	$txt_transportation = "Transportation:";
         break;
     case "NL":
     	$txt_from = "Van:";
         $txt_to = "Naar:";
         $txt_date = "Datum:";
         $txt_map = "Kaart:";
+        $txt_time = "Tijd:";
+        $txt_duration = "Duur:";
+        $txt_delay = "Vertraging:";
+        $txt_platform = "Perron:";
+        $txt_transfers = "Overstappen:";
+        $txt_transportation = "Vervoer:";
         break;
     case "FR":
     	$txt_from = "De:";
         $txt_to = "Vers:";
         $txt_date = "Date:";
         $txt_map = "Carte:";
+        $txt_time = "Heure:";
+        $txt_duration = "Dur&#233;e:";
+        $txt_delay = "Retard:";
+        $txt_platform = "Plate-forme:";
+        $txt_transfers = "Chang.:";
+        $txt_transportation = "Transport:";
         break;
     case "DE":
     	$txt_from = "Von:";
         $txt_to = "Nach:";
         $txt_date = "Datum:";
         $txt_map = "Karte:";
+        $txt_time = "Zeit:";
+        $txt_duration = "Dauer:";
+        $txt_delay = "Verz&#246;gerung:";
+        $txt_platform = "Plattform:";
+        $txt_transfers = "Umst.:";
+        $txt_transportation = "Produkte:";
         break;
     default:
     	$txt_from = "From:";
         $txt_to = "To:";
         $txt_date = "Date:";
         $txt_map = "Map:";
+        $txt_time = "Time:";
+        $txt_duration = "Duration:";
+        $txt_delay = "Delay:";
+        $txt_platform = "Platform:";
+        $txt_transfers = "Transfers:";
+        $txt_transportation = "Transportation:";
         break;
 }
 //
@@ -85,12 +115,12 @@ switch($lang) {
 <td> '. $txt_to .'<b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
 <table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
 <tr>
-<th>Time </th>
-<th>Duration </th>
-<th>Delay</th>
-<th>Platform</th>
-<th>Transfers</th>
-<th>Transportation</th>
+<th> '. $txt_time .' </th>
+<th> '. $txt_duration .' </th>
+<th> '. $txt_delay .' </th>
+<th> '. $txt_platform .'</th>
+<th> '. $txt_transfers .' </th>
+<th> '. $txt_transportation .' </th>
 </tr>
 '. $this->getConnectionsOutput();
         echo "<tr><td colspan=\"8\"><center><form name=\"return\" method=\"post\" action=\"national\"><input type=\"submit\" name=\"submit\" value=\"Back\"></center><br /></td></tr>";
