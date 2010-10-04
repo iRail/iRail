@@ -7,38 +7,6 @@
 
 include("ConnectionOutput.php");
 
-// language settings
-$lang = $_COOKIE["language"];
-
-switch($lang) {
-    case "EN":		
-    	$txt_from = "From:";
-        $txt_to = "To:";
-        $txt_date = "Date:";
-        break;
-    case "NL":		
-    	$txt_from = "Van:";
-        $txt_to = "Naar:";
-        $txt_date = "Datum:";
-        break;
-    case "FR":      
-    	$txt_from = "De:";
-        $txt_to = "Vers:";
-        $txt_date = "Date:";
-        break;
-    case "DE":      
-    	$txt_from = "Von:";
-        $txt_to = "Nach:";
-        $txt_date = "Datum:";
-        break;
-    default:		
-    	$txt_from = "From:";
-        $txt_to = "To:";
-        $txt_date = "Date:";
-        break;
-}
-//
-
 class MobileWebOutput extends ConnectionOutput {
     private $connections;
 
@@ -52,7 +20,7 @@ class MobileWebOutput extends ConnectionOutput {
     }
 
     private function printHeader() {
-        echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+	echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 <head>
 <title>iRail - '. $this->connections[0] -> getDepart() -> getStation() -> getName() . ' to ' . $this->connections[0] -> getArrival() -> getStation() -> getName() .'</title>
@@ -70,17 +38,46 @@ function hideAddressBar() { window.scrollTo(0, 1); }
     }
 
     private function printBody() {
+// language settings
+$lang = $_COOKIE["language"];
+switch($lang) {
+    case "EN":
+    	$txt_from = "From:";
+        $txt_to = "To:";
+        $txt_date = "Date:";
+        break;
+    case "NL":
+    	$txt_from = "Van:";
+        $txt_to = "Naar:";
+        $txt_date = "Datum:";
+        break;
+    case "FR":
+    	$txt_from = "De:";
+        $txt_to = "Vers:";
+        $txt_date = "Date:";
+        break;
+    case "DE":
+    	$txt_from = "Von:";
+        $txt_to = "Nach:";
+        $txt_date = "Datum:";
+        break;
+    default:
+    	$txt_from = "From:";
+        $txt_to = "To:";
+        $txt_date = "Date:";
+        break;
+}
+//
         $con = $this->connections[0];
-        echo '<body>
+	echo '<body>
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
 <tr><td>
 Map: <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
-</td><td>
-<?php echo $txt_date; ?> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
+</td><td> '. $txt_date .' '. date("d/m/y", $con -> getDepart() -> getTime()) .'
 </td></tr>
-<tr><td> <?php echo $txt_from; ?><b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
-<td><?php echo $txt_to; ?><b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
+<tr><td> '. $txt_from .'<b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
+<td> '. $txt_to .'<b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
 <table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
 <tr>
 <th>Time </th>
