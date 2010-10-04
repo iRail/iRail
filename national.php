@@ -188,7 +188,12 @@ generate_js_array($stations);
                                                     }
                                                     ?>
                                                 </select>/<select name="y">
-                                                    <?php /* OPGELET: VALUE IS BELANGRIJK... */ ?>
+                                                    <?php 
+                                                    /* Check this YEAR part of this (and international.php)
+                                                    	=> the if stuff doesn't make sense; it's always going to display year+1 (2nd option)
+                                                    	=> 2011 gives error () as there is no time table available yet
+                                                    	>>> see ticket 17 @ http://project.irail.be/cgi-bin/trac.fcgi/ticket/17
+                                                     */ ?>
                                                     <option value="<?php echo date('y'); ?>" <?php if(date('y') == '10') {
                                                         echo "selected";
                                                             } ?> ><?php echo date('Y'); ?></option>
