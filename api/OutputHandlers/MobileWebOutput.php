@@ -77,10 +77,10 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <tr><td>
 Map: <a href="http://maps.google.be/?saddr=Station'. $con -> getDepart() -> getStation() -> getName().'&daddr=Station '. $con -> getArrival() -> getStation() -> getName() . '" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
 </td><td>
-<?php $txt_date ?> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
+<?php echo $txt_date; ?> '.date("d/m/y", $con -> getDepart() -> getTime()) .'
 </td></tr>
-<tr><td> <?php $txt_from ?><b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
-<td><?php $txt_to ?><b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
+<tr><td> <?php echo $txt_from; ?><b> '.$con -> getDepart() -> getStation() -> getName() .'</b></td>
+<td><?php echo $txt_to; ?><b> '. $con -> getArrival() -> getStation() -> getName() . '</b></td></tr></table>
 <table align="left" cellpadding="0" cellspacing="1" bgcolor="FFFFFF" summary="Train Info">
 <tr>
 <th>Time </th>
