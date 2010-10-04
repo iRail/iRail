@@ -45,26 +45,31 @@ switch($lang) {
     	$txt_from = "From:";
         $txt_to = "To:";
         $txt_date = "Date:";
+        $txt_map = "Map:";
         break;
     case "NL":
     	$txt_from = "Van:";
         $txt_to = "Naar:";
         $txt_date = "Datum:";
+        $txt_map = "Kaart:";
         break;
     case "FR":
     	$txt_from = "De:";
         $txt_to = "Vers:";
         $txt_date = "Date:";
+        $txt_map = "Carte:";
         break;
     case "DE":
     	$txt_from = "Von:";
         $txt_to = "Nach:";
         $txt_date = "Datum:";
+        $txt_map = "Karte:";
         break;
     default:
     	$txt_from = "From:";
         $txt_to = "To:";
         $txt_date = "Date:";
+        $txt_map = "Map:";
         break;
 }
 //
