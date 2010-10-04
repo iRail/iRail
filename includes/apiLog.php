@@ -49,7 +49,7 @@ function writeLog($ua, $from, $to, $err, $ip) {
 	//echo $ua . " - " . $from . " - " . $to;
 	
 	// get time + date in rfc2822 format
-	$now = date('l, d/m/Y - H:i:s');
+	$now = date('D, d M Y H:i:s');
 
 	// checks
 	if($from == "") {
