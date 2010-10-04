@@ -36,6 +36,7 @@ switch($lang) {
         $txt_to = "To:";
         $txt_date = "Date:";
         break;
+}
 //
 
 class MobileWebOutput extends ConnectionOutput {
