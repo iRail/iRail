@@ -7,7 +7,7 @@
  */
 
 include("Output.php");
-class XMLConnectionOutput extends Output {
+class XMLConnectionOutput implements Output {
     private $connections;
 
     function __construct($c) {
