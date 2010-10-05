@@ -1,6 +1,7 @@
 <?php
-/* 	Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-	    Copyright 2010 Pieter Colpaert (pieter@irail.be - http://bonsansnom.wordpress.com)
+/**
+ *  Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
+    Copyright 2010 Pieter Colpaert (pieter@irail.be - http://bonsansnom.wordpress.com)
 
 	This file is part of iRail.
 
@@ -18,272 +19,57 @@
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
 	http://project.irail.be - http://irail.be
-	
+
 	source available at http://github.com/Tuinslak/iRail
-*/
 
-$from = $_COOKIE["from"];
-$to = $_COOKIE["to"];
-$lang = $_COOKIE["language"];
+ 
+ * @author pieterc
+ */
 
-// SPECIAL MSG?
-// 1 or 0
-$special = 0;
+include("Page.php");
 
-switch($lang) {
-    case "EN":		$txt_from = "From:";
-        $txt_to = "To:";
-        $txt_date = "Date:";
-        $txt_time = "Time:";
-        $txt_arrive = "Arrival";
-        $txt_depart = "Departure";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
-        break;
-    case "NL":		$txt_from = "Van:";
-        $txt_to = "Naar:";
-        $txt_date = "Datum:";
-        $txt_time = "Tijd:";
-        $txt_arrive = "Aankomst";
-        $txt_depart = "Vertrek";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
-        break;
-    case "FR":      $txt_from = "De:";
-        $txt_to = "Vers:";
-        $txt_date = "Date:";
-        $txt_time = "Heure:";
-        $txt_arrive = "Arriv&#233;e";
-        $txt_depart = "D&#233;part";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
-        break;
-    case "DE":      $txt_from = "Von:";
-        $txt_to = "Nach:";
-        $txt_date = "Datum:";
-        $txt_time = "Uhrzeit:";
-        $txt_arrive = "Ankunft";
-        $txt_depart = "Abfahrt";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
-        break;
-    default:		$txt_from = "From:";
-        $txt_to = "To:";
-        $txt_date = "Date:";
-        $txt_time = "Time:";
-        $txt_arrive = "Arrival";
-        $txt_depart = "Departure";
-        $txt_special = "<img src='hafas/img/icon_warning.gif' alt='(!)'> System down for maintenance.";
-        break;
+class NationalForm extends Page {
+
+    private $page = array(
+        "title" => "iRail.be"        
+        );
+
+    function __construct() {
+
+        //TODO: generate this in another way according to language...
+        include("includes/stationlist.php");
+        $this->page["stationarray"] = generate_js_array_2($stations);
+
+        $this->page["date"] = date("D d/m/Y h:i");
+        if(isset($_COOKIE["from"]))
+            $this->page["autofrom"] = $_COOKIE["from"];
+        else
+            $this->page["autofrom"] = "";
+
+        if(isset($_COOKIE["to"]))
+            $this->page["autoto"] = $_COOKIE["to"];
+        else
+            $this->page["autoto"] = "";
+        
+        $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
+        $this->page["footer"] = file_get_contents("includes/footer.php");
+
+    }
+
+    protected function loadContent(){
+        foreach($this ->page as $tag => $value){
+            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
+        }
+    }
+
 }
 
+//__MAIN__
+
+$page = new NationalForm();
+if(isset($_COOKIE["language"])){
+    $page -> setLanguage($_COOKIE["language"]);
+}
+$page -> buildPage("FromToForm.tpl");
 
 ?>
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>iRail</title>
-        <link href="/css/mobile.css" rel="stylesheet">
-        <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-        <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
-        <meta name="description" CONTENT="NMBS/SNCB mobile iPhone train route planner.">
-        <meta http-equiv="Cache-control" content="no-cache">
-
-        <script>
-            function switch_station() {
-                var tmp = document.getElementById("from").value;
-                document.getElementById("from").value = document.getElementById("to").value;
-                document.getElementById("to").value = tmp;
-            }
-            addEventListener('load', function() { setTimeout(hideAddressBar, 0); }, false);
-            function hideAddressBar() { window.scrollTo(0, 1); }
-        </script>
-        <script src="/js/actb.js"></script>
-        <script src="/js/common.js"></script>
-        <script>
-<?php
-//this bit generates the stations list
-include("includes/stationlist.php");
-generate_js_array($stations);
-?>
-        </script>
-    </head>
-
-    <body>
-        <div class="container">
-            <div class="toolbar anchorTop">
-                <div class="title"><a href="/">iRail</a> </div>
-                <div style="text-align:right;float:right;margin-right:10px"><a href="settings"><img style="vertical-align:middle;" border="0" src="/img/i.png" alt="Settings"></a></div>
-                <br>
-                <div class="toolbar">
-                    <div id="toolbar" style="height: 14px; padding: 2px; background-color: #efefef; text-align: center; color: #555; font-size: 12px; font-weight: normal;">
-                        <?php echo date('l j/m/Y - H:i'); ?>
-                    </div>
-
-                    <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
-                        <tr>
-                            <form name="search" method="post" action="results">
-                                <td>
-                                    <table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF" style="color:#000000";>
-                                    <?php
-                                    if($special == 1) {
-                                        ?>
-                                           <tr><td colspan="3" style="text-align:center;font-weight:normal;color:red;font-size:14px;"><?php echo $txt_special; ?></td></tr>
-                                                   <?php
-                                               }
-                                               ?>
-                                        <tr>
-                                            <td width="70"><?php echo $txt_from; ?></td>
-                                            <td colspan="2">
-                                                <input name="from" type="text" id="from" AUTOCOMPLETE="OFF" value="<?php echo $from; ?>">
-                                                <script>
-                                                    var obj = actb(document.getElementById('from'),data);
-                                                    function reset_from() {
-                                                        document.getElementById("from").value = '';
-                                                    }</script>
-                                                <a href="#" onclick="javascript:reset_from()"><img src="/img/x.png" alt="X" border="0"></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><?php echo $txt_to; ?></td>
-                                            <td colspan="2"><input name="to" type="text" id="to" AUTOCOMPLETE="OFF" value="<?php echo $to; ?>">
-                                                <script>
-                                                    var obj = actb(document.getElementById('to'),data);
-                                                    function reset_to() {
-                                                        document.getElementById("to").value = "";
-                                                    }
-                                                </script>
-                                                <a href="#" onclick="javascript:reset_to()"><img src="/img/x.png" alt="X" border="0"></a>
-                                            </td>
-                                        </tr>
-                                        <tr><td colspan="3"><br></td></tr>
-                                        <tr>
-                                            <td><?php echo $txt_date; ?></td>
-                                            <td colspan="2">
-                                                <select NAME="d">
-                                                    <?php
-                                                    for($i = 1; $i <= 31; $i++) {
-                                                        if($i < 10) {
-                                                            $number = "0" . $i;
-                                                        }else {
-                                                            $number = $i;
-                                                        }
-                                                        echo "<option value=\"". $number ."\"";
-                                                        if(date('d') == $number) {
-                                                            echo "selected";
-                                                        }
-                                                        echo ">".$number."</option>";
-                                                    }
-                                                    ?>
-                                                </select>/<select NAME="mo">
-                                                    <?php
-                                                    for($i = 1; $i <= 12; $i++) {
-                                                        if($i < 10) {
-                                                            $number = "0" . $i;
-                                                        }else {
-                                                            $number = $i;
-                                                        }
-                                                        echo "<option value=\"". $number ."\"";
-                                                        if(date('m') == $number) {
-                                                            echo "selected";
-                                                        }
-                                                        echo ">".$number."</option>";
-                                                    }
-                                                    ?>
-                                                </select>/<select name="y">
-                                                    <?php 
-                                                    /* Check this YEAR part of this (and international.php)
-                                                    	=> the if stuff doesn't make sense; it's always going to display year+1 (2nd option)
-                                                    	=> 2011 gives error () as there is no time table available yet
-                                                    	>>> see ticket 17 @ http://project.irail.be/cgi-bin/trac.fcgi/ticket/17
-                                                     */ ?>
-                                                    <option value="<?php echo date('y'); ?>" <?php if(date('y') == '10') {
-                                                        echo "selected";
-                                                            } ?> ><?php echo date('Y'); ?></option>
-                                                    <option value="<?php echo date('y')+1; ?>" <?php if(date('y') == '11') {
-                                                        echo "selected";
-                                                            } ?> ><?php echo date('Y')+1; ?></option>
-                                                </select></td>
-                                        </tr>
-                                        <tr>
-                                            <td><?php echo $txt_time; ?></td>
-                                            <td colspan="2">
-                                                <select NAME="h">
-                                                    <?php
-                                                    if(date('i') >= '50' && date('i') <= '59') {
-                                                        $hour = date('H') + 1;
-                                                    }else {
-                                                        $hour = date('H');
-                                                    }
-                                                    for($i = 0; $i < 24; $i++) {
-                                                        if($i < 10) {
-                                                            $number = "0" . $i;
-                                                        }else {
-                                                            $number = $i;
-                                                        }
-                                                        echo "<option value=\"". $number ."\"";
-                                                        if($hour == $number) {
-                                                            echo "selected";
-                                                        }
-                                                        echo ">".$number."</option>";
-                                                    }
-                                                    ?>
-                                                </select>:<select NAME="m">
-                                                    <option VALUE="00" <?php if(date('i') >= '50' && date('i') <= '59') {
-                                                        echo "selected";
-                                                            } ?> >00</option>
-                                                    <option VALUE="10" <?php if(date('i') >= '00' && date('i') <= '09') {
-                                                        echo "selected";
-                                                            } ?> >10</option>
-                                                    <option VALUE="20" <?php if(date('i') >= '10' && date('i') <= '19') {
-                                                        echo "selected";
-                                                            } ?> >20</option>
-                                                    <option VALUE="30" <?php if(date('i') >= '20' && date('i') <= '29') {
-                                                        echo "selected";
-                                                            } ?> >30</option>
-                                                    <option VALUE="40" <?php if(date('i') >= '30' && date('i') <= '39') {
-                                                        echo "selected";
-                                                            } ?> >40</option>
-                                                    <option VALUE="50" <?php if(date('i') >= '40' && date('i') <= '49') {
-                                                        echo "selected";
-                                                            } ?> >50</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td colspan="2">
-                                                <input type="radio" name="timesel" value="depart" checked><span style="font-weight:normal;font-size:18px;"><?php echo $txt_depart; ?></span>
-                                                <input type="radio" name="timesel" value="arrive"><span style="font-weight:normal;font-size:18px;"><?php echo $txt_arrive; ?></span>
-                                            </td>
-                                        </tr>
-                                        <tr><td colspan="3"></td></tr>
-                                        <tr>
-                                            <td colspan="3">
-                                                <div style="text-align:center;">
-                                                    <button type="submit" name="submit" value="Search">Search</button>
-                                                    <button type="button" onclick="javascript:switch_station()">Switch</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr><td colspan="3"><br></td></tr>
-                                        <tr>
-                                            <td colspan="3">
-                                                <table width="100%" border="0" align="center" style="text-align:center;">
-                                                    <tr>
-                                                        <td class="footer" width="50%"><a href="national">Nat</a></td>
-                                                        <td class="footer" width="50%"><a href="international">Int</a></td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </form>
-                        </tr>
-                    </table>
-                    <?php
-                    include 'includes/footer.php';
-                    ?>
-                </div>
-            </div>
-        </div>
-    </body>
-</html>

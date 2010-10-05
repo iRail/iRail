@@ -6,7 +6,7 @@
  * @author pieterc
  */
 
-include("ConnectionOutput.php");
+include("Output.php");
 class XMLConnectionOutput extends ConnectionOutput {
     private $connections;
 
