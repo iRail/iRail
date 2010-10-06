@@ -34,7 +34,7 @@ class MobileWebOutput extends Page implements Output {
     }
 
     public function printAll() {
-        if(sizeof($connections) == 0){
+        if(sizeof($this->connections) == 0){
             header('Location: noresults');
         }
         $this-> buildPage("Results.tpl");
