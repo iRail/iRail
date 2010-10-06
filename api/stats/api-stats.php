@@ -1,12 +1,11 @@
 <html><head><title>iRail API MySQL (request) stats</title>
 	<link href="http://irail.be/css/api_stats.css" rel="stylesheet" type="text/css" />
-    <link rel="apple-touch-icon" href="http://irail.be/img/irail.png" /></style>
-    <link rel="shortcut icon" type="image/x-icon" href="http://irail.be/img/favicon.ico"/>
-</head><body>
-<center>
+	<link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png" /></style>
+	<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
+</head><body><center>
 <?php
 /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-	
+
     This file is part of iRail.
 
     iRail is free software: you can redistribute it and/or modify
@@ -23,7 +22,7 @@
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
     http://project.irail.be - http://irail.be
-	
+
     Source available at http://github.com/Tuinslak/iRail
 */
 
@@ -36,11 +35,13 @@ $limit = 250;
 // include vars
 include("../../includes/dbConfig.php");
 
+$s = $_REQUEST["s"];
+
 if (empty($s)) {
 	$s = 0;
 }
 
-$count = 1 + $s ;
+$count = 1 + $s;
 
 	try {
 		mysql_pconnect($api_host, $api_user, $api_password);
@@ -48,16 +49,16 @@ $count = 1 + $s ;
 		$query = "SELECT COUNT($api_c1) FROM $api_table";
 		$result = mysql_query($query);
 		$numrows = mysql_result($result, 0);
-		
+
 		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
 		echo "Error connecting to the database.";
 	}
-	
+
 	$count++;
-	
+
 	if ($s>=1) { // bypass PREV link if s is 0
 		$prevs=($s-$limit);
 		print "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
@@ -79,7 +80,7 @@ $count = 1 + $s ;
 	}
 
 	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
-	
+
 	while($row = mysql_fetch_object($result)) {
 		echo "<tr>";
 		echo "<td>" . $row->$api_c1 . "</td>";
