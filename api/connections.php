@@ -80,6 +80,7 @@ if($typeOfTransport == "") {
 }
 
 try {
+    if(!(isset($from)) || !(isset($to))) throw new Exception("You didn't use this right. You should specify where to and where from you are traveling.");
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
     $input0 = new BRailConnectionInput();
     $connections = $input0 -> execute($request);

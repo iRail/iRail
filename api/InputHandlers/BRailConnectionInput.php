@@ -91,109 +91,114 @@ class BRailConnectionInput extends ConnectionInput {
         $xml = new SimpleXMLElement($serverData);
         $connections = array();
         $i = 0;
-        //echo $serverData ;
-        foreach($xml -> ConRes -> ConnectionList -> Connection as $conn) {
+        //DEBUG: echo $serverData ;
+        if(isset($xml -> ConRes -> ConnectionList -> Connection)) {
+            foreach($xml -> ConRes -> ConnectionList -> Connection as $conn) {
 
-            $platform0 = $conn -> Overview ->Departure -> BasicStop -> Dep -> Platform -> Text;
+                $platform0 = $conn -> Overview ->Departure -> BasicStop -> Dep -> Platform -> Text;
 
-            $unixtime0 = $this->transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
-            $nameStation0 = $conn -> Overview -> Departure -> BasicStop -> Station['name'];
-            $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
-            preg_match("/(..)(.*)/", $locationX0, $matches);
-            $locationX0 = $matches[1] . "." . $matches[2];
-            $locationY0 = $conn -> Overview -> Departure -> BasicStop -> Station['y'];
-            preg_match("/(.)(.*)/", $locationY0, $matches);
-            $locationY0 = $matches[1] . "." . $matches[2];
-            $station0 = new Station($nameStation0, $locationX0, $locationY0);
+                $unixtime0 = $this->transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
+                $nameStation0 = $conn -> Overview -> Departure -> BasicStop -> Station['name'];
+                $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
+                preg_match("/(..)(.*)/", $locationX0, $matches);
+                $locationX0 = $matches[1] . "." . $matches[2];
+                $locationY0 = $conn -> Overview -> Departure -> BasicStop -> Station['y'];
+                preg_match("/(.)(.*)/", $locationY0, $matches);
+                $locationY0 = $matches[1] . "." . $matches[2];
+                $station0 = new Station($nameStation0, $locationX0, $locationY0);
 
-            $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
+                $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
 
-            $unixtime1 = $this->transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
-            $nameStation1 = $conn -> Overview -> Arrival -> BasicStop -> Station['name'];
-            $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
-            preg_match("/(..)(.*)/", $locationX1, $matches);
-            $locationX1 = $matches[1] . "." . $matches[2];
-            $locationY1 = $conn -> Overview -> Arrival -> BasicStop -> Station['y'];
-            preg_match("/(.)(.*)/", $locationY1, $matches);
-            $locationY1 = $matches[1] . "." . $matches[2];
-            $station1 = new Station($nameStation1, $locationX1, $locationY1);
+                $unixtime1 = $this->transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                $nameStation1 = $conn -> Overview -> Arrival -> BasicStop -> Station['name'];
+                $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
+                preg_match("/(..)(.*)/", $locationX1, $matches);
+                $locationX1 = $matches[1] . "." . $matches[2];
+                $locationY1 = $conn -> Overview -> Arrival -> BasicStop -> Station['y'];
+                preg_match("/(.)(.*)/", $locationY1, $matches);
+                $locationY1 = $matches[1] . "." . $matches[2];
+                $station1 = new Station($nameStation1, $locationX1, $locationY1);
 
-            //Delay or other wrongish stuff
-            $delay0 = 0;
-            $delay1 = 0;
-            $platformNormal0 = true;
-            $platformNormal1 = true;
-            if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO") {
+                //Delay or other wrongish stuff
+                $delay0 = 0;
+                $delay1 = 0;
+                $platformNormal0 = true;
+                $platformNormal1 = true;
+                if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO") {
 
-                $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
-                if($delay0 < 0) {
-                    $delay0 = 0;
+                    $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
+                    if($delay0 < 0) {
+                        $delay0 = 0;
+                    }
+                    //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
+                    $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
+                    if($delay1 < 0) {
+                        $delay1 = 0;
+                    }
+
+                    if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)) {
+                        $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
+                        $platformNormal0= false;
+                    }
+                    if(isset($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform-> Text)) {
+                        $platform1 = $conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform -> Text;
+                        $platformNormal1 = false;
+                    }
                 }
-                //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
-                $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
-                if($delay1 < 0) {
-                    $delay1 = 0;
-                }
+                $trains = array();
+                $vias = array();
+                $j = 0;
+                $connectionindex = 0;
+                //yay for spaghetti code.
+                if(isset($conn -> ConSectionList -> ConSection)) {
+                    foreach($conn -> ConSectionList -> ConSection as $connsection) {
 
-                if(isset($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform->Text)) {
-                    $platform0 = $conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Platform -> Text;
-                    $platformNormal0= false;
-                }
-                if(isset($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform-> Text)) {
-                    $platform1 = $conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Platform -> Text;
-                    $platformNormal1 = false;
-                }
-            }
-            $trains = array();
-            $vias = array();
-            $j = 0;
-            $connectionindex = 0;
-            //yay for spaghetti code.
-            if(isset($conn -> ConSectionList -> ConSection)) {
-                foreach($conn -> ConSectionList -> ConSection as $connsection) {
-
-                    if(isset($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute)) {
-                        foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
-                            if($att -> Attribute["type"] == "NAME") {
-                                $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
-                                $j++;
-                                break;
+                        if(isset($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute)) {
+                            foreach($connsection -> Journey -> JourneyAttributeList -> JourneyAttribute as $att) {
+                                if($att -> Attribute["type"] == "NAME") {
+                                    $trains[$j] = str_replace(" ", "", $att -> Attribute -> AttributeVariant -> Text);
+                                    $j++;
+                                    break;
+                                }
                             }
-                        }
 
-                        if($conn -> Overview -> Transfers > 0 && strcmp($connsection -> Arrival -> BasicStop -> Station['name'],  $conn -> Overview -> Arrival -> BasicStop -> Station['name']) != 0) {
-                            //current index for the train: j-1
-                            $departDelay = 0; //Todo: NYImplemented
-                            $connarray = $conn -> ConSectionList -> ConSection;
-                            $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
-                            $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
-                            $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
-                            $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
-                            $arrivalDelay = 0; //Todo: NYImplemented
-                            $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
-                            $vehiclev = new BTrain($trains[$j-1]);
+                            if($conn -> Overview -> Transfers > 0 && strcmp($connsection -> Arrival -> BasicStop -> Station['name'],  $conn -> Overview -> Arrival -> BasicStop -> Station['name']) != 0) {
+                                //current index for the train: j-1
+                                $departDelay = 0; //Todo: NYImplemented
+                                $connarray = $conn -> ConSectionList -> ConSection;
+                                $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
+                                $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
+                                $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                                $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
+                                $arrivalDelay = 0; //Todo: NYImplemented
+                                $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
+                                $vehiclev = new BTrain($trains[$j-1]);
 
-                            $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
+                                $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
 
-                            $connectionindex++;
+                                $connectionindex++;
+                            }
                         }
                     }
                 }
+                $vehicle0 = new BTrain($trains[0]);
+                $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
+
+                $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
+                $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
+
+
+
+                $duration = $this -> transformDuration($conn -> Overview -> Duration -> Time);
+
+                $connections[$i] = $i;
+                $connections[$i] = new Connection($depart, $arrival, $vias, $duration);
+                $i++;
             }
-            $vehicle0 = new BTrain($trains[0]);
-            $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
-
-            $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
-            $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
-
-
-
-            $duration = $this -> transformDuration($conn -> Overview -> Duration -> Time);
-
-            $connections[$i] = $i;
-            $connections[$i] = new Connection($depart, $arrival, $vias, $duration);
-            $i++;
+        }else{
+            throw new Exception("We're sorry, we could not retrieve the correct data from our sources");
         }
+
         return $connections;
     }
 
