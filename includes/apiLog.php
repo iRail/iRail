@@ -1,6 +1,6 @@
 <?php
 /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-	
+
     This file is part of iRail.
 
     iRail is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
     http://project.irail.be - http://irail.be
-	
+
     Source available at http://github.com/Tuinslak/iRail
 */
 
@@ -47,31 +47,32 @@ function writeLog($ua, $from, $to, $err, $ip) {
 
 	// debug
 	//echo $ua . " - " . $from . " - " . $to;
-	
+
 	// get time + date in rfc2822 format
+	date_default_timezone_set('Europe/Brussels');
 	$now = date('D, d M Y H:i:s');
 
 	// checks
 	if($from == "") {
 		$from = "EMPTY";
 	}
-	
+
 	if($to == "") {
 		$to = "EMPTY";
 	}
-	
+
 	if ($ua == "") {
 		$ua = "-";
 	}
-	
+
 	$from = str_replace("'", "", $from);
 	$to = str_replace("'", "", $to);
 	$err = str_replace("'", "", $err);
-	
+
 	$from = str_replace("\"", "", $from);
 	$to = str_replace("\"", "", $to);
 	$err = str_replace("\"", "", $err);
-	
+
 	// connect to db
 	try {
 		mysql_pconnect($api_host, $api_user, $api_password);
@@ -80,7 +81,7 @@ function writeLog($ua, $from, $to, $err, $ip) {
 	catch (Exception $e) {
 		echo "Error connecting to the database.";
 	}
-	
+
 	// insert in db
 	try {
 		$query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip')";
@@ -89,9 +90,8 @@ function writeLog($ua, $from, $to, $err, $ip) {
 	catch (Exception $e) {
 		echo "Error writing to the database.";
 	}
-	
+
 	// debug
 	//echo $query . "<br />" . $result . "<br />" . mysql_error();
 }
-
 ?>

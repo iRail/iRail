@@ -22,7 +22,7 @@
 
 	source available at http://github.com/Tuinslak/iRail
 
- 
+
  * @author pieterc
  */
 
@@ -31,7 +31,7 @@ include("Page.php");
 class NationalForm extends Page {
 
     private $page = array(
-        "title" => "iRail.be"        
+        "title" => "iRail.be"
         );
 
     function __construct() {
@@ -40,7 +40,7 @@ class NationalForm extends Page {
         include("includes/stationlist.php");
         $this->page["stationarray"] = generate_js_array_2($stations);
 
-        $this->page["date"] = date("D d/m/Y h:i");
+        $this->page["date"] = date("D d/m/Y H:i");
         if(isset($_COOKIE["from"]))
             $this->page["autofrom"] = $_COOKIE["from"];
         else
@@ -50,7 +50,7 @@ class NationalForm extends Page {
             $this->page["autoto"] = $_COOKIE["to"];
         else
             $this->page["autoto"] = "";
-        
+
         $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
         $this->page["footer"] = file_get_contents("includes/footer.php");
 
@@ -71,5 +71,4 @@ if(isset($_COOKIE["language"])){
     $page -> setLanguage($_COOKIE["language"]);
 }
 $page -> buildPage("FromToForm.tpl");
-
 ?>
