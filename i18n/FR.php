@@ -1,25 +1,25 @@
 <?php
 $i18n = array(
-    "from" => "From",
-    "to" => "To",
+    "from" => "De",
+    "to" => "A",
     "date" => "Date",
-    "time" => "Time",
-    "arrival" => "Arrival",
-    "depart" => "Depart",
-    "search" => "Search",
+    "time" => "Heure",
+    "arrival" => "Arriv&#233;é",
+    "depart" => "D&#233;part",
+    "search" => "Recherche",
     "switch" => "Switch",
-    "save" => "Save",
-    "settings" => "Settings",
-    "savedinacookie" => "Saved in a cookie! Yum.",
-    "language" => "Language",
-    "about" => "About",
-    "back" => "Back",
-    "map" => "Map",
-    "duration" => "Duration",
-    "delay" => "Delay",
-    "platform" => "Platform",
-    "transfers" => "Transfers",
-    "transportation" => "Transportion"
+    "save" => "Sauvegarde",
+    "settings" => "Param&#232;tres",
+    "savedinacookie" => "Enregistr&#233; dans un cookie! Miam, miam.",
+    "language" => "Langage",
+    "about" => "A propos",
+    "back" => "Retour",
+    "map" => "Carte",
+    "duration" => "Dur&#233;é",
+    "delay" => "Retard",
+    "platform" => "Quai",
+    "transfers" => "Correspondances",
+    "transportation" => "V&#233;hicules"
 
     );
 
