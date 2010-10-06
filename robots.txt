@@ -12,15 +12,19 @@
 User-agent: *
 
 # Directories
-Disallow: /docs/
-Disallow: /includes/
 Disallow: save.php
 Disallow: noresults.php
 Disallow: noresults
 Disallow: *.php$
 Disallow: .gitignore
 Disallow: README
+Disallow: /docs/
+Disallow: /includes/
 Disallow: /nbproject/
+Disallow: /i18n/
+Disallow: /js/
+Disallow: /templates/
+Disallow: /api/
 
 # API dir on dev.irail.be/api, else check api.irail.be/robots.txt
 
