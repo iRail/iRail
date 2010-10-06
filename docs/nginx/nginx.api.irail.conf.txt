@@ -26,7 +26,7 @@ server {
 		deny all;
 	}
 
-        location /stats {
+        location /stats/ {
 		auth_basic            "iRail API stats";
 		auth_basic_user_file  /var/www/iRail/api/stats/.htpasswd;
         }
