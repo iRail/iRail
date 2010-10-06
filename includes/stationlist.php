@@ -600,6 +600,19 @@ function generate_js_array($stations) {
     echo $output;
 }
 
+
+/*
+ * This function will generate a JavaScript array called data
+ */
+function generate_js_array_2($stations) {
+    $output = '';
+    foreach($stations as $i => $value) {
+        $output .= '"' . $value . '",';
+    }
+    $output = rtrim($output, ',');
+    return $output;
+}
+
 /*
  * This function returns the timestamp - if downloaded once and timestamps match, no need to download it again
  */
