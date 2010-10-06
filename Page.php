@@ -8,14 +8,14 @@
 abstract class Page {
     private $template = "iRail";
     private $lang = "EN";
-    
+
     protected $content;
-    
+
     private $pageName;
 
-    public function buildPage($pageName){
-        if(isset($_COOKIE("language"))){
-            $this->lang = $_COOKIE("language");
+    public function buildPage($pageName) {
+        if(isset($_COOKIE["language"])) {
+            $this->setLanguage($_COOKIE["language"]);
         }
         $this->pageName = $pageName;
         $this->loadTemplate();
@@ -24,30 +24,30 @@ abstract class Page {
         $this->printPage();
     }
 
-    public function setTemplate($template){
+    public function setTemplate($template) {
         $this -> template = $template;
     }
 
-    public function setLanguage($lang){
+    public function setLanguage($lang) {
         $this -> lang = $lang;
     }
 
-    private function loadTemplate(){
+    private function loadTemplate() {
         $tplPath = "templates/" . $this->template . "/" . $this -> pageName;
-        if(file_exists($tplPath) ){
+        if(file_exists($tplPath) ) {
             $this->content = file_get_contents($tplPath);
-        }else{
+        }else {
             throw new Exception("Template doesn't exist");
         }
     }
     protected abstract function loadContent();
-    private function loadI18n(){
+    private function loadI18n() {
         include_once("i18n/".$this->lang. ".php");
-        foreach($i18n as $tag => $value){
+        foreach($i18n as $tag => $value) {
             $this -> content = str_ireplace("{i18n_".$tag."}", $value, $this->content);
         }
     }
-    protected function printPage(){
+    protected function printPage() {
         echo $this->content;
     }
 

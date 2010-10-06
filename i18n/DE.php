@@ -19,7 +19,9 @@ $i18n = array(
     "delay" => "Versp&#228;tung",
     "platform" => "Plattform",
     "transfers" => "Transfers",
-    "transportation" => "Transport"
+    "transportation" => "Transport",
+    "error" => "Error",
+    "errormessage" => "We could not provide you with an answer to your question. Most likely you requested too old information, or information that we can't provide yet. If you think this error is a bug in iRail, please let us know on project.iRail.be"
 
     );
 
