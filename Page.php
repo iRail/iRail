@@ -14,7 +14,9 @@ abstract class Page {
     private $pageName;
 
     public function buildPage($pageName){
-
+        if(isset($_COOKIE("language"))){
+            $this->lang = $_COOKIE("language");
+        }
         $this->pageName = $pageName;
         $this->loadTemplate();
         $this->loadContent();
