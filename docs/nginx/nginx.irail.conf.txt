@@ -21,7 +21,7 @@ server {
 	rewrite ^/noresults$		/noresults.php		last;
 	rewrite ^/settings$		/settings.php		last;
 	rewrite ^/save$			/save.php		last;
-	rewrite ^/about$		/includes/about.php	last;
+	rewrite ^/about$		/about.php		last;
 	rewrite ^/changelog$		/docs/changelog.php	last;
 
 	# API => domain/api
@@ -37,6 +37,11 @@ server {
 		root   /var/www/iRail;
 		index  index.php index.html index.htm index.cgi;
 		fastcgi_index	index.php;
+
+	location ~* \.(jpg|png|gif|jpeg|css|js|mp3|wav|swf|mov|doc|pdf|xls|ppt|docx|pptx|xlsx|exe|dmg|txt|bmp|tar|gz|zip|rar|ico)$ {
+		# setting a 30 days expiry time in the HTTP header
+		expires		   1d;
+	}
 	
 	location /nginx_status {
 		stub_status on;

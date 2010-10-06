@@ -99,7 +99,11 @@ class BRailConnectionInput extends ConnectionInput {
             $unixtime0 = $this->transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
             $nameStation0 = $conn -> Overview -> Departure -> BasicStop -> Station['name'];
             $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
+            preg_match("/(..)(.*)/", $locationX0, $matches);
+            $locationX0 = $matches[1] . "." . $matches[2];
             $locationY0 = $conn -> Overview -> Departure -> BasicStop -> Station['y'];
+            preg_match("/(..)(.*)/", $locationY0, $matches);
+            $locationY0 = $matches[1] . "." . $matches[2];
             $station0 = new Station($nameStation0, $locationX0, $locationY0);
 
             $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
@@ -107,7 +111,11 @@ class BRailConnectionInput extends ConnectionInput {
             $unixtime1 = $this->transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
             $nameStation1 = $conn -> Overview -> Arrival -> BasicStop -> Station['name'];
             $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
+            preg_match("/(..)(.*)/", $locationX1, $matches);
+            $locationX1 = $matches[1] . "." . $matches[2];
             $locationY1 = $conn -> Overview -> Arrival -> BasicStop -> Station['y'];
+            preg_match("/(..)(.*)/", $locationY1, $matches);
+            $locationY1 = $matches[1] . "." . $matches[2];
             $station1 = new Station($nameStation1, $locationX1, $locationY1);
 
             //Delay or other wrongish stuff
