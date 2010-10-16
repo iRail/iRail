@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="utf-8"> <!-- is this normal? -->
+        <meta charset="utf-8">
         <title>{title}</title>
         <link href="templates/iRail/css/mobile.css" rel="stylesheet">
 
-        <!-- What is this line for? Please document -->
         <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
         <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
         <meta name="description" CONTENT="NMBS/SNCB mobile iPhone train route planner.">
