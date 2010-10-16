@@ -72,7 +72,7 @@ try {
     writeLog("Mobile site - " . $_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (iRail.be)", $_SERVER['REMOTE_ADDR']);
 }catch(Exception $e) {
     writeLog("Mobile site - " . $_SERVER['HTTP_USER_AGENT'],"", "", "Error on iRail.be: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
-    header('noresults');
+    header('Location: noresults');
     echo $e->getMessage(); //error handling..
 }
 
