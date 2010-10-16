@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>{title} - {i18n_about}</title>
-        <link href="css/mobile.css" rel="stylesheet">
+        <link href="templates/iRail/css/mobile.css" rel="stylesheet">
         <link rel="apple-touch-icon" href="img/irail.png">
         <link rel="shortcut icon" href="img/favicon.ico">
         <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
@@ -33,7 +33,7 @@
 
                                             <center>
 
-                                                <p id="about">Project iRail (<a href="http://project.irail.be" target="_blank">project.irail.be<a/>) </p>
+                                                <p id="about">Project iRail (<a href="http://project.irail.be" target="_blank">project.irail.be</a>) </p>
 
                                                 <table bgcolor="#FFFFFF" style="color:#000000;">
                                                     <tr><td>

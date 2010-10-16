@@ -13,6 +13,7 @@ class MobileWebOutput extends Page implements Output {
 
     private $page = array(
             "title" => "iRail.be",
+            "strike" => ""
     );
 
     function __construct($c) {
@@ -20,6 +21,9 @@ class MobileWebOutput extends Page implements Output {
 
         $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
         $this->page["footer"] = file_get_contents("includes/footer.php");
+        if(strcmp(date("d/m/Y",$this->connections[0] -> getDepart()->getTime()), "18/10/2010") == 0 || strcmp(date("d/m/Y",$this->connections[0] -> getDepart()->getTime()), "19/10/2010") == 0  ){
+            $this->page["strike"] = '<div id="strike">{i18n_strike}</div><div id="substrike"></div>';
+        }
 
     }
 

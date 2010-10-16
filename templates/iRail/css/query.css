@@ -11,6 +11,18 @@ table {
     text-align: center;
 }
 
+div#strike {
+    background-color: #FF0000;
+    color: #3f4e63;
+    text-align: center;
+}
+
+div#substrike {
+    background-color: #FFCCCC;
+    text-align: center;
+    height: 2px;
+}
+
 th{
     font-size: 12px;
     font-weight: normal;

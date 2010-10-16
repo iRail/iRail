@@ -2,7 +2,6 @@
 
 table.s {
 	border-width: 1px;
-	border-spacing: ;
 	border-style: outset;
 	border-color: white;
 	border-collapse: collapse;
@@ -14,7 +13,6 @@ table.s th {
 	border-style: inset;
 	border-color: gray;
 	background-color: white;
-	-moz-border-radius: ;
 }
 table.s td {
 	border-width: 1px;
@@ -22,5 +20,4 @@ table.s td {
 	border-style: inset;
 	border-color: gray;
 	background-color: white;
-	-moz-border-radius: ;
 }

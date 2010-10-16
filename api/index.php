@@ -13,9 +13,9 @@
       <p>The code of this website is free and open source. It is licensed under the GPL v3 and you can find it at Github: </p>
       <p><a href="http://github.com/Tuinslak/iRail/">Github.com/Tuinslak/iRail</a></p>
       <h1>Authors</h1>
-      <p><a href="http://project.irail.be">Project iRail</a></a>
+      <p><a href="http://project.irail.be">Project iRail</a>
       <p>Copyright &copy; 2008, 2009, 2010 Yeri Tiete ("<a href="http://yeri.be" target="_blank">Tuinslak</a>") - yeri@irail.be,</p>
-      <p>Copyright &copy; 2010 Pieter Colpaert (<a href="http://bonsansnom.wordpress.com" target="_blank">http://bonsansnom.wordpress.com<a/>) - pieter@irail.be,</p>
+      <p>Copyright &copy; 2010 Pieter Colpaert (<a href="http://bonsansnom.wordpress.com" target="_blank">http://bonsansnom.wordpress.com</a>) - pieter@irail.be,</p>
       <p>And <a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors">others</a>.</p>
       <h1>Bugs</h1>
       <p>Nobody is perfect. Writing a webscraper is not the most fault tolerant system you would ever write. Since we think sooner or later NMBS will release an API of their own, we didn't mind writing clean code. So before you dive in, don't mind the mess.</p>
