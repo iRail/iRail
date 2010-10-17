@@ -24,7 +24,7 @@ class MobileWebOutput extends Page implements Output {
 
         $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
         $this->page["footer"] = file_get_contents("includes/footer.php");
-        if(array_search(date("d/m/Y",$this->connections[0] -> getDepart()->getTime()), date("d/m/Y", $this->strikes))) {
+        if(array_search(date("d/m/Y",$this->connections[0] -> getDepart()->getTime()), $this->strikes) !== false) {
         																// what is substrike? empty div?
             $this->page["strike"] = '<div id="strike">{i18n_strike}</div><div id="substrike"></div>';
         }
