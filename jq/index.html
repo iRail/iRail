@@ -1,6 +1,7 @@
 <!DOCTYPE html> 
 <html> 
   <head> 
+    <meta charset="utf-8">
     <title>iRail.be</title> 
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a1/jquery.mobile-1.0a1.min.css" />
     <script src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
@@ -23,72 +24,72 @@
 	<a href="#config" data-icon="gear" class="ui-btn-right">Options</a>
       </div> 
       <div data-role="content">
-	<p>
-	  <form method="post" action="../query_nat.php">
-	    <label for="from">from:</label>
-	    <input name="from" data-type="search" type="text" id="from" AUTOCOMPLETE="OFF" value="">
+	
+	<form method="post" action="../query_nat.php">
+	  <label for="from">from:</label>
+	  <input name="from" data-type="search" type="text" id="from" AUTOCOMPLETE="OFF" value="">
 
-	    <label for="to">to:</label>
-	    <input name="to" data-type="search" type="text" id="to" AUTOCOMPLETE="OFF" value="">
+	  <label for="to">to:</label>
+	  <input name="to" data-type="search" type="text" id="to" AUTOCOMPLETE="OFF" value="">
 
-	    <div data-role="collapsible" data-state="collapsed">
-	      <h3>Set date & time</h3>
-	      <label for="timeselectd">Date:</label>
-	      <div class="ui-grid-b">
-		<div class="ui-block-a">
-		  <select NAME="d" id="timeselectd">
-		    <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-		  </select>
-		</div>
-
-		<div class="ui-block-b">
-		  <select NAME="mo" id="timeselectmo">
-		    <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-		  </select>
-		</div>
-		<div class="ui-block-c">
-		  <select name="y">
-		    <option value="10">2010</option>
-		    <option value="11">2011</option>
-		  </select>
-		</div>
+	  <div data-role="collapsible" data-state="collapsed">
+	    <h3>Set date & time</h3>
+	    <label for="timeselectd">Date:</label>
+	    <div class="ui-grid-b">
+	      <div class="ui-block-a">
+		<select NAME="d" id="timeselectd">
+		  <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+		</select>
 	      </div>
-	      
-	      <label for="timeselecth">time:</label>
-	      <div class="ui-grid-a">
-		<div class="ui-block-a">
-		  <select NAME="h" id="timeselecth">
-		    <option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>                                                
-		  </select>
-		</div>
-		<div class="ui-block-b">
-		  <select NAME="m" id="timeselectm">
-		    <option VALUE="00">00</option>
-		    <option VALUE="10">10</option>
-		    <option VALUE="20">20</option>
-		    <option VALUE="30">30</option>
-		    <option VALUE="40">40</option>
-		    <option VALUE="50">50</option>
-		  </select>
-		</div>
+
+	      <div class="ui-block-b">
+		<select NAME="mo" id="timeselectmo">
+		  <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+		</select>
 	      </div>
-	      <div data-role="fieldcontain">
-		<fieldset data-role="controlgroup" data-type="horizontal">
-		  <input type="radio" name="timesel" value="depart" id="timeseldep" checked="true"><label for="timeseldep">depart</label>
-		  <input type="radio" name="timesel" value="arrive" id="timeselarr"><label for="timeselarr"> arrival</label>
-		</fieldset>
+	      <div class="ui-block-c">
+		<select name="y">
+		  <option value="10">2010</option>
+		  <option value="11">2011</option>
+		</select>
 	      </div>
 	    </div>
-	    <div class="ui-grid-c">
+	    
+	    <label for="timeselecth">time:</label>
+	    <div class="ui-grid-a">
 	      <div class="ui-block-a">
-		<button type="button" id="switch" data-icon="back" onclick="javascript:switch_station()">switch</button>		
+		<select NAME="h" id="timeselecth">
+		  <option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>                                                
+		</select>
 	      </div>
 	      <div class="ui-block-b">
-		<button type="submit" name="submit" value="Search" data-icon="check" data-iconpos="right">search</button>		
+		<select NAME="m" id="timeselectm">
+		  <option VALUE="00">00</option>
+		  <option VALUE="10">10</option>
+		  <option VALUE="20">20</option>
+		  <option VALUE="30">30</option>
+		  <option VALUE="40">40</option>
+		  <option VALUE="50">50</option>
+		</select>
 	      </div>
 	    </div>
-	  </form> 
-	</p>
+	    <div data-role="fieldcontain">
+	      <fieldset data-role="controlgroup" data-type="horizontal">
+		<input type="radio" name="timesel" value="depart" id="timeseldep" checked><label for="timeseldep">depart</label>
+		<input type="radio" name="timesel" value="arrive" id="timeselarr"><label for="timeselarr"> arrival</label>
+	      </fieldset>
+	    </div>
+	  </div>
+	  <div class="ui-grid-c">
+	    <div class="ui-block-a">
+	      <button type="button" id="switch" data-icon="back" onclick="javascript:switch_station()">switch</button>		
+	    </div>
+	    <div class="ui-block-b">
+	      <button type="submit" name="submit" value="Search" data-icon="check" data-iconpos="right">search</button>		
+	    </div>
+	  </div>
+	</form> 
+	
       </div> 
       <div data-role="footer">
 	<a href="#national">national</a>
@@ -102,18 +103,16 @@
 	<a href="#config" data-icon="gear" class="ui-btn-right">Options</a>
       </div> 
       <div data-role="content">
-	<p>
-	  <form name="settings" method="post" action="../save">
-            Choose your language
-            <select name="lang" id="lang">
-              <option value="EN">English</option>
-              <option value="NL">Nederlands</option>
-              <option value="FR">Fran&#231;ais</option>
-              <option value="DE">Deutsch</option>
-            </select>
-	    <input type="submit" name="submit" value="Save!">
-          </form>
-	</p>
+	<form name="settings" method="post" action="../save">
+          Choose your language
+          <select name="lang" id="lang">
+            <option value="EN">English</option>
+            <option value="NL">Nederlands</option>
+            <option value="FR">Fran&#231;ais</option>
+            <option value="DE">Deutsch</option>
+          </select>
+	  <input type="submit" name="submit" value="Save!">
+        </form>
       </div> 
       <div data-role="footer">
 	<a href="#national">national</a>
@@ -128,19 +127,18 @@
 	<a href="#config" data-icon="gear" class="ui-btn-right">Options</a>
       </div> 
       <div data-role="content">
-	<p>
-	<p id="about">Project iRail (<a href="http://project.irail.be" target="_blank">project.irail.be</a>) </p>
+	<p>Project iRail (<a href="http://project.irail.be" target="_blank">project.irail.be</a>)</p>
 	<ul>
-	  <li id="about_s"> API (<a href="http://api.irail.be" target="_blank">api.irail.be</a>) </li>
-	  <li id="about_s"> Created by: </li>
-	  <ul>
-            <li id="about_vs">Yeri Tiete (<a href="http://yeri.be/" target="_blank">Tuinslak</a>),</li>
-            <li id="about_vs"><a href="http://bonsansnom.wordpress.com/" target="_blank">Pieter Colpaert</a>,</li>
-            <li id="about_vs">Christophe Versieux,</li>
-            <li id="about_vs">and <a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors" target="_blank">many others</a>.</li>
-	  </ul>
+	  <li> API (<a href="http://api.irail.be" target="_blank">api.irail.be</a>)</li>
+	  <li> Created by:
+	    <ul>
+              <li>Yeri Tiete (<a href="http://yeri.be/" target="_blank">Tuinslak</a>),</li>
+              <li><a href="http://bonsansnom.wordpress.com/" target="_blank">Pieter Colpaert</a>,</li>
+              <li>Christophe Versieux,</li>
+              <li>and <a href="http://project.irail.be/cgi-bin/trac.fcgi/wiki/Contributors" target="_blank">many others</a>.</li>
+	    </ul>
+	  </li>
 	</ul>
-	</p>
       </div> 
       <div data-role="footer">
 	<a href="#national">national</a>
