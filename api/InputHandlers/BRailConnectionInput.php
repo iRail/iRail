@@ -5,12 +5,12 @@
  * @author pieterc
  */
 ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
-include("ConnectionInput.php");
-include("Connection.php");
-include("Station.php");
-include("TripNode.php");
-include("Via.php");
-include("BTrain.php");
+include_once("ConnectionInput.php");
+include_once("Connection.php");
+include_once("Station.php");
+include_once("TripNode.php");
+include_once("Via.php");
+include_once("BTrain.php");
 
 class BRailConnectionInput extends ConnectionInput {
 

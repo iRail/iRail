@@ -6,7 +6,7 @@
  *
  * @author pieterc
  */
-include("Output.php");
+include_once("Output.php");
 class OldAPIOutput implements Output {
 
     private $connections;

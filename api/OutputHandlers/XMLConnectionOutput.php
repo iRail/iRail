@@ -6,7 +6,7 @@
  * @author pieterc
  */
 
-include("Output.php");
+include_once("Output.php");
 class XMLConnectionOutput implements Output {
     private $connections;
 
@@ -16,6 +16,12 @@ class XMLConnectionOutput implements Output {
 
     public function printAll() {
         date_default_timezone_set("UTC");
+        header('Content-Type: text/xml');
+        $xml = $this-> buildXML($this->connections);
+        echo $xml -> saveXML();
+    }
+    
+    public static function buildXML($connectionsarray){
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml -> createElement("connections");
         $rootNode -> setAttribute("version", "1.0");
@@ -23,7 +29,7 @@ class XMLConnectionOutput implements Output {
 
         $xml -> appendChild($rootNode);
         $conId = 0;
-        foreach($this -> connections as $c) {
+        foreach($connectionsarray as $c) {
             /* @var $c Connection */
             $connection = $xml -> createElement("connection");
             $connection -> setAttribute("id", $conId);
@@ -121,7 +127,7 @@ class XMLConnectionOutput implements Output {
             $rootNode -> appendChild($connection);
             $conId ++;
         }
-        echo $xml -> saveXML();
+        return $xml;
     }
 }
 ?>

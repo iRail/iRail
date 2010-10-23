@@ -5,8 +5,8 @@
  * @author pieterc
  */
 
-include("Output.php");
-include("Page.php");
+include_once("Output.php");
+include_once("Page.php");
 
 class MobileWebOutput extends Page implements Output {
     private $connections;

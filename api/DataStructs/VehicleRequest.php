@@ -4,8 +4,8 @@
  *
  * @author pieterc
  */
-include("Vehicle.php");
-include("Request.php");
+include_once("Vehicle.php");
+include_once("Request.php");
 class VehicleRequest implements Request {
     private $lang;
     private $vehicleId;

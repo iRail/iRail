@@ -4,7 +4,7 @@
  *
  * @author pieterc
  */
-include("Input.php");
+include_once("Input.php");
 abstract class ConnectionInput extends Input {
 
 

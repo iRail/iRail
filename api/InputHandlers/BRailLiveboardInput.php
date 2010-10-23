@@ -5,7 +5,7 @@
  * @author pieterc
  */
 ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
-
+include_once("LiveboardInput.php");
 class BRailLiveboardInput extends LiveboardInput{
     private $scrapeUrl = "http://www.railtime.be/mobile/SearchStation.aspx";
     public function __construct() {

@@ -26,13 +26,12 @@
  * This is the API request handler
  */
 
-header('Content-Type: text/xml');
+include_once("DataStructs/ConnectionRequest.php");
+include_once("InputHandlers/BRailConnectionInput.php");
+include_once("OutputHandlers/XMLConnectionOutput.php");
+include_once("OutputHandlers/JSONConnectionOutput.php");
 
-include("DataStructs/ConnectionRequest.php");
-include("InputHandlers/BRailConnectionInput.php");
-include("OutputHandlers/XMLConnectionOutput.php");
-
-include("../includes/apiLog.php");
+include_once("../includes/apiLog.php");
 
 
 $date = "";
@@ -41,6 +40,7 @@ $results = "";
 $lang = "";
 $timeSel = "";
 $typeOfTransport = "";
+$format = "xml";
 
 //required vars, output error messages if empty
 extract($_GET);
@@ -84,7 +84,14 @@ try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
     $input0 = new BRailConnectionInput();
     $connections = $input0 -> execute($request);
-    $output = new XMLConnectionOutput($connections);
+    $output = null;
+    if(strtolower($format) == "xml"){
+        $output = new XMLConnectionOutput($connections);
+    }else if(strtolower($format) == "json"){
+        $output = new JSONConnectionOutput($connections);
+    }else{
+        throw new Exception("incorrect output type specified");
+    }
     $output -> printAll();
     // Log request to database
     writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (connections.php)", $_SERVER['REMOTE_ADDR']);
