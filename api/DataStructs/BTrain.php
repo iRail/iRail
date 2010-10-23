@@ -6,7 +6,7 @@
  * @author pieterc
  */
 
-include("Vehicle.php");
+include_once("Vehicle.php");
 class BTrain extends Vehicle {
     private $internalId;
     private $x;

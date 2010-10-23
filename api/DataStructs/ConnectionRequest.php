@@ -6,7 +6,7 @@
  * @author pieterc
  */
 
-include("Request.php");
+include_once("Request.php");
 class ConnectionRequest implements Request {
     private $results;
     private $from;
