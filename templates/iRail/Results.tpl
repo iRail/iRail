@@ -14,6 +14,8 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 </script>
 </head>
 <body>
+              <div data-role="content">
+
 {strike}
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
@@ -37,15 +39,16 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 </tr>
 {connections}
 
+
 <tr>
 <td colspan="8">
 <center>
-<form name="return" method="post" action="national">
-<input type="submit" name="submit" value="{i18n_back}">
+<input type="button" name="submit" value="{i18n_back}" onclick="javascript:history.go(-1);">
 </center>
 <br />
 </td>
 </tr>
 </table>
+</div>
 </body>
 </html>
