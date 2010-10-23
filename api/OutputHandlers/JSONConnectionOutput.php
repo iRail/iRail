@@ -6,9 +6,8 @@
  * @author pieterc
  */
 
-include_once("Output.php");
-include_once("XMLConnectionOutput.php");
-class JSONConnectionOutput implements Output {
+include_once("ConnectionOutput.php");
+class JSONConnectionOutput extends ConnectionOutput {
     private $connections;
 
     function __construct($c) {
@@ -17,8 +16,9 @@ class JSONConnectionOutput implements Output {
 
     public function printAll() {
         date_default_timezone_set("UTC");
-        //header("Content-Type: application/json");
-        $xml = XMLConnectionOutput::buildXML($this->connections);
+        header("Content-Type: application/json");
+        $xml = parent::buildXML($this->connections);
+        //yes this may cause some overhead, but it's the easiest way to implement this for now.
         echo json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
     }
 }

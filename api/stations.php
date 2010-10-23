@@ -22,20 +22,43 @@
 
 	source available at http://github.com/Tuinslak/iRail
  */
-//this is the entire array of stations in Belgium
-//set content type in the header to XML
-header('Content-Type: application/xml');
-include "../includes/stationlist.php";
-include "../includes/coordinates.php";
-//make the damn document ;-)
 
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-echo "<stations timestamp=\"". get_timestamp() ."\">";
-foreach ($stations as $i => $value) {
-    echo "<station location=\"". $coordinates[$value] ."\">";
-    echo $value;
-    echo "</station>";
+/**
+ * This is the API request handler
+ */
+
+include_once("DataStructs/StationsRequest.php");
+include_once("InputHandlers/BRailStationsInput.php");
+include_once("OutputHandlers/XMLStationsOutput.php");
+include_once("OutputHandlers/JSONStationsOutput.php");
+
+include_once("../includes/apiLog.php");
+
+$lang = "EN";
+$format = "xml";
+
+//required vars, output error messages if empty
+extract($_GET);
+
+try {
+    $request = new StationsRequest($lang);
+    $input = new BRailStationsInput();
+    $stations = $input -> execute($request);
+    $output = null;
+    if(strtolower($format) == "xml"){
+        $output = new XMLStationsOutput($stations);
+    }else if(strtolower($format) == "json"){
+        $output = new JSONStationsOutput($stations);
+    }else{
+        throw new Exception("incorrect output type specified");
+    }
+    $output -> printAll();
+    // Log request to database
+    writeLog($_SERVER['HTTP_USER_AGENT'], "","", "none (stations.php)", $_SERVER['REMOTE_ADDR']);
+}catch(Exception $e) {
+    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in stations.php: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
+    echo "<error>" . $e->getMessage() . "</error>"; //error handling..
 }
-echo "</stations>";
+
 
 ?>
