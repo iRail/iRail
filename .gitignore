@@ -2,4 +2,4 @@ includes/dbConfig.php
 nbproject/
 api/stats/.htpasswd
 googlea35442edef93c3d8.html
-docs/push.php
+push.php
