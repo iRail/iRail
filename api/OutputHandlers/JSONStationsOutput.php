@@ -21,7 +21,6 @@ class JSONStationsOutput extends StationsOutput {
         //this function builds a DOM XML-tree
         $xml = parent::buildXML($this->stations);
         echo json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
-        ;
     }
 
 }
