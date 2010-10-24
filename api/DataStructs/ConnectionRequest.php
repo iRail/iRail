@@ -31,7 +31,7 @@ class ConnectionRequest implements Request {
         $this->lang = $lang;
         $this->typeOfTransport = $typeOfTransport;
         $expl = explode(".", $_SERVER["SERVER_NAME"]);
-        $this -> country = $expl[1];
+        $this -> country = $expl[sizeof($expl)-1];
     }
 
     public function getResults() {
