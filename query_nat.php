@@ -63,7 +63,12 @@ $typeOfTransport = "all";
 
 try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timesel, $results, $lang, $typeOfTransport);
-    $input = new BRailConnectionInput();
+    $input = null;
+    if($request ->getCountry() == "nl"){
+        $input = new NSConnectionInput();
+    }else if($request->getCountry()=="be"){
+        $input = new BRailConnectionInput();
+    }
     $connections = $input -> execute($request);
     $output = new MobileWebOutput($connections);
     $output -> printAll();
