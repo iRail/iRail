@@ -6,6 +6,6 @@
  * @author pieterc
  */
 interface Request {
-    
+
 }
 ?>

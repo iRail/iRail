@@ -28,6 +28,7 @@
 
 include_once("DataStructs/ConnectionRequest.php");
 include_once("InputHandlers/BRailConnectionInput.php");
+include_once("InputHandlers/NSConnectionInput.php");
 include_once("OutputHandlers/XMLConnectionOutput.php");
 include_once("OutputHandlers/JSONConnectionOutput.php");
 
@@ -82,8 +83,16 @@ if($typeOfTransport == "") {
 try {
     if(!(isset($from)) || !(isset($to))) throw new Exception("You didn't use this right. You should specify where to and where from you are traveling.");
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
-    $input0 = new BRailConnectionInput();
-    $connections = $input0 -> execute($request);
+    $input = null;
+    if($request -> getCountry() == "nl"){
+        $input = new NSConnectionInput();
+    }else if($request -> getCountry() == "be"){
+        $input = new BRailConnectionInput();
+    }else{
+        //for now?
+        $input = new BRailConnectionInput();
+    }
+    $connections = $input -> execute($request);
     $output = null;
     if(strtolower($format) == "xml"){
         $output = new XMLConnectionOutput($connections);

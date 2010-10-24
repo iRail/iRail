@@ -16,6 +16,7 @@ class ConnectionRequest implements Request {
     private $timeSel;
     private $lang;
     private $typeOfTransport;
+    private $country;
 
     function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $typeOfTransport = "all"){
         if($from == "" || $to == ""){
@@ -29,6 +30,8 @@ class ConnectionRequest implements Request {
         $this->timeSel = $timeSel;
         $this->lang = $lang;
         $this->typeOfTransport = $typeOfTransport;
+        $expl = explode(".", $_SERVER["SERVER_NAME"]);
+        $this -> country = $expl[1];
     }
 
     public function getResults() {
@@ -50,8 +53,12 @@ class ConnectionRequest implements Request {
     public function getDate() {
         return $this->date;
     }
+    
+    public function getCountry() {
+        return $this->country;
+    }
 
-    public function getTimeSel() {
+        public function getTimeSel() {
         return $this->timeSel;
     }
 
