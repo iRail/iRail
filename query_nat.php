@@ -26,6 +26,7 @@
 
 include("api/DataStructs/ConnectionRequest.php");
 include("api/InputHandlers/BRailConnectionInput.php");
+include("api/InputHandlers/NSConnectionInput.php");
 include("api/OutputHandlers/MobileWebOutput.php");
 
 include("includes/apiLog.php");
