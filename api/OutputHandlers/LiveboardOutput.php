@@ -39,6 +39,12 @@ abstract class LiveboardOutput implements Output {
             $station->setAttribute("locationY", $node->getStation()->getY());
             $station->setAttribute("locationX", $node->getStation()->getX());
             $platform = $xml -> createElement("platform",$node -> getPlatform());
+
+            $vehicle = $xml -> createElement("vehicle", $node -> getVehicle());
+            $time = $xml -> createElement("time", $node -> getTime());
+
+            $nodeEl->appendChild($time);
+            $nodeEl->appendChild($vehicle);
             $nodeEl->appendChild($platform);
             $nodeEl->appendChild($station);
 

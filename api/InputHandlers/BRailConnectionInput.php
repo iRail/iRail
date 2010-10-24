@@ -97,7 +97,7 @@ class BRailConnectionInput extends ConnectionInput {
 
                 $platform0 = $conn -> Overview ->Departure -> BasicStop -> Dep -> Platform -> Text;
 
-                $unixtime0 = $this->transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
+                $unixtime0 = Input::transformTime($conn -> Overview -> Departure -> BasicStop -> Dep -> Time ,$conn -> Overview -> Date);
                 $nameStation0 = $conn -> Overview -> Departure -> BasicStop -> Station['name'];
                 $locationX0 = $conn -> Overview -> Departure -> BasicStop -> Station['x'];
                 preg_match("/(.)(.*)/", $locationX0, $matches);
@@ -109,7 +109,7 @@ class BRailConnectionInput extends ConnectionInput {
 
                 $platform1 = $conn -> Overview ->Arrival   -> BasicStop -> Arr -> Platform -> Text;
 
-                $unixtime1 = $this->transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                $unixtime1 = Input::transformTime($conn -> Overview -> Arrival ->BasicStop -> Arr -> Time, $conn -> Overview -> Date);
                 $nameStation1 = $conn -> Overview -> Arrival -> BasicStop -> Station['name'];
                 $locationX1 = $conn -> Overview -> Arrival -> BasicStop -> Station['x'];
                 preg_match("/(.)(.*)/", $locationX1, $matches);
@@ -126,12 +126,12 @@ class BRailConnectionInput extends ConnectionInput {
                 $platformNormal1 = true;
                 if($conn -> RtStateList -> RtState["value"] == "HAS_DELAYINFO") {
 
-                    $delay0= $this->transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
+                    $delay0= Input::transformTime($conn -> Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time, $conn -> Overview -> Date) - $unixtime0;
                     if($delay0 < 0) {
                         $delay0 = 0;
                     }
                     //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
-                    $delay1= $this->transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
+                    $delay1= Input::transformTime($conn -> Overview -> Arrival -> BasicStop -> StopPrognosis -> Arr -> Time, $conn -> Overview -> Date) - $unixtime1;
                     if($delay1 < 0) {
                         $delay1 = 0;
                     }
@@ -166,9 +166,9 @@ class BRailConnectionInput extends ConnectionInput {
                                 //current index for the train: j-1
                                 $departDelay = 0; //Todo: NYImplemented
                                 $connarray = $conn -> ConSectionList -> ConSection;
-                                $departTime = $this->transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
+                                $departTime = Input::transformTime($connarray[$connectionindex+1] -> Departure -> BasicStop -> Dep -> Time, $conn -> Overview -> Date);
                                 $departPlatform = $connarray[$connectionindex+1]  -> Departure -> BasicStop -> Dep -> Platform -> Text;
-                                $arrivalTime = $this->transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
+                                $arrivalTime = Input::transformTime($connsection -> Arrival -> BasicStop -> Arr -> Time, $conn -> Overview -> Date);
                                 $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
                                 $arrivalDelay = 0; //Todo: NYImplemented
                                 $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
@@ -189,7 +189,7 @@ class BRailConnectionInput extends ConnectionInput {
 
 
 
-                $duration = $this -> transformDuration($conn -> Overview -> Duration -> Time);
+                $duration = Input::transformDuration($conn -> Overview -> Duration -> Time);
 
                 $connections[$i] = $i;
                 $connections[$i] = new Connection($depart, $arrival, $vias, $duration);
@@ -200,38 +200,6 @@ class BRailConnectionInput extends ConnectionInput {
         }
 
         return $connections;
-    }
-
-    /**
-     *
-     * @param <type> $time -> in 00d15:24:00
-     * @param <type> $date -> in 20100915
-     * @return seconds since the Unix epoch
-     *
-     */
-    private function transformTime($time, $date) {
-        //I solved it with substrings. DateTime class is such a Pain In The Ass.
-        date_default_timezone_set("Europe/Brussels");
-        $dayoffset = intval(substr($time,0,2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6,2));
-        $second = intval(substr($time, 9,2));
-        $year = intval(substr($date, 0,4));
-        $month = intval(substr($date, 4,2));
-        $day = intval(substr($date,6,2));
-        return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
-    }
-    /**
-     * This function transforms the brail formatted timestring and reformats it to seconds
-     * @param int $time
-     * @return int Duration in seconds
-     */
-    private function transformDuration($time) {
-        $days = intval(substr($time, 0,2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6,2));
-        $second = intval(substr($time, 9,2));
-        return $days*24*3600 + $hour*3600 + $minute * 60 + $second;
     }
 
 }
