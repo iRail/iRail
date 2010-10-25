@@ -6,7 +6,7 @@
  * @author pieterc
  */
 include_once("Request.php");
-class LiveboardRequest implements Request{
+class LiveboardRequest extends Request{
     private $station;
     private $date;
     private $time;

@@ -6,7 +6,7 @@
  */
 include_once("Vehicle.php");
 include_once("Request.php");
-class VehicleRequest implements Request {
+class VehicleRequest extends Request {
     private $lang;
     private $vehicleId;
     function __construct($vehicleId, $lang = "EN") {
