@@ -183,7 +183,12 @@ class BRailConnectionInput extends ConnectionInput {
                 }
                 $vehicle0 = new BTrain($trains[0]);
                 $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
-
+                if($platform0 == ""){
+                    $platform0= "NA";
+                }
+                if($platform1 == ""){
+                    $platform1= "NA";
+                }
                 $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
                 $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 

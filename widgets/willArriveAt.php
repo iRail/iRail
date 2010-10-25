@@ -3,72 +3,98 @@
     Copyright 2010 Pieter Colpaert (pieter@irail.be - http://bonsansnom.wordpress.com)
 
     This file is part of iRail.
-
-    iRail is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    iRail is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with iRail.  If not, see <http://www.gnu.org/licenses/>.
-
-    http://project.irail.be - http://irail.be
-
-    Source available at http://github.com/Tuinslak/iRail
+ *
+ * This is an example widget. You can reuse the code to make your own widgets.
 */
 
 // National query page
 
+chdir("../");
 include("api/DataStructs/ConnectionRequest.php");
 include("api/InputHandlers/BRailConnectionInput.php");
-include("api/OutputHandlers/MobileWebOutput.php");
+include("api/InputHandlers/NSConnectionInput.php");
+
 
 include("includes/apiLog.php");
 
+include("api/OutputHandlers/ConnectionOutput.php");
+class WidgetOutput extends ConnectionOutput{
+    private $connection;
+    private $name;
+    public function __construct($connection, $name = "") {
+        $this -> connection = $connection;
+        $this -> name = $name;
+    }
+
+    public function printAll() {
+        echo $this->name ." will arrive at " . $this-> connection -> getArrival() -> getStation() -> getName() . " in " . $this->calculateMinutes() . "minutes";
+    }
+
+    private function calculateMinutes(){
+        //date_default_timezone_set("Europe/Brussels");
+        //echo date("ymd - H:i",$this -> connection -> getArrival() -> getTime() + $this-> connection -> getDepart() -> getDelay());
+        return floor(($this -> connection -> getArrival() -> getTime() + $this-> connection -> getDepart() -> getDelay() - date("U"))/60);
+    }
+
+}
 
 $lang = "";
 $timesel = "";
+$name = "";
+$language = "EN";
+$date = "";
+$time="";
 extract($_COOKIE);
-extract($_POST);
-$lang = $_COOKIE["language"];
+extract($_GET);
+$lang = $language;
 // if bad stations, go back
-if(!isset($_POST["from"]) || !isset($_POST["to"]) || $from == $to) {
+if(!isset($_GET["from"]) || !isset($_GET["to"]) || $from == $to) {
 	header('Location: ..');
 }
-
-// create time vars
-$time = $h . ":". $m;
-$date =  "20".$y. $mo .$d;
-
-if(!isset($lang)) {
-	$lang = "EN";
-}
-
 if(!isset($_POST["timesel"])){
     $timesel = "depart";
 }
+$results = 1;
+$typeOfTransport = "train";
+if($date == "") {
+    $date = date("dmy");
+}
 
-$results = 6;
+//TODO: move this to constructor of ConnectionRequest
 
-$typeOfTransport = "all";
+//reform date to needed train structure
+preg_match("/(..)(..)(..)/si",$date, $m);
+$date = "20" . $m[3] . $m[2] . $m[1];
+
+if($time == "") {
+    $time = date("Hi");
+}
+
+//reform time to wanted structure
+preg_match("/(..)(..)/si",$time, $m);
+$time = $m[1] . ":" . $m[2];
+
 
 try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timesel, $results, $lang, $typeOfTransport);
     $input = new BRailConnectionInput();
+     if($request -> getCountry() == "nl"){
+        $input = new NSConnectionInput();
+    }else if($request -> getCountry() == "be"){
+        $input = new BRailConnectionInput();
+    }else{
+        //for now?
+        $input = new BRailConnectionInput();
+    }
     $connections = $input -> execute($request);
-    $output = new MobileWebOutput($connections);
+    $output = new WidgetOutput($connections[0], $name);
     $output -> printAll();
 
     // Log request to database
     writeLog("willArriveAtWidget - " . $_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (iRail.be)", $_SERVER['REMOTE_ADDR']);
 }catch(Exception $e) {
     writeLog("willArriveAtWidget - " . $_SERVER['HTTP_USER_AGENT'],"", "", "Error on willArriveAtWidget: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
-    header('Location: noresults');
+    //header('Location: ../noresults');
     echo $e->getMessage(); //error handling..
 }
 

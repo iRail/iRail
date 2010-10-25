@@ -29,6 +29,8 @@
 
 include_once("DataStructs/StationsRequest.php");
 include_once("InputHandlers/BRailStationsInput.php");
+include_once("InputHandlers/NSStationsInput.php");
+
 include_once("OutputHandlers/XMLStationsOutput.php");
 include_once("OutputHandlers/JSONStationsOutput.php");
 
@@ -42,7 +44,14 @@ extract($_GET);
 
 try {
     $request = new StationsRequest($lang);
-    $input = new BRailStationsInput();
+    if($request -> getCountry() == "nl"){
+        $input = new NSStationsInput();
+    }else if($request -> getCountry() == "be"){
+        $input = new BRailStationsInput();
+    }else{
+        //for now?
+        $input = new BRailStationsInput();
+    }
     $stations = $input -> execute($request);
     $output = null;
     if(strtolower($format) == "xml"){
