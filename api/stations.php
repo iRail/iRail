@@ -44,14 +44,7 @@ extract($_GET);
 
 try {
     $request = new StationsRequest($lang);
-    if($request -> getCountry() == "nl"){
-        $input = new NSStationsInput();
-    }else if($request -> getCountry() == "be"){
-        $input = new BRailStationsInput();
-    }else{
-        //for now?
-        $input = new BRailStationsInput();
-    }
+    $input = $request ->getInput();
     $stations = $input -> execute($request);
     $output = null;
     if(strtolower($format) == "xml"){
