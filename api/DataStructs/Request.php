@@ -6,13 +6,20 @@
  * @author pieterc
  */
 abstract class Request {
-    protected $country;
-    
-    public function getCountry() {
+
+    /**
+     *
+     * @return countrycode
+     */
+    protected function getCountry() {
         $expl = explode(".", $_SERVER["SERVER_NAME"]);
-        $this -> country = $expl[sizeof($expl)-1];
-        return $this->country;
+        return $expl[sizeof($expl)-1];
     }
+
+    /**
+     * This function serves as a factory method design pattern.
+     */
+    public abstract function getInput();
 
 
 }

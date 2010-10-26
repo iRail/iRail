@@ -64,14 +64,9 @@ $typeOfTransport = "all";
 
 try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timesel, $results, $lang, $typeOfTransport);
-    $input = null;
-    if($request ->getCountry() == "nl"){
-        $input = new NSConnectionInput();
-    }else if($request->getCountry()=="be"){
-        $input = new BRailConnectionInput();
-    }
+    $input = $request -> getInput();
     $connections = $input -> execute($request);
-    $output = new MobileWebOutput($connections);
+    $output = new MobileWebOutput($connections); //this is also an instance of Page
     $output -> printAll();
 
     // Log request to database

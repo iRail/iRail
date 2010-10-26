@@ -4,7 +4,6 @@
  *
  * @author pieterc
  */
-ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
 include_once("StationsInput.php");
 include_once("DataStructs/Station.php");
 class BRailStationsInput extends StationsInput{

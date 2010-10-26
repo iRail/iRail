@@ -4,7 +4,6 @@
  *
  * @author pieterc
  */
-ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
 include_once("ConnectionInput.php");
 include_once("Connection.php");
 include_once("Station.php");

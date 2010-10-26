@@ -5,7 +5,6 @@
  *
  * @author pieterc
  */
-ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
 include_once("LiveboardInput.php");
 include_once("DataStructs/Station.php");
 include_once("DataStructs/TripNode.php");

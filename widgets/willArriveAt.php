@@ -10,10 +10,8 @@
 // National query page
 
 chdir("../");
-include("api/DataStructs/ConnectionRequest.php");
-include("api/InputHandlers/BRailConnectionInput.php");
-include("api/InputHandlers/NSConnectionInput.php");
 
+include_once("api/DataStructs/ConnectionRequest.php");
 
 include("includes/apiLog.php");
 
@@ -77,15 +75,7 @@ $time = $m[1] . ":" . $m[2];
 
 try {
     $request = new ConnectionRequest($from, $to, $time, $date, $timesel, $results, $lang, $typeOfTransport);
-    $input = new BRailConnectionInput();
-     if($request -> getCountry() == "nl"){
-        $input = new NSConnectionInput();
-    }else if($request -> getCountry() == "be"){
-        $input = new BRailConnectionInput();
-    }else{
-        //for now?
-        $input = new BRailConnectionInput();
-    }
+    $input = $request ->getInput();
     $connections = $input -> execute($request);
     $output = new WidgetOutput($connections[0], $name);
     $output -> printAll();

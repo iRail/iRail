@@ -83,15 +83,7 @@ if($typeOfTransport == "") {
 try {
     if(!(isset($from)) || !(isset($to))) throw new Exception("You didn't use this right. You should specify where to and where from you are traveling.");
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
-    $input = null;
-    if($request -> getCountry() == "nl"){
-        $input = new NSConnectionInput();
-    }else if($request -> getCountry() == "be"){
-        $input = new BRailConnectionInput();
-    }else{
-        //for now?
-        $input = new BRailConnectionInput();
-    }
+    $input = $request -> getInput();
     $connections = $input -> execute($request);
     $output = null;
     if(strtolower($format) == "xml"){

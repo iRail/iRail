@@ -4,9 +4,6 @@
  *
  * @author pieterc
  */
-ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
-include_once("StationsInput.php");
-include_once("DataStructs/Station.php");
 include_once("BRailStationsInput.php");
 class NSStationsInput extends BRailStationsInput{
 

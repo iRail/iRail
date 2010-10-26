@@ -5,7 +5,10 @@
  *
  * @author pieterc
  */
+ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes");
 include_once("Request.php");
+include_once("InputHandlers/BRailLiveboardInput.php");
+include_once("InputHandlers/NSLiveboardInput.php");
 class LiveboardRequest extends Request{
     private $station;
     private $date;
@@ -19,6 +22,21 @@ class LiveboardRequest extends Request{
         $this->time = $time;
         $this->arrdep = $arrdep;
         $this->lang = $lang;
+    }
+
+        /**
+     * This function serves as a factory method
+     * It provides something with an input
+     * @return Input
+     */
+    public function getInput(){
+        if(parent::getCountry() == "nl"){
+            return new NSLiveboardInput();
+        }else if(parent::getCountry()=="be"){
+            return new BRailLiveBoardInput();
+        }else{
+            return new NSLiveboardInput();
+        }
     }
 
     public function getStation() {

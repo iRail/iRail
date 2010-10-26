@@ -5,8 +5,11 @@
  *
  * @author pieterc
  */
-
+ini_set("include_path", ".:../:api/DataStructs:DataStructs:api/:../includes:includes");
 include_once("Request.php");
+include_once("InputHandlers/BRailConnectionInput.php");
+include_once("InputHandlers/NSConnectionInput.php");
+
 class ConnectionRequest extends Request {
     private $results;
     private $from;
@@ -17,6 +20,7 @@ class ConnectionRequest extends Request {
     private $lang;
     private $typeOfTransport;
     function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $typeOfTransport = "all"){
+        
         if($from == "" || $to == ""){
             throw new Exception("No stations specified");
         }//TODO: check on input
@@ -28,6 +32,21 @@ class ConnectionRequest extends Request {
         $this->timeSel = $timeSel;
         $this->lang = $lang;
         $this->typeOfTransport = $typeOfTransport;
+    }
+
+    /**
+     * This function serves as a factory method
+     * It provides something with an input
+     * @return Input
+     */
+    public function getInput(){
+        if(parent::getCountry() == "nl"){
+            return new NSConnectionInput();
+        }else if(parent::getCountry()=="be"){
+            return new BRailConnectionInput();
+        }else{
+            return new NSConnectionInput();
+        }
     }
 
     public function getResults() {
