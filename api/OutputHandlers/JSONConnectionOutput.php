@@ -19,7 +19,7 @@ class JSONConnectionOutput extends ConnectionOutput {
         header("Content-Type: application/json");
         $xml = parent::buildXML($this->connections);
         //yes this may cause some overhead, but it's the easiest way to implement this for now.
-        $jsonstring = json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA), JSON_FORCE_OBJECT);
+        $jsonstring = json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
 
         echo $jsonstring;
     }
