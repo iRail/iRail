@@ -26,11 +26,11 @@
 //set content type in the header to XML
 header('Content-Type: application/xml');
 
-include("DataStructs/ConnectionRequest.php");
-include("InputHandlers/BRailConnectionInput.php");
-include("OutputHandlers/OldAPIOutput.php");
+include_once("DataStructs/ConnectionRequest.php");
+include_once("InputHandlers/BRailConnectionInput.php");
+include_once("OutputHandlers/OldAPIOutput.php");
 
-include("../includes/apiLog.php");
+include_once("../includes/apiLog.php");
 
 
 $date = "";
