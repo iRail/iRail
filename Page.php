@@ -42,7 +42,17 @@ abstract class Page {
     }
     protected abstract function loadContent();
     private function loadI18n() {
-        include_once("i18n/".$this->lang. ".php");
+        if($this->lang == "EN"){
+            include_once("i18n/EN.php");
+        }else if($this-> lang == "NL"){
+            include_once("i18n/NL.php");
+        }else if($this-> lang == "FR"){
+            include_once("i18n/FR.php");
+        }else if($this-> lang == "DE"){
+            include_once("i18n/DE.php");
+        }
+
+        
         foreach($i18n as $tag => $value) {
             $this -> content = str_ireplace("{i18n_".$tag."}", $value, $this->content);
         }
