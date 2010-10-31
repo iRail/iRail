@@ -28,24 +28,13 @@
 
 include("Page.php");
 
-class AboutPage extends Page {
-
-    private $page = array(
-        "title" => "iRail.be",
-        "subtitle" => "project iRail.be"
-        );
+class AboutPage extends Page { 
 
     function __construct() {
-
-        $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
-        $this->page["footer"] = file_get_contents("includes/footer.php");
-
-    }
-
-    protected function loadContent(){
-        foreach($this ->page as $tag => $value){
-            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
-        }
+        $this->page = array(
+            "title" => "iRail.be",
+            "subtitle" => "project iRail.be"
+        );
     }
 
 }

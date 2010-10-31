@@ -27,25 +27,16 @@ include("Page.php");
 
 class Settings extends Page {
 
-    private $page = array(
-        "title" => "iRail.be",
-        );
-
     function __construct() {
-        $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
-        $this->page["footer"] = file_get_contents("includes/footer.php");
+        $this->page = array(
+            "title" => "iRail.be",
+        );
         if(isset($_COOKIE["language"])){
             $this->page["lang"] = $_COOKIE["language"];
         }else{
             $this->page["lang"] = "EN";
         }
 
-    }
-
-    protected function loadContent(){
-        foreach($this ->page as $tag => $value){
-            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
-        }
     }
 
 }

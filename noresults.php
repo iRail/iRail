@@ -21,36 +21,16 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 
-$lang = $_COOKIE["language"];
-
-
 include("Page.php");
 
 class NoResults extends Page {
-
-    private $page = array(
-        "title" => "iRail.be",
-        "subtitle" => "{i18n_error}",
-        "msg" => "{i18n_errormessage}"
-        );
-
     function __construct() {
-        $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
-        $this->page["footer"] = file_get_contents("includes/footer.php");
-        if(isset($_COOKIE["language"])){
-            $this->page["lang"] = $_COOKIE["language"];
-        }else{
-            $this->page["lang"] = "EN";
-        }
-
+        $this->page = array(
+            "title" => "iRail.be",
+            "subtitle" => "{i18n_error}",
+            "msg" => "{i18n_errormessage}"
+        );
     }
-
-    protected function loadContent(){
-        foreach($this ->page as $tag => $value){
-            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
-        }
-    }
-
 }
 
 //__MAIN__

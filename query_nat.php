@@ -24,12 +24,10 @@
 
 // National query page
 
-include("api/DataStructs/ConnectionRequest.php");
-include("api/InputHandlers/BRailConnectionInput.php");
-include("api/InputHandlers/NSConnectionInput.php");
-include("api/OutputHandlers/MobileWebOutput.php");
+include_once("api/DataStructs/ConnectionRequest.php");
+include_once("api/OutputHandlers/MobileWebOutput.php");
 
-include("includes/apiLog.php");
+include_once("includes/apiLog.php");
 
 
 $lang = "";

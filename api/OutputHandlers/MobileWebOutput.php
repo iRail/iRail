@@ -10,16 +10,14 @@ include_once("Page.php");
 
 class MobileWebOutput extends Page implements Output {
     private $connections;
-
-    private $page = array(
-            "title" => "iRail.be",
-            "strike" => ""
-    );
-
     //Todo: this should be moved into the connections datastruct
     private $strikes = array("18/10/2010", "19/10/2010");
 
     function __construct($c) {
+        $this->page = array(
+            "title" => "iRail.be",
+            "strike" => ""
+        );
         $this -> connections = $c;
 
         $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
@@ -31,20 +29,14 @@ class MobileWebOutput extends Page implements Output {
 
     }
 
-    protected function loadContent() {
-        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName();
-        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName();
-        $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
-        $this->page["connections"] = $this->getConnectionsOutput();
-        foreach($this ->page as $tag => $value) {
-            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
-        }
-    }
-
     public function printAll() {
         if(sizeof($this->connections) == 0){
             header('Location: noresults');
         }
+        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName();
+        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName();
+        $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
+        $this->page["connections"] = $this->getConnectionsOutput();
         $this-> buildPage("Results.tpl");
     }
 

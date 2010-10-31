@@ -30,12 +30,10 @@ include("Page.php");
 
 class NationalForm extends Page {
 
-    private $page = array(
-        "title" => "iRail.be"
-        );
-
     function __construct() {
-
+        $this-> page = array(
+            "title" => "iRail.be"
+        );
         //TODO: generate this in another way according to language...
         include("includes/stationlist.php");
         $this->page["stationarray"] = generate_js_array_2($stations);
@@ -51,15 +49,6 @@ class NationalForm extends Page {
         else
             $this->page["autoto"] = "";
 
-        $this->page["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
-        $this->page["footer"] = file_get_contents("includes/footer.php");
-
-    }
-
-    protected function loadContent(){
-        foreach($this ->page as $tag => $value){
-            $this -> content = str_ireplace("{".$tag."}", $value, $this->content);
-        }
     }
 
 }
