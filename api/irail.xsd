@@ -192,8 +192,8 @@
                 <attribute name="delay">
                     <simpleType>
                         <restriction base="string">
-                            <enumartion value="yes" />
-                            <enumartion value="no" />
+                            <enumeration value="yes" />
+                            <enumeration value="no" />
                         </restriction>
                     </simpleType>
                 </attribute>
