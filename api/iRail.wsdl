@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 
-<description targetNamespace="http://api.irail.be" xmlns:tns="http://api.irail.be" xmlns:whttp="http://www.w3.org/ns/wsdl/http" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msg="http://api.irail.be/schema" xmlns:wsdlx="http://www.w3.org/ns/wsdl-extensions" xmlns="http://www.w3.org/2003/11/wsdl">
+<description targetNamespace="http://api.irail.be" xmlns:tns="http://api.irail.be" xmlns:whttp="http://www.w3.org/ns/wsdl/http" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msg="http://api.irail.be/schema" xmlns:wsdlx="http://www.w3.org/ns/wsdl-extensions" xmlns="http://www.w3.org/ns/wsdl">
 
     <types>
         <xs:import namespace="http://api.irail.be/schema" schemaLocation="http://dev.api.irail.be/irail.xsd" />
