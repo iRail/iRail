@@ -185,10 +185,15 @@
         <attribute name="delay" type="integer" />
     </complexType>
 
+    <simpleType name="durationRestrictionType">
+        <restriction base="integer">
+            <pattern value="\d{2}:\d{2}" />
+        </restriction>
+    </simpleType>
+
     <complexType name="durationType">
         <simpleContent>
-            <restriction base="integer"> <!--Dit wil nog niet valideren-->
-                <pattern value="\d{2}:\d{2}" />
+            <extension base="tns:durationRestrictionType">
                 <attribute name="delay">
                     <simpleType>
                         <restriction base="string">
@@ -197,7 +202,7 @@
                         </restriction>
                     </simpleType>
                 </attribute>
-            </restriction>
+            </extension>
         </simpleContent>
     </complexType>
 
