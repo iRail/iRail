@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="http://tomi.vanek.sk/xml/wsdl-viewer.xsl"?>
+<?xml-stylesheet type="text/xsl" href="xmlstylesheets/wsdl-viewer.xsl"?>
 
 <description targetNamespace="http://api.irail.be" xmlns:tns="http://api.irail.be" xmlns:whttp="http://www.w3.org/ns/wsdl/http" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msg="http://api.irail.be/schema" xmlns:wsdlx="http://www.w3.org/ns/wsdl-extensions" xmlns="http://www.w3.org/ns/wsdl">
 
