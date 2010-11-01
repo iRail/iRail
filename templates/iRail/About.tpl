@@ -13,7 +13,7 @@
         </script>
     </head>
 
-    <body>
+    <body>      
         <div class="container">
             <div class="toolbar anchorTop">
                 <div class="title"><a href="..">{i18n_about}</a> </div>
