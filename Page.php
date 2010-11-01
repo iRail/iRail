@@ -25,11 +25,9 @@ abstract class Page {
     //This is the array that needs to be filled
     protected $page;
 
-    function __construct($page) {
+    private function setGlobals() {
         $this->globals["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
         $this->globals["footer"] = file_get_contents("includes/footer.php");
-        $this->page = $page;
-        $this->content = "";
     }
 
     public function buildPage($pageName) {
@@ -66,6 +64,7 @@ abstract class Page {
     }
 
     private function loadGlobalVariables(){
+        $this->setGlobals();
         $this->substituteTagsInContent($this->globals);
     }
 
