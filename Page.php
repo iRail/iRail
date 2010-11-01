@@ -41,12 +41,12 @@ abstract class Page {
     }
 
     private function detectLanguageAndTemplate() {
-        if (isset($_COOKIE["lang"])) {
-            $this->setLanguage($_COOKIE["lang"]);
+        if (isset($_COOKIE["language"])) {
+            $this->setLanguage($_COOKIE["language"]);
         }
         if (isset($_GET["lang"])) {
             $this->setLanguage($_GET["lang"]);
-            setcookie("lang", $_GET["lang"], time() + 60 * 60 * 24 * 360);
+            setcookie("language", $_GET["lang"], time() + 60 * 60 * 24 * 360);
         }
         if (isset($_COOKIE["output"])) {
             $this->setTemplate($_COOKIE["output"]);
