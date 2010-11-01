@@ -63,7 +63,7 @@ abstract class Page {
         if ($this->template == "jQueryMobile") {
             $this->globals["footer"] = '<a href="news.php?output=jQueryMobile">{i18n_news}</a>
 <a href="feedback.php?output=jQueryMobile">{i18n_feedback}</a>
-<a href="about?output=jQueryMobile">the iRail team</a>
+<a href="about.php?output=jQueryMobile">the iRail team</a>
 <a href="http://project.iRail.be" target="_blank">Help us out</a>';
         } else {
             $this->globals["footer"] = file_get_contents("includes/footer.php");
