@@ -6,18 +6,24 @@
  * @author pieterc
  */
 abstract class Page {
+    //CONFIG PART
+    private $AVAILABLE_TEMPLATES = array("iRail","iPhone");
+    private $AVAILABLE_LANGUAGES = array("EN", "NL", "FR", "DE");
+
+    private $globals = array(
+        "iRail" => "iRail - The mobile trainplanner"
+    );
+
+    //DON'T TOUCH
     private $template = "iRail";
     private $lang = "EN";
 
+    //The page content is stored here
     private $content;
-    protected $page;
-
     private $pageName;
-
-    private $globals = array(
-        "iRail" => "iRail"
-
-    );
+    
+    //This is the array that needs to be filled
+    protected $page;
 
     function __construct($page) {
         $this->globals["GoogleAnalytics"] = file_get_contents("includes/googleAnalytics.php") ;
@@ -39,11 +45,15 @@ abstract class Page {
     }
 
     public function setTemplate($template) {
-        $this -> template = $template;
+        if(in_array($template, $this-> AVAILABLE_TEMPLATES)){
+            $this -> template = $template;
+        }
     }
 
     public function setLanguage($lang) {
-        $this -> lang = $lang;
+        if(in_array($lang, $this->AVAILABLE_LANGUAGES)){
+            $this -> lang = $lang;
+        }
     }
 
     private function loadTemplate() {
@@ -79,7 +89,6 @@ abstract class Page {
         }else if($this-> lang == "DE"){
             include_once("i18n/DE.php");
         }
-
         
         foreach($i18n as $tag => $value) {
             $this -> content = str_ireplace("{i18n_".$tag."}", $value, $this->content);

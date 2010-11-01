@@ -45,5 +45,8 @@ $page = new AboutPage();
 if(isset($_COOKIE["language"])){
     $page -> setLanguage($_COOKIE["language"]);
 }
+if(isset($_GET["output"])){
+    $page ->setTemplate($_GET["output"]);
+}
 $page -> buildPage("About.tpl");
 ?>
