@@ -28,11 +28,12 @@
 
 include("Page.php");
 
-class NationalForm extends Page {
+class Main extends Page {
 
     function __construct() {
         $this-> page = array(
-            "title" => "iRail.be"
+            "title" => "iRail.be",
+            "subtitle" => "Mobile"
         );
         //TODO: generate this in another way according to language...
         include("includes/stationlist.php");
@@ -40,14 +41,14 @@ class NationalForm extends Page {
 
         $this->page["date"] = date("D d/m/Y H:i");
         if(isset($_COOKIE["from"]))
-            $this->page["autofrom"] = $_COOKIE["from"];
+            $this->page["from"] = $_COOKIE["from"];
         else
-            $this->page["autofrom"] = "";
+            $this->page["from"] = "";
 
         if(isset($_COOKIE["to"]))
-            $this->page["autoto"] = $_COOKIE["to"];
+            $this->page["to"] = $_COOKIE["to"];
         else
-            $this->page["autoto"] = "";
+            $this->page["to"] = "";
 
     }
 
@@ -55,9 +56,7 @@ class NationalForm extends Page {
 
 //__MAIN__
 
-$page = new NationalForm();
-if(isset($_COOKIE["language"])){
-    $page -> setLanguage($_COOKIE["language"]);
-}
-$page -> buildPage("FromToForm.tpl");
+$page = new Main();
+$page -> setDetectLanguageAndTemplate(true);
+$page -> buildPage("Main.tpl");
 ?>

@@ -33,7 +33,7 @@ class AboutPage extends Page {
     function __construct() {
         $this->page = array(
             "title" => "iRail.be",
-            "subtitle" => "project iRail.be"
+            "subtitle" => "project.iRail.be"
         );
     }
 

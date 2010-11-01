@@ -26,7 +26,8 @@ include("Page.php");
 class Feedback extends Page {
     function __construct() {
         $this->page = array(
-            "title" => "iRail.be"
+            "title" => "iRail.be",
+            "subtitle" => "{i18n_feedback}"
         );
     }
 }

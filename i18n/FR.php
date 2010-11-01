@@ -23,6 +23,10 @@ $i18n = array(
     "error" => "Erreur",
     "errormessage" => "We could not provide you with an answer to your question. Most likely you requested too old information, or information that we can't provide yet. If you think this error is a bug in iRail, please let us know on project.iRail.be",
     "strike"=> "A cause de la gr&#232;ve il est possible que les donn&#233;es soient incorrectes."
+        , "news" => "Nouvelles"
+    , "feedback" => "Votre voix"
+    ,"options" =>"Options"
+ , "setdatetime" => "Choisissez la date et l'heure"
     );
 
 ?>
