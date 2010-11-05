@@ -13,9 +13,9 @@ chdir("../");
 
 include_once("api/DataStructs/ConnectionRequest.php");
 
-include("includes/apiLog.php");
+include_once("includes/apiLog.php");
 
-include("api/OutputHandlers/ConnectionOutput.php");
+include_once("api/OutputHandlers/ConnectionOutput.php");
 class WidgetOutput extends ConnectionOutput{
     private $connection;
     private $name;
@@ -25,7 +25,34 @@ class WidgetOutput extends ConnectionOutput{
     }
 
     public function printAll() {
-        echo $this->name ." will arrive at " . $this-> connection -> getArrival() -> getStation() -> getName() . " in " . $this->calculateMinutes() . "minutes";
+        echo '<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a1/jquery.mobile-1.0a1.min.css" />
+        <script src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.0a1/jquery.mobile-1.0a1.min.js"></script>
+        <title>iRail - Mobile</title>
+    </head>
+    <body>
+                <div data-role="page" id="config">
+            <div data-role="header">
+                <h1> iRail </h1>
+            </div>
+            <div data-role="content">
+                '. $this->name .' will arrive at <h1>'.$this-> connection -> getArrival() -> getStation() -> getName().'</h1>
+                    in <strong>'.$this->calculateMinutes() . '</strong> minutes!
+            </div>
+            <div data-role="footer">
+                <a href="http://iRail.be">iRail</a>
+                <a href="../about.php?output=jQueryMobile">About</a>
+                <a href="http://project.iRail.be" target="_blank">Dev</a>
+            </div>
+
+    </body>
+</html>
+
+';
     }
 
     private function calculateMinutes(){
