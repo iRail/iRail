@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:attributeGroup name="rootAttList">
+        <xsd:attribute name="version" type="xsd:string"/>
+        <xsd:attribute name="timestamp" type="xsd:string"/>
+    </xsd:attributeGroup>
+    
+    <xsd:element name="connections">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>This element takes care of the connections</xsd:documentation>
+            </xsd:annotation>
+            <xsd:choice>
+                <xsd:element ref="connection" minOccurs="1" maxOccurs="6"/>
+            </xsd:choice>
+            <xsd:attributeGroup ref="rootAttList"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="connection">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>This elements contains all information for one specific result</xsd:documentation>
+            </xsd:annotation>
+            <xsd:choice minOccurs="3" maxOccurs="4">
+                <xsd:element name="departure" type="arrdep" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="arrival" type="arrdep" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="duration" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="vias" minOccurs="0" maxOccurs="1"/>
+            </xsd:choice>
+            <xsd:attribute name="id" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="arrdep">
+        <xsd:annotation>
+            <xsd:documentation>arrdep is the typename for the arrival or departure element</xsd:documentation>
+        </xsd:annotation>
+        <xsd:choice minOccurs="4" maxOccurs="4">
+            <xsd:element ref="time" minOccurs="1" maxOccurs="1"/>
+            <xsd:element ref="platform" minOccurs="1" maxOccurs="1"/>
+            <xsd:element ref="station" minOccurs="1" maxOccurs="1"/>
+            <xsd:element ref="vehicle" minOccurs="1" maxOccurs="1"/>
+        </xsd:choice>
+        <xsd:attribute name="delay" type="xsd:integer"/>
+    </xsd:complexType>
+
+    <xsd:element name="via">
+        <xsd:annotation>
+            <xsd:documentation>Via defines where you should take another vehicle</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:element name="arrival" type="arrdepType"/>
+                <xsd:element name="departure" type="arrdepType"/>
+                <xsd:element name="timeBetween" type="xsd:integer"/>
+                <xsd:element ref="station"/>
+                <xsd:element ref="vehicle"/>
+            </xsd:choice>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="station">
+        <xsd:annotation>
+            <xsd:documentation>Station is an overall used tag to define a station</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="locationX" type="xsd:double"/>
+                    <xsd:attribute name="locationY" type="xsd:double"/>
+                    <xsd:attribute name="location" type="xsd:string"/><!--should be gone in next version-->
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="vehicle">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        this pattern should first contain the country code, then the name of the corporation, followed by the vehicle ID unique for that company.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:pattern value=".*\..*\..*"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+
+    <xsd:complexType name="arrdepType">
+        <xsd:choice>
+            <xsd:element ref="time"/>
+            <xsd:element ref="platform"/>
+        </xsd:choice>
+        <xsd:attribute name="delay" type="xsd:integer"/>
+    </xsd:complexType>
+
+    <xsd:element name="platform">
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="normal" type="xsd:integer"/>
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="time">
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="formatted" type="xsd:dateTime"/>
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="vias">
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:element ref="via" minOccurs="0"/>
+            </xsd:choice>
+            <xsd:attribute name="number" type="xsd:integer"/>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
