@@ -12,6 +12,9 @@ abstract class ConnectionOutput implements Output {
     protected function buildXML($connectionsarray) {
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("connections");
+        $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        $rootNode ->setAttribute("xsi:noNamespaceSchemaLocation", "http://dev.api.irail.be/irail.xsd");
+        //TODO: xslt
         $rootNode->setAttribute("version", "1.0");
         $rootNode->setAttribute("timestamp", date("U"));
 
@@ -27,9 +30,10 @@ abstract class ConnectionOutput implements Output {
 
             $station = $xml->createElement("station", $c->getDepart()->getStation()->getName());
             $station->setAttribute("location", $c->getDepart()->getStation()->getY() . " " . $c->getDepart()->getStation()->getX());
-
+            $station->setAttribute("locationX", $c->getDepart()->getStation()->getX());
+            $station->setAttribute("locationY", $c->getDepart()->getStation()->getY());
             $time0 = $xml->createElement("time", $c->getDepart()->getTime());
-            $time0->setAttribute("formatted", date("Y-m-d\TH:i\Z", $c->getDepart()->getTime()));
+            $time0->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $c->getDepart()->getTime()));
 
             $platform = $xml->createElement("platform", $c->getDepart()->getPlatform());
             $platform->setAttribute("normal", $c->getDepart()->normalPlatform());
@@ -51,7 +55,7 @@ abstract class ConnectionOutput implements Output {
 
             $time1 = $xml->createElement("time", $c->getArrival()->getTime());
             //iso8601 standard for time: 2010-09-17T09:12Z
-            $time1->setAttribute("formatted", date("Y-m-d\TH:i\Z", $c->getArrival()->getTime()));
+            $time1->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $c->getArrival()->getTime()));
 
             $platform = $xml->createElement("platform", $c->getArrival()->getPlatform());
             $platform->setAttribute("normal", $c->getArrival()->normalPlatform());
@@ -76,14 +80,14 @@ abstract class ConnectionOutput implements Output {
                     $arrivalv = $xml->createElement("arrival");
                     $platformv = $xml->createElement("platform", $v->getArrivalPlatform());
                     $timev = $xml->createElement("time", date("U", $v->getArrivalTime()));
-                    $timev->setAttribute("formatted", date("Y-m-d\TH:i\Z", $v->getArrivalTime()));
+                    $timev->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $v->getArrivalTime()));
                     $arrivalv->appendChild($platformv);
                     $arrivalv->appendChild($timev);
 
                     $departv = $xml->createElement("departure");
                     $platformv = $xml->createElement("platform", $v->getDepartPlatform());
                     $timev = $xml->createElement("time", date("U", $v->getDepartTime()));
-                    $timev->setAttribute("formatted", date("Y-m-d\TH:i\Z", $v->getDepartTime()));
+                    $timev->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $v->getDepartTime()));
                     $departv->appendChild($platformv);
                     $departv->appendChild($timev);
 
@@ -91,6 +95,8 @@ abstract class ConnectionOutput implements Output {
 
                     $stationv = $xml->createElement("station", $v->getStation()->getName());
                     $stationv->setAttribute("location", $v->getStation()->getY() . " " . $v->getStation()->getX());
+                    $stationv->setAttribute("locationX", $v->getStation()->getX());
+                    $stationv->setAttribute("locationY", $v->getStation()->getY());
 
                     $vehiclev = $xml->createElement("vehicle", $v->getVehicle()->getId());
 
