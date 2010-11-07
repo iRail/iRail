@@ -15,6 +15,7 @@ abstract class StationsOutput implements Output {
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         $rootNode ->setAttribute("xsi:noNamespaceSchemaLocation", "http://dev.api.irail.be/stations.xsd");
         $xmlstylesheet = $xml ->createProcessingInstruction("xml-stylesheet", "type='text/xsl' href='http://dev.api.irail.be/xmlstylesheets/stations.xsl'");
+        $rootNode ->appendChild($xmlstylesheet);
         $rootNode->setAttribute("version", "1.0");
         $rootNode->setAttribute("timestamp", date("U"));
 
