@@ -12,6 +12,9 @@ abstract class StationsOutput implements Output {
     protected function buildXML($stationsarray) {
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("stations");
+        $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        $rootNode ->setAttribute("xsi:noNamespaceSchemaLocation", "http://dev.api.irail.be/stations.xsd");
+        $xmlstylesheet = $xml ->createProcessingInstruction("xml-stylesheet", "type='text/xsl' href='http://dev.api.irail.be/xmlstylesheets/stations.xsl'");
         $rootNode->setAttribute("version", "1.0");
         $rootNode->setAttribute("timestamp", date("U"));
 
