@@ -4,6 +4,8 @@
  *  * It will create instances of the right objects to echo things to the client
  *
  * It is the error handler as well. If any error occurs, this knows what errorcode it should return.
+ *
+ * AT THIS MOMENT THIS CLASS HAS NO REAL USAGE. DON'T LOOK HERE IF YOU'RE HACKING SOMETHING IN
  */
 
 /**
