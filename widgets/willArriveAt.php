@@ -35,9 +35,10 @@ class WidgetOutput extends ConnectionOutput{
         <title>iRail - Mobile</title>
     </head>
     <body>
-                <div data-role="page" id="config">
+       <div data-role="page" id="config">
             <div data-role="header">
                 <h1> iRail </h1>
+                <a href="" onclick="javascript: window.location.reload()" data-icon="refresh" class="ui-btn-right">refresh</a>
             </div>
             <div data-role="content">
                 '. $this->name .' will arrive at <h1>'.$this-> connection -> getArrival() -> getStation() -> getName().'</h1>
