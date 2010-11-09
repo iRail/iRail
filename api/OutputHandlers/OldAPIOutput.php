@@ -15,6 +15,15 @@ class OldAPIOutput implements Output {
         $this -> connections = $c;
     }
 
+    public function printError($errorCode, $msg){
+        $xml = new DOMDocument("1.0", "UTF-8");
+        $rootNode = $xml->createElement("error", $msg);
+        $rootNode->setAttribute("version", "1.0");
+        $rootNode->setAttribute("timestamp", date("U"));
+        $rootNode -> setAttribute("code", $errorCode);
+        $xml->appendChild($rootNode);
+    }
+
     public function printAll() {
         date_default_timezone_set("Europe/Brussels");
         $xml = new DOMDocument("1.0", "UTF-8");

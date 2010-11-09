@@ -9,7 +9,7 @@ include_once("Connection.php");
 include_once("Station.php");
 include_once("TripNode.php");
 include_once("Via.php");
-include_once("BTrain.php");
+include_once("Train.php");
 
 class BRailConnectionInput extends ConnectionInput {
 
@@ -180,8 +180,8 @@ class BRailConnectionInput extends ConnectionInput {
                         }
                     }
                 }
-                $vehicle0 = new BTrain($trains[0]);
-                $vehicle1 = new BTrain($trains[sizeof($trains)-1]);
+                $vehicle0 = $this -> newTrain($trains[0]);
+                $vehicle1 = $this -> newTrain($trains[sizeof($trains)-1]);
                 if($platform0 == ""){
                     $platform0= "NA";
                 }
@@ -206,5 +206,8 @@ class BRailConnectionInput extends ConnectionInput {
         return $connections;
     }
 
+    protected function newTrain($id){
+        return new Train($id, "BE", "NMBS");
+    }
 }
 ?>

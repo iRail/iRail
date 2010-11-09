@@ -29,6 +29,10 @@ class MobileWebOutput extends Page implements Output {
 
     }
 
+    public function printError($errorCode, $msg){
+        header("location: noresults.");
+    }
+
     public function printAll() {
         if(sizeof($this->connections) == 0){
             header('Location: noresults');
@@ -36,46 +40,40 @@ class MobileWebOutput extends Page implements Output {
         $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName();
         $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName();
         $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
-        $this->page["connections"] = $this->getConnectionsOutput();
+        $this->loops["connections"] =$this->getConnectionsOutput();
         $this-> buildPage("Results.tpl");
     }
 
     private function getConnectionsOutput() {
         date_default_timezone_set("Europe/Brussels");
-        $output= "";
+        $conoutput = array();
         $index = 0;
         foreach($this->connections as $con) {
-            $output .= "<tr class=\"color". $index%2 ."\">";
-            $output .= "<td>" . date("H:i", $con -> getDepart() -> getTime()) . "<br/>". date("H:i", $con -> getArrival() -> getTime()) ."</td>";
+            $conoutput[$index]["colorindex"] = $index %2;
+            $conoutput[$index]["departtime"] = date("H:i", $con -> getDepart() -> getTime());
+            $conoutput[$index]["arrivaltime"] = date("H:i", $con -> getArrival() -> getTime());
 
             $minutes = $con -> getDuration()/60 % 60;
             $hours = floor($con -> getDuration() / 3600);
             if($minutes < 10) {
                 $minutes = "0" . $minutes;
             }
-            $output .= "<td>" . $hours. ":" . $minutes ."</td>";
-
-            // color delayed minutes in red, else print /
-            $tmp_delay = $con -> getDepart() -> getDelay()/60;
-
-            if($tmp_delay == 0) {
-                $delay_output = "/";
-            }else {
-                $delay_output = "<span style=\"color:red\">" . $tmp_delay . "</span>m";
+            $conoutput[$index]["duration"] = $hours. ":" . $minutes;
+            $conoutput[$index]["delayed"] =  "";
+            if($con -> getDepart() -> getDelay() > 0){
+                $conoutput[$index]["delayed"] = "delayed";
             }
 
-            $output .= "<td>" . $delay_output . "</td>";
+            $conoutput[$index]["delay"] = $con -> getDepart() -> getDelay();
+            $conoutput[$index]["platform"] = $con -> getDepart() -> getPlatform();
+            $conoutput[$index]["transfers"] = sizeof($con -> getVias());
 
-            $output .= "<td>" . $con -> getDepart() -> getPlatform() . "</td>";
+            //$output .= "<td>" . $this -> getTrains($con) ."</td>";
 
-            $output .= "<td>" . sizeof($con -> getVias()) . "</td>";
-
-            $output .= "<td>" . $this -> getTrains($con) ."</td>";
-
-            $output .= "</tr>";
+            //$output .= "</tr>";
             $index ++;
         }
-        return $output;
+        return $conoutput;
     }
 
     private function getTrains(Connection $con) {

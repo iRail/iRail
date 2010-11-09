@@ -3,10 +3,10 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://api.irail.be/schema" xmlns:tns="http://api.irail.be/schema" elementFormDefault="qualified">
     
     <!-- List all stations -->
-    <element name="RequestListAllStations" type="string"> <!--Wat voor type moeten we hier gebruiken, we vragen enkel een url op?-->
+    <element name="RequestListAllStations" type="string">
         <annotation>
             <documentation>
-              Request element for getting all stations.
+              By doing a call to http://api.irail.be/stations/ you can get a list of all stations for the API you're calling to. For example this call returns all Belgian trainstations.
             </documentation>
         </annotation>
     </element>
@@ -14,7 +14,7 @@
     <element name="ResponseListAllStations" type="tns:stationsType">
         <annotation>
             <documentation>
-              Response element containing a list of all stations and their location.
+              The response of a stations request (eg. http://api.irail.be/stations/) will contain a list of all stations with their name and geographic location.
             </documentation>
         </annotation>
     </element>
@@ -27,18 +27,15 @@
     </complexType>
 
     <complexType name="stationType">
-        <simpleContent>
-            <extension base="string">
-                <attribute name="location" type="double" use="required" /> <!-- Dit zou moeten opgesplitst worden in locationX en locationY, geen 2 waarden in 1 attribuut stoppen! -->
-            </extension>
-        </simpleContent>
+        <attribute name="locationX" type="double" use="required" />
+        <attribute name="locationY" type="double" use="required" />
     </complexType>
 
     <!-- Schedules -->
     <element name="RequestSchedules" type="tns:RequestSchedulesType">
         <annotation>
             <documentation>
-              Request for schedules between two stations, with some optional parameters.
+              By doing a call to http://api.irail.be/connections/ and if provided by the right attributes, it will return possible connections to your destination.
             </documentation>
         </annotation>
     </element>

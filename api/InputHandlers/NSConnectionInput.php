@@ -86,5 +86,9 @@ class NSConnectionInput extends BRailConnectionInput {
         return http_parse_message($post)->body;
     }
 
+    protected function newTrain($id){
+        return new Train($id, "NL", "NS");
+    }
+
 }
 ?>
