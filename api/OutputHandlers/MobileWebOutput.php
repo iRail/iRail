@@ -68,9 +68,7 @@ class MobileWebOutput extends Page implements Output {
             $conoutput[$index]["platform"] = $con -> getDepart() -> getPlatform();
             $conoutput[$index]["transfers"] = sizeof($con -> getVias());
 
-            //$output .= "<td>" . $this -> getTrains($con) ."</td>";
-
-            //$output .= "</tr>";
+            $conoutput[$index]["trains"] = $this -> getTrains($con);
             $index ++;
         }
         return $conoutput;
