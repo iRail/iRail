@@ -171,7 +171,7 @@ class BRailConnectionInput extends ConnectionInput {
                                 $arrivalPlatform = $connsection -> Arrival -> BasicStop -> Arr -> Platform -> Text;
                                 $arrivalDelay = 0; //Todo: NYImplemented
                                 $stationv = new Station($connsection -> Arrival -> BasicStop -> Station["name"], $connsection -> Arrival -> BasicStop -> Station["x"], $connsection -> Arrival -> BasicStop -> Station["y"]);
-                                $vehiclev = new BTrain($trains[$j-1]);
+                                $vehiclev = newTrain($trains[$j-1]);
 
                                 $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
 
