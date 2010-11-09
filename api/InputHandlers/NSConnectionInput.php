@@ -7,9 +7,9 @@
 include_once("ConnectionInput.php");
 include_once("Connection.php");
 include_once("Station.php");
+include_once("Train.php");
 include_once("TripNode.php");
 include_once("Via.php");
-include_once("BTrain.php");
 include_once("BRailConnectionInput.php");
 
 class NSConnectionInput extends BRailConnectionInput {
