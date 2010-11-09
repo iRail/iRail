@@ -36,6 +36,7 @@ class Main extends Page {
             "subtitle" => "Mobile"
         );
         //TODO: generate this in another way according to language...
+        //→ see ticket 50
         include("includes/stationlist.php");
         $this->page["stationarray"] = generate_js_array_2($stations);
 

@@ -18,6 +18,7 @@ abstract class Page {
     private $template = "iRail";
     private $lang = "EN";
     //The page content is stored here
+    protected $loops = array(); // array("loop1" => array(1 => array("stuff" => "cool stuff")))
     private $content = "";
     private $pageName;
     //This is the array that needs to be filled
@@ -30,6 +31,7 @@ abstract class Page {
         }
         $this->pageName = $pageName;
         $this->loadTemplate();
+        $this->generateLoops();
         $this->loadContent();
         $this->loadGlobalVariables();
         $this->loadI18n();
@@ -88,6 +90,28 @@ abstract class Page {
             $this->content = file_get_contents($tplPath);
         } else {
             throw new Exception("Template doesn't exist: " . $tplPath);
+        }
+    }
+
+    /**
+     * This algorithm will generate looped content
+     */
+    private function generateLoops(){
+        foreach($this->loops as $loopname => $loopsArray){
+            //get the right piece of template:
+            $pattern = "/{loop_".$loopname."}(.*?){\/loop_". $loopname."}/ism";
+            preg_match($pattern, $this -> content, $matches);
+            $template = $matches[1];
+            $loopcontent = "";
+            foreach($loopsArray as $loopMap){
+                $tempstring = $template;
+                foreach ($loopMap as $tag => $value) {
+                    $tempstring = str_ireplace("{" . $tag . "}", $value, $tempstring);
+                }          
+                $loopcontent .= $tempstring;
+            }
+            //now replace the loopcontent in the template
+            $this->content = preg_replace($pattern, $loopcontent, $this->content);
         }
     }
 

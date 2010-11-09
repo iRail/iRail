@@ -37,8 +37,30 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <th>{i18n_transfers}</th>
 <th>{i18n_transportation}</th>
 </tr>
-{connections}
 
+{loop_connections}
+    <tr class="color{colorindex}">
+        <td>
+            {departtime}<br/>{arrivaltime}
+        </td>
+        <td>
+            {duration}
+        </td>
+        <td class="{delayed}">
+            {delay}
+        </td>
+        <td>
+            {platform}
+        </td>
+        <td>
+            {transfers}
+        </td>
+        <td>
+            {trains}
+        </td>
+
+</tr>
+{/loop_connections}
 
 <tr>
 <td colspan="8">
