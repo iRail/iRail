@@ -17,10 +17,11 @@ class JSONStationsOutput extends StationsOutput {
 
     public function printAll() {
         date_default_timezone_set("UTC");
-        header('Content-Type: application/json');
+        header('Content-Type: application/json;charset=UTF-8');
         //this function builds a DOM XML-tree
         $xml = parent::buildXML($this->stations);
-        echo json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
+        $callback = isset($_GET['callback'] && ctype_alnum($_GET['callback'])) ? $_GET['callback'] : false;
+        echo ($callback ? $callback . '(' : '') . json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA)) . ($callback ? $callback . '(' : '');
     }
 
 }
