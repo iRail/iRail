@@ -21,7 +21,7 @@ class JSONConnectionOutput extends ConnectionOutput {
         $callback = isset($_GET['callback']) && ctype_alnum($_GET['callback']) ? $_GET['callback'] : false;
         //yes this may cause some overhead, but it's the easiest way to implement this for now.
         $jsonstring = json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
-        echo ($callback ? $callback . '(' : '') . $jsonstring . ($callback ? $callback . '(' : '');
+        echo ($callback ? $callback . '(' : '') . $jsonstring . ($callback ? ')' : '');
     }
 }
 ?>

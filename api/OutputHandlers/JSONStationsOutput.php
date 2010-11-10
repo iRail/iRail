@@ -21,7 +21,7 @@ class JSONStationsOutput extends StationsOutput {
         //this function builds a DOM XML-tree
         $xml = parent::buildXML($this->stations);
         $callback = isset($_GET['callback']) && ctype_alnum($_GET['callback']) ? $_GET['callback'] : false;
-        echo ($callback ? $callback . '(' : '') . json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA)) . ($callback ? $callback . '(' : '');
+        echo ($callback ? $callback . '(' : '') . json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA)) . ($callback ? ')' : '');
     }
 
 }
