@@ -9,6 +9,8 @@ ini_set("include_path", ".:../:api/DataStructs:DataStructs:api/:../includes:incl
 include_once("Request.php");
 include_once("InputHandlers/BRailConnectionInput.php");
 include_once("InputHandlers/NSConnectionInput.php");
+include_once("OutputHandlers/JSONConnectionOutput.php");
+include_once("OutputHandlers/XMLConnectionOutput.php");
 
 class ConnectionRequest extends Request {
     private $results;
@@ -19,8 +21,8 @@ class ConnectionRequest extends Request {
     private $timeSel;
     private $lang;
     private $typeOfTransport;
-    function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $typeOfTransport = "all"){
-        
+    function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $format="xml", $typeOfTransport = "all"){
+        parent::__construct($format);
         if($from == "" || $to == ""){
             throw new Exception("No stations specified");
         }//TODO: check on input
@@ -48,7 +50,17 @@ class ConnectionRequest extends Request {
             return new NSConnectionInput();
         }
     }
-
+    
+    public function getOutput($connections){
+        if(parent::getFormat() == "xml"){
+            return new XMLConnectionOutput($connections);
+        }else if(parent::getFormat() == "json"){
+            return new JSONConnectionOutput($connections);
+        }else{
+            throw new Exception("No outputformat specified");
+        }
+    }
+    
     public function getResults() {
         return $this->results;
     }

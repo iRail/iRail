@@ -6,6 +6,11 @@
  * @author pieterc
  */
 abstract class Request {
+    private $format = "xml";
+    
+    function __construct($format) {
+        $this->format = $format;
+    }
 
     /**
      *
@@ -20,7 +25,11 @@ abstract class Request {
      * This function serves as a factory method design pattern.
      */
     public abstract function getInput();
-
-
+    public abstract function getOutput($datastruct);
+    
+    public function getFormat() {
+        return strtolower($this->format);
+    }
+    
 }
 ?>

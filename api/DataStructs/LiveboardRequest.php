@@ -9,6 +9,8 @@ ini_set("include_path", ".:../:api/DataStructs:DataStructs:../includes:includes"
 include_once("Request.php");
 include_once("InputHandlers/BRailLiveboardInput.php");
 include_once("InputHandlers/NSLiveboardInput.php");
+include_once("OutputHandlers/JSONLiveboardOutput.php");
+include_once("OutputHandlers/XMLLiveboardOutput.php");
 class LiveboardRequest extends Request{
     private $station;
     private $date;
@@ -16,7 +18,8 @@ class LiveboardRequest extends Request{
     private $arrdep;
     private $lang;
 
-    function __construct($station, $date, $time, $arrdep = "DEP", $lang = "EN") {
+    function __construct($station, $date, $time, $arrdep = "DEP", $lang = "EN", $format = "xml") {
+        parent::__construct($format);
         $this->station = $station;
         $this->date = $date;
         $this->time = $time;
@@ -38,7 +41,15 @@ class LiveboardRequest extends Request{
             return new NSLiveboardInput();
         }
     }
-
+    public function getOutput($l){
+        if(parent::getFormat() == "xml"){
+            return new XMLLiveboardOutput($l);
+        }else if(parent::getFormat() == "json"){
+            return new JSONLiveboardOutput($l);
+        }else{
+            throw new Exception("No outputformat specified");
+        }
+    }
     public function getStation() {
         return $this->station;
     }

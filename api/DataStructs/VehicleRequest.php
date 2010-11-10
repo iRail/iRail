@@ -10,13 +10,15 @@ include_once("Vehicle.php");
 include_once("Request.php");
 include_once("InputHandlers/NSVehicleInput.php");
 include_once("InputHandlers/BRailVehicleInput.php");
+include_once("OutputHandlers/JSONVehicleOutput.php");
+include_once("OutputHandlers/XMLVehicleOutput.php");
 class VehicleRequest extends Request {
     private $lang;
     private $vehicleId;
-    function __construct($vehicleId, $lang = "EN") {
+    function __construct($vehicleId, $lang = "EN", $format = "xml") {
+        parent::__construct($format);
         $this-> lang = $lang;
         $this-> vehicleId = $vehicleId;
-        
     }
 
     public function getLang() {
@@ -41,6 +43,14 @@ class VehicleRequest extends Request {
             return new NSVehicleInput();
         }
     }
-
+    public function getOutput($vehicle){
+        if(parent::getFormat() == "xml"){
+            return new XMLVehicleOutput($vehicle);
+        }else if(parent::getFormat() == "json"){
+            return new JSONVehicleOutput($vehicle);
+        }else{
+            throw new Exception("No outputformat specified");
+        }
+    }
 }
 ?>

@@ -1,39 +1,40 @@
 <?php
+
 /*  Copyright 2010 Project iRail
-	
-    This file is part of iRail.
 
-    iRail is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of iRail.
 
-    iRail is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  iRail is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with iRail.  If not, see <http://www.gnu.org/licenses/>.
+  iRail is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    http://project.irail.be - http://irail.be
-	
-    Source available at http://github.com/Tuinslak/iRail
-*/
+  You should have received a copy of the GNU General Public License
+  along with iRail.  If not, see <http://www.gnu.org/licenses/>.
+
+  http://project.irail.be - http://irail.be
+
+  Source available at http://github.com/Tuinslak/iRail
+ */
 
 
 /**
  * This is the API request handler
  */
-
 include_once("DataStructs/ConnectionRequest.php");
-include_once("InputHandlers/BRailConnectionInput.php");
-include_once("InputHandlers/NSConnectionInput.php");
-include_once("OutputHandlers/XMLConnectionOutput.php");
-include_once("OutputHandlers/JSONConnectionOutput.php");
+include_once("APICall.php");
 
-include_once("../includes/apiLog.php");
-
+class ConnectionsCall extends APICall{
+    protected function logRequest() {
+        $ds = $this->datastruct;
+        writeLog($_SERVER['HTTP_USER_AGENT'],$ds[0]->getDepart()->getStation()->getName(),$ds[0]->getArrival()->getStation()->getName(), "none (connections)", $_SERVER['REMOTE_ADDR']);
+    }
+}
 
 $date = "";
 $time = "";
@@ -46,59 +47,44 @@ $format = "xml";
 //required vars, output error messages if empty
 extract($_GET);
 
-if($lang == "") {
+if ($lang == "") {
     $lang = "EN";
 }
 
-if($timeSel == "") {
+if ($timeSel == "") {
     $timeSel = "depart";
 }
 
-if($results == "" || $results > 6 || $results < 1) {
+if ($results == "" || $results > 6 || $results < 1) {
     $results = 6;
 }
 
-if($date == "") {
+if ($date == "") {
     $date = date("dmy");
 }
 
 //TODO: move this to constructor of ConnectionRequest
-
 //reform date to needed train structure
-preg_match("/(..)(..)(..)/si",$date, $m);
+preg_match("/(..)(..)(..)/si", $date, $m);
 $date = "20" . $m[3] . $m[2] . $m[1];
 
-if($time == "") {
+if ($time == "") {
     $time = date("Hi");
 }
 
 //reform time to wanted structure
-preg_match("/(..)(..)/si",$time, $m);
+preg_match("/(..)(..)/si", $time, $m);
 $time = $m[1] . ":" . $m[2];
 
-if($typeOfTransport == "") {
+if ($typeOfTransport == "") {
     $typeOfTransport = "train";
 }
-
-try {
-    if(!(isset($from)) || !(isset($to))) throw new Exception("You didn't use this right. You should specify where to and where from you are traveling.");
-    $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $typeOfTransport);
-    $input = $request -> getInput();
-    $connections = $input -> execute($request);
-    $output = null;
-    if(strtolower($format) == "xml"){
-        $output = new XMLConnectionOutput($connections);
-    }else if(strtolower($format) == "json"){
-        $output = new JSONConnectionOutput($connections);
-    }else{
-        throw new Exception("incorrect output type specified");
-    }
-    $output -> printAll();
-    // Log request to database
-    writeLog($_SERVER['HTTP_USER_AGENT'], $connections[0] -> getDepart() -> getStation() -> getName(), $connections[0] -> getArrival() -> getStation() -> getName(), "none (connections.php)", $_SERVER['REMOTE_ADDR']);
-}catch(Exception $e) {
-    writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in connections.php: " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
-    echo "<error>" . $e->getMessage() . "</error>"; //error handling..
+if (!(isset($from)) || !(isset($to))) {
+    echo "<error>You didn't use this right. You should specify where to and where from you are traveling.</error>";
+} else {
+    $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $format, $typeOfTransport);
+    $call = new ConnectionsCall("connections", $request);
+    $call->executeCall();
 }
 
 
