@@ -64,7 +64,7 @@ abstract class ConnectionOutput implements Output {
             $station->setAttribute("location", $c->getArrival()->getStation()->getY() . " " . $c->getArrival()->getStation()->getX());
 
             $time1 = $xml->createElement("time", $c->getArrival()->getTime());
-            //iso8601 standard for time: 2010-09-17T09:12Z
+            //iso8601 standard for time: 2010-09-17T09:12:00Z
             $time1->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $c->getArrival()->getTime()));
 
             $platform = $xml->createElement("platform", $c->getArrival()->getPlatform());

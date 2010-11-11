@@ -11,7 +11,7 @@ include_once("DataStructs/TripNode.php");
 
 class BRailLiveboardInput extends LiveboardInput {
 
-    private $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
+    // private $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
     private $arrdep;
     private $name;
 
@@ -41,7 +41,7 @@ class BRailLiveboardInput extends LiveboardInput {
         $n = $this->name;
         $locationX = 0; //todo
         $locationY = 0;
-        $station = new Station($n, $locationX, $locationY);
+        $station = $this->getStation($n);
         $arrdep = $this->arrdep;
         $nodes = array();
         preg_match_all("/<td valign=\"top\">(.*?<\/td>.*?)<\/td>/ism", $serverData, $m);
@@ -69,7 +69,7 @@ class BRailLiveboardInput extends LiveboardInput {
             }
             preg_match("/&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)/ism", $td, $m);
 
-            $stationNode = new Station($m[1], $locationX, $locationY);
+            $stationNode = $this->getStation($m[1]);
             $vehicle = $m[2];
             $platform = $m[3];
             $platformNormal = "yes";
@@ -79,6 +79,29 @@ class BRailLiveboardInput extends LiveboardInput {
 
         $liveboard = new Liveboard($station, $arrdep, $nodes);
         return $liveboard;
+    }
+
+    /**
+     * This function will use approximate string matching to determine what station we're looking for
+     * @param string $name
+     */
+    private function getStation($name1) {
+        include("includes/coordinates.php");
+        $name1 = strtoupper($name1);
+        $max = 0;
+        $match = "";
+        $coord = "";
+        foreach($coordinates as $name2 => $coordin){
+            similar_text($name1, $name2, $score);
+            if($score > $max){
+                //DBG: echo $score . " " . $name1 . " " . $name2 . "\n";
+                $max = $score;
+                $match = $name2;
+                $coord = $coordin;
+            }
+        }
+        $coords = split(" ", $coord);
+        return new Station($match, $coords[0],$coords[1], "");
     }
 
 }
