@@ -8,6 +8,7 @@
 include_once("LiveboardInput.php");
 include_once("DataStructs/Station.php");
 include_once("DataStructs/TripNode.php");
+include_once("DataStructs/Train.php");
 
 class BRailLiveboardInput extends LiveboardInput {
 
@@ -70,7 +71,7 @@ class BRailLiveboardInput extends LiveboardInput {
             preg_match("/&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)/ism", $td, $m);
 
             $stationNode = $this->getStation($m[1]);
-            $vehicle = $m[2];
+            $vehicle = $this->getVehicle($m[2]);
             $platform = $m[3];
             $platformNormal = "yes";
             $nodes[$i - 1] = new TripNode($platform, $delay, $unixtime, $stationNode, $vehicle, $platformNormal);
@@ -79,6 +80,10 @@ class BRailLiveboardInput extends LiveboardInput {
 
         $liveboard = new Liveboard($station, $arrdep, $nodes);
         return $liveboard;
+    }
+
+    protected function getVehicle($id){
+        return new Train($id, "BE", "NMBS");
     }
 
     /**

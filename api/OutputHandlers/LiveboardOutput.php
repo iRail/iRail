@@ -40,15 +40,14 @@ abstract class LiveboardOutput implements Output {
             }
             $nodeEl ->setAttribute("delay", $node -> getDelay() );
             $station = $xml->createElement("station", $node->getStation()->getName());
-            //provide also this tag for old versions
-            $station->setAttribute("location", $node->getStation()->getY() . " " . $node->getStation()->getX());
             //new version
             $station->setAttribute("locationY", $node->getStation()->getY());
             $station->setAttribute("locationX", $node->getStation()->getX());
             $platform = $xml -> createElement("platform",$node -> getPlatform());
 
-            $vehicle = $xml -> createElement("vehicle", $node -> getVehicle());
+            $vehicle = $xml -> createElement("vehicle", $node -> getVehicle()->getId());
             $time = $xml -> createElement("time", $node -> getTime());
+            $time->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $node->getTime()));
 
             $nodeEl->appendChild($time);
             $nodeEl->appendChild($vehicle);
