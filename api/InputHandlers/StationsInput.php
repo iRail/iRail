@@ -16,8 +16,8 @@ class StationsInput extends Input {
         $stations = array();
         $count = 0;
         $pre = "";
-        $arr = explode("/" ,  $_SERVER['PHP_SELF']);
-        if($arr[sizeof($arr)-2] == "api"){
+        //yes, I hate this dirty hack.
+        if(sizeof(explode("api",$_SERVER['PHP_SELF'])) >1){
             $pre = "../";
         }
         if (($handle = fopen($pre . "stationlists/" . $country . "_" . $lang . ".csv", "r")) !== FALSE) {
