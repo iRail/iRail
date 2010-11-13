@@ -6,6 +6,8 @@
  *
  * @author pieterc
  */
+include_once("api/DataStructs/Request.php");
+
 abstract class Page {
 
     //CONFIG PART
@@ -148,6 +150,10 @@ abstract class Page {
 
     private function printPage() {
         echo $this->content;
+    }
+
+    protected function newRequestInstance(){
+        return new Request("xml", $this->lang);
     }
 
 }

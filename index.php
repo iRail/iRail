@@ -27,6 +27,7 @@
  */
 
 include("Page.php");
+include_once("api/InputHandlers/StationsInput.php");
 
 class Main extends Page {
 
@@ -35,11 +36,9 @@ class Main extends Page {
             "title" => "iRail.be",
             "subtitle" => "Mobile"
         );
-        //TODO: generate this in another way according to language...
-        //→ see ticket 50
-        include("includes/stationlist.php");
-        $this->page["stationarray"] = generate_js_array_2($stations);
-
+        $stationsinput = new StationsInput();
+        $this->page["stationarray"] = $stationsinput->generate_js_array(parent::newRequestInstance());
+        
         $this->page["date"] = date("D d/m/Y H:i");
         if(isset($_COOKIE["from"]))
             $this->page["from"] = $_COOKIE["from"];

@@ -16,15 +16,13 @@ class LiveboardRequest extends Request{
     private $date;
     private $time;
     private $arrdep;
-    private $lang;
 
     function __construct($station, $date, $time, $arrdep = "DEP", $lang = "EN", $format = "xml") {
-        parent::__construct($format);
+        parent::__construct($format, $lang);
         $this->station = $station;
         $this->date = $date;
         $this->time = $time;
         $this->arrdep = $arrdep;
-        $this->lang = $lang;
     }
 
         /**
@@ -64,10 +62,6 @@ class LiveboardRequest extends Request{
 
     public function getArrdep() {
         return $this->arrdep;
-    }
-
-    public function getLang() {
-        return $this->lang;
     }
     
 }

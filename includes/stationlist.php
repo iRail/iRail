@@ -592,19 +592,6 @@ $stations = array(  'AALST',
  * This function will generate a JavaScript array called data
  */
 function generate_js_array($stations) {
-    $output = 'var data=[';
-    foreach($stations as $i => $value) {
-        $output .= '"' . $value . '",';
-    }
-    $output = rtrim($output, ',') . '];';
-    echo $output;
-}
-
-
-/*
- * This function will generate a JavaScript array called data
- */
-function generate_js_array_2($stations) {
     $output = '';
     foreach($stations as $i => $value) {
         $output .= '"' . $value . '",';

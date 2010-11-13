@@ -9,15 +9,17 @@ include_once("LiveboardInput.php");
 include_once("DataStructs/Station.php");
 include_once("DataStructs/TripNode.php");
 include_once("DataStructs/Train.php");
+include_once("StationsInput.php");
 
 class BRailLiveboardInput extends LiveboardInput {
 
     // private $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
     private $arrdep;
     private $name;
-
+    private $request;
     protected function fetchData(Request $request) {
         include "getUA.php";
+        $this-> request = $request;
         $scrapeUrl = "http://www.railtime.be/mobile/SearchStation.aspx";
         $request_options = array(
             "referer" => "http://api.irail.be/",
@@ -91,22 +93,20 @@ class BRailLiveboardInput extends LiveboardInput {
      * @param string $name
      */
     private function getStation($name1) {
-        include("includes/coordinates.php");
+        $stationsinput = new StationsInput();
+        $stations = $stationsinput ->execute($this->request);
         $name1 = strtoupper($name1);
         $max = 0;
         $match = "";
-        $coord = "";
-        foreach($coordinates as $name2 => $coordin){
+        foreach($stations as $station){
+            $name2 = $station ->getName();
             similar_text($name1, $name2, $score);
             if($score > $max){
-                //DBG: echo $score . " " . $name1 . " " . $name2 . "\n";
                 $max = $score;
-                $match = $name2;
-                $coord = $coordin;
+                $match = $station;
             }
         }
-        $coords = split(" ", $coord);
-        return new Station($match, $coords[0],$coords[1], "");
+        return $match;
     }
 
 }

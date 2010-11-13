@@ -19,10 +19,9 @@ class ConnectionRequest extends Request {
     private $time;
     private $date;
     private $timeSel;
-    private $lang;
     private $typeOfTransport;
     function __construct($from, $to, $time, $date, $timeSel, $results = 6, $lang = "EN", $format="xml", $typeOfTransport = "all"){
-        parent::__construct($format);
+        parent::__construct($format, $lang);
         if($from == "" || $to == ""){
             throw new Exception("No stations specified");
         }//TODO: check on input
@@ -32,7 +31,6 @@ class ConnectionRequest extends Request {
         $this->time = $time;
         $this->date = $date;
         $this->timeSel = $timeSel;
-        $this->lang = $lang;
         $this->typeOfTransport = $typeOfTransport;
     }
 
@@ -83,10 +81,6 @@ class ConnectionRequest extends Request {
 
         public function getTimeSel() {
         return $this->timeSel;
-    }
-
-    public function getLang() {
-        return $this->lang;
     }
 
     public function getTypeOfTransport() {

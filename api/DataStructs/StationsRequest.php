@@ -12,15 +12,8 @@ include_once("InputHandlers/BRailStationsInput.php");
 include_once("OutputHandlers/JSONStationsOutput.php");
 include_once("OutputHandlers/XMLStationsOutput.php");
 class StationsRequest extends Request{
-    private $lang;
     function __construct($lang = "EN", $format = "xml") {
-        parent::__construct($format);
-        $this->lang = $lang;
-
-    }
-
-    public function getLang() {
-        return $this->lang;
+        parent::__construct($format, $lang);
     }
 
         /**

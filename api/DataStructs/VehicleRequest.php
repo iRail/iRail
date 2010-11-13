@@ -13,16 +13,10 @@ include_once("InputHandlers/BRailVehicleInput.php");
 include_once("OutputHandlers/JSONVehicleOutput.php");
 include_once("OutputHandlers/XMLVehicleOutput.php");
 class VehicleRequest extends Request {
-    private $lang;
     private $vehicleId;
     function __construct($vehicleId, $lang = "EN", $format = "xml") {
-        parent::__construct($format);
-        $this-> lang = $lang;
+        parent::__construct($format, $lang);
         $this-> vehicleId = $vehicleId;
-    }
-
-    public function getLang() {
-        return $this->lang;
     }
 
     public function getVehicleId() {
