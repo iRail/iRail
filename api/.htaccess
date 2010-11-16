@@ -21,5 +21,7 @@ RewriteBase /
 # API => api.domain
 RewriteRule ^connections/$              connections.php                 [NC,L]
 RewriteRule ^stations/$                 stations.php                    [NC,L]
+RewriteRule ^liveboard/$                liveboard.php                   [NC,L]
+RewriteRule ^vehicle/$                  vehicle.php                     [NC,L]
 
 </IfModule>
