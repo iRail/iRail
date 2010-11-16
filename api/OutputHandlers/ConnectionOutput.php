@@ -30,6 +30,7 @@ abstract class ConnectionOutput implements Output {
             $departure->setAttribute("delay", $c->getDepart()->getDelay());
 
             $station = $xml->createElement("station", $c->getDepart()->getStation()->getName());
+            $station->setAttribute("id", $c->getDepart()->getStation()->getId());
             $station->setAttribute("location", $c->getDepart()->getStation()->getY() . " " . $c->getDepart()->getStation()->getX());
             $station->setAttribute("locationX", $c->getDepart()->getStation()->getX());
             $station->setAttribute("locationY", $c->getDepart()->getStation()->getY());
@@ -52,6 +53,9 @@ abstract class ConnectionOutput implements Output {
             $arrival->setAttribute("delay", $c->getArrival()->getDelay());
 
             $station = $xml->createElement("station", $c->getArrival()->getStation()->getName());
+            $station->setAttribute("id", $c->getArrival()->getStation()->getId());
+            $station->setAttribute("locationX", $c->getArrival()->getStation()->getX());
+            $station->setAttribute("locationY", $c->getArrival()->getStation()->getY());
             $station->setAttribute("location", $c->getArrival()->getStation()->getY() . " " . $c->getArrival()->getStation()->getX());
 
             $time1 = $xml->createElement("time", $c->getArrival()->getTime());
@@ -96,6 +100,7 @@ abstract class ConnectionOutput implements Output {
 
                     $stationv = $xml->createElement("station", $v->getStation()->getName());
                     $stationv->setAttribute("location", $v->getStation()->getY() . " " . $v->getStation()->getX());
+                    $stationv->setAttribute("id", $v->getStation()->getId());
                     $stationv->setAttribute("locationX", $v->getStation()->getX());
                     $stationv->setAttribute("locationY", $v->getStation()->getY());
 
