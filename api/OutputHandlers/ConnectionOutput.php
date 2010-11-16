@@ -11,7 +11,6 @@ abstract class ConnectionOutput implements Output {
 
     protected function buildXML($connectionsarray) {
         $xml = new DOMDocument("1.0", "UTF-8");
-        $xml ->appendChild($xmlstylesheet);
         $rootNode = $xml->createElement("connections");
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         $rootNode ->setAttribute("xsi:noNamespaceSchemaLocation", "connections.xsd");
