@@ -81,7 +81,7 @@ if ($typeOfTransport == "") {
     $typeOfTransport = "train";
 }
 if (!(isset($from)) || !(isset($to))) {
-    $e = new Exception("You didn't use this right. You should specify where to and where from you are traveling.",0);
+    $e = new Exception("You didn't use this right. You should specify where to and where from you are traveling.",1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else {

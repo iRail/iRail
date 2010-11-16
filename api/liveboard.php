@@ -65,7 +65,7 @@ preg_match("/(..)(..)/si", $time, $m);
 $time = $m[1] . ":" . $m[2];
 
 if (!(isset($station))) {
-    $e = new Exception("You didn't use this right. You should specify the station",0);
+    $e = new Exception("You didn't use this right. You should specify the station",1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else {

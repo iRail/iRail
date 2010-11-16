@@ -11,7 +11,7 @@ $lang = "EN";
 $vehicleId = "";
 extract($_GET);
 if (vehicleId == "") {
-    $e = new Exception("You should give us a vehicleId", 0);
+    $e = new Exception("You should give us a vehicleId", 1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else {
