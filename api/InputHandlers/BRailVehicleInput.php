@@ -22,7 +22,7 @@ class BRailVehicleInput extends VehicleInput {
             "useragent" => $irailAgent,
         );
         $id = preg_replace("/.*?(\d.*)/smi", "\\1", $request->getVehicleId());
-        $this->scrapeURL .= "?l=NL&s=1&tid=" . $id . "&da=D&p=2";
+        $this->scrapeURL .= "?l=" . $request ->getLang() . "&s=1&tid=" . $id . "&da=D&p=2";
         $post = http_post_data($this->scrapeURL, "", $request_options) or die("");
         $body = http_parse_message($post)->body;
 
