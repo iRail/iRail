@@ -11,7 +11,6 @@ abstract class StationsOutput implements Output {
 
     protected function buildXML($stationsarray) {
         $xml = new DOMDocument("1.0", "UTF-8");
-        $xmlstylesheet = $xml ->createProcessingInstruction("xml-stylesheet", "type='text/xsl' href='xmlstylesheets/stations.xsl'");
         $rootNode = $xml->createElement("stations");
         $rootNode ->appendChild($xmlstylesheet);
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
