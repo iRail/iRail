@@ -191,7 +191,7 @@ class BRailConnectionInput extends ConnectionInput {
                 $i++;
             }
         } else {
-            throw new Exception("We're sorry, we could not retrieve the correct data from our sources");
+            throw new Exception("We're sorry, we could not retrieve the correct data from our sources",2);
         }
 
         return $connections;
