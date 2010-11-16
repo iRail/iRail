@@ -53,15 +53,17 @@ abstract class Input {
      * @param string $name
      */
     protected function getStation($name1) {
+        $name1 = str_ireplace("[b]","", $name1);
+        $name1 = str_ireplace("(nl)","", $name1);
         $stationsinput = new StationsInput();
         $stations = $stationsinput ->execute($this->request);
         $name1 = strtoupper($name1);
-        $max = 0;
+        $max = 9999;
         $match = "";
         foreach($stations as $station){
             $name2 = $station ->getName();
-            similar_text($name1, $name2, $score);
-            if($score > $max){
+            $score = levenshtein($name1, $name2);
+            if($score < $max){
                 $max = $score;
                 $match = $station;
             }
