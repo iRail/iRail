@@ -58,12 +58,12 @@ abstract class Input {
         $stationsinput = new StationsInput();
         $stations = $stationsinput ->execute($this->request);
         $name1 = strtoupper($name1);
-        $max = 9999;
+        $max = 0;
         $match = "";
         foreach($stations as $station){
             $name2 = $station ->getName();
-            $score = levenshtein($name1, $name2);
-            if($score < $max){
+            similar_text($name1, $name2, $score);
+            if($score > $max){
                 $max = $score;
                 $match = $station;
             }
