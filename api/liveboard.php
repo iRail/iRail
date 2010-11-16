@@ -28,6 +28,7 @@
  */
 include_once("DataStructs/LiveboardRequest.php");
 include_once("APICall.php");
+include_once("ErrorHandlers/ErrorHandler.php");
 
 $date = "";
 $time = "";
@@ -64,7 +65,9 @@ preg_match("/(..)(..)/si", $time, $m);
 $time = $m[1] . ":" . $m[2];
 
 if (!(isset($station))) {
-    echo "You didn't use this right. You should specify the station";
+    $e = new Exception("You didn't use this right. You should specify the station",0);
+    $eh = new ErrorHandler($e, $format);
+    $eh->printError();
 } else {
     $request = new LiveboardRequest($station, $date, $time, $arrdep, $lang, $format);
     $call = new APICall("liveboard", $request);

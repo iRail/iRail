@@ -16,7 +16,6 @@ class BRailLiveboardInput extends LiveboardInput {
     // private $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
     private $arrdep;
     private $name;
-    private $request;
     protected function fetchData(Request $request) {
         include "getUA.php";
         $this-> request = $request;
@@ -72,7 +71,7 @@ class BRailLiveboardInput extends LiveboardInput {
             }
             preg_match("/&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)/ism", $td, $m);
 
-            $stationNode = $this->getStation($m[1]);
+            $stationNode = parent::getStation($m[1]);
             $vehicle = $this->getVehicle($m[2]);
             $platform = $m[3];
             $platformNormal = "yes";
@@ -86,27 +85,6 @@ class BRailLiveboardInput extends LiveboardInput {
 
     protected function getVehicle($id){
         return new Train($id, "BE", "NMBS");
-    }
-
-    /**
-     * This function will use approximate string matching to determine what station we're looking for
-     * @param string $name
-     */
-    private function getStation($name1) {
-        $stationsinput = new StationsInput();
-        $stations = $stationsinput ->execute($this->request);
-        $name1 = strtoupper($name1);
-        $max = 0;
-        $match = "";
-        foreach($stations as $station){
-            $name2 = $station ->getName();
-            similar_text($name1, $name2, $score);
-            if($score > $max){
-                $max = $score;
-                $match = $station;
-            }
-        }
-        return $match;
     }
 
 }

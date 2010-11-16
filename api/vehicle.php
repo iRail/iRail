@@ -11,7 +11,9 @@ $lang = "EN";
 $vehicleId = "";
 extract($_GET);
 if (vehicleId == "") {
-    echo "<error>You should provide us with a vehicle id please.</error>";
+    $e = new Exception("You should give us a vehicleId", 0);
+    $eh = new ErrorHandler($e, $format);
+    $eh->printError();
 } else {
     $request = new VehicleRequest($vehicleId, $lang, $format);
     $call = new APICall("vehicles", $request);

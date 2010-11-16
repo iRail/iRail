@@ -11,7 +11,7 @@ include_once("Page.php");
 class MobileWebOutput extends Page implements Output {
     private $connections;
     //Todo: this should be moved into the connections datastruct
-    private $strikes = array("18/10/2010", "19/10/2010", "23/11/2010");
+    private $strikes = array("18/10/2010", "19/10/2010");
 
     function __construct($c) {
         $this->page = array(
@@ -30,7 +30,7 @@ class MobileWebOutput extends Page implements Output {
     }
 
     public function printError($errorCode, $msg){
-        header("location: noresults.");
+        header("location: noresults");
     }
 
     public function printAll() {

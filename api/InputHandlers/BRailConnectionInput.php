@@ -20,6 +20,7 @@ class BRailConnectionInput extends ConnectionInput {
      * @return <type>
      */
     protected function fetchData(Request $request) {
+        $this->request = $request;
         include "getUA.php";
         $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
         $request_options = array(
@@ -87,7 +88,8 @@ class BRailConnectionInput extends ConnectionInput {
     }
 
     protected function transformData($serverData) {
-
+        $inp = new StationsInput();
+        $stations = $inp->execute($this->request);
         $xml = new SimpleXMLElement($serverData);
         $connections = array();
         $i = 0;
@@ -95,29 +97,17 @@ class BRailConnectionInput extends ConnectionInput {
         if (isset($xml->ConRes->ConnectionList->Connection)) {
             foreach ($xml->ConRes->ConnectionList->Connection as $conn) {
 
-                $platform0 = $conn->Overview->Departure->BasicStop->Dep->Platform->Text;
+                $platform0 = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
 
                 $unixtime0 = Input::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                 $nameStation0 = $conn->Overview->Departure->BasicStop->Station['name'];
-                $locationX0 = $conn->Overview->Departure->BasicStop->Station['x'];
-                preg_match("/(.)(.*)/", $locationX0, $matches);
-                $locationX0 = $matches[1] . "." . $matches[2];
-                $locationY0 = $conn->Overview->Departure->BasicStop->Station['y'];
-                preg_match("/(..)(.*)/", $locationY0, $matches);
-                $locationY0 = $matches[1] . "." . $matches[2];
-                $station0 = new Station($nameStation0, $locationX0, $locationY0);
+                $station0 = parent::getStation($nameStation0);
 
-                $platform1 = $conn->Overview->Arrival->BasicStop->Arr->Platform->Text;
+                $platform1 = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
 
                 $unixtime1 = Input::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                 $nameStation1 = $conn->Overview->Arrival->BasicStop->Station['name'];
-                $locationX1 = $conn->Overview->Arrival->BasicStop->Station['x'];
-                preg_match("/(.)(.*)/", $locationX1, $matches);
-                $locationX1 = $matches[1] . "." . $matches[2];
-                $locationY1 = $conn->Overview->Arrival->BasicStop->Station['y'];
-                preg_match("/(..)(.*)/", $locationY1, $matches);
-                $locationY1 = $matches[1] . "." . $matches[2];
-                $station1 = new Station($nameStation1, $locationX1, $locationY1);
+                $station1 = parent::getStation($nameStation1);
 
                 //Delay or other wrongish stuff
                 $delay0 = 0;
@@ -137,11 +127,11 @@ class BRailConnectionInput extends ConnectionInput {
                     }
 
                     if (isset($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
-                        $platform0 = $conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text;
+                        $platform0 = trim($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
                         $platformNormal0 = false;
                     }
                     if (isset($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
-                        $platform1 = $conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text;
+                        $platform1 = trim($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
                         $platformNormal1 = false;
                     }
                 }
@@ -167,20 +157,13 @@ class BRailConnectionInput extends ConnectionInput {
                                 $departDelay = 0; //Todo: NYImplemented
                                 $connarray = $conn->ConSectionList->ConSection;
                                 $departTime = Input::transformTime($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
-                                $departPlatform = $connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Platform->Text;
+                                $departPlatform = trim($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Platform->Text);
                                 $arrivalTime = Input::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
-                                $arrivalPlatform = $connsection->Arrival->BasicStop->Arr->Platform->Text;
+                                $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
                                 $arrivalDelay = 0; //Todo: NYImplemented
-                                $locationXVia = $connsection->Arrival->BasicStop->Station["x"];
-                                $locationYVia = $connsection->Arrival->BasicStop->Station["y"];
-                                preg_match("/(.)(.*)/", $locationXVia, $matches);
-                                $locationXVia = $matches[1] . "." . $matches[2];
-                                $locationYVia = $conn->Overview->Arrival->BasicStop->Station['y'];
-                                preg_match("/(..)(.*)/", $locationYVia, $matches);
-                                $locationYVia = $matches[1] . "." . $matches[2];
-                                $stationv = new Station($connsection->Arrival->BasicStop->Station["name"], $locationXVia, $locationYVia);
+                                $stationv = parent::getStation($connsection->Arrival->BasicStop->Station["name"]);
                                 $vehiclev = $this->newTrain($trains[$j - 1]);
-                                
+
                                 $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
 
                                 $connectionindex++;

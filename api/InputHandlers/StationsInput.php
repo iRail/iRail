@@ -22,7 +22,7 @@ class StationsInput extends Input {
         }
         if (($handle = fopen($pre . "stationlists/" . $country . "_" . $lang . ".csv", "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                $stations[$count] = new Station($data[0], $data[2], $data[1]);
+                $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
                 $count++;
             }
             fclose($handle);

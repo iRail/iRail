@@ -16,6 +16,7 @@ abstract class LiveboardOutput implements Output {
         $rootNode->setAttribute("timestamp", date("U"));
         $rootNode -> setAttribute("code", $errorCode);
         $xml->appendChild($rootNode);
+        echo $xml->saveXML();
     }
     protected function buildXML($liveboard) {
         $xml = new DOMDocument("1.0", "UTF-8");

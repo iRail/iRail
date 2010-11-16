@@ -6,7 +6,9 @@
  *
  * @author pieterc
  */
+include_once("StationsInput.php");
 abstract class Input {
+    protected $request;
     protected abstract function fetchData(Request $request);
     protected abstract function transformData($serverData);
     public function execute(Request $request){
@@ -44,6 +46,27 @@ abstract class Input {
         $minute = intval(substr($time, 6,2));
         $second = intval(substr($time, 9,2));
         return $days*24*3600 + $hour*3600 + $minute * 60 + $second;
+    }
+
+        /**
+     * This function will use approximate string matching to determine what station we're looking for
+     * @param string $name
+     */
+    protected function getStation($name1) {
+        $stationsinput = new StationsInput();
+        $stations = $stationsinput ->execute($this->request);
+        $name1 = strtoupper($name1);
+        $max = 0;
+        $match = "";
+        foreach($stations as $station){
+            $name2 = $station ->getName();
+            similar_text($name1, $name2, $score);
+            if($score > $max){
+                $max = $score;
+                $match = $station;
+            }
+        }
+        return $match;
     }
 }
 ?>

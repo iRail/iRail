@@ -14,6 +14,7 @@
  * @author pieterc
  */
 include_once("../includes/apiLog.php");
+include_once("ErrorHandlers/ErrorHandler.php");
 class APICall {
 
     protected $request;
@@ -41,7 +42,7 @@ class APICall {
         try{
             $this -> datastruct =  $this -> input-> execute($this->request);
             $this -> output = $this -> request -> getOutput($this -> datastruct);
-            $this ->printOuput();
+            $this ->printOutput();
             $this-> logRequest();
         }catch(Exception $e){
             $this->processError($e);
@@ -64,10 +65,11 @@ class APICall {
 
     protected function processError(Exception $e){
         writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in $this->functionname " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
-        echo "<error>" . $e->getMessage() . "</error>";
+        $eh = new ErrorHandler($e, $this->request->getFormat());
+        $eh -> printError();
     }
 
-    protected function printOuput(){
+    protected function printOutput(){
         $this->output -> printAll();
     }
 

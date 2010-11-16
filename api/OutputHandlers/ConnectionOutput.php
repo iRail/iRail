@@ -16,6 +16,7 @@ abstract class ConnectionOutput implements Output {
         $rootNode->setAttribute("timestamp", date("U"));
         $rootNode -> setAttribute("code", $errorCode);
         $xml->appendChild($rootNode);
+        echo $xml->saveXML();
     }
 
     protected function buildXML($connectionsarray) {

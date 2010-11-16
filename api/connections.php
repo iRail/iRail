@@ -28,6 +28,7 @@
  */
 include_once("DataStructs/ConnectionRequest.php");
 include_once("APICall.php");
+include_once("ErrorHandlers/ErrorHandler.php");
 
 class ConnectionsCall extends APICall{
     protected function logRequest() {
@@ -80,7 +81,9 @@ if ($typeOfTransport == "") {
     $typeOfTransport = "train";
 }
 if (!(isset($from)) || !(isset($to))) {
-    echo "<error>You didn't use this right. You should specify where to and where from you are traveling.</error>";
+    $e = new Exception("You didn't use this right. You should specify where to and where from you are traveling.",0);
+    $eh = new ErrorHandler($e, $format);
+    $eh->printError();
 } else {
     $request = new ConnectionRequest($from, $to, $time, $date, $timeSel, $results, $lang, $format, $typeOfTransport);
     $call = new ConnectionsCall("connections", $request);
