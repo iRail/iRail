@@ -14,11 +14,10 @@ abstract class VehicleOutput implements Output {
         $rootNode->setAttribute("version", "1.0");
         $rootNode->setAttribute("timestamp", date("U"));
         $xml->appendChild($rootNode);
-
-        $location = $xml->createElement("location");
-        $location ->setAttribute("locationX", $route -> getLocationX());
-        $location ->setAttribute("locationY", $route -> getLocationY());
-        $rootNode -> appendChild($location);
+        $vehicle = $xml->createElement("vehicle", $route->getVehicle());
+        $vehicle ->setAttribute("locationX", $route -> getLocationX());
+        $vehicle ->setAttribute("locationY", $route -> getLocationY());
+        $rootNode -> appendChild($vehicle);
 
         $stops = $xml -> createElement("stops");
 

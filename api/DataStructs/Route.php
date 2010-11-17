@@ -9,11 +9,17 @@ class Route {
     private $stops = array();
     private $locationX = "";
     private $locationY = "";
+    private $vehicle;
     
-    function __construct($stops, $locationX, $locationY) {
+    function __construct($stops, $locationX, $locationY, $vehicle) {
         $this->stops = $stops;
         $this->locationX = $locationX;
         $this->locationY = $locationY;
+        $this->vehicle = $vehicle;
+    }
+
+    public function getVehicle() {
+        return $this->vehicle;
     }
 
     public function getStops() {

@@ -37,6 +37,7 @@ class VehicleRequest extends Request {
             return new NSVehicleInput();
         }
     }
+
     public function getOutput($vehicle){
         if(parent::getFormat() == "xml"){
             return new XMLVehicleOutput($vehicle);

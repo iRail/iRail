@@ -9,9 +9,6 @@
 include_once("Vehicle.php");
 class Train extends Vehicle {
     private $internalId;
-    private $x;
-    private $y;
-    private $traject;
     private $countrycode;
     private $company;
 
@@ -30,22 +27,7 @@ class Train extends Vehicle {
     function getInternalId(){
         return $this -> internalId;
     }
-    
-    function hasCoordinates(){
-        return $this->x != 0 && $this->y != 0;
-    }
-    
-    function getCoordinates(){
-        return $this->y . " " . $this->x;
-    }
 
-    function hasTraject(){
-        return $this->traject != null;
-    }
-
-    function getTraject(){
-        return $this->traject;
-    }
     
 }
 ?>

@@ -60,7 +60,7 @@ class BRailVehicleInput extends VehicleInput {
             $locationX = 0;
             $locationY = 0;
         }
-        return new Route($stops, $locationX, $locationY);
+        return new Route($stops, $locationX, $locationY, $this->request->getVehicleId());
     }
 
 }
