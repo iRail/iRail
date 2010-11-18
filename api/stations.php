@@ -29,6 +29,7 @@
  */
 include_once("DataStructs/StationsRequest.php");
 include_once("APICall.php");
+date_default_timezone_set("Europe/Brussels");
 
 $lang = "EN";
 $format = "xml";

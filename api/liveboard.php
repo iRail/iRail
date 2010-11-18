@@ -29,6 +29,7 @@
 include_once("DataStructs/LiveboardRequest.php");
 include_once("APICall.php");
 include_once("ErrorHandlers/ErrorHandler.php");
+date_default_timezone_set("Europe/Brussels");
 
 $date = "";
 $time = "";
@@ -65,7 +66,7 @@ preg_match("/(..)(..)/si", $time, $m);
 $time = $m[1] . ":" . $m[2];
 
 if (!(isset($station))) {
-    $e = new Exception("You didn't use this right. You should specify the station",1);
+    $e = new Exception("You didn't use this right. You should specify the station", 1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else {

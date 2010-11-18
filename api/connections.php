@@ -29,12 +29,15 @@
 include_once("DataStructs/ConnectionRequest.php");
 include_once("APICall.php");
 include_once("ErrorHandlers/ErrorHandler.php");
+date_default_timezone_set("Europe/Brussels");
 
-class ConnectionsCall extends APICall{
+class ConnectionsCall extends APICall {
+
     protected function logRequest() {
         $ds = $this->datastruct;
-        writeLog($_SERVER['HTTP_USER_AGENT'],$ds[0]->getDepart()->getStation()->getName(),$ds[0]->getArrival()->getStation()->getName(), "none (connections)", $_SERVER['REMOTE_ADDR']);
+        writeLog($_SERVER['HTTP_USER_AGENT'], $ds[0]->getDepart()->getStation()->getName(), $ds[0]->getArrival()->getStation()->getName(), "none (connections)", $_SERVER['REMOTE_ADDR']);
     }
+
 }
 
 $date = "";
@@ -81,7 +84,7 @@ if ($typeOfTransport == "") {
     $typeOfTransport = "train";
 }
 if (!(isset($from)) || !(isset($to))) {
-    $e = new Exception("You didn't use this right. You should specify where to and where from you are traveling.",1);
+    $e = new Exception("You didn't use this right. You should specify where to and where from you are traveling.", 1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else {
@@ -89,6 +92,4 @@ if (!(isset($from)) || !(isset($to))) {
     $call = new ConnectionsCall("connections", $request);
     $call->executeCall();
 }
-
-
 ?>

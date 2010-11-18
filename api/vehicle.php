@@ -5,6 +5,7 @@
  */
 include_once("DataStructs/VehicleRequest.php");
 include_once("APICall.php");
+date_default_timezone_set("Europe/Brussels");
 
 $format = "xml";
 $lang = "EN";
