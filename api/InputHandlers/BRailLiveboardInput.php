@@ -27,7 +27,11 @@ class BRailLiveboardInput extends LiveboardInput {
         );
         $stationname = strtoupper($request->getStation());
         include("includes/railtimeids.php");
-        $rtid = $railtimeids[$stationname];
+        if(array_key_exists($stationname, $railtimeids)){
+            $rtid = $railtimeids[$stationname];
+        }else{
+            throw new Exception("Station not available for liveboard", 3);
+        }
         $this->arrdep = $request->getArrdep();
         $this->name = $request->getStation();
 

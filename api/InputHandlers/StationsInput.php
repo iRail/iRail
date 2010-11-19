@@ -44,5 +44,13 @@ class StationsInput extends Input {
         return $output;
     }
 
+    public function getStationFromId($id, $request){
+        $stations = $this ->execute($request);
+        foreach($stations as $station){
+            if($station->getId() == $id){
+                return $station;
+            }
+        }
+    }
 }
 ?>

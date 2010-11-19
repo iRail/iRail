@@ -30,7 +30,6 @@ include_once("DataStructs/LiveboardRequest.php");
 include_once("APICall.php");
 include_once("ErrorHandlers/ErrorHandler.php");
 date_default_timezone_set("Europe/Brussels");
-
 $date = "";
 $time = "";
 $lang = "";
@@ -65,12 +64,16 @@ if ($time == "") {
 preg_match("/(..)(..)/si", $time, $m);
 $time = $m[1] . ":" . $m[2];
 
-if (!(isset($station))) {
+if (!(isset($station))&& !(isset($id))) {
     $e = new Exception("You didn't use this right. You should specify the station", 1);
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
+} else if(!(isset($station))) {
+    $request = new LiveboardRequest($id, $date, $time, $arrdep, $lang, $format, true);
+    $call = new APICall("liveboard", $request);
+    $call->executeCall();
 } else {
-    $request = new LiveboardRequest($station, $date, $time, $arrdep, $lang, $format);
+    $request = new LiveboardRequest($station, $date, $time, $arrdep, $lang, $format, false);
     $call = new APICall("liveboard", $request);
     $call->executeCall();
 }
