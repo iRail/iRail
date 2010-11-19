@@ -34,7 +34,6 @@ class BRailLiveboardInput extends LiveboardInput {
         }
         $this->arrdep = $request->getArrdep();
         $this->name = $request->getStation();
-
         $scrapeUrl .= "?l=" . $request->getLang() . "&s=1&sid=" . $rtid . "&da=" . substr($request->getArrdep(), 0, 1) . "&p=2";
         $post = http_post_data($scrapeUrl, "", $request_options) or die("");
         $body = http_parse_message($post)->body;
@@ -58,9 +57,11 @@ class BRailLiveboardInput extends LiveboardInput {
                 $i++;
                 continue;
             }
-//TODO:<a href="/mobile/SearchTrain.aspx?l=EN&s=1&tid=2043&da=D&p=2">22:20</a></td><td valign="top">&nbsp;<font color="Red">Changed</font>&nbsp;Charleroi-Sud&nbsp;<span>[IC2043&nbsp;Track&nbsp;<font color="Red">12</font>]</span>&nbsp;<img src="/mobile/images/Work.png" border="0" /><br/>
+//=2">22:20</a></td><td valign="top">&nbsp;<font color="Red">Changed</font>&nbsp;Charleroi-Sud&nbsp;<span>[IC2043&nbsp;Track&nbsp;<font color="Red">12</font>]</span>&nbsp;<img src="/mobile/images/Work.png" border="0" /><br/>
 //TODO:<font color="Red" face="Arial" size="-1"> +5'</font><font face="Arial" size="-1">&nbsp;Oostende&nbsp;<span>[IC531]</span>&nbsp;<img src="/mobile/images/Work.png" border="0">
+//=2">12:05</a></font></td><td valign="top"><font size="-1" face="Arial">&nbsp;Antwerpen-Centraal&nbsp;<span>[IC732&nbsp;Spoor&nbsp;2]</span></font></td>
 
+            /**MATCH TIME**/
             preg_match("/2\">(..:..)<\/a>/ism", $td, $m);
             if (!isset($m[0])) {
                 continue;
@@ -68,13 +69,15 @@ class BRailLiveboardInput extends LiveboardInput {
             $date = 20 . date("ymd");
             $unixtime = Input::transformTime("00d" . $m[1] . ":00", $date);
             //echo $td;
+            /**MATCH DELAY**/
             preg_match("/\+(.+?)'/ism", $td, $m);
             $delay = 0;
             if (isset($m[0]) && $m[1] != "") {
                 $delay = $m[1] * 60;
             }
-            preg_match("/&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)/ism", $td, $m);
-
+            /**MATCH STATIONNAME, VEHICLE and PLATFORM**/
+            preg_match("/\">&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)\].*?<\/span>/ism", $td, $m);
+            //echo $m[1] . "\n";
             $stationNode = parent::getStation($m[1]);
             $vehicle = $this->getVehicle($m[2]);
             $platform = $m[3];
