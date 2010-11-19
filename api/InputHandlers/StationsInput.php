@@ -51,6 +51,7 @@ class StationsInput extends Input {
                 return $station;
             }
         }
+        throw new Exception("No station for station id found (getStationFromId)", 3);
     }
 }
 ?>

@@ -68,6 +68,9 @@ abstract class Input {
                 $match = $station;
             }
         }
+        if($match == ""){
+            throw new Exception("Could not find a good station for the name given (getStation())",3);
+        }
         return $match;
     }
 }
