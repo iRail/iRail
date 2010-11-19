@@ -20,20 +20,22 @@ abstract class VehicleOutput implements Output {
         $rootNode -> appendChild($vehicle);
 
         $stops = $xml -> createElement("stops");
-
+        $stops ->setAttribute("number", sizeof($route->getStops()));
+        $i = 0;
         foreach ($route->getStops() as $stop) {
             $stopxml = $xml -> createElement("stop");
+            $stopxml -> setAttribute("delay", $stop -> getDelay());
+            $stopxml -> setAttribute("id", $i);
             $station = $xml->createElement("station", $stop -> getStation()->getName());
             $station->setAttribute("id", $stop->getStation()->getId());
             $station->setAttribute("locationY", $stop->getStation()->getY());
             $station->setAttribute("locationX", $stop->getStation()->getX());
             $stopxml->appendChild($station);
-            $delay = $xml->createElement("delay", $stop -> getDelay());
-            $stopxml->appendChild($delay);
             $time = $xml->createElement("time", $stop -> getTime());
             $time->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $stop -> getTime()));
             $stopxml->appendChild($time);
             $stops -> appendChild($stopxml);
+            $i++;
         }
 
         $rootNode->appendChild($stops);
