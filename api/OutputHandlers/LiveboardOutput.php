@@ -17,9 +17,7 @@ abstract class LiveboardOutput implements Output {
         $xml->appendChild($rootNode);
         $liveboard->getStation();
         $station = $xml->createElement("station", $liveboard->getStation()->getName());
-        //provide also this tag for old versions
-        $station->setAttribute("location", $liveboard->getStation()->getY() . " " . $liveboard->getStation()->getX());
-        //new version
+        $station->setAttribute("id", $liveboard->getStation()->getId());
         $station->setAttribute("locationY", $liveboard->getStation()->getY());
         $station->setAttribute("locationX", $liveboard->getStation()->getX());
         $rootNode->appendChild($station);
@@ -32,7 +30,7 @@ abstract class LiveboardOutput implements Output {
             }
             $nodeEl ->setAttribute("delay", $node -> getDelay() );
             $station = $xml->createElement("station", $node->getStation()->getName());
-            //new version
+            $station->setAttribute("id", $node->getStation()->getId());
             $station->setAttribute("locationY", $node->getStation()->getY());
             $station->setAttribute("locationX", $node->getStation()->getX());
             $platform = $xml -> createElement("platform",$node -> getPlatform());
