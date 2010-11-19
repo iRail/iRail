@@ -1,11 +1,13 @@
 <?php
+
 /**
  * Description of JSONVehicleOutput
  *
  * @author pieterc
  */
 include_once("OutputHandlers/VehicleOutput.php");
-class JSONVehicleOutput extends VehicleOutput{
+
+class JSONVehicleOutput extends VehicleOutput {
 
     private $route;
 
@@ -19,7 +21,10 @@ class JSONVehicleOutput extends VehicleOutput{
         header('Content-Type: ' . ($callback ? 'application/javascript' : 'application/json') . ';charset=UTF-8');
         //this function builds a DOM XML-tree
         $xml = parent::buildXML($this->route);
-        echo ($callback ? $callback . '(' : '') . json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA)) . ($callback ? ')' : '');
+        $jsonstring = json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
+        $jsonstring = preg_replace('/"@attributes":{(.*?)}/sm ', "\\1", $jsonstring);
+        echo ($callback ? $callback . '(' : '') . $jsonstring . ($callback ? ')' : '');
     }
+
 }
 ?>

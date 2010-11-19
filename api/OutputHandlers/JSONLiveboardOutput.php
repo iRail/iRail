@@ -1,15 +1,18 @@
 <?php
+
 /**
  * Description of JSONLiveboardOutput
  *
  * @author pieterc
  */
 include_once("LiveboardOutput.php");
+
 class JSONLiveboardOutput extends LiveboardOutput {
+
     private $liveboard;
 
     function __construct($l) {
-        $this -> liveboard = $l;
+        $this->liveboard = $l;
     }
 
     public function printAll() {
@@ -18,7 +21,10 @@ class JSONLiveboardOutput extends LiveboardOutput {
         header('Content-Type: ' . ($callback ? 'application/javascript' : 'application/json') . ';charset=UTF-8');
         $xml = parent::buildXML($this->liveboard);
         //yes this may cause some overhead, but it's the easiest way to implement this for now.
-        echo ($callback ? $callback . '(' : '') . json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA)) . ($callback ? ')' : '');
+        $jsonstring = json_encode(new SimpleXMLElement($xml->saveXML(), LIBXML_NOCDATA));
+        $jsonstring = preg_replace('/"@attributes":{(.*?)}/sm ', "\\1", $jsonstring);
+        echo ($callback ? $callback . '(' : '') . $jsonstring . ($callback ? ')' : '');
     }
+
 }
 ?>
