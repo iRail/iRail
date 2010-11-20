@@ -33,12 +33,12 @@ class ConnectionRequest extends Request {
         $this->timeSel = $timeSel;
         $this->typeOfTransport = $typeOfTransport;
         //check for ID
-        if(sizeof(str_split(".",$from)) > 1){
+        if(sizeof(explode(".",$from)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($from, $this);
             $from = $station ->getName();
         }
-        if(sizeof(str_split(".",$to)) > 1){
+        if(sizeof(explode(".",$to)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($to, $this);
             $to = $station ->getName();
