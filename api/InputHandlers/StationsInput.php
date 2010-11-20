@@ -20,7 +20,11 @@ class StationsInput extends Input {
         if(sizeof(explode("api",$_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"])) >1){
             $pre = "../";
         }
-        if (($handle = fopen($pre . "stationlists/" . $country . "_" . $lang . ".csv", "r")) !== FALSE) {
+        $file = $pre . "stationlists/" . $country . "_" . $lang . ".csv";
+        if(!file_exists($file)){
+            $file =  $pre . "stationlists/" . $country . "_EN.csv";
+        }
+        if (($handle = fopen($file, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
                 $count++;
