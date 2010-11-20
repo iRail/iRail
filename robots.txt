@@ -25,6 +25,8 @@ Disallow: /i18n/
 Disallow: /js/
 Disallow: /templates/
 Disallow: /api/
+Disallow: /widgets/
+Disallow: /stationlists/
 
 # API dir on dev.irail.be/api, else check api.irail.be/robots.txt
 
