@@ -12,6 +12,7 @@ server {
 	rewrite ^/connections/$		/connections.php	last;
 	rewrite ^/stations/$		/stations.php		last;
 	rewrite ^/liveboard/$		/liveboard.php		last;
+	rewrite ^/vehicle/$		/vehicle.php		last;
 	#
 
 	location / {
