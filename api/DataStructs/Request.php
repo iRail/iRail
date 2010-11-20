@@ -22,7 +22,7 @@ class Request {
         $country = $expl[sizeof($expl)-1];
         if($country == "localhost"){ // added this line for testing locally
             return "be";
-        }else if($country == "COM"){
+        }else if(strtoupper($country) == "COM"){
             return "be";
         }
         return $country;
