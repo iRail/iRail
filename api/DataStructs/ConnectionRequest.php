@@ -36,12 +36,12 @@ class ConnectionRequest extends Request {
         if(sizeof(explode(".",$from)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($from, $this);
-            $from = $station ->getName();
+            $this->from = $station ->getName();
         }
         if(sizeof(explode(".",$to)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($to, $this);
-            $to = $station ->getName();
+            $this->to = $station ->getName();
         }
     }
 
