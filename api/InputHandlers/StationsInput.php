@@ -16,11 +16,12 @@ class StationsInput extends Input {
         $stations = array();
         $count = 0;
         $pre = "";
-        //yes, I hate this dirty hack.
+        //yes, I hate this dirty hack. It's here to provide for the iRail client as well as for the API.
+        //It needs to disapear if we rewrite the mobile client
         if(sizeof(explode("api",$_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"])) >1){
             $pre = "../";
         }
-        $file = $pre . "stationlists/" . $country . "_" . $lang . ".csv";
+        $file = $pre . "stationlists/" . $country . ".csv";
         if(!file_exists($file)){
             $file =  $pre . "stationlists/" . $country . "_EN.csv";
         }
