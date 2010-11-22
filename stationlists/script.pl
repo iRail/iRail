@@ -25,26 +25,35 @@ while(<DATA>){
 }
 #loop through everything and combine what's possible
 %stationscp = %stations;
+$cOut = 0; #outer loop count
 while (($name0, $stationref0) = each(%stations)){
+  my %station0;
   %station0 = %{$stationref0};
   if(!$station0{id}){
+    $cIn = 0; #inner loop count
     while (($name1, $stationref1) = each(%stationscp)){
+      my %station1;
       %station1 = %{$stationref1};
-      if( $station0{rtid} eq $station1{rtid}){
+      if(($cIn != $cOut) && ($station0{rtid} eq $station1{rtid}) && $station1{id}){
 	$station0{id} = $station1{id};
 	$station0{x} = $station1{x};
 	$station0{y} = $station1{y};
 	$stations{$name0} = \%station0;
       }
+      $cin ++;
     }
   }
+  $cOut ++;
 }
 
-#while (($name, $stationref) = each(%stations)){
+
+#print
 
 foreach $name (sort keys %stations) {
      %station = %{$stations{$name}};
-     print $station{id} . ";".$name . ";" . $station{y} . ";" . $station{x} . ";" . $station{rtid} . ";" . "\n";
+     if($station{id} && $station{rtid}){ # CHECK WHETHER DATA IS COMPLETE
+       print $station{id} . ";".$name . ";" . $station{y} . ";" . $station{x} . ";" . $station{rtid} . ";" . "\n";
+     }
 }
 
 
@@ -534,17 +543,15 @@ BE.NMBS.205;GENLY;50.390639;3.911636;
 ;GENTBRUGGE;447
 BE.NMBS.208;GENTBRUGGE;51.038714;3.755975;
 ;GENT DAMPOORT;449
-;GENT DAMPOORT;449
 BE.NMBS.206;GENT DAMPOORT;51.05665;3.740491;
-;GENT SINT PIETERS;455
 ;GENT SINT PIETERS;455
 BE.NMBS.207;GENT SINT PIETERS;51.035763;3.710232;
 ;GENVAL;457
 BE.NMBS.209;GENVAL;50.726408;4.513725;
 ;GERAARDSBERGEN;458
 BE.NMBS.210;GERAARDSBERGEN;50.771025;3.871956;
-;GHENT  DAMPOORT;449
-;GHENT  SINT PIETERS;455
+;GHENT DAMPOORT;449
+;GHENT SINT PIETERS;455
 ;GHLIN;462
 BE.NMBS.211;GHLIN;50.487408;3.906342;
 ;GLAAIEN;470
