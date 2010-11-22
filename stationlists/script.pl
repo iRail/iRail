@@ -39,20 +39,19 @@ $cOut = 0; #outer loop count
 while (($name0, $stationref0) = each(%stations)){
   my %station0;
   %station0 = %{$stationref0};
-  if(!$station0{id}){
-    $cIn = 0; #inner loop count
-    while (($name1, $stationref1) = each(%stationscp)){
-      my %station1;
-      %station1 = %{$stationref1};
-      if(($cIn != $cOut) && ($station0{rtid} eq $station1{rtid}) && $station1{id}){
-	$station0{id} = $station1{id};
-	$station0{x} = $station1{x};
-	$station0{y} = $station1{y};
-	$stations{$name0} = \%station0;
-      }
-      $cin ++;
+  $cIn = 0; #inner loop count
+  while (($name1, $stationref1) = each(%stationscp)){
+    my %station1;
+    %station1 = %{$stationref1};
+    if(($cIn != $cOut) && ($station0{rtid} eq $station1{rtid}) && $station1{id} ne $station0{id}){
+      $station0{id} = $station1{id};
+      $station0{x} = $station1{x};
+      $station0{y} = $station1{y};
+      $stations{$name0} = \%station0;
     }
+    $cin ++;
   }
+  
   $cOut ++;
 }
 
