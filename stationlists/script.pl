@@ -1,4 +1,14 @@
 #!/bin/perl
+################################################################\__
+#This file is part of iRail         #     #      #                 \
+#                                   #     #      #                   \
+#See project.iRail.be for more details.###  #  ################### ### _
+#                                                                       #_
+#This script produces a list of Stations for the Belgian iRail API        #
+# Author: Pieter Colpaert <pieter aŧ iRail.be>                              #
+##########################################################################__ #
+ #  #     #  #    #  #     #  #     #  #     #  #    #  #
+  ##       ##      ##       ##       ##       ##      ##
 my @pieces;
 
 #initialising used vars
