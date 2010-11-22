@@ -27,7 +27,11 @@ class StationsInput extends Input {
         }
         if (($handle = fopen($file, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
+                if(isset($data[4])){
+                    $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0], $data[4]);
+                }else{
+                    $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
+                }
                 $count++;
             }
             fclose($handle);
