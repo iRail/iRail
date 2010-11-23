@@ -14,8 +14,8 @@ All information can be found on [Project iRail](http://project.irail.be/).
 
 Some interesting links:
 
-  * Source: http://github.com/iRail/iRail
-  * Mailing: http://list.irail.be/
-  * Trac: http://project.irail.be/
-  * API: http://api.irail.be/
-  * BeTrains: http://betrains.mobi/
+  * Source: <http://github.com/iRail/iRail>
+  * Mailing: <http://list.irail.be/>
+  * Trac: <http://project.irail.be/>
+  * API: <http://api.irail.be/>
+  * BeTrains: <http://betrains.mobi/>
