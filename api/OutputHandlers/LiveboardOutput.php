@@ -24,10 +24,10 @@ abstract class LiveboardOutput implements Output {
         $rootNode->appendChild($station);
         if ($liveboard->getDeparr() == "ARR") {
             $arrdeps = $xml->createElement("arrivals");
-        } else{
+        } else {
             $arrdeps = $xml->createElement("departures");
         }
-        $arrdeps ->setAttribute("number", sizeof($liveboard->getNodes()));
+        $arrdeps->setAttribute("number", sizeof($liveboard->getNodes()));
         $i = 0;
         foreach ($liveboard->getNodes() as $node) {
             $nodeEl = null;
@@ -43,7 +43,11 @@ abstract class LiveboardOutput implements Output {
             $station->setAttribute("locationY", $node->getStation()->getY());
             $station->setAttribute("locationX", $node->getStation()->getX());
             $platform = $xml->createElement("platform", $node->getPlatform());
-
+            if ($node->normalPlatform()) {
+                $platform->setAttribute("normal", "1");
+            } else {
+                $platform->setAttribute("normal", "0");
+            }
             $vehicle = $xml->createElement("vehicle", $node->getVehicle()->getId());
             $time = $xml->createElement("time", $node->getTime());
             $time->setAttribute("formatted", date("Y-m-d\TH:i:s\Z", $node->getTime()));

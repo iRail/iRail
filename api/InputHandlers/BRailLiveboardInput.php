@@ -26,16 +26,10 @@ class BRailLiveboardInput extends LiveboardInput {
             "timeout" => "30",
             "useragent" => $irailAgent,
         );
-        $stationname = strtoupper($request->getStation());
-        include("includes/railtimeids.php");
-        if (array_key_exists($stationname, $railtimeids)) {
-            $rtid = $railtimeids[$stationname];
-        } else {
-            throw new Exception("Station not available for liveboard", 3);
-        }
+        $station = $this->getStation($request->getStation());
         $this->arrdep = $request->getArrdep();
         $this->name = $request->getStation();
-        $scrapeUrl .= "?l=" . $request->getLang() . "&s=1&sid=" . $rtid . "&da=" . substr($request->getArrdep(), 0, 1) . "&p=2";
+        $scrapeUrl .= "?l=" . $request->getLang() . "&s=1&sid=" . $station->getAdditional() . "&da=" . substr($request->getArrdep(), 0, 1) . "&p=2";
         $post = http_post_data($scrapeUrl, "", $request_options) or die("");
         $body = http_parse_message($post)->body;
 
@@ -43,50 +37,56 @@ class BRailLiveboardInput extends LiveboardInput {
     }
 
     protected function transformData($serverData) {
-        //echo $serverData;
-        $n = $this->name;
-        $locationX = 0; //todo
-        $locationY = 0;
-        $station = $this->getStation($n);
+        $station = $this->getStation($this->name);
         $arrdep = $this->arrdep;
         $nodes = array();
-        preg_match_all("/<td valign=\"top\">(.*?<\/td>.*?)<\/td>/ism", $serverData, $m);
+        preg_match_all("/<tr>(.*?)<\/tr>/ism", $serverData, $m);
         $i = 0;
-        foreach ($m[1] as $td) {
-            //echo $td . "\n";
-            if ($i == 0) {
-                $i++;
-                continue;
-            }
-//=2">22:20</a></td><td valign="top">&nbsp;<font color="Red">Changed</font>&nbsp;Charleroi-Sud&nbsp;<span>[IC2043&nbsp;Track&nbsp;<font color="Red">12</font>]</span>&nbsp;<img src="/mobile/images/Work.png" border="0" /><br/>
-//TODO:<font color="Red" face="Arial" size="-1"> +5'</font><font face="Arial" size="-1">&nbsp;Oostende&nbsp;<span>[IC531]</span>&nbsp;<img src="/mobile/images/Work.png" border="0">
-//=2">12:05</a></font></td><td valign="top"><font size="-1" face="Arial">&nbsp;Antwerpen-Centraal&nbsp;<span>[IC732&nbsp;Spoor&nbsp;2]</span></font></td>
+        //for each row
+        foreach ($m[1] as $tr) {
+            preg_match("/<td valign=\"top\">(.*?)<\/td><td valign=\"top\">(.*?)<\/td>/ism", $tr, $m2);
+            //$m2[1] has: time
+            //$m2[2] has delay, stationname & platform
 
-            /*             * MATCH TIME* */
-            preg_match("/2\">(..:..)<\/a>/ism", $td, $m);
-            if (!isset($m[0])) {
-                continue;
-            }
-            $date = 20 . date("ymd");
-            $unixtime = Input::transformTime("00d" . $m[1] . ":00", $date);
-            //echo $td;
-            /*             * MATCH DELAY* */
-            preg_match("/\+(.+?)'/ism", $td, $m);
+            //GET TIME:
+            preg_match("/(\d\d:\d\d)/", $m2[1], $t);
+            $time = "00d" . $t[1] . ":00";
+            $unixtime = parent::transformTime($time,"20".date("ymd"));
+
+            //GET DELAY
             $delay = 0;
-            if (isset($m[0]) && $m[1] != "") {
-                $delay = $m[1] * 60;
+            preg_match("/\+(\d+)'/", $m2[2], $d);
+            if(isset($d[1])){
+                $delay = $d[1] * 60;
             }
-            /*             * MATCH STATIONNAME, VEHICLE and PLATFORM* */
-            preg_match("/\">&nbsp;(.*?)&nbsp;<span>\[(.*?)[\]&].*?(\d+)\].*?<\/span>/ism", $td, $m);
-            //echo $m[1] . "\n";
-            if(isset($m[1])) {
-                $stationNode = parent::getStation($m[1]);
-                $vehicle = $this->getVehicle($m[2]);
-                $platform = $m[3];
-                $platformNormal = "yes";
-                $nodes[$i - 1] = new TripNode($platform, $delay, $unixtime, $stationNode, $vehicle, $platformNormal);
-                $i++;
+
+            //GET STATION
+            preg_match("/.*&nbsp;(.*?)&nbsp;<span/",$m2[2],$st);
+            //echo $st[1] . "\n";
+            $stationNode = parent::getStation($st[1]);
+
+            //GET VEHICLE AND PLATFORM
+            $platform = "NA";
+            $platformNormal = true;
+            preg_match("/\[(.*?)(&nbsp;.*?)?\]/",$m2[2],$veh);
+            $vehicle = $this->getVehicle($veh[1]);
+            if(isset($veh[2])){
+                if(preg_match("/<[bf].*?>(.*?)<\/.*?>/", $veh[2], $p)){
+                    $platform = $p[1];
+                    $platformNormal = false;
+                }else{
+                    //echo $veh[2] . "\n";
+                    preg_match("/&nbsp;.*?&nbsp;(.*)/", $veh[2], $p2);
+                    if(isset($p2[1])){
+                        $platform = $p2[1];
+                    }
+                }
             }
+
+            preg_match("/\[.*?&nbsp;.*?/", $m2[2], $pl);
+
+            $nodes[$i - 1] = new TripNode($platform, $delay, $unixtime, $stationNode, $vehicle, $platformNormal);
+            $i++;
         }
 
         $liveboard = new Liveboard($station, $arrdep, $nodes);
