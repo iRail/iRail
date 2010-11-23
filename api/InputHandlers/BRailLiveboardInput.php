@@ -29,7 +29,8 @@ class BRailLiveboardInput extends LiveboardInput {
         $station = $this->getStation($request->getStation());
         $this->arrdep = $request->getArrdep();
         $this->name = $request->getStation();
-        $scrapeUrl .= "?l=" . $request->getLang() . "&s=1&sid=" . $station->getAdditional() . "&da=" . substr($request->getArrdep(), 0, 1) . "&p=2";
+        $time = $request->getTime();
+        $scrapeUrl .= "?l=" . $request->getLang() . "&tr=". $time . "-60&s=1&sid=" . $station->getAdditional() . "&da=" . substr($request->getArrdep(), 0, 1) . "&p=2";
         $post = http_post_data($scrapeUrl, "", $request_options) or die("");
         $body = http_parse_message($post)->body;
 
