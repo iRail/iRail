@@ -1,6 +1,0 @@
-NMBS XML interface
-
-Just found this out while digging through HAFAS:
-
-http://hari.b-rail.be/Hafas/bin/extxml.exe
-

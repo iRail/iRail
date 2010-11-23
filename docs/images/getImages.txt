@@ -1,3 +1,0 @@
-for i in `cat a.txt`; do wget http://hari.b-rail.be/HAFAS/img/hafas/$i; done
-
-They seemed to have updated their last batch of images.
