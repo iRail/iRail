@@ -26,15 +26,16 @@ class JSONStationsOutput extends StationsOutput {
     }
 
     private function jsonStations(){
-        $output = "station:[";
+        $output = '{"station":[';
         foreach($this->stations as $station){
             $output .= "{".$this->jsonStation($station) . "},";
         }
-        return $output;
+        $output = trim($output, ",");
+        return $output . "]}";
     }
 
     private function jsonStation($station){
-        return '"id":"' . $station -> getId() . ',"name":"' . $station->getName() . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY(). '"';
+        return '"id":"' . $station -> getId() . '" ,"name":"' . $station->getName() . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY(). '"';
     }
 
 }
