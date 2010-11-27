@@ -56,7 +56,8 @@ abstract class Input {
         $name1 = str_ireplace("[b]","", $name1);
         $name1 = str_ireplace("(nl)","", $name1);
         $stationsinput = new StationsInput();
-        $stations = $stationsinput ->execute($this->request);
+        $international = true;
+        $stations = $stationsinput ->execute($this->request, $international);
         $name1 = strtoupper($name1);
         $max = 0;
         $match = "";
