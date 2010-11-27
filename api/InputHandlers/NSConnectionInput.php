@@ -19,7 +19,7 @@ class NSConnectionInput extends BRailConnectionInput {
      * @param Request $request
      * @return <type>
      */
-    protected function fetchData(Request $request) {
+    public function fetchData(Request $request) {
         $this->request = $request;
         include "getUA.php";
         $url="http://hafas.bene-system.com/bin/query.exe";

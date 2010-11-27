@@ -9,8 +9,8 @@
 include_once("StationsInput.php");
 abstract class Input {
     protected $request;
-    protected abstract function fetchData(Request $request);
-    protected abstract function transformData($serverData);
+    public abstract function fetchData(Request $request);
+    public abstract function transformData($serverData);
     public function execute(Request $request){
         $serverData = $this->fetchData($request);
         return $this->transformData($serverData);
@@ -57,7 +57,8 @@ abstract class Input {
         $name1 = str_ireplace("(nl)","", $name1);
         $stationsinput = new StationsInput();
         $international = true;
-        $stations = $stationsinput ->execute($this->request, $international);
+        $serverData = $stationsinput ->fetchData($this->request, $international);
+        $stations = $stationsinput ->transformData($serverData);
         $name1 = strtoupper($name1);
         $max = 0;
         $match = "";

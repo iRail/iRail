@@ -11,7 +11,7 @@ include_once("DataStructs/Station.php");
 
 class StationsInput extends Input {
 
-    protected function fetchData(Request $request, $international = false) {
+    public function fetchData(Request $request, $international = false) {
         $country = strtoupper($request->getCountry());
         $lang = strtoupper($request->getLang());
         $stations = array();
@@ -54,7 +54,7 @@ class StationsInput extends Input {
         return $stations;
     }
 
-    protected function transformData($serverData) {
+    public function transformData($serverData) {
         return $serverData;
     }
 

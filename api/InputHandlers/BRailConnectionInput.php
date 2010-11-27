@@ -19,7 +19,7 @@ class BRailConnectionInput extends ConnectionInput {
      * @param Request $request
      * @return <type>
      */
-    protected function fetchData(Request $request) {
+    public function fetchData(Request $request) {
         $this->request = $request;
         include "getUA.php";
         $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
@@ -87,7 +87,7 @@ class BRailConnectionInput extends ConnectionInput {
         return http_parse_message($post)->body;
     }
 
-    protected function transformData($serverData) {
+    public function transformData($serverData) {
         $inp = new StationsInput();
         $stations = $inp->execute($this->request);
         $xml = new SimpleXMLElement($serverData);

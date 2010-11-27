@@ -17,7 +17,7 @@ class BRailLiveboardInput extends LiveboardInput {
     private $arrdep;
     private $name;
 
-    protected function fetchData(Request $request) {
+    public function fetchData(Request $request) {
         include "getUA.php";
         $this->request = $request;
         $scrapeUrl = "http://www.railtime.be/mobile/SearchStation.aspx";
@@ -37,7 +37,7 @@ class BRailLiveboardInput extends LiveboardInput {
         return $body;
     }
 
-    protected function transformData($serverData) {
+    public function transformData($serverData) {
         $station = $this->getStation($this->name);
         $arrdep = $this->arrdep;
         $nodes = array();

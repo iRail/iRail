@@ -13,7 +13,7 @@ class BRailVehicleInput extends VehicleInput {
 
     private $scrapeURL = "http://www.railtime.be/mobile/SearchTrain.aspx";
 
-    protected function fetchData(Request $request) {
+    public function fetchData(Request $request) {
         $this->request = $request;
         include "getUA.php";
         $request_options = array(
@@ -29,7 +29,7 @@ class BRailVehicleInput extends VehicleInput {
         return $body;
     }
 
-    protected function transformData($serverData) {
+    public function transformData($serverData) {
         $stops = array();
         //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
         //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
