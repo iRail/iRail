@@ -11,7 +11,7 @@ include_once("DataStructs/Station.php");
 
 class StationsInput extends Input {
 
-    protected function fetchData(Request $request, bool $international = false) {
+    protected function fetchData(Request $request, $international = false) {
         $country = strtoupper($request->getCountry());
         $lang = strtoupper($request->getLang());
         $stations = array();
