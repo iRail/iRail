@@ -6,11 +6,13 @@
  * @author pieterc
  */
 class Request {
+    private $SUPPORTED_LANGUAGES = array("EN", "NL", "FR");
+
     private $format = "xml";
     private $lang = "EN";
     function __construct($format, $lang) {
         $this->format = $format;
-        $this-> lang = $lang;
+        $this-> lang = strtoupper($lang);
     }
 
     /**
@@ -39,7 +41,10 @@ class Request {
     }
 
     public function getLang() {
-        return strtoupper($this->lang);
+        if(in_array($this->lang, $this->SUPPORTED_LANGUAGES)){
+            return $this->lang;
+        }
+        return "EN";
     }
     
 }
