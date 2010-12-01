@@ -153,6 +153,7 @@ abstract class Page {
     }
 
     protected function newRequestInstance(){
+        $this->detectLanguageAndTemplate();
         return new Request("xml", $this->lang);
     }
 

@@ -40,9 +40,9 @@ class VehicleRequest extends Request {
 
     public function getOutput($vehicle){
         if(parent::getFormat() == "xml"){
-            return new XMLVehicleOutput($vehicle);
+            return new XMLVehicleOutput(parent::getLang() ,$vehicle);
         }else if(parent::getFormat() == "json"){
-            return new JSONVehicleOutput($vehicle);
+            return new JSONVehicleOutput(parent::getLang() ,$vehicle);
         }else{
             throw new Exception("No outputformat specified");
         }

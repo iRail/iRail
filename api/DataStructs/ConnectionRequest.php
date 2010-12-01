@@ -62,9 +62,9 @@ class ConnectionRequest extends Request {
     
     public function getOutput($connections){
         if(parent::getFormat() == "xml"){
-            return new XMLConnectionOutput($connections);
+            return new XMLConnectionOutput(parent::getLang(), $connections);
         }else if(parent::getFormat() == "json"){
-            return new JSONConnectionOutput($connections);
+            return new JSONConnectionOutput(parent::getLang(), $connections);
         }else{
             throw new Exception("No outputformat specified");
         }

@@ -63,11 +63,12 @@ abstract class Input {
         $max = 0;
         $match = "";
         foreach($stations as $station){
-            $name2 = $station ->getName();
-            similar_text($name1, $name2, $score);
-            if($score > $max){
-                $max = $score;
-                $match = $station;
+            foreach($station->getNames() as $name2){
+                similar_text($name1, $name2, $score);
+                if($score > $max){
+                    $max = $score;
+                    $match = $station;
+                }
             }
         }
         if($match == ""){

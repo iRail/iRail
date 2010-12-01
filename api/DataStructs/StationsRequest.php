@@ -33,9 +33,9 @@ class StationsRequest extends Request{
 
     public function getOutput($stations){
         if(parent::getFormat() == "xml"){
-            return new XMLStationsOutput($stations);
+            return new XMLStationsOutput(parent::getLang() ,$stations);
         }else if(parent::getFormat() == "json"){
-            return new JSONStationsOutput($stations);
+            return new JSONStationsOutput(parent::getLang() ,$stations);
         }else{
             throw new Exception("No outputformat specified");
         }

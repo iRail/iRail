@@ -11,7 +11,8 @@ class JSONLiveboardOutput extends LiveboardOutput {
 
     private $liveboard;
 
-    function __construct($l) {
+    function __construct($lang, $l) {
+        parent::__construct($lang);
         $this->liveboard = $l;
     }
 

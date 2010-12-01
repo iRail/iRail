@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This class has to be a provider for all Stations available
  *
@@ -15,7 +14,6 @@ class StationsInput extends Input {
         $country = strtoupper($request->getCountry());
         $lang = strtoupper($request->getLang());
         $stations = array();
-        $count = 0;
         $pre = "";
         //yes, I hate this dirty hack. It's here to provide for the iRail client as well as for the API.
         //It needs to disapear if we rewrite the mobile client
@@ -24,16 +22,21 @@ class StationsInput extends Input {
         }
         $file = $pre . "stationlists/" . $country . ".csv";
         if (!file_exists($file)) {
-            $file = $pre . "stationlists/" . $country . "_EN.csv";
+            throw(new Exception("Your country is not supported yet", 3));
         }
         if (($handle = fopen($file, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                if (isset($data[4])) {
-                    $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0], $data[4]);
-                } else {
-                    $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
+                if (!isset($stations[$data[0]])) {
+                    $stations[$data[0]] = new Station($data[0], $data[3], $data[2], $data[4]);
                 }
-                $count++;
+                $language = trim($data[5]);
+                if ($language == '*') {
+                    $stations[$data[0]]->addName("NL", $data[1]);
+                    $stations[$data[0]]->addName("DE", $data[1]);
+                    $stations[$data[0]]->addName("FR", $data[1]);
+                    $stations[$data[0]]->addName("EN", $data[1]);
+                }
+                $stations[$data[0]]->addName($language,$data[1]);
             }
             fclose($handle);
         }
@@ -41,12 +44,17 @@ class StationsInput extends Input {
             $fileINT = $pre . "stationlists/INT.csv";
             if (($handle = fopen($fileINT, "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                    if (isset($data[4])) {
-                        $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0], $data[4]);
-                    } else {
-                        $stations[$count] = new Station($data[1], $data[3], $data[2], $data[0]);
+                    if (!isset($stations[$data[0]])) {
+                        $stations[$data[0]] = new Station($data[0], $data[3], $data[2], $data[4]);
                     }
-                    $count++;
+                    $language = trim($data[5]);
+                    if ($language == '*') {
+                        $stations[$data[0]]->addName("NL", $data[1]);
+                        $stations[$data[0]]->addName("DE", $data[1]);
+                        $stations[$data[0]]->addName("FR", $data[1]);
+                        $stations[$data[0]]->addName("EN", $data[1]);
+                    }
+                    $stations[$data[0]]->addName($language,$data[1]);
                 }
                 fclose($handle);
             }
@@ -62,7 +70,7 @@ class StationsInput extends Input {
         $stations = $this->fetchData($request);
         $output = '';
         foreach ($stations as $i => $station) {
-            $output .= '"' . $station->getName() . '",';
+            $output .= '"' . $station->getName($request->getLang()) . '",';
         }
         $output = rtrim($output, ',');
         return $output;

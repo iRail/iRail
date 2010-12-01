@@ -11,9 +11,11 @@ include_once("Page.php");
 class MobileWebOutput extends Page implements Output {
     private $connections;
     //Todo: this should be moved into the connections datastruct
-    private $strikes = array("18/10/2010", "19/10/2010");
+    private $strikes = array("18/10/2010", "19/10/2010", "21/11/2010");
+
 
     function __construct($c) {
+        //parent::setLanguage(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
         $this->page = array(
             "title" => "iRail.be",
             "strike" => ""
@@ -34,11 +36,12 @@ class MobileWebOutput extends Page implements Output {
     }
 
     public function printAll() {
+        $lang = $_COOKIE["lang"];
         if(sizeof($this->connections) == 0){
             header('Location: noresults');
         }
-        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName();
-        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName();
+        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName($lang);
+        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName($lang);
         $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
         $this->loops["connections"] =$this->getConnectionsOutput();
         $this-> buildPage("Results.tpl");

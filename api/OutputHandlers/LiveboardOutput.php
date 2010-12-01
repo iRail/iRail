@@ -10,14 +10,20 @@ include_once("DataStructs/Liveboard.php");
 
 abstract class LiveboardOutput implements Output {
 
+    protected $lang;
+    function __construct($lang) {
+        $this->lang = $lang;
+    }
+
     protected function buildXML($liveboard) {
+        $lang = $this->lang;
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("liveboard");
         $rootNode->setAttribute("version", "1.0");
         $rootNode->setAttribute("timestamp", date("U"));
         $xml->appendChild($rootNode);
         $liveboard->getStation();
-        $station = $xml->createElement("station", $liveboard->getStation()->getName());
+        $station = $xml->createElement("station", $liveboard->getStation()->getName($lang));
         $station->setAttribute("id", $liveboard->getStation()->getId());
         $station->setAttribute("locationY", $liveboard->getStation()->getY());
         $station->setAttribute("locationX", $liveboard->getStation()->getX());
@@ -38,7 +44,7 @@ abstract class LiveboardOutput implements Output {
             }
             $nodeEl->setAttribute("id", $i);
             $nodeEl->setAttribute("delay", $node->getDelay());
-            $station = $xml->createElement("station", $node->getStation()->getName());
+            $station = $xml->createElement("station", $node->getStation()->getName($lang));
             $station->setAttribute("id", $node->getStation()->getId());
             $station->setAttribute("locationY", $node->getStation()->getY());
             $station->setAttribute("locationX", $node->getStation()->getX());

@@ -5,14 +5,13 @@
  * @author pieterc
  */
 class Station {
-    private $name;
+    private $names;
     private $x;
     private $y;
     private $id;
     private $additional;
 
-    function __construct($name, $locationX, $locationY, $id, $additional = null) {
-        $this->name = $name;
+    function __construct($id, $locationX, $locationY, $additional = null) {
         $this->x = $locationX;
         $this->y = $locationY;
         $this->id = $id;
@@ -22,9 +21,18 @@ class Station {
     public function getAdditional() {
         return $this->additional;
     }
-    
-    public function getName() {
-        return $this->name;
+
+    public function addName($lang, $name){
+        $this->names[$lang] = $name;
+    }
+    public function getName($lang = "EN"){
+        if(isset($this-> names[$lang])){
+            return $this->names[$lang];
+        }
+        return "";
+    }
+    public function getNames() {
+        return $this->names;
     }
 
     public function getId(){

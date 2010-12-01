@@ -47,9 +47,9 @@ class LiveboardRequest extends Request{
     }
     public function getOutput($l){
         if(parent::getFormat() == "xml"){
-            return new XMLLiveboardOutput($l);
+            return new XMLLiveboardOutput(parent::getLang() ,$l);
         }else if(parent::getFormat() == "json"){
-            return new JSONLiveboardOutput($l);
+            return new JSONLiveboardOutput(parent::getLang() ,$l);
         }else{
             throw new Exception("No outputformat specified");
         }

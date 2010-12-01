@@ -7,7 +7,13 @@
 include_once("Output.php");
 abstract class VehicleOutput implements Output {
 
+    protected $lang;
+    function __construct($lang) {
+        $this->lang = $lang;
+    }
+
     protected function buildXML($route) {
+        $lang = $this->lang;
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("vehicleinformation");
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -26,7 +32,7 @@ abstract class VehicleOutput implements Output {
             $stopxml = $xml -> createElement("stop");
             $stopxml -> setAttribute("delay", $stop -> getDelay());
             $stopxml -> setAttribute("id", $i);
-            $station = $xml->createElement("station", $stop -> getStation()->getName());
+            $station = $xml->createElement("station", $stop -> getStation()->getName($lang));
             $station->setAttribute("id", $stop->getStation()->getId());
             $station->setAttribute("locationY", $stop->getStation()->getY());
             $station->setAttribute("locationX", $stop->getStation()->getX());

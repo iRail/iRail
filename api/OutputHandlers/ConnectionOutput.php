@@ -9,7 +9,13 @@ include_once("Output.php");
 
 abstract class ConnectionOutput implements Output {
 
+    protected $lang;
+    function __construct($lang) {
+        $this->lang = $lang;
+    }
+
     protected function buildXML($connectionsarray) {
+        $lang= $this->lang;
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("connections");
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -27,7 +33,7 @@ abstract class ConnectionOutput implements Output {
             $departure = $xml->createElement("departure");
             $departure->setAttribute("delay", $c->getDepart()->getDelay());
 
-            $station = $xml->createElement("station", $c->getDepart()->getStation()->getName());
+            $station = $xml->createElement("station", $c->getDepart()->getStation()->getName($lang));
             $station->setAttribute("id", $c->getDepart()->getStation()->getId());
             $station->setAttribute("location", $c->getDepart()->getStation()->getY() . " " . $c->getDepart()->getStation()->getX());
             $station->setAttribute("locationX", $c->getDepart()->getStation()->getX());
@@ -50,7 +56,7 @@ abstract class ConnectionOutput implements Output {
             $arrival = $xml->createElement("arrival");
             $arrival->setAttribute("delay", $c->getArrival()->getDelay());
 
-            $station = $xml->createElement("station", $c->getArrival()->getStation()->getName());
+            $station = $xml->createElement("station", $c->getArrival()->getStation()->getName($lang));
             $station->setAttribute("id", $c->getArrival()->getStation()->getId());
             $station->setAttribute("locationX", $c->getArrival()->getStation()->getX());
             $station->setAttribute("locationY", $c->getArrival()->getStation()->getY());
@@ -96,7 +102,7 @@ abstract class ConnectionOutput implements Output {
 
                     $timeBetween = $xml->createElement("timeBetween", $v->getTimeBetween());
 
-                    $stationv = $xml->createElement("station", $v->getStation()->getName());
+                    $stationv = $xml->createElement("station", $v->getStation()->getName($lang));
                     $stationv->setAttribute("location", $v->getStation()->getY() . " " . $v->getStation()->getX());
                     $stationv->setAttribute("id", $v->getStation()->getId());
                     $stationv->setAttribute("locationX", $v->getStation()->getX());

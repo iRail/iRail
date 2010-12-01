@@ -39,7 +39,7 @@ class Request {
     }
 
     public function getLang() {
-        return $this->lang;
+        return strtoupper($this->lang);
     }
     
 }

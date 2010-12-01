@@ -9,7 +9,13 @@ include_once("Output.php");
 
 abstract class StationsOutput implements Output {
 
+    protected $lang;
+    function __construct($lang) {
+        $this->lang = $lang;
+    }
+
     protected function buildXML($stationsarray) {
+        $lang = $this->lang;
         $xml = new DOMDocument("1.0", "UTF-8");
         $rootNode = $xml->createElement("stations");
         $rootNode ->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -19,7 +25,7 @@ abstract class StationsOutput implements Output {
 
         $xml->appendChild($rootNode);
         foreach ($stationsarray as $stat) {
-            $station = $xml->createElement("station", $stat->getName());
+            $station = $xml->createElement("station", $stat->getName($lang));
             $station->setAttribute("id", $stat->getId());
             //provide also this tag for old versions
             $station->setAttribute("location", $stat->getY() . " " . $stat->getX());

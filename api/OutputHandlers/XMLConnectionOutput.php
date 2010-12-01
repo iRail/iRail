@@ -10,7 +10,8 @@ include_once("ConnectionOutput.php");
 class XMLConnectionOutput extends ConnectionOutput {
     private $connections;
 
-    function __construct($c) {
+    function __construct($lang, $c) {
+        parent::__construct($lang);
         $this -> connections = $c;
     }
 

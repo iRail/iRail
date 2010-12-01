@@ -10,7 +10,8 @@ class XMLVehicleOutput extends VehicleOutput{
 
     private $route;
 
-    public function __construct($route) {
+    public function __construct($lang, $route) {
+        parent::__construct($lang);
         $this->route = $route;
     }
 

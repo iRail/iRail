@@ -11,7 +11,8 @@ class JSONStationsOutput extends StationsOutput {
 
     private $stations;
 
-    public function __construct($s) {
+    public function __construct($lang, $s) {
+        parent::__construct($lang);
         $this->stations = $s;
     }
 
