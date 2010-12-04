@@ -23,7 +23,7 @@ class Station {
     }
 
     public function addName($lang, $name){
-        $this->names[$lang] = $name;
+        $this->names[$lang] = ucwords(strtolower($name));
     }
     public function getName($lang = "EN"){
         if(isset($this-> names[$lang])){
