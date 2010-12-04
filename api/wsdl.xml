@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="xmlstylesheets/wsdl-viewer.xsl"?>
+
+<description targetNamespace="http://api.irail.be" xmlns:tns="http://api.irail.be" xmlns:whttp="http://www.w3.org/ns/wsdl/http" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msg="http://api.iRail.be/Schema" xmlns:wsdlx="http://www.w3.org/ns/wsdl-extensions" xmlns="http://www.w3.org/ns/wsdl">
+
+    <types>
+        <xs:import namespace="http://api.iRail.be/Schema" schemaLocation="http://dev.api.irail.be/irail.xsd" />
+    </types>
+
+    <service name="iRail" interface="tns:iRailInterface">
+        <documentation>
+            Public API of the iRail project
+        </documentation>
+        <endpoint name="iRailEndpoint" binding="tns:iRailBinding" address="http://api.irail.be" />
+    </service>
+
+    <binding name="iRailBinding" type="http://www.w3.org/ns/wsdl/http" interface="tns:iRailInterface">
+        <documentation>
+            Binding for the iRail API
+        </documentation>
+        <operation ref="tns:ListAllStations" whttp:method="GET" />
+        <operation ref="tns:Schedules" whttp:method="POST" />
+        <operation ref="tns:Liveboard" whttp:method="POST" />
+        <operation ref="tns:Vehicle" whttp:method="POST" />
+    </binding>
+
+    <interface name="iRailInterface">
+        <fault name="Error" element="msg:ErrorResponse" />
+
+        <operation name="ListAllStations" pattern="http://www.w3.org/ns/wsdl/in-out" style="http://www.w3.org/ns/wsdl/style/iri" wsdlx:safe="true">
+            <documentation>
+                Returns a list of all stations together with their location
+            </documentation>
+            <input element="msg:RequestListAllStations" />
+            <output element="msg:ResponseListAllStations" />
+        </operation>
+
+        <operation name="Schedules" pattern="http://www.w3.org/ns/wsdl/in-out" style="http://www.w3.org/ns/wsdl/style/iri" wsdlx:safe="true">
+            <documentation>
+                Returns a list of scheduled connections
+            </documentation>
+            <input element="msg:RequestSchedules" />
+            <output element="msg:ResponseSchedules" />
+        </operation>
+
+        <operation name="Liveboard" pattern="http://www.w3.org/ns/wsdl/in-out" style="http://www.w3.org/ns/wsdl/style/iri" wsdlx:safe="true">
+            <documentation>
+                Returns a liveboard for the given station
+            </documentation>
+            <input element="msg:RequestLiveboard" />
+            <output element="msg:ResponseLiveboard" />
+        </operation>
+
+        <operation name="Vehicle" pattern="http://www.w3.org/ns/wsdl/in-out" style="http://www.w3.org/ns/wsdl/style/iri" wsdlx:safe="true">
+            <documentation>
+                Returns information of given vehicle
+            </documentation>
+            <input element="msg:RequestVehicleInformation" />
+            <output element="msg:ResponseVehicleInformation" />
+        </operation>
+
+    </interface>
+
+</description>

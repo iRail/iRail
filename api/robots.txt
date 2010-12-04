@@ -1,0 +1,17 @@
+# robots.txt for api.irail.be
+# by Project iRail
+# => http://project.irail.be
+
+# API source @ http://github.com/Tuinslak/iRail
+
+User-agent: *
+
+Disallow: README
+Disallow: /unittests/
+Disallow: /xmlstylesheets/
+Disallow: /OutputHandlers/
+Disallow: /InputHandlers/
+Disallow: /DataStructs/
+Disallow: /stats/
+
+# EOF

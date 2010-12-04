@@ -1,0 +1,10 @@
+AuthUserFile /home/yeri/irail/api/stats/.htpasswd
+AuthName "iRail API stats"
+AuthType Basic
+
+<Limit GET>
+require valid-user
+</Limit>
+
+
+Options -Indexes

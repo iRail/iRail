@@ -1,0 +1,40 @@
+# iRail by Yeri Tiete, Pieter Colpaert, and others
+# 
+# http://irail.be - http://project.irail.be
+#
+# robots.txt
+#
+
+# Sitemap
+#Sitemap: http://irail.be/sitemap.xml.gz
+# Missing for now
+
+User-agent: *
+
+# Directories
+Disallow: save.php
+Disallow: noresults.php
+Disallow: noresults
+Disallow: *.php$
+Disallow: .gitignore
+Disallow: README
+Disallow: /docs/
+Disallow: /includes/
+Disallow: /nbproject/
+Disallow: /i18n/
+Disallow: /js/
+Disallow: /templates/
+Disallow: /api/
+Disallow: /widgets/
+Disallow: /stationlists/
+
+# API dir on dev.irail.be/api, else check api.irail.be/robots.txt
+
+Disallow: /api/README     
+Disallow: /api/unittests
+Disallow: /api/xmlstylesheets
+Disallow: /api/OutputHandlers
+Disallow: /api/InputHandlers
+Disallow: /api/DataStructs
+
+# 

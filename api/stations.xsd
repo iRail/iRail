@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:attributeGroup name="rootAttList">
+        <xsd:attribute name="version" type="xsd:string"/>
+        <xsd:attribute name="timestamp" type="xsd:string"/>
+    </xsd:attributeGroup>
+    
+    <xsd:element name="stations">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>This element takes care of the stations</xsd:documentation>
+            </xsd:annotation>
+            <xsd:choice>
+                <xsd:element ref="station" minOccurs="1"/>
+            </xsd:choice>
+            <xsd:attributeGroup ref="rootAttList"/>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="station">
+        <xsd:annotation>
+            <xsd:documentation>Station is an overall used tag to define a station</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="locationX" type="xsd:double"/>
+                    <xsd:attribute name="locationY" type="xsd:double"/>
+                    <xsd:attribute name="location" type="xsd:string"/><!--should be gone in next version-->
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
