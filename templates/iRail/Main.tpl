@@ -127,7 +127,7 @@
                                         <td colspan="3">
                                             <table width="100%" border="0" align="center" style="text-align:center;">
                                                 <tr>
-                                                    <td class="footer" width="50%"><a href="national">Nat</a></td>
+                                                    <td class="footer" width="50%"><a href="/">Nat</a></td>
 
                                                     <td class="footer" width="50%"><a href="international">Int</a></td>
                                                 </tr>
