@@ -68,7 +68,11 @@ class MobileWebOutput extends Page implements Output {
             }
 
             $conoutput[$index]["delay"] = $con -> getDepart() -> getDelay();
-            $conoutput[$index]["platform"] = $con -> getDepart() -> getPlatform();
+            if($con -> getDepart() -> getPlatform() != ""){
+                $conoutput[$index]["platform"] = $con -> getDepart() -> getPlatform();
+            }else{
+                $conoutput[$index]["platform"] = "/";
+            }
             $conoutput[$index]["transfers"] = sizeof($con -> getVias());
 
             $conoutput[$index]["trains"] = $this -> getTrains($con);
