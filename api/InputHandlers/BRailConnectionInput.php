@@ -163,12 +163,6 @@ class BRailConnectionInput extends ConnectionInput {
                                 $arrivalDelay = 0; //Todo: NYImplemented
                                 $stationv = parent::getStation($connsection->Arrival->BasicStop->Station["name"]);
                                 $vehiclev = $this->newTrain($trains[$j - 1]);
-                                if($arrivalPlatform == "" ){
-                                    $arrivalPlatform = "NA";
-                                }
-                                if($departPlatform == "" ){
-                                    $departPlatform = "NA";
-                                }
                                 $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
 
                                 $connectionindex++;
@@ -178,12 +172,6 @@ class BRailConnectionInput extends ConnectionInput {
                 }
                 $vehicle0 = $this->newTrain($trains[0]);
                 $vehicle1 = $this->newTrain($trains[sizeof($trains) - 1]);
-                if ($platform0 == "") {
-                    $platform0 = "NA";
-                }
-                if ($platform1 == "") {
-                    $platform1 = "NA";
-                }
                 $depart = new TripNode($platform0, $delay0, $unixtime0, $station0, $vehicle0, $platformNormal0);
                 $arrival = new TripNode($platform1, $delay1, $unixtime1, $station1, $vehicle1, $platformNormal1);
 
