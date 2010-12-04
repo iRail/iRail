@@ -47,6 +47,8 @@ abstract class Page {
     private function detectLanguageAndTemplate() {
         if (isset($_COOKIE["language"])) {
             $this->setLanguage($_COOKIE["language"]);
+        }else if(in_array(strtoupper($_SERVER['HTTP_ACCEPT_LANGUAGE']), $this->AVAILABLE_LANGUAGES)){
+            $this->setLanguage(strtoupper($_SERVER['HTTP_ACCEPT_LANGUAGE']));
         }
         if (isset($_GET["lang"])) {
             $this->setLanguage($_GET["lang"]);
