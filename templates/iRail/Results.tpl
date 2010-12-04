@@ -20,7 +20,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <!-- compass image by Yusuke Kamiyamane, Creative Commons (Attribution 3.0 Unported) -->
 <table>
 <tr>
-<td>{i18n_map}: <a href="http://maps.google.be/?saddr=Station {from}&daddr=Station {to}" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" /></a>
+<td>{i18n_map}: <a href="http://maps.google.be/?saddr={location1}&daddr={location2}" target="_blank"><img border="0" class="icon" src="img/map.png" width="14" height="14" alt="Local Map" title="Click for map" /></a>
 </td>
 <td>{i18n_date}: {date}
 </td>

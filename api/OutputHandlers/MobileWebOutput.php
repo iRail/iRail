@@ -40,6 +40,8 @@ class MobileWebOutput extends Page implements Output {
         if(sizeof($this->connections) == 0){
             header('Location: noresults');
         }
+        $this->page["location1"]= $this-> connections[0] -> getDepart() -> getStation() -> getY() . " " . $this-> connections[0] -> getDepart() -> getStation() -> getX();
+        $this->page["location2"]= $this-> connections[0] -> getArrival() -> getStation() -> getY() . " " . $this-> connections[0] -> getArrival() -> getStation() -> getX();
         $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName(parent::getLang());
         $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName(parent::getLang());
         $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
