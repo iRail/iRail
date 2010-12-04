@@ -157,5 +157,10 @@ abstract class Page {
         return new Request("xml", $this->lang);
     }
 
+    public function getLang() {
+        return $this->lang;
+    }
+
+
 }
 ?>
