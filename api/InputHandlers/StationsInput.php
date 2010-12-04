@@ -70,7 +70,17 @@ class StationsInput extends Input {
         $stations = $this->fetchData($request);
         $output = '';
         foreach ($stations as $i => $station) {
-            $output .= '"' . $station->getName($request->getLang()) . '",';
+            if(isset($_COOKIE['language'])){
+                $output .= '"' . $station->getName($request->getLang()) . '",';
+            }else{
+                $previousname = array();
+                foreach($station -> getNames() as $name){
+                    if(in_array($name,$previousname)){
+                        $output .=  '"' . $name. '",';
+                        $previousname[sizeof($previousname)] = $name;
+                    }
+                }
+            }
         }
         $output = rtrim($output, ',');
         return $output;
@@ -85,6 +95,5 @@ class StationsInput extends Input {
         }
         throw new Exception("No station for station id found (getStationFromId)", 3);
     }
-
 }
 ?>
