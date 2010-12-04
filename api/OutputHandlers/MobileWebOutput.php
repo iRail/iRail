@@ -36,12 +36,12 @@ class MobileWebOutput extends Page implements Output {
     }
 
     public function printAll() {
-        $lang = $_COOKIE["lang"];
+        
         if(sizeof($this->connections) == 0){
             header('Location: noresults');
         }
-        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName($lang);
-        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName($lang);
+        $this->page["from"] = $this-> connections[0] -> getDepart() -> getStation() -> getName(parent::getLang());
+        $this->page["to"] = $this-> connections[0] -> getArrival() -> getStation() -> getName(parent::getLang());
         $this->page["date"] = date("d/m/Y", $this->connections[0] -> getDepart() -> getTime());
         $this->loops["connections"] =$this->getConnectionsOutput();
         $this-> buildPage("Results.tpl");
