@@ -28,9 +28,13 @@ server {
 		deny all;
 	}
 
-        location /stats/ {
+        location = /stats/api-stats.php {
 		auth_basic            "iRail API stats";
 		auth_basic_user_file  /var/www/iRail/api/stats/.htpasswd;
+		include /etc/nginx/fastcgi_params;
+                keepalive_timeout 0;
+                fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_pass   127.0.0.1:9000;
         }
 
 	autoindex off;
