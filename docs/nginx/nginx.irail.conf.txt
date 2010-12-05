@@ -2,14 +2,14 @@
 server {
 	listen   80;
 	# what domains it should listen to, in this case lab(s).irail.*
-	server_name  irail.be labs.irail.* lab.irail.* irail.* www.irail.*;
+	server_name  irail.be labs.irail.* lab.irail.* irail.* www.irail.* i.irail.* m.irail.*;
 
 	# logging
 	access_log  /var/log/nginx/irail.access.log;
 	error_log   /var/log/nginx/irail.error.log;
 
 	# rewrite rules
-	rewrite ^/national$		/national.php		last;
+	rewrite ^/national$		/index.php		last;
 	rewrite ^/index$		/index.php		last;
 	rewrite ^/Default.htm$		/index.php		last;
 	rewrite ^/index.html$		/index.php		last;
@@ -28,11 +28,13 @@ server {
 	rewrite ^/api/connections/$	/api/connections.php	last;
 	rewrite ^/api/stations/$	/api/stations.php	last;
 	rewrite ^/api/liveboard/$	/api/liveboard.php	last;
+	rewrite ^/vehicle/$		/api/vehicle.php	last;
 
 	# API => api.domain
 	rewrite ^connections/$		/connections.php	last;
 	rewrite ^stations/$		/stations.php		last;
 	rewrite ^/liveboard/$		/liveboard.php		last;
+	rewrite ^/vehicle/$		/vehicle.php		last;
 	#
 
 	location / {
@@ -53,10 +55,14 @@ server {
 		deny all;
 	}
 
-	location /api/stats {
+        location = /api/stats/api-stats.php {
 		auth_basic            "iRail API stats";
 		auth_basic_user_file  /var/www/iRail/api/stats/.htpasswd;
-	}
+		include /etc/nginx/fastcgi_params;
+                keepalive_timeout 0;
+                fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_pass   127.0.0.1:9000;
+        }
 
 	autoindex off;
 	}
