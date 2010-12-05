@@ -81,10 +81,11 @@ try {
             $count = 0;
             foreach ($rows as $day => $value) {
                 $explodedday = explode(" ", $day);
-                $month = $explodedday[1] + 0;
-                $daytime = $explodedday[0] + 0;
-                $year = $explodedday[2] + 0;
-                $date = mktime(0, 0, 0, $month, $daytime, $year);
+                $month__ = $explodedday[1]+0;
+                $daytime__ = $explodedday[0] + 0;
+                $year__ = $explodedday[2] + 1; //€#@%, No idea why this has to be +1. Anyone?
+                $date = mktime(0, 0, 0, $month__, $daytime__, $year__);
+                echo date("d m y" ,$date) . " " . $day. "<br/>";
                 if ($count == 0) {
                     echo '<tr><td align="right"><font color="red">' . $day . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
                 } else if (date("N", $date) == 7 || date("N", $date) == 6) {
