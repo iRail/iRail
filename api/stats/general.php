@@ -4,15 +4,15 @@
 // include vars
 include("../../includes/dbConfig.php");
 $filter = "";
-if(isset($_GET['filter'])){
+if (isset($_GET['filter'])) {
     $filter = mysql_escape_string($_GET['filter']);
 }
 try {
     mysql_pconnect($api_host, $api_user, $api_password);
     mysql_select_db($api_database);
-    if($filter != ""){
-        $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table WHERE $api_c3 LIKE '%$filter%' GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
-    }else{
+    if ($filter != "") {
+        $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %m %Y') day, count(id) visitors FROM $api_table WHERE $api_c3 LIKE '%$filter%' GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
+    } else {
         $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
     }
     $result = mysql_query($query);
@@ -20,7 +20,6 @@ try {
     while ($row = mysql_fetch_object($result)) {
         $rows[$row->day] = $row->visitors;
     }
-
 } catch (Exception $e) {
     echo "Error connecting to the database.";
 }
@@ -33,7 +32,7 @@ try {
         <link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png" />
         <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
         <style type="text/css">
-            #chart { width: 600px; height: 400px }
+            #chart { width: 900px; height: 400px }
         </style>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
         <script type="text/javascript" src="jquery.gchart.min.js"></script>
@@ -45,30 +44,55 @@ try {
 		series: [$.gchart.series('Hits', [
             <?
             $chartrows = array_reverse($rows, true);
-            foreach($chartrows as $day => $value){
-                echo "'$value',";
+            $count = 0;
+            foreach ($chartrows as $day => $value) {
+                if ($count != sizeof($rows) - 1 && $count != 0) {
+                    echo "'$value',";
+                }
+                $count++;
             }
             ?>
             ], 'red', 'ffcccc')],
-		axes: [$.gchart.axis('bottom', [<?
-
-            foreach($chartrows as $day => $value){
-                echo "'" . substr($day, 0, 2). "',";
+		axes: [$.gchart.axis('bottom', [
+            <?
+            $count = 0;
+            foreach ($chartrows as $day => $value) {
+                if ($count != sizeof($rows) - 1 && $count != 0) {
+                    echo "'" . substr($day, 0, 2) . "',";
+                    $count++;
+                }
             }
             ?>
             ], 'black')],
-		legend: 'left'});
+        		legend: 'left'});
             });
         </script>
     </head>
     <body>
-        <h1>Calls to the iRail API<? if($filter != ""){echo "with $filter";} ?></h1>
+        <h1>Calls to the iRail API<?
+            if ($filter != "") {
+                echo " with $filter";
+            }
+            ?></h1>
         <div id="chart"></div>
 
         <?
-            echo '<table width="100%" border="1"><tr><th>Date</td><th>API Requests</th></tr>';
-            foreach($rows as $day => $value){
-                echo '<tr><td align="right">' . $day . '</td><td>' . $value . '</td></tr>';
+            echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
+            $count = 0;
+            foreach ($rows as $day => $value) {
+                $explodedday = explode(" ", $day);
+                $month = $explodedday[1] + 0;
+                $daytime = $explodedday[0] + 0;
+                $year = $explodedday[2] +0;
+                $date = mktime(0, 0, 0, $month, $daytime, $year);
+                if ($count == 0) {
+                    echo '<tr><td align="right"><font color="red">' . $day . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
+                } else if(date("N",$date) == 7 || date("N",$date) == 6) {
+                    echo '<tr><td align="right"><font color="gray">' . $day . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
+                }else{
+                    echo '<tr><td align="right">' . $day . '</td><td>' . $value . '</td></tr>';
+                }
+                $count++;
             }
             echo '</table>';
         ?>
