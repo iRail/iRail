@@ -22,21 +22,28 @@ class JSONStationsOutput extends StationsOutput {
         header('Content-Type: ' . ($callback ? 'application/javascript' : 'application/json') . ';charset=UTF-8');
         //this function builds a DOM XML-tree
         //$xml = parent::buildXML($this->stations);
-        $jsonstring= $this->jsonStations();
-        echo ($callback ? $callback . '(' : '') . $jsonstring  . ($callback ? ')' : '');
+        $jsonstring = $this->jsonStations();
+        echo ($callback ? $callback . '(' : '') . $jsonstring . ($callback ? ')' : '');
     }
 
-    private function jsonStations(){
+    private function jsonStations() {
         $output = '{"station":[';
-        foreach($this->stations as $station){
-            $output .= "{".$this->jsonStation($station) . "},";
+        foreach ($this->stations as $station) {
+            $output .= $this->jsonStation($station);
         }
         $output = trim($output, ",");
         return $output . "]}";
     }
 
-    private function jsonStation($station){
-        return '"id":"' . $station -> getId() . '" ,"name":"' . $station->getName() . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY(). '"';
+    private function jsonStation($station) {
+        $output = "";
+        if (!isset($_GET["lang"])) {
+            foreach ($station->getNames() as $name) {
+                $output.= "{" . '"id":"' . $station->getId() . '" ,"name":"' . $name . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY() . '"' . "},";
+            }
+            return $output;
+        }
+        return "{" . '"id":"' . $station->getId() . '" ,"name":"' . $station->getName($_GET["lang"]) . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY() . '"' . "},";
     }
 
 }
