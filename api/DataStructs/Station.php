@@ -26,6 +26,7 @@ class Station {
         $this->names[$lang] = ucwords(strtolower($name));
     }
     public function getName($lang = "EN"){
+        $lang = strtoupper($lang);
         if(isset($this-> names[$lang])){
             return $this->names[$lang];
         }
