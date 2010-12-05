@@ -3,10 +3,18 @@
 // Gives report about all days report
 // include vars
 include("../../includes/dbConfig.php");
+$filter = "";
+if(isset($_GET['filter'])){
+    $filter = mysql_escape_string($_GET['filter']);
+}
 try {
     mysql_pconnect($api_host, $api_user, $api_password);
     mysql_select_db($api_database);
-    $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table group by DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
+    if($filter != ""){
+        $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table WHERE $api_c3 LIKE '%$filter%' GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
+    }else{
+        $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc";
+    }
     $result = mysql_query($query);
     $rows;
     while ($row = mysql_fetch_object($result)) {
@@ -31,7 +39,7 @@ try {
         <script type="text/javascript" src="jquery.gchart.min.js"></script>
         <script type="text/javascript">
             $(function () {
-	$('#chart').gchart({type: 'line', maxValue: 4000,
+	$('#chart').gchart({type: 'line', maxValue: <? echo max($rows); ?>,
 		title: 'Calls to the iRail API', titleColor: 'red',
 		backgroundColor: $.gchart.gradient('horizontal', 'ccffff', 'ccffff00'),
 		series: [$.gchart.series('Hits', [
@@ -54,6 +62,7 @@ try {
         </script>
     </head>
     <body>
+        <h1></h1>
         <div id="chart"></div>
 
         <?
