@@ -62,7 +62,7 @@ try {
         </script>
     </head>
     <body>
-        <h1></h1>
+        <h1>Calls to the iRail API<? if($filter != ""){echo "with $filter";} ?></h1>
         <div id="chart"></div>
 
         <?
