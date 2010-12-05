@@ -38,8 +38,12 @@ class JSONStationsOutput extends StationsOutput {
     private function jsonStation($station) {
         $output = "";
         if (!isset($_GET["lang"])) {
+            $previousname = array();
             foreach ($station->getNames() as $name) {
-                $output.= "{" . '"id":"' . $station->getId() . '" ,"name":"' . $name . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY() . '"' . "},";
+                if (!in_array($name, $previousname)) {
+                    $output.= "{" . '"id":"' . $station->getId() . '" ,"name":"' . $name . '","locationX":"' . $station->getX() . '","locationY":"' . $station->getY() . '"' . "},";
+                    $previousname[sizeof($previousname)] = $name;
+                }
             }
             return $output;
         }
