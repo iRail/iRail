@@ -1,5 +1,5 @@
 <?php
 
-header('location: api-stats.php');
+header('location: general.php');
 
 ?>
