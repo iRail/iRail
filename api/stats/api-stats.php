@@ -92,7 +92,7 @@ $count = 1 + $s;
 		echo "<td>" . $row->$api_c7 . "</td>";
 		echo "</tr>";
 	}
-
+        mysql_close();
 ?>
 </table>
 </body>
