@@ -59,8 +59,8 @@ try {
             foreach ($chartrows as $day => $value) {
                 if ($count != sizeof($rows) - 1 && $count != 0) {
                     echo "'" . substr($day, 0, 2) . "',";
-                    $count++;
                 }
+                $count++;
             }
             ?>
             ], 'black')],
@@ -83,13 +83,13 @@ try {
                 $explodedday = explode(" ", $day);
                 $month = $explodedday[1] + 0;
                 $daytime = $explodedday[0] + 0;
-                $year = $explodedday[2] +0;
+                $year = $explodedday[2] + 0;
                 $date = mktime(0, 0, 0, $month, $daytime, $year);
                 if ($count == 0) {
                     echo '<tr><td align="right"><font color="red">' . $day . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
-                } else if(date("N",$date) == 7 || date("N",$date) == 6) {
+                } else if (date("N", $date) == 7 || date("N", $date) == 6) {
                     echo '<tr><td align="right"><font color="gray">' . $day . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
-                }else{
+                } else {
                     echo '<tr><td align="right">' . $day . '</td><td>' . $value . '</td></tr>';
                 }
                 $count++;
