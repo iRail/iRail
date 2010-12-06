@@ -65,7 +65,7 @@ function hideAddressBar() { window.scrollTo(0, 1); }
 <tr>
 <td colspan="8">
 <center>
-    <form action="http://iRail.be">
+    <form action="/">
 <input type="submit" name="submit" value="{i18n_back}">
 </form>
 </center>
