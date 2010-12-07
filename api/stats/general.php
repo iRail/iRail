@@ -81,7 +81,7 @@ try {
             $count = 0;
             foreach ($rows as $day__ => $value) {
                 $date__ = strtotime($day__);
-                echo date("d m y" ,$date__) . " " . $day__. "<br/>";
+                //echo date("d m y" ,$date__) . " " . $day__. "<br/>";
                 if ($count == 0) {
                     echo '<tr><td align="right"><font color="red">' . $day__ . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
                 } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
