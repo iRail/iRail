@@ -45,7 +45,7 @@ try {
             <?
             $chartrows = array_reverse($rows, true);
             $count = 0;
-            foreach ($chartrows as $day => $value) {
+            foreach ($chartrows as $day__ => $value) {
                 if ($count != sizeof($rows) - 1 && $count != 0) {
                     echo "'$value',";
                 }
@@ -56,9 +56,9 @@ try {
 		axes: [$.gchart.axis('bottom', [
             <?
             $count = 0;
-            foreach ($chartrows as $day => $value) {
+            foreach ($chartrows as $day__ => $value) {
                 if ($count != sizeof($rows) - 1 && $count != 0) {
-                    echo "'" . substr($day, 0, 2) . "',";
+                    echo "'" . substr($day__, 0, 2) . "',";
                 }
                 $count++;
             }
@@ -79,19 +79,15 @@ try {
         <?
             echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
             $count = 0;
-            foreach ($rows as $day => $value) {
-                $explodedday = explode(" ", $day);
-                $month__ = $explodedday[1]+0;
-                $daytime__ = $explodedday[0] + 0;
-                $year__ = $explodedday[2] + 1; //€#@%, No idea why this has to be +1. Anyone?
-                $date = mktime(0, 0, 0, $month__, $daytime__, $year__);
-                //echo date("d m y" ,$date) . " " . $day. "<br/>";
+            foreach ($rows as $day__ => $value) {
+                $date__ = strtotime($day__);
+                echo date("d m y" ,$date__) . " " . $day__. "<br/>";
                 if ($count == 0) {
-                    echo '<tr><td align="right"><font color="red">' . $day . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
-                } else if (date("N", $date) == 7 || date("N", $date) == 6) {
-                    echo '<tr><td align="right"><font color="gray">' . $day . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
+                    echo '<tr><td align="right"><font color="red">' . $day__ . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
+                } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
+                    echo '<tr><td align="right"><font color="gray">' . $day__ . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
                 } else {
-                    echo '<tr><td align="right">' . $day . '</td><td>' . $value . '</td></tr>';
+                    echo '<tr><td align="right">' . $day__ . '</td><td>' . $value . '</td></tr>';
                 }
                 $count++;
             }
