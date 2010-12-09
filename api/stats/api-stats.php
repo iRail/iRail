@@ -79,7 +79,7 @@ $count = 1 + $s;
 		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
 	}
 
-	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th></tr>";
+	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th><th>srvr</th></tr>";
 
 	while($row = mysql_fetch_object($result)) {
 		echo "<tr>";
