@@ -50,7 +50,7 @@ $count = 1 + $s;
 		$result = mysql_query($query);
 		$numrows = mysql_result($result, 0);
 
-		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
+		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
@@ -90,6 +90,7 @@ $count = 1 + $s;
 		echo "<td>" . $row->$api_c5 . "</td>";
 		echo "<td>" . $row->$api_c6 . "</td>";
 		echo "<td>" . $row->$api_c7 . "</td>";
+		echo "<td>" . $row->$api_c8 . "</td>";
 		echo "</tr>";
 	}
         mysql_close();
