@@ -34,6 +34,7 @@
 	$api_c3 = "useragent";			// UA, if any
 	$api_c4 = "from";				// from station
 	$api_c5 = "to";					// to station
+	$api_c8 = "server";
 */
 
 // API MySQL logging
@@ -84,7 +85,7 @@ function writeLog($ua, $from, $to, $err, $ip) {
 
 	// insert in db
 	try {
-		$query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip')";
+		$query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '$api_server_name')";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
