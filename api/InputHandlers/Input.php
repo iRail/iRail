@@ -52,12 +52,15 @@ abstract class Input {
      * This function will use approximate string matching to determine what station we're looking for
      * @param string $name
      */
-    public function getStation($name1) {
+    public function getStation($name1, $req = null) {
+        if($req == null){
+            $req= $this->request;
+        }
         $name1 = str_ireplace("[b]","", $name1);
         $name1 = str_ireplace("(nl)","", $name1);
         $stationsinput = new StationsInput();
         $international = true;
-        $serverData = $stationsinput ->fetchData($this->request, $international);
+        $serverData = $stationsinput ->fetchData($req, $international);
         $stations = $stationsinput ->transformData($serverData);
         $name1 = strtoupper($name1);
         $max = 0;

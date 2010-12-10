@@ -39,7 +39,7 @@ class ConnectionRequest extends Request {
             $this->from = $station ->getName('NL');
         }else{
             $si = new StationsInput();
-            $station = $si ->getStation($from);
+            $station = $si ->getStation($from, $this);
             //hafas works better in NL. So use NL!
             $this->from = $station -> getName('NL');
         }
@@ -49,7 +49,7 @@ class ConnectionRequest extends Request {
             $this->to = $station ->getName('NL');
         }else{
             $si = new StationsInput();
-            $station = $si ->getStation($to);
+            $station = $si ->getStation($to, $this);
             //hafas works better in NL. So use NL!
             $this->to = $station -> getName('NL');
         }
