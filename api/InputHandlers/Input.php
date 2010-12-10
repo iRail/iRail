@@ -52,7 +52,7 @@ abstract class Input {
      * This function will use approximate string matching to determine what station we're looking for
      * @param string $name
      */
-    protected function getStation($name1) {
+    public function getStation($name1) {
         $name1 = str_ireplace("[b]","", $name1);
         $name1 = str_ireplace("(nl)","", $name1);
         $stationsinput = new StationsInput();
