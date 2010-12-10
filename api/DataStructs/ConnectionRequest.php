@@ -36,12 +36,22 @@ class ConnectionRequest extends Request {
         if(sizeof(explode(".",$from)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($from, $this);
-            $this->from = $station ->getName();
+            $this->from = $station ->getName('NL');
+        }else{
+            $si = new StationsInput();
+            $station = $si ->getStation($from);
+            //hafas works better in NL. So use NL!
+            $this->from = $station -> getName('NL');
         }
         if(sizeof(explode(".",$to)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($to, $this);
-            $this->to = $station ->getName();
+            $this->to = $station ->getName('NL');
+        }else{
+            $si = new StationsInput();
+            $station = $si ->getStation($to);
+            //hafas works better in NL. So use NL!
+            $this->to = $station -> getName('NL');
         }
     }
 
