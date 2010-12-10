@@ -94,6 +94,8 @@ $count = 1 + $s;
 		echo "</tr>";
 	}
         mysql_close();
+        
+include("../../includes/googleAnalytics.php");
 ?>
 </table>
 </body>
