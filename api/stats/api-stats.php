@@ -89,11 +89,12 @@ $count = 1 + $s;
 		echo "<td>" . $row->$api_c4 . "</td>";
 		echo "<td>" . $row->$api_c5 . "</td>";
 		echo "<td>" . $row->$api_c6 . "</td>";
-		echo "<td>" . $row->$api_c7 . "</td>";
-		echo "<td>" . $row->$api_c8 . "</td>";
+		echo "<td><center>" . $row->$api_c7 . "</center></td>";
+		echo "<td><center>" . $row->$api_c8 . "</center></td>";
 		echo "</tr>";
 	}
-        mysql_close();
+        
+	mysql_close();
         
 include("../../includes/googleAnalytics.php");
 ?>
