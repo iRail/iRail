@@ -2,7 +2,7 @@
 <html>
     <head>
         <link rel="apple-touch-icon" href="../img/irail.png" />
-        <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
         <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
         <meta name="keywords" content="nmbs, sncb, iphone, mobile, irail, irail.be, route planner">
         <meta name="language" content="en">

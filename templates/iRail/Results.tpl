@@ -4,8 +4,6 @@
 <title>iRail - {from} to {to}</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="templates/iRail/css/query.css" rel="stylesheet" type="text/css" />
-<link rel="apple-touch-icon" href="img/irail.png" />
-<link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
 <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 <script type="application/x-javascript">
