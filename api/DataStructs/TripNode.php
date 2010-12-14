@@ -11,15 +11,22 @@ class TripNode {
     private $station;
     private $vehicle;
     private $platformNormal; // This is a boolean to indicate whether the platform has changed recently
+    private $left;
 
-    function __construct($platform, $delay, $unixtime, $station, $vehicle, $platformNormal = true) {
+    function __construct($platform, $delay, $unixtime, $station, $vehicle, $platformNormal = true, $left = false) {
         $this->platform = $platform;
         $this->delay = $delay;
         $this->unixtime = $unixtime;
         $this->station = $station;
         $this->vehicle = $vehicle;
         $this->platformNormal = $platformNormal;
+	$this->left = $left;
     }
+
+    public function getLeft(){
+	 return $this->left;
+    }
+    
 
     public function normalPlatform(){
         return $this->platformNormal;

@@ -49,6 +49,14 @@ class BRailLiveboardInput extends LiveboardInput {
             //$m2[1] has: time
             //$m2[2] has delay, stationname & platform
 
+            //GET LEFT OR NOT
+	    $left = false;
+	    if(preg_match("/color=\"DarkGray\"/ism",$tr,$lll) > 0 ){
+		 $left = true;
+	    }
+	    
+	    
+
             //GET TIME:
             preg_match("/(\d\d:\d\d)/", $m2[1], $t);
             $time = "00d" . $t[1] . ":00";
@@ -86,7 +94,7 @@ class BRailLiveboardInput extends LiveboardInput {
 
             preg_match("/\[.*?&nbsp;.*?/", $m2[2], $pl);
 
-            $nodes[$i - 1] = new TripNode($platform, $delay, $unixtime, $stationNode, $vehicle, $platformNormal);
+            $nodes[$i - 1] = new TripNode($platform, $delay, $unixtime, $stationNode, $vehicle, $platformNormal, $left);
             $i++;
         }
 

@@ -42,6 +42,12 @@ abstract class LiveboardOutput implements Output {
             } else if ($liveboard->getDeparr() == "DEP") {
                 $nodeEl = $xml->createElement("departure");
             }
+	    if($node -> getLeft()){
+		 $nodeEl->setAttribute("left", "1");
+	    }else{
+		 $nodeEl->setAttribute("left", "0");
+	    }
+		 
             $nodeEl->setAttribute("id", $i);
             $nodeEl->setAttribute("delay", $node->getDelay());
             $station = $xml->createElement("station", $node->getStation()->getName($lang));
