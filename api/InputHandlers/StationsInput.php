@@ -10,7 +10,7 @@ include_once("DataStructs/Station.php");
 
 class StationsInput extends Input {
 											// set to true
-    public function fetchData(Request $request, $international) {
+    public function fetchData(Request $request, $international = true) {
     	// attempt to fix
     	$international = true;
     	
