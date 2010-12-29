@@ -40,7 +40,7 @@ class StationsInput extends Input {
             }
             fclose($handle);
         }
-        if ($international) {
+        //if ($international) {
             $fileINT = $pre . "stationlists/INT.csv";
             if (!file_exists($fileINT)) {
             	throw(new Exception("International database missing", 3));
@@ -61,7 +61,7 @@ class StationsInput extends Input {
                 }
                 fclose($handle);
             }
-        }
+        //}
         return $stations;
     }
 
