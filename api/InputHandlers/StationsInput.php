@@ -9,11 +9,8 @@ include_once("Input.php");
 include_once("DataStructs/Station.php");
 
 class StationsInput extends Input {
-											// set to true
-    public function fetchData(Request $request, $international = true) {
-    	// attempt to fix
-    	$international = true;
-    	
+												// set to true
+    public function fetchData(Request $request, $international = true) {    	
         $country = strtoupper($request->getCountry());
         $lang = strtoupper($request->getLang());
         $stations = array();
@@ -45,6 +42,9 @@ class StationsInput extends Input {
         }
         if ($international) {
             $fileINT = $pre . "stationlists/INT.csv";
+            if (!file_exists($fileINT)) {
+            	throw(new Exception("International database missing", 3));
+        	}
             if (($handle = fopen($fileINT, "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
                     if (!isset($stations[$data[0]])) {
