@@ -22,7 +22,7 @@ class Request {
     public function getCountry() {
         $expl = explode(".", $_SERVER["SERVER_NAME"]);
         $country = $expl[sizeof($expl)-1];
-        return "BE";
+        return "be";
     }
 
     /**

@@ -101,11 +101,12 @@ class BRailConnectionInput extends ConnectionInput {
                 $nameStation0 = $conn->Overview->Departure->BasicStop->Station['name'];
 		$locXStation0 = $conn->Overview->Departure->BasicStop->Station['x'];
 		$locYStation0 = $conn->Overview->Departure->BasicStop->Station['y'];
+		$IDStation0 = $conn->Overview->Departure->BasicStop->Station['externalStationNr'];
 		preg_match("/(.)(.*)/",$locXStation0, $m);
 		$locXStation0 = $m[1] . ".". $m[2];
 		preg_match("/(..)(.*)/",$locYStation0, $m);
 		$locYStation0 = $m[1] . ".". $m[2];
-                $station0 = new Station("ERROR", $locXStation0,$locYStation0);
+                $station0 = new Station("BE.NMBS." .$IDStation0, $locXStation0,$locYStation0);
 		$station0->addName($this->request->getLang(), $nameStation0);
 		
 
@@ -115,11 +116,12 @@ class BRailConnectionInput extends ConnectionInput {
                 $nameStation1 = $conn->Overview->Arrival->BasicStop->Station['name'];
 		$locXStation1 = $conn->Overview->Arrival->BasicStop->Station['x'];
 		$locYStation1 = $conn->Overview->Arrival->BasicStop->Station['y'];
+		$IDStation1 = $conn->Overview->Arrival->BasicStop->Station['externalStationNr'];
 		preg_match("/(\d)(.*)/",$locXStation1, $m);
 		$locXStation1 = $m[1] . "." . $m[2];
 		preg_match("/(\d\d)(.*)/",$locYStation1, $m);
 		$locYStation1 = $m[1] . "." . $m[2];
-                $station1 = new Station("ERROR", $locXStation1,$locYStation1);
+                $station1 = new Station("BE.NMBS." .$IDStation1, $locXStation1,$locYStation1);
 		$station1->addName($this->request->getLang(), $nameStation1);
 
 
@@ -182,7 +184,8 @@ class BRailConnectionInput extends ConnectionInput {
 				$locXStationV = $m[1] . "." . $m[2];
 				preg_match("/(\d\d)(.*)/",$locYStationV, $m);
 				$locYStationV = $m[1] . "." . $m[2];
-				$stationv = new Station("ERROR", $locXStationV,$locYStationV);
+				$IDStationV = $connsection->Arrival->BasicStop->Station['externalStationNr'];
+				$stationv = new Station("BE.NMBS." .$IDStationV, $locXStationV,$locYStationV);
 				$stationv->addName($this->request->getLang(), $nameStationV);
                                 $vehiclev = $this->newTrain($trains[$j - 1]);
                                 $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);

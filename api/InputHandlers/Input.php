@@ -69,16 +69,19 @@ abstract class Input {
             foreach($station->getNames() as $name2){
                 $name2 = strtoupper($name2);
                 similar_text($name1, $name2, $score);
-                if($score > $max && $score < 0.50){
-		     echo $score;
-		     
+                if($score > $max && $score > 50){
                     $max = $score;
                     $match = $station;
                 }
             }
         }
         if($match == ""){
-            throw new Exception("Could not find a good station for the name given (getStation())",3);
+	     //throw new Exception("Could not find a good station for the name given (getStation())",3);
+	     $s = new Station("UNKNOWN", 0,0);
+	     $s->addName("NL", "Ongekend station");
+	     $s->addName("FR", "Gare inconnue");
+	     $s->addName("EN", "Unknown station");
+	     return $s;
         }
         return $match;
     }
