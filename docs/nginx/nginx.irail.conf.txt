@@ -2,7 +2,7 @@
 server {
 	listen   80;
 	# what domains it should listen to, in this case lab(s).irail.*
-	server_name  irail.be labs.irail.* lab.irail.* irail.* www.irail.* i.irail.* m.irail.*;
+	server_name  irail.be labs.irail.* lab.irail.* irail.* www.irail.* i.irail.* m.irail.* 0.irail.*;
 
 	# logging
 	access_log  /var/log/nginx/irail.access.log;
@@ -16,29 +16,14 @@ server {
 	rewrite ^/nat$			/national.php		last;
 	rewrite ^/international$	/international.php	last;
 	rewrite ^/int$			/international.php	last;
-	rewrite ^/results$		/query_nat.php		last;
-	rewrite ^/intresults$		/query_int.php		last;
+	rewrite ^/results$		/results.php		last;
 	rewrite ^/noresults$		/noresults.php		last;
 	rewrite ^/settings$		/settings.php		last;
 	rewrite ^/save$			/save.php		last;
 	rewrite ^/about$		/about.php		last;
-	rewrite ^/changelog$		/docs/changelog.php	last;
-
-	# API => domain/api
-	rewrite ^/api/connections/$	/api/connections.php	last;
-	rewrite ^/api/stations/$	/api/stations.php	last;
-	rewrite ^/api/liveboard/$	/api/liveboard.php	last;
-	rewrite ^/vehicle/$		/api/vehicle.php	last;
-
-	# API => api.domain
-	rewrite ^connections/$		/connections.php	last;
-	rewrite ^stations/$		/stations.php		last;
-	rewrite ^/liveboard/$		/liveboard.php		last;
-	rewrite ^/vehicle/$		/vehicle.php		last;
-	#
 
 	location / {
-		root   /var/www/iRail;
+		root   /var/www/iRail-web;
 		index  index.php index.html index.htm index.cgi;
 		fastcgi_index	index.php;
 
@@ -55,21 +40,12 @@ server {
 		deny all;
 	}
 
-        location = /api/stats/api-stats.php {
-		auth_basic            "iRail API stats";
-		auth_basic_user_file  /var/www/iRail/api/stats/.htpasswd;
-		include /etc/nginx/fastcgi_params;
-                keepalive_timeout 0;
-                fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                fastcgi_pass   127.0.0.1:9000;
-        }
-
 	autoindex off;
 	}
 
 	error_page  404  /404.html;
 	location = /404.html {
-		root   /var/www/;
+		root   /var/www/iRail-web;
 	}
 
 	# redirect server error pages to the static page /50x.html
@@ -82,7 +58,7 @@ server {
 	# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
 	#
 	location ~* \.(php|cgi)$ {
-		root	/var/www/iRail;
+		root	/var/www/iRail-web;
 		include /etc/nginx/fastcgi_params;
 		keepalive_timeout 0;
 		fastcgi_param   SCRIPT_FILENAME	$document_root$fastcgi_script_name;
