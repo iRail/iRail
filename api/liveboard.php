@@ -69,12 +69,26 @@ if (!(isset($station))&& !(isset($id))) {
     $eh = new ErrorHandler($e, $format);
     $eh->printError();
 } else if(!(isset($station))) {
+     try{
     $request = new LiveboardRequest($id, $date, $time, $arrdep, $lang, $format, true);
     $call = new APICall("liveboard", $request);
     $call->executeCall();
+     }
+     catch(Exception $e){
+    $eh = new ErrorHandler($e, $format);
+    $eh->printError();	  
+     }
 } else {
+     try{
+	  
     $request = new LiveboardRequest($station, $date, $time, $arrdep, $lang, $format, false);
     $call = new APICall("liveboard", $request);
     $call->executeCall();
+
+     }
+     catch(Exception $e){
+    $eh = new ErrorHandler($e, $format);
+    $eh->printError();	  
+     }
 }
 ?>
