@@ -22,12 +22,7 @@ class Request {
     public function getCountry() {
         $expl = explode(".", $_SERVER["SERVER_NAME"]);
         $country = $expl[sizeof($expl)-1];
-        if($country == "localhost"){ // added this line for testing locally
-            return "be";
-        }else if(strtoupper($country) == "COM"){
-            return "be";
-        }
-        return $country;
+        return "BE";
     }
 
     /**

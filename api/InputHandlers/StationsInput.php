@@ -14,13 +14,7 @@ class StationsInput extends Input {
         $country = strtoupper($request->getCountry());
         $lang = strtoupper($request->getLang());
         $stations = array();
-        $pre = "";
-        //yes, I hate this dirty hack. It's here to provide for the iRail client as well as for the API.
-        //It needs to disapear if we rewrite the mobile client
-        if (sizeof(explode("api", $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"])) > 1) {
-            $pre = "../";
-        }
-        $file = $pre . "stationlists/" . $country . ".csv";
+        $file = "../stationlists/" . $country . ".csv";
         if (!file_exists($file)) {
             throw(new Exception("Your country is not supported yet", 3));
         }
@@ -41,7 +35,7 @@ class StationsInput extends Input {
             fclose($handle);
         }
         if ($international) {
-            $fileINT = $pre . "stationlists/INT.csv";
+            $fileINT = "../stationlists/INT.csv";
             if (($handle = fopen($fileINT, "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
                     if (!isset($stations[$data[0]])) {

@@ -88,8 +88,6 @@ class BRailConnectionInput extends ConnectionInput {
     }
 
     public function transformData($serverData) {
-        $inp = new StationsInput();
-        $stations = $inp->execute($this->request);
         $xml = new SimpleXMLElement($serverData);
         $connections = array();
         $i = 0;
@@ -101,13 +99,29 @@ class BRailConnectionInput extends ConnectionInput {
 
                 $unixtime0 = Input::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                 $nameStation0 = $conn->Overview->Departure->BasicStop->Station['name'];
-                $station0 = parent::getStation($nameStation0);
+		$locXStation0 = $conn->Overview->Departure->BasicStop->Station['x'];
+		$locYStation0 = $conn->Overview->Departure->BasicStop->Station['y'];
+		preg_match("/(.)(.*)/",$locXStation0, $m);
+		$locXStation0 = $m[1] . ".". $m[2];
+		preg_match("/(..)(.*)/",$locYStation0, $m);
+		$locYStation0 = $m[1] . ".". $m[2];
+                $station0 = new Station("ERROR", $locXStation0,$locYStation0);
+		$station0->addName($this->request->getLang(), $nameStation0);
+		
 
                 $platform1 = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
 
                 $unixtime1 = Input::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                 $nameStation1 = $conn->Overview->Arrival->BasicStop->Station['name'];
-                $station1 = parent::getStation($nameStation1);
+		$locXStation1 = $conn->Overview->Arrival->BasicStop->Station['x'];
+		$locYStation1 = $conn->Overview->Arrival->BasicStop->Station['y'];
+		preg_match("/(\d)(.*)/",$locXStation1, $m);
+		$locXStation1 = $m[1] . "." . $m[2];
+		preg_match("/(\d\d)(.*)/",$locYStation1, $m);
+		$locYStation1 = $m[1] . "." . $m[2];
+                $station1 = new Station("ERROR", $locXStation1,$locYStation1);
+		$station1->addName($this->request->getLang(), $nameStation1);
+
 
                 //Delay or other wrongish stuff
                 $delay0 = 0;
@@ -161,7 +175,15 @@ class BRailConnectionInput extends ConnectionInput {
                                 $arrivalTime = Input::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
                                 $arrivalDelay = 0; //Todo: NYImplemented
-                                $stationv = parent::getStation($connsection->Arrival->BasicStop->Station["name"]);
+                                $nameStationV = $connsection->Arrival->BasicStop->Station["name"];
+				$locXStationV = $connsection->Arrival->BasicStop->Station['x'];
+				$locYStationV = $connsection->Arrival->BasicStop->Station['y'];
+				preg_match("/(\d)(.*)/",$locXStationV, $m);
+				$locXStationV = $m[1] . "." . $m[2];
+				preg_match("/(\d\d)(.*)/",$locYStationV, $m);
+				$locYStationV = $m[1] . "." . $m[2];
+				$stationv = new Station("ERROR", $locXStationV,$locYStationV);
+				$stationv->addName($this->request->getLang(), $nameStationV);
                                 $vehiclev = $this->newTrain($trains[$j - 1]);
                                 $vias[$connectionindex] = new Via($vehiclev, $stationv, $arrivalTime, $arrivalPlatform, $departTime, $departPlatform, $arrivalDelay, $departDelay);
 

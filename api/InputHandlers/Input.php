@@ -69,7 +69,9 @@ abstract class Input {
             foreach($station->getNames() as $name2){
                 $name2 = strtoupper($name2);
                 similar_text($name1, $name2, $score);
-                if($score > $max){
+                if($score > $max && $score < 0.50){
+		     echo $score;
+		     
                     $max = $score;
                     $match = $station;
                 }

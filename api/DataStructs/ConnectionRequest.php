@@ -37,21 +37,11 @@ class ConnectionRequest extends Request {
             $si = new StationsInput();
             $station = $si ->getStationFromId($from, $this);
             $this->from = $station ->getName('NL');
-        }else{
-            $si = new StationsInput();
-            $station = $si ->getStation($from, $this);
-            //hafas works better in NL. So use NL!
-            $this->from = $station -> getName('NL');
         }
         if(sizeof(explode(".",$to)) > 1){
             $si = new StationsInput();
             $station = $si ->getStationFromId($to, $this);
             $this->to = $station ->getName('NL');
-        }else{
-            $si = new StationsInput();
-            $station = $si ->getStation($to, $this);
-            //hafas works better in NL. So use NL!
-            $this->to = $station -> getName('NL');
         }
     }
 
