@@ -23,6 +23,12 @@ class Station {
     }
 
     public function addName($lang, $name){
+	 $name = str_ireplace(" [b]","",$name);
+	 $name = str_ireplace(" (nl)","",$name);
+	 $name = str_ireplace(" (l)","",$name);
+	 $name = str_ireplace(" (fr)","",$name);
+	 $name = str_ireplace(" (de)","",$name);
+	 $name = str_ireplace(" (lu)","",$name);
         $this->names[$lang] = ucwords(strtolower($name));
     }
 
