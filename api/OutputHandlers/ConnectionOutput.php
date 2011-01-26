@@ -3,7 +3,7 @@
 /**
  * Description of ConnectionOutput
  *
- * @author pieterc
+ * @author Pieter Colpaert
  */
 include_once("Output.php");
 
