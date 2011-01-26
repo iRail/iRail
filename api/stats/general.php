@@ -29,7 +29,7 @@ try {
 
 <html>
     <head><title>iRail API MySQL stats</title>
-        <link href="http://irail.be/css/api_stats.css" rel="stylesheet" type="text/css" />
+        <link href="./api_stats.css" rel="stylesheet" type="text/css" />
         <link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png" />
         <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
         <style type="text/css">
