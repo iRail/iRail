@@ -29,29 +29,32 @@ class StationsInput extends Input {
                     $stations[$data[0]]->addName("DE", $data[1]);
                     $stations[$data[0]]->addName("FR", $data[1]);
                     $stations[$data[0]]->addName("EN", $data[1]);
-                }
-                $stations[$data[0]]->addName($language,$data[1]);
+                }else{
+		     $stations[$data[0]]->addName($language,$data[1]);
+		}
             }
             fclose($handle);
         }
-            $fileINT = "../stationlists/INT.csv";
-            if (($handle = fopen($fileINT, "r")) !== FALSE) {
-                while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                    if (!isset($stations[$data[0]])) {
-                        $stations[$data[0]] = new Station($data[0], $data[3], $data[2], $data[4]);
-                    }
-                    $language = trim($data[5]);
-                    if ($language == '*') {
-                        $stations[$data[0]]->addName("NL", $data[1]);
-                        $stations[$data[0]]->addName("DE", $data[1]);
-                        $stations[$data[0]]->addName("FR", $data[1]);
-                        $stations[$data[0]]->addName("EN", $data[1]);
-                    }
-                    $stations[$data[0]]->addName($language,$data[1]);
-                }
-                fclose($handle);
-            }
-        //}
+	$fileINT = "../stationlists/INT.csv";
+	if (($handle = fopen($fileINT, "r")) !== FALSE) {
+	     while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
+		  if (!isset($stations[$data[0]])) {
+		       $stations[$data[0]] = new Station($data[0], $data[3], $data[2], $data[4]);
+		  }
+		  $language = trim($data[5]);
+		  if ($language == '*') {
+		       $stations[$data[0]]->addName("NL", $data[1]);
+		       $stations[$data[0]]->addName("DE", $data[1]);
+		       $stations[$data[0]]->addName("FR", $data[1]);
+		       $stations[$data[0]]->addName("EN", $data[1]);
+		  }else{	 
+		       $stations[$data[0]]->addName($language,$data[1]);
+		  }
+		    
+	     }
+	     fclose($handle);
+	}
+        
         return $stations;
     }
 
