@@ -1,4 +1,4 @@
-CREATE TABLE `iRail`.`stations` (`ID` VARCHAR(20) NOT NULL, `X` DOUBLE NOT NULL, `Y` DOUBLE NOT NULL, `STD` VARCHAR(5) NOT NULL, `NL` VARCHAR(40) NOT NULL, `FR` VARCHAR(40) NOT NULL, `EN` VARCHAR(40) NOT NULL, `DE` VARCHAR(40) NOT NULL, `ES` VARCHAR(40) NOT NULL, PRIMARY KEY (`ID`)) ENGINE = MyISAM;
+CREATE TABLE `iRail`.`stations` (`ID` VARCHAR(20) NOT NULL, `X` DOUBLE NOT NULL, `Y` DOUBLE NOT NULL, `STD` VARCHAR(81) NOT NULL, `NL` VARCHAR(40) NOT NULL, `FR` VARCHAR(40) NOT NULL, `EN` VARCHAR(40) NOT NULL, `DE` VARCHAR(40) NOT NULL, `ES` VARCHAR(40) NOT NULL, PRIMARY KEY (`ID`)) ENGINE = MyISAM;
 
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008819406' , '4.484444','50.901389','Brussels Airport','Brussel Nationaal Luchthaven','Bruxelles National Aeroport','Brussels Airport','','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008885522' , '3.451308','50.569628','Antoing','Antoing','Antoing','Antoing','Antoing','');
@@ -190,7 +190,7 @@ INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008861200' , '4.690778','50.571292','Gembloux','Gembloux','Gembloux','Gembloux','Gembloux','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008865300' , '5.267703','49.852199','Bertrix','Bertrix','Bertrix','Bertrix','Bertrix','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008814118' , '4.320936','50.810204','Vorst East','Vorst Oost','Forest Est','Vorst East','','');
-INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008883006' , '4.137658','50.605075','Braine Le Comte',''s Gravenbrakel','Braine Le Comte','Braine Le Comte','','');
+INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008883006' , '4.137658','50.605075','Braine Le Comte','''s Gravenbrakel','Braine Le Comte','Braine Le Comte','','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008831039' , '5.29173','50.886419','Alken','Alken','Alken','Alken','Alken','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008843158' , '5.49779','50.61843','Jemeppe Sur Meuse','Jemeppe Sur Meuse','Jemeppe Sur Meuse','Jemeppe Sur Meuse','Jemeppe Sur Meuse','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008821147' , '4.440127','51.190291','Mortsel','Mortsel','Mortsel','Mortsel','Mortsel','');
@@ -198,7 +198,7 @@ INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008822269' , '4.457486','50.9584','Eppegem','Eppegem','Eppegem','Eppegem','Eppegem','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008822459' , '4.539585','50.996904','Hever','Hever','Hever','Hever','Hever','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008812153' , '4.157117','50.988814','Heizijde','Heizijde','Heizijde','Heizijde','Heizijde','');
-INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008814258' , '4.375525','50.684778','Eigenbrakel','Eigenbrakel','Braine L'alleud','Eigenbrakel','','');
+INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008814258' , '4.375525','50.684778','Eigenbrakel','Eigenbrakel','Braine L''alleud','Eigenbrakel','','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008814126' , '4.323539','50.802431','Uccle Stalle','Ukkel Stalle','Uccle Stalle','Uccle Stalle','','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008811544' , '4.54915','50.693761','Profondsart','Profondsart','Profondsart','Profondsart','Profondsart','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008841665' , '5.599325','50.693364','Milmort','Milmort','Milmort','Milmort','Milmort','');
