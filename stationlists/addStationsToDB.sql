@@ -1,3 +1,5 @@
+CREATE TABLE `iRail`.`stations` (`ID` VARCHAR(20) NOT NULL, `X` DOUBLE NOT NULL, `Y` DOUBLE NOT NULL, `STD` VARCHAR(5) NOT NULL, `NL` VARCHAR(40) NOT NULL, `FR` VARCHAR(40) NOT NULL, `EN` VARCHAR(40) NOT NULL, `DE` VARCHAR(40) NOT NULL, `ES` VARCHAR(40) NOT NULL, PRIMARY KEY (`ID`)) ENGINE = MyISAM;
+
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008819406' , '4.484444','50.901389','Brussels Airport','Brussel Nationaal Luchthaven','Bruxelles National Aeroport','Brussels Airport','','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008885522' , '3.451308','50.569628','Antoing','Antoing','Antoing','Antoing','Antoing','');
 INSERT INTO  `iRail`.`stations` (`ID` ,`X` ,`Y` ,`STD` ,`NL` ,`FR` ,`EN` ,`DE` ,`ES`) VALUES ('BE.NMBS.008884566' , '3.885189','50.452289','Jemappes','Jemappes','Jemappes','Jemappes','Jemappes','');
