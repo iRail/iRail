@@ -32,7 +32,7 @@ class Json extends Printer{
      private $arrayindices = array();
      private $currentarrayindex = -1;
      function startArray($name,$number, $root = false){
-	  if(!$root){
+	  if(!$root || $this->rootname == "liveboard"){
 	       echo "\"" . $name . "s\":{\"number\":\"$number\",";
 	  }
 	  echo "\"$name\":[";
@@ -51,7 +51,7 @@ class Json extends Printer{
      }
 
      function startObject($name, $object){
-	  if($this->stack[$this->currentarrayindex] == $name){
+	  if($this->currentarrayindex >-1 && $this->stack[$this->currentarrayindex] == $name){
 	       echo "{";
 //show id (in array) except if array of stations (compatibility issues)
 	       if($name != "station"){
@@ -78,7 +78,7 @@ class Json extends Printer{
 	  $this->stack[$this->currentarrayindex] = "";
 	  $this->arrayindices[$this->currentarrayindex] = 0;
 	  $this->currentarrayindex --;
-	  if($root){
+	  if($root && $this->rootname != "liveboard"){
 	       echo "]";
 	  }else{
 	       echo "]}";
