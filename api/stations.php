@@ -1,8 +1,6 @@
 <?php
-
+/* Copyright (C) 2010, 2011 by iRail vzw/asbl */
 /*
-  Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-  Copyright 2010 Pieter Colpaert (pieter@irail.be - http://bonsansnom.wordpress.com)
 
   This file is part of iRail.
 
@@ -27,18 +25,9 @@
 /**
  * This is the API request handler
  */
-include_once("DataStructs/StationsRequest.php");
+include_once("requests/StationsRequest.php");
 include_once("APICall.php");
 date_default_timezone_set("Europe/Brussels");
-
-$lang = "EN";
-$format = "xml";
-
-//required vars, output error messages if empty
-extract($_GET);
-
-$request = new StationsRequest($lang, $format);
-$call = new APICall("stations", $request);
+$call = new APICall("stations");
 $call->executeCall();
-
 ?>

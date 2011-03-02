@@ -95,4 +95,5 @@ function writeLog($ua, $from, $to, $err, $ip) {
 	// debug
 	//echo $query . "<br />" . $result . "<br />" . mysql_error();
 }
+
 ?>

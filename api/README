@@ -1,5 +1,12 @@
-This is the API of irail.be located at http://api.irail.be
+This is the code for the API of irail.be located at http://api.iRail.be
 
-The API does not require authorisation. Learn how to use it in the index.html
+Architecture:
+\
+|-data: Contains the datalayer: fetches the data and puts it in the iRail hierarchie
+|-- DataRoot.php - The root element of all documents
+|-- NS|NMBS|TEC|SNCB|DL|MIVB|STIB - the folders of the datafetchers - add your folder to add functionality
+|-output: The output package:
+|--Json.php
+|--Jsonp.php
+|--Xml.php
 
-!!If you use this API, NMBS/SNCB might sue you.

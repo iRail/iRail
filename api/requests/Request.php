@@ -1,0 +1,51 @@
+<?php
+
+  /* Copyright (C) 2011 by iRail vzw/asbl 
+   *
+   * This is an interface to a Request
+   *
+   * @author pieterc
+   */
+class Request {
+     public static $SUPPORTED_LANGUAGES = array("EN", "NL", "FR", "DE");
+     private $format = "xml";
+     private $lang = "EN";
+
+     protected function processRequiredVars($array){
+	  foreach($array as $var){
+	       if(!isset($this->$var) || $this->$var == "" || is_null($this->$var)){	    
+		    throw new Exception("$var not set. Please review your request and add the right parameters",401);
+	       }
+	  }
+     }
+
+/**
+ * will take a get a variable from the GET array and set it as a member variable
+ */
+     protected function setGetVar($varName, $default){
+	  if(isset($_GET[$varName])){
+	       $this->$varName = $_GET[$varName];
+	  }else{
+	       $this->$varName = $default;
+	  }
+     }
+     
+
+     function __construct() {
+	  $this->setGetVar("format", "xml");
+	  $this->setGetVar("lang", "EN"); 
+     }
+
+     public function getFormat() {
+	  return strtolower($this->format);
+     }
+
+     public function getLang() {
+	  if(in_array($this->lang, Request::$SUPPORTED_LANGUAGES)){
+	       return strtoupper($this->lang);
+	  }
+	  return "EN";
+     }
+    
+  }
+?>

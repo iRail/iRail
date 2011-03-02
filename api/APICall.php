@@ -1,83 +1,127 @@
 <?php
-/*
- * This is a strange factory pattern:
- *  * It will create instances of the right objects to echo things to the client
- *
- * It is the error handler as well. If any error occurs, this knows what errorcode it should return.
- *
- * AT THIS MOMENT THIS CLASS HAS NO REAL USAGE. DON'T LOOK HERE IF YOU'RE HACKING SOMETHING IN
- */
-
-/**
- * Description of APICall
- *
- * @author pieterc
- */
+  /* Copyright (C) 2011 by iRail vzw/asbl
+   *
+   * This class foresees in basic REST functionality. It will get all the GET vars and put it in a request. This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
+   *
+   * @author Pieter Colpaert
+   */
+ini_set("include_path", ".:data");
 include_once("../includes/apiLog.php");
-include_once("ErrorHandlers/ErrorHandler.php");
+include_once("data/DataRoot.php");
+include_once("data/structs.php");
 class APICall {
 
-    protected $request;
-    private $input;
-    protected $datastruct;
-    private $output;
+     private $VERSION = 1.1;
+     private $SYSTEM = "NMBS";
 
-    private $functionname;
+     protected $request;
+     protected $dataRoot;
 
-    //Hooks
-    private $CORS = true; // Cross Origin Resource Sharing
-                         //Should be turned off for information when logged in
-    private $LOGGING = true;
-    private $error;
+     //Hooks
+     private $logging = true;
 
-    function __construct($functionname, $request) {
-        $this -> functionname = $functionname;
-        $this -> request = $request;
-        $this -> error = false;
-        $this -> input = $request -> getInput();
-    }
+     function __construct($functionname) {
+	  try{
+	       $requestname = ucfirst(strtolower($functionname)) . "Request";
+	       include_once("requests/$requestname.php");
+	       $this->request = new $requestname();
+	       $this->dataRoot = new DataRoot($functionname, $this->VERSION, $this->request->getFormat());
+	  }catch(Exception $e){
+	       $this->buildError($functionname, $e);
+	  }
+     }
 
-    public function executeCall(){
-        $this -> addHeaders();
-        try{
-            $this -> datastruct =  $this -> input-> execute($this->request);
-            $this -> output = $this -> request -> getOutput($this -> datastruct);
-            $this ->printOutput();
-            $this-> logRequest();
-        }catch(Exception $e){
-            $this->processError($e);
-        }
-    }
+     private function buildError($fn, $e){
+	  $this->logError($fn, $e);
+//get the right format - This is some duplicated code and I hate to write it
+	  $format = "";
+	  if(isset($_GET["format"])){
+	       $format = $_GET["format"];
+	  }
+	  if($format == ""){
+	       $format = "Xml";
+	  }
+	  $format = ucfirst(strtolower($format));
+	  if(isset($_GET["callback"]) && $format=="Json"){
+	       $format = "Jsonp";
+	  }
+	  if(!file_exists("output/$format.php")){
+	       $format="Xml";
+	  }
+	  include_once("output/$format.php");
+	  $printer = new $format(NULL);
+	  $printer->printError($e->getCode(),$e->getMessage());
+	  exit(0);
+     }
+     
+     public function executeCall(){
+	  try{
+	       $this->dataRoot->fetchData($this->request, $this->SYSTEM);
+	       $this->dataRoot->printAll();
+	       $this->logRequest();
+	  } catch(Exception $e){
+	       $this->buildError($e);
+	  }
+     }
 
-    public function disableCors(){
-        $this->CORS = false;
-    }
+     public function disableLogging(){
+	  $this->logging = false;
+     }
 
-    public function disableLogging(){
-        $this->LOGGING = false;
-    }
+     protected function logError($functionname, Exception $e){
+	  if($this->logging){
+	       $this->writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in $functionname " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
+	  }
+     }
 
-    private function addHeaders(){
-        if($this->CORS){
-            header("Access-Control-Allow-Origin: *");
-        }
-    }
+     //to be overriden
+     protected function logRequest(){
+	  if($this->logging){
+	       $functionname = $this->dataRoot->getRootname();
+	       $this->writeLog($_SERVER['HTTP_USER_AGENT'],"","", "none ($functionname)", $_SERVER['REMOTE_ADDR']);
+	  }
+     }
 
-    protected function processError(Exception $e){
-        writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in $this->functionname " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
-        $eh = new ErrorHandler($e, $this->request->getFormat());
-        $eh -> printError();
-    }
+     protected function writeLog($ua, $from, $to, $err, $ip) {
+	  // get time + date in rfc2822 format
+	  date_default_timezone_set('Europe/Brussels');
+	  $now = date('D, d M Y H:i:s');
+	  if($from == "") {
+	       $from = "EMPTY";
+	  }
+	  if($to == "") {
+	       $to = "EMPTY";
+	  }
+	  if ($ua == "") {
+	       $ua = "-";
+	  }
+	  APICall::connectToDB();
+	  $from = mysql_real_escape_string($from);
+	  $to = mysql_real_escape_string($to);
+	  $err = mysql_real_escape_string($err);
+	  $ip = mysql_real_escape_string($ip);
+	  $ua = mysql_real_escape_string($ua);
+	  // insert in db
+	  try {
+	       include("../includes/dbConfig.php");
+	       $query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '$api_server_name')";
+	       $result = mysql_query($query);
+	  }
+	  catch (Exception $e) {
+	       echo "Error writing to the database.";
+	  }
+     }
 
-    protected function printOutput(){
-        $this->output -> printAll();
-    }
 
-    //to be overriden
-    protected function logRequest(){
-        if($this->LOGGING){
-            writeLog($_SERVER['HTTP_USER_AGENT'],"","", "none ($this->functionname)", $_SERVER['REMOTE_ADDR']);
-        }
-    }
+     public static function connectToDB(){
+	  try {
+	       include("../includes/dbConfig.php");
+	       mysql_pconnect($api_host, $api_user, $api_password);
+	       mysql_select_db($api_database);
+	  }
+	  catch (Exception $e) {
+	       throw new Exception("Error connecting to the database.", 3);
+	  }
+     }
 }
 ?>
