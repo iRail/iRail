@@ -61,9 +61,9 @@ class liveboard{
             //$m2[2] has delay, stationname & platform
 
             //GET LEFT OR NOT
-	    $left = false;
+	    $left = 0;
 	    if(preg_match("/color=\"DarkGray\"/ism",$tr,$lll) > 0 ){
-		 $left = true;
+		 $left = 1;
 	    }
 
             //GET TIME:
