@@ -62,6 +62,9 @@ class Json extends Printer{
 	       if($this->rootname != "stations" && $name == "station"){ // split station into station and stationinfo to be compatible with 1.0
 		    echo "\"$name\":\"$object->name\",";
 		    echo "\"". $name. "info\":{";
+	       }else if($this->rootname != "vehicle" && $name == "vehicle"){ // split vehicle into vehicle and vehicleinfo to be compatible with 1.0
+		    echo "\"$name\":\"$object->name\",";
+		    echo "\"". $name. "info\":{";
 	       }else{
 		    echo "\"$name\":{";
 	       }

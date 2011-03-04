@@ -11,12 +11,14 @@ include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
 class vehicleinformation{
      public static function fillDataRoot($dataroot,$request){
-	  $dataroot->vehicle = $request->getVehicleId();
+	  $lang= $request->getLang();
+	  $serverData = vehicleinformation::getServerData($request->getVehicleId(),$lang);
+	  $dataroot->vehicle = vehicleinformation::getVehicleData($serverData, $request->getVehicleId(), $lang);
 	  $dataroot->stop = array();
-	  $dataroot->stop = vehicleinformation::getData($request->getVehicleId(),$request->getLang());
+	  $dataroot->stop = vehicleinformation::getData($serverData, $lang);
      }
 
-     private static function getData($id,$lang){
+     private static function getServerData($id,$lang){
 	  include_once("../includes/getUA.php");
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
@@ -27,8 +29,11 @@ class vehicleinformation{
 	  $id = preg_replace("/.*?(\d.*)/smi", "\\1", $id);
 	  $scrapeURL .= "?l=" . $lang . "&s=1&tid=" . $id . "&da=D&p=2";
 	  $post = http_post_data($scrapeURL, "", $request_options) or die("");
-	  $serverData = http_parse_message($post)->body;
+	  return http_parse_message($post)->body;	  
+     }
+     
 
+     private static function getData($serverData, $lang){
 	  $stops = array();
 	  //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
 	  //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
@@ -52,23 +57,29 @@ class vehicleinformation{
 	       $stops[$i]->time = $time;
 	       $i++;
 	  }
-
-////TODO: determine the location of the vehicle
-//	  preg_match("/=&gt;(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*? >(.*?)<\/a>/smi", $serverData, $matches);
-//	  if(isset($matches[4])){
-//	       $now = new Stop($matches[4], "1","1");
-//	       $locationX = $now -> getStation() -> getX();
-//	       $locationY = $now -> getStation() -> getY();
-//	  }else{
-//	       $locationX = 0;
-//	       $locationY = 0;
-//	  }
-//
 	  return $stops;
      }
+
+     private static function getVehicleData($serverData, $id, $lang){
+// determine the location of the vehicle
+	  preg_match("/=&gt;(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*? >(.*?)<\/a>/smi", $serverData, $matches);
+	  $locationX = 0;
+	  $locationY = 0;	  
+	  if(isset($matches[4])){
+	       $now = stations::getStationFromRTName($matches[4], $lang);
+	       $locationX = $now -> locationX;
+	       $locationY = $now -> locationY;
+	  }
+	  $vehicle = new Vehicle();
+	  $vehicle->name = $id;
+	  $vehicle->locationX = $locationX;
+	  $vehicle->locationY = $locationY;
+	  return $vehicle;
+     }
+     
 };
 
      
 
 
-     ?>
+?>

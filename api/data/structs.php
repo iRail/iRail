@@ -49,6 +49,13 @@ class Via{
      public $vehicle;
 }
 
+class Vehicle{
+     public $locationX;
+     public $locationY;
+     public $name;
+}
+
+
 class ViaDepartureArrival{
      public $time;
      public $platform;
