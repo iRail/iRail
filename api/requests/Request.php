@@ -41,8 +41,9 @@ class Request {
      }
 
      public function getLang() {
+	  $this->lang = strtoupper($this->lang);
 	  if(in_array($this->lang, Request::$SUPPORTED_LANGUAGES)){
-	       return strtoupper($this->lang);
+	       return $this->lang;
 	  }
 	  return "EN";
      }
