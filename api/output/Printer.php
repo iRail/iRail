@@ -61,8 +61,8 @@ abstract class Printer{
 			      $this->nextArrayElement();
 			 }
 		    }
+		    $this->endArray($key, $root);
 	       }
-	       $this->endArray($key, $root);
 	  }else if(is_object($val)){
 	       $this->startObject($key,$val);
 	       $hash = get_object_vars($val);

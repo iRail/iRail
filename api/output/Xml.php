@@ -26,16 +26,31 @@ class Xml extends Printer{
      function startRootElement($name, $version, $timestamp){
 	  echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
      }
-
+//make a stack of array information, always work on the last one
+//for nested array support
+     private $stack = array();
+     private $arrayindices = array();
+     private $currentarrayindex = -1;
      function startArray($name,$number, $root = false){
 	  if(!$root){
 	       echo "<".$name."s number=\"$number\">";
 	  }
+	  $this->currentarrayindex ++;
+	  $this->arrayindices[$this->currentarrayindex] = 0;
+	  $this->stack[$this->currentarrayindex] = $name;
+     }
+
+     function nextArrayElement(){
+	  $this->arrayindices[$this->currentarrayindex]++;
      }
 
      function startObject($name, $object){
+//test wether this object is a first-level array object
 	  echo "<$name";
-          //fallback for attributes and name tag
+	  if($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != "station") {
+	       echo " id=\"".$this->arrayindices[$this->currentarrayindex]."\"";
+	  }
+	  //fallback for attributes and name tag
 	  $hash = get_object_vars($object);
 	  $named = "";
 	  foreach($hash as $elementkey => $elementval){
@@ -49,7 +64,7 @@ class Xml extends Printer{
 	  if($named != ""){
 	       echo $named;
 	  }
-	  $nameObjectStarted = $name;
+	  
      }
 
      function startKeyVal($key,$val){
@@ -69,7 +84,10 @@ class Xml extends Printer{
      function endArray($name, $root = false){
 	  if(!$root){
 	       echo "</".$name."s>";
-	  }	  
+	  }
+	  $this->stack[$this->currentarrayindex] = "";
+	  $this->arrayindices[$this->currentarrayindex] = 0;
+	  $this->currentarrayindex --;
      }
 
      function endRootElement($name){
