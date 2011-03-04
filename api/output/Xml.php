@@ -34,7 +34,7 @@ class Xml extends Printer{
      private $arrayindices = array();
      private $currentarrayindex = -1;
      function startArray($name,$number, $root = false){
-	  if(!$root || $this->rootname == "liveboard"){
+	  if(!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation"){
 	       echo "<".$name."s number=\"$number\">";
 	  }
 	  $this->currentarrayindex ++;
@@ -84,7 +84,7 @@ class Xml extends Printer{
 	  }
      }
      function endArray($name, $root = false){
-	  if(!$root || $this->rootname == "liveboard"){
+	  if(!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation"){
 	       echo "</".$name."s>";
 	  }
 	  $this->stack[$this->currentarrayindex] = "";
