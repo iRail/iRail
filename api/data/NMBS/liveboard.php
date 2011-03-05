@@ -23,7 +23,7 @@ class liveboard{
 	       $dataroot->departure = liveboard::parseData($html, $request->getLang());
 	  }	       
 	  else{
-	       throw new Exception("Not a good timeSel value: try ARR or DEP", 2);
+	       throw new Exception("Not a good timeSel value: try ARR or DEP", 300);
 	  }
      }
 
@@ -76,6 +76,10 @@ class liveboard{
             preg_match("/\+(\d+)'/", $m2[2], $d);
             if(isset($d[1])){
                 $delay = $d[1] * 60;
+            }
+            preg_match("/\+(\d):(\d)+)/", $m2[2], $d);
+            if(isset($d[1])){
+                $delay = $d[1] * 3600 + $d[2]*60;
             }
 
             //GET STATION
