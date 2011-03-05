@@ -77,7 +77,7 @@ class liveboard{
             if(isset($d[1])){
                 $delay = $d[1] * 60;
             }
-            preg_match("/\+(\d):(\d)+)/", $m2[2], $d);
+            preg_match("/\+(\d):(\d+)/", $m2[2], $d);
             if(isset($d[1])){
                 $delay = $d[1] * 3600 + $d[2]*60;
             }
