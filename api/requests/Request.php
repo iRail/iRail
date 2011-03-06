@@ -8,8 +8,11 @@
    */
 class Request {
      public static $SUPPORTED_LANGUAGES = array("EN", "NL", "FR", "DE");
+     public static $SUPPORTED_SYSTEMS = array("NMBS", "MIVB");
+
      private $format = "xml";
      private $lang = "EN";
+     private $system = "NMBS";
 
      protected function processRequiredVars($array){
 	  foreach($array as $var){
@@ -34,6 +37,7 @@ class Request {
      function __construct() {
 	  $this->setGetVar("format", "xml");
 	  $this->setGetVar("lang", "EN"); 
+	  $this->setGetVar("system", "NMBS");
      }
 
      public function getFormat() {
@@ -47,6 +51,14 @@ class Request {
 	  }
 	  return "EN";
      }
-    
+
+     public function getSystem(){
+	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
+	       return $this->system;
+	  }else{
+	       return "NMBS";
+	  }
+     }
+     
   }
 ?>
