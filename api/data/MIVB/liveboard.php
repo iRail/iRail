@@ -9,7 +9,7 @@
    */
 include_once("data/MIVB/stations.php");
 class liveboard{
-     public static function fillDataRoot($dataroot,$request){
+     public static function fillDataRoot($dataroot,$request){	       
 //detect if this is an id or a station
 	  if(sizeof(explode(".",$request->getStation()))>1){
 	       $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
@@ -41,6 +41,8 @@ class liveboard{
 //	  $MIVBMODES = array("M", "N", "T", "B");
 	  $s = explode(".",$station->id);
 	  $stid = $s[2];
+//stibrt server wants lang in lowercase
+	  $lang = strtolower($lang);
 	  $scrapeUrl = "http://stibrt.be/labs/stib/service/getwaitingtimes.php?1=1&iti=1&halt=$stid&lang=$lang";
 //	  echo $scrapeUrl . "\n";
 	  $post = http_post_data($scrapeUrl, "", $request_options) or die("");
@@ -48,7 +50,7 @@ class liveboard{
      }
 
      private static function parseData($xml, $lang){
-                         //<waitingtime><line>5     </line><mode>M     </mode><minutes>6     </minutes><destination>Herrma</destination> </waitingtime>
+	  //<waitingtime><line>5     </line><mode>M     </mode><minutes>6     </minutes><destination>Herrma</destination> </waitingtime>
 	  preg_match_all("/<waitingtime>.*?<line>(.*?)<\/line>.*?<mode>(.*?)<\/mode>.*?<minutes>(.*?)<\/minutes>.*?<destination>(.*?)<\/destination>.*?<\/waitingtime>/si", $xml,$matches);
 //	  echo $xml . "\n";
 //	  var_dump($matches);
@@ -59,13 +61,26 @@ class liveboard{
 	       $nodes[$i-1]->time = date("U") + $matches[3][$i]*60;
 	       $nodes[$i-1]->delay = 0;
 //	       echo $matches[3][$i] . "   ";
-	       $nodes[$i-1]->station = stations::getStationFromName($matches[4][$i], $lang);
+	       try{
+		    $nodes[$i-1]->station = stations::getStationFromName($matches[4][$i], $lang);
+	       }
+	       catch(Exception $e){
+//fallback for if a station is not found
+		    $nodes[$i-1]->station = new Station();
+		    $nodes[$i-1]->station->id = "notfound";
+		    $nodes[$i-1]->station->locationX=0;
+		    $nodes[$i-1]->station->locationY=0;
+		    $nodes[$i-1]->station->name = $matches[4][$i-1];
+		    $nodes[$i-1]->station->standardname = $matches[4][$i-1];
+		    //echo "No stations found for ". $matches[4][$i-1] . "\n";
+	       }
+	       
 //	       echo $nodes[$i-1]->station->name;
 	       $nodes[$i-1]->platform = $nodes[$i-1]->station->name;
 //	       echo $i-1 . "\n";
 	  }
 	  return $nodes;
      }
-  };
+};
 
 ?>

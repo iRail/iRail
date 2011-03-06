@@ -62,8 +62,12 @@ class stations{
 	       $station->standardname = $line["STD"];
 	  }
 	  catch (Exception $e) {
-	       throw new Exception("Error reading from the database.", 3);
+	       throw new Exception("Error reading from the database.", 500);
 	  }
+	  if($station->id == ""){
+	       throw new Exception("No station found for name", 400);
+	  }
+	  
 	  return $station;
      }
 
@@ -119,6 +123,7 @@ class stations{
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 300);
 	  }
+
 	  return $station;
      }
 
