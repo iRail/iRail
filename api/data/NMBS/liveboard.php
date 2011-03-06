@@ -38,7 +38,7 @@ class liveboard{
 //we want data for 1 hour. But we can only retrieve 15 minutes per request
 	  for($i=0;$i<4;$i++){
 	       $scrapeUrl = "http://www.railtime.be/mobile/SearchStation.aspx";
-	       $scrapeUrl .= "?l=" . $lang . "&tr=". $time . "-15&s=1&sid=" . stations::getRTID($station, $lang) . "&da=" . $timeSel . "&p=2";
+	       $scrapeUrl .= "?l=EN&tr=". $time . "-15&s=1&sid=" . stations::getRTID($station, $lang) . "&da=" . $timeSel . "&p=2";
 	       $post = http_post_data($scrapeUrl, "", $request_options) or die("");
 	       $body .= http_parse_message($post)->body;
 	       $time = tools::addQuarter($time);
@@ -53,9 +53,6 @@ class liveboard{
         $i = 0;
         //for each row
         foreach ($m[1] as $tr) {
-//
-//TODO: remove doubles
-//TODO: strip slashes /
             preg_match("/<td valign=\"top\">(.*?)<\/td><td valign=\"top\">(.*?)<\/td>/ism", $tr, $m2);
             //$m2[1] has: time
             //$m2[2] has delay, stationname & platform
@@ -87,7 +84,13 @@ class liveboard{
             //echo $st[1] . "\n";
 	    $st = explode("/",$st[1]);
 	    $st = trim($st[0]);
-            $stationNode = stations::getStationFromRTName(strtoupper($st), $lang);
+	    try{
+		 $stationNode = stations::getStationFromRTName(strtoupper($st), $lang);
+	    }catch(Exception $e){
+//fallback: if no railtime name is available, let's ask HAFAS to solve this issue for us
+		 $stationNode = stations::getStationFromName($st, $lang);
+	    }
+	    
 
             //GET VEHICLE AND PLATFORM
             $platform = "";
@@ -117,7 +120,28 @@ class liveboard{
 	    $nodes[$i]->left = $left;
             $i++;
         }
-        return $nodes;
+        return liveboard::removeDuplicates($nodes);
+     }
+
+/**
+ * Small algorithm I wrote:
+ * It will remove the duplicates from an array the php way. Since a PHP array will need to recopy everything to be reindexed, I figured this would go faster if we did the deleting when copying.
+ */
+     private static function removeDuplicates($nodes){
+	  $newarray = array();
+	  for($i = 0; $i < sizeof($nodes); $i++){
+	       $duplicate = false;
+	       for($j = 0; $j < $i; $j++){
+		    if($nodes[$i]->vehicle == $nodes[$j]->vehicle){
+			 $duplicate = true;
+			 continue;
+		    }
+	       }
+	       if(!$duplicate){
+		    $newarray[sizeof($newarray)] = $nodes[$i];
+	       }
+	  }
+	  return $newarray;
      }
 };
 

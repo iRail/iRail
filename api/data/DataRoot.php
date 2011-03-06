@@ -1,4 +1,5 @@
 <?php
+/* Copyright (C) 2011 by iRail vzw/asbl */
   /**
    * This is the root of every document. It will specify a version and timestamp. It also has the printer class to print the entire document.
    *

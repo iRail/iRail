@@ -55,7 +55,7 @@ class stations
 	       $station->standardname = $line["STD"];
 	  }
 	  catch (Exception $e) {
-	       throw new Exception("Error reading from the database.", 3);
+	       throw new Exception("Error reading from the database.", 300);
 	  }
 	  return $station;	  
      }
@@ -108,9 +108,13 @@ class stations
 	       $station->locationY = $line["Y"];
 	       $station->name = $line[$lang];
 	       $station->standardname = $line["STD"];
+	       if($station->id == ""){
+		    throw new Exception("doesn't matter what's in here. It doesn't get parsed", 0);
+	       }
+	       
 	  }
 	  catch (Exception $e) {
-	       throw new Exception("No Railtimename found for station", 3);
+	       throw new Exception("No Railtimename found for station", 300);
 	  }
 	  return $station;
      }

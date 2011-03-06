@@ -12,7 +12,6 @@ include_once("data/structs.php");
 class APICall {
 
      private $VERSION = 1.1;
-     private $SYSTEM = "NMBS";
 
      protected $request;
      protected $dataRoot;
@@ -56,11 +55,11 @@ class APICall {
      
      public function executeCall(){
 	  try{
-	       $this->dataRoot->fetchData($this->request, $this->SYSTEM);
+	       $this->dataRoot->fetchData($this->request, $this->request->getSystem());
 	       $this->dataRoot->printAll();
 	       $this->logRequest();
 	  } catch(Exception $e){
-	       $this->buildError($e);
+	       $this->buildError($this->dataRoot->getRootname(), $e);
 	  }
      }
 
