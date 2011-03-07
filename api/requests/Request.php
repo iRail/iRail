@@ -53,6 +53,7 @@ class Request {
      }
 
      public function getSystem(){
+	  $this->system = strtoupper($this->system);
 	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
 	       return $this->system;
 	  }else{
