@@ -17,10 +17,10 @@ class liveboard{
 	  }
 	  if($request->getArrdep() == "ARR"){
 	       $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
-	       $dataroot->arrival = liveboard::parseData($html, $request->getLang());
+	       $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang());
 	  }else if($request->getArrdep() == "DEP"){
 	       $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"D");
-	       $dataroot->departure = liveboard::parseData($html, $request->getLang());
+	       $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang());
 	  }	       
 	  else{
 	       throw new Exception("Not a good timeSel value: try ARR or DEP", 300);
@@ -47,7 +47,9 @@ class liveboard{
 	  
      }
   
-     private static function parseData($html,$lang){
+     private static function parseData($html,$time,$lang){
+	  $hour = substr($time, 0,2);
+	  
         preg_match_all("/<tr>(.*?)<\/tr>/ism", $html, $m);
 	$nodes = array();
         $i = 0;
@@ -64,9 +66,21 @@ class liveboard{
 	    }
 
             //GET TIME:
-            preg_match("/(\d\d:\d\d)/", $m2[1], $t);
-            $time = "00d" . $t[1] . ":00";
-            $unixtime = tools::transformTime($time,"20".date("ymd"));
+            preg_match("/((\d\d):\d\d)/", $m2[1], $t);
+            //if it is 23 pm and we fetched data for 1 hour, we may end up with data for the next day and thus we will need to add a day
+	    $dayoffset = 0;
+	    if($t[2] != 23 && $hour == 23){
+		 $dayoffset = 1;
+	    }
+	    
+            $time = "0". $dayoffset . "d" . $t[1] . ":00";
+
+	    $dateparam = date("ymd");
+            //day is previous day if time is before 4 O clock (NMBS-ish thing)
+	    if(date('G') < 4){
+		 $dateparam = date("ymd", strtotime("-1 day"));
+	    }
+            $unixtime = tools::transformTime($time,"20". $dateparam);
 
             //GET DELAY
             $delay = 0;
@@ -89,8 +103,7 @@ class liveboard{
 	    }catch(Exception $e){
 //fallback: if no railtime name is available, let's ask HAFAS to solve this issue for us
 		 $stationNode = stations::getStationFromName($st, $lang);
-	    }
-	    
+	    }	    
 
             //GET VEHICLE AND PLATFORM
             $platform = "";
