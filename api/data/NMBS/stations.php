@@ -140,7 +140,7 @@ class stations
 	  $station = array();
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
-	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations ORDER BY `$lang`";
+	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE `ID` LIKE 'BE.NMBS.%' ORDER BY `$lang`";	       
 	       $result = mysql_query($query) or die("Could not get stationslist from DB");
 	       $i = 0;
 	       while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
