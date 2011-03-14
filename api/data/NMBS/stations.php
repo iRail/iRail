@@ -29,7 +29,12 @@ class stations
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
-	       $station->name = $line[$lang];
+	       if($line[$lang] != ""){
+		    $station->name = $line[$lang];
+	       }else{
+		    $station->name = $line["STD"];	    
+	       }
+	       
 	       $station->standardname = $line["STD"];
 	  }
 	  catch (Exception $e) {
@@ -51,7 +56,11 @@ class stations
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
-	       $station->name = $line[$lang];
+	       if($line[$lang] != ""){
+		    $station->name = $line[$lang];
+	       }else{
+		    $station->name = $line["STD"];	    
+	       }
 	       $station->standardname = $line["STD"];
 	  }
 	  catch (Exception $e) {
@@ -106,7 +115,11 @@ class stations
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
-	       $station->name = $line[$lang];
+	       if($line[$lang] != ""){
+		    $station->name = $line[$lang];
+	       }else{
+		    $station->name = $line["STD"];	    
+	       }
 	       $station->standardname = $line["STD"];
 	       if($station->id == ""){
 		    throw new Exception("doesn't matter what's in here. It doesn't get parsed", 0);
@@ -148,7 +161,11 @@ class stations
 		    $station[$i]->id = $line["ID"];
 		    $station[$i]->locationX = $line["X"];
 		    $station[$i]->locationY = $line["Y"];
-		    $station[$i]->name = $line[$lang];
+		    if($line[$lang] != ""){
+			 $station[$i]->name = $line[$lang];
+		    }else{
+			 $station[$i]->name = $line["STD"];	    
+		    }
 		    $station[$i]->standardname = $line["STD"];
 		    $i++;
 	       }
