@@ -58,7 +58,7 @@ class connections{
 	  return $id;
      }
 
-     private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){	  
+     private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
 	  include "../includes/getUA.php";
 	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
@@ -133,6 +133,7 @@ class connections{
 		    $connection[$i]->departure->station = $fromstation;
 		    $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
 		    $connection[$i]->departure->platform = new Platform();
+		    $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
 		    $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
 		    $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
 		    $connection[$i]->arrival->platform = new Platform();
@@ -170,7 +171,9 @@ class connections{
 
 		    $trains = array();
 		    $vias = array();
+		    $directions = array();
 		    $j = 0;
+		    $k = 0;
 		    $connectionindex = 0;
 //yay for spaghetti code.
 		    if (isset($conn->ConSectionList->ConSection)) {
@@ -181,7 +184,9 @@ class connections{
 					if ($att->Attribute["type"] == "NAME") {
 					     $trains[$j] = str_replace(" ", "", $att->Attribute->AttributeVariant->Text);
 					     $j++;
-					     break;
+					}else if($att->Attribute["type"] == "DIRECTION"){
+					     $directions[$k] = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
+					     $k++;
 					}
 				   }
 
@@ -207,6 +212,7 @@ class connections{
 					$vias[$connectionindex]->departure->platform->name = $departPlatform;
 					$vias[$connectionindex]->departure->platform->normal = 1;
 					$vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
+					$vias[$connectionindex]->direction = $directions[$k-1];
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
 					$connectionindex++;
@@ -219,6 +225,7 @@ class connections{
 			 
 		    }
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
+		    $connection[$i]->departure->direction = $directions[0];
 		    $connection[$i]->arrival->vehicle = "BE.NMBS." . $trains[sizeof($trains) - 1];
 		    $i++;
 	       }
