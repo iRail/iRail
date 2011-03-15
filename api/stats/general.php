@@ -77,7 +77,7 @@ try {
             ?></h1>
         <div id="chart"></div>
 
-<p>As of 15/03/2011 this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).
+<p>As of <a href="http://project.irail.be/ticket/85" target="_blank">15/03/2011</a> this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).</p>
 
         <?
             echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
