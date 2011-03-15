@@ -7,11 +7,9 @@
 User-agent: *
 
 Disallow: README
-Disallow: /unittests/
 Disallow: /xmlstylesheets/
-Disallow: /OutputHandlers/
-Disallow: /InputHandlers/
-Disallow: /DataStructs/
-Disallow: /stats/
+Disallow: /data/
+Disallow: /requests/
+Disallow: /output/
 
 # EOF
