@@ -40,7 +40,7 @@ try {
         <script type="text/javascript">
             $(function () {
 	$('#chart').gchart({type: 'line', maxValue: <? echo max($rows); ?>,
-		title: 'Calls to the iRail API', titleColor: 'red',
+		title: 'Uncached iRail API calls', titleColor: 'red',
 		backgroundColor: $.gchart.gradient('horizontal', 'ccffff', 'ccffff00'),
 		series: [$.gchart.series('Hits', [
             <?
@@ -70,12 +70,14 @@ try {
         </script>
     </head>
     <body>
-        <h1>Calls to the iRail API<?
+        <h1>Uncached iRail API calls<?
             if ($filter != "") {
                 echo " with $filter";
             }
             ?></h1>
         <div id="chart"></div>
+
+<p>As of 15/03/2011 this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).
 
         <?
             echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
