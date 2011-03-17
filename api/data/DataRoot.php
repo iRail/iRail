@@ -56,7 +56,7 @@ class DataRoot
 	       $rn = $this->rootname;
 	       $rn::fillDataRoot($this,$request);
 	  }catch(Exception $e){
-	       throw new Exception("Could not get data. Please report this problem to list@iRail.be.", 502);
+	       throw new Exception("Could not get data. Please report this problem to iRail@list.iRail.be.", 502);
 	  }
 	  
      }

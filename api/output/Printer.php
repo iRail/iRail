@@ -83,7 +83,7 @@ abstract class Printer{
 	       $this->startKeyVal($key,$val);
 	       $this->endElement($key);
 	  }else{
-	       throw new Exception("Could not retrieve the right information - please report this problem to list@iRail.be or try again with other arguments.",500);
+	       throw new Exception("Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.",500);
 	  }
      }
      function nextArrayElement(){
