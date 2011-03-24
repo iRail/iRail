@@ -62,6 +62,10 @@ abstract class Printer{
 			 }
 		    }
 		    $this->endArray($key, $root);
+	       }else{
+		    //very dirty fix of the komma problem when empty array when this would occur
+		    $this->startKeyVal("1", "1");
+		    $this->endElement("1");
 	       }
 	  }else if(is_object($val)){
 	       $this->startObject($key,$val);

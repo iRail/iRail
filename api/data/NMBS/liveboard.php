@@ -15,10 +15,10 @@ class liveboard{
 	  }else{
 	       $dataroot->station = stations::getStationFromName($request->getStation(), $request->getLang());
 	  }
-	  if($request->getArrdep() == "ARR"){
+	  if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
 	       $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
 	       $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang());
-	  }else if($request->getArrdep() == "DEP"){
+	  }else if(strtoupper(substr($request->getArrdep(), 0, 1)) == "D"){
 	       $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"D");
 	       $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang());
 	  }	       

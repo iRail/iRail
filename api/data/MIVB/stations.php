@@ -91,9 +91,12 @@ class stations{
 	       $station->locationY = $line["Y"];
 	       $station->name = $line[$lang];
 	       $station->standardname = $line["STD"];
+	       if($station->id == ""){
+		    throw new Exception("Can't find id in db");
+	       }
 	  }
 	  catch (Exception $e) {
-	       throw new Exception("Error reading from the database.", 3);
+	       throw new Exception("Error reading from the database - " . $e->getMessage(), 3);
 	  }
 	  return $station;
      }

@@ -28,7 +28,7 @@ class liveboard{
 	  }
      }
 
-     private static function fetchData($station,$time,$lang,$arrdep){
+     public static function fetchData($station,$time,$lang,$arrdep){
 	  include "../includes/getUA.php";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
@@ -39,7 +39,7 @@ class liveboard{
 	       throw new Exception("Not yet implemented. If you really need this function you can try to implement it yourself in http://github.com/iRail/iRail or you can ask on the mailinglist list.iRail.be",500);
 	  }
 //	  $MIVBMODES = array("M", "N", "T", "B");
-	  $s = explode(".",$station->id);
+	  $s = explode(".",$station->id);	  
 	  $stid = $s[2];
 //stibrt server wants lang in lowercase
 	  $lang = strtolower($lang);
@@ -49,7 +49,7 @@ class liveboard{
 	  return http_parse_message($post)->body;
      }
 
-     private static function parseData($xml, $lang){
+     public static function parseData($xml, $lang){
 	  //<waitingtime><line>5     </line><mode>M     </mode><minutes>6     </minutes><destination>Herrma</destination> </waitingtime>
 	  preg_match_all("/<waitingtime>.*?<line>(.*?)<\/line>.*?<mode>(.*?)<\/mode>.*?<minutes>(.*?)<\/minutes>.*?<destination>(.*?)<\/destination>.*?<\/waitingtime>/si", $xml,$matches);
 //	  echo $xml . "\n";
@@ -74,7 +74,6 @@ class liveboard{
 		    $nodes[$i-1]->station->standardname = $matches[4][$i-1];
 		    //echo "No stations found for ". $matches[4][$i-1] . "\n";
 	       }
-	       
 //	       echo $nodes[$i-1]->station->name;
 	       $nodes[$i-1]->platform = $nodes[$i-1]->station->name;
 //	       echo $i-1 . "\n";
