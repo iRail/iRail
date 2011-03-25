@@ -227,6 +227,7 @@ class connections{
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
 		    $connection[$i]->departure->direction = $directions[0];
 		    $connection[$i]->arrival->vehicle = "BE.NMBS." . $trains[sizeof($trains) - 1];
+		    $connect[$i]->arrival->vehicle = $directions[sizeof($directions)-1];
 		    $i++;
 	       }
 	  } else {
