@@ -37,37 +37,7 @@ try {
         </style>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
         <script type="text/javascript" src="jquery.gchart.min.js"></script>
-        <script type="text/javascript">
-            $(function () {
-	$('#chart').gchart({type: 'line', maxValue: <? echo max($rows); ?>,
-		title: 'Uncached iRail API calls', titleColor: 'red',
-		backgroundColor: $.gchart.gradient('horizontal', 'ccffff', 'ccffff00'),
-		series: [$.gchart.series('Hits', [
-            <?
-            $chartrows = array_reverse($rows, true);
-            $count = 0;
-            foreach ($chartrows as $day__ => $value) {
-                if ($count != sizeof($rows) - 1 && $count != 0) {
-                    echo "'$value',";
-                }
-                $count++;
-            }
-            ?>
-            ], 'red', 'ffcccc')],
-		axes: [$.gchart.axis('bottom', [
-            <?
-            $count = 0;
-            foreach ($chartrows as $day__ => $value) {
-                if ($count != sizeof($rows) - 1 && $count != 0) {
-                    echo "'" . substr($day__, 0, 2) . "',";
-                }
-                $count++;
-            }
-            ?>
-            ], 'black')],
-        		legend: 'left'});
-            });
-        </script>
+   <script language="javascript" src="http://www.google.com/jsapi"></script>
     </head>
     <body>
         <h1>Uncached iRail API calls<?
@@ -76,6 +46,71 @@ try {
             }
             ?></h1>
         <div id="chart"></div>
+
+   <script type="text/javascript">
+      var queryString = '';
+      var dataUrl = '';
+
+      function onLoadCallback() {
+        if (dataUrl.length > 0) {
+          var query = new google.visualization.Query(dataUrl);
+          query.setQuery(queryString);
+          query.send(handleQueryResponse);
+        } else {
+          var dataTable = new google.visualization.DataTable();
+          dataTable.addRows(<? echo sizeof($rows); ?>);
+          dataTable.addColumn('number');
+            <?
+            $chartrows = array_reverse($rows, true);
+            $count = 0;
+            foreach ($chartrows as $day__ => $value) {
+                if ($count != sizeof($rows) - 1 && $count != 0) {
+                    echo "dataTable.setValue($count, 0,$value);";
+                }
+                $count++;
+            }
+            ?>
+          draw(dataTable);
+        }
+      }
+
+      function draw(dataTable) {
+        var vis = new google.visualization.ImageChart(document.getElementById('chart'));
+        var options = {
+          chxl: '',
+          chxp: '',
+          chxr: '0,0,<? echo max($rows); ?>',
+          chxs: '',
+          chxtc: '',
+          chxt: 'y',
+          chbh: 'a,0,0',
+          chs: '800x365',
+          cht: 'bvg',
+          chco: 'A2C180',
+          chd: 's:GflxYlS',
+          chdl: '',
+          chg: '-1,0,0,4',
+          chtt: 'Uncached+iRail+API+calls'
+        };
+        vis.draw(dataTable, options);
+      }
+
+      function handleQueryResponse(response) {
+        if (response.isError()) {
+          alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+          return;
+        }
+        draw(response.getDataTable());
+      }
+
+      google.load("visualization", "1", {packages:["imagechart"]});
+      google.setOnLoadCallback(onLoadCallback);
+
+    </script>
+
+
+
+
 
 <p>As of <a href="http://project.irail.be/ticket/85" target="_blank">15/03/2011</a> this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).</p>
 
