@@ -34,6 +34,9 @@ class vehicleinformation{
      
 
      private static function getData($serverData, $lang){
+
+	  try{
+	       
 	  $stops = array();
 	  //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
 	  //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
@@ -52,12 +55,17 @@ class vehicleinformation{
 	       }
 	       $time = tools::transformTime("00d" . $times[$i] . ":00", date("Ymd"));
 	       $stops[$i] = new Stop();
-	       $stops[$i]->station = stations::getStationFromRTName($st,$lang);
+	       $stops[$i]->station = stations::getStationFromName($st,$lang);
 	       $stops[$i]->delay = $delay;
 	       $stops[$i]->time = $time;
 	       $i++;
 	  }
 	  return $stops;
+	  }
+	  catch(Exception $e){
+	       throw new Exception($e->getMessage(), 500);
+	  }
+	  
      }
 
      private static function getVehicleData($serverData, $id, $lang){
