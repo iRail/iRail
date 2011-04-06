@@ -78,6 +78,15 @@ class stations
 // * match railtime name
 
 //Let's go wih the hafas solution and get the location from it
+
+//fallback for wrong hafas information
+	  if(strtolower($name) == "brussels north" || strtolower($name) == "brussel noord" || strtolower($name) == "bruxelles nord"){
+	       return stations::getStationFromLocation(4.360854,50.859658, $lang);
+	  }
+	  if(strtolower($name) == "vorst zuid"){
+	       return stations::getStationFromLocation(4.310025,50.810158, $lang);
+	  }
+	  
 	  include "../includes/getUA.php";
 	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
