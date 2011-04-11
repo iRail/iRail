@@ -136,7 +136,8 @@ class stations
 	       
 	  }
 	  catch (Exception $e) {
-	       throw new Exception("No Railtimename found for station", 300);
+	       //no station found, let's try a HAFAS lookup as last resort
+	       return stations::getStationFromName($name,$lang);
 	  }
 	  return $station;
      }

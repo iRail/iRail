@@ -34,45 +34,42 @@ class vehicleinformation{
      
 
      private static function getData($serverData, $lang){
-
 	  try{
-	       
-	  $stops = array();
-	  //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
-	  //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
-	  //AT: =&gt;22:01&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=318&tr=22:00-60&da=D&p=2">Denderleeuw</a></font><br>
-	  //END: O 23:28&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=973&tr=23:15-60&da=D&p=2">Poperinge</a><br>
-	  preg_match_all("/(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*?>(.*?)<\/a>/smi", $serverData, $matches);
-	  $delays = $matches[3];
-	  $times = $matches[0];
-	  $stationnames = $matches[4];
-	  $i = 0;
-	  foreach ($stationnames as $st) {
-	       if (isset($delays[$i])) {
-		    $delay = $delays[$i] * 60;
-	       } else {
-		    $delay = 0;
+	       $stops = array();
+	       //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
+	       //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
+	       //AT: =&gt;22:01&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=318&tr=22:00-60&da=D&p=2">Denderleeuw</a></font><br>
+	       //END: O 23:28&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=973&tr=23:15-60&da=D&p=2">Poperinge</a><br>
+	       preg_match_all("/(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*?>(.*?)<\/a>/smi", $serverData, $matches);
+	       $delays = $matches[3];
+	       $times = $matches[0];
+	       $stationnames = $matches[4];
+	       $i = 0;
+	       foreach ($stationnames as $st) {
+		    if (isset($delays[$i])) {
+			 $delay = $delays[$i] * 60;
+		    } else {
+			 $delay = 0;
+		    }
+		    $time = tools::transformTime("00d" . $times[$i] . ":00", date("Ymd"));
+		    $stops[$i] = new Stop();
+		    $stops[$i]->station = stations::getStationFromRTName($st,$lang);
+		    $stops[$i]->delay = $delay;
+		    $stops[$i]->time = $time;
+		    $i++;
 	       }
-	       $time = tools::transformTime("00d" . $times[$i] . ":00", date("Ymd"));
-	       $stops[$i] = new Stop();
-	       $stops[$i]->station = stations::getStationFromName($st,$lang);
-	       $stops[$i]->delay = $delay;
-	       $stops[$i]->time = $time;
-	       $i++;
-	  }
-	  return $stops;
+	       return $stops;
 	  }
 	  catch(Exception $e){
 	       throw new Exception($e->getMessage(), 500);
 	  }
-	  
      }
 
      private static function getVehicleData($serverData, $id, $lang){
 // determine the location of the vehicle
 	  preg_match("/=&gt;(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*? >(.*?)<\/a>/smi", $serverData, $matches);
 	  $locationX = 0;
-	  $locationY = 0;	  
+	  $locationY = 0;
 	  if(isset($matches[4])){
 	       $now = stations::getStationFromRTName($matches[4], $lang);
 	       $locationX = $now -> locationX;
