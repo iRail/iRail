@@ -39,15 +39,23 @@ class vehicleinformation{
 	       //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
 	       //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
 	       //AT: =&gt;22:01&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=318&tr=22:00-60&da=D&p=2">Denderleeuw</a></font><br>
+	       //BETWEEN: <font face="Arial">| 10:35</font><font color="Red"> +15'</font><font face="Arial">&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=215&tr=10:45-60&da=D&p=2">Brussel-Centraal</a><br>
+	       //        | 10:40<font color="Red"> +15'</font></font>&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=221&tr=10:45-60&da=D&p=2">Brussel-Noord</a><br>
 	       //END: O 23:28&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=973&tr=23:15-60&da=D&p=2">Poperinge</a><br>
-	       preg_match_all("/(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*?>(.*?)<\/a>/smi", $serverData, $matches);
+	       preg_match_all("/^.*?(\d\d:\d\d).*?( \+(\d\d?(:?\d\d)?)'?)?&nbsp;<a href=\"\/mobile\/SearchStation.*?>(.*?)<\/a>/smi", $serverData, $matches);
 	       $delays = $matches[3];
 	       $times = $matches[0];
-	       $stationnames = $matches[4];
+	       $stationnames = $matches[5];
 	       $i = 0;
 	       foreach ($stationnames as $st) {
 		    if (isset($delays[$i])) {
-			 $delay = $delays[$i] * 60;
+			 $arr= array();
+			 $arr = explode(":",$delays[$i]);
+			 if(isset($arr[1])){
+			      $delay = (60*$arr[0] + $arr[1])*60;
+			 }else{
+			      $delay = $delays[$i] * 60;
+			 }
 		    } else {
 			 $delay = 0;
 		    }
