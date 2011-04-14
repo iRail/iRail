@@ -9,7 +9,7 @@
    * @package data/NS
    */
 class stations{
-     private static $stations;
+     private static $stations = array();
      public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
@@ -69,16 +69,16 @@ class stations{
      
      private static function fetchAllStationsFromDB($lang){
 //<station locationX="4.323973" locationY="52.081261" id="NL.NS.gvc" standardname="'s-Gravenhage">'s-Gravenhage</station>
-	  if(!isset(stations::$stations)){
-	       $allstations = file_get_contents("data/NS/stations.xml",true);
-	       preg_match_all("/<station locationX=\"([^\"])\" locationY=\"([^\"])\" id=\"([^\"])\" standardname=\"([^\"])\">([^<])<\/station>/smi", $allstations, $matches);
+	  if(sizeof(stations::$stations)==0){
+	       $allstations = file_get_contents("data/NS/stations.xml",true);	       
+	       preg_match_all("/<station locationX=\"(.*?)\" locationY=\"(.*?)\" id=\"(.*?)\" standardname=\"(.*?)\">(.*?)<\/station>/smi", $allstations, $matches);
 	       for($i =0; $i < sizeof($matches[0]); $i++){
 		    stations::$stations[$i] = new Station();
-		    stations::$stations[$i]->locationX = $matches[0][$i];
-		    stations::$stations[$i]->locationY = $matches[1][$i];
-		    stations::$stations[$i]->id = $matches[2][$i];
-		    stations::$stations[$i]->standardname = $matches[3][$i];
-		    stations::$stations[$i]->name = $matches[4][$i];
+		    stations::$stations[$i]->locationX = $matches[1][$i];
+		    stations::$stations[$i]->locationY = $matches[2][$i];
+		    stations::$stations[$i]->id = $matches[3][$i];
+		    stations::$stations[$i]->standardname = $matches[4][$i];
+		    stations::$stations[$i]->name = $matches[5][$i];
 	       }
 	  }
 	  return stations::$stations;

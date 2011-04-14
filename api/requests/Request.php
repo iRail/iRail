@@ -8,7 +8,7 @@
    */
 class Request {
      public static $SUPPORTED_LANGUAGES = array("EN", "NL", "FR", "DE");
-     public static $SUPPORTED_SYSTEMS = array("NMBS", "MIVB");
+     public static $SUPPORTED_SYSTEMS = array("NMBS", "MIVB", "NS");
 
      private $format = "xml";
      private $lang = "EN";
@@ -53,7 +53,7 @@ class Request {
      }
 
      public function getSystem(){
-	  $this->system = strtoupper($this->system);
+	  $this->system = strtoupper($this->system);	  
 	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
 	       return $this->system;
 	  }else{
