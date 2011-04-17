@@ -30,7 +30,6 @@ class Kml extends Printer{
 	  $this->rootname = $name;
 	  if($name == "stations"){
 	       echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\">";
-	       echo "<Document>";
 	  }else{
 	       $this->printError(400,"KML only works for stations at this moment");
 	  }
@@ -62,7 +61,7 @@ class Kml extends Printer{
      }
 
      function endRootElement($name){
-	  echo "</Document>";
+	  echo "</kml>";
      }
 };
 ?>
