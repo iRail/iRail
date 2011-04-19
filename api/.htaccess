@@ -9,6 +9,8 @@
 Options -Indexes
 Options +FollowSymLinks
 
+AddType application/vnd.google-earth.kml+xml .kml
+
 AddDefaultCharset UTF-8
 
 # mod rewrite, I like sexy looking URLs
