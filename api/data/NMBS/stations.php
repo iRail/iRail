@@ -81,8 +81,8 @@ class stations
 
 //fallback for wrong hafas information
 	  if(strtolower($name) == "brussels north" || strtolower($name) == "brussel noord" || strtolower($name) == "bruxelles nord"){
-	       //return stations::getStationFromLocation(4.360854,50.859658, $lang);
-	       return stations::getStationFromId("BE.NMBS.008812005", $lang);
+	       return stations::getStationFromLocation(4.360854,50.859658, $lang);
+	       //return stations::getStationFromId("BE.NMBS.008812005", $lang);
 	  }
 	  if(strtolower($name) == "vorst zuid"){
 	       return stations::getStationFromLocation(4.310025,50.810158, $lang);
