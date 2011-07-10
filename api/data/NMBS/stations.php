@@ -80,9 +80,10 @@ class stations
 //Let's go wih the hafas solution and get the location from it
 
 //fallback for wrong hafas information
-	  str_ireplace("south", "zuid", $name);
-	  str_ireplace("north", "noord", $name);
+	  $name = str_ireplace("south", "zuid", $name);
+	  $name = str_ireplace("north", "noord", $name);
 	  
+
 	  include "../includes/getUA.php";
 	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
