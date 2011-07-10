@@ -38,10 +38,10 @@ class connections{
 	  include "../includes/getUA.php";
 	  //Hard fix
 	  $name1 = str_ireplace("north", "noord", $name1);
-	  $name2 = str_ireplace("north", "noord", $name1);
+	  $name2 = str_ireplace("north", "noord", $name2);
 	  
 	  $name1 = str_ireplace("south", "zuid", $name1);
-	  $name2 = str_ireplace("south", "zuid", $name1);
+	  $name2 = str_ireplace("south", "zuid", $name2);
 
 	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
