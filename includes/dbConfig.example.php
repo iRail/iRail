@@ -27,9 +27,9 @@
 // API DB config
 
 $api_host = "localhost";		// db host
-$api_user = "irail";			// db user
-$api_password = "passwd";		// passwd
-$api_database = "irail";		// db name
+$api_user = "root";			// db user
+$api_password = "QjlEecmdJ2008";		// passwd
+$api_database = "beroads";		// db name
 $api_table = "apilog";			// table name
 
 // API server name

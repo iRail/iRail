@@ -37,12 +37,16 @@ class liveboard{
 	  $body = "";
 //we want data for 1 hour. But we can only retrieve 15 minutes per request
 	  for($i=0;$i<4;$i++){
-	       $scrapeUrl = "http://www.railtime.be/mobile/SearchStation.aspx";
-	       $scrapeUrl .= "?l=EN&tr=". $time . "-15&s=1&sid=" . stations::getRTID($station, $lang) . "&da=" . $timeSel . "&p=2";
+
+	       
+		$scrapeUrl = "http://www.railtime.be/mobile/HTML/StationDetail.aspx";
+		$scrapeUrl .= "?sn=" . urlencode($station->name) . "&sid=" . stations::getRTID($station, $lang) . "&ti=" . urlencode($time) . "&da=" . urlencode($timeSel) . "&l=EN&s=1";
+	
 	       $post = http_post_data($scrapeUrl, "", $request_options) or die("");
 	       $body .= http_parse_message($post)->body;
 	       $time = tools::addQuarter($time);
 	  }
+	  
 	  return $body;
 	  
      }
@@ -50,23 +54,39 @@ class liveboard{
      private static function parseData($html,$time,$lang){
 	  $hour = substr($time, 0,2);
 	  
-        preg_match_all("/<tr>(.*?)<\/tr>/ism", $html, $m);
+	
+        preg_match_all("/<table class=\"StationList\">(.*?)<\/table>/ism", $html, $m);
+
+
 	$nodes = array();
         $i = 0;
         //for each row
-        foreach ($m[1] as $tr) {
-            preg_match("/<td valign=\"top\">(.*?)<\/td><td valign=\"top\">(.*?)<\/td>/ism", $tr, $m2);
-            //$m2[1] has: time
-            //$m2[2] has delay, stationname & platform
+	
+        foreach ($m[0] as $table) {
+		$left = 0;
+		preg_match_all("/<tr class=(.*?)>(.*?)<\/tr>/ism", $table, $m2);
+		
+		if($m2[1][0] == "rowStation trainLeft"){$left = 1;}
+		
 
-            //GET LEFT OR NOT
-	    $left = 0;
-	    if(preg_match("/color=\"DarkGray\"/ism",$tr,$lll) > 0 ){
-		 $left = 1;
-	    }
+		preg_match_all("/<label>(.*?)<\/label>/ism",$m2[2][0],$m3);
+
+		//$m3[1][0] has : time
+		//$m3[1][1] has : stationname
+		
+		preg_match_all("/<label class=\"orange\">(.*?)<\/label>/ism",$m2[2][0],$delay);
+		preg_match_all("/<label class=\"bold\">(.*?)<\/label>/ism",$m2[2][0],$platform);
+		preg_match_all("/<a class=\"button cmd blue\" href=(.*?)>&gt;<\/a>/ism", $m2[2][0], $id);
+		
+		
+		$delay = $delay[1][0];
+		$platform = $platform[1][0];
+		$id = $id[1][0];
+
+           
 
             //GET TIME:
-            preg_match("/((\d\d):\d\d)/", $m2[1], $t);
+            preg_match("/((\d\d):\d\d)/", $m3[1][0], $t);
             //if it is 23 pm and we fetched data for 1 hour, we may end up with data for the next day and thus we will need to add a day
 	    $dayoffset = 0;
 	    if($t[2] != 23 && $hour == 23){
@@ -83,21 +103,17 @@ class liveboard{
             $unixtime = tools::transformTime($time,"20". $dateparam);
 
             //GET DELAY
-            $delay = 0;
-            preg_match("/\+(\d+)'/", $m2[2], $d);
+            preg_match("/\+(\d+)'/", $delay, $d);
             if(isset($d[1])){
                 $delay = $d[1] * 60;
             }
-            preg_match("/\+(\d):(\d+)/", $m2[2], $d);
+            preg_match("/\+(\d):(\d+)/", $delay, $d);
             if(isset($d[1])){
                 $delay = $d[1] * 3600 + $d[2]*60;
             }
 
             //GET STATION
-            preg_match("/.*&nbsp;(.*?)&nbsp;<span/",$m2[2],$st);
-            //echo $st[1] . "\n";
-	    $st = explode("/",$st[1]);
-	    $st = trim($st[0]);
+	    $st = trim(utf8_encode($m3[1][1]));
 	    try{
 		 $stationNode = stations::getStationFromRTName(strtoupper($st), $lang);
 	    }catch(Exception $e){
@@ -106,22 +122,12 @@ class liveboard{
 	    }	    
 
             //GET VEHICLE AND PLATFORM
-            $platform = "";
+
             $platformNormal = true;
-            preg_match("/\[(.*?)(&nbsp;.*?)?\]/",$m2[2],$veh);
-            $vehicle = "BE.NMBS." . $veh[1];
-            if(isset($veh[2])){
-                if(preg_match("/<[bf].*?>(.*?)<\/.*?>/", $veh[2], $p)){
-                    $platform = $p[1];
-                    $platformNormal = false;
-                }else{
-                    //echo $veh[2] . "\n";
-                    preg_match("/&nbsp;.*?&nbsp;(.*)/", $veh[2], $p2);
-                    if(isset($p2[1])){
-                        $platform = $p2[1];
-                    }
-                }
-            }
+	    $veh = explode(";",$id);
+	    $veh = explode("=",$veh[2]);
+	    
+            $vehicle = "BE.NMBS." . str_replace("&amp", "", ($veh[1]));
 	    $nodes[$i] = new DepartureArrival();
 	    $nodes[$i]->delay= $delay;
 	    $nodes[$i]->station= $stationNode;
@@ -132,7 +138,9 @@ class liveboard{
 	    $nodes[$i]->platform->normal = $platformNormal;
 	    $nodes[$i]->left = $left;
             $i++;
-        }
+        
+	
+	}
         return liveboard::removeDuplicates($nodes);
      }
 
