@@ -144,10 +144,13 @@ class stations
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $station->id = mysql_real_escape_string($station->id);
-	       $query = "SELECT `RT` FROM railtime WHERE `ID` = '$station->id'";
+	       $query = "SELECT `RT`, `RAILTIMENAME` FROM railtime WHERE `ID` = '$station->id'";
 	       $result = mysql_query($query) or die("Could not get stationslist from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
-	       return $line["RT"];
+               $o = new stdClass();
+               $o->rtid = $line["RT"];
+               $o->rtname = $line["RAILTIMENAME"];
+	       return $o;
 	  }catch(Exception $e){
 	       throw new Exception("error getting RT ID", 3);
 	  }

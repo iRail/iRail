@@ -40,7 +40,10 @@ class liveboard{
 
 	       
 		$scrapeUrl = "http://www.railtime.be/mobile/HTML/StationDetail.aspx";
-		$scrapeUrl .= "?sn=" . urlencode($station->name) . "&sid=" . stations::getRTID($station, $lang) . "&ti=" . urlencode($time) . "&da=" . urlencode($timeSel) . "&l=EN&s=1";
+                $rt = stations::getRTID($station, $lang);
+                $rtname = $rt->rtname;
+                $rtid = $rt->rtid;
+		$scrapeUrl .= "?sn=" . urlencode($rtname) . "&sid=" . urlencode($rtid) . "&ti=" . urlencode($time) . "&da=" . urlencode($timeSel) . "&l=EN&s=1";
 	
 	       $post = http_post_data($scrapeUrl, "", $request_options) or die("");
 	       $body .= http_parse_message($post)->body;
