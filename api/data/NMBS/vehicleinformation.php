@@ -9,6 +9,7 @@
  */
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
+include_once("../includes/simple_html_dom.php");
 class vehicleinformation{
      public static function fillDataRoot($dataroot,$request){
 	  $lang= $request->getLang();
@@ -25,9 +26,9 @@ class vehicleinformation{
 	       "timeout" => "30",
 	       "useragent" => $irailAgent,
 	       );
-	  $scrapeURL = "http://www.railtime.be/mobile/SearchTrain.aspx";
+	  $scrapeURL = "http://www.railtime.be/mobile/HTML/TrainDetail.aspx";
 	  $id = preg_replace("/.*?(\d.*)/smi", "\\1", $id);
-	  $scrapeURL .= "?l=" . $lang . "&s=1&tid=" . $id . "&da=D&p=2";
+	  $scrapeURL .= "?l=" . $lang . "&tid=" . $id . "&dt=" . date( 'd%2fm%2fY' );
 	  $post = http_post_data($scrapeURL, "", $request_options) or die("");
 	  return http_parse_message($post)->body;	  
      }
@@ -35,37 +36,29 @@ class vehicleinformation{
 
      private static function getData($serverData, $lang){
 	  try{
-	       $stops = array();
-	       //BEGIN: O 20:29 +8'&nbsp;<a.*? >(.*?)</a><br>
-	       //NORMAL: | 20:50 +9'&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=1265&tr=20:45-60&da=D&p=2">Zele</a><br>
-	       //AT: =&gt;22:01&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=318&tr=22:00-60&da=D&p=2">Denderleeuw</a></font><br>
-	       //BETWEEN: <font face="Arial">| 10:35</font><font color="Red"> +15'</font><font face="Arial">&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=215&tr=10:45-60&da=D&p=2">Brussel-Centraal</a><br>
-	       //        | 10:40<font color="Red"> +15'</font></font>&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=221&tr=10:45-60&da=D&p=2">Brussel-Noord</a><br>
-	       //END: O 23:28&nbsp;<a href="/mobile/SearchStation.aspx?l=NL&s=1&sid=973&tr=23:15-60&da=D&p=2">Poperinge</a><br>
-	       preg_match_all("/(\d\d:\d\d).*?( \+(\d\d?(:?\d\d)?)'?)?&nbsp;<a href=\"\/mobile\/SearchStation.*?>(.*?)<\/a>/smi", $serverData, $matches);
-	       $delays = $matches[3];
-	       $times = $matches[0];
-	       $stationnames = $matches[5];
-	       $i = 0;
-	       foreach ($stationnames as $st) {
-		    if (isset($delays[$i])) {
-			 $arr= array();
-			 $arr = explode(":",$delays[$i]);
-			 if(isset($arr[1])){
-			      $delay = (60*$arr[0] + $arr[1])*60;
-			 }else{
-			      $delay = $delays[$i] * 60;
-			 }
-		    } else {
-			 $delay = 0;
-		    }
-		    $time = tools::transformTime("00d" . $times[$i] . ":00", date("Ymd"));
-		    $stops[$i] = new Stop();
-		    $stops[$i]->station = stations::getStationFromRTName($st,$lang);
-		    $stops[$i]->delay = $delay;
-		    $stops[$i]->time = $time;
-		    $i++;
-	       }
+               $stops = array();
+               $html = str_get_html($serverData);
+               $nodes = $html->find("tr.rowHeightTraject");
+               $i = 0;
+               foreach ($nodes as $node) {
+                    $row_delay = str_replace("'",'',str_replace('+','',trim($node->children(3)->first_child()->plaintext)));
+                    if (isset($row_delay)) {
+                         $arr= array();
+                         $arr = explode(":",$row_delay);
+                         if(isset($arr[1])){
+                              $delay = (60*$arr[0] + $arr[1])*60;
+                         }else{
+                              $delay = $row_delay * 60;
+                         }
+                    } else {
+                         $delay = 0;
+                    }
+                    $stops[$i] = new Stop();
+                    $stops[$i]->station = stations::getStationFromRTName($node->children(1)->first_child()->plaintext,$lang);
+                    $stops[$i]->delay = $delay;
+                    $stops[$i]->time = tools::transformTime("00d" . $node->children(2)->first_child()->plaintext . ":00", date("Ymd"));
+                    $i++;
+               }
 	       return $stops;
 	  }
 	  catch(Exception $e){
@@ -75,11 +68,16 @@ class vehicleinformation{
 
      private static function getVehicleData($serverData, $id, $lang){
 // determine the location of the vehicle
-	  preg_match("/=&gt;(\d\d:\d\d)( \+(\d\d?)')?&nbsp;<a href=\"\/mobile\/SearchStation.*? >(.*?)<\/a>/smi", $serverData, $matches);
+          $html = str_get_html($serverData);
+          $nodes = $html->find("td[class*=TrainReperage]");
+          if ($nodes) {
+              $station = $nodes[0]->parent()->children(1)->first_child()->plaintext;
+          }
+
 	  $locationX = 0;
 	  $locationY = 0;
-	  if(isset($matches[4])){
-	       $now = stations::getStationFromRTName($matches[4], $lang);
+	  if(isset($station)){
+	       $now = stations::getStationFromRTName($station, $lang);
 	       $locationX = $now -> locationX;
 	       $locationY = $now -> locationY;
 	  }
