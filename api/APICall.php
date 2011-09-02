@@ -6,7 +6,6 @@
    * @author Pieter Colpaert
    */
 ini_set("include_path", ".:data");
-include_once("../includes/apiLog.php");
 include_once("data/DataRoot.php");
 include_once("data/structs.php");
 class APICall {

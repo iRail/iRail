@@ -66,7 +66,7 @@ class stations
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 300);
 	  }
-	  return $station;	  
+	  return $station;
      }
 
      public static function getStationFromName($name, $lang){
@@ -106,7 +106,10 @@ class stations
 	  $x= $m[1] . ".". $m[2];
 	  preg_match("/(..)(.*)/",$y, $m);
 	  $y = $m[1] . ".". $m[2];
-	  return stations::getStationFromLocation($x,$y,$lang);
+          $sss = stations::getStationFromLocation($x,$y,$lang);
+          preg_match("/externalStationNr=\"(.*?)\"/si", $idbody,$hafasid);
+          $sss->setHID($hafasid[1]);
+          return $sss;
      }
 
      public static function getStationFromRTName($name,$lang){
@@ -154,7 +157,6 @@ class stations
 	  }catch(Exception $e){
 	       throw new Exception("error getting RT ID", 3);
 	  }
-	  
      }
      
      
