@@ -10,11 +10,11 @@ include_once("data/NMBS/stations.php");
 class liveboard{
     public static function fillDataRoot($dataroot,$request){
 //detect if this is an id or a station
-        if(sizeof(explode(".",$request->getStation()))>1){
-            $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
-        }else{
+//        if(sizeof(explode(".",$request->getStation()))>1){
+//            $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
+ //       }else{
             $dataroot->station = stations::getStationFromName($request->getStation(), $request->getLang());
-        }
+   //     }
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
             $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang());
