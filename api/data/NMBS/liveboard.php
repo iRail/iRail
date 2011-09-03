@@ -88,11 +88,11 @@ class liveboard{
             $unixtime = tools::transformtime($time,$dateparam);
 
             //GET DELAY
-            preg_match("/\+(\d+)/", $delay, $d);
+            preg_match("/\+\s*(\d+)/", $delay, $d);
             if(isset($d[1])){
                 $delay = $d[1] * 60;
             }
-            preg_match("/\+(\d):(\d+)/", $delay, $d);
+            preg_match("/\+\s*(\d):(\d+)/", $delay, $d);
             if(isset($d[1])){
                 $delay = $d[1] * 3600 + $d[2]*60;
             }
