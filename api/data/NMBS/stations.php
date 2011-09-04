@@ -45,6 +45,10 @@ class stations
 
      public static function getStationFromID($id, $lang){
 	  APICall::connectToDB();
+          $idarray = explode(".",$id);
+	  if(sizeof($idarray) > 0){
+		$id=$idarray[2];
+	  }
 	  $station;
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
