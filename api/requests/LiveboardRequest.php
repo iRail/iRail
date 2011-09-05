@@ -20,7 +20,9 @@ class LiveboardRequest extends Request{
 	  parent::setGetVar("arrdep", "DEP");
 	  parent::setGetVar("time", date("Hi"));
 	  preg_match("/(..)(..)(..)/si", $this->date, $m);
-	  $this->date = "20" . $m[3] . $m[2] . $m[1];
+          if(sizeof($this->date) >0){
+              $this->date = "20" . $m[3] . $m[2] . $m[1];
+          }
 	  preg_match("/(..)(..)/si", $this->time, $m);
 	  $this->time = $m[1] . ":" . $m[2];
 	  if($this->station == "" && isset($_GET["id"])){

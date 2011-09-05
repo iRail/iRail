@@ -45,7 +45,7 @@ class liveboard{
 
           $ curl "http://hari.b-rail.be/Hafas/bin/stboard.exe/en?start=yes&time=15%3a12&date=01.09.2011&inputTripelId=A=1@O=@X=@Y=@U=80@L=008892007@B=1@p=@&maxJourneys=50&boardType=dep&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=00010000001111"
         */
-        $scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/en?start=yes";
+        $scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/". $lang ."?start=yes";
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
         $scrapeUrl .= "&time=" . $time ."&date=". date("d") . "." . date("m") .".". date("Y") ."&inputTripelId=". urlencode("A=1@O=@X=@Y=@U=80@L=". $hafasid ."@B=1@p=@") . "&maxJourneys=50&boardType=" . $timeSel . "&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000";
@@ -70,10 +70,12 @@ class liveboard{
 
         $hour = substr($time,0,2);
         $hour_ = substr((string)$data->Journey[0]["fpTime"],0,2);
+        if($hour_ != "23" && $hour == "23") $hour_ = 24;
+        
         $minutes = substr($time,3,2);
         $minutes_ = substr((string)$data->Journey[0]["fpTime"],3,2);
-        
-        while(($hour_-$hour)*60 + ($minutes_ - $minutes) <= 60){
+
+        while(isset($data->Journey[$i]) &&($hour_-$hour)*60 + ($minutes_ - $minutes) <= 60){
             $journey = $data->Journey[$i] ;
             
             $left = 0;
@@ -102,7 +104,7 @@ class liveboard{
                 $delay = $d[1] * 3600 + $d[2]*60;
             }
 
-            //GET STATION
+
             $stationNode = stations::getStationFromName($journey["dir"], $lang);
 
             //GET VEHICLE AND PLATFORM
@@ -123,6 +125,7 @@ class liveboard{
 	    $nodes[$i]->platform->normal = $platformNormal;
 	    $nodes[$i]->left = $left;
             $hour_ = substr((string)$data->Journey[$i]["fpTime"],0,2);
+            if($hour_ != "23" && $hour == "23") $hour_ = 24;
             $minutes_ = substr((string)$data->Journey[$i]["fpTime"],3,2);
             $i++;
 	}
