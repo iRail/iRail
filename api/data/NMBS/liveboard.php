@@ -22,10 +22,10 @@ class liveboard{
    //     }
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
-            $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang());
+            $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang(),$request->isFast());
         }else if(strtoupper(substr($request->getArrdep(), 0, 1)) == "D"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"D");
-            $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang());
+            $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
         }
         else{
             throw new Exception("Not a good timeSel value: try ARR or DEP", 300);
@@ -57,7 +57,7 @@ class liveboard{
         
     }
   
-    private static function parseData($xml,$time,$lang){
+    private static function parseData($xml,$time,$lang, $fast = false){
         $data = new SimpleXMLElement($xml);
         $hour = substr($time, 0,2);
 
@@ -104,9 +104,14 @@ class liveboard{
                 $delay = $d[1] * 3600 + $d[2]*60;
             }
 
-
-            $stationNode = stations::getStationFromName($journey["dir"], $lang);
-
+            if($fast){
+                $stationNode = new Station();
+                $stationNode->name = (string) $journey["dir"];
+                $stationNode->name = str_replace(" [B]", "", $stationNode->name);
+            }else{
+                $stationNode = stations::getStationFromName($journey["dir"], $lang);
+            }
+            
             //GET VEHICLE AND PLATFORM
 
             $platformNormal = true;
@@ -131,7 +136,6 @@ class liveboard{
 	}
         return $nodes;
     }
-
 };
 
 

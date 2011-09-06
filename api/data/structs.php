@@ -28,12 +28,6 @@ class Station{
     public function getHID(){
         return $this->hafasid;
     }
-    
-     public $id;
-     public $locationX;
-     public $locationY;
-     public $name;
-     public $standardname;
 }
 
 class DepartureArrival{

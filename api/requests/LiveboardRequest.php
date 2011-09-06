@@ -12,6 +12,7 @@ class LiveboardRequest extends Request{
      protected $date;
      protected $time;
      protected $arrdep;
+     protected $fast;
 
      function __construct(){
 	  parent::__construct();
@@ -19,6 +20,7 @@ class LiveboardRequest extends Request{
 	  parent::setGetVar("date", date("dmy"));
 	  parent::setGetVar("arrdep", "DEP");
 	  parent::setGetVar("time", date("Hi"));
+          parent::setGetVar("fast","false");
 	  preg_match("/(..)(..)(..)/si", $this->date, $m);
           if(sizeof($m) > 3){
               $this->date = "20" . $m[3] . $m[2] . $m[1];
@@ -33,6 +35,10 @@ class LiveboardRequest extends Request{
 	       $this->station = $_GET["id"];
 	  }
 	  parent::processRequiredVars(array("station"));
+     }
+
+     public function isFast(){
+         return $this->fast == "true";
      }
 
      public function getStation() {
