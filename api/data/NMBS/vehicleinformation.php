@@ -34,7 +34,7 @@ class vehicleinformation{
      }
      
 
-     private static function getData($serverData, $lang){
+     private static function getData($serverData, $lang, $fast){
 	  try{
                $stops = array();
                $html = str_get_html($serverData);
