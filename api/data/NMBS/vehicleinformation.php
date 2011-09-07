@@ -16,7 +16,7 @@ class vehicleinformation{
 	  $serverData = vehicleinformation::getServerData($request->getVehicleId(),$lang);
 	  $dataroot->vehicle = vehicleinformation::getVehicleData($serverData, $request->getVehicleId(), $lang);
 	  $dataroot->stop = array();
-	  $dataroot->stop = vehicleinformation::getData($serverData, $lang);
+	  $dataroot->stop = vehicleinformation::getData($serverData, $lang, $request->getFast());
      }
 
      private static function getServerData($id,$lang){
@@ -54,7 +54,13 @@ class vehicleinformation{
                          $delay = 0;
                     }
                     $stops[$i] = new Stop();
-                    $stops[$i]->station = stations::getStationFromRTName($node->children(1)->first_child()->plaintext,$lang);
+                    $station = new Station();
+                    if($fast == "true"){
+                        $station->name = $node->children(1)->first_child()->plaintext;
+                    }else{
+                        $station = stations::getStationFromRTName($node->children(1)->first_child()->plaintext,$lang);
+                    }
+                    $stops[$i]->station = $station;
                     $stops[$i]->delay = $delay;
                     $stops[$i]->time = tools::transformTime("00d" . $node->children(2)->first_child()->plaintext . ":00", date("Ymd"));
                     $i++;

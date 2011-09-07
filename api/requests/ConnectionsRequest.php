@@ -14,6 +14,7 @@ class ConnectionsRequest extends Request {
      protected $time;
      protected $date;
      protected $timeSel;
+     protected $fast;
      protected $typeOfTransport;
      function __construct(){
 	  parent::__construct();
@@ -24,6 +25,7 @@ class ConnectionsRequest extends Request {
 	  parent::setGetVar("time", date("Hi"));
 	  parent::setGetVar("timeSel","depart");
 	  parent::setGetVar("typeOfTransport", "train");
+          parent::setGetVar("fast","false");
 	  parent::processRequiredVars(array("from", "to"));
 
 //reform date and time to wanted structure for hafas and railtime
@@ -32,7 +34,11 @@ class ConnectionsRequest extends Request {
 	  preg_match("/(..)(..)/si", $this->time, $m);
 	  $this->time = $m[1] . ":" . $m[2];
      }
-    
+
+     public function getFast(){
+         return $this->fast;
+     }
+
      public function getResults() {
 	  return $this->results;
      }

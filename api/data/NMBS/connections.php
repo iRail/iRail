@@ -192,7 +192,13 @@ class connections{
 					     $trains[$j] = str_replace(" ", "", $att->Attribute->AttributeVariant->Text);
 					     $j++;
 					}else if($att->Attribute["type"] == "DIRECTION"){
-					     $directions[$k] = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
+                                            $__stat = new Station();
+                                            if($fast == "true"){
+                                                $__stat->name = trim($att->Attribute->AttributeVariant->Text);
+                                            }else{
+                                                $__stat = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
+                                            }
+                                            $directions[$k] = $__stat;
 					     $k++;
 					}
 				   }

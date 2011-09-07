@@ -8,16 +8,23 @@
 include_once("Request.php");
 class VehicleinformationRequest extends Request {
      protected $id;
-    
+     protected $fast;
+
      function __construct() {
 	  parent::__construct();
 	  parent::setGetVar("id", "");
+          parent::setGetVar("fast", "false");
 	  parent::processRequiredVars(array("id"));
      }
 
      public function getVehicleId() {
 	  return $this->id;
      }
+
+     public function getFast(){
+         return $this->fast;
+     }
+     
 
 }
 ?>
