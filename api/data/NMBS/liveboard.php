@@ -116,7 +116,7 @@ class liveboard{
 
             $platformNormal = true;
 	    $veh = $journey["prod"];
-            $veh = substr($veh,0,7);
+            $veh = substr($veh,0,8);
             $veh = str_replace(" ","",$veh);
             $vehicle = "BE.NMBS." . $veh;
 
