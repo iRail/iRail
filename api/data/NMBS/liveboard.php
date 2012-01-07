@@ -21,10 +21,10 @@ class liveboard{
             $dataroot->station = stations::getStationFromName($stationr, $request->getLang());
    //     }
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
-            $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
+            $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"arr");
             $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang(),$request->isFast());
         }else if(strtoupper(substr($request->getArrdep(), 0, 1)) == "D"){
-            $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"D");
+            $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"dep");
             $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
         }
         else{
