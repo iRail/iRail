@@ -14,10 +14,8 @@ class Xml extends Printer{
      private $rootname;
 
      function printHeader(){
-	ob_start();
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: text/xml; charset=UTF-8");
-	echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
      }
 
      function printError($ec, $msg){
