@@ -178,11 +178,11 @@ class stations
 		    $station[$i]->locationX = $line["X"];
 		    $station[$i]->locationY = $line["Y"];
 		    if($line[$lang] != ""){
-			 $station[$i]->name = $line[$lang];
+                        $station[$i]->name = utf8_encode($line[$lang]);
 		    }else{
-			 $station[$i]->name = $line["STD"];	    
+                        $station[$i]->name = utf8_encode($line["STD"]);	    
 		    }
-		    $station[$i]->standardname = $line["STD"];
+		    $station[$i]->standardname = utf8_encode($line["STD"]);
 		    $i++;
 	       }
 	  }
