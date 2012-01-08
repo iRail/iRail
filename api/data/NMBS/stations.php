@@ -30,12 +30,12 @@ class stations
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
 	       if($line[$lang] != ""){
-		    $station->name = $line[$lang];
+		    $station->name = utf8_encode($line[$lang]);
 	       }else{
-		    $station->name = $line["STD"];	    
+		    $station->name = utf8_encode($line["STD"]);	    
 	       }
 	       
-	       $station->standardname = $line["STD"];
+	       $station->standardname = utf8_encode($line["STD"]);
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 3);
@@ -61,11 +61,11 @@ class stations
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
 	       if($line[$lang] != ""){
-		    $station->name = $line[$lang];
+		    $station->name = utf8_encode($line[$lang]);
 	       }else{
-		    $station->name = $line["STD"];	    
+		    $station->name = utf8_encode($line["STD"]);	    
 	       }
-	       $station->standardname = $line["STD"];
+	       $station->standardname = utf8_encode($line["STD"]);
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 300);
@@ -129,11 +129,11 @@ class stations
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
 	       if($line[$lang] != ""){
-		    $station->name = $line[$lang];
+		    $station->name = utf8_encode($line[$lang]);
 	       }else{
-		    $station->name = $line["STD"];	    
+		    $station->name = utf8_encode($line["STD"]);	    
 	       }
-	       $station->standardname = $line["STD"];
+	       $station->standardname = utf8_encode($line["STD"]);
 	       if($station->id == ""){
 		    throw new Exception("doesn't matter what's in here. It doesn't get parsed", 0);
 	       }
@@ -156,7 +156,7 @@ class stations
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
                $o = new stdClass();
                $o->rtid = $line["RT"];
-               $o->rtname = $line["RAILTIMENAME"];
+               $o->rtname = utf8_encode($line["RAILTIMENAME"]);
 	       return $o;
 	  }catch(Exception $e){
 	       throw new Exception("error getting RT ID", 3);
