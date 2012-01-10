@@ -68,9 +68,7 @@ class Json extends Printer{
 	       }else{
 		    echo "\"$name\":{";
 	       }
-	       
 	  }
-	  
      }
 
      function startKeyVal($key,$val){

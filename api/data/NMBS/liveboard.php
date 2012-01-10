@@ -119,7 +119,7 @@ class liveboard{
             $veh = substr($veh,0,8);
             $veh = str_replace(" ","",$veh);
             $vehicle = "BE.NMBS." . $veh;
-
+            
 	    $nodes[$i] = new DepartureArrival();
 	    $nodes[$i]->delay= $delay;
 	    $nodes[$i]->station= $stationNode;
@@ -134,7 +134,7 @@ class liveboard{
             $minutes_ = substr((string)$data->Journey[$i]["fpTime"],3,2);
             $i++;
 	}
-        return $nodes;
+        return array_merge($nodes);//array merge reindexes the array
     }
 };
 
