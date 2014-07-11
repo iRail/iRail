@@ -67,6 +67,8 @@ class APICall {
      }
 
      protected function logError($functionname, Exception $e){
+	  if(!isset($_SERVER['HTTP_USER_AGENT']))
+                $_SERVER['HTTP_USER_AGENT'] = "unknown";
 	  if($this->logging){
 	       $this->writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in $functionname " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
 	  }
@@ -74,6 +76,8 @@ class APICall {
 
      //to be overriden
      protected function logRequest(){
+	if(!isset($_SERVER['HTTP_USER_AGENT']))
+		$_SERVER['HTTP_USER_AGENT'] = "unknown";
 	  if($this->logging){
 	       $functionname = $this->dataRoot->getRootname();
 	       $this->writeLog($_SERVER['HTTP_USER_AGENT'],"","", "none ($functionname)", $_SERVER['REMOTE_ADDR']);

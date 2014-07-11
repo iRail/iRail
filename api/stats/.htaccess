@@ -1,4 +1,4 @@
-AuthUserFile /home/yeri/irail/api/stats/.htpasswd
+AuthUserFile /var/www/irapi/sites/api/api/stats/.htpasswd
 AuthName "iRail API stats"
 AuthType Basic
 

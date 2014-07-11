@@ -42,8 +42,8 @@ class connections{
 	  
 	  $name1 = str_ireplace("south", "zuid", $name1);
 	  $name2 = str_ireplace("south", "zuid", $name2);
-
-	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
+$url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
+//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
@@ -67,18 +67,19 @@ class connections{
 
      private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
 	  include "../includes/getUA.php";
-	  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
+	  $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
+//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
 	       "useragent" => $irailAgent,
 	       );
 	  if($typeOfTransport == "trains"){
-	       $trainsonly = "0111111000000000";
+	       $trainsonly = "1111111000000000";
 	  }else if($typeOfTransport == "all"){
 	       $trainsonly = "1111111111111111";     
 	  }else{
-	       $trainsonly = "0111111000000000";
+	       $trainsonly = "1111111000000000";
 	  }
 
 	  if ($timeSel == "depart") {
@@ -117,17 +118,18 @@ class connections{
 </GISParameters>
 </ConReq>
 </ReqC>';
-	  $post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+	 $post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 	  return http_parse_message($post)->body;
      }
 
   
 
      public static function parseHafasXml($serverData, $lang, $fast) {
-	  $xml = new SimpleXMLElement($serverData);
+          $xml = new SimpleXMLElement($serverData);
 	  $connection = array();
 	  $i = 0;
-	  //DEBUG: echo $serverData ;
+	  //DEBUG:
+//echo $serverData ;
 	  if (isset($xml->ConRes->ConnectionList->Connection)) {
 //get stations from & to once for all connections
 	       $fromstation = connections::getStationFromHafasLocation($xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['x'],$xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['y'], $lang);
@@ -225,7 +227,11 @@ class connections{
 					$vias[$connectionindex]->departure->platform->name = $departPlatform;
 					$vias[$connectionindex]->departure->platform->normal = 1;
 					$vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
-					$vias[$connectionindex]->direction = $directions[$k-1];
+	if(isset($directions[$k-1])){
+				$vias[$connectionindex]->direction = $directions[$k-1];
+ } else {
+$vias[$connectionindex]->direction = "unknown";
+}
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
 					$connectionindex++;
@@ -238,9 +244,18 @@ class connections{
 			 
 		    }
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
+if(isset($directions[0])){
 		    $connection[$i]->departure->direction = $directions[0];
+}else{
+        $connection[$i]->departure->direction = "unknown";
+}
+
 		    $connection[$i]->arrival->vehicle = "BE.NMBS." . $trains[sizeof($trains) - 1];
+	if(isset($directions[sizeof($directions)-1])){
 		    $connection[$i]->arrival->direction = $directions[sizeof($directions)-1];
+}else{
+	$connection[$i]->arrival->direction = "unknown";
+}
 		    $i++;
 	       }
 	  } else {

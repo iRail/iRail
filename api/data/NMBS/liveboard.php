@@ -45,7 +45,9 @@ class liveboard{
 
           $ curl "http://hari.b-rail.be/Hafas/bin/stboard.exe/en?start=yes&time=15%3a12&date=01.09.2011&inputTripelId=A=1@O=@X=@Y=@U=80@L=008892007@B=1@p=@&maxJourneys=50&boardType=dep&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=00010000001111"
         */
-        $scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/". $lang ."?start=yes";
+        //$scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/";
+	$scrapeUrl = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/stboard.exe/";
+        $scrapeUrl .= $lang ."?start=yes";
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
         $scrapeUrl .= "&time=" . $time ."&date=". date("d") . "." . date("m") .".". date("Y") ."&inputTripelId=". urlencode("A=1@O=@X=@Y=@U=80@L=". $hafasid ."@B=1@p=@") . "&maxJourneys=50&boardType=" . $timeSel . "&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000";
@@ -53,14 +55,21 @@ class liveboard{
         $post = http_post_data($scrapeUrl, "", $request_options) or die("");
         $body .= http_parse_message($post)->body;
         //Strangly, the response didn't have a root-tag
-        return "<xml>" . $body. "</xml>";
+        return "<xml>" . $body . "</xml>";
         
     }
   
     private static function parseData($xml,$time,$lang, $fast = false){
+	//clean XML
+        if(class_exists("tidy",false)) {
+                $tidy = new tidy();
+                $tidy->parseString($xml, array('input-xml' => true,'output-xml' => true),'utf8');
+                $tidy->cleanRepair();
+                $xml = $tidy;
+	}
         $data = new SimpleXMLElement($xml);
         $hour = substr($time, 0,2);
-
+	$data = $data->StationTable;
 //<Journey fpTime="08:36" fpDate="03/09/11" delay="-" 
 //platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L" 
 //dir="Eeklo [B]" is_reachable="0" />
@@ -108,6 +117,7 @@ class liveboard{
                 $stationNode = new Station();
                 $stationNode->name = (string) $journey["dir"];
                 $stationNode->name = str_replace(" [B]", "", $stationNode->name);
+                $stationNode->name = str_replace(" [NMBS/SNCB]", "", $stationNode->name);
             }else{
                 $stationNode = stations::getStationFromName($journey["dir"], $lang);
             }
@@ -115,7 +125,7 @@ class liveboard{
             //GET VEHICLE AND PLATFORM
 
             $platformNormal = true;
-	    $veh = $journey["prod"];
+	    $veh = $journey["hafasname"];
             $veh = substr($veh,0,8);
             $veh = str_replace(" ","",$veh);
             $vehicle = "BE.NMBS." . $veh;
