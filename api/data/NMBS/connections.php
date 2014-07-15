@@ -42,8 +42,8 @@ class connections{
 	  
 	  $name1 = str_ireplace("south", "zuid", $name1);
 	  $name2 = str_ireplace("south", "zuid", $name2);
-$url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
-//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
+          $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
+          //$url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
@@ -51,18 +51,34 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 	       );
 	  $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
 <ReqC ver="1.1" prod="iRail API v1.0" lang="'. $lang .'">
-<LocValReq id="stat1" maxNr="1">
+<LocValReq id="stat1" maxNr="3">
 <ReqLoc match="' . $name1 . '" type="ST"/>
 </LocValReq>
-<LocValReq id="stat2" maxNr="1">
+<LocValReq id="stat2" maxNr="3">
 <ReqLoc match="' . $name2 . '" type="ST"/>
 </LocValReq>
 </ReqC>';
 	  $post = http_post_data($url, $postdata, $request_options) or die("");
 	  $idbody = http_parse_message($post)->body;
-	  preg_match_all("/externalId=\"(.*?)\"/si", $idbody, $matches);
-	  $id = $matches[1]; // this is an array of 2 id's
-	  return $id;
+          $xml = new SimpleXMLElement($idbody);
+          $id = array();
+          $res1 = $xml->ResC->LocValRes[0];
+          $res2 = $xml->ResC->LocValRes[1];
+          $id[0] = $res1->Station[0]["externalId"];
+          $counter = 1;
+          while(substr($id[0],0,3) !== "008" && $counter < sizeof($res1->Station)){
+              $id[0] =  $res1->Station[$counter]["externalId"];
+              $counter ++;
+          }
+          
+          $id[1] = $res2->Station[0]["externalId"];
+          $counter = 1;
+          while(substr($id[1],0,3) !== "008" && $counter < sizeof($res2->Station)){
+              $id[1] =  $res2->Station[$counter]["externalId"];
+              $counter ++;
+          }
+          
+          return $id;
      }
 
      private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){

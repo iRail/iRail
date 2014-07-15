@@ -25,6 +25,7 @@
 /**
  * This is the API request handler
  */
+require '../vendor/autoload.php';
 include_once("APICall.php");
 date_default_timezone_set("Europe/Brussels");
 

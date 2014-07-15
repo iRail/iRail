@@ -18,4 +18,8 @@ Some interesting links:
   * Mailing: <http://list.irail.be/>
   * Trac: <http://project.irail.be/>
   * API: <http://api.irail.be/>
-  * BeTrains: <http://betrains.mobi/>
+
+## Apps written on top of this API
+
+ * BeTrains for Android, Nokia and Windows Phone
+ * Railer App
