@@ -65,17 +65,17 @@ class connections{
           $res1 = $xml->LocValRes[0];
           
           $res2 = $xml->LocValRes[1];
-          $id[0] = $res1->Station[0]->{"attributes"}["externalId"];
+          $id[0] = $res1->Station[0]->{"@attributes"}["externalId"];
           $counter = 1;
           while(substr($id[0],0,3) !== "008" && $counter < sizeof($res1->Station)){
-              $id[0] =  $res1->Station[$counter]->{"attributes"}["externalId"];
+              $id[0] =  $res1->Station[$counter]->{"@attributes"}["externalId"];
               $counter ++;
           }
           
           $id[1] = $res2->Station[0]->{"attributes"}["externalId"];
           $counter = 1;
           while(substr($id[1],0,3) !== "008" && $counter < sizeof($res2->Station)){
-              $id[1] =  $res2->Station[$counter]->{"attributes"}["externalId"];
+              $id[1] =  $res2->Station[$counter]->{"@attributes"}["externalId"];
               $counter ++;
           }
           
