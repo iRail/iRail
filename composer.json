@@ -1,0 +1,14 @@
+{
+    "name": "irail/irail",
+    "description": "The iRail API",
+    "license": "AGPLv3",
+    "authors": [
+        {
+            "name": "Pieter Colpaert",
+            "email": "pieter.colpaert@okfn.org"
+        }
+    ],
+    "require": {
+
+    }
+}
