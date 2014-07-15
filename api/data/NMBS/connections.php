@@ -61,20 +61,21 @@ class connections{
 	  $post = http_post_data($url, $postdata, $request_options) or die("");
 	  $idbody = http_parse_message($post)->body;
           $xml = new SimpleXMLElement($idbody);
-          $id = array();
-          $res1 = $xml->ResC->LocValRes[0];
-          $res2 = $xml->ResC->LocValRes[1];
-          $id[0] = $res1->Station[0]["externalId"];
+          $id = array(); 
+          $res1 = $xml->LocValRes[0];
+          
+          $res2 = $xml->LocValRes[1];
+          $id[0] = $res1->Station[0]->{"attributes"}["externalId"];
           $counter = 1;
           while(substr($id[0],0,3) !== "008" && $counter < sizeof($res1->Station)){
-              $id[0] =  $res1->Station[$counter]["externalId"];
+              $id[0] =  $res1->Station[$counter]->{"attributes"}["externalId"];
               $counter ++;
           }
           
-          $id[1] = $res2->Station[0]["externalId"];
+          $id[1] = $res2->Station[0]->{"attributes"}["externalId"];
           $counter = 1;
           while(substr($id[1],0,3) !== "008" && $counter < sizeof($res2->Station)){
-              $id[1] =  $res2->Station[$counter]["externalId"];
+              $id[1] =  $res2->Station[$counter]->{"attributes"}["externalId"];
               $counter ++;
           }
           
