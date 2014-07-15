@@ -36,7 +36,12 @@ class connections{
  */
      private static function getHafasIDsFromNames($name1,$name2,$lang){
 	  include "../includes/getUA.php";
-	  //Hard fix
+
+
+	  //Wierd hard fix no one can explain
+	  $name1 = str_ireplace("bruxelles", "brussel", $name1);
+	  $name2 = str_ireplace("bruxelles", "brussel", $name2);
+
 	  $name1 = str_ireplace("north", "noord", $name1);
 	  $name2 = str_ireplace("north", "noord", $name2);
 	  
