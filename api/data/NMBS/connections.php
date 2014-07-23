@@ -209,7 +209,7 @@ class connections{
 					}else if($att->Attribute["type"] == "DIRECTION"){
                                             $__stat = new stdClass();
                                             //This recently changed: only fetch direction name, nothing else.
-                                            $__stat->name = str_replace("% [NMBS/SNCB]%","",trim($att->Attribute->AttributeVariant->Text));
+                                            $__stat->name = str_replace(" [NMBS/SNCB]","",trim($att->Attribute->AttributeVariant->Text));
                                             $directions[$k] = $__stat;
                                             $k++;
 					}
