@@ -12,10 +12,10 @@ include_once("data/NMBS/stations.php");
 class connections{
 
 
-    public static function createDepartureURI($stationURI, $routeLabel, $headSign,$datetime, $platform){
+    public static function createDepartureURI($stationURI, $routeLabel, $headSign,$datetime){
         $routeLabel = preg_replace("/(.*\.)?([A-Z]{1,2})(\d+)/", "$2 $3", $routeLabel);
         $md5hash = md5($this->routeLabel . $headsign);
-        return $stationURI . "/" . $md5hash ;
+        return $stationURI . "/" . date('yymmddHi',$datetime) . $md5hash ;
     }
 
      public static function fillDataRoot($dataroot,$request){
@@ -55,7 +55,7 @@ class connections{
 	  
 	  $name1 = str_ireplace("south", "zuid", $name1);
 	  $name2 = str_ireplace("south", "zuid", $name2);
-$url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
+          $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 //  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
@@ -74,7 +74,7 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 	  $post = http_post_data($url, $postdata, $request_options) or die("");
 	  $idbody = http_parse_message($post)->body;
 	  preg_match_all("/externalId=\"(.*?)\"/si", $idbody, $matches);
-	  $id = $matches[1]; // this is an array of 2 id's
+	  $id = $matches[1]; // this is an array of 2 ids
 	  return $id;
      }
 
@@ -156,7 +156,7 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 		    $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
 		    $connection[$i]->departure->platform = new Platform();
 		    $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
-		    $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
+		    $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);                    
 		    $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
 		    $connection[$i]->arrival->platform = new Platform();
 		    $connection[$i]->arrival->platform->name = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
@@ -213,7 +213,7 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
                                             }else{
                                                 $__stat = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
                                             }
-                                            $directions[$k] = $__stat;
+                                            $directions[$k] = str_replace(" [NMBS/SNCB]","",$__stat);
 					     $k++;
 					}
 				   }
@@ -257,18 +257,19 @@ $vias[$connectionindex]->direction = "unknown";
 			 
 		    }
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
-if(isset($directions[0])){
-		    $connection[$i]->departure->direction = $directions[0];
-}else{
-        $connection[$i]->departure->direction = "unknown";
-}
+                    if(isset($directions[0])){
+                        $connection[$i]->departure->direction = $directions[0];
+                        $connection[$i]->departure->{"@id"} = connections::createDepartureURI($fromstation->{"@id"}, $trains[0],$directions[0], $connection[$i]->departure->time);
+                    }else{
+                        $connection[$i]->departure->direction = "unknown";
+                    }
 
 		    $connection[$i]->arrival->vehicle = "BE.NMBS." . $trains[sizeof($trains) - 1];
-	if(isset($directions[sizeof($directions)-1])){
-		    $connection[$i]->arrival->direction = $directions[sizeof($directions)-1];
-}else{
-	$connection[$i]->arrival->direction = "unknown";
-}
+                    if(isset($directions[sizeof($directions)-1])){
+                        $connection[$i]->arrival->direction = $directions[sizeof($directions)-1];
+                    }else{
+                        $connection[$i]->arrival->direction = "unknown";
+                    }
 		    $i++;
 	       }
 	  } else {
