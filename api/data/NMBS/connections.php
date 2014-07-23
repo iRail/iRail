@@ -209,7 +209,8 @@ class connections{
 					}else if($att->Attribute["type"] == "DIRECTION"){
                                             $__stat = new Station();
                                             $__stat->name = trim($att->Attribute->AttributeVariant->Text);
-                                            $__stat = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
+                                            //This recently changed: only fetch direction name, nothing else.
+                                            $__stat = trim($att->Attribute->AttributeVariant->Text);
                                             $__stat->name = str_replace(" [NMBS/SNCB]","",$__stat->name);
                                             $directions[$k] = $__stat;
                                             $k++;
