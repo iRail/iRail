@@ -208,13 +208,11 @@ class connections{
 					     $j++;
 					}else if($att->Attribute["type"] == "DIRECTION"){
                                             $__stat = new Station();
-                                            if($fast == "true"){
-                                                $__stat->name = trim($att->Attribute->AttributeVariant->Text);
-                                            }else{
-                                                $__stat = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
-                                            }
-                                            $directions[$k] = str_replace(" [NMBS/SNCB]","",$__stat);
-					     $k++;
+                                            $__stat->name = trim($att->Attribute->AttributeVariant->Text);
+                                            $__stat = stations::getStationFromName(trim($att->Attribute->AttributeVariant->Text), $lang);
+                                            $__stat->name = str_replace(" [NMBS/SNCB]","",$__stat->name);
+                                            $directions[$k] = $__stat;
+                                            $k++;
 					}
 				   }
 
@@ -240,11 +238,11 @@ class connections{
 					$vias[$connectionindex]->departure->platform->name = $departPlatform;
 					$vias[$connectionindex]->departure->platform->normal = 1;
 					$vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
-	if(isset($directions[$k-1])){
-				$vias[$connectionindex]->direction = $directions[$k-1];
- } else {
-$vias[$connectionindex]->direction = "unknown";
-}
+                                        if(isset($directions[$k-1])){
+                                            $vias[$connectionindex]->direction = $directions[$k-1];
+                                        } else {
+                                            $vias[$connectionindex]->direction = "unknown";
+                                        }
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
 					$connectionindex++;
@@ -259,7 +257,7 @@ $vias[$connectionindex]->direction = "unknown";
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
                     if(isset($directions[0])){
                         $connection[$i]->departure->direction = $directions[0];
-                        $connection[$i]->departure->{"@id"} = connections::createDepartureURI($fromstation->{"@id"}, $trains[0],$directions[0], $connection[$i]->departure->time);
+                        $connection[$i]->departure->{"@id"} = connections::createDepartureURI($fromstation->{"@id"}, $trains[0],$directions[0]->name, $connection[$i]->departure->time);
                     }else{
                         $connection[$i]->departure->direction = "unknown";
                     }
