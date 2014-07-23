@@ -57,8 +57,8 @@ class Xml extends Printer{
 	  $named = "";
 	  foreach($hash as $elementkey => $elementval){
 	       if(in_array($elementkey, $this->ATTRIBUTES)){
-                   if($elementKey == "@id"){
-                       $elementKey = "URI";
+                   if($elementkey == "@id"){
+                       $elementkey = "URI";
                    }
                    echo " $elementkey=\"$elementval\"";
 	       }else if($elementkey == "name"){
