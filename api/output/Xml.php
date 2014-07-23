@@ -10,7 +10,7 @@ include_once("Printer.php");
  * @package output
  */
 class Xml extends Printer{
-     private $ATTRIBUTES=array("id", "locationX", "locationY", "standardname", "left","delay", "normal");
+    private $ATTRIBUTES=array("id", "@id", "locationX", "locationY", "standardname", "left","delay", "normal");
      private $rootname;
 
      function printHeader(){
@@ -57,7 +57,10 @@ class Xml extends Printer{
 	  $named = "";
 	  foreach($hash as $elementkey => $elementval){
 	       if(in_array($elementkey, $this->ATTRIBUTES)){
-		    echo " $elementkey=\"$elementval\"";
+                   if($elementKey == "@id"){
+                       $elementKey = "URI";
+                   }
+                   echo " $elementkey=\"$elementval\"";
 	       }else if($elementkey == "name"){
 		    $named = $elementval;
 	       }
