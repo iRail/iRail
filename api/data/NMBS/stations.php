@@ -84,6 +84,9 @@ class stations
 //Let's go wih the hafas solution and get the location from it
 
 //fallback for wrong hafas information
+
+          $name = urldecode($name);
+          $name = str_ireplace(" ","-",$name);
 	  $name = str_ireplace("south", "zuid", $name);
 	  $name = str_ireplace("north", "noord", $name);
 	  
