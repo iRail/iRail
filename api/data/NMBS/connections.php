@@ -10,6 +10,14 @@
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
 class connections{
+
+
+    public static function createDepartureURI($stationURI, $routeLabel, $headSign,$datetime, $platform){
+        $routeLabel = preg_replace("/(.*\.)?([A-Z]{1,2})(\d+)/", "$2 $3", $routeLabel);
+        $md5hash = md5($this->routeLabel . $headsign);
+        return $stationURI . "/" . $md5hash ;
+    }
+
      public static function fillDataRoot($dataroot,$request){
 //detect whether from was an id and change from accordingly
 	  $from = $request->getFrom();

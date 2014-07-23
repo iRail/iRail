@@ -21,7 +21,7 @@ class stations
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $locationX = mysql_real_escape_string($locationX);
 	       $locationY = mysql_real_escape_string($locationY);
-//It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
+               //It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE ((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) = (SELECT MIN((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) FROM stations)";
 	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
@@ -29,6 +29,9 @@ class stations
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
+               $id = str_replace("BE.NMBS.", "",$station->id);
+               $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
+               
 	       if($line[$lang] != ""){
 		    $station->name = utf8_encode($line[$lang]);
 	       }else{
@@ -60,6 +63,8 @@ class stations
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
+               $id = str_replace("BE.NMBS.", "",$station->id);
+               $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
 	       if($line[$lang] != ""){
 		    $station->name = utf8_encode($line[$lang]);
 	       }else{
@@ -134,6 +139,8 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
 	       $station->locationY = $line["Y"];
+               $id = str_replace("BE.NMBS.", "",$station->id);
+               $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
 	       if($line[$lang] != ""){
 		    $station->name = utf8_encode($line[$lang]);
 	       }else{
@@ -183,6 +190,8 @@ $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 		    $station[$i]->id = $line["ID"];
 		    $station[$i]->locationX = $line["X"];
 		    $station[$i]->locationY = $line["Y"];
+                    $id = str_replace("BE.NMBS.", "",$station->id);
+                    $station[$i]->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
 		    if($line[$lang] != ""){
                         $station[$i]->name = utf8_encode($line[$lang]);
 		    }else{
