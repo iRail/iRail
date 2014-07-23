@@ -12,8 +12,8 @@ include_once("data/NMBS/stations.php");
 class connections{
 
 
-    public static function createDepartureURI($stationURI, $routeLabel, $headSign,$datetime){
-        $routeLabel = preg_replace("/(.*\.)?([A-Z]{1,2})(\d+)/", "$2 $3", $routeLabel);
+    public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){
+        $routeLabel = preg_replace("/([A-Z]{1,2})(\d+)/", "$1 $2", $routeLabel);
         $md5hash = md5($this->routeLabel . $headsign);
         return $stationURI . "/" . date('yymmddHi',$datetime) . $md5hash ;
     }
