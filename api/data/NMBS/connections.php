@@ -207,10 +207,9 @@ class connections{
 					     $trains[$j] = str_replace(" ", "", $att->Attribute->AttributeVariant->Text);
 					     $j++;
 					}else if($att->Attribute["type"] == "DIRECTION"){
-                                            $__stat = new Station();
+                                            $__stat = new stdClass();
                                             //This recently changed: only fetch direction name, nothing else.
-                                            $__stat->name = trim($att->Attribute->AttributeVariant->Text);
-                                            $__stat->name = str_replace("% [NMBS/SNCB]%","",$__stat->name);
+                                            $__stat->name = str_replace("% [NMBS/SNCB]%","",trim($att->Attribute->AttributeVariant->Text));
                                             $directions[$k] = $__stat;
                                             $k++;
 					}
