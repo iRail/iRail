@@ -15,7 +15,7 @@ class connections{
     public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){
         $routeLabel = preg_replace("/([A-Z]{1,2})(\d+)/", "$1 $2", $routeLabel);
         $md5hash = md5($routeLabel . $headsign);
-        return $stationURI . "/" . date('yymmddHi',$datetime) . $md5hash ;
+        return $stationURI . "/" . date('ymdHi',$datetime) . $md5hash ;
     }
 
      public static function fillDataRoot($dataroot,$request){
