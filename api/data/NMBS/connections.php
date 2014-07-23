@@ -105,7 +105,7 @@ class connections{
 	  
 	  //now we're going to get the real data
 	  $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="iRail" lang="' . $lang . '">
+<ReqC ver="1.1" prod="iRail" lang="nl">
 <ConReq>
 <Start min="0">
 <Station externalId="' . $idfrom . '" distance="0">
@@ -244,6 +244,7 @@ class connections{
                                         }
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
+                                        $vias[$connectionindex]->departure->{"@id"} = connections::createDepartureURI($vias[$connectionindex]->station->{"@id"}, $trains[$j-1],$directions[$k-1]->name, $vias[$connectionindex]->departure->time);
 					$connectionindex++;
 				   }
 			      }
