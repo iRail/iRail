@@ -252,8 +252,8 @@ class connections{
 			 if($connectionindex != 0){
                              //if there were, lets calculate a URI for them
                              $counter = 0;
-                             for($counter =1; $counter < sizeof($directions) ; $counter++) {
-                                 if (isset($trains[$counter]) && isset($directions[$counter]&&isset($vias[$counter])) ){
+                             for($counter =1; $counter < sizeof($directions) ; $counter++ ) {
+                                 if (isset($trains[$counter]) && isset($directions[$counter]) && isset($vias[$counter])) {
                                      $vias[$counter-1]->departure->{"@id"} = connections::createDepartureURI($vias[$counter-1]->station->{"@id"}, $trains[$counter],$directions[$counter]->name, $vias[$counter]->departure->time);
                                  }
                              }
