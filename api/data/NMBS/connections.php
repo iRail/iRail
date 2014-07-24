@@ -244,7 +244,10 @@ class connections{
                                         }
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
-                                        $vias[$connectionindex]->departure->{"@id"} = connections::createDepartureURI($vias[$connectionindex]->station->{"@id"}, $trains[$j],$directions[$k]->name, $vias[$connectionindex]->departure->time);
+                                        if (isset($trains[$j]) && isset($directions[$k]) ){
+                                            $vias[$connectionindex]->departure->{"@id"} = connections::createDepartureURI($vias[$connectionindex]->station->{"@id"}, $trains[$j],$directions[$k]->name, $vias[$connectionindex]->departure->time);
+                                        }
+                                        
 					$connectionindex++;
 				   }
 			      }
