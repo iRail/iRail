@@ -244,19 +244,26 @@ class connections{
                                         }
 					$vias[$connectionindex]->vehicle = "BE.NMBS." . $trains[$j - 1];
 					$vias[$connectionindex]->station = connections::getStationFromHafasLocation($connsection->Arrival->BasicStop->Station['x'],$connsection->Arrival->BasicStop->Station['y'], $lang);
-                                        if (isset($trains[$j]) && isset($directions[$k]) ){
-                                            $vias[$connectionindex]->departure->{"@id"} = connections::createDepartureURI($vias[$connectionindex]->station->{"@id"}, $trains[$j],$directions[$k]->name, $vias[$connectionindex]->departure->time);
-                                        }
-                                        
 					$connectionindex++;
 				   }
 			      }
 			 }
+                         //check if there were vias at all
 			 if($connectionindex != 0){
-			      $connection[$i]->via = $vias;
+                             //if there were, lets calculate a URI for them
+                             $counter = 0;
+                             for($counter =1; $counter < sizeof($directions) ; $counter++) {
+                                 if (isset($trains[$counter]) && isset($directions[$counter]&&isset($vias[$counter])) ){
+                                     $vias[$counter-1]->departure->{"@id"} = connections::createDepartureURI($vias[$counter-1]->station->{"@id"}, $trains[$counter],$directions[$counter]->name, $vias[$counter]->departure->time);
+                                 }
+                             }
+                             //if there were vias, add them to the array
+                             $connection[$i]->via = $vias;
 			 }
 			 
 		    }
+                    
+
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
                     if(isset($directions[0])){
                         $connection[$i]->departure->direction = $directions[0];
