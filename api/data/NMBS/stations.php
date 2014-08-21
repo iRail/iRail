@@ -52,6 +52,7 @@ class stations
 	  if(sizeof($idarray) > 0){
 		$id=$idarray[2];
 	  }
+          $id = "BE.NMBS." . $id;
 	  $station;
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
@@ -83,9 +84,9 @@ class stations
       */
      public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
-          if(substr($name,0,1) === "0" || substr($name,0,4) === "NMBS"){
-              $id=$name;
-              $idarray = explode(".",$id);              
+          if(substr($name,0,1) === "0" || substr($name,0,6) === "BE.NMBS"){
+              $id = $name;
+              $idarray = explode(".",$id);
               if(sizeof($idarray) > 0){
                   $id=$idarray[2];
               }
