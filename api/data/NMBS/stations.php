@@ -90,7 +90,9 @@ class stations
           $x = $station->longitude;
           $y = $station->latitude;
           //sadly, our old API only works with the IDs stored in our database, so we're going to match the longitude latitude and get them from there.
-          return stations::getStationFromLocation($x,$y,$lang);
+          $stationresult =  stations::getStationFromLocation($x,$y,$lang);
+          $stationresult->setHID = str_replace("BE.NMBS.","",$stationresult->id);
+          return $stationresult;
      }
 
      public static function getStationFromRTName($name,$lang){
