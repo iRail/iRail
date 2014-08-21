@@ -84,7 +84,9 @@ class stations
      public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
           if(substr($name,0,1) === "0" || substr($name,0,4) === "NMBS"){
-              return stations::getStationFromID($name,$lang);
+              $stationresult = stations::getStationFromID($name,$lang);
+              $stationresult->setHID(str_replace("BE.NMBS.","",$stationresult->id));
+              return $stationresult;
           }
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
@@ -97,7 +99,7 @@ class stations
           $x = $station->longitude;
           $y = $station->latitude;
           //sadly, our old API only works with the IDs stored in our database, so we're going to match the longitude latitude and get them from there.
-          $stationresult =  stations::getStationFromLocation($x,$y,$lang);
+          $stationresult = stations::getStationFromLocation($x,$y,$lang);
           $stationresult->setHID(str_replace("BE.NMBS.","",$stationresult->id));
           return $stationresult;
      }
