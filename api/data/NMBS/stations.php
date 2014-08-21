@@ -84,7 +84,7 @@ class stations
      public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
           if(substr($name,0,1) === "0" || substr($name,0,4) === "NMBS"){
-              return connections::getStationFromID($name,$lang);
+              return stations::getStationFromID($name,$lang);
           }
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
