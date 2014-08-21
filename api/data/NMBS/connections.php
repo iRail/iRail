@@ -45,7 +45,7 @@ class connections{
      private static function getHafasIDsFromNames($name1,$name2,$lang){
          $station1 = stations::getStationFromName($name1, $lang);
          $station2 = stations::getStationFromName($name2, $lang);
-         return array($station1->id,$station2->id);
+         return array($station1->getHID(),$station2->getHID());
      }
 
      private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
