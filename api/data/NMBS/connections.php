@@ -43,39 +43,9 @@ class connections{
  * This function scrapes the ID from the HAFAS system. Since hafas id's will be requested in pairs, it also returns 2 id's and asks for 2 names
  */
      private static function getHafasIDsFromNames($name1,$name2,$lang){
-	  include "../includes/getUA.php";
-
-
-	  //Wierd hard fix no one can explain
-	  $name1 = str_ireplace("bruxelles", "brussel", $name1);
-	  $name2 = str_ireplace("bruxelles", "brussel", $name2);
-
-	  $name1 = str_ireplace("north", "noord", $name1);
-	  $name2 = str_ireplace("north", "noord", $name2);
-	  
-	  $name1 = str_ireplace("south", "zuid", $name1);
-	  $name2 = str_ireplace("south", "zuid", $name2);
-          $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
-//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
-	  $request_options = array(
-	       "referer" => "http://api.irail.be/",
-	       "timeout" => "30",
-	       "useragent" => $irailAgent,
-	       );
-	  $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="iRail API v1.0" lang="'. $lang .'">
-<LocValReq id="stat1" maxNr="1">
-<ReqLoc match="' . $name1 . '" type="ST"/>
-</LocValReq>
-<LocValReq id="stat2" maxNr="1">
-<ReqLoc match="' . $name2 . '" type="ST"/>
-</LocValReq>
-</ReqC>';
-	  $post = http_post_data($url, $postdata, $request_options) or die("");
-	  $idbody = http_parse_message($post)->body;
-	  preg_match_all("/externalId=\"(.*?)\"/si", $idbody, $matches);
-	  $id = $matches[1]; // this is an array of 2 ids
-	  return $id;
+         $station1 = stations::getStationFromName($name1, $lang);
+         $station2 = stations::getStationFromName($name2, $lang);
+         return array($station1->id,$station2->id);
      }
 
      private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){

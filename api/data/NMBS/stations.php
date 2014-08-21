@@ -78,53 +78,22 @@ class stations
 	  return $station;
      }
 
+     /**
+      * Gets an appropriate station from the new iRail API
+      */
      public static function getStationFromName($name, $lang){
-//We can do a couple of things here: 
-// * Match the name with something in the DB
-// * Give the name to hafas so that it returns us an ID which we can reuse - Doesn't work for external stations
-// * Do a hybrid mode
-// * match from location
-// * match railtime name
-
-//Let's go wih the hafas solution and get the location from it
-
-//fallback for wrong hafas information
 
           $name = urldecode($name);
-          $name = str_ireplace(" ","-",$name);
-	  $name = str_ireplace("south", "zuid", $name);
-	  $name = str_ireplace("north", "noord", $name);
-	  
-
 	  include "../includes/getUA.php";
-	
-$url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
-//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
-	  $request_options = array(
-	       "referer" => "http://api.irail.be/",
-	       "timeout" => "30",
-	       "useragent" => $irailAgent,
-	       );
-	  $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="iRail API v1.0" lang="'. $lang .'">
-<LocValReq id="stat1" maxNr="1">
-<ReqLoc match="' . $name . '" type="ST"/>
-</LocValReq>
-</ReqC>';
-	  $post = http_post_data($url, $postdata, $request_options) or die("");
-	  $idbody = http_parse_message($post)->body;
-	  preg_match("/x=\"(.*?)\".*?y=\"(.*?)\"/si", $idbody, $matches);
-	  $x = $matches[1];
-	  $y = $matches[2];
-	  preg_match("/(.)(.*)/",$x, $m);
-	  $x= $m[1] . ".". $m[2];
-	  preg_match("/(..)(.*)/",$y, $m);
-	
-	  $y = $m[1] . ".". $m[2];
-          $sss = stations::getStationFromLocation($x,$y,$lang);
-          preg_match("/externalStationNr=\"(.*?)\"/si", $idbody,$hafasid);
-          $sss->setHID($hafasid[1]);
-          return $sss;
+          $url = "https://irail.be/stations/NMBS?q=" . $name;
+          
+          $post = http_get($url, $request_options) or die("");
+	  $stationsgraph = json_decode(http_parse_message($post)->body);
+          $station = $stationsgraph->{'@graph'}[0];
+          $x = $station["longitude"];
+          $y = $station["latitude"];
+          //sadly, our old API only works with the IDs stored in our database, so we're going to match the longitude latitude and get them from there.
+          return stations::getStationFromLocation($x,$y,$lang);
      }
 
      public static function getStationFromRTName($name,$lang){
