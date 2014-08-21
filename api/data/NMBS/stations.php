@@ -82,12 +82,9 @@ class stations
       * Gets an appropriate station from the new iRail API
       */
      public static function getStationFromName($name, $lang){
-
-          $name = urldecode($name);
-	  include "../includes/getUA.php";
+          $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
-          
-          $post = http_get($url, $request_options) or die("");
+          $post = http_get($url) or die("");
 	  $stationsgraph = json_decode(http_parse_message($post)->body);
           $station = $stationsgraph->{'@graph'}[0];
           $x = $station->longitude;
