@@ -84,10 +84,16 @@ class stations
      public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
           if(substr($name,0,1) === "0" || substr($name,0,4) === "NMBS"){
-              $stationresult = stations::getStationFromID($name,$lang);
-              $stationresult->setHID(str_replace("BE.NMBS.","",$stationresult->id));
+              $id=$name;
+              $idarray = explode(".",$id);              
+              if(sizeof($idarray) > 0){
+                  $id=$idarray[2];
+              }
+              $stationresult = stations::getStationFromID($id,$lang);
+              $stationresult->setHID($id);
               return $stationresult;
           }
+          $name = str_replace(" [NMBS/SNCB]","",$name);
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
           $post = http_get($url) or die("iRail down");
