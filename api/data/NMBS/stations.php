@@ -90,8 +90,8 @@ class stations
           $post = http_get($url, $request_options) or die("");
 	  $stationsgraph = json_decode(http_parse_message($post)->body);
           $station = $stationsgraph->{'@graph'}[0];
-          $x = $station["longitude"];
-          $y = $station["latitude"];
+          $x = $station->longitude;
+          $y = $station->latitude;
           //sadly, our old API only works with the IDs stored in our database, so we're going to match the longitude latitude and get them from there.
           return stations::getStationFromLocation($x,$y,$lang);
      }
