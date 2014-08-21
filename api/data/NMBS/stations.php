@@ -82,12 +82,16 @@ class stations
       * Gets an appropriate station from the new iRail API
       */
      public static function getStationFromName($name, $lang){
+          //first check if it wasn't by any chance an id
+          if(substr($name,0,1) === "0" || substr($name,0,4) === "NMBS"){
+              return connections::getStationFromID($name,$lang);
+          }
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
           $post = http_get($url) or die("iRail down");
 	  $stationsgraph = json_decode(http_parse_message($post)->body);
           if(!isset($stationsgraph->{'@graph'}[0])){
-              die("No station found for " . $name);
+              die("No station found for " . urldecode($name));
           }
           $station = $stationsgraph->{'@graph'}[0];
           $x = $station->longitude;
