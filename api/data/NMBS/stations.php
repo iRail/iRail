@@ -49,7 +49,7 @@ class stations
      public static function getStationFromID($id, $lang){
 	  APICall::connectToDB();
           $idarray = explode(".",$id);
-	  if(sizeof($idarray) > 0){
+	  if(sizeof($idarray) > 1){
 		$id=$idarray[2];
 	  }
           $id = "BE.NMBS." . $id;
@@ -57,21 +57,27 @@ class stations
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $id = mysql_real_escape_string($id);
+               //e.g., SELECT `ID`,`X`, `Y`, `STD`,`EN` FROM stations WHERE `ID` = 'BE.NMBS.008866530'
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE `ID` = '$id'";
 	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
-	       $station = new Station();
-	       $station->id = $line["ID"];
-	       $station->locationX = $line["X"];
-	       $station->locationY = $line["Y"];
-               $id = str_replace("BE.NMBS.", "",$station->id);
-               $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
-	       if($line[$lang] != ""){
-		    $station->name = utf8_encode($line[$lang]);
-	       }else{
-		    $station->name = utf8_encode($line["STD"]);	    
-	       }
-	       $station->standardname = utf8_encode($line["STD"]);
+               if ($line) {
+                   
+                   $station = new Station();
+                   $station->id = $line["ID"];
+                   $station->locationX = $line["X"];
+                   $station->locationY = $line["Y"];
+                   $id = str_replace("BE.NMBS.", "",$station->id);
+                   $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
+                   if($line[$lang] != ""){
+                       $station->name = utf8_encode($line[$lang]);
+                   }else{
+                       $station->name = utf8_encode($line["STD"]);	    
+                   }
+                   $station->standardname = utf8_encode($line["STD"]);
+               } else {
+                   throw new Exception("Error reading station BE.NMBS." . $id ." from the database.", 300);
+               }
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 300);
@@ -84,10 +90,10 @@ class stations
       */
      public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
-          if(substr($name,0,1) === "0" || substr($name,0,6) === "BE.NMBS"){
+          if(substr($name,0,1) == "0" || substr($name,0,7) == "BE.NMBS"){
               $id = $name;
               $idarray = explode(".",$id);
-              if(sizeof($idarray) > 0){
+              if(sizeof($idarray) > 1){
                   $id=$idarray[2];
               }
               $stationresult = stations::getStationFromID($id,$lang);

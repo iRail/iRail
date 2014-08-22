@@ -9,17 +9,12 @@ include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
 class liveboard{
     public static function fillDataRoot($dataroot,$request){
-//detect if this is an id or a station
-//            $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
- //       }else{
-	$stationr=$request->getStation();
-	   
         $arr = explode(".",$request->getStation());
+        $stationr=$request->getStation();
         if(sizeof($arr)>1){
-		$stationr=$arr[2];
+            $stationr=$arr[2];
 	}
-            $dataroot->station = stations::getStationFromName($stationr, $request->getLang());
-   //     }
+        $dataroot->station = stations::getStationFromName($stationr, $request->getLang());
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"arr");
             $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang(),$request->isFast());
