@@ -100,6 +100,7 @@ class stations
               $stationresult->setHID($id);
               return $stationresult;
           }
+          $name = preg_replace("/[ ]?\([a-zA-Z]+\)/","",$name);
           $name = str_replace(" [NMBS/SNCB]","",$name);
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
