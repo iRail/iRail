@@ -100,7 +100,7 @@ class stations
               $stationresult->setHID($id);
               return $stationresult;
           }
-          $name = html_entity_decode($name);
+          $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, "UTF-8");
           $name = preg_replace("/[ ]?\([a-zA-Z]+\)/","",$name);
           $name = str_replace(" [NMBS/SNCB]","",$name);
           $name = urlencode($name);
