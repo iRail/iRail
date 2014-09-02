@@ -111,6 +111,24 @@ class stations
               die("No station found for " . urldecode($name));
           }
           $station = $stationsgraph->{'@graph'}[0];
+
+          //or find exact match using ugly breaks and strlen
+          foreach($stationsgraph->{'@graph'} as $stationitem) {
+              if (strlen($stationitem->name) === strlen($name)) {
+                  $station = $stationitem;
+                  break;
+              } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+                  foreach ($stationitem->alternative as $alt) {
+                      if(strlen($alt->{"@value"}) === strlen($name)) {
+                          $station = $stationitem;
+                          break;
+                      }
+                  }
+              } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{"@value"}) === strlen($name)){
+                  $station = $stationitem;
+                  break;
+              }
+          }
           $x = $station->longitude;
           $y = $station->latitude;
           //sadly, our old API only works with the IDs stored in our database, so we're going to match the longitude latitude and get them from there.
