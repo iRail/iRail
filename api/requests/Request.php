@@ -17,7 +17,7 @@ class Request {
      protected function processRequiredVars($array){
 	  foreach($array as $var){
 	       if(!isset($this->$var) || $this->$var == "" || is_null($this->$var)){	    
-		    throw new Exception("$var not set. Please review your request and add the right parameters",401);
+		    throw new Exception("$var not set. Please review your request and add the right parameters",400);
 	       }
 	  }
      }
