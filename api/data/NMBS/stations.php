@@ -141,10 +141,12 @@ class stations
 	  APICall::connectToDB();
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
+	       // var_dump($lang);
 	       $name = mysql_real_escape_string($name);
-	       $query = "SELECT stations.`ID`,stations.`X`, stations.`Y`, stations.`STD`,stations.`$lang` FROM stations RIGHT JOIN railtime ON railtime.`ID` = stations.`ID` WHERE railtime.`RAILTIMENAME` = '$name'";
+	       $query = "SELECT stations.`ID`,stations.`X`, stations.`Y`, stations.`STD`,stations.`$lang` FROM stations WHERE stations.`$lang` = '$name'";
 	       $result = mysql_query($query) or die("Could not get stationslist from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
+	       //var_dump($line);
 	       $station  = new Station();
 	       $station->id = $line["ID"];
 	       $station->locationX = $line["X"];
@@ -160,7 +162,8 @@ class stations
 	       if($station->id == ""){
 		    throw new Exception("doesn't matter what's in here. It doesn't get parsed", 0);
 	       }
-	       
+	       //var_dump($station);	
+
 	  }
 	  catch (Exception $e) {
 	       //no station found, let's try a HAFAS lookup as last resort
