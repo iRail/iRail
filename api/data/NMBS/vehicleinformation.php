@@ -43,8 +43,6 @@ class vehicleinformation{
           
           curl_close ($ch);
 
-
-          // to do : die when error
           return $result;
      }
      
@@ -90,20 +88,30 @@ class vehicleinformation{
 
           $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
           if (!is_object($test)) die(""); // catch errors 
+
+          $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
+               
+               for($i=1; $i<count($nodes); $i++){
+                    $node = $nodes[$i];
+                    if(!count($node->attr)) continue; // row with no class-attribute contain no data
+
+                    $station = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
           
-          $station = array_values($html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->first_child()->nextSibling()->find('a')[0]->nodes[0]->_)[0];
-	     $locationX = 0;
-	     $locationY = 0;
-	     if(isset($station)){
-	          $now = stations::getStationFromRTName($station, $lang);
-	          $locationX = $now->locationX;
-	          $locationY = $now->locationY;
-	     }
-	     $vehicle = new Vehicle();
-	     $vehicle->name = $id;
-	     $vehicle->locationX = $locationX;
-	     $vehicle->locationY = $locationY;
-	     return $vehicle;
+          	     $locationX = 0;
+          	     $locationY = 0;
+          	     if(isset($station)){
+          	          $now = stations::getStationFromRTName($station, $lang);
+          	          $locationX = $now->locationX;
+          	          $locationY = $now->locationY;
+          	     }
+          	     $vehicle = new Vehicle();
+          	     $vehicle->name = $id;
+          	     $vehicle->locationX = $locationX;
+          	     $vehicle->locationY = $locationY;
+          	     return $vehicle;
+               }
+
+          return null;
      }
      
 };
