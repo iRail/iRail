@@ -108,7 +108,8 @@ class stations
           $post = http_get($url) or die("iRail down");
 	  $stationsgraph = json_decode(http_parse_message($post)->body);
           if(!isset($stationsgraph->{'@graph'}[0])){
-              die("No station found for " . urldecode($name));
+              // die("No station found for " . urldecode($name));
+          		return "";
           }
           $station = $stationsgraph->{'@graph'}[0];
 
@@ -142,7 +143,7 @@ class stations
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $name = mysql_real_escape_string($name);
-	       $query = "SELECT stations.`ID`,stations.`X`, stations.`Y`, stations.`STD`,stations.`$lang` FROM stations RIGHT JOIN railtime ON railtime.`ID` = stations.`ID` WHERE railtime.`RAILTIMENAME` = '$name'";
+	       $query = "SELECT stations.`ID`,stations.`X`, stations.`Y`, stations.`STD`,stations.`$lang` FROM stations WHERE stations.`$lang` = '$name'";
 	       $result = mysql_query($query) or die("Could not get stationslist from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	       $station  = new Station();
@@ -160,7 +161,7 @@ class stations
 	       if($station->id == ""){
 		    throw new Exception("doesn't matter what's in here. It doesn't get parsed", 0);
 	       }
-	       
+
 	  }
 	  catch (Exception $e) {
 	       //no station found, let's try a HAFAS lookup as last resort
