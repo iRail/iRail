@@ -108,7 +108,8 @@ class stations
           $post = http_get($url) or die("iRail down");
 	  $stationsgraph = json_decode(http_parse_message($post)->body);
           if(!isset($stationsgraph->{'@graph'}[0])){
-              die("No station found for " . urldecode($name));
+              // die("No station found for " . urldecode($name));
+          		return "";
           }
           $station = $stationsgraph->{'@graph'}[0];
 
