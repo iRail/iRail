@@ -1,1 +1,1 @@
-<?php header('Location: http://project.irail.be/wiki/API/APIv1'); ?>
+<?php header('Location: https://hello.irail.be/api/1-0/'); ?>
