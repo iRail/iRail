@@ -59,6 +59,7 @@ class vehicleinformation{
 
                     $delaynodearray = $node->children[2]->find('span');
                     $delay = count($delaynodearray) > 0 ? trim(array_values($delaynodearray[0]->nodes[0]->_)[0]) : "0";
+                    $delayseconds = preg_replace("/[^0-9]/", '', $delay)*60;
 
                     $van = array_values($node->children[1]->find('span')[0]->nodes[0]->_)[0]; 
                     
@@ -74,7 +75,7 @@ class vehicleinformation{
                          $station = stations::getStationFromName($stationname,$lang);
                     }
                     $stops[$i-1]->station = $station;
-                    $stops[$i-1]->delay = $delay;
+                    $stops[$i-1]->delay = $delayseconds;
                     $stops[$i-1]->time = tools::transformTime("00d" . $van . ":00", date("Ymd"));
                }
 
