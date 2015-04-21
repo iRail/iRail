@@ -62,7 +62,9 @@ class vehicleinformation{
 
                     $van = array_values($node->children[1]->find('span')[0]->nodes[0]->_)[0]; 
                     
-                    $stationname = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
+                    if(count($node->children[3]->find('a')))
+                         $stationname = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
+                    else $stationname = array_values($node->children[3]->nodes[0]->_)[0];
 
                     $stops[$i-1] = new Stop();
                     $station = new Station();
