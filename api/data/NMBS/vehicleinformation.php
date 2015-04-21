@@ -64,11 +64,15 @@ class vehicleinformation{
                     $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : "0";
                     $delayseconds = preg_replace("/[^0-9]/", '', $delay)*60;
 
-                    $arriveTime = reset($node->children[1]->find('span')[0]->nodes[0]->_); 
+                    $spans = $node->children[1]->find('span');
+                    $arriveTime = reset($spans[0]->nodes[0]->_);                    
                     $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;  
                     
-                    if(count($node->children[3]->find('a')))
-                         $stationname = reset($node->children[3]->find('a')[0]->nodes[0]->_);
+                    if(count($node->children[3]->find('a'))) {
+                        $as = $node->children[3]->find('a');
+                        $stationname = reset($as[0]->nodes[0]->_);
+                    }
+                    
                     else $stationname = reset($node->children[3]->nodes[0]->_);
 
                     $stops[$i-1] = new Stop();
@@ -102,8 +106,8 @@ class vehicleinformation{
                for($i=1; $i<count($nodes); $i++){
                     $node = $nodes[$i];
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
-
-                    $station = reset($node->children[3]->find('a')[0]->nodes[0]->_);
+                    $as = $node->children[3]->find('a');
+                    $station = reset($as[0]->nodes[0]->_);
           
           	     $locationX = 0;
           	     $locationY = 0;
@@ -123,8 +127,3 @@ class vehicleinformation{
      }
      
 };
-
-     
-
-
-?>
