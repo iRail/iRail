@@ -61,7 +61,8 @@ class vehicleinformation{
                     $delay = count($delaynodearray) > 0 ? trim(array_values($delaynodearray[0]->nodes[0]->_)[0]) : "0";
                     $delayseconds = preg_replace("/[^0-9]/", '', $delay)*60;
 
-                    $van = array_values($node->children[1]->find('span')[0]->nodes[0]->_)[0]; 
+                    $arriveTime = array_values($node->children[1]->find('span')[0]->nodes[0]->_)[0]; 
+                    $departureTime = count($nodes[$i]->children[1]->children) == 3 ? array_values($nodes[$i]->children[1]->children[0]->nodes[0]->_)[0] : $arriveTime;  
                     
                     if(count($node->children[3]->find('a')))
                          $stationname = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
@@ -76,7 +77,7 @@ class vehicleinformation{
                     }
                     $stops[$i-1]->station = $station;
                     $stops[$i-1]->delay = $delayseconds;
-                    $stops[$i-1]->time = tools::transformTime("00d" . $van . ":00", date("Ymd"));
+                    $stops[$i-1]->time = tools::transformTime("00d" . $departureTime . ":00", date("Ymd"));
                }
 
 	       return $stops;
@@ -94,7 +95,7 @@ class vehicleinformation{
           if (!is_object($test)) die(""); // catch errors 
 
           $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
-
+          //echo $html->getElementById('tq_trainroute_content_table_alteAnsicht');
                for($i=1; $i<count($nodes); $i++){
                     $node = $nodes[$i];
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
