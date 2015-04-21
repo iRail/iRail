@@ -38,9 +38,12 @@ class vehicleinformation{
           curl_setopt($ch, CURLOPT_POST, 1);
           curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));   
           curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($ch, CURLOPT_REFERER, $request_options["referer"]);
+          curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $request_options["timeout"]);
+          curl_setopt($ch, CURLOPT_USERAGENT, $request_options["useragent"]);
           $result = curl_exec($ch);
-          
+
           curl_close ($ch);
 
           return $result;
@@ -58,15 +61,15 @@ class vehicleinformation{
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
 
                     $delaynodearray = $node->children[2]->find('span');
-                    $delay = count($delaynodearray) > 0 ? trim(array_values($delaynodearray[0]->nodes[0]->_)[0]) : "0";
+                    $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : "0";
                     $delayseconds = preg_replace("/[^0-9]/", '', $delay)*60;
 
-                    $arriveTime = array_values($node->children[1]->find('span')[0]->nodes[0]->_)[0]; 
-                    $departureTime = count($nodes[$i]->children[1]->children) == 3 ? array_values($nodes[$i]->children[1]->children[0]->nodes[0]->_)[0] : $arriveTime;  
+                    $arriveTime = reset($node->children[1]->find('span')[0]->nodes[0]->_); 
+                    $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;  
                     
                     if(count($node->children[3]->find('a')))
-                         $stationname = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
-                    else $stationname = array_values($node->children[3]->nodes[0]->_)[0];
+                         $stationname = reset($node->children[3]->find('a')[0]->nodes[0]->_);
+                    else $stationname = reset($node->children[3]->nodes[0]->_);
 
                     $stops[$i-1] = new Stop();
                     $station = new Station();
@@ -95,12 +98,12 @@ class vehicleinformation{
           if (!is_object($test)) die(""); // catch errors 
 
           $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
-          //echo $html->getElementById('tq_trainroute_content_table_alteAnsicht');
+
                for($i=1; $i<count($nodes); $i++){
                     $node = $nodes[$i];
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
 
-                    $station = array_values($node->children[3]->find('a')[0]->nodes[0]->_)[0];
+                    $station = reset($node->children[3]->find('a')[0]->nodes[0]->_);
           
           	     $locationX = 0;
           	     $locationY = 0;
