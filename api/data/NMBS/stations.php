@@ -103,6 +103,8 @@ class stations
           $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, "UTF-8");
           $name = preg_replace("/[ ]?\([a-zA-Z]+\)/","",$name);
           $name = str_replace(" [NMBS/SNCB]","",$name);
+          $name = explode("/",$name);
+          $name = trim($name[0]);
           $name = urlencode($name);
           $url = "https://irail.be/stations/NMBS?q=" . $name;
           $post = http_get($url) or die("iRail down");
