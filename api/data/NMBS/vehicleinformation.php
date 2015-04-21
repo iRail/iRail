@@ -71,7 +71,7 @@ class vehicleinformation{
                     if($fast == "true"){
                          $station->name = $stationname;
                     }else{
-                         $station = stations::getStationFromRTName($stationname,$lang);
+                         $station = stations::getStationFromName($stationname,$lang);
                     }
                     $stops[$i-1]->station = $station;
                     $stops[$i-1]->delay = $delay;
@@ -103,7 +103,7 @@ class vehicleinformation{
           	     $locationX = 0;
           	     $locationY = 0;
           	     if(isset($station)){
-          	          $now = stations::getStationFromRTName($station, $lang);
+          	          $now = stations::getStationFromName($station, $lang);
           	          $locationX = $now->locationX;
           	          $locationY = $now->locationY;
           	     }
