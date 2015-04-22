@@ -56,6 +56,7 @@ class vehicleinformation{
                $html = str_get_html($serverData);
                $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
                
+               $j = 0;
                for($i=1; $i<count($nodes); $i++){
                     $node = $nodes[$i];
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
@@ -75,16 +76,18 @@ class vehicleinformation{
                     
                     else $stationname = reset($node->children[3]->nodes[0]->_);
 
-                    $stops[$i-1] = new Stop();
+                    $stops[$j] = new Stop();
                     $station = new Station();
                     if($fast == "true"){
                          $station->name = $stationname;
                     }else{
                          $station = stations::getStationFromName($stationname,$lang);
                     }
-                    $stops[$i-1]->station = $station;
-                    $stops[$i-1]->delay = $delayseconds;
-                    $stops[$i-1]->time = tools::transformTime("00d" . $departureTime . ":00", date("Ymd"));
+                    $stops[$j]->station = $station;
+                    $stops[$j]->delay = $delayseconds;
+                    $stops[$j]->time = tools::transformTime("00d" . $departureTime . ":00", date("Ymd"));
+
+                    $j++;
                }
 
 	       return $stops;
