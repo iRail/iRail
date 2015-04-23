@@ -30,7 +30,8 @@ class vehicleinformation{
             "useragent" => $irailAgent,
             );
           $scrapeURL = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/" . $lang . "ld=std&seqnr=1&ident=at.02043113.1429435556&";
-          $id = preg_replace("/.*?(\d.*)/smi", "\\1", $id);
+          $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", "\\1", $id);
+
           $post_data = "trainname=" . $id . "&start=Zoeken&selectDate=oneday&date=" . date( 'd%2fm%2fY' ) . "&realtimeMode=Show";
 
           $ch = curl_init();
