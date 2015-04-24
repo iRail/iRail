@@ -18,6 +18,6 @@ Some interesting links:
 
   * Source: <http://github.com/iRail/iRail>
   * Mailing: <http://list.irail.be/>
-  * Trac: <http://project.irail.be/>
+  * Issue tracking: <https://github.com/iRail/iRail/issues>
   * API: <http://api.irail.be/>
-  * BeTrains: <http://betrains.mobi/>
+  * BeTrains: <https://github.com/iRail/BeTrains-for-Android>
