@@ -13,8 +13,6 @@ include_once("../includes/simple_html_dom.php");
 class vehicleinformation{
      public static function fillDataRoot($dataroot,$request){
           $lang= $request->getLang();
-          // NMBS stationnames in English are in Dutch
-          if($lang == 'EN') $lang = 'nl'; // Dutch
 
           $serverData = vehicleinformation::getServerData($request->getVehicleId(),$lang);
           $dataroot->vehicle = vehicleinformation::getVehicleData($serverData, $request->getVehicleId(), $lang);
