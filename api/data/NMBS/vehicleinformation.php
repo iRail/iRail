@@ -1,8 +1,8 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl 
+/** Copyright (C) 2011 by iRail vzw/asbl
  *
  * This will fetch all vehicledata for the NMBS.
- *   
+ *
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  *
  * @package data/NMBS
@@ -35,7 +35,7 @@ class vehicleinformation{
           $ch = curl_init();
           curl_setopt($ch, CURLOPT_URL, $scrapeURL);
           curl_setopt($ch, CURLOPT_POST, 1);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));   
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
           curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($ch, CURLOPT_REFERER, $request_options["referer"]);
@@ -47,14 +47,14 @@ class vehicleinformation{
 
           return $result;
      }
-     
+
 
      private static function getData($serverData, $lang, $fast){
 	  try{
                $stops = array();
                $html = str_get_html($serverData);
                $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
-               
+
                $j = 0;
                for($i=1; $i<count($nodes); $i++){
                     $node = $nodes[$i];
@@ -65,14 +65,14 @@ class vehicleinformation{
                     $delayseconds = preg_replace("/[^0-9]/", '', $delay)*60;
 
                     $spans = $node->children[1]->find('span');
-                    $arriveTime = reset($spans[0]->nodes[0]->_);                    
-                    $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;  
-                    
+                    $arriveTime = reset($spans[0]->nodes[0]->_);
+                    $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;
+
                     if(count($node->children[3]->find('a'))) {
                         $as = $node->children[3]->find('a');
                         $stationname = reset($as[0]->nodes[0]->_);
                     }
-                    
+
                     else $stationname = reset($node->children[3]->nodes[0]->_);
 
                     $stops[$j] = new Stop();
@@ -101,8 +101,8 @@ class vehicleinformation{
           $html = str_get_html($serverData);
 
           $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-          if (!is_object($test)) 
-              throw new Exception("Vehicle not found", 1); // catch errors 
+          if (!is_object($test))
+              throw new Exception("Vehicle not found", 1); // catch errors
 
           $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
 
@@ -111,7 +111,7 @@ class vehicleinformation{
                     if(!count($node->attr)) continue; // row with no class-attribute contain no data
                     $as = $node->children[3]->find('a');
                     $station = reset($as[0]->nodes[0]->_);
-          
+
           	     $locationX = 0;
           	     $locationY = 0;
           	     if(isset($station)){
@@ -128,5 +128,5 @@ class vehicleinformation{
 
           return null;
      }
-     
+
 };
