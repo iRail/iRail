@@ -59,8 +59,6 @@ class tools{
 	  }else{
 	       $minutes +=15;
 	  }
-	  return $hours. ":" . $minutes;	  
-     } 
+	  return $hours. ":" . $minutes;
+     }
   }
-
-?>

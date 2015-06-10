@@ -23,7 +23,7 @@ class Xml extends Printer{
 	  header("HTTP/1.1 $ec $msg");
 	  echo "<error code=\"$ec\">$msg</error>";
      }
-     
+
      function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
@@ -69,7 +69,7 @@ class Xml extends Printer{
 	  if($named != ""){
 	       echo $named;
 	  }
-	  
+
      }
 
      function startKeyVal($key,$val){
@@ -104,4 +104,3 @@ class Xml extends Printer{
      }
 
 };
-?>

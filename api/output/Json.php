@@ -9,7 +9,7 @@
 include_once("Printer.php");
 class Json extends Printer{
      private $rootname;
-     
+
      function printHeader(){
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/json;charset=UTF-8");
@@ -85,18 +85,16 @@ class Json extends Printer{
 	       echo "]}";
 	  }
      }
-     
+
      function endObject($name){
 	  echo "}";
      }
-     
+
      function endElement($name){
-	  
+
      }
 
      function endRootElement($name){
 	  echo "}";
      }
 };
-
-?>

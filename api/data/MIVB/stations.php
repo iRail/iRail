@@ -1,8 +1,8 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * This will fetch all stationdata for the MIVB. It implements a couple of standard functions implemented by all stations classes:
-   *   
+   *
    *   * fillDataRoot will fill the entire dataroot with stations
    *   * getStationFromName will return the right station object for a Name
    *
@@ -38,13 +38,13 @@ class stations{
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 3);
 	  }
-	  return $station;	  
+	  return $station;
      }
 
      public static function getStationFromName($name, $lang){
 	  if($lang == "EN"){
 	       $lang="STD";
-	  }	  
+	  }
 	  APICall::connectToDB();
 	  mysql_query("SET NAMES utf8");
 	  $station;
@@ -67,7 +67,7 @@ class stations{
 	  if($station->id == ""){
 	       throw new Exception("No station found for name", 400);
 	  }
-	  
+
 	  return $station;
      }
 
@@ -100,7 +100,7 @@ class stations{
 	  }
 	  return $station;
      }
-     
+
      private static function fetchAllStationsFromDB($lang){
 	  if($lang == "EN"){
 	       $lang="STD";
@@ -169,5 +169,3 @@ class line{
      public $x;
      public $y;
 };
-
-?>

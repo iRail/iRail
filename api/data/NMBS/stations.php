@@ -1,8 +1,8 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * This will fetch all stationdata for the NMBS. It implements a couple of standard functions implemented by all stations classes:
-   *   
+   *
    *   * fillDataRoot will fill the entire dataroot with stations
    *   * getStationFromName will return the right station object for a Name
    *
@@ -31,19 +31,19 @@ class stations
 	       $station->locationY = $line["Y"];
                $id = str_replace("BE.NMBS.", "",$station->id);
                $station->{"@id"} = "http://irail.be/stations/NMBS/" . $id;
-               
+
 	       if($line[$lang] != ""){
 		    $station->name = utf8_encode($line[$lang]);
 	       }else{
-		    $station->name = utf8_encode($line["STD"]);	    
+		    $station->name = utf8_encode($line["STD"]);
 	       }
-	       
+
 	       $station->standardname = utf8_encode($line["STD"]);
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 3);
 	  }
-	  return $station;	  
+	  return $station;
      }
 
      public static function getStationFromID($id, $lang){
@@ -62,7 +62,7 @@ class stations
 	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
                if ($line) {
-                   
+
                    $station = new Station();
                    $station->id = $line["ID"];
                    $station->locationX = $line["X"];
@@ -72,7 +72,7 @@ class stations
                    if($line[$lang] != ""){
                        $station->name = utf8_encode($line[$lang]);
                    }else{
-                       $station->name = utf8_encode($line["STD"]);	    
+                       $station->name = utf8_encode($line["STD"]);
                    }
                    $station->standardname = utf8_encode($line["STD"]);
                } else {
@@ -157,7 +157,7 @@ class stations
 	       if($line[$lang] != ""){
 		    $station->name = utf8_encode($line[$lang]);
 	       }else{
-		    $station->name = utf8_encode($line["STD"]);	    
+		    $station->name = utf8_encode($line["STD"]);
 	       }
 	       $station->standardname = utf8_encode($line["STD"]);
 	       if($station->id == ""){
@@ -188,14 +188,14 @@ class stations
 	       throw new Exception("error getting RT ID", 3);
 	  }
      }
-     
-     
+
+
      private static function fetchAllStationsFromDB($lang){
 	  APICall::connectToDB();
 	  $station = array();
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
-	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE `ID` LIKE 'BE.NMBS.%' ORDER BY `$lang`";	       
+	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE `ID` LIKE 'BE.NMBS.%' ORDER BY `$lang`";
 	       $result = mysql_query($query) or die("Could not get stationslist from DB");
 	       $i = 0;
 	       while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
@@ -208,7 +208,7 @@ class stations
 		    if($line[$lang] != ""){
                         $station[$i]->name = utf8_encode($line[$lang]);
 		    }else{
-                        $station[$i]->name = utf8_encode($line["STD"]);	    
+                        $station[$i]->name = utf8_encode($line["STD"]);
 		    }
 		    $station[$i]->standardname = utf8_encode($line["STD"]);
 		    $i++;
@@ -220,5 +220,3 @@ class stations
 	  return $station;
      }
 };
-
-?>

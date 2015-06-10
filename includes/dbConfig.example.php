@@ -45,6 +45,3 @@ $api_c5 = "tostation";			// to station
 $api_c6 = "errors";				// catch error output
 $api_c7 = "ip";					// request IP address
 $api_c8 = "server";				// server name of iRail server, usually 0[.irail.be], 1[.irail.be], dev, etc
-
-
-?>

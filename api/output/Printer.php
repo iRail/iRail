@@ -7,15 +7,15 @@
    */
 abstract class Printer{
      protected $documentRoot;
-     
+
      function __construct($documentRoot){
 	  $this->documentRoot = $documentRoot;
      }
-     
+
      function printAll(){
 	  $this->printHeader();
 	  $this->printBody();
-     }     
+     }
 /**
  * prints http header: what kind of output, etc
  *
@@ -24,7 +24,7 @@ abstract class Printer{
      abstract function printHeader();
 
      protected $root;
-     
+
 /**
  * prints the body: The idea begind this is a reversed sax-parser. It will create events which you will have to implement in your implementation of an output.
  */
@@ -78,7 +78,7 @@ abstract class Printer{
 		    }
 		    $counter++;
 	       }
-	       $this->endObject($key);  
+	       $this->endObject($key);
 	  }else if(is_bool($val)){
 	       $val = $val?1:0;//turn boolean into an int
 	       $this->startKeyVal($key,$val);
@@ -107,7 +107,5 @@ abstract class Printer{
      abstract function endElement($name);
      abstract function endRootElement($name);
 
-     abstract function printError($ec,$msg);     
+     abstract function printError($ec,$msg);
   }
-
-?>

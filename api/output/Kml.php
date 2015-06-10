@@ -17,7 +17,7 @@ class Kml extends Printer{
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/vnd.google-earth.kml+xml");
 	  echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-	  
+
      }
 
      function printError($ec, $msg){
@@ -25,7 +25,7 @@ class Kml extends Printer{
 	  header("HTTP/1.1 $ec $msg");
 	  echo "<error code=\"$ec\">$msg</error>";
      }
-     
+
      function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  if($name == "stations"){
@@ -64,4 +64,3 @@ class Kml extends Printer{
 	  echo "</kml>";
      }
 };
-?>

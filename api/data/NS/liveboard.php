@@ -1,6 +1,6 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
-   *   
+  /** Copyright (C) 2011 by iRail vzw/asbl
+   *
    * fillDataRoot will fill the entire dataroot with a liveboard for a specific station
    *
    * @package data/NS
@@ -40,11 +40,11 @@ class liveboard{
 	       throw new Exception("Could not reach NS server", 500);
 	  }
      }
-  
+
      private static function parseData($xml,$time,$lang){
 	$nodes = array();
 	//var_dump($xml);
-	
+
         $i = 0;
         for($i = 0; $i < sizeof($xml->VertrekkendeTrein); $i ++) {
 	     $dep = $xml->VertrekkendeTrein[$i];
@@ -74,6 +74,3 @@ class liveboard{
      }
 
 };
-
-
-?>

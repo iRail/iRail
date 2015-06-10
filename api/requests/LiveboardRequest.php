@@ -27,7 +27,7 @@ class LiveboardRequest extends Request{
           }else if(sizeof($m) > 2){
               $this->date = date("Y") . $m[2] . $m[1];
           }
-          
+
 	  preg_match("/(..)(..)/si", $this->time, $m);
 	  $this->time = $m[1] . ":" . $m[2];
 	  if($this->station == "" && isset($_GET["id"])){
@@ -56,6 +56,5 @@ class LiveboardRequest extends Request{
      public function getArrdep() {
 	  return $this->arrdep;
      }
-    
+
 }
-?>

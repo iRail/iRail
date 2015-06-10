@@ -26,8 +26,8 @@ class DataRoot
 	       $format = "Jsonp";
 	  }
 	  if(!file_exists("output/$format.php")){
-	       throw new Exception("Incorrect format specified. Please correct this and try again",402);	    
-	  }    
+	       throw new Exception("Incorrect format specified. Please correct this and try again",402);
+	  }
 	  include_once("output/$format.php");
 	  $this->printer = new $format($this);
 	  $this->version = $version;
@@ -58,9 +58,7 @@ class DataRoot
 	  }catch(Exception $e){
 	       throw new Exception("Could not get data. Please report this problem to iRail@list.iRail.be.", 502);
 	  }
-	  
-     }
-     
-}
 
-?>
+     }
+
+}

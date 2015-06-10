@@ -1,5 +1,5 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * The request information for a vehicle lookup. It tracks the location and gets information about its future location.
    *
@@ -24,7 +24,6 @@ class VehicleinformationRequest extends Request {
      public function getFast(){
          return $this->fast;
      }
-     
+
 
 }
-?>

@@ -1,6 +1,6 @@
 <?php
 
-  /* Copyright (C) 2011 by iRail vzw/asbl 
+  /* Copyright (C) 2011 by iRail vzw/asbl
    *
    * This is an interface to a Request
    *
@@ -16,7 +16,7 @@ class Request {
 
      protected function processRequiredVars($array){
 	  foreach($array as $var){
-	       if(!isset($this->$var) || $this->$var == "" || is_null($this->$var)){	    
+	       if(!isset($this->$var) || $this->$var == "" || is_null($this->$var)){
 		    throw new Exception("$var not set. Please review your request and add the right parameters",400);
 	       }
 	  }
@@ -32,11 +32,11 @@ class Request {
 	       $this->$varName = $default;
 	  }
      }
-     
+
 
      function __construct() {
 	  $this->setGetVar("format", "xml");
-	  $this->setGetVar("lang", "EN"); 
+	  $this->setGetVar("lang", "EN");
 	  $this->setGetVar("system", "NMBS");
      }
 
@@ -53,13 +53,12 @@ class Request {
      }
 
      public function getSystem(){
-	  $this->system = strtoupper($this->system);	  
+	  $this->system = strtoupper($this->system);
 	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
 	       return $this->system;
 	  }else{
 	       return "NMBS";
 	  }
      }
-     
+
   }
-?>

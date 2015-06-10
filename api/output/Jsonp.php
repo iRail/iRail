@@ -11,7 +11,7 @@ class Jsonp extends Json
 {
      function printHeader(){
 	  header("Access-Control-Allow-Origin: *");
-	  header("Content-Type: application/javascript;charset=UTF-8"); 
+	  header("Content-Type: application/javascript;charset=UTF-8");
      }
      function printBody(){
 	  $callback = $_GET['callback'];
@@ -26,5 +26,3 @@ class Jsonp extends Json
      }
 
 };
-
-?>

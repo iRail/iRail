@@ -30,7 +30,7 @@ class tools{
 	  tools::$g = tools::$m1/(tools::$n*pow(tools::$t1,tools::$n));
 	  tools::$r0=tools::$a*tools::$g*pow(tools::$t0,tools::$n);
      }
-     
+
      public static function LambertToWGS84($x,$y){
 	  tools::initvars();
 	  //calc
@@ -59,5 +59,3 @@ class tools{
 	  return array($x,$y);
      }
 }
-
-?>
