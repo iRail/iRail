@@ -5,7 +5,7 @@
    * @package data/NMBS
    */
 
-class tools{
+class tools {
      /**
       *
       * @param <type> $time -> in 00d15:24:00
@@ -27,6 +27,7 @@ class tools{
 
      /**
       * This function transforms the brail formatted timestring and reformats it to seconds
+      *
       * @param int $time
       * @return int Duration in seconds
       */
@@ -39,9 +40,12 @@ class tools{
      }
 
 
-/**
- * Adds a quarter and responds with a time
- */
+    /**
+     * Adds a quarter and responds with a time
+     *
+     * @param $time
+     * @return string
+     */
      public static function addQuarter($time){
 	  preg_match("/(..):(..)/",$time, $m);
 	  $hours = $m[1];

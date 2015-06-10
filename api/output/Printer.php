@@ -28,7 +28,7 @@ abstract class Printer{
 /**
  * prints the body: The idea begind this is a reversed sax-parser. It will create events which you will have to implement in your implementation of an output.
  */
-     function printBody(){
+     function printBody() {
           //so that people would know that we have a child of the rootelement
 	  $this->root = true;
 	  $this->startRootElement($this->documentRoot->getRootname(), $this->documentRoot->version, $this->documentRoot->timestamp);
@@ -40,7 +40,7 @@ abstract class Printer{
 		    continue;
 	       }
 	       $this->printElement($key,$val, true);
-	       if($counter < sizeof($hash)-1){
+	       if($counter < sizeof($hash)-1) {
 		    $this->nextObjectElement();
 	       }
 	       $counter++;
@@ -48,10 +48,15 @@ abstract class Printer{
 	  $this->endRootElement($this->documentRoot->getRootname());
      }
 
-/**
- * It will detect what kind of element the element is and will print it accordingly. If it contains more elements it will print more recursively
- */
-     private function printElement($key,$val, $root = false){
+    /**
+     * It will detect what kind of element the element is and will print it accordingly. If it contains more elements it will print more recursively
+     *
+     * @param $key
+     * @param $val
+     * @param bool $root
+     * @throws Exception
+     */
+     private function printElement($key, $val, $root = false) {
 	  if(is_array($val)){
 	       if(sizeof($val)>0){
 		    $this->startArray($key,sizeof($val), $root);
@@ -62,16 +67,16 @@ abstract class Printer{
 			 }
 		    }
 		    $this->endArray($key, $root);
-	       }else{
+	       } else {
 		    //very dirty fix of the komma problem when empty array when this would occur
 		    $this->startKeyVal("empty", "");
 		    $this->endElement("empty");
 	       }
-	  }else if(is_object($val)){
+	  } else if (is_object($val)) {
 	       $this->startObject($key,$val);
 	       $hash = get_object_vars($val);
 	       $counter = 0;
-	       foreach($hash as $elementkey => $elementval){
+	       foreach($hash as $elementkey => $elementval) {
 		    $this->printElement($elementkey,$elementval);
 		    if($counter < sizeof($hash)-1){
 			 $this->nextObjectElement();
@@ -79,14 +84,14 @@ abstract class Printer{
 		    $counter++;
 	       }
 	       $this->endObject($key);
-	  }else if(is_bool($val)){
+	  } else if(is_bool($val)) {
 	       $val = $val?1:0;//turn boolean into an int
 	       $this->startKeyVal($key,$val);
 	       $this->endElement($key);
-	  }else if(!is_null($val)){
+	  } else if(!is_null($val)) {
 	       $this->startKeyVal($key,$val);
 	       $this->endElement($key);
-	  }else{
+	  } else {
 	       throw new Exception("Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.",500);
 	  }
      }
@@ -94,7 +99,17 @@ abstract class Printer{
      }
      function nextObjectElement(){
      }
-     abstract function startRootElement($name, $version, $timestamp);
+
+
+    /**
+     * startRootElement
+     *
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     * @return mixed
+     */
+    abstract function startRootElement($name, $version, $timestamp);
 
      abstract function startArray($name,$number, $root = false);
      abstract function startObject($name, $object);

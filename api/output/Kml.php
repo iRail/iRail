@@ -9,58 +9,115 @@ include_once("Printer.php");
  *
  * @package output
  */
-class Kml extends Printer{
-     private $ATTRIBUTES=array("id", "locationX", "locationY", "standardname", "left","delay", "normal");
+class Kml extends Printer {
+     private $ATTRIBUTES = ["id", "locationX", "locationY", "standardname", "left","delay", "normal"];
      private $rootname;
 
-     function printHeader(){
+    /**
+     * printHeader()
+     */
+    function printHeader() {
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/vnd.google-earth.kml+xml");
 	  echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
      }
 
-     function printError($ec, $msg){
+    /**
+     * printError()
+     *
+     * @param $ec
+     * @param $msg
+     */
+    function printError($ec, $msg) {
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo "<error code=\"$ec\">$msg</error>";
      }
 
-     function startRootElement($name, $version, $timestamp){
+    /**
+     * startRootElement
+     *
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     */
+    function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
-	  if($name == "stations"){
+	  if($name == "stations") {
 	       echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\">";
-	  }else{
+	  } else {
 	       $this->printError(400,"KML only works for stations at this moment");
 	  }
      }
 //make a stack of array information, always work on the last one
 //for nested array support
-     private $stack = array();
-     private $arrayindices = array();
+     private $stack = [];
+     private $arrayindices = [];
      private $currentarrayindex = -1;
-     function startArray($name,$number, $root = false){
+
+
+    /**
+     * startArray()
+     *
+     * @param $name
+     * @param $number
+     * @param bool $root
+     */
+    function startArray($name,$number, $root = false) {
      }
 
-     function nextArrayElement(){
+    /**
+     * nextArrayElement()
+     */
+    function nextArrayElement() {
 	  $this->arrayindices[$this->currentarrayindex]++;
      }
 
-     function startObject($name, $object){
+    /**
+     * startObject()
+     *
+     * @param $name
+     * @param $object
+     */
+    function startObject($name, $object) {
 	  if($name == "station"){
 	       echo "<Placemark id='". $object->id ."'><name>". $object->name ."</name><Point><coordinates>". $object->locationX .",". $object->locationY."</coordinates></Point></Placemark>";
 	  }
      }
 
-     function startKeyVal($key,$val){
+    /**
+     * startKeyVal
+     *
+     * @param $key
+     * @param $val
+     */
+    function startKeyVal($key,$val) {
      }
 
-     function endElement($name){
-     }
-     function endArray($name, $root = false){
+    /**
+     * endElement()
+     *
+     * @param $name
+     */
+    function endElement($name) {
      }
 
-     function endRootElement($name){
+    /**
+     * endArray()
+     *
+     * @param $name
+     * @param bool $root
+     */
+    function endArray($name, $root = false) {
+     }
+
+    /**
+     * endRootElement
+     *
+     * @param $name
+     */
+    function endRootElement($name) {
 	  echo "</kml>";
      }
 };

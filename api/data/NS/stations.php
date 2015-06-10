@@ -8,15 +8,29 @@
    *   * getStationFromName will return the right station object for a Name
    * @package data/NS
    */
-class stations{
-     private static $stations = array();
-     public static function fillDataRoot($dataroot,$request){
+class stations {
+     private static $stations = [];
+
+    /**
+     * fillDataRoot()
+     *
+     * @param $dataroot
+     * @param $request
+     */
+    public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
 
-/**
- * The closest to a certain location
- */
+    /**
+     * getStationFromLocation()
+     *
+     * The closest to a certain location
+     *
+     * @param $locationX
+     * @param $locationY
+     * @param $lang
+     * @return
+     */
      public static function getStationFromLocation($locationX, $locationY, $lang){
 	  stations::fetchAllStationsFromDB("EN");
 	  $bestindex= 0;
@@ -33,7 +47,16 @@ class stations{
 	  return stations::$stations[$i];
      }
 
-     private static function distance($x1,$x2,$y1,$y2){
+    /**
+     * distance()
+     *
+     * @param $x1
+     * @param $x2
+     * @param $y1
+     * @param $y2
+     * @return int
+     */
+    private static function distance($x1,$x2,$y1,$y2){
 	  $R = 6371; // km
 	  $dY = deg2rad($y2-$y1);
 	  $dX = deg2rad($x2-$x1);
@@ -42,7 +65,15 @@ class stations{
 	  return $R * $c;
      }
 
-     public static function getStationFromID($id, $lang){
+    /**
+     * getStationFromID()
+     *
+     * @param $id
+     * @param $lang
+     * @return mixed
+     * @throws Exception
+     */
+    public static function getStationFromID($id, $lang){
 	  stations::fetchAllStationsFromDB("EN");
 	  $i = 0;
 	  while($i < sizeof(stations::$stations) && stations::$stations[$i]->id != $id){
@@ -54,7 +85,14 @@ class stations{
 	  throw new Exception("ID not found", 404);
      }
 
-     public static function getStationFromName($name, $lang){
+    /**
+     * getStationFromName()
+     *
+     * @param $name
+     * @param $lang
+     * @return null
+     */
+    public static function getStationFromName($name, $lang){
 	  stations::fetchAllStationsFromDB("EN");
 	  $i = 0;
 	  while($i < sizeof(stations::$stations) && stations::$stations[$i]->name != $name){
@@ -67,7 +105,13 @@ class stations{
 	  return null;
      }
 
-     private static function fetchAllStationsFromDB($lang){
+    /**
+     * fetchAllStationsFromDB()
+     *
+     * @param $lang
+     * @return array
+     */
+    private static function fetchAllStationsFromDB($lang){
 //<station locationX="4.323973" locationY="52.081261" id="NL.NS.gvc" standardname="'s-Gravenhage">'s-Gravenhage</station>
 	  if(sizeof(stations::$stations)==0){
 	       $allstations = file_get_contents("data/NS/stations.xml",true);

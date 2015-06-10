@@ -10,11 +10,28 @@
    */
 class stations
 {
-     public static function fillDataRoot($dataroot,$request){
+
+    /**
+     * fillDataRoot()
+     *
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
 
-     public static function getStationFromLocation($locationX, $locationY, $lang){
+    /**
+     * getStationFromLocation()
+     *
+     * @param $locationX
+     * @param $locationY
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromLocation($locationX, $locationY, $lang){
 	  APICall::connectToDB();
 	  $station;
 	  try {
@@ -46,7 +63,15 @@ class stations
 	  return $station;
      }
 
-     public static function getStationFromID($id, $lang){
+    /**
+     * getStationFromID()
+     *
+     * @param $id
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromID($id, $lang){
 	  APICall::connectToDB();
           $idarray = explode(".",$id);
 	  if(sizeof($idarray) > 1){
@@ -85,10 +110,18 @@ class stations
 	  return $station;
      }
 
-     /**
-      * Gets an appropriate station from the new iRail API
-      */
-     public static function getStationFromName($name, $lang){
+
+    /**
+     * getStationFromName()
+     *
+     * Gets an appropriate station from the new iRail API
+     *
+     * @param $name
+     * @param $lang
+     * @return Station|string
+     * @throws Exception
+     */
+    public static function getStationFromName($name, $lang){
           //first check if it wasn't by any chance an id
           if(substr($name,0,1) == "0" || substr($name,0,7) == "BE.NMBS"){
               $id = $name;
@@ -140,7 +173,15 @@ class stations
           return $stationresult;
      }
 
-     public static function getStationFromRTName($name,$lang){
+    /**
+     * getStationFromRTName()
+     *
+     * @param $name
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromRTName($name, $lang){
 	  APICall::connectToDB();
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
@@ -172,7 +213,15 @@ class stations
 	  return $station;
      }
 
-     public static function getRTID($station, $lang){
+    /**
+     * getRTID()
+     *
+     * @param $station
+     * @param $lang
+     * @return stdClass
+     * @throws Exception
+     */
+    public static function getRTID($station, $lang){
 	  APICall::connectToDB();
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
@@ -190,7 +239,14 @@ class stations
      }
 
 
-     private static function fetchAllStationsFromDB($lang){
+    /**
+     * fetchAllStationsFromDB()
+     *
+     * @param $lang
+     * @return array
+     * @throws Exception
+     */
+    private static function fetchAllStationsFromDB($lang) {
 	  APICall::connectToDB();
 	  $station = array();
 	  try {

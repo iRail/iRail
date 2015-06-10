@@ -30,30 +30,55 @@ class LiveboardRequest extends Request{
 
 	  preg_match("/(..)(..)/si", $this->time, $m);
 	  $this->time = $m[1] . ":" . $m[2];
-	  if($this->station == "" && isset($_GET["id"])){
+	  if($this->station == "" && isset($_GET["id"])) {
 	       //then there was an id given
 	       $this->station = $_GET["id"];
 	  }
-	  parent::processRequiredVars(array("station"));
+	  parent::processRequiredVars(["station"]);
      }
 
-     public function isFast(){
+    /**
+     * isFast()
+     *
+     * @return bool
+     */
+    public function isFast(){
          return $this->fast == "true";
      }
 
-     public function getStation() {
+    /**
+     * getStation()
+     *
+     * @return mixed
+     */
+    public function getStation() {
 	  return $this->station;
      }
 
-     public function getDate() {
+    /**
+     * getDate()
+     *
+     * @return string
+     */
+    public function getDate() {
 	  return $this->date;
      }
 
-     public function getTime() {
+    /**
+     * getTime()
+     *
+     * @return string
+     */
+    public function getTime() {
 	  return $this->time;
      }
 
-     public function getArrdep() {
+    /**
+     * getArrdep()
+     *
+     * @return mixed
+     */
+    public function getArrdep() {
 	  return $this->arrdep;
      }
 

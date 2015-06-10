@@ -7,7 +7,11 @@
 
 include_once("Request.php");
 class StationsRequest extends Request{
-     function __construct() {
+
+    /**
+     * Class Constructor
+     */
+    function __construct() {
 	  parent::__construct();
      }
 }

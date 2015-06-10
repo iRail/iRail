@@ -7,14 +7,20 @@
    * @author pieterc
    */
 class Request {
-     public static $SUPPORTED_LANGUAGES = array("EN", "NL", "FR", "DE");
-     public static $SUPPORTED_SYSTEMS = array("NMBS", "MIVB", "NS", "DL");
+     public static $SUPPORTED_LANGUAGES = ["EN", "NL", "FR", "DE"];
+     public static $SUPPORTED_SYSTEMS = ["NMBS", "MIVB", "NS", "DL"];
 
      private $format = "xml";
      private $lang = "EN";
      private $system = "NMBS";
 
-     protected function processRequiredVars($array){
+    /**
+     * processRequireVars
+     *
+     * @param $array
+     * @throws Exception
+     */
+    protected function processRequiredVars($array) {
 	  foreach($array as $var){
 	       if(!isset($this->$var) || $this->$var == "" || is_null($this->$var)){
 		    throw new Exception("$var not set. Please review your request and add the right parameters",400);
@@ -22,29 +28,45 @@ class Request {
 	  }
      }
 
-/**
- * will take a get a variable from the GET array and set it as a member variable
- */
+    /**
+     * will take a get a variable from the GET array and set it as a member variable
+     *
+     * @param $varName
+     * @param $default
+     */
      protected function setGetVar($varName, $default){
-	  if(isset($_GET[$varName])){
+	  if (isset($_GET[$varName])){
 	       $this->$varName = $_GET[$varName];
-	  }else{
+	  } else {
 	       $this->$varName = $default;
 	  }
      }
 
-
-     function __construct() {
+    /**
+     * Class constructor
+     */
+    function __construct() {
 	  $this->setGetVar("format", "xml");
 	  $this->setGetVar("lang", "EN");
 	  $this->setGetVar("system", "NMBS");
      }
 
-     public function getFormat() {
+
+    /**
+     * getFormat()
+     *
+     * @return string
+     */
+    public function getFormat() {
 	  return strtolower($this->format);
      }
 
-     public function getLang() {
+    /**
+     * getLang()
+     *
+     * @return string
+     */
+    public function getLang() {
 	  $this->lang = strtoupper($this->lang);
 	  if(in_array($this->lang, Request::$SUPPORTED_LANGUAGES)){
 	       return $this->lang;
@@ -52,7 +74,12 @@ class Request {
 	  return "EN";
      }
 
-     public function getSystem(){
+    /**
+     * getSystem()
+     *
+     * @return string
+     */
+    public function getSystem() {
 	  $this->system = strtoupper($this->system);
 	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
 	       return $this->system;

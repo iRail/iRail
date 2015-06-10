@@ -9,17 +9,31 @@ include_once("Json.php");
  */
 class Jsonp extends Json
 {
-     function printHeader(){
+    /**
+     * printheader()
+     */
+    function printHeader() {
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/javascript;charset=UTF-8");
      }
-     function printBody(){
+
+    /**
+     * printBody()
+     */
+    function printBody() {
 	  $callback = $_GET['callback'];
 	  echo "$callback(";
 	  parent::printBody($this->documentRoot);
 	  echo ")";
      }
-     function printError($ec, $msg){
+
+    /**
+     * printError()
+     *
+     * @param $ec
+     * @param $msg
+     */
+    function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo $_GET['callback'] . "({\"error\":$ec, \"message\": \"$msg\"})";

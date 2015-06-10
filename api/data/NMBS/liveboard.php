@@ -7,7 +7,15 @@
  */
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
-class liveboard{
+class liveboard {
+
+    /**
+     * fillDataRoot()
+     *
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
     public static function fillDataRoot($dataroot,$request){
         $arr = explode(".",$request->getStation());
         $stationr=$request->getStation();
@@ -27,6 +35,15 @@ class liveboard{
         }
     }
 
+    /**
+     * fetchData()
+     *
+     * @param $station
+     * @param $time
+     * @param $lang
+     * @param $timeSel
+     * @return string
+     */
     private static function fetchData($station, $time, $lang, $timeSel){
         include "../includes/getUA.php";
         $request_options = array(
@@ -54,6 +71,15 @@ class liveboard{
 
     }
 
+    /**
+     * parseData()
+     *
+     * @param $xml
+     * @param $time
+     * @param $lang
+     * @param bool $fast
+     * @return array
+     */
     private static function parseData($xml,$time,$lang, $fast = false){
 	//clean XML
         if(class_exists("tidy",false)) {

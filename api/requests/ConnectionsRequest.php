@@ -16,7 +16,14 @@ class ConnectionsRequest extends Request {
      protected $timeSel;
      protected $fast;
      protected $typeOfTransport;
-     function __construct(){
+
+
+    /**
+     * Class constructor
+     *
+     * @throws Exception
+     */
+    function __construct(){
 	  parent::__construct();
 	  parent::setGetVar("from", "");
 	  parent::setGetVar("to", "");
@@ -35,35 +42,75 @@ class ConnectionsRequest extends Request {
 	  $this->time = $m[1] . ":" . $m[2];
      }
 
-     public function getFast(){
+    /**
+     * getFast()
+     *
+     * @return mixed
+     */
+    public function getFast(){
          return $this->fast;
      }
 
-     public function getResults() {
+    /**
+     * getResults()
+     *
+     * @return mixed
+     */
+    public function getResults() {
 	  return $this->results;
      }
 
-     public function getFrom() {
+    /**
+     * getFrom()
+     *
+     * @return mixed
+     */
+    public function getFrom() {
 	  return $this->from;
      }
 
-     public function getTo() {
+    /**
+     * getTo()
+     *
+     * @return mixed
+     */
+    public function getTo() {
 	  return $this->to;
      }
 
-     public function getTime() {
+    /**
+     * getTime()
+     *
+     * @return string
+     */
+    public function getTime() {
 	  return $this->time;
      }
 
-     public function getDate() {
+    /**
+     * getdata()
+     *
+     * @return string
+     */
+    public function getDate() {
 	  return $this->date;
      }
 
-     public function getTimeSel() {
+    /**
+     * getTimeSel()
+     *
+     * @return mixed
+     */
+    public function getTimeSel() {
 	  return $this->timeSel;
      }
 
-     public function getTypeOfTransport() {
+    /**
+     * getTypeOfTransport
+     *
+     * @return mixed
+     */
+    public function getTypeOfTransport() {
 	  return $this->typeOfTransport;
      }
 

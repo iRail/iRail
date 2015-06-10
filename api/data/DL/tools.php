@@ -11,7 +11,7 @@ class tools{
      private static $a,$f,$x0,$y0,$e,$p0,$p1,$p2,$l0,$m1,$m2,$t1 ,$t2 ,$t0 ,$n,$g ,$r0;
 
 //Initiate constants
-     private static function initvars(){
+     private static function initvars() {
 	  tools::$a=6378388;
 	  tools::$f=1/297;
 	  tools::$x0=150000.013;

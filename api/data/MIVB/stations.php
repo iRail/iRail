@@ -9,11 +9,28 @@
    * @package data/MIVB
    */
 class stations{
-     public static function fillDataRoot($dataroot,$request){
+
+    /**
+     * fillDataRoot()
+     *
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
 
-     public static function getStationFromLocation($locationX, $locationY, $lang){
+    /**
+     * getStationFromLocation()
+     *
+     * @param $locationX
+     * @param $locationY
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromLocation($locationX, $locationY, $lang){
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -41,7 +58,15 @@ class stations{
 	  return $station;
      }
 
-     public static function getStationFromName($name, $lang){
+    /**
+     * getStationFromName()
+     *
+     * @param $name
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromName($name, $lang) {
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -72,7 +97,15 @@ class stations{
      }
 
 
-     public static function getStationFromID($id, $lang){
+    /**
+     * getStationFromID
+     *
+     * @param $id
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromID($id, $lang) {
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -101,7 +134,14 @@ class stations{
 	  return $station;
      }
 
-     private static function fetchAllStationsFromDB($lang){
+    /**
+     * fetchAllStationsFromDB()
+     *
+     * @param $lang
+     * @return array
+     * @throws Exception
+     */
+    private static function fetchAllStationsFromDB($lang) {
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -130,7 +170,16 @@ class stations{
 	  return $station;
      }
 
-     public static function getLinesFromCoordinates($x,$y,$lang){
+    /**
+     * getLinesFromCoordinates()
+     *
+     * @param $x
+     * @param $y
+     * @param $lang
+     * @return array
+     * @throws Exception
+     */
+    public static function getLinesFromCoordinates($x, $y, $lang) {
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -161,7 +210,7 @@ class stations{
      }
   };
 
-class line{
+class line {
      public $id;
      public $mode;
      public $from;

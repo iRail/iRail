@@ -75,26 +75,48 @@ class Json extends Printer{
 	  echo "\"$key\":\"$val\"";
      }
 
-     function endArray($name, $root = false){
+    /**
+     * endArray
+     *
+     * @param $name
+     * @param bool $root
+     */
+    function endArray($name, $root = false){
 	  $this->stack[$this->currentarrayindex] = "";
 	  $this->arrayindices[$this->currentarrayindex] = 0;
 	  $this->currentarrayindex --;
-	  if($root && $this->rootname != "liveboard" && $this->rootname != "vehicleinformation"){
+
+	  if($root && $this->rootname != "liveboard" && $this->rootname != "vehicleinformation") {
 	       echo "]";
-	  }else{
+	  } else {
 	       echo "]}";
 	  }
      }
 
-     function endObject($name){
+    /**
+     * endObject()
+     *
+     * @param $name
+     */
+    function endObject($name){
 	  echo "}";
      }
 
-     function endElement($name){
+    /**
+     * endElement()
+     *
+     * @param $name
+     */
+    function endElement($name){
 
      }
 
-     function endRootElement($name){
+    /**
+     * endRootElement
+     *
+     * @param $name
+     */
+    function endRootElement($name){
 	  echo "}";
      }
 };

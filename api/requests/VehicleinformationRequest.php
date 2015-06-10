@@ -10,18 +10,33 @@ class VehicleinformationRequest extends Request {
      protected $id;
      protected $fast;
 
-     function __construct() {
+    /**
+     * Class constructor.
+     *
+     * @throws Exception
+     */
+    function __construct() {
 	  parent::__construct();
 	  parent::setGetVar("id", "");
           parent::setGetVar("fast", "false");
-	  parent::processRequiredVars(array("id"));
+	  parent::processRequiredVars(["id"]);
      }
 
-     public function getVehicleId() {
+    /**
+     * getVehicleId()
+     *
+     * @return mixed
+     */
+    public function getVehicleId() {
 	  return $this->id;
      }
 
-     public function getFast(){
+    /**
+     * getFast()
+     *
+     * @return mixed
+     */
+    public function getFast(){
          return $this->fast;
      }
 
