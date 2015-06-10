@@ -703,8 +703,8 @@ class simple_html_dom_node {
         preg_match_all($pattern, trim($selector_string).' ', $matches, PREG_SET_ORDER);
         if (is_object($debugObject)) {$debugObject->debugLog(2, "Matches Array: ", $matches);}
 
-        $selectors = array();
-        $result = array();
+        $selectors = [];
+        $result = [];
         //print_r($matches);
 
         foreach ($matches as $m) {
@@ -713,7 +713,7 @@ class simple_html_dom_node {
             // for browser generated xpath
             if ($m[1]==='tbody') continue;
 
-            list($tag, $key, $val, $exp, $no_key) = array($m[1], null, null, '=', false);
+            list($tag, $key, $val, $exp, $no_key) = [$m[1], null, null, '=', false];
             if (!empty($m[2])) { $key='id'; $val=$m[2]; }
             if (!empty($m[3])) { $key='class'; $val=$m[3]; }
             if (!empty($m[4])) { $key=$m[4]; }
@@ -725,10 +725,10 @@ class simple_html_dom_node {
             //elements that do NOT have the specified attribute
             if (isset($key[0]) && $key[0]==='!') {$key=substr($key, 1); $no_key=true;}
 
-            $result[] = array($tag, $key, $val, $exp, $no_key);
+            $result[] = [$tag, $key, $val, $exp, $no_key];
             if (trim($m[7])===',') {
                 $selectors[] = $result;
-                $result = array();
+                $result = [];
             }
         }
         if (count($result)>0)
@@ -770,7 +770,7 @@ class simple_html_dom_node {
                 return $this->_[HDOM_INFO_INNER] = $value;
         }
         if (!isset($this->attr[$name])) {
-            $this->_[HDOM_INFO_SPACE][] = array(' ', '', '');
+            $this->_[HDOM_INFO_SPACE][] = [' ', '', ''];
             $this->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_DOUBLE;
         }
         $this->attr[$name] = $value;
@@ -893,7 +893,7 @@ class simple_html_dom {
     protected $default_br_text = "";
 
     // use isset instead of in_array, performance boost about 30%...
-    protected $self_closing_tags = array('img'=>1, 'br'=>1, 'input'=>1, 'meta'=>1, 'link'=>1, 'hr'=>1, 'base'=>1, 'embed'=>1, 'spacer'=>1);
+    protected $self_closing_tags = ['img'=>1, 'br'=>1, 'input'=>1, 'meta'=>1, 'link'=>1, 'hr'=>1, 'base'=>1, 'embed'=>1, 'spacer'=>1];
     protected $block_tags = ['root' => 1, 'body' => 1, 'form' => 1, 'div' => 1, 'span' => 1, 'table' => 1];
     // Known sourceforge issue #2977341
     // B tags that are not closed cause us to return everything to the end of the document.
@@ -919,7 +919,7 @@ class simple_html_dom {
         }
         // Forcing tags to be closed implies that we don't trust the html, but it can lead to parsing errors if we SHOULD trust the html.
         if (!$forceTagsClosed) {
-            $this->optional_closing_array=array();
+            $this->optional_closing_array = [];
         }
         $this->_target_charset = $target_charset;
     }
@@ -1030,8 +1030,8 @@ class simple_html_dom {
         $this->doc = $str;
         $this->pos = 0;
         $this->cursor = 1;
-        $this->noise = array();
-        $this->nodes = array();
+        $this->noise = [];
+        $this->nodes = [];
         $this->lowercase = $lowercase;
         $this->default_br_text = $defaultBRText;
         $this->root = new simple_html_dom_node($this);
@@ -1286,7 +1286,7 @@ class simple_html_dom {
             if ($this->doc[$this->pos-1]=='<') {
                 $node->nodetype = HDOM_TYPE_TEXT;
                 $node->tag = 'text';
-                $node->attr = array();
+                $node->attr = [];
                 $node->_[HDOM_INFO_END] = 0;
                 $node->_[HDOM_INFO_TEXT] = substr($this->doc, $begin_tag_pos, $this->pos-$begin_tag_pos-1);
                 $this->pos -= 2;
@@ -1310,7 +1310,7 @@ class simple_html_dom {
                     if ($this->char!='>') $this->char = $this->doc[--$this->pos]; // prev
                 }
                 $node->_[HDOM_INFO_SPACE][] = $space;
-                $space = array($this->copy_skip($this->token_blank), '', '');
+                $space = [$this->copy_skip($this->token_blank), '', ''];
             }
             else
                 break;

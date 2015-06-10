@@ -41,6 +41,7 @@ class Kml extends Printer {
      * @param $name
      * @param $version
      * @param $timestamp
+     * @return mixed|void
      */
     function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;

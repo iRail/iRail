@@ -68,7 +68,7 @@ class liveboard {
      * @return array
      */
     private static function parseData($xml,$time,$lang){
-	$nodes = array();
+	$nodes = [];
 	//var_dump($xml);
 
         $i = 0;
