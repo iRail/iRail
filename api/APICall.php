@@ -118,7 +118,7 @@ class APICall {
      public static function connectToDB(){
 	  try {
 	       include("../includes/dbConfig.php");
-	       mysql_pconnect($api_host, $api_user, $api_password);
+	       mysql_connect($api_host, $api_user, $api_password);
 	       mysql_select_db($api_database);
 	  }
 	  catch (Exception $e) {
