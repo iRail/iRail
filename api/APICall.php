@@ -51,7 +51,7 @@ class APICall {
 	  $printer->printError($e->getCode(),$e->getMessage());
 	  exit(0);
      }
-     
+
      public function executeCall(){
 	  try{
 	       $this->dataRoot->fetchData($this->request, $this->request->getSystem());
@@ -118,7 +118,7 @@ class APICall {
      public static function connectToDB(){
 	  try {
 	       include("../includes/dbConfig.php");
-	       mysql_pconnect($api_host, $api_user, $api_password);
+	       mysql_connect($api_host, $api_user, $api_password);
 	       mysql_select_db($api_database);
 	  }
 	  catch (Exception $e) {
@@ -126,4 +126,3 @@ class APICall {
 	  }
      }
 }
-?>
