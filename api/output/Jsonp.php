@@ -1,5 +1,5 @@
 <?php
-  /* Copyright (C) 2011 by iRail vzw/asbl */
+/* Copyright (C) 2011 by iRail vzw/asbl */
 include_once("Json.php");
 
 /**
@@ -12,20 +12,22 @@ class Jsonp extends Json
     /**
      * printheader()
      */
-    function printHeader() {
-	  header("Access-Control-Allow-Origin: *");
-	  header("Content-Type: application/javascript;charset=UTF-8");
-     }
+    function printHeader()
+    {
+        header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/javascript;charset=UTF-8");
+    }
 
     /**
      * printBody()
      */
-    function printBody() {
-	  $callback = $_GET['callback'];
-	  echo "$callback(";
-	  parent::printBody($this->documentRoot);
-	  echo ")";
-     }
+    function printBody()
+    {
+        $callback = $_GET['callback'];
+        echo "$callback(";
+        parent::printBody($this->documentRoot);
+        echo ")";
+    }
 
     /**
      * printError()
@@ -33,10 +35,13 @@ class Jsonp extends Json
      * @param $ec
      * @param $msg
      */
-    function printError($ec, $msg){
-	  $this->printHeader();
-	  header("HTTP/1.1 $ec $msg");
-	  echo $_GET['callback'] . "({\"error\":$ec, \"message\": \"$msg\"})";
-     }
+    function printError($ec, $msg)
+    {
+        $this->printHeader();
+        header("HTTP/1.1 $ec $msg");
+        echo $_GET['callback'] . "({\"error\":$ec, \"message\": \"$msg\"})";
+    }
 
-};
+}
+
+;

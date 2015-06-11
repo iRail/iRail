@@ -1,9 +1,28 @@
-<html><head><title>iRail API MySQL (request) stats</title>
-	<link href="api_stats.css" rel="stylesheet" type="text/css" />
-	<link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png" /></style>
-	<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
-</head><body><center>
-<?php
+<html>
+<head><title>iRail API MySQL (request) stats</title>
+    <link href="api_stats.css" rel="stylesheet" type="text/css"/>
+    <link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png"/>
+    </
+    style
+    >
+    <
+    link rel
+
+    =
+    "shortcut icon"
+    type
+
+    =
+    "image/x-icon"
+    href
+
+    =
+    "../favicon.ico"
+    /
+    >
+    <
+    /
+    head > < body > < center ><?php
 /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
 
     This file is part of iRail.
@@ -97,7 +116,15 @@ $count = 1 + $s;
 	mysql_close();
         
 include("../../includes/googleAnalytics.php");
-?>
-</table>
-</body>
-</html>
+?> <
+
+    /
+    table >
+    <
+
+    /
+    body >
+    <
+
+    /
+    html >
