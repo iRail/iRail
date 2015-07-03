@@ -1,72 +1,128 @@
 <?php
 
-  /**
-   * This is the data structure for a request. If we get more arguments, we will be able to add those here.
-   *
-   * @author pieterc
-   */
+/**
+ * This is the data structure for a request. If we get more arguments, we will be able to add those here.
+ *
+ * @author pieterc
+ */
 include_once("Request.php");
 
-class ConnectionsRequest extends Request {
-     protected $results;
-     protected $from;
-     protected $to;
-     protected $time;
-     protected $date;
-     protected $timeSel;
-     protected $fast;
-     protected $typeOfTransport;
-     function __construct(){
-	  parent::__construct();
-	  parent::setGetVar("from", "");
-	  parent::setGetVar("to", "");
-	  parent::setGetVar("results", 6);
-	  parent::setGetVar("date", date("dmy"));
-	  parent::setGetVar("time", date("Hi"));
-	  parent::setGetVar("timeSel","depart");
-	  parent::setGetVar("typeOfTransport", "train");
-          parent::setGetVar("fast","false");
-	  parent::processRequiredVars(array("from", "to"));
+class ConnectionsRequest extends Request
+{
+    protected $results;
+    protected $from;
+    protected $to;
+    protected $time;
+    protected $date;
+    protected $timeSel;
+    protected $fast;
+    protected $typeOfTransport;
+
+
+    /**
+     * Class constructor
+     *
+     * @throws Exception
+     */
+    function __construct()
+    {
+        parent::__construct();
+        parent::setGetVar("from", "");
+        parent::setGetVar("to", "");
+        parent::setGetVar("results", 6);
+        parent::setGetVar("date", date("dmy"));
+        parent::setGetVar("time", date("Hi"));
+        parent::setGetVar("timeSel", "depart");
+        parent::setGetVar("typeOfTransport", "train");
+        parent::setGetVar("fast", "false");
+        parent::processRequiredVars(array("from", "to"));
 
 //reform date and time to wanted structure for hafas and railtime
-	  preg_match("/(..)(..)(..)/si", $this->date, $m);
-	  $this->date = "20" . $m[3] . $m[2] . $m[1];
-	  preg_match("/(..)(..)/si", $this->time, $m);
-	  $this->time = $m[1] . ":" . $m[2];
-     }
+        preg_match("/(..)(..)(..)/si", $this->date, $m);
+        $this->date = "20" . $m[3] . $m[2] . $m[1];
+        preg_match("/(..)(..)/si", $this->time, $m);
+        $this->time = $m[1] . ":" . $m[2];
+    }
 
-     public function getFast(){
-         return $this->fast;
-     }
+    /**
+     * getFast()
+     *
+     * @return mixed
+     */
+    public function getFast()
+    {
+        return $this->fast;
+    }
 
-     public function getResults() {
-	  return $this->results;
-     }
+    /**
+     * getResults()
+     *
+     * @return mixed
+     */
+    public function getResults()
+    {
+        return $this->results;
+    }
 
-     public function getFrom() {
-	  return $this->from;
-     }
+    /**
+     * getFrom()
+     *
+     * @return mixed
+     */
+    public function getFrom()
+    {
+        return $this->from;
+    }
 
-     public function getTo() {
-	  return $this->to;
-     }
+    /**
+     * getTo()
+     *
+     * @return mixed
+     */
+    public function getTo()
+    {
+        return $this->to;
+    }
 
-     public function getTime() {
-	  return $this->time;
-     }
+    /**
+     * getTime()
+     *
+     * @return string
+     */
+    public function getTime()
+    {
+        return $this->time;
+    }
 
-     public function getDate() {
-	  return $this->date;
-     }
+    /**
+     * getdata()
+     *
+     * @return string
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
 
-     public function getTimeSel() {
-	  return $this->timeSel;
-     }
+    /**
+     * getTimeSel()
+     *
+     * @return mixed
+     */
+    public function getTimeSel()
+    {
+        return $this->timeSel;
+    }
 
-     public function getTypeOfTransport() {
-	  return $this->typeOfTransport;
-     }
+    /**
+     * getTypeOfTransport
+     *
+     * @return mixed
+     */
+    public function getTypeOfTransport()
+    {
+        return $this->typeOfTransport;
+    }
 
 
 }
-?>
