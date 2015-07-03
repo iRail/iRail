@@ -6,19 +6,19 @@ include("../../includes/dbConfig.php");
 
 $filter = "";
 if (isset($_GET['filter'])) {
-    $filter = mysql_escape_string($_GET['filter']);
+    $filter = mysqli_escape_string($_GET['filter']);
 }
 try {
-    mysql_pconnect($api_host, $api_user, $api_password);
-    mysql_select_db($api_database);
+    mysqli_pconnect($api_host, $api_user, $api_password);
+    mysqli_select_db($api_database);
     if ($filter != "") {
         $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %m %Y') day, count(id) visitors FROM $api_table WHERE $api_c3 LIKE '%$filter%' GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc LIMIT 1000";
     } else {
         $query = "SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') day, count(id) visitors FROM $api_table GROUP BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %b %Y') ORDER BY DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%Y') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%m') desc, DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d') desc LIMIT 1000";
     }
-    $result = mysql_query($query);
+    $result = mysqli_query($query);
     $rows;
-    while ($row = mysql_fetch_object($result)) {
+    while ($row = mysqli_fetch_object($result)) {
         $rows[$row->day] = $row->visitors;
     }
 } catch (Exception $e) {

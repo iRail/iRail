@@ -387,7 +387,7 @@ class simple_html_dom_node
         }
 
         // render end tag
-        if (isset($this->_[HDOM_INFO_END]) && $this->_[HDOM_INFO_END] != )
+        if (isset($this->_[HDOM_INFO_END]) && $this->_[HDOM_INFO_END] != 0)
             $ret .= '</' . $this->tag . '>';
         return $ret;
     }

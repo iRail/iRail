@@ -39,16 +39,16 @@ class stations
             $lang = "STD";
         }
         APICall::connectToDB();
-        mysql_query("SET NAMES utf8");
+        mysqli_query("SET NAMES utf8");
         $station;
         try {
-            $lang = mysql_real_escape_string(strtoupper($lang));
-            $locationX = mysql_real_escape_string($locationX);
-            $locationY = mysql_real_escape_string($locationY);
+            $lang = mysqli_real_escape_string(strtoupper($lang));
+            $locationX = mysqli_real_escape_string($locationX);
+            $locationY = mysqli_real_escape_string($locationY);
 //It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
             $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE ((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) = (SELECT MIN((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) FROM mivb)";
-            $result = mysql_query($query) or die("Could not get station from coordinates from DB");
-            $line = mysql_fetch_array($result, MYSQL_ASSOC);
+            $result = mysqli_query($query) or die("Could not get station from coordinates from DB");
+            $line = mysqli_fetch_array($result, MYSQL_ASSOC);
             $station = new Station();
             $station->id = $line["ID"];
             $station->locationX = $line["X"];
@@ -75,14 +75,14 @@ class stations
             $lang = "STD";
         }
         APICall::connectToDB();
-        mysql_query("SET NAMES utf8");
+        mysqli_query("SET NAMES utf8");
         $station;
         try {
-            $lang = mysql_real_escape_string(strtoupper($lang));
-            $id = mysql_real_escape_string($name);
+            $lang = mysqli_real_escape_string(strtoupper($lang));
+            $id = mysqli_real_escape_string($name);
             $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb WHERE `$lang` like '$name'";
-            $result = mysql_query($query) or die("Could not get station from coordinates from DB");
-            $line = mysql_fetch_array($result, MYSQL_ASSOC);
+            $result = mysqli_query($query) or die("Could not get station from coordinates from DB");
+            $line = mysqli_fetch_array($result, MYSQL_ASSOC);
             $station = new Station();
             $station->id = $line["ID"];
             $station->locationX = $line["X"];
@@ -114,14 +114,14 @@ class stations
             $lang = "STD";
         }
         APICall::connectToDB();
-        mysql_query("SET NAMES utf8");
+        mysqli_query("SET NAMES utf8");
         $station;
         try {
-            $lang = mysql_real_escape_string(strtoupper($lang));
-            $id = mysql_real_escape_string($id);
+            $lang = mysqli_real_escape_string(strtoupper($lang));
+            $id = mysqli_real_escape_string($id);
             $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb WHERE `ID` = '$id'";
-            $result = mysql_query($query) or die("Could not get station from coordinates from DB");
-            $line = mysql_fetch_array($result, MYSQL_ASSOC);
+            $result = mysqli_query($query) or die("Could not get station from coordinates from DB");
+            $line = mysqli_fetch_array($result, MYSQL_ASSOC);
             $station = new Station();
             $station->id = $line["ID"];
             $station->locationX = $line["X"];
@@ -150,14 +150,14 @@ class stations
             $lang = "STD";
         }
         APICall::connectToDB();
-        mysql_query("SET NAMES utf8");
+        mysqli_query("SET NAMES utf8");
         $station = [];
         try {
-            $lang = mysql_real_escape_string(strtoupper($lang));
+            $lang = mysqli_real_escape_string(strtoupper($lang));
             $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb ORDER BY `$lang`";
-            $result = mysql_query($query) or die("Could not get stationslist from DB");
+            $result = mysqli_query($query) or die("Could not get stationslist from DB");
             $i = 0;
-            while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+            while ($line = mysqli_fetch_array($result, MYSQL_ASSOC)) {
                 $station[$i] = new Station();
                 $station[$i]->id = $line["ID"];
                 $station[$i]->locationX = $line["X"];
