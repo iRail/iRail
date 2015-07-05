@@ -119,20 +119,50 @@ try {
 <?
 echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
 $count = 0;
-foreach ($rows as $day__ => $value) {
-    $date__ = strtotime($day__);
-    //echo date("d m y" ,$date__) . " " . $day__. "<br/>";
-    if ($count == 0) {
-        echo '<tr><td align="right"><font color="red">' . $day__ . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
-    } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
-        echo '<tr><td align="right"><font color="gray">' . $day__ . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
-    } else {
-        echo '<tr><td align="right">' . $day__ . '</td><td>' . $value . '</td></tr>';
-    }
-    $count++;
-}
-echo '</table>';
 ?>
+
+<?php foreach($rows as $day__ => $value): ?>
+  <?php $data__ = strtotime($day__); //echo date("d m y" ,$date__) . " " . $day__. "<br/>"; ?>
+    <?php if($count == 0): ?>
+      <tr>
+        <td align="right">
+          <font color="red">
+            <?php echo $day__; ?>
+          </font>
+        </td>
+        <td>
+          <font color="red">
+            <?php echo $value; ?>
+          </font>
+        </td>
+      </tr>
+    <?php else if(date("w", $date__) == 6 || date("w", $date__) == 0) ?>
+      <tr>
+        <td align="right">
+          <font color="gray">
+            <?php echo $day__; ?>
+          </font>
+        </td>
+        <td>
+          <font color="gray">
+            <?php echo $value; ?>
+          </font>
+        </td>
+      </tr>';
+    <?php else: ?>
+      <tr>
+        <td align="right">
+          <?php echo $day__; ?>
+        </td>
+        <td>
+          <?php echo $value; ?>
+        </td>
+      </tr>
+    <?php endif; ?>
+    <?php $count++; ?>
+  <?php endforeach; ?>
+
+<?php echo '</table>'; ?>
 
 <?php
 include("../../includes/googleAnalytics.php");
