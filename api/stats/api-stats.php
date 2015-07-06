@@ -1,103 +1,130 @@
-<html><head><title>iRail API MySQL (request) stats</title>
-	<link href="api_stats.css" rel="stylesheet" type="text/css" />
-	<link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png" /></style>
-	<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
-</head><body><center>
-<?php
-/*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
+<html>
+<head><title>iRail API MySQL (request) stats</title>
+    <link href="api_stats.css" rel="stylesheet" type="text/css"/>
+    <link rel="apple-touch-icon" href="http://irail.be/apple-touch-icon.png"/>
+    </
+    style
+    >
+    <
+    link rel
 
-    This file is part of iRail.
+    =
+    "shortcut icon"
+    type
 
-    iRail is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    =
+    "image/x-icon"
+    href
 
-    iRail is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    =
+    "../favicon.ico"
+    /
+    >
+    <
+    /
+    head > < body > < center ><?php
+                              /*  Copyright 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
 
-    You should have received a copy of the GNU General Public License
-    along with iRail.  If not, see <http://www.gnu.org/licenses/>.
+                              This file is part of iRail.
 
-    http://project.irail.be - http://irail.be
+                              iRail is free software: you can redistribute it and/or modify
+                              it under the terms of the GNU General Public License as published by
+                              the Free Software Foundation, either version 3 of the License, or
+                              (at your option) any later version.
 
-    Source available at http://github.com/Tuinslak/iRail
-*/
+                              iRail is distributed in the hope that it will be useful,
+                              but WITHOUT ANY WARRANTY; without even the implied warranty of
+                              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+                              GNU General Public License for more details.
 
-// "Public" API stats page
-// to prevent giving MySQL access to *
+                              You should have received a copy of the GNU General Public License
+                              along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
-// vars
-$limit = 250;
+                              http://project.irail.be - http://irail.be
 
-// include vars
-include("../../includes/dbConfig.php");
+                              Source available at http://github.com/Tuinslak/iRail
+                              */
 
-$s = $_REQUEST["s"];
+                              // "Public" API stats page
+                              // to prevent giving MySQL access to *
 
-if (empty($s)) {
-	$s = 0;
-}
+                              // vars
+                              $limit = 250;
 
-$count = 1 + $s;
+                              // include vars
+                              require "../../includes/dbConfig.php";
 
-	try {
-		mysql_pconnect($api_host, $api_user, $api_password);
-		mysql_select_db($api_database);
-		$query = "SELECT COUNT($api_c1) FROM $api_table";
-		$result = mysql_query($query);
-		$numrows = mysql_result($result, 0);
+                              $s = $_REQUEST["s"];
 
-		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
-		$result = mysql_query($query);
-	}
-	catch (Exception $e) {
-		echo "Error connecting to the database.";
-	}
+                              if (empty($s)) {
+                                  $s = 0;
+                              }
 
-	$count++;
+                                $count = 1 + $s;
 
-	if ($s>=1) { // bypass PREV link if s is 0
-		$prevs=($s-$limit);
-		print "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
-	}
+                                try {
+                                    mysql_pconnect($api_host, $api_user, $api_password);
+                                    mysql_select_db($api_database);
+                                    $query = "SELECT COUNT($api_c1) FROM $api_table";
+                                    $result = mysql_query($query);
+                                    $numrows = mysql_result($result, 0);
 
-	// calculate number of pages needing links
-	$pages=intval($numrows/$limit);
+                                    $query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
+                                    $result = mysql_query($query);
+                                }
+                                catch (Exception $e) {
+                                    echo "Error connecting to the database.";
+                                }
 
-	if ($numrows%$limit) {
-		// has a page
-		$pages++;
-	}
+                                $count++;
 
-	// check to see if last page
-	if (!((($s+$limit)/$limit)==$pages) && $pages!=1) {
-		// not last page so give NEXT link
-		$news=$s+$limit;
-		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
-	}
+                                if ($s>=1) { // bypass PREV link if s is 0
+                                    $prevs=($s-$limit);
+                                    print "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
+                                }
 
-	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th><th>srvr</th></tr>";
+                                // calculate number of pages needing links
+                                $pages=intval($numrows/$limit);
 
-	while($row = mysql_fetch_object($result)) {
-		echo "<tr>";
-		echo "<td>" . $row->$api_c1 . "</td>";
-		echo "<td>" . $row->$api_c2 . "</td>";
-		echo "<td>" . $row->$api_c3 . "</td>";
-		echo "<td>" . $row->$api_c4 . "</td>";
-		echo "<td>" . $row->$api_c5 . "</td>";
-		echo "<td>" . $row->$api_c6 . "</td>";
-		echo "<td><center>" . $row->$api_c7 . "</center></td>";
-		echo "<td><center>" . $row->$api_c8 . "</center></td>";
-		echo "</tr>";
-	}
+                                if ($numrows%$limit) {
+                                    // has a page
+                                    $pages++;
+                                }
+
+                                // check to see if last page
+                                if (!((($s+$limit)/$limit)==$pages) && $pages!=1) {
+                                    // not last page so give NEXT link
+                                    $news=$s+$limit;
+                                    echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
+                                }
+
+                                echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th><th>srvr</th></tr>";
+
+                                while($row = mysql_fetch_object($result)) {
+                                    echo "<tr>";
+                                    echo "<td>" . $row->$api_c1 . "</td>";
+                                    echo "<td>" . $row->$api_c2 . "</td>";
+                                    echo "<td>" . $row->$api_c3 . "</td>";
+                                    echo "<td>" . $row->$api_c4 . "</td>";
+                                    echo "<td>" . $row->$api_c5 . "</td>";
+                                    echo "<td>" . $row->$api_c6 . "</td>";
+                                    echo "<td><center>" . $row->$api_c7 . "</center></td>";
+                                    echo "<td><center>" . $row->$api_c8 . "</center></td>";
+                                    echo "</tr>";
+                                }
         
-	mysql_close();
+                                mysql_close();
         
-include("../../includes/googleAnalytics.php");
-?>
-</table>
-</body>
-</html>
+                                require "../../includes/googleAnalytics.php";
+?> <
+
+    /
+    table >
+    <
+
+    /
+    body >
+    <
+
+    /
+    html >

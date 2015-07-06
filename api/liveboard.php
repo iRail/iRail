@@ -25,9 +25,8 @@
 /**
  * This returns information about 1 specific station
  */
-include_once("APICall.php");
-include_once("requests/LiveboardRequest.php");
+require_once "APICall.php";
+require_once "requests/LiveboardRequest.php";
 date_default_timezone_set("Europe/Brussels");
 $call = new APICall("liveboard");
 $call->executeCall();
-?>

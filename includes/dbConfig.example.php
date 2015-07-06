@@ -26,25 +26,22 @@
 
 // API DB config
 
-$api_host = "localhost";		// db host
-$api_user = "irail";			// db user
-$api_password = "passwd";		// passwd
-$api_database = "irail";		// db name
-$api_table = "apilog";			// table name
+$api_host = "localhost";        // db host
+$api_user = "irail";            // db user
+$api_password = "passwd";        // passwd
+$api_database = "irail";        // db name
+$api_table = "apilog";            // table name
 
 // API server name
-$api_server_name = "0";			// set a name, name < 5 chars in iRail DB
+$api_server_name = "0";            // set a name, name < 5 chars in iRail DB
 
 // database columns
 
-$api_c1 = "id";					// unique ID
-$api_c2 = "time";				// request unix time
-$api_c3 = "useragent";			// UA, if any
-$api_c4 = "fromstation";		// from station
-$api_c5 = "tostation";			// to station
-$api_c6 = "errors";				// catch error output
-$api_c7 = "ip";					// request IP address
-$api_c8 = "server";				// server name of iRail server, usually 0[.irail.be], 1[.irail.be], dev, etc
-
-
-?>
+$api_c1 = "id";                    // unique ID
+$api_c2 = "time";                // request unix time
+$api_c3 = "useragent";            // UA, if any
+$api_c4 = "fromstation";        // from station
+$api_c5 = "tostation";            // to station
+$api_c6 = "errors";                // catch error output
+$api_c7 = "ip";                    // request IP address
+$api_c8 = "server";                // server name of iRail server, usually 0[.irail.be], 1[.irail.be], dev, etc

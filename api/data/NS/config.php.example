@@ -4,5 +4,3 @@ $api_url = "http://webservices.ns.nl/";
 
 $api_user = "...";
 $api_password = "...";
-
-?>
