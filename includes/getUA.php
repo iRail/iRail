@@ -20,7 +20,7 @@
 
 	source available at http://github.com/Tuinslak/iRail
 */
-include 'getVersion.php';
+require 'getVersion.php';
 // add trailing "-" to prevent RH/Apache/NMBS error: HTTP header: invalid date
 $irailAgent = "iRail.be by Project iRail (http://yeri.be/dx); Git version: $irailVersion -";
 

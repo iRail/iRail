@@ -15,8 +15,8 @@
     </head>
     <body>
         <?php
-        include '../includes/getVersion.php';
-        include '../includes/getChangelog.php';
+        require '../includes/getVersion.php';
+        require '../includes/getChangelog.php';
 
         $irailChangelog = str_replace("<", "&#060;", $irailChangelog);
         $irailChangelog = str_replace(">", "&#062;", $irailChangelog);
@@ -26,7 +26,7 @@
         ?>
 
         <?php
-        include '../includes/googleAnalytics.php';
+        require '../includes/googleAnalytics.php';
         ?>
 
     </body>

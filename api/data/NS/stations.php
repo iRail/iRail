@@ -1,12 +1,14 @@
 <?php
 
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * Author: Pieter Colpaert <pieter aŧ iRail.be>
  *
  * This will fetch all stationdata for the NS. It implements a couple of standard functions implemented by all stations classes:
  *   * fillDataRoot will fill the entire dataroot with stations
  *   * getStationFromName will return the right station object for a Name
+ *
  * @package data/NS
  */
 class stations
@@ -29,9 +31,9 @@ class stations
      *
      * The closest to a certain location
      *
-     * @param $locationX
-     * @param $locationY
-     * @param $lang
+     * @param  $locationX
+     * @param  $locationY
+     * @param  $lang
      * @return
      */
     public static function getStationFromLocation($locationX, $locationY, $lang)
@@ -54,10 +56,10 @@ class stations
     /**
      * distance()
      *
-     * @param $x1
-     * @param $x2
-     * @param $y1
-     * @param $y2
+     * @param  $x1
+     * @param  $x2
+     * @param  $y1
+     * @param  $y2
      * @return int
      */
     private static function distance($x1, $x2, $y1, $y2)
@@ -73,8 +75,8 @@ class stations
     /**
      * getStationFromID()
      *
-     * @param $id
-     * @param $lang
+     * @param  $id
+     * @param  $lang
      * @return mixed
      * @throws Exception
      */
@@ -94,8 +96,8 @@ class stations
     /**
      * getStationFromName()
      *
-     * @param $name
-     * @param $lang
+     * @param  $name
+     * @param  $lang
      * @return null
      */
     public static function getStationFromName($name, $lang)
@@ -115,12 +117,12 @@ class stations
     /**
      * fetchAllStationsFromDB()
      *
-     * @param $lang
+     * @param  $lang
      * @return array
      */
     private static function fetchAllStationsFromDB($lang)
     {
-//<station locationX="4.323973" locationY="52.081261" id="NL.NS.gvc" standardname="'s-Gravenhage">'s-Gravenhage</station>
+        //<station locationX="4.323973" locationY="52.081261" id="NL.NS.gvc" standardname="'s-Gravenhage">'s-Gravenhage</station>
         if (sizeof(stations::$stations) == 0) {
             $allstations = file_get_contents("data/NS/stations.xml", true);
             preg_match_all("/<station locationX=\"(.*?)\" locationY=\"(.*?)\" id=\"(.*?)\" standardname=\"(.*?)\">(.*?)<\/station>/smi", $allstations, $matches);

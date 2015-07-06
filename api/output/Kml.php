@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Printer.php");
+require_once "Printer.php";
 
 /**
  * Prints the Kml style output. This works only for stations!!!
@@ -41,9 +41,9 @@ class Kml extends Printer
     /**
      * startRootElement
      *
-     * @param $name
-     * @param $version
-     * @param $timestamp
+     * @param  $name
+     * @param  $version
+     * @param  $timestamp
      * @return mixed|void
      */
     function startRootElement($name, $version, $timestamp)
@@ -55,8 +55,8 @@ class Kml extends Printer
             $this->printError(400, "KML only works for stations at this moment");
         }
     }
-//make a stack of array information, always work on the last one
-//for nested array support
+    //make a stack of array information, always work on the last one
+    //for nested array support
     private $stack = [];
     private $arrayindices = [];
     private $currentarrayindex = -1;
@@ -67,7 +67,7 @@ class Kml extends Printer
      *
      * @param $name
      * @param $number
-     * @param bool $root
+     * @param bool   $root
      */
     function startArray($name, $number, $root = false)
     {

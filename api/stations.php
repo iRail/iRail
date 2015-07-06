@@ -25,8 +25,8 @@
 /**
  * This is the API request handler
  */
-include_once("requests/StationsRequest.php");
-include_once("APICall.php");
+require_once "requests/StationsRequest.php";
+require_once "APICall.php";
 date_default_timezone_set("Europe/Brussels");
 $call = new APICall("stations");
 $call->executeCall();

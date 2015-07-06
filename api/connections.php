@@ -25,13 +25,15 @@
 /**
  * This is the API request handler
  */
-include_once("APICall.php");
+require_once "APICall.php";
 date_default_timezone_set("Europe/Brussels");
 
-class ConnectionsCall extends APICall {
-    protected function logRequest() {
+class ConnectionsCall extends APICall
+{
+    protected function logRequest() 
+    {
         $r = $this->request;
-	parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), "none (connections)", $_SERVER['REMOTE_ADDR']);
+        parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), "none (connections)", $_SERVER['REMOTE_ADDR']);
     }
 }
 $call = new ConnectionsCall("connections");

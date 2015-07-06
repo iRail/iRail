@@ -1,11 +1,12 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * LiveboardRequest Class
  *
  * @author pieterc
  */
-include_once("Request.php");
+require_once "Request.php";
 
 class LiveboardRequest extends Request
 {

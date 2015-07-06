@@ -1,6 +1,7 @@
 <?php
 
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * This will fetch all stationdata for the NMBS. It implements a couple of standard functions implemented by all stations classes:
  *
@@ -15,8 +16,8 @@ class stations
     /**
      * fillDataRoot()
      *
-     * @param $dataroot
-     * @param $request
+     * @param  $dataroot
+     * @param  $request
      * @throws Exception
      */
     public static function fillDataRoot($dataroot, $request)
@@ -27,9 +28,9 @@ class stations
     /**
      * getStationFromLocation()
      *
-     * @param $locationX
-     * @param $locationY
-     * @param $lang
+     * @param  $locationX
+     * @param  $locationY
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -68,8 +69,8 @@ class stations
     /**
      * getStationFromID()
      *
-     * @param $id
-     * @param $lang
+     * @param  $id
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -118,8 +119,8 @@ class stations
      *
      * Gets an appropriate station from the new iRail API
      *
-     * @param $name
-     * @param $lang
+     * @param  $name
+     * @param  $lang
      * @return Station|string
      * @throws Exception
      */
@@ -179,8 +180,8 @@ class stations
     /**
      * getStationFromRTName()
      *
-     * @param $name
-     * @param $lang
+     * @param  $name
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -219,8 +220,8 @@ class stations
     /**
      * getRTID()
      *
-     * @param $station
-     * @param $lang
+     * @param  $station
+     * @param  $lang
      * @return stdClass
      * @throws Exception
      */
@@ -246,7 +247,7 @@ class stations
     /**
      * fetchAllStationsFromDB()
      *
-     * @param $lang
+     * @param  $lang
      * @return array
      * @throws Exception
      */

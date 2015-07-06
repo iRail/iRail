@@ -1,6 +1,7 @@
 <?php
 
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  * This is a class with static tools for you to use on the NMBS scraper. It contains stuff that is needed by all other classes
  *
  * @package data/NMBS
@@ -12,7 +13,6 @@ class tools
      * @param <type> $time -> in 00d15:24:00
      * @param <type> $date -> in 20100915
      * @return seconds since the Unix epoch
-     *
      */
     public static function transformTime($time, $date)
     {
@@ -30,7 +30,7 @@ class tools
     /**
      * This function transforms the brail formatted timestring and reformats it to seconds
      *
-     * @param int $time
+     * @param  int $time
      * @return int Duration in seconds
      */
     public static function transformDuration($time)
@@ -46,7 +46,7 @@ class tools
     /**
      * Adds a quarter and responds with a time
      *
-     * @param $time
+     * @param  $time
      * @return string
      */
     public static function addQuarter($time)

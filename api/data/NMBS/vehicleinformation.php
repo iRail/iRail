@@ -1,5 +1,6 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * This will fetch all vehicledata for the NMBS.
  *
@@ -7,9 +8,9 @@
  *
  * @package data/NMBS
  */
-include_once("data/NMBS/tools.php");
-include_once("data/NMBS/stations.php");
-include_once("../includes/simple_html_dom.php");
+require_once "data/NMBS/tools.php";
+require_once "data/NMBS/stations.php";
+require_once "../includes/simple_html_dom.php";
 
 class vehicleinformation
 {
@@ -17,8 +18,8 @@ class vehicleinformation
     /**
      * fillDataRoot()
      *
-     * @param $dataroot
-     * @param $request
+     * @param  $dataroot
+     * @param  $request
      * @throws Exception
      */
     public static function fillDataRoot($dataroot, $request)
@@ -34,13 +35,13 @@ class vehicleinformation
     /**
      * getServerData()
      *
-     * @param $id
-     * @param $lang
+     * @param  $id
+     * @param  $lang
      * @return mixed
      */
     private static function getServerData($id, $lang)
     {
-        include_once("../includes/getUA.php");
+        include_once "../includes/getUA.php";
         $request_options = [
             "referer" => "http://api.irail.be/",
             "timeout" => "30",
@@ -71,9 +72,9 @@ class vehicleinformation
     /**
      * getData()
      *
-     * @param $serverData
-     * @param $lang
-     * @param $fast
+     * @param  $serverData
+     * @param  $lang
+     * @param  $fast
      * @return array
      * @throws Exception
      */
@@ -87,8 +88,8 @@ class vehicleinformation
             $j = 0;
             for ($i = 1; $i < count($nodes); $i++) {
                 $node = $nodes[$i];
-                if (!count($node->attr)) continue; // row with no class-attribute contain no data
-
+                if (!count($node->attr)) { continue; // row with no class-attribute contain no data
+                }
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : "0";
                 $delayseconds = preg_replace("/[^0-9]/", '', $delay) * 60;
@@ -100,7 +101,8 @@ class vehicleinformation
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
                     $stationname = reset($as[0]->nodes[0]->_);
-                } else $stationname = reset($node->children[3]->nodes[0]->_);
+                } else { $stationname = reset($node->children[3]->nodes[0]->_); 
+                }
 
                 $stops[$j] = new Stop();
                 $station = new Station();
@@ -125,27 +127,27 @@ class vehicleinformation
     /**
      * getVihicleData()
      *
-     * @param $serverData
-     * @param $id
-     * @param $lang
+     * @param  $serverData
+     * @param  $id
+     * @param  $lang
      * @return null|Vehicle
      * @throws Exception
      */
     private static function getVehicleData($serverData, $id, $lang)
     {
-// determine the location of the vehicle
+        // determine the location of the vehicle
         $html = str_get_html($serverData);
 
         $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        if (!is_object($test))
+        if (!is_object($test)) {
             throw new Exception("Vehicle not found", 1); // catch errors
-
+        }
         $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
 
         for ($i = 1; $i < count($nodes); $i++) {
             $node = $nodes[$i];
-            if (!count($node->attr)) continue; // row with no class-attribute contain no data
-            $as = $node->children[3]->find('a');
+            if (!count($node->attr)) { continue; // row with no class-attribute contain no data
+            }            $as = $node->children[3]->find('a');
             $station = reset($as[0]->nodes[0]->_);
 
             $locationX = 0;

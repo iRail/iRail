@@ -1,6 +1,7 @@
 <?php
 
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * This will fetch all stationdata for the MIVB. It implements a couple of standard functions implemented by all stations classes:
  *
@@ -15,8 +16,8 @@ class stations
     /**
      * fillDataRoot()
      *
-     * @param $dataroot
-     * @param $request
+     * @param  $dataroot
+     * @param  $request
      * @throws Exception
      */
     public static function fillDataRoot($dataroot, $request)
@@ -27,9 +28,9 @@ class stations
     /**
      * getStationFromLocation()
      *
-     * @param $locationX
-     * @param $locationY
-     * @param $lang
+     * @param  $locationX
+     * @param  $locationY
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -45,7 +46,7 @@ class stations
             $lang = mysqli_real_escape_string(strtoupper($lang));
             $locationX = mysqli_real_escape_string($locationX);
             $locationY = mysqli_real_escape_string($locationY);
-//It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
+            //It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
             $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE ((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) = (SELECT MIN((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) FROM mivb)";
             $result = mysqli_query($query) or die("Could not get station from coordinates from DB");
             $line = mysqli_fetch_array($result, MYSQL_ASSOC);
@@ -64,8 +65,8 @@ class stations
     /**
      * getStationFromName()
      *
-     * @param $name
-     * @param $lang
+     * @param  $name
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -103,8 +104,8 @@ class stations
     /**
      * getStationFromID
      *
-     * @param $id
-     * @param $lang
+     * @param  $id
+     * @param  $lang
      * @return Station
      * @throws Exception
      */
@@ -140,7 +141,7 @@ class stations
     /**
      * fetchAllStationsFromDB()
      *
-     * @param $lang
+     * @param  $lang
      * @return array
      * @throws Exception
      */
@@ -176,9 +177,9 @@ class stations
     /**
      * getLinesFromCoordinates()
      *
-     * @param $x
-     * @param $y
-     * @param $lang
+     * @param  $x
+     * @param  $y
+     * @param  $lang
      * @return array
      * @throws Exception
      */

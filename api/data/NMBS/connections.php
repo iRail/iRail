@@ -1,5 +1,6 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * This will return information about 1 specific route for the NMBS.
  *
@@ -7,8 +8,8 @@
  *
  * @package data/NMBS
  */
-include_once("data/NMBS/tools.php");
-include_once("data/NMBS/stations.php");
+require_once "data/NMBS/tools.php";
+require_once "data/NMBS/stations.php";
 
 class connections
 {
@@ -17,10 +18,10 @@ class connections
     /**
      * createDepartureURI
      *
-     * @param $stationURI
-     * @param $routeLabel
-     * @param $headsign
-     * @param $datetime
+     * @param  $stationURI
+     * @param  $routeLabel
+     * @param  $headsign
+     * @param  $datetime
      * @return string
      */
     public static function createDepartureURI($stationURI, $routeLabel, $headsign, $datetime)
@@ -38,7 +39,7 @@ class connections
      */
     public static function fillDataRoot($dataroot, $request)
     {
-//detect whether from was an id and change from accordingly
+        //detect whether from was an id and change from accordingly
         $from = $request->getFrom();
         if (sizeof(explode(".", $request->getFrom())) > 1) {
             $from = stations::getStationFromID($request->getFrom(), $request->getLang());
@@ -55,15 +56,15 @@ class connections
     /**
      * scrapeConnections()
      *
-     * @param $from
-     * @param $to
-     * @param $time
-     * @param $date
-     * @param $results
-     * @param $lang
-     * @param $fast
-     * @param string $timeSel
-     * @param string $typeOfTransport
+     * @param  $from
+     * @param  $to
+     * @param  $time
+     * @param  $date
+     * @param  $results
+     * @param  $lang
+     * @param  $fast
+     * @param  string  $timeSel
+     * @param  string  $typeOfTransport
      * @return array
      * @throws Exception
      */
@@ -87,21 +88,21 @@ class connections
     /**
      * requestHafasXml()
      *
-     * @param $idfrom
-     * @param $idto
-     * @param $lang
-     * @param $time
-     * @param $date
-     * @param $results
-     * @param $timeSel
-     * @param $typeOfTransport
+     * @param  $idfrom
+     * @param  $idto
+     * @param  $lang
+     * @param  $time
+     * @param  $date
+     * @param  $results
+     * @param  $timeSel
+     * @param  $typeOfTransport
      * @return mixed
      */
     private static function requestHafasXml($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
     {
         include "../includes/getUA.php";
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
-//  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
+        //  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
         $request_options = [
             "referer" => "http://api.irail.be/",
             "timeout" => "30",
@@ -159,9 +160,9 @@ class connections
     /**
      * parseHafasXml()
      *
-     * @param $serverData
-     * @param $lang
-     * @param $fast
+     * @param  $serverData
+     * @param  $lang
+     * @param  $fast
      * @return array
      * @throws Exception
      */
@@ -171,9 +172,9 @@ class connections
         $connection = [];
         $i = 0;
         //DEBUG:
-//echo $serverData ;
+        //echo $serverData ;
         if (isset($xml->ConRes->ConnectionList->Connection)) {
-//get stations from & to once for all connections
+            //get stations from & to once for all connections
             $fromstation = connections::getStationFromHafasLocation($xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['x'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['y'], $lang);
             $tostation = connections::getStationFromHafasLocation($xml->ConRes->ConnectionList->Connection[0]->Overview->Arrival->BasicStop->Station['x'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Arrival->BasicStop->Station['y'], $lang);
             foreach ($xml->ConRes->ConnectionList->Connection as $conn) {
@@ -190,7 +191,7 @@ class connections
                 $connection[$i]->arrival->platform = new Platform();
                 $connection[$i]->arrival->platform->name = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
                 $connection[$i]->arrival->station = $tostation;
-//Delay and platform changes //TODO: get Delay from railtime instead - much better information
+                //Delay and platform changes //TODO: get Delay from railtime instead - much better information
                 $delay0 = 0;
                 $delay1 = 0;
                 $platformNormal0 = true;
@@ -201,7 +202,7 @@ class connections
                     if ($delay0 < 0) {
                         $delay0 = 0;
                     }
-//echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
+                    //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
                     $delay1 = tools::transformTime($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Time, $conn->Overview->Date) - $connection[$i]->arrival->time;
                     if ($delay1 < 0) {
                         $delay1 = 0;
@@ -226,7 +227,7 @@ class connections
                 $j = 0;
                 $k = 0;
                 $connectionindex = 0;
-//yay for spaghetti code.
+                //yay for spaghetti code.
                 if (isset($conn->ConSectionList->ConSection)) {
                     foreach ($conn->ConSectionList->ConSection as $connsection) {
 
@@ -245,7 +246,7 @@ class connections
                             }
 
                             if ($conn->Overview->Transfers > 0 && strcmp($connsection->Arrival->BasicStop->Station['name'], $conn->Overview->Arrival->BasicStop->Station['name']) != 0) {
-//current index for the train: j-1
+                                //current index for the train: j-1
                                 $departDelay = 0; //Todo: NYImplemented
                                 $connarray = $conn->ConSectionList->ConSection;
                                 $departTime = tools::transformTime($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
@@ -318,9 +319,9 @@ class connections
     /**
      * getStationFromHafasLocation()
      *
-     * @param $locationX
-     * @param $locationY
-     * @param $lang
+     * @param  $locationX
+     * @param  $locationY
+     * @param  $lang
      * @return Station
      */
     private static function getStationFromHafasLocation($locationX, $locationY, $lang)

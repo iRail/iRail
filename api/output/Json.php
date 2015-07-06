@@ -3,10 +3,9 @@
 /**
  * Prints the Json style output
  *
- *
  * @package output
  */
-include_once("Printer.php");
+require_once "Printer.php";
 
 class Json extends Printer
 {
@@ -31,8 +30,8 @@ class Json extends Printer
         echo "{\"version\":\"$version\",\"timestamp\":\"$timestamp\",";
     }
 
-//make a stack of array information, always work on the last one
-//for nested array support
+    //make a stack of array information, always work on the last one
+    //for nested array support
     private $stack = array();
     private $arrayindices = array();
     private $currentarrayindex = -1;
@@ -63,7 +62,7 @@ class Json extends Printer
     {
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name) {
             echo "{";
-//show id (in array) except if array of stations (compatibility issues)
+            //show id (in array) except if array of stations (compatibility issues)
             if ($name != "station") {
                 echo "\"id\":\"" . $this->arrayindices[$this->currentarrayindex] . "\",";
             }

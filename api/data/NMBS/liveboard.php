@@ -1,12 +1,13 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station
  *
  * @package data/NMBS
  */
-include_once("data/NMBS/tools.php");
-include_once("data/NMBS/stations.php");
+require_once "data/NMBS/tools.php";
+require_once "data/NMBS/stations.php";
 
 class liveboard
 {
@@ -14,8 +15,8 @@ class liveboard
     /**
      * fillDataRoot()
      *
-     * @param $dataroot
-     * @param $request
+     * @param  $dataroot
+     * @param  $request
      * @throws Exception
      */
     public static function fillDataRoot($dataroot, $request)
@@ -40,10 +41,10 @@ class liveboard
     /**
      * fetchData()
      *
-     * @param $station
-     * @param $time
-     * @param $lang
-     * @param $timeSel
+     * @param  $station
+     * @param  $time
+     * @param  $lang
+     * @param  $timeSel
      * @return string
      */
     private static function fetchData($station, $time, $lang, $timeSel)
@@ -77,10 +78,10 @@ class liveboard
     /**
      * parseData()
      *
-     * @param $xml
-     * @param $time
-     * @param $lang
-     * @param bool $fast
+     * @param  $xml
+     * @param  $time
+     * @param  $lang
+     * @param  bool $fast
      * @return array
      */
     private static function parseData($xml, $time, $lang, $fast = false)
@@ -95,16 +96,17 @@ class liveboard
         $data = new SimpleXMLElement($xml);
         $hour = substr($time, 0, 2);
         $data = $data->StationTable;
-//<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
-//platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
-//dir="Eeklo [B]" is_reachable="0" />
+        //<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
+        //platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
+        //dir="Eeklo [B]" is_reachable="0" />
 
         $nodes = [];
         $i = 0;
 
         $hour = substr($time, 0, 2);
         $hour_ = substr((string)$data->Journey[0]["fpTime"], 0, 2);
-        if ($hour_ != "23" && $hour == "23") $hour_ = 24;
+        if ($hour_ != "23" && $hour == "23") { $hour_ = 24; 
+        }
 
         $minutes = substr($time, 3, 2);
         $minutes_ = substr((string)$data->Journey[0]["fpTime"], 3, 2);
@@ -165,7 +167,8 @@ class liveboard
             $nodes[$i]->platform->normal = $platformNormal;
             $nodes[$i]->left = $left;
             $hour_ = substr((string)$data->Journey[$i]["fpTime"], 0, 2);
-            if ($hour_ != "23" && $hour == "23") $hour_ = 24;
+            if ($hour_ != "23" && $hour == "23") { $hour_ = 24; 
+            }
             $minutes_ = substr((string)$data->Journey[$i]["fpTime"], 3, 2);
             $i++;
         }

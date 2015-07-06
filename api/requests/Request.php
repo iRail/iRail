@@ -19,7 +19,7 @@ class Request
     /**
      * processRequireVars
      *
-     * @param $array
+     * @param  $array
      * @throws Exception
      */
     protected function processRequiredVars($array)

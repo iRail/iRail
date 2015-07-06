@@ -56,9 +56,9 @@ abstract class Printer
     /**
      * It will detect what kind of element the element is and will print it accordingly. If it contains more elements it will print more recursively
      *
-     * @param $key
-     * @param $val
-     * @param bool $root
+     * @param  $key
+     * @param  $val
+     * @param  bool $root
      * @throws Exception
      */
     private function printElement($key, $val, $root = false)
@@ -114,9 +114,9 @@ abstract class Printer
     /**
      * startRootElement
      *
-     * @param $name
-     * @param $version
-     * @param $timestamp
+     * @param  $name
+     * @param  $version
+     * @param  $timestamp
      * @return mixed
      */
     abstract function startRootElement($name, $version, $timestamp);

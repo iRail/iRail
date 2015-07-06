@@ -2,7 +2,7 @@
 // "Public" API stats page
 // Gives report about all days report
 // include vars
-include("../../includes/dbConfig.php");
+require "../../includes/dbConfig.php";
 
 $filter = "";
 if (isset($_GET['filter'])) {
@@ -122,8 +122,8 @@ $count = 0;
 ?>
 
 <?php foreach($rows as $day__ => $value): ?>
-  <?php $data__ = strtotime($day__); //echo date("d m y" ,$date__) . " " . $day__. "<br/>"; ?>
-    <?php if($count == 0): ?>
+    <?php $data__ = strtotime($day__); //echo date("d m y" ,$date__) . " " . $day__. "<br/>"; ?>
+    <?php if($count == 0) : ?>
       <tr>
         <td align="right">
           <font color="red">
@@ -136,7 +136,8 @@ $count = 0;
           </font>
         </td>
       </tr>
-    <?php else if(date("w", $date__) == 6 || date("w", $date__) == 0) ?>
+    <?php else if(date("w", $date__) == 6 || date("w", $date__) == 0) {; 
+} ?>
       <tr>
         <td align="right">
           <font color="gray">
@@ -152,20 +153,22 @@ $count = 0;
     <?php else: ?>
       <tr>
         <td align="right">
-          <?php echo $day__; ?>
+            <?php echo $day__; ?>
         </td>
         <td>
-          <?php echo $value; ?>
+            <?php echo $value; ?>
         </td>
       </tr>
-    <?php endif; ?>
+    <?php 
+endif; ?>
     <?php $count++; ?>
-  <?php endforeach; ?>
+    <?php 
+endforeach; ?>
 
 <?php echo '</table>'; ?>
 
 <?php
-include("../../includes/googleAnalytics.php");
+require "../../includes/googleAnalytics.php";
 ?>
 
 </body>

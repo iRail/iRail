@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Printer.php");
+require_once "Printer.php";
 
 /**
  * Prints the Xml style output
@@ -39,9 +39,9 @@ class Xml extends Printer
     /**
      * startRootElement
      *
-     * @param $name
-     * @param $version
-     * @param $timestamp
+     * @param  $name
+     * @param  $version
+     * @param  $timestamp
      * @return mixed|void
      */
     function startRootElement($name, $version, $timestamp)
@@ -49,8 +49,8 @@ class Xml extends Printer
         $this->rootname = $name;
         echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
     }
-//make a stack of array information, always work on the last one
-//for nested array support
+    //make a stack of array information, always work on the last one
+    //for nested array support
     private $stack = [];
     private $arrayindices = [];
     private $currentarrayindex = -1;
@@ -60,7 +60,7 @@ class Xml extends Printer
      *
      * @param $name
      * @param $number
-     * @param bool $root
+     * @param bool   $root
      */
     function startArray($name, $number, $root = false)
     {
@@ -88,7 +88,7 @@ class Xml extends Printer
      */
     function startObject($name, $object)
     {
-//test wether this object is a first-level array object
+        //test wether this object is a first-level array object
         echo "<$name";
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != "station") {
             echo " id=\"" . $this->arrayindices[$this->currentarrayindex] . "\"";
@@ -170,7 +170,7 @@ class Xml extends Printer
     /**
      * iso8601()
      *
-     * @param $unixtime
+     * @param  $unixtime
      * @return bool|string
      */
     function iso8601($unixtime)

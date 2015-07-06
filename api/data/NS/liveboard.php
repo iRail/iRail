@@ -1,11 +1,12 @@
 <?php
-/** Copyright (C) 2011 by iRail vzw/asbl
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
  *
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station
  *
  * @package data/NS
  */
-include_once("data/NS/stations.php");
+require_once "data/NS/stations.php";
 
 class liveboard
 {
@@ -13,13 +14,13 @@ class liveboard
     /**
      * fillDataRoot()
      *
-     * @param $dataroot
-     * @param $request
+     * @param  $dataroot
+     * @param  $request
      * @throws Exception
      */
     public static function fillDataRoot($dataroot, $request)
     {
-//detect if this is an id or a station
+        //detect if this is an id or a station
         if (sizeof(explode(".", $request->getStation())) > 1) {
             $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
         } else {
@@ -40,10 +41,10 @@ class liveboard
     /**
      * fetchData
      *
-     * @param $station
-     * @param $time
-     * @param $lang
-     * @param $timeSel
+     * @param  $station
+     * @param  $time
+     * @param  $lang
+     * @param  $timeSel
      * @return SimpleXMLElement
      * @throws Exception
      */
@@ -65,9 +66,9 @@ class liveboard
     /**
      * parseData()
      *
-     * @param $xml
-     * @param $time
-     * @param $lang
+     * @param  $xml
+     * @param  $time
+     * @param  $lang
      * @return array
      */
     private static function parseData($xml, $time, $lang)
