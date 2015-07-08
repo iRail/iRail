@@ -5,6 +5,9 @@
    *
    * @author Pieter Colpaert
    */
+
+use Dotenv\Dotenv;
+
 ini_set("include_path", ".:data");
 include_once("data/DataRoot.php");
 include_once("data/structs.php");
@@ -24,6 +27,8 @@ class APICall {
 	       include_once("requests/$requestname.php");
 	       $this->request = new $requestname();
 	       $this->dataRoot = new DataRoot($functionname, $this->VERSION, $this->request->getFormat());
+           $dotenv = new Dotenv(dirname(__DIR__));
+           $dotenv->load();
 	  }catch(Exception $e){
 	       $this->buildError($functionname, $e);
 	  }
@@ -51,7 +56,7 @@ class APICall {
 	  $printer->printError($e->getCode(),$e->getMessage());
 	  exit(0);
      }
-     
+
      public function executeCall(){
 	  try{
 	       $this->dataRoot->fetchData($this->request, $this->request->getSystem());
@@ -98,16 +103,23 @@ class APICall {
 	       $ua = "-";
 	  }
 	  APICall::connectToDB();
-	  $from = mysql_real_escape_string($from);
-	  $to = mysql_real_escape_string($to);
-	  $err = mysql_real_escape_string($err);
-	  $ip = mysql_real_escape_string($ip);
-	  $ua = mysql_real_escape_string($ua);
+	  $from = mysqli_real_escape_string($from);
+	  $to = mysqli_real_escape_string($to);
+	  $err = mysqli_real_escape_string($err);
+	  $ip = mysqli_real_escape_string($ip);
+	  $ua = mysqli_real_escape_string($ua);
 	  // insert in db
 	  try {
-	       include("../includes/dbConfig.php");
-	       $query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '$api_server_name')";
-	       $result = mysql_query($query);
+          // Loaded by dotenv
+          $selectColumns = [
+              $_ENV['column1'], $_ENV['column2'], $_ENV['column3'], $_ENV['column4'],
+              $_ENV['column5'], $_ENV['column6'], $_ENV['column7'], $_ENV['column8']
+          ];
+
+	       $query = "INSERT INTO ". $_ENV['apiTable'] ." ($selectColumns)
+	                    VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '$api_server_name')";
+
+	       $result = mysqli_query($query);
 	  }
 	  catch (Exception $e) {
 	       echo "Error writing to the database.";
@@ -117,13 +129,13 @@ class APICall {
 
      public static function connectToDB(){
 	  try {
-	       include("../includes/dbConfig.php");
-	       mysql_pconnect($api_host, $api_user, $api_password);
-	       mysql_select_db($api_database);
+          $connectionInfo = [$_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']];
+
+	       mysqli_connect($connectionInfo);
+	       mysqli_select_db($_ENV['apiDatabase']);
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error connecting to the database.", 3);
 	  }
      }
 }
-?>

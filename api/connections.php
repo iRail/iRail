@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2010, 2011 by iRail vzw/asbl */
-/* 
+/*
   This file is part of iRail.
 
   iRail is free software: you can redistribute it and/or modify
@@ -36,4 +36,3 @@ class ConnectionsCall extends APICall {
 }
 $call = new ConnectionsCall("connections");
 $call->executeCall();
-?>
