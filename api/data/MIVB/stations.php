@@ -8,7 +8,7 @@
    *
    * @package data/MIVB
    */
-class stations{
+class Stations{
      public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
@@ -161,7 +161,7 @@ class stations{
      }
   };
 
-class line{
+class Line{
      public $id;
      public $mode;
      public $from;

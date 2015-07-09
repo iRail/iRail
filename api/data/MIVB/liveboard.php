@@ -8,7 +8,7 @@
    * @package data/MIVB
    */
 include_once("data/MIVB/stations.php");
-class liveboard{
+class Liveboard{
      public static function fillDataRoot($dataroot,$request){
 //detect if this is an id or a station
 	  if(sizeof(explode(".",$request->getStation()))>1){

@@ -7,7 +7,7 @@
  */
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
-class liveboard{
+class Liveboard{
     public static function fillDataRoot($dataroot,$request){
         $arr = explode(".",$request->getStation());
         $stationr=$request->getStation();

@@ -9,7 +9,7 @@
    */
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
-class connections{
+class Connections{
 
 
     public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){

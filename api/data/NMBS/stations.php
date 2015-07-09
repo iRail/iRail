@@ -8,7 +8,7 @@
    *
    * @package data/NMBS
    */
-class stations
+class Stations
 {
      public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
