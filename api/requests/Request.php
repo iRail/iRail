@@ -22,9 +22,12 @@ class Request {
 	  }
      }
 
-/**
- * will take a get a variable from the GET array and set it as a member variable
- */
+    /**
+     * will take a get a variable from the GET array and set it as a member variable
+     *
+     * @param $varName
+     * @param $default
+     */
      protected function setGetVar($varName, $default){
 	  if(isset($_GET[$varName])){
 	       $this->$varName = $_GET[$varName];
@@ -40,11 +43,17 @@ class Request {
 	  $this->setGetVar("system", "NMBS");
      }
 
-     public function getFormat() {
+    /**
+     * @return string
+     */
+    public function getFormat() {
 	  return strtolower($this->format);
      }
 
-     public function getLang() {
+    /**
+     * @return string
+     */
+    public function getLang() {
 	  $this->lang = strtoupper($this->lang);
 	  if(in_array($this->lang, Request::$SUPPORTED_LANGUAGES)){
 	       return $this->lang;
@@ -52,7 +61,10 @@ class Request {
 	  return "EN";
      }
 
-     public function getSystem(){
+    /**
+     * @return string
+     */
+    public function getSystem(){
 	  $this->system = strtoupper($this->system);	  
 	  if(in_array($this->system, Request::$SUPPORTED_SYSTEMS)){
 	       return $this->system;

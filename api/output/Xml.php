@@ -18,13 +18,22 @@ class Xml extends Printer{
 	  header("Content-Type: text/xml; charset=UTF-8");
      }
 
-     function printError($ec, $msg){
+    /**
+     * @param $ec
+     * @param $msg
+     */
+    function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo "<error code=\"$ec\">$msg</error>";
      }
-     
-     function startRootElement($name, $version, $timestamp){
+
+    /**
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     */
+    function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
      }
@@ -46,7 +55,11 @@ class Xml extends Printer{
 	  $this->arrayindices[$this->currentarrayindex]++;
      }
 
-     function startObject($name, $object){
+    /**
+     * @param $name
+     * @param $object
+     */
+    function startObject($name, $object){
 //test wether this object is a first-level array object
 	  echo "<$name";
 	  if($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != "station") {
@@ -72,7 +85,11 @@ class Xml extends Printer{
 	  
      }
 
-     function startKeyVal($key,$val){
+    /**
+     * @param $key
+     * @param $val
+     */
+    function startKeyVal($key,$val){
 	  if($key == "time"){
 	       $form = $this->iso8601($val);
 	       echo "<$key formatted=\"$form\">$val";
@@ -81,12 +98,20 @@ class Xml extends Printer{
 	  }
      }
 
-     function endElement($name){
+    /**
+     * @param $name
+     */
+    function endElement($name){
 	  if(!in_array($name, $this->ATTRIBUTES) && $name != "name"){
 	       echo "</$name>";
 	  }
      }
-     function endArray($name, $root = false){
+
+    /**
+     * @param $name
+     * @param bool $root
+     */
+    function endArray($name, $root = false){
 	  if(!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation"){
 	       echo "</".$name."s>";
 	  }
@@ -95,11 +120,18 @@ class Xml extends Printer{
 	  $this->currentarrayindex --;
      }
 
-     function endRootElement($name){
+    /**
+     * @param $name
+     */
+    function endRootElement($name){
 	  echo "</$name>";
      }
 
-     function iso8601($unixtime){
+    /**
+     * @param $unixtime
+     * @return bool|string
+     */
+    function iso8601($unixtime){
 	  return date("Y-m-d\TH:i:s\Z", $unixtime);
      }
 

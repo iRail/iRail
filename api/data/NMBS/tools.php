@@ -39,9 +39,12 @@ class tools{
      }
 
 
-/**
- * Adds a quarter and responds with a time
- */
+    /**
+     * Adds a quarter and responds with a time.
+     *
+     * @param $time
+     * @return string
+     */
      public static function addQuarter($time){
 	  preg_match("/(..):(..)/",$time, $m);
 	  $hours = $m[1];

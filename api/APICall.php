@@ -18,7 +18,10 @@ class APICall {
      //Hooks
      private $logging = true;
 
-     function __construct($functionname) {
+    /**
+     * @param $functionname
+     */
+    function __construct($functionname) {
 	  try{
 	       $requestname = ucfirst(strtolower($functionname)) . "Request";
 	       include_once("requests/$requestname.php");
@@ -29,7 +32,11 @@ class APICall {
 	  }
      }
 
-     private function buildError($fn, $e){
+    /**
+     * @param $fn
+     * @param $e
+     */
+    private function buildError($fn, $e){
 	  $this->logError($fn, $e);
 //get the right format - This is some duplicated code and I hate to write it
 	  $format = "";
@@ -66,7 +73,11 @@ class APICall {
 	  $this->logging = false;
      }
 
-     protected function logError($functionname, Exception $e){
+    /**
+     * @param $functionname
+     * @param Exception $e
+     */
+    protected function logError($functionname, Exception $e){
 	  if(!isset($_SERVER['HTTP_USER_AGENT']))
                 $_SERVER['HTTP_USER_AGENT'] = "unknown";
 	  if($this->logging){
@@ -84,7 +95,15 @@ class APICall {
 	  }
      }
 
-     protected function writeLog($ua, $from, $to, $err, $ip) {
+    /**
+     * @param $ua
+     * @param $from
+     * @param $to
+     * @param $err
+     * @param $ip
+     * @throws Exception
+     */
+    protected function writeLog($ua, $from, $to, $err, $ip) {
 	  // get time + date in rfc2822 format
 	  date_default_timezone_set('Europe/Brussels');
 	  $now = date('D, d M Y H:i:s');

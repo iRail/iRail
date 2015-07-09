@@ -7,7 +7,13 @@
    */
 include_once("data/NS/stations.php");
 class liveboard{
-     public static function fillDataRoot($dataroot,$request){
+
+    /**
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
 //detect if this is an id or a station
 	  if(sizeof(explode(".",$request->getStation()))>1){
 	       $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
@@ -27,7 +33,15 @@ class liveboard{
 	  }
      }
 
-     private static function fetchData($station, $time, $lang, $timeSel){
+    /**
+     * @param $station
+     * @param $time
+     * @param $lang
+     * @param $timeSel
+     * @return SimpleXMLElement
+     * @throws Exception
+     */
+    private static function fetchData($station, $time, $lang, $timeSel){
 	  //temporal public credentials for the NS API.
 	  $url = "http://". urlencode("pieter@appsforghent.be") . ":" . urlencode("fEoQropezniTJRw_5oKhGVlFwm_YWdOgozdMjSAVPLk3M3yZYKEa0A") . "@webservices.ns.nl/ns-api-avt?station=" . $station->name;
 	  $r = new HttpRequest($url, HttpRequest::METH_GET);
@@ -40,8 +54,14 @@ class liveboard{
 	       throw new Exception("Could not reach NS server", 500);
 	  }
      }
-  
-     private static function parseData($xml,$time,$lang){
+
+    /**
+     * @param $xml
+     * @param $time
+     * @param $lang
+     * @return array
+     */
+    private static function parseData($xml,$time,$lang){
 	$nodes = array();
 	//var_dump($xml);
 	
