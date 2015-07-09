@@ -98,5 +98,3 @@ class Json extends Printer{
 	  echo "}";
      }
 };
-
-?>

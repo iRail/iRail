@@ -8,4 +8,3 @@ include_once("APICall.php");
 date_default_timezone_set("Europe/Brussels");
 $call = new APICall("vehicleinformation");
 $call->executeCall();
-?>

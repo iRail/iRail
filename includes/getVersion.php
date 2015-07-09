@@ -21,4 +21,3 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 $irailVersion = `git rev-parse --short HEAD`;
-?>

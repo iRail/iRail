@@ -27,4 +27,3 @@ class Jsonp extends Json
 
 };
 
-?>
