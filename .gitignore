@@ -6,3 +6,4 @@ push.php
 api/push.php
 .vagrant
 /vendor/
+.env
