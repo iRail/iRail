@@ -15,7 +15,7 @@ class Stations
      }
 
      public static function getStationFromLocation($locationX, $locationY, $lang){
-	  APICall::connectToDB();
+         APICall::connectToDB();
 	  $station;
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
