@@ -2,4 +2,3 @@
 
 header('location: general.php');
 
-?>
