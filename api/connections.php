@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2010, 2011 by iRail vzw/asbl */
-/* 
+/*
   This file is part of iRail.
 
   iRail is free software: you can redistribute it and/or modify
@@ -30,10 +30,11 @@ date_default_timezone_set("Europe/Brussels");
 
 class ConnectionsCall extends APICall {
     protected function logRequest() {
-        $r = $this->request;
-	parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), "none (connections)", $_SERVER['REMOTE_ADDR']);
+          $r = $this->request;
+	       parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), "none (connections)", $_SERVER['REMOTE_ADDR']);
     }
 }
+
 $call = new ConnectionsCall("connections");
 $call->executeCall();
 ?>
