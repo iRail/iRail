@@ -8,7 +8,7 @@
             "email": "pieter.colpaert@okfn.org"
         }
     ],
-    "require": {
-
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*"
     }
 }
