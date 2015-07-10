@@ -10,5 +10,8 @@
     ],
     "require-dev": {
         "squizlabs/php_codesniffer": "*"
+    },
+    "require": {
+        "phpmd/phpmd": "^2.2"
     }
 }
