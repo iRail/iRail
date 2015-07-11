@@ -1,15 +1,15 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * This will fetch all liveboarddata for the MIVB. It implements a couple of standard functions implemented by all stations classes:
-   *   
+   *
    *   * fillDataRoot will fill the entire dataroot with stations
    *
    * @package data/MIVB
    */
 include_once("data/MIVB/stations.php");
-class liveboard{
-     public static function fillDataRoot($dataroot,$request){	       
+class Liveboard{
+     public static function fillDataRoot($dataroot,$request){
 //detect if this is an id or a station
 	  if(sizeof(explode(".",$request->getStation()))>1){
 	       $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
@@ -39,13 +39,13 @@ class liveboard{
 	       throw new Exception("Not yet implemented. If you really need this function you can try to implement it yourself in http://github.com/iRail/iRail or you can ask on the mailinglist list.iRail.be",500);
 	  }
 //	  $MIVBMODES = array("M", "N", "T", "B");
-	  $s = explode(".",$station->id);	  
+	  $s = explode(".",$station->id);
 	  $stid = $s[2];
 //stibrt server wants lang in lowercase
 	  $lang = strtolower($lang);
 	  $scrapeUrl = "http://stibrt.be/labs/stib/service/getwaitingtimes.php?1=1&iti=1&halt=$stid&lang=$lang";
 //	  echo $scrapeUrl . "\n";
-	  $post = http_post_data($scrapeUrl, "", $request_options) or die("");
+	  $post = http_post_data($scrapeUrl, "", $request_options) || die("");
 	  return http_parse_message($post)->body;
      }
 

@@ -1,15 +1,15 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * This will return information about 1 specific route for the NMBS.
-   *   
+   *
    * fillDataRoot will fill the entire dataroot with connections
    *
    * @package data/NMBS
    */
 include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
-class connections{
+class Connections{
 
 
     public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){
@@ -29,7 +29,7 @@ class connections{
 	  if(sizeof(explode(".",$request->getTo()))>1){
 	       $to = stations::getStationFromID($request->getTo(), $request->getLang());
 	       $to = $to->name;
-	  }	  
+	  }
 	  $dataroot->connection = connections::scrapeConnections($from, $to,$request->getTime(), $request->getDate(),$request->getResults(),$request->getLang(), $request->getFast() , $request->getTimeSel(), $request->getTypeOfTransport());
      }
 
@@ -60,7 +60,7 @@ class connections{
 	  if($typeOfTransport == "trains"){
 	       $trainsonly = "1111111000000000";
 	  }else if($typeOfTransport == "all"){
-	       $trainsonly = "1111111111111111";     
+	       $trainsonly = "1111111111111111";
 	  }else{
 	       $trainsonly = "1111111000000000";
 	  }
@@ -72,7 +72,7 @@ class connections{
 	  }else {
 	       $timeSel = 1;
 	  }
-	  
+
 	  //now we're going to get the real data
 	  $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
 <ReqC ver="1.1" prod="iRail" lang="' . $lang . '">
@@ -101,11 +101,11 @@ class connections{
 </GISParameters>
 </ConReq>
 </ReqC>';
-	 $post = http_post_data($url, $postdata, $request_options) or die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
+	 $post = http_post_data($url, $postdata, $request_options) || die("<br />NMBS/SNCB website timeout. Please <a href='..'>refresh</a>.");
 	  return http_parse_message($post)->body;
      }
 
-  
+
 
      public static function parseHafasXml($serverData, $lang, $fast) {
           $xml = new SimpleXMLElement($serverData);
@@ -126,7 +126,7 @@ class connections{
 		    $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
 		    $connection[$i]->departure->platform = new Platform();
 		    $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
-		    $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);                    
+		    $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
 		    $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
 		    $connection[$i]->arrival->platform = new Platform();
 		    $connection[$i]->arrival->platform->name = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
@@ -230,9 +230,9 @@ class connections{
                              //if there were vias, add them to the array
                              $connection[$i]->via = $vias;
 			 }
-			 
+
 		    }
-                    
+
 
 		    $connection[$i]->departure->vehicle = "BE.NMBS." . $trains[0];
                     if(isset($directions[0])){
@@ -255,7 +255,7 @@ class connections{
 	  }
 	  return $connection;
      }
-     
+
      private static function getStationFromHafasLocation($locationX,$locationY, $lang){
 	  preg_match("/(.)(.*)/",$locationX, $m);
 	  $locationX= $m[1] . ".". $m[2];
@@ -263,7 +263,7 @@ class connections{
 	  $locationY = $m[1] . ".". $m[2];
 	  return stations::getStationFromLocation($locationX,$locationY,$lang);
      }
-     
+
 }
 
 

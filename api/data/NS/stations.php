@@ -1,5 +1,5 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * Author: Pieter Colpaert <pieter aŧ iRail.be>
    *
@@ -8,7 +8,7 @@
    *   * getStationFromName will return the right station object for a Name
    * @package data/NS
    */
-class stations{
+class Stations{
      private static $stations = array();
      public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
@@ -64,13 +64,13 @@ class stations{
 	       return stations::$stations[$i];
 	  }
 	  //otherwise search for other method: Hafas?
-	  return null;     
+	  return null;
      }
-     
+
      private static function fetchAllStationsFromDB($lang){
 //<station locationX="4.323973" locationY="52.081261" id="NL.NS.gvc" standardname="'s-Gravenhage">'s-Gravenhage</station>
 	  if(sizeof(stations::$stations)==0){
-	       $allstations = file_get_contents("data/NS/stations.xml",true);	       
+	       $allstations = file_get_contents("data/NS/stations.xml",true);
 	       preg_match_all("/<station locationX=\"(.*?)\" locationY=\"(.*?)\" id=\"(.*?)\" standardname=\"(.*?)\">(.*?)<\/station>/smi", $allstations, $matches);
 	       for($i =0; $i < sizeof($matches[0]); $i++){
 		    stations::$stations[$i] = new Station();

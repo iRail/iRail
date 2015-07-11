@@ -1,14 +1,14 @@
 <?php
-  /** Copyright (C) 2011 by iRail vzw/asbl 
+  /** Copyright (C) 2011 by iRail vzw/asbl
    *
    * This will fetch all stationdata for the MIVB. It implements a couple of standard functions implemented by all stations classes:
-   *   
+   *
    *   * fillDataRoot will fill the entire dataroot with stations
    *   * getStationFromName will return the right station object for a Name
    *
    * @package data/MIVB
    */
-class stations{
+class Stations{
      public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
@@ -26,7 +26,7 @@ class stations{
 	       $locationY = mysql_real_escape_string($locationY);
 //It selects the closest station to the given coordinates. It needs to calculate the squared distance and return the smalest of those
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE ((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) = (SELECT MIN((`X`-$locationX)*(`X`-$locationX)+(`Y`-$locationY)*(`Y`-$locationY)) FROM mivb)";
-	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
+	       $result = mysql_query($query) || die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	       $station = new Station();
 	       $station->id = $line["ID"];
@@ -38,13 +38,13 @@ class stations{
 	  catch (Exception $e) {
 	       throw new Exception("Error reading from the database.", 3);
 	  }
-	  return $station;	  
+	  return $station;
      }
 
      public static function getStationFromName($name, $lang){
 	  if($lang == "EN"){
 	       $lang="STD";
-	  }	  
+	  }
 	  APICall::connectToDB();
 	  mysql_query("SET NAMES utf8");
 	  $station;
@@ -52,7 +52,7 @@ class stations{
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $id = mysql_real_escape_string($name);
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb WHERE `$lang` like '$name'";
-	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
+	       $result = mysql_query($query) || die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	       $station = new Station();
 	       $station->id = $line["ID"];
@@ -67,7 +67,7 @@ class stations{
 	  if($station->id == ""){
 	       throw new Exception("No station found for name", 400);
 	  }
-	  
+
 	  return $station;
      }
 
@@ -83,7 +83,7 @@ class stations{
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $id = mysql_real_escape_string($id);
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb WHERE `ID` = '$id'";
-	       $result = mysql_query($query) or die("Could not get station from coordinates from DB");
+	       $result = mysql_query($query) || die("Could not get station from coordinates from DB");
 	       $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	       $station = new Station();
 	       $station->id = $line["ID"];
@@ -100,7 +100,7 @@ class stations{
 	  }
 	  return $station;
      }
-     
+
      private static function fetchAllStationsFromDB($lang){
 	  if($lang == "EN"){
 	       $lang="STD";
@@ -111,7 +111,7 @@ class stations{
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb ORDER BY `$lang`";
-	       $result = mysql_query($query) or die("Could not get stationslist from DB");
+	       $result = mysql_query($query) || die("Could not get stationslist from DB");
 	       $i = 0;
 	       while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		    $station[$i] = new Station();
@@ -142,7 +142,7 @@ class stations{
 	       "useragent" => $irailAgent,
 	       );
 
-	  $post = http_post_data($scrapeUrl, "", $request_options) or die("");
+	  $post = http_post_data($scrapeUrl, "", $request_options) || die("");
 	  $body = http_parse_message($post)->body;
 	  preg_match("/<ul>(.*?)<\/ul>/si",$body, $match);
 	  if(!isset($match[1])){
@@ -161,7 +161,7 @@ class stations{
      }
   };
 
-class line{
+class Line{
      public $id;
      public $mode;
      public $from;
