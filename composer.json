@@ -9,9 +9,7 @@
         }
     ],
     "require-dev": {
-        "squizlabs/php_codesniffer": "*"
-    },
-    "require": {
+        "squizlabs/php_codesniffer": "*",
         "phpmd/phpmd": "^2.2"
-    }
+    },
 }
