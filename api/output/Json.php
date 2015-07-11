@@ -9,19 +9,28 @@
 include_once("Printer.php");
 class Json extends Printer{
      private $rootname;
-     
-     function printHeader(){
+
+    function printHeader(){
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/json;charset=UTF-8");
      }
 
-     function printError($ec, $msg){
+    /**
+     * @param $ec
+     * @param $msg
+     */
+    function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo "{\"error\":$ec,\"message\":\"$msg\"}";
      }
 
-     function startRootElement($name, $version, $timestamp){
+    /**
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     */
+    function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  echo "{\"version\":\"$version\",\"timestamp\":\"$timestamp\",";
      }
@@ -31,7 +40,14 @@ class Json extends Printer{
      private $stack = array();
      private $arrayindices = array();
      private $currentarrayindex = -1;
-     function startArray($name,$number, $root = false){
+
+
+    /**
+     * @param $name
+     * @param $number
+     * @param bool $root
+     */
+    function startArray($name,$number, $root = false){
 	  if(!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation"){
 	       echo "\"" . $name . "s\":{\"number\":\"$number\",";
 	  }
@@ -50,7 +66,11 @@ class Json extends Printer{
 	  echo ",";
      }
 
-     function startObject($name, $object){
+    /**
+     * @param $name
+     * @param $object
+     */
+    function startObject($name, $object){
 	  if($this->currentarrayindex >-1 && $this->stack[$this->currentarrayindex] == $name){
 	       echo "{";
 //show id (in array) except if array of stations (compatibility issues)
@@ -71,11 +91,19 @@ class Json extends Printer{
 	  }
      }
 
-     function startKeyVal($key,$val){
+    /**
+     * @param $key
+     * @param $val
+     */
+    function startKeyVal($key,$val){
 	  echo "\"$key\":\"$val\"";
      }
 
-     function endArray($name, $root = false){
+    /**
+     * @param $name
+     * @param bool $root
+     */
+    function endArray($name, $root = false){
 	  $this->stack[$this->currentarrayindex] = "";
 	  $this->arrayindices[$this->currentarrayindex] = 0;
 	  $this->currentarrayindex --;
@@ -85,16 +113,25 @@ class Json extends Printer{
 	       echo "]}";
 	  }
      }
-     
-     function endObject($name){
+
+    /**
+     * @param $name
+     */
+    function endObject($name){
 	  echo "}";
      }
-     
-     function endElement($name){
+
+    /**
+     * @param $name
+     */
+    function endElement($name){
 	  
      }
 
-     function endRootElement($name){
+    /**
+     * @param $name
+     */
+    function endRootElement($name){
 	  echo "}";
      }
 };

@@ -12,12 +12,17 @@ class DataRoot
 
      public $version;
      public $timestamp;
-     /**
-      * constructor of this class
-      *
-      * @param double $version the version of the API
-      * @param string format the format of the document: json, json or XML
-      */
+
+    /**
+     * constructor of this class
+     *
+     * @param $rootname
+     * @param double $version the version of the API
+     * @param $format
+     * @param string $error
+     * @throws Exception
+     * @internal param format $string the format of the document: json, json or XML
+     */
      function __construct($rootname, $version, $format, $error = "") {
           //We're making this in the class form: Json or Xml or Jsonp
 	  $format = ucfirst(strtolower($format));
@@ -35,7 +40,10 @@ class DataRoot
 	  $this->rootname = $rootname;
      }
 
-     public function getPrinter(){
+    /**
+     * @return mixed
+     */
+    public function getPrinter(){
 	  return $printer;
      }
 
@@ -46,11 +54,19 @@ class DataRoot
 	  $this->printer->printAll();
      }
 
-     public function getRootname(){
+    /**
+     * @return mixed
+     */
+    public function getRootname(){
 	  return $this->rootname;
      }
 
-     public function fetchData($request, $SYSTEM){
+    /**
+     * @param $request
+     * @param $SYSTEM
+     * @throws Exception
+     */
+    public function fetchData($request, $SYSTEM){
 	  try{
 	       include_once("data/$SYSTEM/$this->rootname.php");
 	       $rn = $this->rootname;

@@ -8,8 +8,14 @@
    *
    * @package data/MIVB
    */
+
 class Stations{
-     public static function fillDataRoot($dataroot,$request){
+    /**
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
 	  $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
      }
 
@@ -41,7 +47,13 @@ class Stations{
 	  return $station;
      }
 
-     public static function getStationFromName($name, $lang){
+    /**
+     * @param $name
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromName($name, $lang){
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -72,7 +84,13 @@ class Stations{
      }
 
 
-     public static function getStationFromID($id, $lang){
+    /**
+     * @param $id
+     * @param $lang
+     * @return Station
+     * @throws Exception
+     */
+    public static function getStationFromID($id, $lang){
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -101,7 +119,12 @@ class Stations{
 	  return $station;
      }
 
-     private static function fetchAllStationsFromDB($lang){
+    /**
+     * @param $lang
+     * @return array
+     * @throws Exception
+     */
+    private static function fetchAllStationsFromDB($lang){
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
@@ -130,7 +153,14 @@ class Stations{
 	  return $station;
      }
 
-     public static function getLinesFromCoordinates($x,$y,$lang){
+    /**
+     * @param $x
+     * @param $y
+     * @param $lang
+     * @return array
+     * @throws Exception
+     */
+    public static function getLinesFromCoordinates($x,$y,$lang){
 	  if($lang == "EN"){
 	       $lang="STD";
 	  }
