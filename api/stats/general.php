@@ -129,7 +129,19 @@ try {
     </script>
 
 
+    <style type="text/css">
+        td {
+            text-align: right;
+        }
 
+        .red {
+            color: red;
+        }
+
+        .gray {
+            color: gray;
+        }
+    </style>
 
 
 <p>As of <a href="http://project.irail.be/ticket/85" target="_blank">15/03/2011</a> this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).</p>
@@ -141,11 +153,11 @@ try {
                 $date__ = strtotime($day__);
                 //echo date("d m y" ,$date__) . " " . $day__. "<br/>";
                 if ($count == 0) {
-                    echo '<tr><td align="right"><font color="red">' . $day__ . '</font></td><td><font color="red">' . $value . '</font></td></tr>';
+                    echo '<tr><td><span class="red">' . $day__ . '</span></td><td><span class="red">' . $value . '</span></td></tr>';
                 } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
-                    echo '<tr><td align="right"><font color="gray">' . $day__ . '</font></td><td><font color="gray">' . $value . '</font></td></tr>';
+                    echo '<tr><td><span class="gray">' . $day__ . '</span></td><td><span class="gray">' . $value . '</span></td></tr>';
                 } else {
-                    echo '<tr><td align="right">' . $day__ . '</td><td>' . $value . '</td></tr>';
+                    echo '<tr><td>' . $day__ . '</td><td>' . $value . '</td></tr>';
                 }
                 $count++;
             }
