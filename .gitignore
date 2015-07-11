@@ -7,3 +7,4 @@ api/push.php
 .vagrant
 .idea/
 /vendor/
+.env

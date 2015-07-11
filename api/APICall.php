@@ -5,6 +5,9 @@
    *
    * @author Pieter Colpaert
    */
+
+use Dotenv\Dotenv;
+
 ini_set("include_path", ".:data");
 include_once("data/DataRoot.php");
 include_once("data/structs.php");
@@ -124,8 +127,13 @@ class APICall {
 	  $ua = mysql_real_escape_string($ua);
 	  // insert in db
 	  try {
-	       include("../includes/dbConfig.php");
-	       $query = "INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8) VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '$api_server_name')";
+            $dotenv = new Dotenv(dirname(__DIR__));
+            $dotenv->load();
+
+	       $query = "
+              INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8)
+              VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '". $_ENV['apiServerName'] ."')";
+
 	       $result = mysql_query($query);
 	  }
 	  catch (Exception $e) {
@@ -135,10 +143,12 @@ class APICall {
 
 
      public static function connectToDB(){
-	  try {
-	       include("../includes/dbConfig.php");
-	       mysql_pconnect($api_host, $api_user, $api_password);
-	       mysql_select_db($api_database);
+         try {
+             $dotenv = new Dotenv(dirname(__DIR__));
+             $dotenv->load();
+
+             mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
+             mysql_select_db($_ENV['apiDatabase']);
 	  }
 	  catch (Exception $e) {
 	       throw new Exception("Error connecting to the database.", 3);

@@ -26,14 +26,16 @@
     Source available at http://github.com/Tuinslak/iRail
 */
 
+use Dotenv\Dotenv;
+
 // "Public" API stats page
 // to prevent giving MySQL access to *
 
 // vars
 $limit = 250;
 
-// include vars
-include("../../includes/dbConfig.php");
+$dotenv = new Dotenv(dirname(__DIR__));
+$dotenv->load();
 
 $s = $_REQUEST["s"];
 
@@ -44,13 +46,18 @@ if (empty($s)) {
 $count = 1 + $s;
 
 	try {
-		mysql_pconnect($api_host, $api_user, $api_password);
+		mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
 		mysql_select_db($api_database);
-		$query = "SELECT COUNT($api_c1) FROM $api_table";
+		$query = "SELECT COUNT(". $_ENV['column1'] .") FROM ". $_ENV['apiTable'] ."";
 		$result = mysql_query($query);
 		$numrows = mysql_result($result, 0);
 
-		$query = "SELECT $api_c1, $api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8 FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
+        $dbColumns = [
+            $_ENV['column1'], $_ENV['column2'], $_ENV['column3'], $_ENV['column4'],
+            $_ENV['column5'], $_ENV['column6'], $_ENV['column7'], $_ENV['column8']
+        ];
+
+		$query = "SELECT $dbColumns FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
 		$result = mysql_query($query);
 	}
 	catch (Exception $e) {
