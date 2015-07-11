@@ -14,6 +14,13 @@ Native applications using the iRail API and created or supported by the iRail te
 
 All information can be found on [Project iRail](http://project.irail.be/).
 
+### Configuration 
+
+For the configuration we used a package named dotenv. 
+There is a `.env example` located in the base folder from the project. 
+`composer install` wil write a nex .env file for your confiration. 
+The only thing you need to do is change the variables so it fits to your credentails.
+
 Some interesting links:
 
   * Source: <http://github.com/iRail/iRail>
