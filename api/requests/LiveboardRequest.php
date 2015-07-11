@@ -37,23 +37,38 @@ class LiveboardRequest extends Request{
 	  parent::processRequiredVars(array("station"));
      }
 
-     public function isFast(){
+    /**
+     * @return bool
+     */
+    public function isFast(){
          return $this->fast == "true";
      }
 
-     public function getStation() {
+    /**
+     * @return mixed
+     */
+    public function getStation() {
 	  return $this->station;
      }
 
-     public function getDate() {
+    /**
+     * @return string
+     */
+    public function getDate() {
 	  return $this->date;
      }
 
-     public function getTime() {
+    /**
+     * @return string
+     */
+    public function getTime() {
 	  return $this->time;
      }
 
-     public function getArrdep() {
+    /**
+     * @return mixed
+     */
+    public function getArrdep() {
 	  return $this->arrdep;
      }
     

@@ -12,13 +12,24 @@ include_once("data/NMBS/stations.php");
 class Connections{
 
 
+    /**
+     * @param $stationURI
+     * @param $routeLabel
+     * @param $headsign
+     * @param $datetime
+     * @return string
+     */
     public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){
         $routeLabel = preg_replace("/([A-Z]{1,2})(\d+)/", "$1 $2", $routeLabel);
         $md5hash = md5($routeLabel . $headsign);
         return $stationURI . "/departures/" . date('YmdHi',$datetime) . $md5hash ;
     }
 
-     public static function fillDataRoot($dataroot,$request){
+    /**
+     * @param $dataroot
+     * @param $request
+     */
+    public static function fillDataRoot($dataroot,$request){
 //detect whether from was an id and change from accordingly
 	  $from = $request->getFrom();
 	  if(sizeof(explode(".",$request->getFrom()))>1){
@@ -33,22 +44,51 @@ class Connections{
 	  $dataroot->connection = connections::scrapeConnections($from, $to,$request->getTime(), $request->getDate(),$request->getResults(),$request->getLang(), $request->getFast() , $request->getTimeSel(), $request->getTypeOfTransport());
      }
 
-     private static function scrapeConnections($from,$to, $time, $date, $results,$lang, $fast,$timeSel ="depart", $typeOfTransport = "trains"){
+    /**
+     * @param $from
+     * @param $to
+     * @param $time
+     * @param $date
+     * @param $results
+     * @param $lang
+     * @param $fast
+     * @param string $timeSel
+     * @param string $typeOfTransport
+     * @return array
+     * @throws Exception
+     */
+    private static function scrapeConnections($from,$to, $time, $date, $results,$lang, $fast,$timeSel ="depart", $typeOfTransport = "trains"){
 	  $ids = connections::getHafasIDsFromNames($from,$to,$lang);
 	  $xml = connections::requestHafasXml($ids[0],$ids[1],$lang,$time,$date,$results,$timeSel,$typeOfTransport);
 	  return connections::parseHafasXml($xml, $lang, $fast);
      }
 
-/**
- * This function scrapes the ID from the HAFAS system. Since hafas id's will be requested in pairs, it also returns 2 id's and asks for 2 names
- */
+    /**
+     * This function scrapes the ID from the HAFAS system. Since hafas id's will be requested in pairs, it also returns 2 id's and asks for 2 names
+     *
+     * @param $name1
+     * @param $name2
+     * @param $lang
+     * @return array
+     */
      private static function getHafasIDsFromNames($name1,$name2,$lang){
          $station1 = stations::getStationFromName($name1, $lang);
          $station2 = stations::getStationFromName($name2, $lang);
          return array($station1->getHID(),$station2->getHID());
      }
 
-     private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
+    /**
+     * @param $idfrom
+     * @param $idto
+     * @param $lang
+     * @param $time
+     * @param $date
+     * @param $results
+     * @param $timeSel
+     * @param $typeOfTransport
+     * @return mixed
+     */
+    private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
 	  include "../includes/getUA.php";
 	  $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 //  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
@@ -256,7 +296,13 @@ class Connections{
 	  return $connection;
      }
 
-     private static function getStationFromHafasLocation($locationX,$locationY, $lang){
+    /**
+     * @param $locationX
+     * @param $locationY
+     * @param $lang
+     * @return Station
+     */
+    private static function getStationFromHafasLocation($locationX,$locationY, $lang){
 	  preg_match("/(.)(.*)/",$locationX, $m);
 	  $locationX= $m[1] . ".". $m[2];
 	  preg_match("/(..)(.*)/",$locationY, $m);
