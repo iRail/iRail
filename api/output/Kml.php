@@ -13,6 +13,7 @@ class Kml extends Printer{
      private $ATTRIBUTES=array("id", "locationX", "locationY", "standardname", "left","delay", "normal");
      private $rootname;
 
+
      function printHeader(){
 	  header("Access-Control-Allow-Origin: *");
 	  header("Content-Type: application/vnd.google-earth.kml+xml");
@@ -20,13 +21,22 @@ class Kml extends Printer{
 	  
      }
 
-     function printError($ec, $msg){
+    /**
+     * @param $ec
+     * @param $msg
+     */
+    function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo "<error code=\"$ec\">$msg</error>";
      }
-     
-     function startRootElement($name, $version, $timestamp){
+
+    /**
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     */
+    function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  if($name == "stations"){
 	       echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\">";
@@ -39,28 +49,53 @@ class Kml extends Printer{
      private $stack = array();
      private $arrayindices = array();
      private $currentarrayindex = -1;
-     function startArray($name,$number, $root = false){
+
+    /**
+     * @param $name
+     * @param $number
+     * @param bool $root
+     */
+    function startArray($name,$number, $root = false){
      }
 
      function nextArrayElement(){
 	  $this->arrayindices[$this->currentarrayindex]++;
      }
 
-     function startObject($name, $object){
+    /**
+     * @param $name
+     * @param $object
+     */
+    function startObject($name, $object){
 	  if($name == "station"){
 	       echo "<Placemark id='". $object->id ."'><name>". $object->name ."</name><Point><coordinates>". $object->locationX .",". $object->locationY."</coordinates></Point></Placemark>";
 	  }
      }
 
-     function startKeyVal($key,$val){
+    /**
+     * @param $key
+     * @param $val
+     */
+    function startKeyVal($key,$val){
      }
 
-     function endElement($name){
-     }
-     function endArray($name, $root = false){
+    /**
+     * @param $name
+     */
+    function endElement($name){
      }
 
-     function endRootElement($name){
+    /**
+     * @param $name
+     * @param bool $root
+     */
+    function endArray($name, $root = false){
+     }
+
+    /**
+     * @param $name
+     */
+    function endRootElement($name){
 	  echo "</kml>";
      }
 };

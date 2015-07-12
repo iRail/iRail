@@ -7,8 +7,11 @@
    */
 abstract class Printer{
      protected $documentRoot;
-     
-     function __construct($documentRoot){
+
+    /**
+     * @param $documentRoot
+     */
+    function __construct($documentRoot){
 	  $this->documentRoot = $documentRoot;
      }
      
@@ -48,9 +51,14 @@ abstract class Printer{
 	  $this->endRootElement($this->documentRoot->getRootname());
      }
 
-/**
- * It will detect what kind of element the element is and will print it accordingly. If it contains more elements it will print more recursively
- */
+    /**
+     * It will detect what kind of element the element is and will print it accordingly. If it contains more elements it will print more recursively
+     *
+     * @param $key
+     * @param $val
+     * @param bool $root
+     * @throws Exception
+     */
      private function printElement($key,$val, $root = false){
 	  if(is_array($val)){
 	       if(sizeof($val)>0){
@@ -94,20 +102,70 @@ abstract class Printer{
      }
      function nextObjectElement(){
      }
-     abstract function startRootElement($name, $version, $timestamp);
 
-     abstract function startArray($name,$number, $root = false);
-     abstract function startObject($name, $object);
-     abstract function startKeyVal($key,$val);
 
-     abstract function endArray($name, $root = false);
-     function endObject($name){
+    /**
+     * @param $name
+     * @param $version
+     * @param $timestamp
+     * @return mixed
+     */
+    abstract function startRootElement($name, $version, $timestamp);
+
+    /**
+     * @param $name
+     * @param $number
+     * @param bool $root
+     * @return mixed
+     */
+    abstract function startArray($name,$number, $root = false);
+
+    /**
+     * @param $name
+     * @param $object
+     * @return mixed
+     */
+    abstract function startObject($name, $object);
+
+    /**
+     * @param $key
+     * @param $val
+     * @return mixed
+     */
+    abstract function startKeyVal($key,$val);
+
+    /**
+     * @param $name
+     * @param bool $root
+     * @return mixed
+     */
+    abstract function endArray($name, $root = false);
+
+    /**
+     * @param $name
+     */
+    function endObject($name){
 	  $this->endElement($name);
      }
-     abstract function endElement($name);
-     abstract function endRootElement($name);
 
-     abstract function printError($ec,$msg);     
+    /**
+     * @param $name
+     * @return mixed
+     */
+    abstract function endElement($name);
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    abstract function endRootElement($name);
+
+    /**
+     * @param $ec
+     * @param $msg
+     * @return mixed
+     */
+    abstract function printError($ec,$msg);
   }
 
 ?>

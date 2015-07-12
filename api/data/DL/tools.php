@@ -10,7 +10,7 @@ class Tools{
      //Lambert transformation algorithm constants
      private static $a,$f,$x0,$y0,$e,$p0,$p1,$p2,$l0,$m1,$m2,$t1 ,$t2 ,$t0 ,$n,$g ,$r0;
 
-//Initiate constants
+    //Initiate constants
      private static function initvars(){
 	  Tools::$a=6378388;
 	  Tools::$f=1/297;

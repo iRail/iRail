@@ -11,7 +11,13 @@ include_once("data/NMBS/tools.php");
 include_once("data/NMBS/stations.php");
 include_once("../includes/simple_html_dom.php");
 class vehicleinformation{
-     public static function fillDataRoot($dataroot,$request){
+
+    /**
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
           $lang= $request->getLang();
 
           $serverData = vehicleinformation::getServerData($request->getVehicleId(),$lang);
@@ -20,7 +26,12 @@ class vehicleinformation{
           $dataroot->stop = vehicleinformation::getData($serverData, $lang, $request->getFast());
      }
 
-     private static function getServerData($id,$lang){
+    /**
+     * @param $id
+     * @param $lang
+     * @return mixed
+     */
+    private static function getServerData($id,$lang){
           include_once("../includes/getUA.php");
           $request_options = array(
             "referer" => "http://api.irail.be/",
@@ -47,9 +58,16 @@ class vehicleinformation{
 
           return $result;
      }
-     
 
-     private static function getData($serverData, $lang, $fast){
+
+    /**
+     * @param $serverData
+     * @param $lang
+     * @param $fast
+     * @return array
+     * @throws Exception
+     */
+    private static function getData($serverData, $lang, $fast){
 	  try{
                $stops = array();
                $html = str_get_html($serverData);
@@ -96,7 +114,14 @@ class vehicleinformation{
 	  }
      }
 
-     private static function getVehicleData($serverData, $id, $lang){
+    /**
+     * @param $serverData
+     * @param $id
+     * @param $lang
+     * @return null|Vehicle
+     * @throws Exception
+     */
+    private static function getVehicleData($serverData, $id, $lang){
 // determine the location of the vehicle
           $html = str_get_html($serverData);
 

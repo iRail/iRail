@@ -8,8 +8,15 @@
    * @package data/MIVB
    */
 include_once("data/MIVB/stations.php");
+
 class Liveboard{
-     public static function fillDataRoot($dataroot,$request){
+
+    /**
+     * @param $dataroot
+     * @param $request
+     * @throws Exception
+     */
+    public static function fillDataRoot($dataroot,$request){
 //detect if this is an id or a station
 	  if(sizeof(explode(".",$request->getStation()))>1){
 	       $dataroot->station = stations::getStationFromID($request->getStation(), $request->getLang());
@@ -28,7 +35,15 @@ class Liveboard{
 	  }
      }
 
-     public static function fetchData($station,$time,$lang,$arrdep){
+    /**
+     * @param $station
+     * @param $time
+     * @param $lang
+     * @param $arrdep
+     * @return mixed
+     * @throws Exception
+     */
+    public static function fetchData($station,$time,$lang,$arrdep){
 	  include "../includes/getUA.php";
 	  $request_options = array(
 	       "referer" => "http://api.irail.be/",
@@ -49,7 +64,12 @@ class Liveboard{
 	  return http_parse_message($post)->body;
      }
 
-     public static function parseData($xml, $lang){
+    /**
+     * @param $xml
+     * @param $lang
+     * @return array
+     */
+    public static function parseData($xml, $lang){
 	  //<waitingtime><line>5     </line><mode>M     </mode><minutes>6     </minutes><destination>Herrma</destination> </waitingtime>
 	  preg_match_all("/<waitingtime>.*?<line>(.*?)<\/line>.*?<mode>(.*?)<\/mode>.*?<minutes>(.*?)<\/minutes>.*?<destination>(.*?)<\/destination>.*?<\/waitingtime>/si", $xml,$matches);
 //	  echo $xml . "\n";

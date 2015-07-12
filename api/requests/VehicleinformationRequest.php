@@ -17,11 +17,17 @@ class VehicleinformationRequest extends Request {
 	  parent::processRequiredVars(array("id"));
      }
 
-     public function getVehicleId() {
+    /**
+     * @return mixed
+     */
+    public function getVehicleId() {
 	  return $this->id;
      }
 
-     public function getFast(){
+    /**
+     * @return mixed
+     */
+    public function getFast(){
          return $this->fast;
      }
      
