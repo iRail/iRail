@@ -50,7 +50,7 @@ class APICall
     private function buildError($fn, $e)
     {
         $this->logError($fn, $e);
-//get the right format - This is some duplicated code and I hate to write it
+        // Get the right format - This is some duplicated code and I hate to write it
         $format = "";
         if (isset($_GET["format"])) {
             $format = $_GET["format"];
@@ -141,7 +141,7 @@ class APICall
         if ($ua == "") {
             $ua = "-";
         }
-        APICall::connectToDB();
+        APICall::DBConnection();
         $from = mysql_real_escape_string($from);
         $to = mysql_real_escape_string($to);
         $err = mysql_real_escape_string($err);
@@ -152,13 +152,14 @@ class APICall
             $dotenv = new Dotenv(dirname(__DIR__));
             $dotenv->load();
 
+            $table = $_ENV['apiTable'];
             $columns = [
                 $_ENV['column1'], $_ENV['column2'], $_ENV['column3'], $_ENV['column4'],
                 $_ENV['column5'], $_ENV['column6'], $_ENV['column7'], $_ENV['column8']
             ];
 
             $query = "
-              INSERT INTO $api_table ($columns)
+              INSERT INTO $table ($columns)
               VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '" . $_ENV['apiServerName'] . "')";
 
             $result = mysql_query($query);
@@ -166,7 +167,6 @@ class APICall
             echo "Error writing to the database.";
         }
     }
-
 
     public static function connectToDB()
     {

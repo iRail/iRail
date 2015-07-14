@@ -56,7 +56,7 @@ class LiveboardRequest extends Request
     }
 
     /**
-     * @return string
+     * @return string, $this->date
      */
     public function getDate()
     {
@@ -64,7 +64,7 @@ class LiveboardRequest extends Request
     }
 
     /**
-     * @return string
+     * @return string, $this->time
      */
     public function getTime()
     {
@@ -72,7 +72,9 @@ class LiveboardRequest extends Request
     }
 
     /**
-     * @return mixed
+     * getArrDep
+     *
+     * @return mixed, $this->arrdep
      */
     public function getArrdep()
     {

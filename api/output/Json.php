@@ -19,8 +19,8 @@ class Json extends Printer
     }
 
     /**
-     * @param $ec
-     * @param $msg
+     * @param  <type> $ec  <description>
+     * @param  <type> $msg <description>
      * @return mixed|void
      */
     public function printError($ec, $msg)
@@ -31,9 +31,9 @@ class Json extends Printer
     }
 
     /**
-     * @param $name
-     * @param $version
-     * @param $timestamp
+     * @param  <type> $name      <description>
+     * @param  <type> $version   <description>
+     * @param  <type> $timestamp <description>
      * @return mixed|void
      */
     public function startRootElement($name, $version, $timestamp)
@@ -50,9 +50,9 @@ class Json extends Printer
 
 
     /**
-     * @param $name
-     * @param $number
-     * @param bool $root
+     * @param  <type> $name   <description>
+     * @param  <type> $number <description>
+     * @param  bool   $root
      * @return mixed|void
      */
     public function startArray($name, $number, $root = false)
@@ -78,8 +78,8 @@ class Json extends Printer
     }
 
     /**
-     * @param $name
-     * @param $object
+     * @param  <type> $name  <description>
+     * @param  <type> $object <description>
      * @return mixed|void
      */
     public function startObject($name, $object)
@@ -108,8 +108,8 @@ class Json extends Printer
     }
 
     /**
-     * @param $key
-     * @param $val
+     * @param  <type> $key <description>
+     * @param  <type> $val <description>
      * @return mixed|void
      */
     public function startKeyVal($key, $val)
@@ -118,8 +118,8 @@ class Json extends Printer
     }
 
     /**
-     * @param $name
-     * @param bool $root
+     * @param  string $name <description>
+     * @param  bool,  $root, an be true of false.
      * @return mixed|void
      */
     public function endArray($name, $root = false)
@@ -148,7 +148,7 @@ class Json extends Printer
      */
     public function endElement($name)
     {
-
+        // Write magic over here.
     }
 
     /**

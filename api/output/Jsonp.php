@@ -24,8 +24,8 @@ class Jsonp extends Json
     }
 
     /**
-     * @param $ec
-     * @param $msg
+     * @param  <string> $ec  <description>
+     * @param  <string> $msg <description>
      * @return mixed|void
      */
     public function printError($ec, $msg)
