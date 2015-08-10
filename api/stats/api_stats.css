@@ -1,23 +1,17 @@
 /* iRail by Tuinslak / yeri.be */
 
 table.s {
-	border-width: 1px;
-	border-style: outset;
-	border-color: white;
+	border: 1px outset white;
 	border-collapse: collapse;
 	background-color: white;
 }
 table.s th {
-	border-width: 1px;
 	padding: 1px;
-	border-style: inset;
-	border-color: gray;
+	border: 1px inset gray;
 	background-color: white;
 }
 table.s td {
-	border-width: 1px;
 	padding: 1px;
-	border-style: inset;
-	border-color: gray;
+	border: 1px inset gray;
 	background-color: white;
 }
