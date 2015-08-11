@@ -37,4 +37,3 @@ class ConnectionsCall extends APICall {
 
 $call = new ConnectionsCall("connections");
 $call->executeCall();
-?>

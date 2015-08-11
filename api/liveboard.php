@@ -30,4 +30,4 @@ include_once("requests/LiveboardRequest.php");
 date_default_timezone_set("Europe/Brussels");
 $call = new APICall("liveboard");
 $call->executeCall();
-?>
+

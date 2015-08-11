@@ -65,5 +65,3 @@ class tools{
 	  return $hours. ":" . $minutes;	  
      } 
   }
-
-?>

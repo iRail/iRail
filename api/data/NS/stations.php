@@ -115,5 +115,3 @@ class Stations{
 	  return stations::$stations;
      }
 };
-
-?>

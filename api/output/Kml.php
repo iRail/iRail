@@ -99,4 +99,3 @@ class Kml extends Printer{
 	  echo "</kml>";
      }
 };
-?>
