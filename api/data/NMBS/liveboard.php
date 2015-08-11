@@ -163,6 +163,3 @@ class Liveboard{
         return array_merge($nodes);//array merge reindexes the array
     }
 };
-
-
-?>

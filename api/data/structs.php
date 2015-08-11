@@ -73,4 +73,3 @@ class Stop{
      public $time;
      public $delay;
 }
-?>

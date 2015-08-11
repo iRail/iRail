@@ -311,6 +311,3 @@ class Connections{
      }
 
 }
-
-
-?>

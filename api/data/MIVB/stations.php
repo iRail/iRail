@@ -199,5 +199,3 @@ class Line{
      public $x;
      public $y;
 };
-
-?>

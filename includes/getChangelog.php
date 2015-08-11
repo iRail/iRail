@@ -21,4 +21,3 @@
 	source available at http://github.com/Tuinslak/iRail
 */
 $irailChangelog = `git whatchanged`
-?>

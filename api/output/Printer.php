@@ -167,5 +167,3 @@ abstract class Printer{
      */
     abstract function printError($ec,$msg);
   }
-
-?>
