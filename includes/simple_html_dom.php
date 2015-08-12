@@ -570,7 +570,7 @@ class simple_html_dom_node {
 
         // return nth-element or array
         if (is_null($idx)) return $found;
-        else if ($idx<0) $idx = count($found) + $idx;
+        elseif ($idx<0) $idx = count($found) + $idx;
         return (isset($found[$idx])) ? $found[$idx] : null;
     }
 
@@ -1316,7 +1316,7 @@ class simple_html_dom {
                         return $this->as_text_node($tag);
                     }
                 }
-                else if (($this->parent->parent) && isset($this->block_tags[$tag_lower])) {
+                elseif (($this->parent->parent) && isset($this->block_tags[$tag_lower])) {
                     $this->parent->_[HDOM_INFO_END] = 0;
                     $org_parent = $this->parent;
 
@@ -1329,7 +1329,7 @@ class simple_html_dom {
                         return $this->as_text_node($tag);
                     }
                 }
-                else if (($this->parent->parent) && strtolower($this->parent->parent->tag)===$tag_lower) {
+                elseif (($this->parent->parent) && strtolower($this->parent->parent->tag)===$tag_lower) {
                     $this->parent->_[HDOM_INFO_END] = 0;
                     $this->parent = $this->parent->parent;
                 }
