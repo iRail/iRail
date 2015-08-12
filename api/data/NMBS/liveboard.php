@@ -25,7 +25,7 @@ class Liveboard{
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"arr");
             $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang(),$request->isFast());
-        }else if(strtoupper(substr($request->getArrdep(), 0, 1)) == "D"){
+        }elseif(strtoupper(substr($request->getArrdep(), 0, 1)) == "D"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"dep");
             $dataroot->departure = liveboard::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
         }

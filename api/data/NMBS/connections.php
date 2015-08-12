@@ -99,7 +99,7 @@ class Connections{
 	       ];
 	  if($typeOfTransport == "trains"){
 	       $trainsonly = "1111111000000000";
-	  }else if($typeOfTransport == "all"){
+	  }elseif($typeOfTransport == "all"){
 	       $trainsonly = "1111111111111111";
 	  }else{
 	       $trainsonly = "1111111000000000";
@@ -107,7 +107,7 @@ class Connections{
 
 	  if ($timeSel == "depart") {
 	       $timeSel = 0;
-	  } else if ($timeSel == "arrive") {
+	  } elseif ($timeSel == "arrive") {
 	       $timeSel = 1;
 	  }else {
 	       $timeSel = 1;
@@ -216,7 +216,7 @@ class Connections{
 					if ($att->Attribute["type"] == "NAME") {
 					     $trains[$j] = str_replace(" ", "", $att->Attribute->AttributeVariant->Text);
 					     $j++;
-					}else if($att->Attribute["type"] == "DIRECTION"){
+					}elseif($att->Attribute["type"] == "DIRECTION"){
                                             $__stat = new stdClass();
                                             //This recently changed: only fetch direction name, nothing else.
                                             $__stat->name = str_replace(" [NMBS/SNCB]","",trim($att->Attribute->AttributeVariant->Text));

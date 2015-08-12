@@ -74,7 +74,7 @@ class Xml extends Printer{
                        $elementkey = "URI";
                    }
                    echo " $elementkey=\"$elementval\"";
-	       }else if($elementkey == "name"){
+	       }elseif($elementkey == "name"){
 		    $named = $elementval;
 	       }
 	  }
@@ -93,7 +93,7 @@ class Xml extends Printer{
 	  if($key == "time"){
 	       $form = $this->iso8601($val);
 	       echo "<$key formatted=\"$form\">$val";
-	  }else if($key != "name" && !in_array($key,$this->ATTRIBUTES)){
+	  }elseif($key != "name" && !in_array($key,$this->ATTRIBUTES)){
 	       echo "<$key>$val";
 	  }
      }

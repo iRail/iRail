@@ -26,7 +26,7 @@ class Liveboard{
 	  if($request->getArrdep() == "ARR"){
 	       $xml = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"A");
 	       $dataroot->arrival = liveboard::parseData($xml, $request->getLang());
-	  }else if($request->getArrdep() == "DEP"){
+	  }elseif($request->getArrdep() == "DEP"){
 	       $xml = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"D");
 	       $dataroot->departure = liveboard::parseData($xml, $request->getLang());
 	  }
