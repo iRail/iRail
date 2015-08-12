@@ -43,11 +43,11 @@ class Liveboard{
      */
     private static function fetchData($station, $time, $lang, $timeSel){
         include "../includes/getUA.php";
-        $request_options = array(
+        $request_options = [
             "referer" => "http://api.irail.be/",
             "timeout" => "30",
             "useragent" => $irailAgent,
-        );
+        ];
         $body = "";
         /*
           For example, run this in command line:
@@ -79,7 +79,7 @@ class Liveboard{
 	//clean XML
         if(class_exists("tidy",false)) {
                 $tidy = new tidy();
-                $tidy->parseString($xml, array('input-xml' => true,'output-xml' => true),'utf8');
+                $tidy->parseString($xml, ['input-xml' => true,'output-xml' => true],'utf8');
                 $tidy->cleanRepair();
                 $xml = $tidy;
 	}
@@ -90,7 +90,7 @@ class Liveboard{
 //platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
 //dir="Eeklo [B]" is_reachable="0" />
 
-	$nodes = array();
+	$nodes = [];
         $i = 0;
 
         $hour = substr($time,0,2);

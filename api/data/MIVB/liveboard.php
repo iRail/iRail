@@ -45,11 +45,11 @@ class Liveboard{
      */
     public static function fetchData($station,$time,$lang,$arrdep){
 	  include "../includes/getUA.php";
-	  $request_options = array(
+	  $request_options = [
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
 	       "useragent" => $irailAgent,
-	       );
+	       ];
 	  if($arrdep == "A"){
 	       throw new Exception("Not yet implemented. If you really need this function you can try to implement it yourself in http://github.com/iRail/iRail or you can ask on the mailinglist list.iRail.be",500);
 	  }
@@ -74,7 +74,7 @@ class Liveboard{
 	  preg_match_all("/<waitingtime>.*?<line>(.*?)<\/line>.*?<mode>(.*?)<\/mode>.*?<minutes>(.*?)<\/minutes>.*?<destination>(.*?)<\/destination>.*?<\/waitingtime>/si", $xml,$matches);
 //	  echo $xml . "\n";
 //	  var_dump($matches);
-	  $nodes = array();
+	  $nodes = [];
 	  for($i=1;$i<sizeof($matches[0]);$i++){
 	       $nodes[$i-1] = new DepartureArrival();
 	       $nodes[$i-1]->vehicle = "BE.MIVB." . $matches[2][$i] . $matches[1][$i];

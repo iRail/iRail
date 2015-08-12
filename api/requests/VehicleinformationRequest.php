@@ -14,7 +14,7 @@ class VehicleinformationRequest extends Request {
 	  parent::__construct();
 	  parent::setGetVar("id", "");
           parent::setGetVar("fast", "false");
-	  parent::processRequiredVars(array("id"));
+	  parent::processRequiredVars(["id"]);
      }
 
     /**

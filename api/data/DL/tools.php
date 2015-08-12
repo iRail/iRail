@@ -43,7 +43,7 @@ class Tools{
 	  for($i = 0; $i< 10; $i++){ //10 ought to be enough for anyone?
 	       $phi = pi()/2 - 2 * atan($t * pow((1-Tools::$e*sin($phi))/(1+Tools::$e*sin($phi)), Tools::$e/2));
 	  }
-	  return array(rad2deg($phi),rad2deg($lambda));
+	  return [rad2deg($phi), rad2deg($lambda)];
      }
 
      public static function WGS84ToLambert($phi,$lambda){
@@ -56,6 +56,6 @@ class Tools{
 	  $theta = Tools::$n*($lambda - Tools::$l0);
 	  $x = Tools::$x0+$r*sin($theta);
 	  $y = Tools::$y0+Tools::$r0-$r*cos($theta);
-	  return array($x,$y);
+	  return [$x, $y];
      }
 }

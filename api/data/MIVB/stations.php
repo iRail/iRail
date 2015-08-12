@@ -130,7 +130,7 @@ class Stations{
 	  }
 	  APICall::connectToDB();
 	  mysql_query("SET NAMES utf8");
-	  $station = array();
+	  $station = [];
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM mivb ORDER BY `$lang`";
@@ -166,11 +166,11 @@ class Stations{
 	  }
 	  $scrapeUrl = "http://m.mivb.be/closeststops.php?latitude=$y&longitude=$x&lang=$lang";
 	  include "../includes/getUA.php";
-	  $request_options = array(
+	  $request_options = [
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
 	       "useragent" => $irailAgent,
-	       );
+	       ];
 
 	  $post = http_post_data($scrapeUrl, "", $request_options) || die("");
 	  $body = http_parse_message($post)->body;
@@ -180,7 +180,7 @@ class Stations{
 	  }
 	  $list = $match[1];
 	  preg_match_all("/<span class=\".*?\">(.*?)<\/span>/si", $list, $matches);
-	  $lines = array();
+	  $lines = [];
 	  $i =0;
 	  foreach($m as $matches[1]){
 	       $m[$i] = new line();

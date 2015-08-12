@@ -27,7 +27,7 @@ class ConnectionsRequest extends Request {
 	  parent::setGetVar("timeSel","depart");
 	  parent::setGetVar("typeOfTransport", "train");
           parent::setGetVar("fast","false");
-	  parent::processRequiredVars(array("from", "to"));
+	  parent::processRequiredVars(["from", "to"]);
 
 //reform date and time to wanted structure for hafas and railtime
 	  preg_match("/(..)(..)(..)/si", $this->date, $m);

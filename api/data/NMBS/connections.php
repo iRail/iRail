@@ -74,7 +74,7 @@ class Connections{
      private static function getHafasIDsFromNames($name1,$name2,$lang){
          $station1 = stations::getStationFromName($name1, $lang);
          $station2 = stations::getStationFromName($name2, $lang);
-         return array($station1->getHID(),$station2->getHID());
+         return [$station1->getHID(), $station2->getHID()];
      }
 
     /**
@@ -92,11 +92,11 @@ class Connections{
 	  include "../includes/getUA.php";
 	  $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/extxml.exe";
 //  $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
-	  $request_options = array(
+	  $request_options = [
 	       "referer" => "http://api.irail.be/",
 	       "timeout" => "30",
 	       "useragent" => $irailAgent,
-	       );
+	       ];
 	  if($typeOfTransport == "trains"){
 	       $trainsonly = "1111111000000000";
 	  }else if($typeOfTransport == "all"){
@@ -149,7 +149,7 @@ class Connections{
 
      public static function parseHafasXml($serverData, $lang, $fast) {
           $xml = new SimpleXMLElement($serverData);
-	  $connection = array();
+	  $connection = [];
 	  $i = 0;
 	  //DEBUG:
 //echo $serverData ;
@@ -201,9 +201,9 @@ class Connections{
 		    $connection[$i]->arrival->delay= $delay1;
 		    $connection[$i]->arrival->platform->normal = $platformNormal1;
 
-		    $trains = array();
-		    $vias = array();
-		    $directions = array();
+		    $trains = [];
+		    $vias = [];
+		    $directions = [];
 		    $j = 0;
 		    $k = 0;
 		    $connectionindex = 0;

@@ -34,7 +34,7 @@ class LiveboardRequest extends Request{
 	       //then there was an id given
 	       $this->station = $_GET["id"];
 	  }
-	  parent::processRequiredVars(array("station"));
+	  parent::processRequiredVars(["station"]);
      }
 
     /**
