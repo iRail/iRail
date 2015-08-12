@@ -26,4 +26,3 @@ $irailAgent = "iRail.be by Project iRail (http://yeri.be/dx); Git version: $irai
 
 // result example:
 // 85.12.6.130 - - [20/Sep/2010:14:57:58 +0200] "POST / HTTP/1.1" 200 119564 "http://irail.be/" "iRail.be by Project iRail (http://yeri.be/dx); Git version: 902542a"
-?>

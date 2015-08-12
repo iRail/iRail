@@ -260,5 +260,3 @@ class Stations
 	  return $station;
      }
 };
-
-?>

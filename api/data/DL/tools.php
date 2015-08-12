@@ -59,5 +59,3 @@ class Tools{
 	  return array($x,$y);
      }
 }
-
-?>

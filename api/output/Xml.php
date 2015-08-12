@@ -136,4 +136,3 @@ class Xml extends Printer{
      }
 
 };
-?>
