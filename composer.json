@@ -9,14 +9,18 @@
     }
   ],
   "require": {
-    "vlucas/phpdotenv": "^2.0"
+    "vlucas/phpdotenv": "^2.0",
+    "irail/stations": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "4.7.*"
   },
   "scripts": {
     "post-install-cmd": [
-      "php -r \"copy('.env.example', '.env');\""
-    ]
-  }
+      "php -r \"copy('.env.example', '.env');\"",
+      "cd vendor/irail/stations; npm install ; nodejs bin/build.js > stations.jsonld"
+    ],
+    "post-update-cmd" : "cd vendor/irail/stations; npm install ; nodejs bin/build.js > stations.jsonld"
+  },
+  "minimum-stability" : "dev"
 }
