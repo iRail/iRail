@@ -232,7 +232,7 @@ class Stations
      */
     private static function fetchAllStationsFromDB($lang){
 	  APICall::connectToDB();
-	  $station = array();
+	  $station = [];
 	  try {
 	       $lang = mysql_real_escape_string(strtoupper($lang));
 	       $query = "SELECT `ID`,`X`, `Y`, `STD`,`$lang` FROM stations WHERE `ID` LIKE 'BE.NMBS.%' ORDER BY `$lang`";

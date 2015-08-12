@@ -10,7 +10,7 @@ include_once("Printer.php");
  * @package output
  */
 class Kml extends Printer{
-     private $ATTRIBUTES=array("id", "locationX", "locationY", "standardname", "left","delay", "normal");
+     private $ATTRIBUTES = ["id", "locationX", "locationY", "standardname", "left","delay", "normal"];
      private $rootname;
 
 
@@ -46,8 +46,8 @@ class Kml extends Printer{
      }
 //make a stack of array information, always work on the last one
 //for nested array support
-     private $stack = array();
-     private $arrayindices = array();
+     private $stack = [];
+     private $arrayindices = [];
      private $currentarrayindex = -1;
 
     /**

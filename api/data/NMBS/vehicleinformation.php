@@ -22,7 +22,7 @@ class vehicleinformation{
 
           $serverData = vehicleinformation::getServerData($request->getVehicleId(),$lang);
           $dataroot->vehicle = vehicleinformation::getVehicleData($serverData, $request->getVehicleId(), $lang);
-          $dataroot->stop = array();
+          $dataroot->stop = [];
           $dataroot->stop = vehicleinformation::getData($serverData, $lang, $request->getFast());
      }
 
@@ -33,11 +33,11 @@ class vehicleinformation{
      */
     private static function getServerData($id,$lang){
           include_once("../includes/getUA.php");
-          $request_options = array(
+          $request_options = [
             "referer" => "http://api.irail.be/",
             "timeout" => "30",
             "useragent" => $irailAgent,
-            );
+            ];
           $scrapeURL = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/" . $lang . "ld=std&seqnr=1&ident=at.02043113.1429435556&";
           $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", "\\1", $id);
 
@@ -46,7 +46,7 @@ class vehicleinformation{
           $ch = curl_init();
           curl_setopt($ch, CURLOPT_URL, $scrapeURL);
           curl_setopt($ch, CURLOPT_POST, 1);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));   
+          curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
           curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($ch, CURLOPT_REFERER, $request_options["referer"]);
@@ -69,7 +69,7 @@ class vehicleinformation{
      */
     private static function getData($serverData, $lang, $fast){
 	  try{
-               $stops = array();
+               $stops = [];
                $html = str_get_html($serverData);
                $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
                

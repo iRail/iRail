@@ -37,8 +37,8 @@ class Json extends Printer{
 
 //make a stack of array information, always work on the last one
 //for nested array support
-     private $stack = array();
-     private $arrayindices = array();
+     private $stack = [];
+     private $arrayindices = [];
      private $currentarrayindex = -1;
 
 
