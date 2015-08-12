@@ -193,9 +193,7 @@ class Stations
         }
         return $lines;
     }
-}
-
-;
+};
 
 class Line
 {
@@ -205,6 +203,4 @@ class Line
     public $to;
     public $x;
     public $y;
-}
-
-;
+};
