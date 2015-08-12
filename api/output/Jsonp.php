@@ -21,10 +21,11 @@ class Jsonp extends Json
 	  echo ")";
      }
 
-    /**
-     * @param $ec
-     * @param $msg
-     */
+	/**
+	 * @param $ec
+	 * @param $msg
+	 * @return mixed|void
+	 */
     function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");

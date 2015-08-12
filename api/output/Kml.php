@@ -54,6 +54,7 @@ class Kml extends Printer{
      * @param $name
      * @param $number
      * @param bool $root
+     * @return mixed|void
      */
     function startArray($name,$number, $root = false){
      }
@@ -65,6 +66,7 @@ class Kml extends Printer{
     /**
      * @param $name
      * @param $object
+     * @return mixed|void
      */
     function startObject($name, $object){
 	  if($name == "station"){
@@ -75,12 +77,14 @@ class Kml extends Printer{
     /**
      * @param $key
      * @param $val
+     * @return mixed|void
      */
     function startKeyVal($key,$val){
      }
 
     /**
      * @param $name
+     * @return mixed|void
      */
     function endElement($name){
      }
@@ -88,12 +92,14 @@ class Kml extends Printer{
     /**
      * @param $name
      * @param bool $root
+     * @return mixed|void
      */
     function endArray($name, $root = false){
      }
 
     /**
      * @param $name
+     * @return mixed|void
      */
     function endRootElement($name){
 	  echo "</kml>";

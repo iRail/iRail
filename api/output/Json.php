@@ -15,21 +15,23 @@ class Json extends Printer{
 	  header("Content-Type: application/json;charset=UTF-8");
      }
 
-    /**
-     * @param $ec
-     * @param $msg
-     */
+	/**
+	 * @param $ec
+	 * @param $msg
+	 * @return mixed|void
+	 */
     function printError($ec, $msg){
 	  $this->printHeader();
 	  header("HTTP/1.1 $ec $msg");
 	  echo "{\"error\":$ec,\"message\":\"$msg\"}";
      }
 
-    /**
-     * @param $name
-     * @param $version
-     * @param $timestamp
-     */
+	/**
+	 * @param $name
+	 * @param $version
+	 * @param $timestamp
+	 * @return mixed|void
+	 */
     function startRootElement($name, $version, $timestamp){
 	  $this->rootname = $name;
 	  echo "{\"version\":\"$version\",\"timestamp\":\"$timestamp\",";
@@ -42,11 +44,12 @@ class Json extends Printer{
      private $currentarrayindex = -1;
 
 
-    /**
-     * @param $name
-     * @param $number
-     * @param bool $root
-     */
+	/**
+	 * @param $name
+	 * @param $number
+	 * @param bool $root
+	 * @return mixed|void
+	 */
     function startArray($name,$number, $root = false){
 	  if(!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation"){
 	       echo "\"" . $name . "s\":{\"number\":\"$number\",";
@@ -66,10 +69,11 @@ class Json extends Printer{
 	  echo ",";
      }
 
-    /**
-     * @param $name
-     * @param $object
-     */
+	/**
+	 * @param $name
+	 * @param $object
+	 * @return mixed|void
+	 */
     function startObject($name, $object){
 	  if($this->currentarrayindex >-1 && $this->stack[$this->currentarrayindex] == $name){
 	       echo "{";
@@ -91,18 +95,20 @@ class Json extends Printer{
 	  }
      }
 
-    /**
-     * @param $key
-     * @param $val
-     */
+	/**
+	 * @param $key
+	 * @param $val
+	 * @return mixed|void
+	 */
     function startKeyVal($key,$val){
 	  echo "\"$key\":\"$val\"";
      }
 
-    /**
-     * @param $name
-     * @param bool $root
-     */
+	/**
+	 * @param $name
+	 * @param bool $root
+	 * @return mixed|void
+	 */
     function endArray($name, $root = false){
 	  $this->stack[$this->currentarrayindex] = "";
 	  $this->arrayindices[$this->currentarrayindex] = 0;
@@ -121,16 +127,18 @@ class Json extends Printer{
 	  echo "}";
      }
 
-    /**
-     * @param $name
-     */
+	/**
+	 * @param $name
+	 * @return mixed|void
+	 */
     function endElement($name){
 	  
      }
 
-    /**
-     * @param $name
-     */
+	/**
+	 * @param $name
+	 * @return mixed|void
+	 */
     function endRootElement($name){
 	  echo "}";
      }
