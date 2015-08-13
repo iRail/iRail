@@ -6,8 +6,10 @@
    */
 
 include_once("Request.php");
-class StationsRequest extends Request{
-     function __construct() {
-	  parent::__construct();
-     }
+class StationsRequest extends Request
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
 }
