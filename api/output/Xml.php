@@ -132,7 +132,7 @@ class Xml extends Printer{
      * @return bool|string
      */
     function iso8601($unixtime){
-	  return date("Y-m-d\TH:i:s\Z", $unixtime);
+	  return date("Y-m-d\TH:i:s", $unixtime);
      }
 
 };
