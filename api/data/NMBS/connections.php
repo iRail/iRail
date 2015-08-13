@@ -13,10 +13,10 @@ class Connections{
 
 
     /**
-     * @param $stationURI
-     * @param $routeLabel
-     * @param $headsign
-     * @param $datetime
+     * @param  string, $stationURI, The URI fot the station.
+     * @param  $routeLabel
+     * @param  $headsign
+     * @param  $datetime
      * @return string
      */
     public static function createDepartureURI($stationURI, $routeLabel, $headsign,$datetime){
@@ -45,15 +45,15 @@ class Connections{
      }
 
     /**
-     * @param $from
-     * @param $to
-     * @param $time
-     * @param $date
+     * @param string, $from
+     * @param string, $to
+     * @param int,    $time
+     * @param int,    $date
      * @param $results
-     * @param $lang
+     * @param string, $lang, The language.
      * @param $fast
      * @param string $timeSel
-     * @param string $typeOfTransport
+     * @param string $typeOfTransport, The type of transport
      * @return array
      * @throws Exception
      */
@@ -68,7 +68,7 @@ class Connections{
      *
      * @param $name1
      * @param $name2
-     * @param $lang
+     * @param  string, $lang, The language.
      * @return array
      */
      private static function getHafasIDsFromNames($name1,$name2,$lang){
@@ -78,14 +78,14 @@ class Connections{
      }
 
     /**
-     * @param $idfrom
-     * @param $idto
+     * @param int, $idfrom
+     * @param int, $idto
      * @param $lang
      * @param $time
      * @param $date
      * @param $results
      * @param $timeSel
-     * @param $typeOfTransport
+     * @param $typeOfTransport, The type of transport.
      * @return mixed
      */
     private static function requestHafasXml($idfrom,$idto,$lang, $time, $date, $results, $timeSel, $typeOfTransport){
