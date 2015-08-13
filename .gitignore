@@ -8,3 +8,4 @@ api/push.php
 .idea/
 /vendor/
 .env
+composer.lock

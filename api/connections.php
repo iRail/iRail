@@ -25,7 +25,8 @@
 /**
  * This is the API request handler
  */
-include_once("APICall.php");
+include_once '../vendor/autoload.php';
+include_once 'APICall.php';
 date_default_timezone_set("Europe/Brussels");
 
 class ConnectionsCall extends APICall {

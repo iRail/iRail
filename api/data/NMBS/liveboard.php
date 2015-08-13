@@ -17,11 +17,12 @@ class Liveboard{
 
     public static function fillDataRoot($dataroot,$request){
         $arr = explode(".",$request->getStation());
-        $stationr=$request->getStation();
-        if(sizeof($arr)>1){
+        $stationr = $request->getStation();
+        if (sizeof($arr) > 1) {
             $stationr=$arr[2];
-	}
-        $dataroot->station = stations::getStationFromName($stationr, $request->getLang());
+        }
+        $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
+        
         if(strtoupper(substr($request->getArrdep(), 0, 1)) == "A"){
             $html = liveboard::fetchData($dataroot->station, $request->getTime(), $request->getLang(),"arr");
             $dataroot->arrival = liveboard::parseData($html, $request->getTime(), $request->getLang(),$request->isFast());
@@ -60,11 +61,19 @@ class Liveboard{
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
         $scrapeUrl .= "&time=" . $time ."&date=". date("d") . "." . date("m") .".". date("Y") ."&inputTripelId=". urlencode("A=1@O=@X=@Y=@U=80@L=". $hafasid ."@B=1@p=@") . "&maxJourneys=50&boardType=" . $timeSel . "&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000";
-
-        $post = http_post_data($scrapeUrl, "", $request_options) || die("");
-        $body .= http_parse_message($post)->body;
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $scrapeUrl);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options["useragent"]);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options["referer"]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options["timeout"]);
+        $response = curl_exec ($ch);
+        curl_close ($ch);
         //Strangly, the response didn't have a root-tag
-        return "<xml>" . $body . "</xml>";
+        return "<xml>" . $response . "</xml>";
 
     }
 

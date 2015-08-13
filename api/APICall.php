@@ -5,12 +5,12 @@
    *
    * @author Pieter Colpaert
    */
-include_once 'vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 ini_set("include_path", ".:data");
-include_once("data/DataRoot.php");
-include_once("data/structs.php");
+include_once "data/DataRoot.php";
+include_once "data/structs.php";
 class APICall {
 
      private $VERSION = 1.1;

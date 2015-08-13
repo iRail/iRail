@@ -18,9 +18,9 @@
   "scripts": {
     "post-install-cmd": [
       "php -r \"copy('.env.example', '.env');\"",
-      "cd vendor/irail/stations; npm install ; nodejs bin/build.js > stations.jsonld"
+      "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
     ],
-    "post-update-cmd" : "cd vendor/irail/stations; npm install ; nodejs bin/build.js > stations.jsonld"
+    "post-update-cmd" : "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
   },
   "minimum-stability" : "dev"
 }
