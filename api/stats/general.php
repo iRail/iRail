@@ -60,7 +60,7 @@ try {
    <script language="javascript" src="http://www.google.com/jsapi"></script>
     </head>
     <body>
-        <h1>Uncached iRail API calls<?
+        <h1>Uncached iRail API calls<?php
             if ($filter != "") {
                 echo " with $filter";
             }
@@ -78,9 +78,9 @@ try {
           query.send(handleQueryResponse);
         } else {
           var dataTable = new google.visualization.DataTable();
-          dataTable.addRows(<? echo sizeof($rows); ?>);
+          dataTable.addRows(<?php echo sizeof($rows); ?>);
           dataTable.addColumn('number');
-            <?
+            <?php
             $chartrows = array_reverse($rows, true);
             $count = 0;
             foreach ($chartrows as $day__ => $value) {
@@ -99,7 +99,7 @@ try {
         var options = {
           chxl: '',
           chxp: '',
-          chxr: '0,0,<? echo max($rows); ?>',
+          chxr: '0,0,<?php echo max($rows); ?>',
           chxs: '',
           chxtc: '',
           chxt: 'y',
@@ -146,7 +146,7 @@ try {
 
 <p>As of <a href="http://project.irail.be/ticket/85" target="_blank">15/03/2011</a> this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).</p>
 
-        <?
+        <?php
             echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
             $count = 0;
             foreach ($rows as $day__ => $value) {
@@ -154,10 +154,12 @@ try {
                 //echo date("d m y" ,$date__) . " " . $day__. "<br/>";
                 if ($count == 0) {
                     echo '<tr><td><span class="red">' . $day__ . '</span></td><td><span class="red">' . $value . '</span></td></tr>';
-                } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
-                    echo '<tr><td><span class="gray">' . $day__ . '</span></td><td><span class="gray">' . $value . '</span></td></tr>';
                 } else {
-                    echo '<tr><td>' . $day__ . '</td><td>' . $value . '</td></tr>';
+                    if (date("w", $date__) == 6 || date("w", $date__) == 0) {
+                        echo '<tr><td><span class="gray">' . $day__ . '</span></td><td><span class="gray">' . $value . '</span></td></tr>';
+                    } else {
+                        echo '<tr><td>' . $day__ . '</td><td>' . $value . '</td></tr>';
+                    }
                 }
                 $count++;
             }
@@ -165,7 +167,7 @@ try {
         ?>
         
 <?php
-	include("../../includes/googleAnalytics.php");
+    include("../../includes/googleAnalytics.php");
 ?>
 
     </body>

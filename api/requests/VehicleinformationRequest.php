@@ -6,30 +6,32 @@
    * @author pieterc
    */
 include_once("Request.php");
-class VehicleinformationRequest extends Request {
-     protected $id;
-     protected $fast;
+class VehicleinformationRequest extends Request
+{
+    protected $id;
+    protected $fast;
 
-     function __construct() {
-	  parent::__construct();
-	  parent::setGetVar("id", "");
-          parent::setGetVar("fast", "false");
-	  parent::processRequiredVars(["id"]);
-     }
-
-    /**
-     * @return mixed
-     */
-    public function getVehicleId() {
-	  return $this->id;
-     }
+    public function __construct()
+    {
+        parent::__construct();
+        parent::setGetVar("id", "");
+        parent::setGetVar("fast", "false");
+        parent::processRequiredVars(["id"]);
+    }
 
     /**
      * @return mixed
      */
-    public function getFast(){
-         return $this->fast;
-     }
-     
+    public function getVehicleId()
+    {
+        return $this->id;
+    }
 
+    /**
+     * @return mixed
+     */
+    public function getFast()
+    {
+        return $this->fast;
+    }
 }

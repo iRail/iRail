@@ -1,7 +1,7 @@
 <?php
 /* 	Copyright 2008, 2009, 2010 Yeri "Tuinslak" Tiete (http://yeri.be), and others
-	
-	This file is part of iRail.
+    
+    This file is part of iRail.
 
     iRail is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with iRail.  If not, see <http://www.gnu.org/licenses/>.
 
-	http://project.irail.be - http://irail.be
-	
-	source available at http://github.com/Tuinslak/iRail
+    http://project.irail.be - http://irail.be
+    
+    source available at http://github.com/Tuinslak/iRail
 */
 include 'getVersion.php';
 // add trailing "-" to prevent RH/Apache/NMBS error: HTTP header: invalid date
@@ -26,3 +26,4 @@ $irailAgent = "iRail.be by Project iRail (http://yeri.be/dx); Git version: $irai
 
 // result example:
 // 85.12.6.130 - - [20/Sep/2010:14:57:58 +0200] "POST / HTTP/1.1" 200 119564 "http://irail.be/" "iRail.be by Project iRail (http://yeri.be/dx); Git version: 902542a"
+
