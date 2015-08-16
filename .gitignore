@@ -9,3 +9,5 @@ api/push.php
 /vendor/
 .env
 composer.lock
+
+*.log

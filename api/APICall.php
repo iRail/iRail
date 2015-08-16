@@ -7,6 +7,8 @@
    */
 
 use Dotenv\Dotenv;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 ini_set("include_path", ".:data");
 include_once "data/DataRoot.php";
@@ -119,39 +121,20 @@ class APICall {
 	  if ($ua == "") {
 	       $ua = "-";
 	  }
-	  APICall::connectToDB();
-	  $from = mysql_real_escape_string($from);
-	  $to = mysql_real_escape_string($to);
-	  $err = mysql_real_escape_string($err);
-	  $ip = mysql_real_escape_string($ip);
-	  $ua = mysql_real_escape_string($ua);
+
 	  // insert in db
 	  try {
             $dotenv = new Dotenv(dirname(__DIR__));
             $dotenv->load();
 
-	       $query = "
-              INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8)
-              VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '". $_ENV['apiServerName'] ."')";
+		  $stream = new StreamHandler(__DIR__ . '/logs/'. date('Y-m-d') .'-log.log', Logger::INFO);
+		  $logger = new Logger('irail_api');
+		  $logger->pushHandler($stream);
 
-	       $result = mysql_query($query);
+		  $logger->addInfo('', [$now, $ua, $from, $to, $err, $ip, $_ENV['apiServerName']]);
 	  }
 	  catch (Exception $e) {
-	       echo "Error writing to the database.";
-	  }
-     }
-
-
-     public static function connectToDB(){
-         try {
-             $dotenv = new Dotenv(dirname(__DIR__));
-             $dotenv->load();
-
-             mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
-             mysql_select_db($_ENV['apiDatabase']);
-	  }
-	  catch (Exception $e) {
-	       throw new Exception("Error connecting to the database.", 3);
+	       echo "Error writing to the log file.";
 	  }
      }
 }
