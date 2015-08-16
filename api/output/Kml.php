@@ -1,6 +1,7 @@
 <?php
+namespace Irail\Api\output;
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Printer.php");
 
 /**
  * Prints the Kml style output. This works only for stations!!!
@@ -9,7 +10,7 @@ include_once("Printer.php");
  *
  * @package output
  */
-class Kml extends Printer
+class Kml extends \Irail\Api\output\Printer
 {
     private $ATTRIBUTES = ["id", "locationX", "locationY", "standardname", "left", "delay", "normal"];
     private $rootname;
