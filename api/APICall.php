@@ -137,5 +137,17 @@ class APICall {
 	       echo "Error writing to the log file.";
 	  }
      }
+
+	public static function connectToDB(){
+		try {
+			$dotenv = new Dotenv(dirname(__DIR__));
+			$dotenv->load();
+			mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
+			mysql_select_db($_ENV['apiDatabase']);
+		}
+		catch (Exception $e) {
+			throw new Exception("Error connecting to the database.", 3);
+		}
+	}
 }
 
