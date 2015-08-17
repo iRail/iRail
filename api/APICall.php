@@ -136,12 +136,17 @@ class APICall
             $dotenv = new Dotenv(dirname(__DIR__));
             $dotenv->load();
 
-            $stream = new StreamHandler(__DIR__ . '/logs/' . date('Y-m-d') . '-log.log', Logger::INFO);
+            $stream = new StreamHandler(__DIR__ . '/logs/access.log', Logger::INFO);
             $logger = new Logger('irail_api');
             $logger->pushHandler($stream);
 
             $logger->addInfo('', [$now, $ua, $from, $to, $err, $ip, $_ENV['apiServerName']]);
         } catch (Exception $e) {
+            $stream = newStreamHandler(__DIR__ . '/logs/error.log', Logger::ERROR);
+            $logger->pushHandler($stream);
+
+            $logger->addError('Errpr writing to the log file');
+
             echo "Error writing to the log file.";
         }
     }
