@@ -19,7 +19,7 @@ class APICall {
      protected $dataRoot;
 
      //Hooks
-     private $logging = true;
+     private $logging = false;
 
     /**
      * @param $functionname
@@ -83,7 +83,7 @@ class APICall {
     protected function logError($functionname, Exception $e){
 	  if(!isset($_SERVER['HTTP_USER_AGENT']))
                 $_SERVER['HTTP_USER_AGENT'] = "unknown";
-	  if($this->logging){
+	  if($this->logging){          
 	       $this->writeLog($_SERVER['HTTP_USER_AGENT'],"", "", "Error in $functionname " . $e -> getMessage(), $_SERVER['REMOTE_ADDR']);
 	  }
      }
