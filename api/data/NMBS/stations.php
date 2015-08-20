@@ -17,7 +17,7 @@ class Stations
      * @param $request
      * @throws Exception
      */
-    public static function fillDataRoot ($dataroot,$request)
+    public static function fillDataRoot($dataroot,$request)
     {
         $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
     }
