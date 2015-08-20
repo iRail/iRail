@@ -55,7 +55,8 @@ class Stations
      * @return Station
      * @throws Exception
      */
-    public static function getStationFromID($id, $lang){
+    public static function getStationFromID($id, $lang)
+    {
         $stationobject = irail\stations\Stations::getStationFromID($id);
         if ($stationobject) {
             return stations::transformNewToOldStyle($stationobject, $lang);
@@ -72,7 +73,8 @@ class Stations
      * @return Station
      * @throws Exception
      */
-    public static function getStationFromName($name, $lang){
+    public static function getStationFromName($name, $lang)
+    {
         //first check if it wasn't by any chance an id
         if (substr($name, 0, 1) == "0" || substr($name, 0, 7) == "BE.NMBS" || substr($name, 0, 7) == "http://") {
             return stations::getStationFromID($name, $lang);
