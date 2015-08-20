@@ -73,13 +73,16 @@ class vehicleinformation{
         try {
             $stops = [];
             $html = str_get_html($serverData);
-            $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
+
+            $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
+                ->getElementByTagName('table')
+                ->children;
             
             
             $j = 0;
             for ($i=1; $i < count($nodes); $i++) {
                 $node = $nodes[$i];
-                if(!count($node->attr)) continue; // row with no class-attribute contain no data
+                if (!count($node->attr)) continue; // row with no class-attribute contain no data
 
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : "0";
@@ -89,7 +92,7 @@ class vehicleinformation{
                 $arriveTime = reset($spans[0]->nodes[0]->_);                    
                 $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;  
                     
-                if(count($node->children[3]->find('a'))) {
+                if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
                     $stationname = reset($as[0]->nodes[0]->_);
                 }
@@ -98,9 +101,9 @@ class vehicleinformation{
 
                 $stops[$j] = new Stop();
                 $station = new Station();
-                if($fast == "true"){
+                if ($fast == "true"){
                     $station->name = $stationname;
-                }else{
+                } else {
                     $station = stations::getStationFromName($stationname,$lang);
                 }
                 $stops[$j]->station = $station;
@@ -111,8 +114,7 @@ class vehicleinformation{
             }
 
             return $stops;
-        }
-        catch(Exception $e){
+        } catch (Exception $e) {
             throw new Exception($e->getMessage(), 500);
         }
     }
@@ -136,13 +138,13 @@ class vehicleinformation{
 
         for($i=1; $i<count($nodes); $i++){
             $node = $nodes[$i];
-            if(!count($node->attr)) continue; // row with no class-attribute contain no data
+            if (!count($node->attr)) continue; // row with no class-attribute contain no data
             $as = $node->children[3]->find('a');
             $station = reset($as[0]->nodes[0]->_);
           
             $locationX = 0;
             $locationY = 0;
-            if(isset($station)){
+            if (isset($station)){
                 $now = stations::getStationFromName($station, $lang);
                 $locationX = $now->locationX;
                 $locationY = $now->locationY;

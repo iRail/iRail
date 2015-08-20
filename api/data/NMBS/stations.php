@@ -17,7 +17,7 @@ class Stations
      * @param $request
      * @throws Exception
      */
-    public static function fillDataRoot ($dataroot,$request)
+    public static function fillDataRoot($dataroot, $request)
     {
         $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
     }
@@ -55,7 +55,8 @@ class Stations
      * @return Station
      * @throws Exception
      */
-    public static function getStationFromID($id, $lang){
+    public static function getStationFromID($id, $lang)
+    {
         $stationobject = irail\stations\Stations::getStationFromID($id);
         if ($stationobject) {
             return stations::transformNewToOldStyle($stationobject, $lang);
@@ -72,31 +73,32 @@ class Stations
      * @return Station
      * @throws Exception
      */
-    public static function getStationFromName($name, $lang){
+    public static function getStationFromName($name, $lang)
+    {
         //first check if it wasn't by any chance an id
-        if (substr($name,0,1) == "0" || substr($name,0,7) == "BE.NMBS" || substr($name,0,7) == "http://") {
+        if (substr($name, 0, 1) == "0" || substr($name, 0, 7) == "BE.NMBS" || substr($name, 0, 7) == "http://") {
             return stations::getStationFromID($name, $lang);
         }
         $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, "UTF-8");
-        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/","",$name);
-        $name = str_replace(" [NMBS/SNCB]","",$name);
-        $name = explode("/",$name);
+        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", "", $name);
+        $name = str_replace(" [NMBS/SNCB]", "", $name);
+        $name = explode("/", $name);
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
         
-        if(!isset($stationsgraph->{'@graph'}[0])){
+        if (!isset($stationsgraph->{'@graph'}[0])) {
             throw new Exception("Could not match " . $name . " with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new");
         }
         $station = $stationsgraph->{'@graph'}[0];
 
         //or find exact match using ugly breaks and strlen
-        foreach($stationsgraph->{'@graph'} as $stationitem) {
+        foreach ($stationsgraph->{'@graph'} as $stationitem) {
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
-            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
-                    if(strlen($alt->{"@value"}) === strlen($name)) {
+                    if (strlen($alt->{"@value"}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
