@@ -84,7 +84,7 @@ class Stations
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
         
-        if(!isset($stationsgraph->{'@graph'}[0])){
+        if (!isset($stationsgraph->{'@graph'}[0])) {
             throw new Exception("Could not match " . $name . " with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new");
         }
         $station = $stationsgraph->{'@graph'}[0];
@@ -96,7 +96,7 @@ class Stations
                 break;
             } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
-                    if(strlen($alt->{"@value"}) === strlen($name)) {
+                    if (strlen($alt->{"@value"}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
