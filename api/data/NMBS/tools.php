@@ -50,16 +50,16 @@ class tools{
 	  $hours = $m[1];
 	  $minutes = $m[2];
 	  //echo $hours . " " . $minutes . "\n";
-	  if($minutes >= 45){
+	  if ($minutes >= 45){
 	       $minutes = ($minutes + 15)-60;
-	       if($minutes < 10){
+	       if ($minutes < 10){
 		    $minutes = "0" . $minutes;
 	       }
 	       $hours ++;
 	       if($hours > 23){
 		    $hours = "00";//no fallback for days?
 	       }
-	  }else{
+	  } else {
 	       $minutes +=15;
 	  }
 	  return $hours. ":" . $minutes;	  
