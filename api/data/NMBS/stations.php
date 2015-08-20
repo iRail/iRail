@@ -90,7 +90,7 @@ class Stations
         $station = $stationsgraph->{'@graph'}[0];
 
         //or find exact match using ugly breaks and strlen
-        foreach($stationsgraph->{'@graph'} as $stationitem) {
+        foreach ($stationsgraph->{'@graph'} as $stationitem) {
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
