@@ -74,13 +74,13 @@ class Stations
      */
     public static function getStationFromName($name, $lang){
         //first check if it wasn't by any chance an id
-        if (substr($name,0,1) == "0" || substr($name,0,7) == "BE.NMBS" || substr($name,0,7) == "http://") {
+        if (substr($name, 0, 1) == "0" || substr($name, 0, 7) == "BE.NMBS" || substr($name, 0, 7) == "http://") {
             return stations::getStationFromID($name, $lang);
         }
         $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, "UTF-8");
-        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/","",$name);
-        $name = str_replace(" [NMBS/SNCB]","",$name);
-        $name = explode("/",$name);
+        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", "", $name);
+        $name = str_replace(" [NMBS/SNCB]", "", $name);
+        $name = explode("/", $name);
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
         
