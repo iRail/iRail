@@ -10,7 +10,8 @@
   ],
   "require": {
     "vlucas/phpdotenv": "^2.0",
-    "irail/stations": "dev-master"
+    "irail/stations": "dev-master",
+    "monolog/monolog": "^1.16@dev"
   },
   "require-dev": {
     "phpunit/phpunit": "4.7.*"
@@ -21,6 +22,11 @@
       "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
     ],
     "post-update-cmd" : "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
+  },
+  "autoload": {
+    "psr-4": {
+      "Irail\\Api\\": "/api"
+    }
   },
   "minimum-stability" : "dev"
 }

@@ -1,13 +1,15 @@
 <?php
+namespace Irail\Api\output;
+
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Json.php");
 
 /**
  * Prints the Jsonp style output
  *
  * @package output
  */
-class Jsonp extends Json
+class Jsonp extends \Irail\Api\output\Json
 {
     public function printHeader()
     {

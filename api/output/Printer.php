@@ -1,5 +1,7 @@
 <?php
 
+namespace Irail\Api\output;
+
 /**
  * An abstract class for a printer. It prints a document
  *

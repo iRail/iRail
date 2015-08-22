@@ -1,6 +1,7 @@
 <?php
+namespace Irail\Api\output;
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Printer.php");
 
 /**
  * Prints the Xml style output
@@ -9,7 +10,7 @@ include_once("Printer.php");
  *
  * @package output
  */
-class Xml extends Printer
+class Xml extends \Irail\Api\output\Printer
 {
     private $ATTRIBUTES = ["id", "@id", "locationX", "locationY", "standardname", "left", "delay", "normal"];
     private $rootname;

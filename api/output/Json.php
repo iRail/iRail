@@ -1,4 +1,7 @@
 <?php
+
+namespace Irail\Api\output;
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
 /**
  * Prints the Json style output
@@ -6,9 +9,8 @@
  *
  * @package output
  */
-include_once("Printer.php");
 
-class Json extends Printer
+class Json extends \Irail\Api\output\Printer
 {
     private $rootname;
 
