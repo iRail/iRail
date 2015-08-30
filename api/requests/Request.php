@@ -10,7 +10,7 @@
 class Request
 {
     public static $SUPPORTED_LANGUAGES = ["EN", "NL", "FR", "DE"];
-    public static $SUPPORTED_SYSTEMS = ["NMBS", "MIVB", "NS", "DL"];
+    public static $SUPPORTED_SYSTEMS = ["NMBS"];
 
     private $format = "xml";
     private $lang = "EN";
