@@ -89,8 +89,8 @@ class Connections
      * @param $time
      * @param $date
      * @param $results
-     * @param string, $timeSel
-     * @param string, $typeOfTransport
+     * @param string $timeSel
+     * @param string $typeOfTransport
      * @return mixed
      */
     private static function requestHafasXml($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
