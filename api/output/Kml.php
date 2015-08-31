@@ -10,7 +10,6 @@ include_once 'Printer.php';
  */
 class Kml extends Printer
 {
-    private $ATTRIBUTES = ['id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'normal'];
     private $rootname;
 
     // make a stack of array information, always work on the last one
