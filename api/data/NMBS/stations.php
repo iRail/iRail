@@ -1,13 +1,12 @@
 <?php
 
-/** 
- * Copyright (C) 2011 by iRail vzw/asbl
+/**
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
  *
  * This will fetch all stationdata for the NMBS. It implements a couple of standard functions implemented by all stations classes:
  *
- *   * fillDataRoot will fill the entire dataroot with stations
- *   * getStationFromName will return the right station object for a Name
+ * fillDataRoot will fill the entire dataroot with stations
+ * getStationFromName will return the right station object for a Name
  */
 class Stations
 {
