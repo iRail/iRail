@@ -6,8 +6,8 @@
 class tools
 {
     /**
-      * @param <type> $time -> in 00d15:24:00
-      * @param <type> $date -> in 20100915
+      * @param $time -> in 00d15:24:00
+      * @param $date -> in 20100915
       * @return seconds since the Unix epoch
       */
      public static function transformTime($time, $date)
