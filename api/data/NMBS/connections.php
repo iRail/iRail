@@ -163,7 +163,7 @@ class Connections
         return $response;
     }
 
-    public static function parseHafasXml($serverData, $lang)
+    public static function parseHafasXml($serverData, $lang, $fast)
     {
         $xml = new SimpleXMLElement($serverData);
         $connection = [];
