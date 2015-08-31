@@ -5,7 +5,6 @@
  *
  * @author pieterc
  */
-
 class DepartureArrival
 {
     public $delay;

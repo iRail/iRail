@@ -5,7 +5,6 @@
  *
  * @author pieterc
  */
-
 class Connection
 {
     public $departure;
