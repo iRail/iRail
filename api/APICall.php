@@ -152,6 +152,16 @@ class APICall
           $dotenv = new Dotenv(dirname(__DIR__));
           $dotenv->load();
 
+          // Database columns
+          $api_table = getenv('apiTable');
+          $api_c2 = getenv('column2');
+          $api_c3 = getenv('column3');
+          $api_c4 = getenv('column4');
+          $api_c5 = getenv('column5');
+          $api_c6 = getenv('column6');
+          $api_c7 = getenv('column7');
+          $api_c8 = getenv('column8');
+
           $query = "
               INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8)
               VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '".$_ENV['apiServerName']."')";
