@@ -5,7 +5,7 @@
  *
  * @author pieterc
  */
-include_once("Request.php");
+include_once 'Request.php';
 
 class ConnectionsRequest extends Request
 {
@@ -21,21 +21,21 @@ class ConnectionsRequest extends Request
     public function __construct()
     {
         parent::__construct();
-        parent::setGetVar("from", "");
-        parent::setGetVar("to", "");
-        parent::setGetVar("results", 6);
-        parent::setGetVar("date", date("dmy"));
-        parent::setGetVar("time", date("Hi"));
-        parent::setGetVar("timeSel", "depart");
-        parent::setGetVar("typeOfTransport", "train");
-        parent::setGetVar("fast", "false");
-        parent::processRequiredVars(["from", "to"]);
+        parent::setGetVar('from', '');
+        parent::setGetVar('to', '');
+        parent::setGetVar('results', 6);
+        parent::setGetVar('date', date('dmy'));
+        parent::setGetVar('time', date('Hi'));
+        parent::setGetVar('timeSel', 'depart');
+        parent::setGetVar('typeOfTransport', 'train');
+        parent::setGetVar('fast', 'false');
+        parent::processRequiredVars(['from', 'to']);
 
         // reform date and time to wanted structure for hafas and railtime
-        preg_match("/(..)(..)(..)/si", $this->date, $m);
-        $this->date = "20" . $m[3] . $m[2] . $m[1];
-        preg_match("/(..)(..)/si", $this->time, $m);
-        $this->time = $m[1] . ":" . $m[2];
+        preg_match('/(..)(..)(..)/si', $this->date, $m);
+        $this->date = '20'.$m[3].$m[2].$m[1];
+        preg_match('/(..)(..)/si', $this->time, $m);
+        $this->time = $m[1].':'.$m[2];
     }
 
     /**
@@ -101,6 +101,4 @@ class ConnectionsRequest extends Request
     {
         return $this->typeOfTransport;
     }
-
 }
-

@@ -1,5 +1,7 @@
 <?php
+
 use Dotenv\Dotenv;
+
 class configurationTest extends \PHPUnit_Framework_TestCase
 {
     public function testDotEnvVars()
