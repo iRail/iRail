@@ -14,7 +14,6 @@ class Kml extends Printer
 
     // make a stack of array information, always work on the last one
     // for nested array support
-    private $stack = [];
     private $arrayindices = [];
     private $currentarrayindex = -1;
 
