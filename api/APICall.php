@@ -1,5 +1,7 @@
 <?php
 
+
+
   /* Copyright (C) 2011 by iRail vzw/asbl
    *
    * This class foresees in basic REST functionality. It will get all the GET vars and put it in a request. This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
