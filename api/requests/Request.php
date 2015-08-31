@@ -9,12 +9,12 @@
 
 class Request
 {
-    public static $SUPPORTED_LANGUAGES = ["EN", "NL", "FR", "DE"];
-    public static $SUPPORTED_SYSTEMS = ["NMBS", "MIVB", "NS", "DL"];
+    public static $SUPPORTED_LANGUAGES = ['EN', 'NL', 'FR', 'DE'];
+    public static $SUPPORTED_SYSTEMS = ['NMBS'];
 
-    private $format = "xml";
-    private $lang = "EN";
-    private $system = "NMBS";
+    private $format = 'xml';
+    private $lang = 'EN';
+    private $system = 'NMBS';
 
     /**
      * @param  array , $array
@@ -23,14 +23,14 @@ class Request
     protected function processRequiredVars($array)
     {
         foreach ($array as $var) {
-            if (!isset($this->$var) || $this->$var == "" || is_null($this->$var)) {
+            if (! isset($this->$var) || $this->$var == '' || is_null($this->$var)) {
                 throw new Exception("$var not set. Please review your request and add the right parameters", 400);
             }
         }
     }
 
     /**
-     * will take a get a variable from the GET array and set it as a member variable
+     * will take a get a variable from the GET array and set it as a member variable.
      *
      * @param $varName
      * @param $default
@@ -44,12 +44,11 @@ class Request
         }
     }
 
-
     public function __construct()
     {
-        $this->setGetVar("format", "xml");
-        $this->setGetVar("lang", "EN");
-        $this->setGetVar("system", "NMBS");
+        $this->setGetVar('format', 'xml');
+        $this->setGetVar('lang', 'EN');
+        $this->setGetVar('system', 'NMBS');
     }
 
     /**
@@ -67,11 +66,11 @@ class Request
     {
         $this->lang = strtoupper($this->lang);
 
-        if (in_array($this->lang, Request::$SUPPORTED_LANGUAGES)) {
+        if (in_array($this->lang, self::$SUPPORTED_LANGUAGES)) {
             return $this->lang;
         }
 
-        return "EN";
+        return 'EN';
     }
 
     /**
@@ -81,11 +80,10 @@ class Request
     {
         $this->system = strtoupper($this->system);
 
-        if (in_array($this->system, Request::$SUPPORTED_SYSTEMS)) {
+        if (in_array($this->system, self::$SUPPORTED_SYSTEMS)) {
             return $this->system;
         } else {
-            return "NMBS";
+            return 'NMBS';
         }
     }
-
 }
