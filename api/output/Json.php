@@ -1,6 +1,9 @@
 <?php
 
-/* Copyright (C) 2011 by iRail vzw/asbl */
+/**
+ * Copyright (C) 2011 by iRail vzw/asbl
+ */
+
 /**
  * Prints the Json style output.
  */
