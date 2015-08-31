@@ -30,7 +30,7 @@ class DataRoot
       if (isset($_GET['callback']) && $format == 'Json') {
           $format = 'Jsonp';
       }
-         if (! file_exists("output/$format.php")) {
+         if (!file_exists("output/$format.php")) {
              throw new Exception('Incorrect format specified. Please correct this and try again', 402);
          }
          include_once "output/$format.php";
