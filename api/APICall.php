@@ -24,7 +24,6 @@ include_once 'data/structs/Vehicle.php';
 include_once 'data/structs/Via.php';
 include_once 'data/structs/ViaDepartureArrival.php';
 
-
 class APICall
 {
     private $VERSION = 1.1;
