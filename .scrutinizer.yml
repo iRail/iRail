@@ -4,3 +4,8 @@ checks:
     php:
         code_rating: true
         duplication: true
+
+tools:
+    php_code_sniffer:
+        config:
+            standard: "PSR2" # Other Values: PSR1, PEAR, Zend, WordPress, Drupal, TYPO3CMS
