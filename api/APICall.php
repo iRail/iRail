@@ -13,7 +13,17 @@ use Dotenv\Dotenv;
 
 ini_set('include_path', '.:data');
 include_once 'data/DataRoot.php';
-include_once 'data/structs.php';
+
+// Data structs
+include_once 'data/structs/Connection.php';
+include_once 'data/structs/DepartureArrival.php';
+include_once 'data/structs/Platform.php';
+include_once 'data/structs/Station.php';
+include_once 'data/structs/Stop.php';
+include_once 'data/structs/Vehicle.php';
+include_once 'data/structs/Via.php';
+include_once 'data/structs/ViaDepartureArrival.php';
+
 class APICall
 {
     private $VERSION = 1.1;
