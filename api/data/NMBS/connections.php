@@ -20,9 +20,9 @@ class Connections
     public static function createDepartureURI($stationURI, $routeLabel, $headsign, $datetime)
     {
         $routeLabel = preg_replace("/([A-Z]{1,2})(\d+)/", '$1 $2', $routeLabel);
-        $md5hash = md5($routeLabel . $headsign);
+        $md5hash = md5($routeLabel.$headsign);
 
-        return $stationURI . '/departures/' . date('YmdHi', $datetime) . $md5hash;
+        return $stationURI.'/departures/'.date('YmdHi', $datetime).$md5hash;
     }
 
     /**
@@ -121,23 +121,23 @@ class Connections
 
         //now we're going to get the real data
         $postdata = '<?xml version="1.0 encoding="iso-8859-1"?>
-<ReqC ver="1.1" prod="iRail" lang="' . $lang . '">
+<ReqC ver="1.1" prod="iRail" lang="'.$lang.'">
 <ConReq>
 <Start min="0">
-<Station externalId="' . $idfrom . '" distance="0">
+<Station externalId="'.$idfrom.'" distance="0">
 </Station>
 <Prod prod="' . $trainsonly . '">
 </Prod>
 </Start>
 <Dest min="0">
-<Station externalId="' . $idto . '" distance="0">
+<Station externalId="'.$idto.'" distance="0">
 </Station>
 </Dest>
 <Via>
 </Via>
-<ReqT time="' . $time . '" date="' . $date . '" a="' . $timeSel . '">
+<ReqT time="'.$time.'" date="'.$date.'" a="'.$timeSel.'">
 </ReqT>
-<RFlags b="' . $results * $timeSel . '" f="' . $results * -($timeSel - 1) . '">
+<RFlags b="'.$results * $timeSel.'" f="'.$results * -($timeSel - 1).'">
 </RFlags>
 <GISParameters>
 <Front>
@@ -267,7 +267,7 @@ class Connections
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
                                 }
-                                $vias[$connectionindex]->vehicle = 'BE.NMBS.' . $trains[$j - 1];
+                                $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
                                 $connectionindex++;
                             }
@@ -287,7 +287,7 @@ class Connections
                     }
                 }
 
-                $connection[$i]->departure->vehicle = 'BE.NMBS.' . $trains[0];
+                $connection[$i]->departure->vehicle = 'BE.NMBS.'.$trains[0];
                 if (isset($directions[0])) {
                     $connection[$i]->departure->direction = $directions[0];
                     $connection[$i]->departure->{'@id'} = self::createDepartureURI($fromstation->{'@id'}, $trains[0], $directions[0]->name, $connection[$i]->departure->time);
@@ -295,7 +295,7 @@ class Connections
                     $connection[$i]->departure->direction = 'unknown';
                 }
 
-                $connection[$i]->arrival->vehicle = 'BE.NMBS.' . $trains[count($trains) - 1];
+                $connection[$i]->arrival->vehicle = 'BE.NMBS.'.$trains[count($trains) - 1];
                 if (isset($directions[count($directions) - 1])) {
                     $connection[$i]->arrival->direction = $directions[count($directions) - 1];
                 } else {
@@ -319,9 +319,9 @@ class Connections
     private static function getStationFromHafasDescription($name, $locationX, $locationY, $lang)
     {
         preg_match('/(.)(.*)/', $locationX, $m);
-        $locationX = $m[1] . '.' . $m[2];
+        $locationX = $m[1].'.'.$m[2];
         preg_match('/(..)(.*)/', $locationY, $m);
-        $locationY = $m[1] . '.' . $m[2];
+        $locationY = $m[1].'.'.$m[2];
 
         return stations::getStationFromName($name, $lang);
     }

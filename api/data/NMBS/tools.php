@@ -54,7 +54,7 @@ class tools
         if ($minutes >= 45) {
             $minutes = ($minutes + 15) - 60;
             if ($minutes < 10) {
-                $minutes = '0' . $minutes;
+                $minutes = '0'.$minutes;
             }
             $hours++;
             if ($hours > 23) {
@@ -64,6 +64,6 @@ class tools
             $minutes += 15;
         }
 
-        return $hours . ':' . $minutes;
+        return $hours.':'.$minutes;
     }
 }
