@@ -126,7 +126,7 @@ class Connections
 <Start min="0">
 <Station externalId="'.$idfrom.'" distance="0">
 </Station>
-<Prod prod="' . $trainsonly . '">
+<Prod prod="'.$trainsonly.'">
 </Prod>
 </Start>
 <Dest min="0">
