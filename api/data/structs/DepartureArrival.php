@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2011 by iRail vzw/asbl
+ * Copyright (C) 2011 by iRail vzw/asbl.
  *
  * The datastruct for departure's and arrival's.
  *
