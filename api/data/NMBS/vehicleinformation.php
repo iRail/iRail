@@ -181,6 +181,10 @@ class vehicleinformation{
     private static function parseCorrectUrl($serverData) {
         $html = str_get_html($serverData);
 
+        $test = $html->getElementById('HFSResult')->getElementByTagName('table');
+        if (!is_object($test))
+            throw new Exception("Vehicle not found", 1); // catch errors
+
         // Try first url
         $url = $html->getElementById('HFSResult')
             ->getElementByTagName('table')
