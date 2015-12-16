@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2010, 2011 by iRail vzw/asbl */
 /*
   This file is part of iRail.
@@ -21,20 +22,21 @@
   Source available at http://github.com/Tuinslak/iRail
  */
 
-
 /**
- * This is the API request handler
+ * This is the API request handler.
  */
 include_once '../vendor/autoload.php';
 include_once 'APICall.php';
-date_default_timezone_set("Europe/Brussels");
+date_default_timezone_set('Europe/Brussels');
 
-class ConnectionsCall extends APICall {
-    protected function logRequest() {
-          $r = $this->request;
-	       parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), "none (connections)", $_SERVER['REMOTE_ADDR']);
+class ConnectionsCall extends APICall
+{
+    protected function logRequest()
+    {
+        $r = $this->request;
+        parent::writeLog($_SERVER['HTTP_USER_AGENT'], $r->getFrom(), $r->getTo(), 'none (connections)', $_SERVER['REMOTE_ADDR']);
     }
 }
 
-$call = new ConnectionsCall("connections");
+$call = new ConnectionsCall('connections');
 $call->executeCall();

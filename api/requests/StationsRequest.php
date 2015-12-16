@@ -5,7 +5,7 @@
  * @author pieterc
  */
 
-include_once("Request.php");
+include_once 'Request.php';
 
 class StationsRequest extends Request
 {

@@ -7,7 +7,7 @@ use Dotenv\Dotenv;
 $dotenv = new Dotenv(dirname(__DIR__));
 $dotenv->load();
 
-$filter = "";
+$filter = '';
 if (isset($_GET['filter'])) {
     $filter = mysql_escape_string($_GET['filter']);
 }
@@ -18,7 +18,7 @@ try {
     $api_c2 = $_ENV['column2'];
     $api_table = $_ENV['apiTable'];
 
-    if ($filter != "") {
+    if ($filter != '') {
         $query = "
           SELECT DATE_FORMAT(STR_TO_DATE($api_c2,'%a, %d %b %Y %T'), '%d %m %Y') day, count(id) visitors
           FROM $api_table
@@ -42,7 +42,7 @@ try {
         $rows[$row->day] = $row->visitors;
     }
 } catch (Exception $e) {
-    echo "Error connecting to the database.";
+    echo 'Error connecting to the database.';
 }
 //PAGE OUTPUT
 ?>
@@ -60,8 +60,8 @@ try {
    <script language="javascript" src="http://www.google.com/jsapi"></script>
     </head>
     <body>
-        <h1>Uncached iRail API calls<?
-            if ($filter != "") {
+        <h1>Uncached iRail API calls<?php
+            if ($filter != '') {
                 echo " with $filter";
             }
             ?></h1>
@@ -78,13 +78,13 @@ try {
           query.send(handleQueryResponse);
         } else {
           var dataTable = new google.visualization.DataTable();
-          dataTable.addRows(<? echo sizeof($rows); ?>);
+          dataTable.addRows(<?php echo count($rows); ?>);
           dataTable.addColumn('number');
-            <?
+            <?php
             $chartrows = array_reverse($rows, true);
             $count = 0;
             foreach ($chartrows as $day__ => $value) {
-                if ($count != sizeof($rows) - 1 && $count != 0) {
+                if ($count != count($rows) - 1 && $count != 0) {
                     echo "dataTable.setValue($count, 0,$value);";
                 }
                 $count++;
@@ -99,7 +99,7 @@ try {
         var options = {
           chxl: '',
           chxp: '',
-          chxr: '0,0,<? echo max($rows); ?>',
+          chxr: '0,0,<?php echo max($rows); ?>',
           chxs: '',
           chxtc: '',
           chxt: 'y',
@@ -146,18 +146,18 @@ try {
 
 <p>As of <a href="http://project.irail.be/ticket/85" target="_blank">15/03/2011</a> this graph only displays uncached API calls. This displays the amount of requests we send to our data providers (such as NMBS/SNCB).</p>
 
-        <?
+        <?php
             echo '<table border="1"><tr><th>Date</td><th>API Requests</th></tr>';
             $count = 0;
             foreach ($rows as $day__ => $value) {
                 $date__ = strtotime($day__);
                 //echo date("d m y" ,$date__) . " " . $day__. "<br/>";
                 if ($count == 0) {
-                    echo '<tr><td><span class="red">' . $day__ . '</span></td><td><span class="red">' . $value . '</span></td></tr>';
-                } else if (date("w", $date__) == 6 || date("w", $date__) == 0) {
-                    echo '<tr><td><span class="gray">' . $day__ . '</span></td><td><span class="gray">' . $value . '</span></td></tr>';
+                    echo '<tr><td><span class="red">'.$day__.'</span></td><td><span class="red">'.$value.'</span></td></tr>';
+                } elseif (date('w', $date__) == 6 || date('w', $date__) == 0) {
+                    echo '<tr><td><span class="gray">'.$day__.'</span></td><td><span class="gray">'.$value.'</span></td></tr>';
                 } else {
-                    echo '<tr><td>' . $day__ . '</td><td>' . $value . '</td></tr>';
+                    echo '<tr><td>'.$day__.'</td><td>'.$value.'</td></tr>';
                 }
                 $count++;
             }
@@ -165,7 +165,7 @@ try {
         ?>
         
 <?php
-	include("../../includes/googleAnalytics.php");
+    include '../../includes/googleAnalytics.php';
 ?>
 
     </body>

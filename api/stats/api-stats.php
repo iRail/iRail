@@ -37,73 +37,72 @@ $limit = 250;
 $dotenv = new Dotenv(dirname(__DIR__));
 $dotenv->load();
 
-$s = $_REQUEST["s"];
+$s = $_REQUEST['s'];
 
 if (empty($s)) {
-	$s = 0;
+    $s = 0;
 }
 
 $count = 1 + $s;
 
-	try {
-		mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
-		mysql_select_db($api_database);
-		$query = "SELECT COUNT(". $_ENV['column1'] .") FROM ". $_ENV['apiTable'] ."";
-		$result = mysql_query($query);
-		$numrows = mysql_result($result, 0);
+    try {
+        mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
+        mysql_select_db($api_database);
+        $query = 'SELECT COUNT('.$_ENV['column1'].') FROM '.$_ENV['apiTable'].'';
+        $result = mysql_query($query);
+        $numrows = mysql_result($result, 0);
 
         $dbColumns = [
             $_ENV['column1'], $_ENV['column2'], $_ENV['column3'], $_ENV['column4'],
-            $_ENV['column5'], $_ENV['column6'], $_ENV['column7'], $_ENV['column8']
+            $_ENV['column5'], $_ENV['column6'], $_ENV['column7'], $_ENV['column8'],
         ];
 
-		$query = "SELECT $dbColumns FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
-		$result = mysql_query($query);
-	}
-	catch (Exception $e) {
-		echo "Error connecting to the database.";
-	}
+        $query = "SELECT $dbColumns FROM $api_table ORDER BY $api_c1 DESC LIMIT $s,$limit";
+        $result = mysql_query($query);
+    } catch (Exception $e) {
+        echo 'Error connecting to the database.';
+    }
 
-	$count++;
+    $count++;
 
-	if ($s>=1) { // bypass PREV link if s is 0
-		$prevs=($s-$limit);
-		print "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
-	}
+    if ($s >= 1) { // bypass PREV link if s is 0
+        $prevs = ($s - $limit);
+        echo "&nbsp;<a href=\"$PHP_SELF?s=$prevs\">&lt;&lt; Prev</a>&nbsp&nbsp;";
+    }
 
-	// calculate number of pages needing links
-	$pages=intval($numrows/$limit);
+    // calculate number of pages needing links
+    $pages = intval($numrows / $limit);
 
-	if ($numrows%$limit) {
-		// has a page
-		$pages++;
-	}
+    if ($numrows % $limit) {
+        // has a page
+        $pages++;
+    }
 
-	// check to see if last page
-	if (!((($s+$limit)/$limit)==$pages) && $pages!=1) {
-		// not last page so give NEXT link
-		$news=$s+$limit;
-		echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
-	}
+    // check to see if last page
+    if (! ((($s + $limit) / $limit) == $pages) && $pages != 1) {
+        // not last page so give NEXT link
+        $news = $s + $limit;
+        echo "&nbsp;<a href=\"$PHP_SELF?s=$news\">Next &gt;&gt;</a>";
+    }
 
-	echo "</center><table class=\"s\"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th><th>srvr</th></tr>";
+    echo '</center><table class="s"><tr><th>id</th><th>time</th><th>browser</th><th>from</th><th>to</th><th>errors</th><th>ip</th><th>srvr</th></tr>';
 
-	while($row = mysql_fetch_object($result)) {
-		echo "<tr>";
-		echo "<td>" . $row->$api_c1 . "</td>";
-		echo "<td>" . $row->$api_c2 . "</td>";
-		echo "<td>" . $row->$api_c3 . "</td>";
-		echo "<td>" . $row->$api_c4 . "</td>";
-		echo "<td>" . $row->$api_c5 . "</td>";
-		echo "<td>" . $row->$api_c6 . "</td>";
-		echo "<td><center>" . $row->$api_c7 . "</center></td>";
-		echo "<td><center>" . $row->$api_c8 . "</center></td>";
-		echo "</tr>";
-	}
-        
-	mysql_close();
-        
-include("../../includes/googleAnalytics.php");
+    while ($row = mysql_fetch_object($result)) {
+        echo '<tr>';
+        echo '<td>'.$row->$api_c1.'</td>';
+        echo '<td>'.$row->$api_c2.'</td>';
+        echo '<td>'.$row->$api_c3.'</td>';
+        echo '<td>'.$row->$api_c4.'</td>';
+        echo '<td>'.$row->$api_c5.'</td>';
+        echo '<td>'.$row->$api_c6.'</td>';
+        echo '<td><center>'.$row->$api_c7.'</center></td>';
+        echo '<td><center>'.$row->$api_c8.'</center></td>';
+        echo '</tr>';
+    }
+
+    mysql_close();
+
+include '../../includes/googleAnalytics.php';
 ?>
 </table>
 </body>

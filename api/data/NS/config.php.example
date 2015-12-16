@@ -1,6 +1,0 @@
-<?php
-//This is the config file for your own NS API
-$api_url = "http://webservices.ns.nl/";
-
-$api_user = "...";
-$api_password = "...";

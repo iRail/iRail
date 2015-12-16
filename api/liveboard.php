@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2010, 2011 by iRail vzw/asbl */
 /*
   This file is part of iRail.
@@ -21,14 +22,12 @@
   Source available at http://github.com/Tuinslak/iRail
  */
 
-
 /**
- * This returns information about 1 specific station
+ * This returns information about 1 specific station.
  */
 include_once '../vendor/autoload.php';
-include_once("APICall.php");
-include_once("requests/LiveboardRequest.php");
-date_default_timezone_set("Europe/Brussels");
-$call = new APICall("liveboard");
+include_once 'APICall.php';
+include_once 'requests/LiveboardRequest.php';
+date_default_timezone_set('Europe/Brussels');
+$call = new APICall('liveboard');
 $call->executeCall();
-

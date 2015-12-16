@@ -1,17 +1,16 @@
 <?php
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
-include_once("Printer.php");
+include_once 'Printer.php';
 
 /**
- * Prints the Xml style output
+ * Prints the Xml style output.
  *
  * Todo: change in_array to isset key lookups. This should make the whole faster
- *
- * @package output
  */
 class Xml extends Printer
 {
-    private $ATTRIBUTES = ["id", "@id", "locationX", "locationY", "standardname", "left", "delay", "normal"];
+    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'normal'];
     private $rootname;
 
     // make a stack of array information, always work on the last one
@@ -22,8 +21,8 @@ class Xml extends Printer
 
     public function printHeader()
     {
-        header("Access-Control-Allow-Origin: *");
-        header("Content-Type: text/xml; charset=UTF-8");
+        header('Access-Control-Allow-Origin: *');
+        header('Content-Type: text/xml; charset=UTF-8');
     }
 
     /**
@@ -52,8 +51,8 @@ class Xml extends Printer
 
     public function startArray($name, $number, $root = false)
     {
-        if (!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation") {
-            echo "<" . $name . "s number=\"$number\">";
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '<'.$name."s number=\"$number\">";
         }
 
         $this->currentarrayindex++;
@@ -76,31 +75,30 @@ class Xml extends Printer
         // Test wether this object is a first-level array object
         echo "<$name";
 
-        if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != "station") {
-            echo " id=\"" . $this->arrayindices[$this->currentarrayindex] . "\"";
+        if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != 'station') {
+            echo ' id="'.$this->arrayindices[$this->currentarrayindex].'"';
         }
 
         // fallback for attributes and name tag
         $hash = get_object_vars($object);
-        $named = "";
+        $named = '';
 
         foreach ($hash as $elementkey => $elementval) {
             if (in_array($elementkey, $this->ATTRIBUTES)) {
-                if ($elementkey == "@id") {
-                    $elementkey = "URI";
+                if ($elementkey == '@id') {
+                    $elementkey = 'URI';
                 }
                 echo " $elementkey=\"$elementval\"";
-            } elseif ($elementkey == "name") {
+            } elseif ($elementkey == 'name') {
                 $named = $elementval;
             }
         }
 
-        echo ">";
+        echo '>';
 
-        if ($named != "") {
+        if ($named != '') {
             echo $named;
         }
-
     }
 
     /**
@@ -110,10 +108,10 @@ class Xml extends Printer
      */
     public function startKeyVal($key, $val)
     {
-        if ($key == "time") {
+        if ($key == 'time') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
-        } elseif ($key != "name" && !in_array($key, $this->ATTRIBUTES)) {
+        } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
             echo "<$key>$val";
         }
     }
@@ -124,7 +122,7 @@ class Xml extends Printer
      */
     public function endElement($name)
     {
-        if (!in_array($name, $this->ATTRIBUTES) && $name != "name") {
+        if (! in_array($name, $this->ATTRIBUTES) && $name != 'name') {
             echo "</$name>";
         }
     }
@@ -136,10 +134,10 @@ class Xml extends Printer
      */
     public function endArray($name, $root = false)
     {
-        if (!$root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation") {
-            echo "</" . $name . "s>";
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '</'.$name.'s>';
         }
-        $this->stack[$this->currentarrayindex] = "";
+        $this->stack[$this->currentarrayindex] = '';
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->currentarrayindex--;
     }
@@ -161,5 +159,4 @@ class Xml extends Printer
     {
         return date("Y-m-d\TH:i:s", $unixtime);
     }
-
 };

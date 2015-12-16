@@ -1,12 +1,10 @@
 <?php
+
 /* Copyright (C) 2011 by iRail vzw/asbl */
 /**
- * Prints the Json style output
- *
- *
- * @package output
+ * Prints the Json style output.
  */
-include_once("Printer.php");
+include_once 'Printer.php';
 
 class Json extends Printer
 {
@@ -20,8 +18,8 @@ class Json extends Printer
 
     public function printHeader()
     {
-        header("Access-Control-Allow-Origin: *");
-        header("Content-Type: application/json;charset=UTF-8");
+        header('Access-Control-Allow-Origin: *');
+        header('Content-Type: application/json;charset=UTF-8');
     }
 
     /**
@@ -56,8 +54,8 @@ class Json extends Printer
      */
     public function startArray($name, $number, $root = false)
     {
-        if (! $root || $this->rootname == "liveboard" || $this->rootname == "vehicleinformation") {
-            echo "\"" . $name . "s\":{\"number\":\"$number\",";
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '"'.$name."s\":{\"number\":\"$number\",";
         }
 
         echo "\"$name\":[";
@@ -69,13 +67,13 @@ class Json extends Printer
 
     public function nextArrayElement()
     {
-        echo ",";
+        echo ',';
         $this->arrayindices[$this->currentarrayindex]++;
     }
 
     public function nextObjectElement()
     {
-        echo ",";
+        echo ',';
     }
 
     /**
@@ -86,21 +84,21 @@ class Json extends Printer
     public function startObject($name, $object)
     {
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name) {
-            echo "{";
+            echo '{';
             // Show id (in array) except if array of stations (compatibility issues)
-            if ($name != "station") {
-                echo "\"id\":\"" . $this->arrayindices[$this->currentarrayindex] . "\",";
+            if ($name != 'station') {
+                echo '"id":"'.$this->arrayindices[$this->currentarrayindex].'",';
             }
         } else {
-            if ($this->rootname != "stations" && $name == "station" || $name == "platform") {
+            if ($this->rootname != 'stations' && $name == 'station' || $name == 'platform') {
                 // split station and platform into station/platform and stationinfo/platforminfox,
                 // to be compatible with 1.0
                 echo "\"$name\":\"$object->name\",";
-                echo "\"" . $name . "info\":{";
-            } elseif ($this->rootname != "vehicle" && $name == "vehicle") {
+                echo '"'.$name.'info":{';
+            } elseif ($this->rootname != 'vehicle' && $name == 'vehicle') {
                 // split vehicle into vehicle and vehicleinfo to be compatible with 1.0
                 echo "\"$name\":\"$object->name\",";
-                echo "\"" . $name . "info\":{";
+                echo '"'.$name.'info":{';
             } else {
                 echo "\"$name\":{";
             }
@@ -124,14 +122,14 @@ class Json extends Printer
      */
     public function endArray($name, $root = false)
     {
-        $this->stack[$this->currentarrayindex] = "";
+        $this->stack[$this->currentarrayindex] = '';
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->currentarrayindex--;
 
-        if ($root && $this->rootname != "liveboard" && $this->rootname != "vehicleinformation") {
-            echo "]";
+        if ($root && $this->rootname != 'liveboard' && $this->rootname != 'vehicleinformation') {
+            echo ']';
         } else {
-            echo "]}";
+            echo ']}';
         }
     }
 
@@ -140,7 +138,7 @@ class Json extends Printer
      */
     public function endObject($name)
     {
-        echo "}";
+        echo '}';
     }
 
     /**
@@ -149,7 +147,6 @@ class Json extends Printer
      */
     public function endElement($name)
     {
-
     }
 
     /**
@@ -158,6 +155,6 @@ class Json extends Printer
      */
     public function endRootElement($name)
     {
-        echo "}";
+        echo '}';
     }
 };
