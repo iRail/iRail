@@ -1,11 +1,10 @@
 <?php
 /** Copyright (C) 2011 by iRail vzw/asbl
- *
  * The request information for a vehicle lookup. It tracks the location and gets information about its future location.
  *
  * @author pieterc
  */
-include_once("Request.php");
+include_once 'Request.php';
 
 class VehicleinformationRequest extends Request
 {
@@ -15,9 +14,9 @@ class VehicleinformationRequest extends Request
     public function __construct()
     {
         parent::__construct();
-        parent::setGetVar("id", "");
-        parent::setGetVar("fast", "false");
-        parent::processRequiredVars(["id"]);
+        parent::setGetVar('id', '');
+        parent::setGetVar('fast', 'false');
+        parent::processRequiredVars(['id']);
     }
 
     /**
@@ -35,6 +34,4 @@ class VehicleinformationRequest extends Request
     {
         return $this->fast;
     }
-
 }
-

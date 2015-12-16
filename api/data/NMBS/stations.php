@@ -1,16 +1,14 @@
 <?php
 /** 
  * Copyright (C) 2011 by iRail vzw/asbl
- * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl
+ * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
  *
  * This will fetch all stationdata for the NMBS. It implements a couple of standard functions implemented by all stations classes:
  *
  *   * fillDataRoot will fill the entire dataroot with stations
  *   * getStationFromName will return the right station object for a Name
- *
- * @package data/NMBS
  */
-class Stations
+class stations
 {
     /**
      * @param $dataroot
@@ -19,33 +17,34 @@ class Stations
      */
     public static function fillDataRoot($dataroot, $request)
     {
-        $dataroot->station = stations::fetchAllStationsFromDB($request->getLang());
+        $dataroot->station = self::fetchAllStationsFromDB($request->getLang());
     }
 
     /**
-     * Takes a JSON-LD station element and transforms it into the style of the old API
+     * Takes a JSON-LD station element and transforms it into the style of the old API.
      */
-    private static function transformNewToOldStyle ($newstation, $lang) 
+    private static function transformNewToOldStyle($newstation, $lang)
     {
         $station = new Station();
-        $id = str_replace("http://irail.be/stations/NMBS/","", $newstation->{"@id"});
-        $station->id = "BE.NMBS." . $id; //old-style iRail ids
+        $id = str_replace('http://irail.be/stations/NMBS/', '', $newstation->{'@id'});
+        $station->id = 'BE.NMBS.'.$id; //old-style iRail ids
         $station->locationX = $newstation->longitude;
         $station->locationY = $newstation->latitude;
-        $station->{"@id"} = $newstation->{"@id"};
-        if (isset($newstation->{"alternative"})) {
-            foreach ($newstation->{"alternative"} as $alternatives) {
-                if ($alternatives->{"@language"} == strtolower($lang)) {
-                    $station->name = $alternatives->{"@value"};
+        $station->{'@id'} = $newstation->{'@id'};
+        if (isset($newstation->{'alternative'})) {
+            foreach ($newstation->{'alternative'} as $alternatives) {
+                if ($alternatives->{'@language'} == strtolower($lang)) {
+                    $station->name = $alternatives->{'@value'};
                 }
             }
         }
         $station->standardname = $newstation->name;
-        
-        if (!isset($station->name)) {
+
+        if (! isset($station->name)) {
             $station->name = $station->standardname;
         }
         $station->setHID($id);
+
         return $station;
     }
 
@@ -59,14 +58,14 @@ class Stations
     {
         $stationobject = irail\stations\Stations::getStationFromID($id);
         if ($stationobject) {
-            return stations::transformNewToOldStyle($stationobject, $lang);
+            return self::transformNewToOldStyle($stationobject, $lang);
         } else {
-            throw new Exception("Error: could not find a station with id " . $stationobject->{"@id"} .".", 300);
+            throw new Exception('Error: could not find a station with id '.$stationobject->{'@id'}.'.', 300);
         }
     }
 
     /**
-     * Gets an appropriate station from the new iRail API
+     * Gets an appropriate station from the new iRail API.
      *
      * @param $name
      * @param $lang
@@ -76,18 +75,18 @@ class Stations
     public static function getStationFromName($name, $lang)
     {
         //first check if it wasn't by any chance an id
-        if (substr($name, 0, 1) == "0" || substr($name, 0, 7) == "BE.NMBS" || substr($name, 0, 7) == "http://") {
-            return stations::getStationFromID($name, $lang);
+        if (substr($name, 0, 1) == '0' || substr($name, 0, 7) == 'BE.NMBS' || substr($name, 0, 7) == 'http://') {
+            return self::getStationFromID($name, $lang);
         }
-        $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, "UTF-8");
-        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", "", $name);
-        $name = str_replace(" [NMBS/SNCB]", "", $name);
-        $name = explode("/", $name);
+        $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, 'UTF-8');
+        $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", '', $name);
+        $name = str_replace(' [NMBS/SNCB]', '', $name);
+        $name = explode('/', $name);
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
-        
-        if (!isset($stationsgraph->{'@graph'}[0])) {
-            throw new Exception("Could not match " . $name . " with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new");
+
+        if (! isset($stationsgraph->{'@graph'}[0])) {
+            throw new Exception('Could not match '.$name.' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new');
         }
         $station = $stationsgraph->{'@graph'}[0];
 
@@ -98,17 +97,18 @@ class Stations
                 break;
             } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
-                    if (strlen($alt->{"@value"}) === strlen($name)) {
+                    if (strlen($alt->{'@value'}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
                 }
-            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{"@value"}) === strlen($name)){
+            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                 $station = $stationitem;
                 break;
             }
         }
-        return stations::transformNewToOldStyle($station, $lang);
+
+        return self::transformNewToOldStyle($station, $lang);
     }
 
     /**
@@ -120,9 +120,10 @@ class Stations
     {
         $stations = [];
         $newstations = irail\stations\Stations::getStations();
-        foreach ($newstations->{"@graph"} as $station) {
-            array_push($stations, stations::transformNewToOldStyle($station, $lang));
+        foreach ($newstations->{'@graph'} as $station) {
+            array_push($stations, self::transformNewToOldStyle($station, $lang));
         }
+
         return $stations;
     }
 };

@@ -1,11 +1,10 @@
 <?php
 /** Copyright (C) 2011 by iRail vzw/asbl
- *
- * LiveboardRequest Class
+ * LiveboardRequest Class.
  *
  * @author pieterc
  */
-include_once("Request.php");
+include_once 'Request.php';
 
 class LiveboardRequest extends Request
 {
@@ -18,29 +17,29 @@ class LiveboardRequest extends Request
     public function __construct()
     {
         parent::__construct();
-        parent::setGetVar("station", "");
-        parent::setGetVar("date", date("dmy"));
-        parent::setGetVar("arrdep", "DEP");
-        parent::setGetVar("time", date("Hi"));
-        parent::setGetVar("fast", "false");
+        parent::setGetVar('station', '');
+        parent::setGetVar('date', date('dmy'));
+        parent::setGetVar('arrdep', 'DEP');
+        parent::setGetVar('time', date('Hi'));
+        parent::setGetVar('fast', 'false');
 
-        preg_match("/(..)(..)(..)/si", $this->date, $m);
+        preg_match('/(..)(..)(..)/si', $this->date, $m);
 
-        if (sizeof($m) > 3) {
-            $this->date = "20" . $m[3] . $m[2] . $m[1];
-        } elseif (sizeof($m) > 2) {
-            $this->date = date("Y") . $m[2] . $m[1];
+        if (count($m) > 3) {
+            $this->date = '20'.$m[3].$m[2].$m[1];
+        } elseif (count($m) > 2) {
+            $this->date = date('Y').$m[2].$m[1];
         }
 
-        preg_match("/(..)(..)/si", $this->time, $m);
-        $this->time = $m[1] . ":" . $m[2];
+        preg_match('/(..)(..)/si', $this->time, $m);
+        $this->time = $m[1].':'.$m[2];
 
-        if ($this->station == "" && isset($_GET["id"])) {
+        if ($this->station == '' && isset($_GET['id'])) {
             //then there was an id given
-            $this->station = $_GET["id"];
+            $this->station = $_GET['id'];
         }
 
-        parent::processRequiredVars(["station"]);
+        parent::processRequiredVars(['station']);
     }
 
     /**
@@ -48,7 +47,7 @@ class LiveboardRequest extends Request
      */
     public function isFast()
     {
-        return $this->fast == "true";
+        return $this->fast == 'true';
     }
 
     /**
@@ -82,6 +81,4 @@ class LiveboardRequest extends Request
     {
         return $this->arrdep;
     }
-
 }
-
