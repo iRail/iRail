@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2010, 2011 by iRail vzw/asbl */
 /*
 
@@ -23,12 +24,11 @@
  */
 
 /**
- * This is the API request handler
+ * This is the API request handler.
  */
 include_once '../vendor/autoload.php';
-include_once("requests/StationsRequest.php");
-include_once("APICall.php");
-date_default_timezone_set("Europe/Brussels");
-$call = new APICall("stations");
+include_once 'requests/StationsRequest.php';
+include_once 'APICall.php';
+date_default_timezone_set('Europe/Brussels');
+$call = new APICall('stations');
 $call->executeCall();
-
