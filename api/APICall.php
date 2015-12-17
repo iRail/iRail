@@ -38,7 +38,7 @@ class APICall
         try {
             $this->log = new Logger('irapi');
             //Create a formatter for the logs
-            $logFormatter = new LineFormatter("%datetime% | %message% | %context%\n", 'Y-m-d\TH:i:s');
+            $logFormatter = new LineFormatter("%context%\n", 'Y-m-d\TH:i:s');
             $streamHandler = new StreamHandler(__DIR__ . '/../storage/irapi.log', Logger::INFO);
             $streamHandler->setFormatter($logFormatter);
             $this->log->pushHandler($streamHandler);
@@ -96,11 +96,13 @@ class APICall
     {
         if ($e->getCode() >= 500) {
             $this->log->addCritical($this->resourcename, [
+                "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode()]
             );
         } else {
             $this->log->addError($this->resourcename, [
+                "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode()]
             );
@@ -115,19 +117,26 @@ class APICall
      */
      protected function writeLog($err)
      {
-         $query = [];
+         $query = [
+             'serialization' => $this->request->getFormat(),
+             'language' => $this->request->getLang()
+         ];
          if ($this->resourcename === 'connections') {
              $query['departureStop'] = $this->request->getFrom();
              $query['arrivalStop'] = $this->request->getTo();
+             $query['dateTime'] = $this->request->getDate() . 'T' . $this->request->getTime() . '+01:00';
          } elseif ($this->resourcename === 'liveboard') {
+             $query['dateTime'] = $this->request->getDate() . 'T' . $this->request->getTime() . '+01:00';
              $query['departureStop'] = $this->request->getStation();
          } elseif ($this->resourcename === 'vehicleinformation') {
              $query['vehicle'] = $this->request->getVehicleId();
          }
         
          $this->log->addInfo($this->resourcename, [
-            'query' => $query,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+             'querytype' => $this->resourcename,
+             'querytime' => date('c'),
+             'query' => $query,
+             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
         ]);
      }
 }
