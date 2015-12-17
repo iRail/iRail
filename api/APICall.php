@@ -109,21 +109,20 @@ class APICall
      */
      protected function writeLog($err)
      {
-        $query = [];
-        if ($this->resourcename === 'connections') {
-            $query['departureStop'] = $this->request->getFrom();
-            $query['arrivalStop'] = $this->request->getTo();
-        } else if ($this->resourcename === 'liveboard') {
-            $query['departureStop'] = $this->request->getStation();
-        } else if ($this->resourcename === 'vehicle') {
-            $query['vehicle'] = $this->request->getVehicleId();
-        }
+         $query = [];
+         if ($this->resourcename === 'connections') {
+             $query['departureStop'] = $this->request->getFrom();
+             $query['arrivalStop'] = $this->request->getTo();
+         } elseif ($this->resourcename === 'liveboard') {
+             $query['departureStop'] = $this->request->getStation();
+         } elseif ($this->resourcename === 'vehicle') {
+             $query['vehicle'] = $this->request->getVehicleId();
+         }
         
-        $this->log->addInfo($this->resourcename, [
+         $this->log->addInfo($this->resourcename, [
             'query' => $query,
             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
             'error' => $err
         ]);
-        
-    }
+     }
 }

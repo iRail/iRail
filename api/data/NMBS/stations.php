@@ -83,7 +83,7 @@ class stations
         $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", '', $name);
         $name = str_replace(' [NMBS/SNCB]', '', $name);
         $name = explode('/', $name);
-        $name = trim($name[0]);        
+        $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
         if (! isset($stationsgraph->{'@graph'}[0])) {
             throw new Exception('Could not match '.$name.' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new');

@@ -23,7 +23,7 @@ class DataRoot
    * @internal param format $string the format of the document: json, json or XML
    */
   public function __construct($rootname, $version, $format, $error = '')
-  {      
+  {
       //We're making this in the class form: Json or Xml or Jsonp
       $format = ucfirst(strtolower($format));
       //fallback for when callback is set but not the format= Jsonp
