@@ -115,7 +115,7 @@ class APICall
              $query['arrivalStop'] = $this->request->getTo();
          } elseif ($this->resourcename === 'liveboard') {
              $query['departureStop'] = $this->request->getStation();
-         } elseif ($this->resourcename === 'vehicle') {
+         } elseif ($this->resourcename === 'vehicleinformation') {
              $query['vehicle'] = $this->request->getVehicleId();
          }
         
