@@ -1,12 +1,16 @@
 <?php
   /* Copyright (C) 2011 by iRail vzw/asbl
+   * © 2015 by Open Knowledge Belgium vzw/asbl
    *
-   * This class foresees in basic REST functionality. It will get all the GET vars and put it in a request. This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
+   * This class foresees in basic HTTP functionality. It will get all the GET vars and put it in a request.
+   * This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
    *
    * @author Pieter Colpaert
    */
 
-use Dotenv\Dotenv;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\LineFormatter;
 
 ini_set('include_path', '.:data');
 include_once 'data/DataRoot.php';
@@ -17,34 +21,44 @@ class APICall
 
     protected $request;
     protected $dataRoot;
-
-     //Hooks
-     private $logging = false;
-
+    protected $log;
     /**
      * @param $functionname
      */
-    public function __construct($functionname)
+    public function __construct($resourcename)
     {
+        //When the HTTP request didn't set a User Agent, set it to a blank
+        if (! isset($_SERVER['HTTP_USER_AGENT'])) {
+            $_SERVER['HTTP_USER_AGENT'] = '';
+        }
+        //Default timezone is Brussels
+        date_default_timezone_set('Europe/Brussels');
+        //This is the current resource that's handled. E.g., stations, connections, vehicleinfo or liveboard
+        $this->resourcename = $resourcename;
         try {
-            $requestname = ucfirst(strtolower($functionname)).'Request';
+            $this->log = new Logger('irapi');
+            //Create a formatter for the logs
+            $logFormatter = new LineFormatter("%datetime% | %message% | %context%\n", 'Y-m-d\TH:i:s');
+            $streamHandler = new StreamHandler(__DIR__ . '/../storage/irapi.log', Logger::INFO);
+            $streamHandler->setFormatter($logFormatter);
+            $this->log->pushHandler($streamHandler);
+            $requestname = ucfirst(strtolower($resourcename)).'Request';
             include_once "requests/$requestname.php";
             $this->request = new $requestname();
-            $this->dataRoot = new DataRoot($functionname, $this->VERSION, $this->request->getFormat());
+            $this->dataRoot = new DataRoot($resourcename, $this->VERSION, $this->request->getFormat());
         } catch (Exception $e) {
-            $this->buildError($functionname, $e);
+            $this->buildError($e);
         }
     }
 
     /**
-     * @param $fn
      * @param $e
      */
-    private function buildError($fn, $e)
+    private function buildError($e)
     {
-        $this->logError($fn, $e);
-//get the right format - This is some duplicated code and I hate to write it
-      $format = '';
+        $this->logError($e);
+        //Build a nice output
+        $format = '';
         if (isset($_GET['format'])) {
             $format = $_GET['format'];
         }
@@ -69,97 +83,47 @@ class APICall
         try {
             $this->dataRoot->fetchData($this->request, $this->request->getSystem());
             $this->dataRoot->printAll();
-            $this->logRequest();
+            $this->writeLog();
         } catch (Exception $e) {
-            $this->buildError($this->dataRoot->getRootname(), $e);
+            $this->buildError($e);
         }
     }
 
-    public function disableLogging()
-    {
-        $this->logging = false;
-    }
-
     /**
-     * @param $functionname
      * @param Exception $e
      */
-    protected function logError($functionname, Exception $e)
+    protected function logError(Exception $e)
     {
-        if (! isset($_SERVER['HTTP_USER_AGENT'])) {
-            $_SERVER['HTTP_USER_AGENT'] = 'unknown';
-        }
-        if ($this->logging) {
-            $this->writeLog($_SERVER['HTTP_USER_AGENT'], '', '', "Error in $functionname ".$e->getMessage(), $_SERVER['REMOTE_ADDR']);
+        if ($e->getCode() >= 500) {
+            $this->log->addCritical($this->resourcename . ',,,' . '"' . $e->getMessage() . '"');
+        } else {
+            $this->log->addError($this->resourcename . ',,,' . '"' . $e->getMessage() . '"');
         }
     }
 
-     //to be overriden
-
-     protected function logRequest()
-     {
-         if (! isset($_SERVER['HTTP_USER_AGENT'])) {
-             $_SERVER['HTTP_USER_AGENT'] = 'unknown';
-         }
-         if ($this->logging) {
-             $functionname = $this->dataRoot->getRootname();
-             $this->writeLog($_SERVER['HTTP_USER_AGENT'], '', '', "none ($functionname)", $_SERVER['REMOTE_ADDR']);
-         }
-     }
-
     /**
-     * @param $ua
      * @param $from
      * @param $to
      * @param $err
-     * @param $ip
      * @throws Exception
      */
-    protected function writeLog($ua, $from, $to, $err, $ip)
-    {
-        // get time + date in rfc2822 format
-      date_default_timezone_set('Europe/Brussels');
-        $now = date('D, d M Y H:i:s');
-        if ($from == '') {
-            $from = 'EMPTY';
+     protected function writeLog($err)
+     {
+        $query = [];
+        if ($this->resourcename === 'connections') {
+            $query['departureStop'] = $this->request->getFrom();
+            $query['arrivalStop'] = $this->request->getTo();
+        } else if ($this->resourcename === 'liveboard') {
+            $query['departureStop'] = $this->request->getStation();
+        } else if ($this->resourcename === 'vehicle') {
+            $query['vehicle'] = $this->request->getVehicleId();
         }
-        if ($to == '') {
-            $to = 'EMPTY';
-        }
-        if ($ua == '') {
-            $ua = '-';
-        }
-        self::connectToDB();
-        $from = mysql_real_escape_string($from);
-        $to = mysql_real_escape_string($to);
-        $err = mysql_real_escape_string($err);
-        $ip = mysql_real_escape_string($ip);
-        $ua = mysql_real_escape_string($ua);
-      // insert in db
-      try {
-          $dotenv = new Dotenv(dirname(__DIR__));
-          $dotenv->load();
-
-          $query = "
-              INSERT INTO $api_table ($api_c2, $api_c3, $api_c4, $api_c5, $api_c6, $api_c7, $api_c8)
-              VALUES('$now', '$ua', '$from', '$to', '$err', '$ip', '".$_ENV['apiServerName']."')";
-
-          $result = mysql_query($query);
-      } catch (Exception $e) {
-          echo 'Error writing to the database.';
-      }
-    }
-
-    public static function connectToDB()
-    {
-        try {
-            $dotenv = new Dotenv(dirname(__DIR__));
-            $dotenv->load();
-
-            mysql_pconnect($_ENV['apiHost'], $_ENV['apiUser'], $_ENV['apiPassword']);
-            mysql_select_db($_ENV['apiDatabase']);
-        } catch (Exception $e) {
-            throw new Exception('Error connecting to the database.', 3);
-        }
+        
+        $this->log->addInfo($this->resourcename, [
+            'query' => $query,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'error' => $err
+        ]);
+        
     }
 }

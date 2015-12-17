@@ -10,26 +10,25 @@ Native applications using the iRail API and created or supported by the iRail te
 
 All information can be found on [our blog at hello.iRail.be](http://hello.irail.be/).
 
-## Configuration ##
+## Installation for development purposes ##
 
-For the configuration we used a package named dotenv. 
-There is a `.env example` located in the base folder from the project. 
-`composer install` wil write a nex .env file for your confiration. 
-The only thing you need to do is change the variables so it fits to your credentails.
+_note: you'll also need to have [nodejs](https://nodejs.org) and [composer](http://getcomposer.org) installed on your system_
 
  * Step 1: clone this repo
  * Step 2: `composer install`
- * Step 3: Run your test server: `php -S localhost:8008 -t api`
- * Step 4: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
+ * Step 3: make sure storage is writable: `chmod 777 storage`
+ * Step 4: Run your test server: `php -S localhost:8008 -t api`
+ * Step 5: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
 
 ## Update stations list ##
 
 Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project
 
-## Some interesting links: ##
+## More links ##
 
-  * Source: <http://github.com/iRail/iRail>
-  * Mailing: <http://list.irail.be/>
-  * Issue tracking: <https://github.com/iRail/iRail/issues>
-  * API: <http://api.irail.be/>
-  * BeTrains code: <https://github.com/iRail/BeTrains-for-Android>
+ * Our mailing list: http://list.irail.be/
+ * Our GTFS data dumps: http://gtfs.irail.be/
+ * Issue tracker: https://github.com/iRail/iRail/issues
+ * Just use our HTTP API: http://api.irail.be/
+ * BeTrains for Android app source code: https://github.com/iRail/BeTrains-for-Android
+ * Other repositories: https://github.com/iRail
