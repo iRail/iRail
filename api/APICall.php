@@ -95,9 +95,15 @@ class APICall
     protected function logError(Exception $e)
     {
         if ($e->getCode() >= 500) {
-            $this->log->addCritical($this->resourcename, ["error":$e->getMessage(),"code":$e->getCode()]);
+            $this->log->addCritical($this->resourcename, [
+                "error" => $e->getMessage(),
+                "code" => $e->getCode()]
+            );
         } else {
-            $this->log->addError($this->resourcename, ["error":$e->getMessage(),"code":$e->getCode()]);
+            $this->log->addError($this->resourcename, [
+                "error" => $e->getMessage(),
+                "code" => $e->getCode()]
+            );
         }
     }
 
