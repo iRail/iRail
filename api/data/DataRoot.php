@@ -25,11 +25,11 @@ class DataRoot
   public function __construct($rootname, $version, $format, $error = '')
   {
       //We're making this in the class form: Json or Xml or Jsonp
-    $format = ucfirst(strtolower($format));
-    //fallback for when callback is set but not the format= Jsonp
-    if (isset($_GET['callback']) && $format == 'Json') {
-        $format = 'Jsonp';
-    }
+      $format = ucfirst(strtolower($format));
+      //fallback for when callback is set but not the format= Jsonp
+      if (isset($_GET['callback']) && $format == 'Json') {
+          $format = 'Jsonp';
+      }
       if (! file_exists("output/$format.php")) {
           throw new Exception('Incorrect format specified. Please correct this and try again', 402);
       }
@@ -81,7 +81,7 @@ class DataRoot
           } elseif ($e->getCode() == '300') {
               throw new Exception($e->getMessage(), 300);
           } else {
-              throw new Exception('Could not get data. Please report this problem to iRail@list.iRail.be.', 502);
+              throw new Exception('Could not get data. Please report this problem to iRail@list.iRail.be.', 500);
           }
       }
   }

@@ -159,7 +159,7 @@ class vehicleinformation
         // determine the location of the vehicle
         $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
         if (! is_object($test)) {
-            throw new Exception('Vehicle not found', 1);
+            throw new Exception('Vehicle not found', 500);
         } // catch errors
 
         $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
@@ -225,7 +225,7 @@ class vehicleinformation
     {
         $test = $html->getElementById('HFSResult')->getElementByTagName('table');
         if (! is_object($test)) {
-            throw new Exception('Vehicle not found', 1);
+            throw new Exception('Vehicle not found', 500);
         } // catch errors
 
         // Try first url

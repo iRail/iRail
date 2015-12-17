@@ -14,13 +14,15 @@ class liveboard
      */
     public static function fillDataRoot($dataroot, $request)
     {
-        $arr = explode('.', $request->getStation());
         $stationr = $request->getStation();
-        if (count($arr) > 1) {
-            $stationr = $arr[2];
+        $dataroot->station;
+        
+        try {
+            $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
+        } catch (Exception $e) {
+            throw new Exception('Could not find station ' . $stationr, 404);
         }
-        $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
-
+        
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'arr');
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
@@ -28,7 +30,7 @@ class liveboard
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'dep');
             $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
         } else {
-            throw new Exception('Not a good timeSel value: try ARR or DEP', 300);
+            throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
     }
 

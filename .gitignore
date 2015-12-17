@@ -1,11 +1,9 @@
-includes/dbConfig.php
+storage
 nbproject/
 api/stats/.htpasswd
 googlea35442edef93c3d8.html
 push.php
 api/push.php
-.vagrant
 .idea/
 /vendor/
-.env
 composer.lock
