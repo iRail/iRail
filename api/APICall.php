@@ -95,9 +95,15 @@ class APICall
     protected function logError(Exception $e)
     {
         if ($e->getCode() >= 500) {
-            $this->log->addCritical($this->resourcename . ',,,' . '"' . $e->getMessage() . '"');
+            $this->log->addCritical($this->resourcename, [
+                "error" => $e->getMessage(),
+                "code" => $e->getCode()]
+            );
         } else {
-            $this->log->addError($this->resourcename . ',,,' . '"' . $e->getMessage() . '"');
+            $this->log->addError($this->resourcename, [
+                "error" => $e->getMessage(),
+                "code" => $e->getCode()]
+            );
         }
     }
 
@@ -122,7 +128,6 @@ class APICall
          $this->log->addInfo($this->resourcename, [
             'query' => $query,
             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-            'error' => $err
         ]);
      }
 }
