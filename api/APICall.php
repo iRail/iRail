@@ -84,7 +84,7 @@ class APICall
             $this->dataRoot->fetchData($this->request, $this->request->getSystem());
             $this->dataRoot->printAll();
         } catch (Exception $e) {
-			$this->writeLog($e);
+            $this->writeLog($e);
             $this->buildError($e);
         }
     }

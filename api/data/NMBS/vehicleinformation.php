@@ -137,9 +137,9 @@ class vehicleinformation
                 $station = new Station();
                 if ($fast == 'true') {
                     $station->name = $stationname;
-					if ($stationId) {
-						$station->id = "BE.NMBS." . $stationId;
-					}
+                    if ($stationId) {
+                        $station->id = "BE.NMBS." . $stationId;
+                    }
                 } else {
                     // Station ID can be parsed from the station URL
                     if ($stationId) {
