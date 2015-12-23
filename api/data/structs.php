@@ -81,4 +81,5 @@ class Stop
     public $station;
     public $time;
     public $delay;
+	public $platform;
 }
