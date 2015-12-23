@@ -112,7 +112,7 @@ class APICall
         }
     }
 
-    private function getQuery() 
+    private function getQuery()
     {
         if (isset($this->request)) {
             $query = [
@@ -123,9 +123,9 @@ class APICall
                 $query['departureStop'] = $this->request->getFrom();
                 $query['arrivalStop'] = $this->request->getTo();
                 //transform to ISO8601
-                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i','$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
             } elseif ($this->resourcename === 'liveboard') {
-                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i','$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['departureStop'] = $this->request->getStation();
             } elseif ($this->resourcename === 'vehicleinformation') {
                 $query['vehicle'] = $this->request->getVehicleId();
