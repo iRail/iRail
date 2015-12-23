@@ -15,7 +15,7 @@ class liveboard
     public static function fillDataRoot($dataroot, $request)
     {
         $stationr = $request->getStation();
-        $dataroot->station;
+        $dataroot->station = new \stdClass();
         
         try {
             $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
@@ -56,7 +56,7 @@ class liveboard
           $ curl "http://hari.b-rail.be/Hafas/bin/stboard.exe/en?start=yes&time=15%3a12&date=01.09.2011&inputTripelId=A=1@O=@X=@Y=@U=80@L=008892007@B=1@p=@&maxJourneys=50&boardType=dep&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=00010000001111"
         */
         //$scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/";
-    $scrapeUrl = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/stboard.exe/';
+        $scrapeUrl = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/stboard.exe/';
         $scrapeUrl .= $lang.'?start=yes';
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
@@ -65,7 +65,6 @@ class liveboard
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeUrl);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
