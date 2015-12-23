@@ -82,4 +82,5 @@ class Stop
     public $time;
     public $delay;
     public $platform;
+    public $cancelled;
 }

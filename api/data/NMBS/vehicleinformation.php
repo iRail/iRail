@@ -101,6 +101,8 @@ class vehicleinformation
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : '0';
                 if (!preg_match('/[^A-Za-z]/', $delay)) {
+                    // Delay is 'cancelled' localized
+                    $cancelled = TRUE;
                     $delayseconds = 999999;
                 } else {
                     $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
@@ -160,6 +162,7 @@ class vehicleinformation
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
+                $stops[$j]->cancelled = $cancelled;
 
                 $j++;
             }
