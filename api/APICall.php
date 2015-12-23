@@ -138,12 +138,9 @@ class APICall
     }
     
     /**
-     * @param $from
-     * @param $to
-     * @param $err
-     * @throws Exception
+     * Writes an entry to the log in level "INFO"
      */
-     protected function writeLog($err)
+     protected function writeLog()
      {
          $query = $this->getQuery();
          $this->log->addInfo($this->resourcename, [
