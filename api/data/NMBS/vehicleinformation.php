@@ -113,30 +113,49 @@ class vehicleinformation
                     $stationname = reset($node->children[3]->nodes[0]->_);
                 }
 
-                $stops[$j] = new Stop();
+                $platformnodearray = $node->children[5]->find('span');
+                if (count($platformnodearray) > 0) {
+                    $normalplatform = 0;
+                    $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
+                } else  {
+                    $normalplatform = 1;
+                    $platform = reset($node->children[5]->nodes[0]->_);
+				}
+
+                if (isset($node->children[3]->children[0])) {
+	                $link = $node->children[3]->children[0]->{'attr'}['href'];
+	                // With capital S
+	                if (strpos($link, 'StationId=')) {
+	                    $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
+	                } else {
+	                    $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
+	                }
+	                $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
+	                $stationId = '00'.$nr;
+                }
+				
                 $station = new Station();
                 if ($fast == 'true') {
                     $station->name = $stationname;
+                    if ($stationId) {
+                        $station->id = "BE.NMBS." . $stationId;
+                    }
                 } else {
                     // Station ID can be parsed from the station URL
-                    if (isset($node->children[3]->children[0])) {
-                        $link = $node->children[3]->children[0]->{'attr'}['href'];
-                        // With capital S
-                        if (strpos($link, 'StationId=')) {
-                            $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
-                        } else {
-                            $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
-                        }
-                        $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
-                        $stationId = '00'.$nr;
+                    if ($stationId) {
                         $station = stations::getStationFromID($stationId, $lang);
                     } else {
                         $station = stations::getStationFromName($stationname, $lang);
                     }
                 }
+				
+                $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->delay = $delayseconds;
                 $stops[$j]->time = tools::transformTime('00d'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->platform = new Platform();
+                $stops[$j]->platform->name = $platform;
+                $stops[$j]->platform->normal = $normalplatform;
 
                 $j++;
             }
