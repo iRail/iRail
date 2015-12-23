@@ -94,44 +94,55 @@ class APICall
      */
     protected function logError(Exception $e)
     {
+        $query = $this->getQuery();
         if ($e->getCode() >= 500) {
             $this->log->addCritical($this->resourcename, [
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
-                "code" => $e->getCode()]
-            );
+                "code" => $e->getCode(),
+                "query" => $query
+            ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
-                "code" => $e->getCode()]
-            );
+                "code" => $e->getCode(),
+                "query" => $query
+            ]);
         }
     }
 
+    private function getQuery()
+    {
+        if (isset($this->request)) {
+            $query = [
+                'serialization' => $this->request->getFormat(),
+                'language' => $this->request->getLang()
+            ];
+            if ($this->resourcename === 'connections') {
+                $query['departureStop'] = $this->request->getFrom();
+                $query['arrivalStop'] = $this->request->getTo();
+                //transform to ISO8601
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+            } elseif ($this->resourcename === 'liveboard') {
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['departureStop'] = $this->request->getStation();
+            } elseif ($this->resourcename === 'vehicleinformation') {
+                $query['vehicle'] = $this->request->getVehicleId();
+            }
+            return $query;
+        } else {
+            //If we were unable to retrieve the right parameters, just return the GET parameters in the request
+            return $_GET;
+        }
+    }
+    
     /**
-     * @param $from
-     * @param $to
-     * @param $err
-     * @throws Exception
+     * Writes an entry to the log in level "INFO"
      */
-     protected function writeLog($err)
+     protected function writeLog()
      {
-         $query = [
-             'serialization' => $this->request->getFormat(),
-             'language' => $this->request->getLang()
-         ];
-         if ($this->resourcename === 'connections') {
-             $query['departureStop'] = $this->request->getFrom();
-             $query['arrivalStop'] = $this->request->getTo();
-             $query['dateTime'] = $this->request->getDate() . 'T' . $this->request->getTime() . '+01:00';
-         } elseif ($this->resourcename === 'liveboard') {
-             $query['dateTime'] = $this->request->getDate() . 'T' . $this->request->getTime() . '+01:00';
-             $query['departureStop'] = $this->request->getStation();
-         } elseif ($this->resourcename === 'vehicleinformation') {
-             $query['vehicle'] = $this->request->getVehicleId();
-         }
-        
+         $query = $this->getQuery();
          $this->log->addInfo($this->resourcename, [
              'querytype' => $this->resourcename,
              'querytime' => date('c'),
