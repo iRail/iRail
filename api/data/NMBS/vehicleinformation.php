@@ -100,7 +100,11 @@ class vehicleinformation
 
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : '0';
-                $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
+                if (!preg_match('/[^A-Za-z]/', $delay)) {
+                    $delayseconds = 999999;
+                } else {
+                    $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
+                }
 
                 $spans = $node->children[1]->find('span');
                 $arriveTime = reset($spans[0]->nodes[0]->_);
