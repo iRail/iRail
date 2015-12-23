@@ -122,21 +122,27 @@ class vehicleinformation
 					$platform = reset($node->children[5]->nodes[0]->_);
 				}
 
+				if (isset($node->children[3]->children[0])) {
+	                $link = $node->children[3]->children[0]->{'attr'}['href'];
+	                // With capital S
+	                if (strpos($link, 'StationId=')) {
+	                    $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
+	                } else {
+	                    $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
+	                }
+	                $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
+	                $stationId = '00'.$nr;
+				}
+				
                 $station = new Station();
                 if ($fast == 'true') {
                     $station->name = $stationname;
+					if ($stationId) {
+						$station->id = "BE.NMBS." . $stationId;
+					}
                 } else {
                     // Station ID can be parsed from the station URL
-                    if (isset($node->children[3]->children[0])) {
-                        $link = $node->children[3]->children[0]->{'attr'}['href'];
-                        // With capital S
-                        if (strpos($link, 'StationId=')) {
-                            $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
-                        } else {
-                            $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
-                        }
-                        $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
-                        $stationId = '00'.$nr;
+                    if ($stationId) {
                         $station = stations::getStationFromID($stationId, $lang);
                     } else {
                         $station = stations::getStationFromName($stationname, $lang);
