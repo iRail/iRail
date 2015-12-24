@@ -160,49 +160,57 @@ class connections
             
             foreach ($xml->ConRes->ConnectionList->Connection as $conn) {
                 $connection[$i] = new Connection();
-                $connection[$i]->departure = new DepartureArrival();
-                $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->duration = tools::transformDuration($conn->Overview->Duration->Time);
+
+                $connection[$i]->departure = new DepartureArrival();
                 $connection[$i]->departure->station = $fromstation;
-                $connection[$i]->departure->cancelled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
-                $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
-                $connection[$i]->departure->platform = new Platform();
                 $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
-                $connection[$i]->departure->platform->name = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
-                $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
-                $connection[$i]->arrival->platform = new Platform();
-                $connection[$i]->arrival->platform->name = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
+                $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
+                $connection[$i]->departure->cancelled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+
+                $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->arrival->station = $tostation;
+                $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                 $connection[$i]->arrival->cancelled = $conn->Overview->Arrival->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+                
                 //Delay and platform changes
-                $delay0 = 0;
-                $delay1 = 0;
-                $platformNormal0 = true;
-                $platformNormal1 = true;
+                $departureDelay = 0;
+                $departurePlatform = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
+                $departurePlatformNormal = true;
+                
+                $arrivalDelay = 0;
+                $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
+                $arrivalPlatformNormal = true;
+
                 if ($conn->RtStateList->RtState['value'] == 'HAS_DELAYINFO') {
-                    $delay0 = tools::transformTime($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Time, $conn->Overview->Date) - $connection[$i]->departure->time;
-                    if ($delay0 < 0) {
-                        $delay0 = 0;
-                    }
                     //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
-                    $delay1 = tools::transformTime($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Time, $conn->Overview->Date) - $connection[$i]->arrival->time;
-                    if ($delay1 < 0) {
-                        $delay1 = 0;
+                    $departureDelay = tools::transformTime($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Time, $conn->Overview->Date) - $connection[$i]->departure->time;
+                    if ($departureDelay < 0) {
+                        $departureDelay = 0;
+                    }
+                    $arrivalDelay = tools::transformTime($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Time, $conn->Overview->Date) - $connection[$i]->arrival->time;
+                    if ($arrivalDelay < 0) {
+                        $arrivalDelay = 0;
                     }
                     if (isset($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
-                        $platform0 = trim($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
-                        $platformNormal0 = false;
+                        $departurePlatform = trim($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
+                        $departurePlatformNormal = false;
                     }
                     if (isset($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
-                        $platform1 = trim($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
-                        $platformNormal1 = false;
+                        $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
+                        $arrivalPlatformNormal = false;
                     }
                 }
 
-                $connection[$i]->departure->delay = $delay0;
-                $connection[$i]->departure->platform->normal = $platformNormal0;
-                $connection[$i]->arrival->delay = $delay1;
-                $connection[$i]->arrival->platform->normal = $platformNormal1;
+                $connection[$i]->departure->delay = $departureDelay;
+                $connection[$i]->departure->platform = new Platform();
+                $connection[$i]->departure->platform->name = $departurePlatformNormal;
+                $connection[$i]->departure->platform->normal = $departurePlatformNormal;
+                
+                $connection[$i]->arrival->delay = $arrivalDelay;
+                $connection[$i]->arrival->platform = new Platform();
+                $connection[$i]->arrival->platform->name = $arrivalPlatform;
+                $connection[$i]->arrival->platform->normal = $arrivalPlatformNormal;
 
                 $trains = [];
                 $vias = [];
