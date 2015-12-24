@@ -41,6 +41,7 @@ class DepartureArrival
     public $time;
     public $vehicle;
     public $platform;
+    public $cancelled;
 }
 
 class Platform

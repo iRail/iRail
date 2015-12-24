@@ -164,6 +164,7 @@ class connections
                 $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->duration = tools::transformDuration($conn->Overview->Duration->Time);
                 $connection[$i]->departure->station = $fromstation;
+                $connection[$i]->departure->cancelled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
                 $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                 $connection[$i]->departure->platform = new Platform();
                 $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
@@ -172,6 +173,7 @@ class connections
                 $connection[$i]->arrival->platform = new Platform();
                 $connection[$i]->arrival->platform->name = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
                 $connection[$i]->arrival->station = $tostation;
+                $connection[$i]->arrival->cancelled = $conn->Overview->Arrival->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
                 //Delay and platform changes
                 $delay0 = 0;
                 $delay1 = 0;
@@ -196,6 +198,7 @@ class connections
                         $platformNormal1 = false;
                     }
                 }
+
                 $connection[$i]->departure->delay = $delay0;
                 $connection[$i]->departure->platform->normal = $platformNormal0;
                 $connection[$i]->arrival->delay = $delay1;
@@ -225,13 +228,15 @@ class connections
 
                             if ($conn->Overview->Transfers > 0 && strcmp($connsection->Arrival->BasicStop->Station['name'], $conn->Overview->Arrival->BasicStop->Station['name']) != 0) {
                                 //current index for the train: j-1
-                                $departDelay = 0; //Todo: NYImplemented
                                 $connarray = $conn->ConSectionList->ConSection;
                                 $departTime = tools::transformTime($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                                 $departPlatform = trim($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Platform->Text);
+                                $departDelay = 0; //Todo: NYImplemented
+                                $departCancelled = $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
                                 $arrivalDelay = 0; //Todo: NYImplemented
+                                $arrivalCancelled = $connarray[$connectionindex + 1]->Arrival->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
 
                                 $vias[$connectionindex] = new Via();
                                 $vias[$connectionindex]->arrival = new ViaDepartureArrival();
@@ -239,11 +244,13 @@ class connections
                                 $vias[$connectionindex]->arrival->platform = new Platform();
                                 $vias[$connectionindex]->arrival->platform->name = $arrivalPlatform;
                                 $vias[$connectionindex]->arrival->platform->normal = 1;
+                                $vias[$connectionindex]->arrival->cancelled = $arrivalCancelled;
                                 $vias[$connectionindex]->departure = new ViaDepartureArrival();
                                 $vias[$connectionindex]->departure->time = $departTime;
                                 $vias[$connectionindex]->departure->platform = new Platform();
                                 $vias[$connectionindex]->departure->platform->name = $departPlatform;
                                 $vias[$connectionindex]->departure->platform->normal = 1;
+                                $vias[$connectionindex]->departure->cancelled = $departCancelled;
                                 $vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
                                 if (isset($directions[$k - 1])) {
                                     $vias[$connectionindex]->direction = $directions[$k - 1];
