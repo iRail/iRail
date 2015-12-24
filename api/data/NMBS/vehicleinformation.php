@@ -100,11 +100,12 @@ class vehicleinformation
 
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : '0';
-                if (!preg_match('/[^A-Za-z]/', $delay)) {
+                if (preg_match('/[^A-Za-z]/', $delay)) {
                     // Delay is 'cancelled' localized
-                    $cancelled = TRUE;
+                    $cancelled = true;
                     $delayseconds = 999999;
                 } else {
+                    $cancelled = false;
                     $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
                 }
 
