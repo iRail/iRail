@@ -129,6 +129,10 @@ class vehicleinformation
                     $normalplatform = 1;
                     $platform = trim(reset($node->children[5]->nodes[0]->_));
                 }
+                
+                if ($platform == "&nbsp;") {
+                    $platform = '?'; // Indicate to end user platform is unknown
+                }
 
                 if (isset($node->children[3]->children[0])) {
                     $link = $node->children[3]->children[0]->{'attr'}['href'];
