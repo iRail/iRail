@@ -124,9 +124,16 @@ class liveboard
             }
 
             $platform = '';
+            $platformNormal = true;
             if (isset($journey['platform'])) {
                 $platform = (string) $journey['platform'];
             }
+            
+            if (isset($journey['newpl'])) {
+                $platform = (string) $journey['newpl'];
+                $platformNormal = false;
+            }
+            
             $time = '00d'.(string) $journey['fpTime'].':00';
             preg_match("/(..)\/(..)\/(..)/si", (string) $journey['fpDate'], $dayxplode);
             $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
@@ -154,7 +161,6 @@ class liveboard
 
             //GET VEHICLE AND PLATFORM
 
-            $platformNormal = true;
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
