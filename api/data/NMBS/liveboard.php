@@ -118,11 +118,22 @@ class liveboard
             if ($delay == '-') {
                 $delay = '0';
             }
+            
+            if (isset($journey['e_delay'])) {
+                $delay = $journey['e_delay'] * 60;
+            }
 
-            $platform = '';
+            $platform = '?'; // Indicate to end user platform is unknown
+            $platformNormal = true;
             if (isset($journey['platform'])) {
                 $platform = (string) $journey['platform'];
             }
+            
+            if (isset($journey['newpl'])) {
+                $platform = (string) $journey['newpl'];
+                $platformNormal = false;
+            }
+            
             $time = '00d'.(string) $journey['fpTime'].':00';
             preg_match("/(..)\/(..)\/(..)/si", (string) $journey['fpDate'], $dayxplode);
             $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
@@ -141,16 +152,15 @@ class liveboard
 
             if ($fast) {
                 $stationNode = new Station();
-                $stationNode->name = (string) $journey['dir'];
+                $stationNode->name = (string) $journey['targetLoc'];
                 $stationNode->name = str_replace(' [B]', '', $stationNode->name);
                 $stationNode->name = str_replace(' [NMBS/SNCB]', '', $stationNode->name);
             } else {
-                $stationNode = stations::getStationFromName($journey['dir'], $lang);
+                $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
             }
 
             //GET VEHICLE AND PLATFORM
 
-            $platformNormal = true;
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
@@ -164,6 +174,7 @@ class liveboard
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
+            $nodes[$i]->cancelled = false;
             $nodes[$i]->left = $left;
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {

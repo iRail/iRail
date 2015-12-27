@@ -100,7 +100,15 @@ class vehicleinformation
 
                 $delaynodearray = $node->children[2]->find('span');
                 $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : '0';
-                $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
+                if (!preg_match('/[1-9]/', $delay) && $delay != 0) {
+                    // Delay value is 'cancelled' localized
+                    $cancelled = true;
+                    $delayseconds = 999999; // Indicate something is wrong if `cancelled` is not read by the client
+                } else {
+                    // Delay value always contains a number
+                    $cancelled = false;
+                    $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
+                }
 
                 $spans = $node->children[1]->find('span');
                 $arriveTime = reset($spans[0]->nodes[0]->_);
@@ -156,6 +164,7 @@ class vehicleinformation
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
+                $stops[$j]->cancelled = $cancelled;
 
                 $j++;
             }
