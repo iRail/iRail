@@ -152,11 +152,11 @@ class liveboard
 
             if ($fast) {
                 $stationNode = new Station();
-                $stationNode->name = (string) $journey['dir'];
+                $stationNode->name = (string) $journey['targetLoc'];
                 $stationNode->name = str_replace(' [B]', '', $stationNode->name);
                 $stationNode->name = str_replace(' [NMBS/SNCB]', '', $stationNode->name);
             } else {
-                $stationNode = stations::getStationFromName($journey['dir'], $lang);
+                $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
             }
 
             //GET VEHICLE AND PLATFORM
