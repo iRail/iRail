@@ -168,6 +168,7 @@ class liveboard
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
+            $nodes[$i]->cancelled = false;
             $nodes[$i]->left = $left;
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
