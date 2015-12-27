@@ -88,7 +88,7 @@ class Xml extends Printer
                 if ($elementkey == '@id') {
                     $elementkey = 'URI';
                 }
-                if ($elementkey == 'cancelled') {
+                if ($elementkey == 'normal' || $elementkey == 'cancelled') {
                     $elementval = intval($elementval);
                 }
                 echo " $elementkey=\"$elementval\"";
