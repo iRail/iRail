@@ -118,6 +118,10 @@ class liveboard
             if ($delay == '-') {
                 $delay = '0';
             }
+            
+            if (isset($journey['e_delay'])) {
+                $delay = $journey['e_delay'] * 60;
+            }
 
             $platform = '';
             if (isset($journey['platform'])) {
