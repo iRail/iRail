@@ -123,7 +123,7 @@ class liveboard
                 $delay = $journey['e_delay'] * 60;
             }
 
-            $platform = '';
+            $platform = '?'; // Indicate to end user platform is unknown
             $platformNormal = true;
             if (isset($journey['platform'])) {
                 $platform = (string) $journey['platform'];
