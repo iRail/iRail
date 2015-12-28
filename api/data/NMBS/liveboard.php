@@ -114,13 +114,28 @@ class liveboard
             $journey = $data->Journey[$i];
 
             $left = 0;
+            $cancelled = false;
             $delay = (string) $journey['delay'];
             if ($delay == '-') {
                 $delay = '0';
             }
             
+            if ($delay == 'cancel') {
+                $delay = 999999; // Indicate something is wrong if `cancelled` is not read by the client
+                $cancelled = true;
+            }
+            
             if (isset($journey['e_delay'])) {
                 $delay = $journey['e_delay'] * 60;
+            }
+            
+            preg_match("/\+\s*(\d+)/", $delay, $d);
+            if (isset($d[1])) {
+                $delay = $d[1] * 60;
+            }
+            preg_match("/\+\s*(\d):(\d+)/", $delay, $d);
+            if (isset($d[1])) {
+                $delay = $d[1] * 3600 + $d[2] * 60;
             }
 
             $platform = '?'; // Indicate to end user platform is unknown
@@ -139,16 +154,6 @@ class liveboard
             $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
 
             $unixtime = tools::transformtime($time, $dateparam);
-
-            //GET DELAY
-            preg_match("/\+\s*(\d+)/", $delay, $d);
-            if (isset($d[1])) {
-                $delay = $d[1] * 60;
-            }
-            preg_match("/\+\s*(\d):(\d+)/", $delay, $d);
-            if (isset($d[1])) {
-                $delay = $d[1] * 3600 + $d[2] * 60;
-            }
 
             if ($fast) {
                 $stationNode = new Station();
@@ -174,7 +179,7 @@ class liveboard
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
-            $nodes[$i]->cancelled = false;
+            $nodes[$i]->cancelled = $cancelled;
             $nodes[$i]->left = $left;
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
