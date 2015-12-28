@@ -105,11 +105,11 @@ class vehicleinformation
                 $delay = count($delaynodearray) > 0 ? trim(strip_tags($delaynodearray[0]->nodes[0])) : '0';
                 if (!$delay) {
                     // Delay value is empty since we stripped the tag
-                    $cancelled = true;
-                    $delayseconds = 999999; // Indicate something is wrong if `cancelled` is not read by the client
+                    $canceled = true;
+                    $delayseconds = 999999; // Indicate something is wrong if `canceled` is not read by the client
                 } else {
                     // Delay value always contains a number
-                    $cancelled = false;
+                    $canceled = false;
                     $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
                 }
 
@@ -171,7 +171,7 @@ class vehicleinformation
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
-                $stops[$j]->cancelled = $cancelled;
+                $stops[$j]->canceled = $canceled;
 
                 $j++;
             }

@@ -114,15 +114,15 @@ class liveboard
             $journey = $data->Journey[$i];
 
             $left = 0;
-            $cancelled = false;
+            $canceled = false;
             $delay = (string) $journey['delay'];
             if ($delay == '-') {
                 $delay = '0';
             }
             
             if ($delay == 'cancel') {
-                $delay = 999999; // Indicate something is wrong if `cancelled` is not read by the client
-                $cancelled = true;
+                $delay = 999999; // Indicate something is wrong if `canceled` is not read by the client
+                $canceled = true;
             }
             
             if (isset($journey['e_delay'])) {
@@ -179,7 +179,7 @@ class liveboard
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
-            $nodes[$i]->cancelled = $cancelled;
+            $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
