@@ -166,12 +166,12 @@ class connections
                 $connection[$i]->departure->station = $fromstation;
                 $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
                 $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
-                $connection[$i]->departure->cancelled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+                $connection[$i]->departure->cancelled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
 
                 $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->arrival->station = $tostation;
                 $connection[$i]->arrival->time = tools::transformTime($conn->Overview->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
-                $connection[$i]->arrival->cancelled = $conn->Overview->Arrival->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+                $connection[$i]->arrival->cancelled = $conn->Overview->Arrival->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
                 
                 //Delay and platform changes
                 $departureDelay = 0;
@@ -240,11 +240,11 @@ class connections
                                 $departTime = tools::transformTime($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                                 $departPlatform = trim($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Platform->Text);
                                 $departDelay = 0; //Todo: NYImplemented
-                                $departCancelled = $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+                                $departCancelled = $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
                                 $arrivalDelay = 0; //Todo: NYImplemented
-                                $arrivalCancelled = $connarray[$connectionindex + 1]->Arrival->BasicStop->StopPrognosis->Status == "CANCELLED" ? true : false;
+                                $arrivalCancelled = $connarray[$connectionindex + 1]->Arrival->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
 
                                 $vias[$connectionindex] = new Via();
                                 $vias[$connectionindex]->arrival = new ViaDepartureArrival();
