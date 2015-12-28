@@ -283,28 +283,8 @@ class vehicleinformation
     private static function isOtherTrain($serverData)
     {
         $html = str_get_html($serverData);
-        $originalTrainname = null;
-
-        $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
-            ->getElementByTagName('table')
-            ->children;
-
-        for ($i = 1; $i < count($nodes); $i++) {
-            $node = $nodes[$i];
-            if (! count($node->attr)) {
-                continue;
-            } // row with no class-attribute contain no data
-
-            $trainname = str_replace(' ', '', reset($node->children[4]->nodes[0]->_));
-            if (! is_object($originalTrainname)) {
-                $originalTrainname = $trainname;
-            } elseif ($trainname != '&nbsp;' && $trainname != $originalTrainname) {
-                // This URL returns route of the other train
-                return true;
-            }
-        }
-
-        return false;
+        $traindata = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
+        return ! is_object($traindata);
     }
 
     private static function getServerDataByUrl($url)
