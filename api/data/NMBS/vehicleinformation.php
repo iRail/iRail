@@ -99,9 +99,12 @@ class vehicleinformation
                 } // row with no class-attribute contain no data
 
                 $delaynodearray = $node->children[2]->find('span');
-                $delay = count($delaynodearray) > 0 ? trim(reset($delaynodearray[0]->nodes[0]->_)) : '0';
-                if (!preg_match('/[1-9]/', $delay) && $delay != 0) {
-                    // Delay value is 'cancelled' localized
+                // Check if node has any content, if not, there's no delay.
+                // Delay content: "+1 min."
+                // Cancellation content: "<img src="/as/hafas-res/img/rt_late_cancelled_detail.gif" height="11" width="11" alt=""> Cancelled"
+                $delay = count($delaynodearray) > 0 ? trim(strip_tags($delaynodearray[0]->nodes[0])) : '0';
+                if (!$delay) {
+                    // Delay value is empty since we stripped the tag
                     $cancelled = true;
                     $delayseconds = 999999; // Indicate something is wrong if `cancelled` is not read by the client
                 } else {
