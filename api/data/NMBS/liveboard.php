@@ -121,7 +121,7 @@ class liveboard
             }
             
             if ($delay == 'cancel') {
-                $delay = 999999; // Indicate something is wrong if `canceled` is not read by the client
+                $delay = 0;
                 $canceled = true;
             }
             

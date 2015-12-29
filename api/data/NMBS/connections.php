@@ -206,7 +206,7 @@ class connections
                 $connection[$i]->departure->platform = new Platform();
                 $connection[$i]->departure->platform->name = $departurePlatform;
                 $connection[$i]->departure->platform->normal = $departurePlatformNormal;
-                
+
                 $connection[$i]->arrival->delay = $arrivalDelay;
                 $connection[$i]->arrival->platform = new Platform();
                 $connection[$i]->arrival->platform->name = $arrivalPlatform;
