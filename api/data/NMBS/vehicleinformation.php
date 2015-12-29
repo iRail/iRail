@@ -98,24 +98,38 @@ class vehicleinformation
                     continue;
                 } // row with no class-attribute contain no data
 
-                $delaynodearray = $node->children[2]->find('span');
-                // Check if node has any content, if not, there's no delay.
-                // Delay content: "+1 min."
-                // Cancellation content: "<img src="/as/hafas-res/img/rt_late_cancelled_detail.gif" height="11" width="11" alt=""> Cancelled"
-                $delay = count($delaynodearray) > 0 ? trim(strip_tags($delaynodearray[0]->nodes[0])) : '0';
-                if (!$delay) {
-                    // Delay value is empty since we stripped the tag
-                    $canceled = true;
-                    $delayseconds = 999999; // Indicate something is wrong if `canceled` is not read by the client
+                // Delay and canceled
+                $splitter = '***';
+                $delaycontent = preg_replace("/<br\W*?\/>/", $splitter, $node->children[2]);
+                $delayelements = explode($splitter, strip_tags($delaycontent));
+                // print_r($delayelements);
+
+                $arrivalDelay = trim($delayelements[0]);
+                $arrivalCanceled = false;
+                if (!$arrivalDelay) {
+                    $arrivalDelay = 0;
+                } elseif (stripos($arrivalDelay, '+') !== false) {
+                    $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
                 } else {
-                    // Delay value always contains a number
-                    $canceled = false;
-                    $delayseconds = preg_replace('/[^0-9]/', '', $delay) * 60;
+                    $arrivalDelay = 0;
+                    $arrivalCanceled = true;
+                }
+                
+                $departureDelay = trim($delayelements[1]);
+                $departureCanceled = false;
+                if (!$departureDelay) {
+                    $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
+                } elseif (stripos($departureDelay, '+') !== false) {
+                    $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
+                } else {
+                    $departureDelay = 0;
+                    $departureCanceled = true;
                 }
 
-                $spans = $node->children[1]->find('span');
-                $arriveTime = reset($spans[0]->nodes[0]->_);
-                $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[0]->nodes[0]->_) : $arriveTime;
+                // Time
+                $timenodearray = $node->children[1]->find('span');
+                $arriveTime = reset($timenodearray[0]->nodes[0]->_);
+                $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[2]->nodes[0]->_) : $arriveTime;
 
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
@@ -124,6 +138,7 @@ class vehicleinformation
                     $stationname = reset($node->children[3]->nodes[0]->_);
                 }
 
+                // Platform
                 $platformnodearray = $node->children[5]->find('span');
                 if (count($platformnodearray) > 0) {
                     $normalplatform = 0;
@@ -166,12 +181,12 @@ class vehicleinformation
 
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
-                $stops[$j]->delay = $delayseconds;
+                $stops[$j]->delay = $departureDelay;
+                $stops[$j]->canceled = $departureCanceled;
                 $stops[$j]->time = tools::transformTime('00d'.$departureTime.':00', date('Ymd'));
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
-                $stops[$j]->canceled = $canceled;
 
                 $j++;
             }
