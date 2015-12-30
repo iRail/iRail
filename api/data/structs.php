@@ -41,6 +41,7 @@ class DepartureArrival
     public $time;
     public $vehicle;
     public $platform;
+    public $canceled;
 }
 
 class Platform
@@ -77,6 +78,7 @@ class Stop
     public $time;
     public $delay;
     public $platform;
+    public $canceled;
 }
 
 class Alert

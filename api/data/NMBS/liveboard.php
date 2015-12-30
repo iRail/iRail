@@ -115,22 +115,21 @@ class liveboard
             $journey = $data->Journey[$i];
 
             $left = 0;
+            $canceled = false;
             $delay = (string) $journey['delay'];
             if ($delay == '-') {
                 $delay = '0';
             }
-
-            $platform = '';
-            if (isset($journey['platform'])) {
-                $platform = (string) $journey['platform'];
+            
+            if ($delay == 'cancel') {
+                $delay = 0;
+                $canceled = true;
             }
-            $time = '00d'.(string) $journey['fpTime'].':00';
-            preg_match("/(..)\/(..)\/(..)/si", (string) $journey['fpDate'], $dayxplode);
-            $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
-
-            $unixtime = tools::transformtime($time, $dateparam);
-
-            //GET DELAY
+            
+            if (isset($journey['e_delay'])) {
+                $delay = $journey['e_delay'] * 60;
+            }
+            
             preg_match("/\+\s*(\d+)/", $delay, $d);
             if (isset($d[1])) {
                 $delay = $d[1] * 60;
@@ -140,16 +139,32 @@ class liveboard
                 $delay = $d[1] * 3600 + $d[2] * 60;
             }
 
+            $platform = '?'; // Indicate to end user platform is unknown
+            $platformNormal = true;
+            if (isset($journey['platform'])) {
+                $platform = (string) $journey['platform'];
+            }
+            
+            if (isset($journey['newpl'])) {
+                $platform = (string) $journey['newpl'];
+                $platformNormal = false;
+            }
+            
+            $time = '00d'.(string) $journey['fpTime'].':00';
+            preg_match("/(..)\/(..)\/(..)/si", (string) $journey['fpDate'], $dayxplode);
+            $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
+
+            $unixtime = tools::transformtime($time, $dateparam);
+
             if ($fast) {
                 $stationNode = new Station();
-                $stationNode->name = (string) $journey['dir'];
+                $stationNode->name = (string) $journey['targetLoc'];
                 $stationNode->name = str_replace(' [B]', '', $stationNode->name);
                 $stationNode->name = str_replace(' [NMBS/SNCB]', '', $stationNode->name);
             } else {
-                $stationNode = stations::getStationFromName($journey['dir'], $lang);
+                $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
             }
 
-            $platformNormal = true;
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
@@ -163,6 +178,7 @@ class liveboard
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
+            $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
