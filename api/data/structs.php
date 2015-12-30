@@ -85,6 +85,5 @@ class Alert
 {
     public $header;
     public $description;
-    public $enforcedFromStation;
 }
 

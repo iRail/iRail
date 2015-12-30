@@ -37,6 +37,9 @@ class vehicleinformation
         }
 
         $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
+        if (self::getAlerts($html)) {
+            $dataroot->alert = self::getAlerts($html);
+        }
         $dataroot->stop = [];
         $dataroot->stop = self::getData($html, $lang, $request->getFast());
     }
@@ -195,6 +198,44 @@ class vehicleinformation
         } catch (Exception $e) {
             throw new Exception($e->getMessage(), 500);
         }
+    }
+
+    /**
+     * @param $html
+     * @return null|Alerts
+     * @throws Exception
+     */
+    private static function getAlerts($html)
+    {
+        $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
+        if (! is_object($test)) {
+            throw new Exception('Vehicle not found', 500);
+        }
+        
+        $tables = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementsByTagName('table');
+        $nodes = $tables[1]->getElementsByTagName('div');
+
+        $alerts = [];
+
+        foreach ($nodes as $alertnode) {
+            $bodysplitter = "*#*";
+            $alertbody = strip_tags($alertnode, '<strong>, <br>');
+            $alertbody = str_replace("</strong>",$bodysplitter,$alertbody);
+            $alertbody = str_replace("<strong>","",$alertbody);
+            $alertbody = preg_replace("/&nbsp;/","",$alertbody);
+            $alertelements = explode($bodysplitter, $alertbody);
+
+            $header = $alertelements[0];
+            $header = preg_replace("/\s*\(.*?\)\s*/i",'',$header);
+                
+            $alert = new Alert();
+            $alert->header = $header;
+            $alert->description = $alertelements[1];
+
+            array_push($alerts, $alert);
+        }
+        
+        return $alerts;
     }
 
     /**

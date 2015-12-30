@@ -208,10 +208,10 @@ class connections
                         $alert = new Alert();
                         $alert->header = trim($info['header']);
                         $alert->description = trim($info['text']);
-                        $alert->enforcedFromStation = stations::getStationFromName(trim($info['dep']),$lang);
-                        if (isset($info['arr'])) {
-                            $alert->enforcedToStation = stations::getStationFromName(trim($info['arr']),$lang);
-                        }
+                        // $alert->enforcedFromStation = stations::getStationFromName(trim($info['dep']),$lang);
+                        // if (isset($info['arr'])) {
+                        //     $alert->enforcedToStation = stations::getStationFromName(trim($info['arr']),$lang);
+                        // }
                         array_push($alerts, $alert);
                     }
                     $connection[$i]->alert = $alerts;
