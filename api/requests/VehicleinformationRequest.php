@@ -16,6 +16,7 @@ class VehicleinformationRequest extends Request
         parent::__construct();
         parent::setGetVar('id', '');
         parent::setGetVar('fast', 'false');
+        parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['id']);
     }
 
@@ -33,5 +34,13 @@ class VehicleinformationRequest extends Request
     public function getFast()
     {
         return $this->fast;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlerts()
+    {
+        return $this->alerts == 'true';
     }
 }

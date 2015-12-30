@@ -16,6 +16,7 @@ class ConnectionsRequest extends Request
     protected $date;
     protected $timeSel;
     protected $fast;
+    protected $alerts;
     protected $typeOfTransport;
 
     public function __construct()
@@ -29,6 +30,7 @@ class ConnectionsRequest extends Request
         parent::setGetVar('timeSel', 'depart');
         parent::setGetVar('typeOfTransport', 'train');
         parent::setGetVar('fast', 'false');
+        parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['from', 'to']);
 
         // reform date and time to wanted structure for hafas and railtime
@@ -44,6 +46,14 @@ class ConnectionsRequest extends Request
     public function getFast()
     {
         return $this->fast;
+    }
+    
+    /**
+     * @return mixed
+     */
+    public function getAlerts()
+    {
+        return $this->alerts == 'true';
     }
 
     /**

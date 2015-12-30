@@ -37,7 +37,7 @@ class vehicleinformation
         }
 
         $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
-        if (self::getAlerts($html)) {
+        if ($request->getAlerts() && self::getAlerts($html)) {
             $dataroot->alert = self::getAlerts($html);
         }
         $dataroot->stop = [];
