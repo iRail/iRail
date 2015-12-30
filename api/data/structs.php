@@ -17,7 +17,6 @@ class Connection
     public $arrival;
 //     public $via; // not compulsory
     public $duration;
-    public $alert;
 }
 
 class Station
@@ -86,7 +85,6 @@ class Alert
 {
     public $header;
     public $description;
-    public $departure;
-    public $arrival;
+    public $enforcedFromStation;
 }
 

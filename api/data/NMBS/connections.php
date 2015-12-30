@@ -145,7 +145,6 @@ class connections
 
         $response = curl_exec($ch);
         curl_close($ch);
-
         return $response;
     }
 
@@ -203,22 +202,20 @@ class connections
                 }
 
                 // Alerts
-                $alerts = [];
                 if (isset($conn->IList)) {
+                    $alerts = [];
                     foreach ($conn->IList->I as $info) {
-                        // print_r($info);
                         $alert = new Alert();
                         $alert->header = trim($info['header']);
                         $alert->description = trim($info['text']);
-                        $alert->departure = stations::getStationFromName(trim($info['dep']),$lang);
-                        $alert->arrival = isset($info['arr']) ? stations::getStationFromName(trim($info['arr']),$lang) : 0;
+                        $alert->enforcedFromStation = stations::getStationFromName(trim($info['dep']),$lang);
+                        if (isset($info['arr'])) {
+                            $alert->enforcedToStation = stations::getStationFromName(trim($info['arr']),$lang);
+                        }
                         array_push($alerts, $alert);
                     }
-                } else {
-                    $alerts = 0;
+                    $connection[$i]->alert = $alerts;
                 }
-
-                $connection[$i]->alert = $alerts;
 
                 $connection[$i]->departure->delay = $departureDelay;
                 $connection[$i]->departure->platform = new Platform();
