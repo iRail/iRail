@@ -222,12 +222,9 @@ class vehicleinformation
             $alertbody = strip_tags($alertnode, '<strong>, <br>');
             $alertbody = str_replace("</strong>",$bodysplitter,$alertbody);
             $alertbody = str_replace("<strong>","",$alertbody);
-            $alertbody = preg_replace("/&nbsp;/","",$alertbody);
             $alertelements = explode($bodysplitter, $alertbody);
+            $header = preg_replace("/&nbsp;|\s*\(.*?\)\s*/i",'',$alertelements[0]);
 
-            $header = $alertelements[0];
-            $header = preg_replace("/\s*\(.*?\)\s*/i",'',$header);
-                
             $alert = new Alert();
             $alert->header = $header;
             $alert->description = $alertelements[1];
