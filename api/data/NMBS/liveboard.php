@@ -164,8 +164,6 @@ class liveboard
                 $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
             }
 
-            //GET VEHICLE AND PLATFORM
-
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
@@ -186,7 +184,22 @@ class liveboard
                 $hour_ = 24;
             }
             $minutes_ = substr((string) $data->Journey[$i]['fpTime'], 3, 2);
+            
+            // Alerts
+            if (isset($journey->HIMMessage)) {
+                $alerts = [];
+                $himmessage = $journey->HIMMessage;
+                for ($a = 0; $a < count($himmessage); $a++ ) {
+                    $alert = new Alert();
+                    $alert->header = trim($himmessage[$a]['header']);
+                    $alert->description = trim($himmessage[$a]['lead']);
+                    array_push($alerts, $alert);
+                }
+                $nodes[$i]->alert = $alerts;
+            }
+
             $i++;
+
         }
 
         return array_merge($nodes); //array merge reindexes the array
