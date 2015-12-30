@@ -10,6 +10,7 @@ class VehicleinformationRequest extends Request
 {
     protected $id;
     protected $fast;
+    protected $alerts;
 
     public function __construct()
     {
