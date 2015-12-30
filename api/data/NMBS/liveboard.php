@@ -192,8 +192,8 @@ class liveboard
                 $himmessage = $journey->HIMMessage;
                 for ($a = 0; $a < count($himmessage); $a++) {
                     $alert = new Alert();
-                    $alert->header = trim($himmessage[$a]['header']);
-                    $alert->description = trim($himmessage[$a]['lead']);
+                    $alert->header = htmlentities(trim($himmessage[$a]['header']));
+                    $alert->description = htmlentities(trim($himmessage[$a]['lead']));
                     array_push($alerts, $alert);
                 }
                 $nodes[$i]->alert = $alerts;
