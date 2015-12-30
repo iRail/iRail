@@ -10,7 +10,7 @@ include_once 'Printer.php';
  */
 class Xml extends Printer
 {
-    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'canceled', 'normal'];
+    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'normal'];
     private $rootname;
 
     // make a stack of array information, always work on the last one
@@ -87,9 +87,6 @@ class Xml extends Printer
             if (in_array($elementkey, $this->ATTRIBUTES)) {
                 if ($elementkey == '@id') {
                     $elementkey = 'URI';
-                }
-                if ($elementkey == 'normal' || $elementkey == 'canceled') {
-                    $elementval = intval($elementval);
                 }
                 echo " $elementkey=\"$elementval\"";
             } elseif ($elementkey == 'name') {
