@@ -148,7 +148,7 @@ class vehicleinformation
                     $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
                 } else {
                     $normalplatform = 1;
-                    $platform = trim(reset($node->children[5]->nodes[0]->_));
+                    $platform = reset($node->children[5]->nodes[0]->_);
                 }
                 
                 if ($platform == "&nbsp;") {
@@ -166,7 +166,7 @@ class vehicleinformation
                     $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
                     $stationId = '00'.$nr;
                 }
-
+                
                 $station = new Station();
                 if ($fast == 'true') {
                     $station->name = $stationname;
@@ -181,7 +181,7 @@ class vehicleinformation
                         $station = stations::getStationFromName($stationname, $lang);
                     }
                 }
-
+                
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->delay = $departureDelay;
