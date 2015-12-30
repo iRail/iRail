@@ -190,7 +190,7 @@ class liveboard
             if ($showAlerts && isset($journey->HIMMessage)) {
                 $alerts = [];
                 $himmessage = $journey->HIMMessage;
-                for ($a = 0; $a < count($himmessage); $a++ ) {
+                for ($a = 0; $a < count($himmessage); $a++) {
                     $alert = new Alert();
                     $alert->header = trim($himmessage[$a]['header']);
                     $alert->description = trim($himmessage[$a]['lead']);
@@ -200,7 +200,6 @@ class liveboard
             }
 
             $i++;
-
         }
 
         return array_merge($nodes); //array merge reindexes the array

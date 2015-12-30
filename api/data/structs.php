@@ -86,4 +86,3 @@ class Alert
     public $header;
     public $description;
 }
-
