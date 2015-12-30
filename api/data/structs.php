@@ -16,7 +16,8 @@ class Connection
     public $departure;
     public $arrival;
 //     public $via; // not compulsory
-     public $duration;
+    public $duration;
+    public $alert;
 }
 
 class Station
@@ -72,11 +73,6 @@ class ViaDepartureArrival
     public $platform;
 }
 
-//class VehicleInformation{
-//     public $vehicle;
-//     public $stop;
-//}
-
 class Stop
 {
     public $station;
@@ -85,3 +81,12 @@ class Stop
     public $platform;
     public $canceled;
 }
+
+class Alert
+{
+    public $header;
+    public $description;
+    public $departure;
+    public $arrival;
+}
+
