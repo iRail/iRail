@@ -25,10 +25,10 @@ class liveboard
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'arr');
-            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
+            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts());
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'dep');
-            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast());
+            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts());
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
@@ -80,9 +80,10 @@ class liveboard
      * @param $time
      * @param $lang
      * @param bool $fast
+     * @param bool $showAlerts
      * @return array
      */
-    private static function parseData($xml, $time, $lang, $fast = false)
+    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false)
     {
         //clean XML
         if (class_exists('tidy', false)) {
@@ -164,8 +165,6 @@ class liveboard
                 $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
             }
 
-            //GET VEHICLE AND PLATFORM
-
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
@@ -186,6 +185,20 @@ class liveboard
                 $hour_ = 24;
             }
             $minutes_ = substr((string) $data->Journey[$i]['fpTime'], 3, 2);
+            
+            // Alerts
+            if ($showAlerts && isset($journey->HIMMessage)) {
+                $alerts = [];
+                $himmessage = $journey->HIMMessage;
+                for ($a = 0; $a < count($himmessage); $a++) {
+                    $alert = new Alert();
+                    $alert->header = htmlentities(trim($himmessage[$a]['header']));
+                    $alert->description = htmlentities(trim($himmessage[$a]['lead']));
+                    array_push($alerts, $alert);
+                }
+                $nodes[$i]->alert = $alerts;
+            }
+
             $i++;
         }
 
