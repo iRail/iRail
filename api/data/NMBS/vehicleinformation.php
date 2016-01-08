@@ -219,7 +219,7 @@ class vehicleinformation
 
         foreach ($nodes as $alertnode) {
             $bodysplitter = "*#*";
-            $alertbody = strip_tags($alertnode, '<strong>, <br>');
+            $alertbody = strip_tags($alertnode, '<strong>, <br>, <a>');
             $alertbody = str_replace('</strong>', $bodysplitter, $alertbody);
             $alertbody = str_replace('<strong>', '', $alertbody);
             $alertelements = explode($bodysplitter, $alertbody);
