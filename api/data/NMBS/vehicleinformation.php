@@ -228,15 +228,15 @@ class vehicleinformation
 
         foreach ($nodes as $alertnode) {
             $bodysplitter = "*#*";
-            $alertbody = strip_tags($alertnode, '<strong>, <br>');
+            $alertbody = strip_tags($alertnode, '<strong>, <br>, <a>');
             $alertbody = str_replace('</strong>', $bodysplitter, $alertbody);
             $alertbody = str_replace('<strong>', '', $alertbody);
             $alertelements = explode($bodysplitter, $alertbody);
             $header = preg_replace("/&nbsp;|\s*\(.*?\)\s*/i", '', $alertelements[0]);
 
             $alert = new Alert();
-            $alert->header = htmlentities(trim($header));
-            $alert->description = htmlentities(trim($alertelements[1]));
+            $alert->header = html_entity_decode(htmlentities(trim($header)));
+            $alert->description = html_entity_decode(htmlentities(trim($alertelements[1])));
 
             array_push($alerts, $alert);
         }
