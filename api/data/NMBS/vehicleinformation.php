@@ -132,7 +132,7 @@ class vehicleinformation
                 $departureTime = "";
                 
                 // Handle last stop time, delay and canceled info
-                if (count($nodes[$i]->children[1]->children) == 3) { 
+                if (count($nodes[$i]->children[1]->children) == 3) {
                     $departureTime = reset($nodes[$i]->children[1]->children[2]->nodes[0]->_);
                 } else {
                     $departureTime = $arriveTime;
