@@ -142,9 +142,9 @@ class vehicleinformation
 
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
-                    $stationname = reset($as[0]->nodes[0]->_);
+                    $stationname = trim(reset($as[0]->nodes[0]->_));
                 } else {
-                    $stationname = reset($node->children[3]->nodes[0]->_);
+                    $stationname = trim(reset($node->children[3]->nodes[0]->_));
                 }
 
                 // Platform
