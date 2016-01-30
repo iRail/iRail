@@ -132,13 +132,22 @@ class vehicleinformation
                 // Time
                 $timenodearray = $node->children[1]->find('span');
                 $arriveTime = reset($timenodearray[0]->nodes[0]->_);
-                $departureTime = count($nodes[$i]->children[1]->children) == 3 ? reset($nodes[$i]->children[1]->children[2]->nodes[0]->_) : $arriveTime;
+                $departureTime = "";
+                
+                // Handle last stop time, delay and canceled info
+                if (count($nodes[$i]->children[1]->children) == 3) {
+                    $departureTime = reset($nodes[$i]->children[1]->children[2]->nodes[0]->_);
+                } else {
+                    $departureTime = $arriveTime;
+                    $departureDelay = $arrivalDelay;
+                    $departureCanceled = $arrivalCanceled;
+                }
 
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
-                    $stationname = reset($as[0]->nodes[0]->_);
+                    $stationname = trim(reset($as[0]->nodes[0]->_));
                 } else {
-                    $stationname = reset($node->children[3]->nodes[0]->_);
+                    $stationname = trim(reset($node->children[3]->nodes[0]->_));
                 }
 
                 // Platform
@@ -219,15 +228,15 @@ class vehicleinformation
 
         foreach ($nodes as $alertnode) {
             $bodysplitter = "*#*";
-            $alertbody = strip_tags($alertnode, '<strong>, <br>');
+            $alertbody = strip_tags($alertnode, '<strong>, <br>, <a>');
             $alertbody = str_replace('</strong>', $bodysplitter, $alertbody);
             $alertbody = str_replace('<strong>', '', $alertbody);
             $alertelements = explode($bodysplitter, $alertbody);
             $header = preg_replace("/&nbsp;|\s*\(.*?\)\s*/i", '', $alertelements[0]);
 
             $alert = new Alert();
-            $alert->header = htmlentities(trim($header));
-            $alert->description = htmlentities(trim($alertelements[1]));
+            $alert->header = html_entity_decode(htmlentities(trim($header)));
+            $alert->description = html_entity_decode(htmlentities(trim($alertelements[1])));
 
             array_push($alerts, $alert);
         }
