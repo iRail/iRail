@@ -226,8 +226,8 @@ class vehicleinformation
             $header = preg_replace("/&nbsp;|\s*\(.*?\)\s*/i", '', $alertelements[0]);
 
             $alert = new Alert();
-            $alert->header = htmlentities(trim($header));
-            $alert->description = htmlentities(trim($alertelements[1]));
+            $alert->header = html_entity_decode(htmlentities(trim($header)));
+            $alert->description = html_entity_decode(htmlentities(trim($alertelements[1])));
 
             array_push($alerts, $alert);
         }

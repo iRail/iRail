@@ -207,8 +207,8 @@ class connections
                     $alerts = [];
                     foreach ($conn->IList->I as $info) {
                         $alert = new Alert();
-                        $alert->header = htmlentities(trim($info['header']));
-                        $alert->description = htmlentities(trim($info['text']));
+                        $alert->header = html_entity_decode(htmlentities(trim($info['header'])));
+                        $alert->description = html_entity_decode(htmlentities(trim($info['text'])));
                         array_push($alerts, $alert);
                     }
                     $connection[$i]->alert = $alerts;
