@@ -115,7 +115,11 @@ class Xml extends Printer
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
         } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
-            echo "<$key>$val";
+            echo "<$key>";
+            if ($key == 'header' || $key == 'description') {
+                echo "<![CDATA[";
+            }
+            echo $val;
         }
     }
 
@@ -125,6 +129,10 @@ class Xml extends Printer
      */
     public function endElement($name)
     {
+        if ($name == 'header' || $name == 'description') {
+            echo ']]>';
+        }
+        
         if (! in_array($name, $this->ATTRIBUTES) && $name != 'name') {
             echo "</$name>";
         }
