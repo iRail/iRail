@@ -13,6 +13,7 @@ class LiveboardRequest extends Request
     protected $time;
     protected $arrdep;
     protected $fast;
+    protected $alerts;
 
     public function __construct()
     {
@@ -22,6 +23,7 @@ class LiveboardRequest extends Request
         parent::setGetVar('arrdep', 'DEP');
         parent::setGetVar('time', date('Hi'));
         parent::setGetVar('fast', 'false');
+        parent::setGetVar('alerts', 'false');
 
         preg_match('/(..)(..)(..)/si', $this->date, $m);
 
@@ -48,6 +50,14 @@ class LiveboardRequest extends Request
     public function isFast()
     {
         return $this->fast == 'true';
+    }
+
+    /**
+     * @return bool
+     */
+    public function getAlerts()
+    {
+        return $this->alerts == 'true';
     }
 
     /**

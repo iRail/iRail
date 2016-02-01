@@ -28,7 +28,7 @@ class connections
             $to = stations::getStationFromID($request->getTo(), $request->getLang());
             $to = $to->name;
         }
-        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getResults(), $request->getLang(), $request->getFast(), $request->getTimeSel(), $request->getTypeOfTransport());
+        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getResults(), $request->getLang(), $request->getFast(), $request->getAlerts(), $request->getTimeSel(), $request->getTypeOfTransport());
     }
 
     /**
@@ -39,17 +39,18 @@ class connections
      * @param $results
      * @param $lang
      * @param $fast
+     * @param bool $showAlerts
      * @param string $timeSel
      * @param string $typeOfTransport
      * @return array
      * @throws Exception
      */
-    private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $timeSel = 'depart', $typeOfTransport = 'trains')
+    private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $showAlerts, $timeSel = 'depart', $typeOfTransport = 'trains')
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
 
-        return self::parseHafasXml($xml, $lang, $fast);
+        return self::parseHafasXml($xml, $lang, $fast, $showAlerts);
     }
 
     /**
@@ -145,11 +146,10 @@ class connections
 
         $response = curl_exec($ch);
         curl_close($ch);
-
         return $response;
     }
 
-    public static function parseHafasXml($serverData, $lang, $fast)
+    public static function parseHafasXml($serverData, $lang, $fast, $showAlerts = false)
     {
         $xml = new SimpleXMLElement($serverData);
         $connection = [];
@@ -200,6 +200,18 @@ class connections
                         $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
                         $arrivalPlatformNormal = false;
                     }
+                }
+
+                // Alerts
+                if ($showAlerts && isset($conn->IList)) {
+                    $alerts = [];
+                    foreach ($conn->IList->I as $info) {
+                        $alert = new Alert();
+                        $alert->header = html_entity_decode(htmlentities(trim($info['header'])));
+                        $alert->description = html_entity_decode(htmlentities(trim($info['text'])));
+                        array_push($alerts, $alert);
+                    }
+                    $connection[$i]->alert = $alerts;
                 }
 
                 $connection[$i]->departure->delay = $departureDelay;
