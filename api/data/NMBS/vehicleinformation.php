@@ -178,6 +178,8 @@ class vehicleinformation
                     }
                     $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
                     $stationId = '00'.$nr;
+                } else {
+                    $stationId = NULL;
                 }
 
                 $station = new Station();
