@@ -166,7 +166,14 @@ class connections
                 $connection[$i]->departure->station = $fromstation;
                 $connection[$i]->departure->direction = (trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text));
                 $connection[$i]->departure->time = tools::transformTime($conn->Overview->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
-                $connection[$i]->departure->canceled = $conn->Overview->Departure->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
+
+                if ($conn->Overview->Departure->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
+                    $conn->Overview->Departure->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_ARR") {
+                    $departurecanceled = false;
+                } else {
+                    $departurecanceled = true;
+                }
+                $connection[$i]->departure->canceled = $departurecanceled;
 
                 $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->arrival->station = $tostation;
@@ -178,7 +185,6 @@ class connections
                 } else {
                     $arrivalcanceled = true;
                 }
-
                 $connection[$i]->arrival->canceled = $arrivalcanceled;
 
                 //Delay and platform changes
@@ -261,7 +267,13 @@ class connections
                                 $departTime = tools::transformTime($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Time, $conn->Overview->Date);
                                 $departPlatform = trim($connarray[$connectionindex + 1]->Departure->BasicStop->Dep->Platform->Text);
                                 $departDelay = 0; //Todo: NYImplemented
-                                $departcanceled = $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status != "SCHEDULED" ? true : false;
+
+                                if ($connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
+                                    $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_ARR") {
+                                    $departcanceled = false;
+                                } else {
+                                    $departcanceled = true;
+                                }
 
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
