@@ -267,8 +267,8 @@ class connections
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
                                 $arrivalDelay = 0; //Todo: NYImplemented
 
-                                if ($connarray[$connectionindex + 1]->Arrival->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
-                                    $connarray[$connectionindex + 1]->Arrival->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_DEP") {
+                                if ($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
+                                    $connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_DEP") {
                                     $arrivalcanceled = false;
                                 } else {
                                     $arrivalcanceled = true;
