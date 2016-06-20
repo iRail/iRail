@@ -196,7 +196,7 @@ class connections
                 $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
                 $arrivalPlatformNormal = true;
 
-                if ($conn->RtStateList->RtState['value'] == 'HAS_DELAYINFO') {
+                if ($conn->RtStateList->RtState['value'] == 'HAS_DELAYINFO' or $conn->RtStateList->RtState['value'] == 'IS_ALTERNATIVE') {
                     //echo "delay: " .$conn->Overview -> Departure -> BasicStop -> StopPrognosis -> Dep -> Time . "\n";
                     $departureDelay = tools::transformTime($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Time, $conn->Overview->Date) - $connection[$i]->departure->time;
                     if ($departureDelay < 0) {
