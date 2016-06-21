@@ -278,9 +278,16 @@ class connections
                                 } else {
                                     $departcanceled = true;
                                 }
+                                
+                                $departPlatformNormal = true;
+								if (isset($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
+										$departPlatform = trim($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
+										$departPlatformNormal = false;
+								}
 
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
+                                
                                 $arrivalDelay = tools::transformTime($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Time, $conn->Overview->Date) - $arrivalTime;
                                 if ($arrivalDelay < 0) {
                                     $arrivalDelay = 0;
@@ -292,6 +299,12 @@ class connections
                                 } else {
                                     $arrivalcanceled = true;
                                 }
+                                
+                                $arrivalPlatformNormal = true;
+								if (isset($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
+										$arrivalPlatform = trim($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
+										$arrivalPlatformNormal = false;
+								}
 
                                 $vias[$connectionindex] = new Via();
                                 $vias[$connectionindex]->arrival = new ViaDepartureArrival();
@@ -299,14 +312,14 @@ class connections
                                 $vias[$connectionindex]->arrival->delay = $arrivalDelay;
                                 $vias[$connectionindex]->arrival->platform = new Platform();
                                 $vias[$connectionindex]->arrival->platform->name = $arrivalPlatform;
-                                $vias[$connectionindex]->arrival->platform->normal = 1;
+                                $vias[$connectionindex]->arrival->platform->normal = $arrivalPlatformNormal;
                                 $vias[$connectionindex]->arrival->canceled = $arrivalcanceled;
                                 $vias[$connectionindex]->departure = new ViaDepartureArrival();
                                 $vias[$connectionindex]->departure->time = $departTime;
                                 $vias[$connectionindex]->departure->delay = $departDelay;
                                 $vias[$connectionindex]->departure->platform = new Platform();
                                 $vias[$connectionindex]->departure->platform->name = $departPlatform;
-                                $vias[$connectionindex]->departure->platform->normal = 1;
+                                $vias[$connectionindex]->departure->platform->normal = $departPlatformNormal;
                                 $vias[$connectionindex]->departure->canceled = $departcanceled;
                                 $vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
                                 if (isset($directions[$k - 1])) {
