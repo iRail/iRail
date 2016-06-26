@@ -95,6 +95,9 @@ class vehicleinformation
                 ->children;
 
             $j = 0;
+
+            $previousHour = 0;
+            $nextDay = 0;
             for ($i = 1; $i < count($nodes); $i++) {
                 $node = $nodes[$i];
                 if (! count($node->attr)) {
@@ -146,7 +149,7 @@ class vehicleinformation
                     }
                     
                 }
-
+                
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
                     $stationname = trim(reset($as[0]->nodes[0]->_));
@@ -196,12 +199,16 @@ class vehicleinformation
                         $station = stations::getStationFromName($stationname, $lang);
                     }
                 }
-
+                // The HTML file is ordered chronologically: so once we crossed midnight, we will alway have a next day set to 1.
+                if ($previousHour > (int)substr($departureTime,0,2)) {
+                    $nextDay = 1;
+                }
+                $previousHour = (int)substr($departureTime,0,2);
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
-                $stops[$j]->time = tools::transformTime('00d'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;

@@ -12,7 +12,7 @@ All information can be found on [our blog at hello.iRail.be](http://hello.irail.
 
 ## Installation for development purposes ##
 
-_note: you'll also need to have [nodejs](https://nodejs.org) and [composer](http://getcomposer.org) installed on your system_
+_note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and PHP curl extension installed on your system_
 
  * Step 1: clone this repo
  * Step 2: `composer install`
