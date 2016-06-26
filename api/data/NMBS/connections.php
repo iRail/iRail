@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * Copyright (C) 2011 by iRail vzw/asbl
  * © 2015 by Open Knowledge Belgium vzw/asbl
  * This will return information about 1 specific route for the NMBS.
@@ -280,10 +280,10 @@ class connections
                                 }
                                 
                                 $departPlatformNormal = true;
-								if (isset($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
-										$departPlatform = trim($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
-										$departPlatformNormal = false;
-								}
+                                if (isset($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
+                                    $departPlatform = trim($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
+                                    $departPlatformNormal = false;
+                                }
 
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
@@ -301,10 +301,10 @@ class connections
                                 }
                                 
                                 $arrivalPlatformNormal = true;
-								if (isset($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
-										$arrivalPlatform = trim($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
-										$arrivalPlatformNormal = false;
-								}
+                                if (isset($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
+                                    $arrivalPlatform = trim($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
+                                    $arrivalPlatformNormal = false;
+                                }
 
                                 $vias[$connectionindex] = new Via();
                                 $vias[$connectionindex]->arrival = new ViaDepartureArrival();
