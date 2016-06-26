@@ -8,5 +8,3 @@ header('Content-Type: application/json');
 $log = new JsonLog('../storage/irapi.log');
 
 print json_encode($log->getLastEntries(1000));
-
-?>

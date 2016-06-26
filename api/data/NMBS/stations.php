@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * Copyright (C) 2011 by iRail vzw/asbl
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
  *

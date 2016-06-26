@@ -147,7 +147,6 @@ class vehicleinformation
                         $departureDelay = $arrivalDelay;
                         $departureCanceled = $arrivalCanceled;
                     }
-                    
                 }
                 
                 if (count($node->children[3]->find('a'))) {
@@ -182,7 +181,7 @@ class vehicleinformation
                     $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
                     $stationId = '00'.$nr;
                 } else {
-                    $stationId = NULL;
+                    $stationId = null;
                 }
 
                 $station = new Station();
@@ -200,10 +199,10 @@ class vehicleinformation
                     }
                 }
                 // The HTML file is ordered chronologically: so once we crossed midnight, we will alway have a next day set to 1.
-                if ($previousHour > (int)substr($departureTime,0,2)) {
+                if ($previousHour > (int)substr($departureTime, 0, 2)) {
                     $nextDay = 1;
                 }
-                $previousHour = (int)substr($departureTime,0,2);
+                $previousHour = (int)substr($departureTime, 0, 2);
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->delay = $departureDelay;
