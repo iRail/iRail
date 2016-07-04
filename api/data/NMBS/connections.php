@@ -20,15 +20,16 @@ class connections
         //detect whether from was an id and change from accordingly
         $from = $request->getFrom();
         if (count(explode('.', $request->getFrom())) > 1) {
-            $from = stations::getStationFromID($request->getFrom(), $request->getLang());
+            $from = stations::getStationFromID($request->getFrom(), $request->getLang());            
             $from = $from->name;
         }
         $to = $request->getTo();
         if (count(explode('.', $request->getTo())) > 1) {
             $to = stations::getStationFromID($request->getTo(), $request->getLang());
+            $request->setTo($to);
             $to = $to->name;
         }
-        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getResults(), $request->getLang(), $request->getFast(), $request->getAlerts(), $request->getTimeSel(), $request->getTypeOfTransport());
+        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getResults(), $request->getLang(), $request->getFast(), $request->getAlerts(), $request->getTimeSel(), $request->getTypeOfTransport(), $request);
     }
 
     /**
@@ -45,9 +46,9 @@ class connections
      * @return array
      * @throws Exception
      */
-    private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $showAlerts, $timeSel = 'depart', $typeOfTransport = 'trains')
+    private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $showAlerts, $timeSel = 'depart', $typeOfTransport = 'trains', $request)
     {
-        $ids = self::getHafasIDsFromNames($from, $to, $lang);
+        $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
 
         return self::parseHafasXml($xml, $lang, $fast, $showAlerts);
@@ -56,16 +57,19 @@ class connections
     /**
      * This function scrapes the ID from the HAFAS system. Since hafas IDs will be requested in pairs, it also returns 2 id's and asks for 2 names.
      *
-     * @param $name1
-     * @param $name2
+     * @param $from
+     * @param $to
      * @param $lang
      * @return array
      */
-    private static function getHafasIDsFromNames($name1, $name2, $lang)
+    private static function getHafasIDsFromNames($from, $to, $lang, $request)
     {
-        $station1 = stations::getStationFromName($name1, $lang);
-        $station2 = stations::getStationFromName($name2, $lang);
-
+        $station1 = stations::getStationFromName($from, $lang);
+        $station2 = stations::getStationFromName($to, $lang);
+        if (isset($request)) {
+            $request->setFrom($station1);
+            $request->setTo($station2);
+        }
         return [$station1->getHID(), $station2->getHID()];
     }
 

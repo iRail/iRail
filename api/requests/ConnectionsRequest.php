@@ -6,6 +6,7 @@
  * @author pieterc
  */
 include_once 'Request.php';
+include_once 'data/NMBS/stations.php';
 
 class ConnectionsRequest extends Request
 {
@@ -73,6 +74,18 @@ class ConnectionsRequest extends Request
     }
 
     /**
+     * When we have found a better description of the from, let the request know
+     * @param $from is a departure station 
+     */
+    public function setFrom($from)
+    {
+        $from = stations::transformOldToNewStyle($from);
+        //save the original text search string
+        $from['query'] = $this->from;
+        $this->from = $from;
+    }
+    
+    /**
      * @return mixed
      */
     public function getTo()
@@ -80,6 +93,18 @@ class ConnectionsRequest extends Request
         return $this->to;
     }
 
+    /**
+     * When we have found a better description of the $to, let the request know
+     * @param $to a destination station 
+     */
+    public function setTo($to)
+    {
+        $to = stations::transformOldToNewStyle($to);
+        //save the original text search string
+        $to['query'] = $this->to;
+        $this->to = $to;
+    }
+    
     /**
      * @return string
      */

@@ -5,6 +5,7 @@
  * @author pieterc
  */
 include_once 'Request.php';
+include_once 'data/NMBS/stations.php';
 
 class LiveboardRequest extends Request
 {
@@ -68,6 +69,16 @@ class LiveboardRequest extends Request
         return $this->station;
     }
 
+    /**
+     * @param $station a resolved station object
+     */
+    public function setStation($station)
+    {
+        $station = stations::transformOldToNewStyle($station);
+        $station['query'] = $this->station;
+        $this->station = $station;
+    }
+    
     /**
      * @return string
      */
