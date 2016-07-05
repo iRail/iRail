@@ -76,7 +76,7 @@ class ConnectionsRequest extends Request
 
     /**
      * When we have found a better description of the from, let the request know
-     * @param $from is a departure station 
+     * @param $from is a departure station
      */
     public function setFrom($from)
     {
@@ -96,7 +96,7 @@ class ConnectionsRequest extends Request
 
     /**
      * When we have found a better description of the $to, let the request know
-     * @param $to a destination station 
+     * @param $to a destination station
      */
     public function setTo($to)
     {
