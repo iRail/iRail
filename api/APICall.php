@@ -124,6 +124,7 @@ class APICall
                 $query['arrivalStop'] = $this->request->getTo();
                 //transform to ISO8601
                 $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['journeyoptions'] = $this->request->getJourneyOptions();
             } elseif ($this->resourcename === 'liveboard') {
                 $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['departureStop'] = $this->request->getStation();

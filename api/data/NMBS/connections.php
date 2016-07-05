@@ -50,8 +50,7 @@ class connections
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
-
-        return self::parseHafasXml($xml, $lang, $fast, $showAlerts);
+        return self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
     }
 
     /**
@@ -153,10 +152,11 @@ class connections
         return $response;
     }
 
-    public static function parseHafasXml($serverData, $lang, $fast, $showAlerts = false)
+    public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false)
     {
         $xml = new SimpleXMLElement($serverData);
         $connection = [];
+        $journeyoptions = [];
         $i = 0;
         if (isset($xml->ConRes->ConnectionList->Connection)) {
             $fromstation = self::getStationFromHafasDescription($xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['name'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['x'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['y'], $lang);
@@ -357,10 +357,31 @@ class connections
                 } else {
                     $connection[$i]->arrival->direction = 'unknown';
                 }
+
+                //Add journey options to the logs of iRail
+                $journeyoptions[$i] = ["journeys" => [] ];
+                $departureStop = $connection[$i]->departure->station;
+                for ($viaindex = 0; $viaindex < count($vias); $viaindex++) {
+                    $arrivalStop = $vias[$viaindex]->station;
+                    $journeyoptions[$i]["journeys"][] = [
+                        "trip" => substr($vias[$viaindex]->vehicle, 8),
+                        "departureStop" => $departureStop->{'@id'},
+                        "arrivalStop" => $arrivalStop->{'@id'}
+                    ];
+                    //set the next departureStop
+                    $departureStop = $vias[$viaindex]->station;
+                }
+                //add last journey
+                $journeyoptions[$i]["journeys"][] = [
+                    "trip" => substr($connection[$i]->arrival->vehicle, 8),
+                    "departureStop" => $departureStop->{'@id'},
+                    "arrivalStop" => $connection[$i]->arrival->station->{'@id'}
+                ];
+                $request->setJourneyOptions($journeyoptions);
                 $i++;
             }
         } else {
-            throw new Exception("We're sorry, we could not retrieve the correct data from our sources", 500);
+            throw new Exception("We're sorry, we could not parse the correct data from our sources", 500);
         }
 
         return $connection;

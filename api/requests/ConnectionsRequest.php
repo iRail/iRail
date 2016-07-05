@@ -19,6 +19,7 @@ class ConnectionsRequest extends Request
     protected $fast;
     protected $alerts;
     protected $typeOfTransport;
+    protected $journeyoptions;
 
     public function __construct()
     {
@@ -105,6 +106,25 @@ class ConnectionsRequest extends Request
         $this->to = $to;
     }
     
+    /**
+     * Get the journey options
+     * @return array
+     */
+    public function getJourneyOptions()
+    {
+        return $this->journeyoptions;
+    }
+
+
+    /**
+     * Set the journey options when a result has been found. This will be stored in the logs.
+     * @param $jo is an array of journey options
+     */
+    public function setJourneyOptions($jo)
+    {
+        $this->journeyoptions = $jo;
+    }
+
     /**
      * @return string
      */
