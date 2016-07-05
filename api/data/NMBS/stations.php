@@ -49,6 +49,20 @@ class stations
     }
 
     /**
+     * Creates a JSON-LD object from an old-style iRail API station object
+     */
+    public static function transformOldToNewStyle($oldstation)
+    {
+        $station = [];
+        $station['@id'] = $oldstation->{'@id'};
+        $station['longitude'] = $oldstation->locationX;
+        $station['latitude'] = $oldstation->locationY;
+        $station['name'] = $oldstation->name;
+        return $station;
+    }
+
+    
+    /**
      * @param $id
      * @param $lang
      * @return Station

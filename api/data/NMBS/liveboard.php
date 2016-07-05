@@ -22,6 +22,7 @@ class liveboard
         } catch (Exception $e) {
             throw new Exception('Could not find station ' . $stationr, 404);
         }
+        $request->setStation($dataroot->station);
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'arr');
