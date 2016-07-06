@@ -20,7 +20,7 @@ class connections
         //detect whether from was an id and change from accordingly
         $from = $request->getFrom();
         if (count(explode('.', $request->getFrom())) > 1) {
-            $from = stations::getStationFromID($request->getFrom(), $request->getLang());            
+            $from = stations::getStationFromID($request->getFrom(), $request->getLang());
             $from = $from->name;
         }
         $to = $request->getTo();
