@@ -15,7 +15,7 @@ All information can be found on [our blog at hello.iRail.be](http://hello.irail.
 _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and PHP curl extension installed on your system_
 
  * Step 1: clone this repo
- * Step 2: `composer install`
+ * Step 2: `sudo composer install`
  * Step 3: make sure storage is writable: `chmod 777 storage`
  * Step 4: Run your test server: `php -S localhost:8008 -t api`
  * Step 5: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
