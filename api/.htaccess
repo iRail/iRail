@@ -33,11 +33,13 @@ RewriteRule ^vehicle/$                  vehicle.php                     [NC,L]
 
 RewriteRule ^feedback/occupancy/$       feedback/occupancy.php          [NC,L]
 
-RewriteRule ^terms/unknown$       		terms/unknown.html         		[R=303]
-RewriteRule ^terms/low$       			terms/low.html         			[R=303]
-RewriteRule ^terms/medium$       		terms/medium.html         		[R=303]
-RewriteRule ^terms/high$       			terms/high.html         		[R=303]
+# Linked Data terms
+RewriteRule ^terms/unknown$             terms/unknown.html              [R=303]
+RewriteRule ^terms/low$                 terms/low.html                  [R=303]
+RewriteRule ^terms/medium$              terms/medium.html               [R=303]
+RewriteRule ^terms/high$                terms/high.html                 [R=303]
 
+# Logs
 RewriteRule ^logs/?$                    logs.php                        [NC,L]
 
 </IfModule>
