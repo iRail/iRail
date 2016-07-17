@@ -14,8 +14,8 @@ use Monolog\Formatter\LineFormatter;
 
 class APIPost
 {
-	private $postData;
-	private $resourcename;
+    private $postData;
+    private $resourcename;
     private $log;
 
     public function __construct($resourcename, $postData)
@@ -23,8 +23,8 @@ class APIPost
         //Default timezone is Brussels
         date_default_timezone_set('Europe/Brussels');
 
-    	$this->resourcename = $resourcename;
-    	$this->postData = json_decode($postData);
+        $this->resourcename = $resourcename;
+        $this->postData = json_decode($postData);
 
         try {
             $this->log = new Logger('irapi');
@@ -40,16 +40,18 @@ class APIPost
 
     public function writeToMongo($ip)
     {
-    	try {
-        	if($this->resourcename == 'occupancy') $this->occupancyToMongo($ip);
+        try {
+            if ($this->resourcename == 'occupancy') {
+                $this->occupancyToMongo($ip);
+            }
         } catch (Exception $e) {
             $this->buildError($e);
         }
     }
 
-	private function occupancyToMongo($ip)
-	{
-		if($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
+    private function occupancyToMongo($ip)
+    {
+        if ($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
             $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
             $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
@@ -61,7 +63,7 @@ class APIPost
             $ipLastMinute = $ips->findOne(array('ip' => $ip));
 
             // If it didn't put it in the table and execute the post
-            if(is_null($ipLastMinute)) {
+            if (is_null($ipLastMinute)) {
                 $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
                 $postInfo = array(
@@ -73,19 +75,19 @@ class APIPost
                 );
 
                 $feedback = new MongoDB\Collection($m, 'spitsgids', 'feedback');
-    			$feedback->insertOne($postInfo);
+                $feedback->insertOne($postInfo);
 
                 array_push($postInfo, $ip);
                 $this->writeLog($postInfo);
             } else {
                 throw new Exception('You can only post once every minute.', 400);
             }
-		} else {
-			throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
-		}
-	}
+        } else {
+            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
+        }
+    }
 
-	/**
+    /**
      * @param $e
      */
     private function buildError($e)
