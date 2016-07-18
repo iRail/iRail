@@ -51,7 +51,7 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
+        if ($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
             try {
                 $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
                 $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
@@ -64,7 +64,7 @@ class APIPost
                 $ipLastMinute = $ips->findOne(array('ip' => $ip));
 
                 // If it didn't put it in the table and execute the post
-                if(is_null($ipLastMinute)) {
+                if (is_null($ipLastMinute)) {
                     $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
                     $postInfo = array(
