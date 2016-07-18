@@ -41,7 +41,9 @@ class APIPost
     public function writeToMongo($ip)
     {
         try {
-            if($this->resourcename == 'occupancy') $this->occupancyToMongo($ip);
+            if ($this->resourcename == 'occupancy') {
+                $this->occupancyToMongo($ip);
+            }
         } catch (Exception $e) {
             $this->buildError($e);
         }
@@ -95,7 +97,7 @@ class APIPost
         }
     }
 
-	/**
+    /**
      * @param $e
      */
     private function buildError($e)
