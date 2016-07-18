@@ -24,6 +24,26 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
 
 Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project
 
+## Set up the MongoDB yourself ##
+
+Things you will need on the server you want to set it up:
+
+ * MongoDB
+  * Installation on the [MongoDB site](https://www.mongodb.com/download-center?jmp=nav#community)
+ * PHP 7.0
+ * MongoDB module for PHP
+  * Preferable with PECL `sudo pecl install mongodb`
+  * In case of problems with `Homebrew brew install php70-mongodb`
+
+If you got these things set up you will need to import the data (the .csv files) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data):
+
+```
+mongoimport -d spitsgids -c survey --type csv --file survey.csv --headerline
+mongoimport -d spitsgids -c nmbs --type csv --file nmbs.csv --headerline
+```
+
+If you run `mongod` now you should be good to go!
+
 ## More links ##
 
  * Our mailing list: http://list.irail.be/
