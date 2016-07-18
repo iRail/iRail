@@ -50,35 +50,45 @@ class APIPost
 	private function occupancyToMongo($ip)
 	{
 		if($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
-            $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-            $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
+            try {
+                $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+                $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
-            // Delete the ips who are longer there than 1 minute
-            $epochMinuteAgo = time() - 60;
-            $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
+                // Delete the ips who are longer there than 1 minute
+                $epochMinuteAgo = time() - 60;
+                $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
-            // Find if the same IP posted the last minute
-            $ipLastMinute = $ips->findOne(array('ip' => $ip));
+                // Find if the same IP posted the last minute
+                $ipLastMinute = $ips->findOne(array('ip' => $ip));
 
-            // If it didn't put it in the table and execute the post
-            if(is_null($ipLastMinute)) {
-                $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
+                // If it didn't put it in the table and execute the post
+                if(is_null($ipLastMinute)) {
+                    $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
-                $postInfo = array(
-                    'vehicle' => $this->postData->vehicle,
-                    'from' => $this->postData->from,
-                    'to' => $this->postData->to,
-                    'occupancy' => $this->postData->occupancy,
-                    'date' => date('Ymd')
-                );
+                    $postInfo = array(
+                        'vehicle' => $this->postData->vehicle,
+                        'from' => $this->postData->from,
+                        'to' => $this->postData->to,
+                        'occupancy' => $this->postData->occupancy,
+                        'date' => date('Ymd')
+                    );
 
-                $feedback = new MongoDB\Collection($m, 'spitsgids', 'feedback');
-    			$feedback->insertOne($postInfo);
+                    // Insert the feedback
+                    $feedback = new MongoDB\Collection($m, 'spitsgids', 'feedback');
+                    $feedback->insertOne($postInfo);
 
-                array_push($postInfo, $ip);
-                $this->writeLog($postInfo);
-            } else {
-                throw new Exception('You can only post once every minute.', 400);
+                    // Log the post in the iRail log file
+                    array_push($postInfo, $ip);
+                    $this->writeLog($postInfo);
+
+                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+                    header("HTTP/1.0 201 Created");
+                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                } else {
+                    throw new Exception('Too Many Requests', 429);
+                }
+            } catch (Exception $e) {
+                $this->buildError($e);
             }
 		} else {
 			throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
