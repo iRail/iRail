@@ -38,7 +38,7 @@ Things you will need on the server you want to set it up:
 If you got these things set up you will need to import the data (the structural.csv file) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data):
 
 ```
-mongoimport -d spitsgids -c structure --type csv --file structural.csv --headerline
+mongoimport -d spitsgids -c structural --type csv --file structural.csv --headerline
 ```
 
 If you run `mongod` now you should be good to go!
