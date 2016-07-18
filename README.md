@@ -35,11 +35,10 @@ Things you will need on the server you want to set it up:
   * Preferable with PECL `sudo pecl install mongodb`
   * In case of problems with `Homebrew brew install php70-mongodb`
 
-If you got these things set up you will need to import the data (the .csv files) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data):
+If you got these things set up you will need to import the data (the structural.csv file) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data):
 
 ```
-mongoimport -d spitsgids -c survey --type csv --file survey.csv --headerline
-mongoimport -d spitsgids -c nmbs --type csv --file nmbs.csv --headerline
+mongoimport -d spitsgids -c structural --type csv --file structural.csv --headerline
 ```
 
 If you run `mongod` now you should be good to go!
