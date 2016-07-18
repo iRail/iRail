@@ -17,14 +17,16 @@ class APIPost
     private $postData;
     private $resourcename;
     private $log;
+    private $method;
 
-    public function __construct($resourcename, $postData)
+    public function __construct($resourcename, $postData, $method)
     {
         //Default timezone is Brussels
         date_default_timezone_set('Europe/Brussels');
 
         $this->resourcename = $resourcename;
         $this->postData = json_decode($postData);
+        $this->method = $method;
 
         try {
             $this->log = new Logger('irapi');
@@ -40,12 +42,16 @@ class APIPost
 
     public function writeToMongo($ip)
     {
-        try {
-            if ($this->resourcename == 'occupancy') {
-                $this->occupancyToMongo($ip);
+        if($this->method == "POST") {
+            try {
+                if ($this->resourcename == 'occupancy') {
+                    $this->occupancyToMongo($ip);
+                }
+            } catch (Exception $e) {
+                $this->buildError($e);
             }
-        } catch (Exception $e) {
-            $this->buildError($e);
+        } else {
+            $this->buildError(new Exception('Only post requests are allowed', 405));
         }
     }
 
