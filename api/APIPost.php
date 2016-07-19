@@ -11,6 +11,7 @@ use MongoDB\Collection;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+include_once 'spitsgids/SpitsgidsController.php';
 
 class APIPost
 {
@@ -57,13 +58,14 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if ($this->postData->vehicle && $this->postData->from && $this->postData->to && $this->postData->occupancy) {
+        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
             try {
                 $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
                 $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
                 // Delete the ips who are longer there than 1 minute
-                $epochMinuteAgo = time() - 60;
+                $epoch = time();
+                $epochMinuteAgo = $epoch - 60;
                 $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
                 // Find if the same IP posted the last minute
@@ -73,6 +75,10 @@ class APIPost
                 if (is_null($ipLastMinute)) {
                     $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
+                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+                    header("HTTP/1.0 201 Created");
+                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+
                     $postInfo = array(
                         'vehicle' => $this->postData->vehicle,
                         'from' => $this->postData->from,
@@ -81,17 +87,11 @@ class APIPost
                         'date' => date('Ymd')
                     );
 
-                    // Insert the feedback
-                    $feedback = new MongoDB\Collection($m, 'spitsgids', 'feedback');
-                    $feedback->insertOne($postInfo);
-
                     // Log the post in the iRail log file
                     array_push($postInfo, $ip);
                     $this->writeLog($postInfo);
 
-                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
-                    header("HTTP/1.0 201 Created");
-                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                    SpitsgidsController::processFeedback($postInfo, $epoch);
                 } else {
                     throw new Exception('Too Many Requests', 429);
                 }
