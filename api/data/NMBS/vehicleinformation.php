@@ -11,6 +11,8 @@ include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once '../includes/simple_html_dom.php';
 include_once '../includes/getUA.php';
+use MongoDB\Collection;
+
 class vehicleinformation
 {
     /**
@@ -40,8 +42,11 @@ class vehicleinformation
         if ($request->getAlerts() && self::getAlerts($html)) {
             $dataroot->alert = self::getAlerts($html);
         }
+        
+        $vehicleOccupancy = self::getOccupancy(substr(strrchr($request->getVehicleId(), "."), 1));
+        
         $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast());
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy));
     }
 
     /**
@@ -80,13 +85,25 @@ class vehicleinformation
     }
 
     /**
+     * @param $vehicle
+     */
+    private static function getOccupancy($vehicle)
+    {
+        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+        $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
+
+        // If we ever start using a date as parmater the parameter should be put here as date
+        return $occupancy->find(array('vehicle' => $vehicle, 'date' => date('Ymd')));
+    }
+
+    /**
      * @param $html
      * @param $lang
      * @param $fast
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast)
+    private static function getData($html, $lang, $fast, $occupancyArr)
     {
         try {
             $stops = [];
@@ -212,6 +229,17 @@ class vehicleinformation
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
 
+                // Add occupancy
+                foreach ($occupancyArr as $stopOccupancy) {
+                    if($station->{'@id'} == $stopOccupancy["from"][0]) {
+                        $URI = self::getURLForOccupancy($stopOccupancy["occupancy"]);
+
+                        $stops[$j]->occupancy->{'@id'} = $URI;
+                        $stops[$j]->occupancy->name = basename($URI);
+                        break;
+                    }
+                }
+                
                 $j++;
             }
 
@@ -388,5 +416,15 @@ class vehicleinformation
         curl_close($ch);
 
         return $result;
+    }
+
+    private static function getURLForOccupancy($occupancy) {
+        if($occupancy < 1/3) {
+            return 'https://api.irail.be/terms/low';
+        } else if ($occupancy > 2/3) {
+            return 'https://api.irail.be/terms/high';
+        } else {
+            return 'https://api.irail.be/terms/medium';
+        }
     }
 };
