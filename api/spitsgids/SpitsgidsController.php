@@ -11,16 +11,17 @@ use MongoDB\Collection;
 
 class SpitsgidsController
 {
-    public static function processFeedback($feedback, $epoch) {
+    public static function processFeedback($feedback, $epoch)
+    {
         date_default_timezone_set('Europe/Brussels');
 
         $stops = self::getVehicleStopsInfo($feedback["vehicle"]);
         $errorCheck = 0;
         $lastStation = "";
 
-        foreach($stops->stop as $stop) {
-            if($errorCheck > 0) {
-                if($epoch < intval($stop->time) + intval($stop["delay"])) {
+        foreach ($stops->stop as $stop) {
+            if ($errorCheck > 0) {
+                if ($epoch < intval($stop->time) + intval($stop["delay"])) {
                     $feedback["from"] = $lastStation;
                     self::processFeedbackOneConnection($feedback);
                     break;
@@ -29,22 +30,23 @@ class SpitsgidsController
                 }
             }
 
-            if($stop->station["URI"] == $feedback["from"] || $stop->station["URI"] == $feedback["to"]) {
-                if($errorCheck == 0) {
+            if ($stop->station["URI"] == $feedback["from"] || $stop->station["URI"] == $feedback["to"]) {
+                if ($errorCheck == 0) {
                     $lastStation = $stop->station["URI"];
                 }
 
                 $errorCheck += 1;
             }
 
-            if($errorCheck == 2) {
+            if ($errorCheck == 2) {
                 self::processFeedbackOneConnection($feedback);
                 break;
             }
         }
     }
 
-    private static function getVehicleStopsInfo($vehicle) {
+    private static function getVehicleStopsInfo($vehicle)
+    {
         $url = "http://api.irail.be/vehicle/?id=BE.NMBS." . $vehicle;
 
         $curl = curl_init();
@@ -58,12 +60,14 @@ class SpitsgidsController
         return $xml->stops;
     }
 
-    private static function processFeedbackOneConnection($feedback) {
+    private static function processFeedbackOneConnection($feedback)
+    {
         self::feedbackOneConnectionToOccupancyTable($feedback);
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
 
-    private static function feedbackOneConnectionToOccupancyTable($feedback) {
+    private static function feedbackOneConnectionToOccupancyTable($feedback)
+    {
         $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
         $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
 
@@ -80,10 +84,10 @@ class SpitsgidsController
             'occupancy' => self::occupancyToNumber($feedback["occupancy"])
         );
 
-        if(is_null($occupancyExists)) {
+        if (is_null($occupancyExists)) {
             $occupancy->insertOne($occupancyData);
         } else {
-            if(is_null($occupancyExists["feedback"])) {
+            if (is_null($occupancyExists["feedback"])) {
                 $occupancy->updateOne(
                     array('id' => $id),
                     array('$set' => array('feedback' => $occupancyData["feedback"], 'occupancy' => $occupancyData["feedback"]))
@@ -100,7 +104,8 @@ class SpitsgidsController
         }
     }
 
-    private static function feedbackOneConnectionToFeedbackTable($feedback) {
+    private static function feedbackOneConnectionToFeedbackTable($feedback)
+    {
         $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
         $feedbackTable = new MongoDB\Collection($m, 'spitsgids', 'feedback');
 
@@ -117,7 +122,8 @@ class SpitsgidsController
         $feedbackTable->insertOne($feedbackData);
     }
 
-    private static function occupancyToNumber($occupancy) {
+    private static function occupancyToNumber($occupancy)
+    {
         switch ($occupancy) {
             case 'https://api.irail.be/terms/low':
                 return 0;
@@ -131,5 +137,3 @@ class SpitsgidsController
         }
     }
 }
-
-?>

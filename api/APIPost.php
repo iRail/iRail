@@ -11,6 +11,7 @@ use MongoDB\Collection;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+
 include_once 'spitsgids/SpitsgidsController.php';
 
 class APIPost
@@ -43,7 +44,7 @@ class APIPost
 
     public function writeToMongo($ip)
     {
-        if($this->method == "POST") {
+        if ($this->method == "POST") {
             try {
                 if ($this->resourcename == 'occupancy') {
                     $this->occupancyToMongo($ip);
@@ -58,7 +59,7 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
+        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
             try {
                 $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
                 $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
