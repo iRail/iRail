@@ -39,6 +39,18 @@ You will then need to import the data (the structural.csv file) in MongoDB that 
 mongoimport -d irail -c structural --type csv --file structural.csv --headerline
 ```
 
+You also need to make sure the MongoDB is addressed correctly on your server. This can be done by creating an environment file. In this repository you can find an example file here: /api/env.example.
+Execute the following command:
+
+```bash
+Mac: cp api/.env.example api/.env
+Windows: copy api/.env.example api/.env
+```
+
+If your MongoDB URL is different than the default one specified in the .env you should change it.
+
+If you now run `mongod` now you should be good to go!
+
 ## More links ##
 
  * Our mailing list: http://list.irail.be/
