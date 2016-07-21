@@ -98,6 +98,7 @@ class vehicleinformation
 
             $previousHour = 0;
             $nextDay = 0;
+            $nextDayArrival = 0;
             for ($i = 1; $i < count($nodes); $i++) {
                 $node = $nodes[$i];
                 if (! count($node->attr)) {
@@ -108,7 +109,7 @@ class vehicleinformation
                 $splitter = '***';
                 $delaycontent = preg_replace("/<br\W*?\/>/", $splitter, $node->children[2]);
                 $delayelements = explode($splitter, strip_tags($delaycontent));
-                // print_r($delayelements);
+                //print_r($delayelements);
 
                 $arrivalDelay = trim($delayelements[0]);
                 $arrivalCanceled = false;
@@ -134,14 +135,14 @@ class vehicleinformation
 
                 // Time
                 $timenodearray = $node->children[1]->find('span');
-                $arriveTime = reset($timenodearray[0]->nodes[0]->_);
+                $arrivalTime = reset($timenodearray[0]->nodes[0]->_);
                 $departureTime = "";
 
                 if (count($nodes[$i]->children[1]->children) == 3) {
                     $departureTime = reset($nodes[$i]->children[1]->children[2]->nodes[0]->_);
                 } else {
                     // Handle first and last stop: time, delay and canceled info
-                    $departureTime = $arriveTime;
+                    $departureTime = $arrivalTime;
 
                     if ($j != 0) {
                         $departureDelay = $arrivalDelay;
@@ -202,15 +203,26 @@ class vehicleinformation
                 if ($previousHour > (int)substr($departureTime, 0, 2)) {
                     $nextDay = 1;
                 }
+                if ($previousHour > (int)substr($arrivalTime, 0, 2)) {
+                    $nextDayArrival = 1;
+                }
                 $previousHour = (int)substr($departureTime, 0, 2);
+
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
-                $stops[$j]->delay = $departureDelay;
-                $stops[$j]->canceled = $departureCanceled;
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->departureDelay = $departureDelay;
+                $stops[$j]->departureCanceled = $departureCanceled;
+                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', date('Ymd'));
+                $stops[$j]->arrivalDelay = $arrivalDelay;
+                $stops[$j]->arrivalCanceled = $arrivalCanceled;
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
+                //for backward compatibility
+                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->delay = $departureDelay;
+                $stops[$j]->canceled = $departureCanceled;
 
                 $j++;
             }
