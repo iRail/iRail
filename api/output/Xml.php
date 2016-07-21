@@ -111,7 +111,7 @@ class Xml extends Printer
      */
     public function startKeyVal($key, $val)
     {
-        if ($key == 'time') {
+        if ($key == 'time' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
         } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
