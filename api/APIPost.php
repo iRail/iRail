@@ -21,6 +21,7 @@ class APIPost
     private $resourcename;
     private $log;
     private $method;
+    private $mongodb_url;
 
     public function __construct($resourcename, $postData, $method)
     {
@@ -30,6 +31,10 @@ class APIPost
         $this->resourcename = $resourcename;
         $this->postData = json_decode($postData);
         $this->method = $method;
+
+        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv->load();
+        $this->mongodb_url = getenv('MONGODB_URL');
 
         try {
             $this->log = new Logger('irapi');
@@ -63,11 +68,7 @@ class APIPost
         if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
             if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    $dotenv = new Dotenv\Dotenv(__DIR__);
-                    $dotenv->load();
-                    $mongodb_env = getenv('MONGODB_URL');
-                    
-                    $m = new MongoDB\Driver\Manager($mongodb_env);
+                    $m = new MongoDB\Driver\Manager($this->mongodb_url);
                     $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
                     // Delete the ips who are longer there than 1 minute

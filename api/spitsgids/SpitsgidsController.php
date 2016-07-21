@@ -66,13 +66,12 @@ class SpitsgidsController
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
 
-    private static function feedbackOneConnectionToOccupancyTable($feedback)
-    {
-        $dotenv = new Dotenv\Dotenv(__DIR__);
+    private static function feedbackOneConnectionToOccupancyTable($feedback) {
+        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
-        $mongodb_env = getenv('MONGODB_URL');
-        
-        $m = new MongoDB\Driver\Manager($mongodb_env);
+        $mongodb_url = getenv('MONGODB_URL');
+
+        $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
@@ -108,13 +107,12 @@ class SpitsgidsController
         }
     }
 
-    private static function feedbackOneConnectionToFeedbackTable($feedback)
-    {
-        $dotenv = new Dotenv\Dotenv(__DIR__);
+    private static function feedbackOneConnectionToFeedbackTable($feedback) {
+        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
-        $mongodb_env = getenv('MONGODB_URL');
-        
-        $m = new MongoDB\Driver\Manager($mongodb_env);
+        $mongodb_url = getenv('MONGODB_URL');
+
+        $m = new MongoDB\Driver\Manager($mongodb_url);
         $feedbackTable = new MongoDB\Collection($m, 'spitsgids', 'feedback');
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);

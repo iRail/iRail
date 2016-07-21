@@ -15,23 +15,23 @@ class OccupancyOperations {
 
     public static function NumberToURI($occupancy) {
         if($occupancy < 1/3) {
-            return LOW;
+            return self::LOW;
         } else if ($occupancy <= 2/3) {
-            return MEDIUM;
+            return self::MEDIUM;
         } else {
-            return HIGH;
+            return self::HIGH;
         }
     }
 
     public static function URIToNumber($occupancy) {
         switch ($occupancy) {
-            case LOW:
+            case self::LOW:
                 return 0;
                 break;
-            case MEDIUM:
+            case self::MEDIUM:
                 return 1;
                 break;
-            case HIGH:
+            case self::HIGH:
                 return 2;
                 break;
             default:
@@ -55,11 +55,11 @@ class OccupancyOperations {
     }
 
     public static function isCorrectPostURI($URI) {
-        return $URI == LOW || $URI == MEDIUM || $URI == HIGH;
+        return $URI == self::LOW || $URI == self::MEDIUM || $URI == self::HIGH;
     }
 
     public static function getUnknown() {
-        return UNKNOWN;
+        return self::UNKNOWN;
     }
 }
 
