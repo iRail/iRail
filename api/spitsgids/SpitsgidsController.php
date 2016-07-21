@@ -7,6 +7,7 @@
    * @author Stan Callewaert
    */
 
+include_once 'spitsgids/OccupancyOperations.php';
 use MongoDB\Collection;
 
 class SpitsgidsController
@@ -75,9 +76,9 @@ class SpitsgidsController
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
-            'feedback' => self::occupancyToNumber($feedback["occupancy"]),
+            'feedback' => OccupancyOperations::URIToNumber($feedback["occupancy"]),
             'feedbackAmount' => 1,
-            'occupancy' => self::occupancyToNumber($feedback["occupancy"])
+            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );
 
         if(is_null($occupancyExists)) {
@@ -111,24 +112,10 @@ class SpitsgidsController
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
-            'occupancy' => self::occupancyToNumber($feedback["occupancy"])
+            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );
 
         $feedbackTable->insertOne($feedbackData);
-    }
-
-    private static function occupancyToNumber($occupancy) {
-        switch ($occupancy) {
-            case 'https://api.irail.be/terms/low':
-                return 0;
-                break;
-            case 'https://api.irail.be/terms/medium':
-                return 1;
-                break;
-            default:
-                return 2;
-                break;
-        }
     }
 }
 

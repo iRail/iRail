@@ -8,6 +8,8 @@
  */
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
+include_once 'spitsgids/OccupancyOperations.php';
+use MongoDB\Collection;
 
 class connections
 {
@@ -50,7 +52,18 @@ class connections
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
-        return self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
+        $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
+
+        $requestedDate = DateTime::createFromFormat('Ymd', $date);
+        $now = time();
+        $dateDiff = $now - $your_date;
+        $daysDiff = floor($datediff/(60*60*24));
+
+        if($daysDiff >= 2) {
+            return $connections;
+        } else {
+            return self::addOccupancy($connections, $date);
+        }
     }
 
     /**
@@ -387,6 +400,59 @@ class connections
         }
 
         return $connection;
+    }
+
+    private static function addOccupancy($connections, $date) {
+        foreach ($connections as $connection) {
+            $departure = $connection->departure;
+            $vehicle = substr(strrchr($departure->vehicle, "."), 1);
+            $from = $departure->station->{"@id"};
+
+            $URI = self::getOccupancyURI($vehicle, $from, $date);
+            $occupancyArr = [];
+
+            $connection->departure->occupancy->{'@id'} = $URI;
+            $connection->departure->occupancy->name = basename($URI);
+            array_push($occupancyArr, $URI);
+
+            if(!is_null($connection->via)) {
+                foreach ($connection->via as $via) {
+                    $vehicle = substr(strrchr($via->vehicle, "."), 1);
+                    $from = $via->station->{'@id'};
+                    
+                    $URI = self::getOccupancyURI($vehicle, $from, $date);
+
+                    $via->departure->occupancy->{'@id'} = $URI;
+                    $via->departure->occupancy->name = basename($URI);
+                    array_push($occupancyArr, $URI);
+                }
+            }
+
+            $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
+
+            $connection->occupancy->{'@id'} = $URI;
+            $connection->occupancy->name = basename($URI);
+        }
+
+        return $connections;
+    }
+
+    private static getOccupancyURI($vehicle, $from, $date) {
+        $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
+        $URI = "";
+        
+        if(!is_null($occupancyDeparture)) {
+            return OccupancyOperations::NumberToURI($occupancyDeparture->occupancy);
+        } else {
+            return OccupancyOperations::getUnknown();
+        }
+    }
+
+    private static function getOccupancyTrip($vehicle, $from, $date) {
+        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+        $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
+
+        return $occupancy->findOne(array('vehicle' => $vehicle, 'from' => $from, 'date' => $date));
     }
 
     /**
