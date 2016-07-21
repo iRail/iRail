@@ -68,7 +68,11 @@ class SpitsgidsController
 
     private static function feedbackOneConnectionToOccupancyTable($feedback)
     {
-        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv->load();
+        $mongodb_env = getenv('MONGODB_URL');
+        
+        $m = new MongoDB\Driver\Manager($mongodb_env);
         $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
@@ -79,9 +83,9 @@ class SpitsgidsController
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
-            'feedback' => self::occupancyToNumber($feedback["occupancy"]),
+            'feedback' => OccupancyOperations::URIToNumber($feedback["occupancy"]),
             'feedbackAmount' => 1,
-            'occupancy' => self::occupancyToNumber($feedback["occupancy"])
+            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );
 
         if (is_null($occupancyExists)) {
@@ -106,7 +110,11 @@ class SpitsgidsController
 
     private static function feedbackOneConnectionToFeedbackTable($feedback)
     {
-        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv->load();
+        $mongodb_env = getenv('MONGODB_URL');
+        
+        $m = new MongoDB\Driver\Manager($mongodb_env);
         $feedbackTable = new MongoDB\Collection($m, 'spitsgids', 'feedback');
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
@@ -116,24 +124,10 @@ class SpitsgidsController
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
-            'occupancy' => self::occupancyToNumber($feedback["occupancy"])
+            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );
 
         $feedbackTable->insertOne($feedbackData);
     }
-
-    private static function occupancyToNumber($occupancy)
-    {
-        switch ($occupancy) {
-            case 'https://api.irail.be/terms/low':
-                return 0;
-                break;
-            case 'https://api.irail.be/terms/medium':
-                return 1;
-                break;
-            default:
-                return 2;
-                break;
-        }
-    }
+}
 }
