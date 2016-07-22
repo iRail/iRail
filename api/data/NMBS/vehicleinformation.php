@@ -67,7 +67,7 @@ class vehicleinformation
         $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/'.$lang.'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.date_format(new DateTime($date), 'd%2fm%2fY').'&realtimeMode=Show';
+        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY').'&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -225,20 +225,21 @@ class vehicleinformation
                     $nextDayArrival = 1;
                 }
                 $previousHour = (int)substr($departureTime, 0, 2);
+                $dateDatetime = DateTime::createFromFormat('dmy', $date);
 
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->departureDelay = $departureDelay;
                 $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $date);
-                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $date);
+                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
+                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
                 //for backward compatibility
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $date);
+                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
