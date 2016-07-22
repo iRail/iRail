@@ -23,8 +23,9 @@ class vehicleinformation
     public static function fillDataRoot($dataroot, $request)
     {
         $lang = $request->getLang();
+        $date = $request->getDate();
 
-        $serverData = self::getServerData($request->getVehicleId(), $lang);
+        $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
         $html = str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
@@ -46,7 +47,7 @@ class vehicleinformation
         $vehicleOccupancy = self::getOccupancy(substr(strrchr($request->getVehicleId(), "."), 1));
         
         $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy));
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date);
     }
 
     /**
@@ -54,7 +55,7 @@ class vehicleinformation
      * @param $lang
      * @return mixed
      */
-    private static function getServerData($id, $lang)
+    private static function getServerData($id, $date, $lang)
     {
         global $irailAgent; // from ../includes/getUA.php
 
@@ -66,7 +67,7 @@ class vehicleinformation
         $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/'.$lang.'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.date('d%2fm%2fY').'&realtimeMode=Show';
+        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.date_format(new DateTime($date), 'd%2fm%2fY').'&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -103,7 +104,7 @@ class vehicleinformation
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast, $occupancyArr)
+    private static function getData($html, $lang, $fast, $occupancyArr, $date)
     {
         try {
             $stops = [];
@@ -229,15 +230,15 @@ class vehicleinformation
                 $stops[$j]->station = $station;
                 $stops[$j]->departureDelay = $departureDelay;
                 $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
-                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', date('Ymd'));
+                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $date);
+                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $date);
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
                 //for backward compatibility
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $date);
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
