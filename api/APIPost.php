@@ -65,8 +65,8 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
-            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
+            if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
                     $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
