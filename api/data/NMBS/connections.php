@@ -95,6 +95,8 @@ class connections
         ];
         if ($typeOfTransport == 'trains') {
             $trainsonly = '1111111000000000';
+        } elseif ($typeOfTransport == 'nointernationaltrains') {
+            $trainsonly = '0111111000000000';
         } elseif ($typeOfTransport == 'all') {
             $trainsonly = '1111111111111111';
         } else {
