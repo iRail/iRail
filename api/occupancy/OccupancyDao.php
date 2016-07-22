@@ -2,14 +2,14 @@
 /* Copyright (C) 2011 by iRail vzw/asbl
    * © 2015 by Open Knowledge Belgium vzw/asbl
    *
-   * This class handles the data transfer from Spitsgids tables.
+   * This class handles the data transfer from occupancy score tables.
    *
    * @author Stan Callewaert
    */
 
 use MongoDB\Collection;
 
-class SpitsgidsController
+class OccupancyDao
 {
     public static function processFeedback($feedback, $epoch)
     {
@@ -70,15 +70,18 @@ class SpitsgidsController
         $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
-
+        $mongodb_db = getenv('MONGODB_DB');
+        
         $m = new MongoDB\Driver\Manager($mongodb_url);
-        $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
+        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+        //Create a connection URI
+        //TODO: feedback date should be changed to the date the train started
+        $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
-        $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
         $occupancyExists = $occupancy->findOne(array('id' => $id));
 
         $occupancyData = array(
-            'id' => $id,
+            'connection' => $connectionid,
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
@@ -111,14 +114,16 @@ class SpitsgidsController
         $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
-
+        $mongodb_db = getenv('MONGODB_DB');
         $m = new MongoDB\Driver\Manager($mongodb_url);
-        $feedbackTable = new MongoDB\Collection($m, 'spitsgids', 'feedback');
+        $feedbackTable = new MongoDB\Collection($m, $mongodb_db, 'feedback');
 
-        $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
+        //Create a connection URI
+        //TODO: feedback date should be changed to the date the train started
+        $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
         $feedbackData = array(
-            'id' => $id,
+            'connection' => $connectionid,
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
@@ -127,5 +132,4 @@ class SpitsgidsController
 
         $feedbackTable->insertOne($feedbackData);
     }
-}
 }

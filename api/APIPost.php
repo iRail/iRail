@@ -12,8 +12,8 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
 
-include_once 'spitsgids/SpitsgidsController.php';
-include_once 'spitsgids/OccupancyOperations.php';
+include_once 'occupancy/OccupancyDao.php';
+include_once 'occupancy/OccupancyOperations.php';
 
 class APIPost
 {
@@ -99,7 +99,7 @@ class APIPost
                         array_push($postInfo, $ip);
                         $this->writeLog($postInfo);
 
-                        SpitsgidsController::processFeedback($postInfo, $epoch);
+                        OccupancyDao::processFeedback($postInfo, $epoch);
                     } else {
                         throw new Exception('Too Many Requests', 429);
                     }
