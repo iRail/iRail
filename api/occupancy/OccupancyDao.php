@@ -66,7 +66,8 @@ class OccupancyDao
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
 
-    private static function feedbackOneConnectionToOccupancyTable($feedback) {
+    private static function feedbackOneConnectionToOccupancyTable($feedback)
+    {
         $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
@@ -110,7 +111,8 @@ class OccupancyDao
         }
     }
 
-    private static function feedbackOneConnectionToFeedbackTable($feedback) {
+    private static function feedbackOneConnectionToFeedbackTable($feedback)
+    {
         $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
