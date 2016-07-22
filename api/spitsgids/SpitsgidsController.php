@@ -7,7 +7,7 @@
    * @author Stan Callewaert
    */
 
-include_once 'spitsgids/OccupancyOperations.php';
+include_once 'OccupancyOperations.php';
 use MongoDB\Collection;
 
 class SpitsgidsController
@@ -70,11 +70,12 @@ class SpitsgidsController
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
         $occupancyExists = $occupancy->findOne(array('id' => $id));
+        $feedbackFromArr = (Array)($feedback["from"]);
 
         $occupancyData = array(
             'id' => $id,
             'vehicle' => $feedback["vehicle"],
-            'from' => $feedback["from"],
+            'from' => $feedbackFromArr[0],
             'date' => $feedback["date"],
             'feedback' => OccupancyOperations::URIToNumber($feedback["occupancy"]),
             'feedbackAmount' => 1,
@@ -106,11 +107,12 @@ class SpitsgidsController
         $feedbackTable = new MongoDB\Collection($m, 'spitsgids', 'feedback');
 
         $id = $feedback["vehicle"] . "-" . $feedback["date"] . "-" . basename($feedback["from"]);
+        $feedbackFromArr = (Array)($feedback["from"]);
 
         $feedbackData = array(
             'id' => $id,
             'vehicle' => $feedback["vehicle"],
-            'from' => $feedback["from"],
+            'from' => $feedbackFromArr[0],
             'date' => $feedback["date"],
             'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );

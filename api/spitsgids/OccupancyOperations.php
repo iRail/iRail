@@ -14,24 +14,41 @@ class OccupancyOperations {
     const HIGH = 'https://api.irail.be/terms/high';
 
     public static function NumberToURI($occupancy) {
-        if($occupancy < 1/3) {
-            return LOW;
-        } else if ($occupancy <= 2/3) {
-            return MEDIUM;
+        if($occupancy < 2/3) {
+            return self::LOW;
+        } else if ($occupancy <= 4/3) {
+            return self::MEDIUM;
         } else {
-            return HIGH;
+            return self::HIGH;
+        }
+    }
+
+    private static function numberToURIExact($occupancy) {
+        switch ($occupancy) {
+            case 0:
+                return self::LOW;
+                break;
+            case 1:
+                return self::MEDIUM;
+                break;
+            case 2:
+                return self::HIGH;
+                break;
+            default:
+                return self::UNKNOWN;
+                break;
         }
     }
 
     public static function URIToNumber($occupancy) {
         switch ($occupancy) {
-            case LOW:
+            case self::LOW:
                 return 0;
                 break;
-            case MEDIUM:
+            case self::MEDIUM:
                 return 1;
                 break;
-            case HIGH:
+            case self::HIGH:
                 return 2;
                 break;
             default:
@@ -51,11 +68,11 @@ class OccupancyOperations {
             }
         }
 
-        return self::NumberToURI($maxOccupancy);
+        return self::numberToURIExact($maxOccupancy);
     }
 
     public static function getUnknown() {
-        return UNKNOWN;
+        return self::UNKNOWN;
     }
 }
 

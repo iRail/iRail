@@ -55,11 +55,10 @@ class connections
         $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
 
         $requestedDate = DateTime::createFromFormat('Ymd', $date);
-        $now = time();
-        $dateDiff = $now - $your_date;
-        $daysDiff = floor($datediff/(60*60*24));
+        $now = new DateTime();
+        $daysDiff = $now->diff($requestedDate);
 
-        if($daysDiff >= 2) {
+        if(intval($daysDiff->format('%R%a')) >= 2) {
             return $connections;
         } else {
             return self::addOccupancy($connections, $date);
@@ -416,8 +415,13 @@ class connections
             array_push($occupancyArr, $URI);
 
             if(!is_null($connection->via)) {
-                foreach ($connection->via as $via) {
-                    $vehicle = substr(strrchr($via->vehicle, "."), 1);
+                foreach ($connection->via as $key => $via) {
+                    if($key < count($connection->via)-1) {
+                        $vehicle = substr(strrchr($connection->via[$key+1]->vehicle, "."), 1);
+                    } else {
+                        $vehicle = substr(strrchr($connection->arrival->vehicle, "."), 1);
+                    }
+
                     $from = $via->station->{'@id'};
                     
                     $URI = self::getOccupancyURI($vehicle, $from, $date);
@@ -437,7 +441,7 @@ class connections
         return $connections;
     }
 
-    private static getOccupancyURI($vehicle, $from, $date) {
+    private static function getOccupancyURI($vehicle, $from, $date) {
         $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
         $URI = "";
         
