@@ -13,6 +13,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
 
 include_once 'spitsgids/SpitsgidsController.php';
+include_once 'spitsgids/OccupancyOperations.php';
 
 class APIPost
 {
@@ -20,6 +21,7 @@ class APIPost
     private $resourcename;
     private $log;
     private $method;
+    private $mongodb_url;
 
     public function __construct($resourcename, $postData, $method)
     {
@@ -29,6 +31,10 @@ class APIPost
         $this->resourcename = $resourcename;
         $this->postData = json_decode($postData);
         $this->method = $method;
+
+        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv->load();
+        $this->mongodb_url = getenv('MONGODB_URL');
 
         try {
             $this->log = new Logger('irapi');
@@ -59,45 +65,49 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
-            try {
-                $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-                $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
+        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
+            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+                try {
+                    $m = new MongoDB\Driver\Manager($this->mongodb_url);
+                    $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
-                // Delete the ips who are longer there than 1 minute
-                $epoch = time();
-                $epochMinuteAgo = $epoch - 60;
-                $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
+                    // Delete the ips who are longer there than 1 minute
+                    $epoch = time();
+                    $epochMinuteAgo = $epoch - 60;
+                    $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
-                // Find if the same IP posted the last minute
-                $ipLastMinute = $ips->findOne(array('ip' => $ip));
+                    // Find if the same IP posted the last minute
+                    $ipLastMinute = $ips->findOne(array('ip' => $ip));
 
-                // If it didn't put it in the table and execute the post
-                if (is_null($ipLastMinute)) {
-                    $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
+                    // If it didn't put it in the table and execute the post
+                    if (is_null($ipLastMinute)) {
+                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
-                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
-                    header("HTTP/1.0 201 Created");
-                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                        // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+                        header("HTTP/1.0 201 Created");
+                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
 
-                    $postInfo = array(
-                        'vehicle' => $this->postData->vehicle,
-                        'from' => $this->postData->from,
-                        'to' => $this->postData->to,
-                        'occupancy' => $this->postData->occupancy,
-                        'date' => date('Ymd')
-                    );
+                        $postInfo = array(
+                            'vehicle' => $this->postData->vehicle,
+                            'from' => $this->postData->from,
+                            'to' => $this->postData->to,
+                            'occupancy' => $this->postData->occupancy,
+                            'date' => date('Ymd')
+                        );
 
-                    // Log the post in the iRail log file
-                    array_push($postInfo, $ip);
-                    $this->writeLog($postInfo);
+                        // Log the post in the iRail log file
+                        array_push($postInfo, $ip);
+                        $this->writeLog($postInfo);
 
-                    SpitsgidsController::processFeedback($postInfo, $epoch);
-                } else {
-                    throw new Exception('Too Many Requests', 429);
+                        SpitsgidsController::processFeedback($postInfo, $epoch);
+                    } else {
+                        throw new Exception('Too Many Requests', 429);
+                    }
+                } catch (Exception $e) {
+                    $this->buildError($e);
                 }
-            } catch (Exception $e) {
-                $this->buildError($e);
+            } else {
+                throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high', 400);
             }
         } else {
             throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
