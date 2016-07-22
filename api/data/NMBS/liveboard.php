@@ -4,6 +4,7 @@
  */
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
+include_once 'spitsgids/OccupancyOperations.php';
 
 class liveboard
 {
@@ -171,6 +172,12 @@ class liveboard
             $veh = str_replace(' ', '', $veh);
             $vehicle = 'BE.NMBS.'.$veh;
 
+            $station = $stationNode->{'@id'};
+            $vehicleShort = substr(strrchr($vehicle, "."), 1);
+            $date = date('Ymd');
+
+            $occupancy = OccupancyOperations::getOccupancyURI($station, $vehicleShort, $date);
+
             $nodes[$i] = new DepartureArrival();
             $nodes[$i]->delay = $delay;
             $nodes[$i]->station = $stationNode;
@@ -181,6 +188,10 @@ class liveboard
             $nodes[$i]->platform->normal = $platformNormal;
             $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
+            $nodes[$i]->occupancy->name = basename($occupancy);
+            $nodes[$i]->occupancy->{'@id'} = $occupancy;
+
+
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
                 $hour_ = 24;
