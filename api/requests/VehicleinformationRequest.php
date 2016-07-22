@@ -16,6 +16,7 @@ class VehicleinformationRequest extends Request
     {
         parent::__construct();
         parent::setGetVar('id', '');
+        parent::setGetVar('date', date('dmy'));
         parent::setGetVar('fast', 'false');
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['id']);
@@ -27,6 +28,14 @@ class VehicleinformationRequest extends Request
     public function getVehicleId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDate()
+    {
+        return $this->date;
     }
 
     /**
