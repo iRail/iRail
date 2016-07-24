@@ -24,6 +24,33 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
 
 Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project
 
+## Integrating train occupancy scores ##
+
+We use user feedback and our own knowledge to tell users how busy a train is thank to the crowdfunding campaign of [Spitsgids](https://spitsgids.be).
+
+Optionally, you can thus also set up the occupancy scores on your local machine, but this is a bit more complicated as you will also need mongodb installed:
+
+ * MongoDB: [installation instructions](https://www.mongodb.com/download-center?jmp=nav#community)
+ * MongoDB module for PHP, installable through pecl or your systems package manager
+
+You will then need to import the data (the structural.csv file) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data):
+
+```bash
+mongoimport -d irail -c structural --type csv --file structural.csv --headerline
+```
+
+You also need to make sure the MongoDB is addressed correctly on your server. This can be done by creating an environment file. In this repository you can find an example file here: ".env.example".
+Execute the following command:
+
+```bash
+Mac: cp .env.example .env
+Windows: copy .env.example .env
+```
+
+If your MongoDB URL is different than the default one specified in the .env you should change it.
+
+If you now run `mongod` now you should be good to go!
+
 ## More links ##
 
  * Our mailing list: http://list.irail.be/
