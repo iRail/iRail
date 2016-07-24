@@ -65,9 +65,12 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
-            if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
+                    //Test if departureTime is ISO compatible
+                    date($this->postData->departureTime);
+
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
                     $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
 
@@ -85,14 +88,14 @@ class APIPost
 
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
-                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                         $postInfo = array(
                             'vehicle' => $this->postData->vehicle,
                             'from' => $this->postData->from,
                             'to' => $this->postData->to,
                             'occupancy' => $this->postData->occupancy,
-                            'date' => date('Ymd')
+                            'date' => $this->postData->departureTime
                         );
 
                         // Log the post in the iRail log file
@@ -151,14 +154,14 @@ class APIPost
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         }
     }

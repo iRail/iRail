@@ -11,7 +11,7 @@ use MongoDB\Collection;
 
 class OccupancyDao
 {
-    public static function processFeedback($feedback, $epoch)
+    public static function processFeedback($feedback, $epochFeedback)
     {
         date_default_timezone_set('Europe/Brussels');
 
@@ -21,18 +21,18 @@ class OccupancyDao
 
         foreach ($stops->stop as $stop) {
             if ($errorCheck > 0) {
-                if ($epoch < intval($stop->time) + intval($stop["delay"])) {
+                if ($epochFeedback < intval($stop->time) + intval($stop["delay"])) {
                     $feedback["from"] = $lastStation;
                     self::processFeedbackOneConnection($feedback);
                     break;
                 } else {
-                    $lastStation = $stop->station["URI"];
+                    $lastStation = $stop->station["URI"][0];
                 }
             }
 
             if ($stop->station["URI"] == $feedback["from"] || $stop->station["URI"] == $feedback["to"]) {
                 if ($errorCheck == 0) {
-                    $lastStation = $stop->station["URI"];
+                    $lastStation = $stop->station["URI"][0];
                 }
 
                 $errorCheck += 1;
@@ -62,6 +62,9 @@ class OccupancyDao
 
     private static function processFeedbackOneConnection($feedback)
     {
+        $fromArr = (Array)$feedback["from"];
+        $feedback["from"] = $fromArr[0];
+
         self::feedbackOneConnectionToOccupancyTable($feedback);
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
@@ -76,7 +79,6 @@ class OccupancyDao
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
         //Create a connection URI
-        //TODO: feedback date should be changed to the date the train started
         $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
         $occupancyExists = $occupancy->findOne(array('id' => $id));
@@ -96,7 +98,7 @@ class OccupancyDao
         } else {
             if (is_null($occupancyExists["feedback"])) {
                 $occupancy->updateOne(
-                    array('id' => $id),
+                    array('connection' => $connectionid),
                     array('$set' => array('feedback' => $occupancyData["feedback"], 'occupancy' => $occupancyData["feedback"]))
                 );
             } else {
@@ -104,7 +106,7 @@ class OccupancyDao
                 $feedbackScore = ((double)$occupancyExists->feedback * (double)$occupancyExists->feedbackAmount + (double)$occupancyData["feedback"]) / (double)$feedbackAmount;
 
                 $occupancy->updateOne(
-                    array('id' => $id),
+                    array('connection' => $connectionid),
                     array('$set' => array('feedbackAmount' => $feedbackAmount, 'feedback' => $feedbackScore, 'occupancy' => $feedbackScore))
                 );
             }
@@ -121,7 +123,6 @@ class OccupancyDao
         $feedbackTable = new MongoDB\Collection($m, $mongodb_db, 'feedback');
 
         //Create a connection URI
-        //TODO: feedback date should be changed to the date the train started
         $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
         $feedbackData = array(
