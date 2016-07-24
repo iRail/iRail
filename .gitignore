@@ -7,3 +7,4 @@ api/push.php
 .idea/
 /vendor/
 composer.lock
+.env
