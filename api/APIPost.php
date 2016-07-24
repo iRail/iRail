@@ -67,8 +67,8 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
-            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+            if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
                     //Test if departureTime is ISO compatible
                     date($this->postData->departureTime);
