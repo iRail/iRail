@@ -22,6 +22,7 @@ class APIPost
     private $log;
     private $method;
     private $mongodb_url;
+    private $mongodb_db;
 
     public function __construct($resourcename, $postData, $method)
     {
@@ -32,9 +33,10 @@ class APIPost
         $this->postData = json_decode($postData);
         $this->method = $method;
 
-        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $this->mongodb_url = getenv('MONGODB_URL');
+        $this->mongodb_db = getenv('MONGODB_DB');
 
         try {
             $this->log = new Logger('irapi');
@@ -65,11 +67,14 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
-            if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
+                    //Test if departureTime is ISO compatible
+                    date($this->postData->departureTime);
+
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
-                    $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
+                    $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
                     // Delete the ips who are longer there than 1 minute
                     $epoch = time();
@@ -85,14 +90,14 @@ class APIPost
 
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
-                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                         $postInfo = array(
                             'vehicle' => $this->postData->vehicle,
                             'from' => $this->postData->from,
                             'to' => $this->postData->to,
                             'occupancy' => $this->postData->occupancy,
-                            'date' => date('Ymd')
+                            'date' => $this->postData->departureTime
                         );
 
                         // Log the post in the iRail log file
@@ -151,14 +156,14 @@ class APIPost
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         }
     }
