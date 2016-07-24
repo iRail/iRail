@@ -22,6 +22,7 @@ class APIPost
     private $log;
     private $method;
     private $mongodb_url;
+    private $mongodb_db;
 
     public function __construct($resourcename, $postData, $method)
     {
@@ -32,9 +33,10 @@ class APIPost
         $this->postData = json_decode($postData);
         $this->method = $method;
 
-        $dotenv = new Dotenv\Dotenv(__DIR__);
+        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
         $dotenv->load();
         $this->mongodb_url = getenv('MONGODB_URL');
+        $this->mongodb_db = getenv('MONGODB_DB');
 
         try {
             $this->log = new Logger('irapi');
@@ -72,7 +74,7 @@ class APIPost
                     date($this->postData->departureTime);
 
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
-                    $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
+                    $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
                     // Delete the ips who are longer there than 1 minute
                     $epoch = time();

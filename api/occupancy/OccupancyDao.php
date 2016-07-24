@@ -71,17 +71,18 @@ class OccupancyDao
 
     private static function feedbackOneConnectionToOccupancyTable($feedback)
     {
-        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+        $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
         $mongodb_db = getenv('MONGODB_DB');
         
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+        
         //Create a connection URI
         $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
-        $occupancyExists = $occupancy->findOne(array('id' => $id));
+        $occupancyExists = $occupancy->findOne(array('id' => $connectionid));
 
         $occupancyData = array(
             'connection' => $connectionid,
@@ -115,7 +116,7 @@ class OccupancyDao
 
     private static function feedbackOneConnectionToFeedbackTable($feedback)
     {
-        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+        $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
         $mongodb_db = getenv('MONGODB_DB');
