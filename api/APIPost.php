@@ -79,7 +79,7 @@ class APIPost
 
                     // Delete the ips who are longer there than 1 minute
                     $epoch = time();
-                    $epochMinuteAgo = $epoch - 0;
+                    $epochMinuteAgo = $epoch - 60;
                     $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
                     // Find if the same IP posted the last minute
