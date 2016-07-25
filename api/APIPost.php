@@ -11,7 +11,9 @@ use MongoDB\Collection;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
-include_once 'spitsgids/SpitsgidsController.php';
+
+include_once 'occupancy/OccupancyDao.php';
+include_once 'occupancy/OccupancyOperations.php';
 
 class APIPost
 {
@@ -19,6 +21,8 @@ class APIPost
     private $resourcename;
     private $log;
     private $method;
+    private $mongodb_url;
+    private $mongodb_db;
 
     public function __construct($resourcename, $postData, $method)
     {
@@ -28,6 +32,11 @@ class APIPost
         $this->resourcename = $resourcename;
         $this->postData = json_decode($postData);
         $this->method = $method;
+
+        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+        $dotenv->load();
+        $this->mongodb_url = getenv('MONGODB_URL');
+        $this->mongodb_db = getenv('MONGODB_DB');
 
         try {
             $this->log = new Logger('irapi');
@@ -43,7 +52,7 @@ class APIPost
 
     public function writeToMongo($ip)
     {
-        if($this->method == "POST") {
+        if ($this->method == "POST") {
             try {
                 if ($this->resourcename == 'occupancy') {
                     $this->occupancyToMongo($ip);
@@ -58,45 +67,52 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy)) {
-            try {
-                $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-                $ips = new MongoDB\Collection($m, 'spitsgids', 'IPsUsersLastMinute');
+        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+                try {
+                    //Test if departureTime is ISO compatible
+                    date($this->postData->departureTime);
 
-                // Delete the ips who are longer there than 1 minute
-                $epoch = time();
-                $epochMinuteAgo = $epoch - 60;
-                $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
+                    $m = new MongoDB\Driver\Manager($this->mongodb_url);
+                    $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
-                // Find if the same IP posted the last minute
-                $ipLastMinute = $ips->findOne(array('ip' => $ip));
+                    // Delete the ips who are longer there than 1 minute
+                    $epoch = time();
+                    $epochMinuteAgo = $epoch - 60;
+                    $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
-                // If it didn't put it in the table and execute the post
-                if(is_null($ipLastMinute)) {
-                    $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
+                    // Find if the same IP posted the last minute
+                    $ipLastMinute = $ips->findOne(array('ip' => $ip));
 
-                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
-                    header("HTTP/1.0 201 Created");
-                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' + $this->postData->vehicle);
+                    // If it didn't put it in the table and execute the post
+                    if (is_null($ipLastMinute)) {
+                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
-                    $postInfo = array(
-                        'vehicle' => $this->postData->vehicle,
-                        'from' => $this->postData->from,
-                        'to' => $this->postData->to,
-                        'occupancy' => $this->postData->occupancy,
-                        'date' => date('Ymd')
-                    );
+                        // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+                        header("HTTP/1.0 201 Created");
+                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
-                    // Log the post in the iRail log file
-                    array_push($postInfo, $ip);
-                    $this->writeLog($postInfo);
+                        $postInfo = array(
+                            'vehicle' => $this->postData->vehicle,
+                            'from' => $this->postData->from,
+                            'to' => $this->postData->to,
+                            'occupancy' => $this->postData->occupancy,
+                            'date' => $this->postData->departureTime
+                        );
 
-                    SpitsgidsController::processFeedback($postInfo, $epoch);
-                } else {
-                    throw new Exception('Too Many Requests', 429);
+                        // Log the post in the iRail log file
+                        array_push($postInfo, $ip);
+                        $this->writeLog($postInfo);
+
+                        OccupancyDao::processFeedback($postInfo, $epoch);
+                    } else {
+                        throw new Exception('Too Many Requests', 429);
+                    }
+                } catch (Exception $e) {
+                    $this->buildError($e);
                 }
-            } catch (Exception $e) {
-                $this->buildError($e);
+            } else {
+                throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high', 400);
             }
         } else {
             throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
@@ -140,14 +156,14 @@ class APIPost
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
                 "error" => $e->getMessage(),
                 "code" => $e->getCode(),
-                "query" => $postData
+                "query" => $this->postData
             ]);
         }
     }
