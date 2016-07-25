@@ -11,7 +11,7 @@ include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once '../includes/simple_html_dom.php';
 include_once '../includes/getUA.php';
-use MongoDB\Collection;
+include_once 'occupancy/OccupancyOperations.php';
 
 class vehicleinformation
 {
@@ -39,14 +39,15 @@ class vehicleinformation
             $html = str_get_html($serverData);
         }
 
+
         $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
         if ($request->getAlerts() && self::getAlerts($html)) {
             $dataroot->alert = self::getAlerts($html);
         }
-        
-        $vehicleOccupancy = self::getOccupancy(substr(strrchr($request->getVehicleId(), "."), 1));
-        
+
+        $vehicleOccupancy = OccupancyOperations::getOccupancy(substr(strrchr($request->getVehicleId(), "."), 1), DateTime::createFromFormat('dmy', $date)->format('Ymd'));
         $dataroot->stop = [];
+
         $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date);
     }
 
@@ -86,18 +87,6 @@ class vehicleinformation
     }
 
     /**
-     * @param $vehicle
-     */
-    private static function getOccupancy($vehicle)
-    {
-        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-        $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
-
-        // If we ever start using a date as parmater the parameter should be put here as date
-        return $occupancy->find(array('vehicle' => $vehicle, 'date' => date('Ymd')));
-    }
-
-    /**
      * @param $html
      * @param $lang
      * @param $fast
@@ -106,6 +95,15 @@ class vehicleinformation
      */
     private static function getData($html, $lang, $fast, $occupancyArr, $date)
     {
+        $now = new DateTime();
+        $requestedDate = DateTime::createFromFormat('dmy', $date);
+        $daysBetweenNowAndRequest = $now->diff($requestedDate);
+        $occupancyDate = true;
+
+        if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
+            $occupancyDate = false;
+        }
+
         try {
             $stops = [];
             $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
@@ -243,14 +241,30 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
-                // Add occupancy
-                foreach ($occupancyArr as $stopOccupancy) {
-                    if($station->{'@id'} == $stopOccupancy["from"][0]) {
-                        $URI = self::getURLForOccupancy($stopOccupancy["occupancy"]);
+                // Check if it is in less than 2 days
+                if($occupancyDate) {
+                    // Add occupancy
+                    $occupancyOfStationFound = false;
+                    $k = 0;
 
-                        $stops[$j]->occupancy->{'@id'} = $URI;
-                        $stops[$j]->occupancy->name = basename($URI);
-                        break;
+                    while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
+                        if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
+                            $URI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+
+                            $stops[$j]->occupancy->{'@id'} = $URI;
+                            $stops[$j]->occupancy->name = basename($URI);
+
+                            $occupancyOfStationFound = true;
+                        }
+
+                        $k++;
+                    }
+
+                    if(is_null($stops[$j]->occupancy->{'@id'})) {
+                        $unknown = OccupancyOperations::getUnknown();
+
+                        $stops[$j]->occupancy->{'@id'} = $unknown;
+                        $stops[$j]->occupancy->name = basename($unknown);
                     }
                 }
                 
@@ -430,15 +444,5 @@ class vehicleinformation
         curl_close($ch);
 
         return $result;
-    }
-
-    private static function getURLForOccupancy($occupancy) {
-        if($occupancy < 1/3) {
-            return 'https://api.irail.be/terms/low';
-        } else if ($occupancy > 2/3) {
-            return 'https://api.irail.be/terms/high';
-        } else {
-            return 'https://api.irail.be/terms/medium';
-        }
     }
 };

@@ -7,6 +7,9 @@
    * @author Stan Callewaert
    */
 
+use Dotenv\Dotenv;
+use MongoDB\Collection;
+
 class OccupancyOperations
 {
     const UNKNOWN = 'https://api.irail.be/terms/unknown';
@@ -14,11 +17,25 @@ class OccupancyOperations
     const MEDIUM = 'https://api.irail.be/terms/medium';
     const HIGH = 'https://api.irail.be/terms/high';
 
+    public static function getOccupancy($vehicle, $date)
+    {
+        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+        $dotenv->load();
+        $mongodb_url = getenv('MONGODB_URL');
+        $mongodb_db = getenv('MONGODB_DB');
+
+        $m = new MongoDB\Driver\Manager($mongodb_url);
+        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+
+        // If we ever start using a date as parameter the parameter should be put here as date
+        return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+    }
+
     public static function NumberToURI($occupancy)
     {
-        if ($occupancy < 1/3) {
+        if ($occupancy < 2/3) {
             return self::LOW;
-        } elseif ($occupancy <= 2/3) {
+        } elseif ($occupancy <= 4/3) {
             return self::MEDIUM;
         } else {
             return self::HIGH;
