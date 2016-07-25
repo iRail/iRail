@@ -11,7 +11,7 @@ include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once '../includes/simple_html_dom.php';
 include_once '../includes/getUA.php';
-use MongoDB\Collection;
+include_once 'occupancy/OccupancyOperations.php';
 
 class vehicleinformation
 {

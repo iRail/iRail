@@ -8,7 +8,7 @@
  */
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
-include_once 'spitsgids/OccupancyOperations.php';
+include_once 'occupancy/OccupancyOperations.php';
 use MongoDB\Collection;
 
 class connections
@@ -401,30 +401,31 @@ class connections
         return $connection;
     }
 
-    private static function addOccupancy($connections, $date) {
+    private static function addOccupancy($connections, $date)
+    {
         foreach ($connections as $connection) {
             $departure = $connection->departure;
             $vehicle = substr(strrchr($departure->vehicle, "."), 1);
             $from = $departure->station->{"@id"};
 
-            $URI = self::getOccupancyURI($vehicle, $from, $date);
+            $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
             $occupancyArr = [];
 
             $connection->departure->occupancy->{'@id'} = $URI;
             $connection->departure->occupancy->name = basename($URI);
             array_push($occupancyArr, $URI);
 
-            if(!is_null($connection->via)) {
+            if (!is_null($connection->via)) {
                 foreach ($connection->via as $key => $via) {
-                    if($key < count($connection->via)-1) {
-                        $vehicle = substr(strrchr($connection->via[$key+1]->vehicle, "."), 1);
+                    if ($key < count($connection->via) - 1) {
+                        $vehicle = substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
                     } else {
                         $vehicle = substr(strrchr($connection->arrival->vehicle, "."), 1);
                     }
 
                     $from = $via->station->{'@id'};
-                    
-                    $URI = self::getOccupancyURI($vehicle, $from, $date);
+
+                    $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
 
                     $via->departure->occupancy->{'@id'} = $URI;
                     $via->departure->occupancy->name = basename($URI);
@@ -439,24 +440,6 @@ class connections
         }
 
         return $connections;
-    }
-
-    private static function getOccupancyURI($vehicle, $from, $date) {
-        $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
-        $URI = "";
-        
-        if(!is_null($occupancyDeparture)) {
-            return OccupancyOperations::NumberToURI($occupancyDeparture->occupancy);
-        } else {
-            return OccupancyOperations::getUnknown();
-        }
-    }
-
-    private static function getOccupancyTrip($vehicle, $from, $date) {
-        $m = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-        $occupancy = new MongoDB\Collection($m, 'spitsgids', 'occupancy');
-
-        return $occupancy->findOne(array('vehicle' => $vehicle, 'from' => $from, 'date' => $date));
     }
 
     /**

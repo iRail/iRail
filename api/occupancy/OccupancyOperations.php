@@ -17,6 +17,28 @@ class OccupancyOperations
     const MEDIUM = 'https://api.irail.be/terms/medium';
     const HIGH = 'https://api.irail.be/terms/high';
 
+    public static function getOccupancyURI($vehicle, $from, $date) {
+        $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
+
+        if(!is_null($occupancyDeparture)) {
+            return self::NumberToURI($occupancyDeparture->occupancy);
+        } else {
+            return self::getUnknown();
+        }
+    }
+
+    private static function getOccupancyTrip($vehicle, $from, $date) {
+        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+        $dotenv->load();
+        $mongodb_url = getenv('MONGODB_URL');
+        $mongodb_db = getenv('MONGODB_DB');
+
+        $m = new MongoDB\Driver\Manager($mongodb_url);
+        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+
+        return $occupancy->findOne(array('vehicle' => $vehicle, 'from' => $from, 'date' => $date));
+    }
+
     public static function getOccupancy($vehicle, $date)
     {
         $dotenv = new Dotenv(dirname(dirname(__DIR__)));
@@ -27,7 +49,6 @@ class OccupancyOperations
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-        // If we ever start using a date as parameter the parameter should be put here as date
         return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
     }
 
@@ -54,6 +75,24 @@ class OccupancyOperations
             return self::MEDIUM;
         } else {
             return self::HIGH;
+        }
+    }
+
+    public static function numberToURIExact($occupancy)
+    {
+        switch ($occupancy) {
+            case 0:
+                return self::LOW;
+                break;
+            case 1:
+                return self::MEDIUM;
+                break;
+            case 2:
+                return self::HIGH;
+                break;
+            default:
+                return self::UNKNOWN;
+                break;
         }
     }
 
@@ -87,7 +126,7 @@ class OccupancyOperations
             }
         }
 
-        return self::NumberToURI($maxOccupancy);
+        return self::numberToURIExact($maxOccupancy);
     }
 
     public static function isCorrectPostURI($URI)
