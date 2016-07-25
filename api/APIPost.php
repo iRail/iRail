@@ -67,11 +67,12 @@ class APIPost
 
     private function occupancyToMongo($ip)
     {
-        if(!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
-            if(OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
+        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+            if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
                     //Test if departureTime is ISO compatible
-                    date($this->postData->departureTime);
+                    $dateISO = strtotime($this->postData->departureTime);
+                    $date = date("Ymd", $dateISO);
 
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
                     $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
@@ -97,7 +98,8 @@ class APIPost
                             'from' => $this->postData->from,
                             'to' => $this->postData->to,
                             'occupancy' => $this->postData->occupancy,
-                            'date' => $this->postData->departureTime
+                            'date' => $date,
+                            'time' => $this->postData->departureTime
                         );
 
                         // Log the post in the iRail log file
