@@ -89,6 +89,7 @@ class OccupancyDao
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
+            'time' => $feedback["time"],
             'feedback' => OccupancyOperations::URIToNumber($feedback["occupancy"]),
             'feedbackAmount' => 1,
             'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
@@ -131,6 +132,7 @@ class OccupancyDao
             'vehicle' => $feedback["vehicle"],
             'from' => $feedback["from"],
             'date' => $feedback["date"],
+            'time' => $feedback["time"],
             'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
         );
 
