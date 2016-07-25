@@ -31,6 +31,21 @@ class OccupancyOperations
         return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
     }
 
+    /**
+     * This function returns gets a number from 0 till 2.
+     * It returns either the LOW, MEDIUM or HIGH URI.
+     *
+     * To do this one has to create borders.
+     * Since there are 3 parts (LOW, MEDIUM and HIGH) 2 has to be diveded by 3 for each part.
+     *
+     * This implies that:
+     * - LOW is from 0 till 2/3 (0,666...)
+     * - MEDIUM is from 2/3 (0,666...) till 4/3 (1,333...)
+     * - HIGH is from 4/3 (1,333...) till 2
+     *
+     * @param $occupancy
+     * @return occupancyURI
+     */
     public static function NumberToURI($occupancy)
     {
         if ($occupancy < 2/3) {
