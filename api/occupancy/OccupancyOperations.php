@@ -18,12 +18,16 @@ class OccupancyOperations
     const HIGH = 'https://api.irail.be/terms/high';
 
     public static function getOccupancyURI($vehicle, $from, $date) {
-        $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
+        try {
+            $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
-        if(!is_null($occupancyDeparture)) {
-            return self::NumberToURI($occupancyDeparture->occupancy);
-        } else {
-            return self::getUnknown();
+            if (!is_null($occupancyDeparture)) {
+                return self::NumberToURI($occupancyDeparture->occupancy);
+            } else {
+                return self::getUnknown();
+            }
+        } catch(Exception $e) {
+            throw new Exception($e, 503);
         }
     }
 

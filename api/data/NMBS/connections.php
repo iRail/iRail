@@ -403,43 +403,50 @@ class connections
 
     private static function addOccupancy($connections, $date)
     {
-        foreach ($connections as $connection) {
-            $departure = $connection->departure;
-            $vehicle = substr(strrchr($departure->vehicle, "."), 1);
-            $from = $departure->station->{"@id"};
+        $occupancyConnections = $connections;
 
-            $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
-            $occupancyArr = [];
+        try {
+            foreach ($occupancyConnections as $connection) {
+                $departure = $connection->departure;
+                $vehicle = substr(strrchr($departure->vehicle, "."), 1);
+                $from = $departure->station->{"@id"};
 
-            $connection->departure->occupancy->{'@id'} = $URI;
-            $connection->departure->occupancy->name = basename($URI);
-            array_push($occupancyArr, $URI);
+                $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
+                $occupancyArr = [];
 
-            if (!is_null($connection->via)) {
-                foreach ($connection->via as $key => $via) {
-                    if ($key < count($connection->via) - 1) {
-                        $vehicle = substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
-                    } else {
-                        $vehicle = substr(strrchr($connection->arrival->vehicle, "."), 1);
+                $connection->departure->occupancy->{'@id'} = $URI;
+                $connection->departure->occupancy->name = basename($URI);
+                array_push($occupancyArr, $URI);
+
+                if (!is_null($connection->via)) {
+                    foreach ($connection->via as $key => $via) {
+                        if ($key < count($connection->via) - 1) {
+                            $vehicle = substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
+                        } else {
+                            $vehicle = substr(strrchr($connection->arrival->vehicle, "."), 1);
+                        }
+
+                        $from = $via->station->{'@id'};
+
+                        $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
+
+                        $via->departure->occupancy->{'@id'} = $URI;
+                        $via->departure->occupancy->name = basename($URI);
+                        array_push($occupancyArr, $URI);
                     }
-
-                    $from = $via->station->{'@id'};
-
-                    $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
-
-                    $via->departure->occupancy->{'@id'} = $URI;
-                    $via->departure->occupancy->name = basename($URI);
-                    array_push($occupancyArr, $URI);
                 }
+
+                $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
+
+                $connection->occupancy->{'@id'} = $URI;
+                $connection->occupancy->name = basename($URI);
             }
-
-            $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
-
-            $connection->occupancy->{'@id'} = $URI;
-            $connection->occupancy->name = basename($URI);
+        } catch (Exception $e) {
+            // Here one can implement a reporting to the iRail owner that the database has problems.
+            return $connections;
         }
 
-        return $connections;
+        return $occupancyConnections;
     }
 
     /**
