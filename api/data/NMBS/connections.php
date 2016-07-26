@@ -58,7 +58,7 @@ class connections
         $now = new DateTime();
         $daysDiff = $now->diff($requestedDate);
 
-        if(intval($daysDiff->format('%R%a')) >= 2) {
+        if (intval($daysDiff->format('%R%a')) >= 2) {
             return $connections;
         } else {
             return self::addOccupancy($connections, $date);
@@ -347,6 +347,7 @@ class connections
                                 }
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
+                                $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->vehicle, strrpos($vias[$connectionindex]->vehicle, '.') + 1);
                                 $connectionindex++;
                             }
                         }
@@ -359,6 +360,7 @@ class connections
                 }
 
                 $connection[$i]->departure->vehicle = 'BE.NMBS.'.$trains[0];
+                $connection[$i]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($fromstation->{'@id'}), 2) . '/' . date('Ymd', $connection[$i]->departure->time) . '/' . $trains[0];
                 if (isset($directions[0])) {
                     $connection[$i]->departure->direction = $directions[0];
                 } else {

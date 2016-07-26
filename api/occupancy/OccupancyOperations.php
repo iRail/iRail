@@ -18,7 +18,8 @@ class OccupancyOperations
     const HIGH = 'http://api.irail.be/terms/high';
     const CONNECTIONBASEURI = 'http://irail.be/connections/';
 
-    public static function getOccupancyURI($vehicle, $from, $date) {
+    public static function getOccupancyURI($vehicle, $from, $date)
+    {
         try {
             $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
@@ -27,12 +28,13 @@ class OccupancyOperations
             } else {
                 return self::getUnknown();
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             throw new Exception($e, 503);
         }
     }
 
-    private static function getOccupancyTrip($vehicle, $from, $date) {
+    private static function getOccupancyTrip($vehicle, $from, $date)
+    {
         $dotenv = new Dotenv(dirname(dirname(__DIR__)));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
@@ -145,7 +147,8 @@ class OccupancyOperations
         return self::UNKNOWN;
     }
 
-    private static function buildConnectionURI($vehicle, $from, $date) {
+    private static function buildConnectionURI($vehicle, $from, $date)
+    {
         return self::CONNECTIONBASEURI . substr(basename($from), 2) . '/' . $date . '/' . basename($vehicle);
     }
 }

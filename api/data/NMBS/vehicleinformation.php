@@ -49,7 +49,7 @@ class vehicleinformation
         $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
         $dataroot->stop = [];
 
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date);
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date, $request->getVehicleId());
     }
 
     /**
@@ -94,7 +94,7 @@ class vehicleinformation
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast, $occupancyArr, $date)
+    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle)
     {
         $now = new DateTime();
         $requestedDate = DateTime::createFromFormat('dmy', $date);
@@ -234,6 +234,7 @@ class vehicleinformation
                 $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
+                $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, strrpos($vehicle, '.') + 1);
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
@@ -242,8 +243,9 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
+
                 // Check if it is in less than 2 days
-                if($occupancyDate) {
+                if ($occupancyDate) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
@@ -261,7 +263,7 @@ class vehicleinformation
                         $k++;
                     }
 
-                    if(is_null($stops[$j]->occupancy->{'@id'})) {
+                    if (is_null($stops[$j]->occupancy->{'@id'})) {
                         $unknown = OccupancyOperations::getUnknown();
 
                         $stops[$j]->occupancy->{'@id'} = $unknown;

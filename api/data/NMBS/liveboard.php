@@ -116,8 +116,9 @@ class liveboard
 
         $departureStation = null;
 
-        if(!is_null($station)) {
-            $departureStation = "http://irail.be/stations/NMBS/" . substr($station->id, strrpos($station->id, '.') + 1);;
+        if (!is_null($station)) {
+            $departureStation = "http://irail.be/stations/NMBS/" . substr($station->id, strrpos($station->id, '.') + 1);
+            ;
         }
 
         while (isset($data->Journey[$i]) && ($hour_ - $hour) * 60 + ($minutes_ - $minutes) <= 60) {
@@ -192,8 +193,9 @@ class liveboard
             $nodes[$i]->platform->normal = $platformNormal;
             $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
+            $nodes[$i]->departureConnection = 'http://irail.be/connections/' . substr(basename($station->{'@id'}), 2) . '/' . date('Ymd', $unixtime) . '/' . basename($vehicle);
 
-            if(!is_null($departureStation)) {
+            if (!is_null($departureStation)) {
                 try {
                     $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
 
