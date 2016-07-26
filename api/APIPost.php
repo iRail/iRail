@@ -80,11 +80,14 @@ class APIPost
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
-                    $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
+                    //$ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
-                    // Delete the ips who are longer there than 1 minute
                     $epoch = time();
-                    $epochMinuteAgo = $epoch - 0;
+
+                    /*
+                     * TODO: Find new way to secure the data by making sure a user can't just do a lot of posts in a short period of time.
+                    // Delete the ips who are longer there than 1 minute
+                    $epochMinuteAgo = $epoch - 60;
                     $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
                     // Find if the same IP posted the last minute
@@ -92,7 +95,7 @@ class APIPost
 
                     // If it didn't put it in the table and execute the post
                     if (is_null($ipLastMinute)) {
-                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
+                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));*/
 
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
@@ -112,13 +115,13 @@ class APIPost
                         }
 
                         // Log the post in the iRail log file
-                        $postInfo['ip'] = $ip;
+                        //$postInfo['ip'] = $ip;
                         $this->writeLog($postInfo);
 
                         OccupancyDao::processFeedback($postInfo, $epoch);
-                    } else {
+                    /*} else {
                         throw new Exception('Too Many Requests', 429);
-                    }
+                    }*/
                 } catch (Exception $e) {
                     $this->buildError($e);
                 }
