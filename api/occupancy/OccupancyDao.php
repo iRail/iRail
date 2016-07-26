@@ -15,7 +15,7 @@ class OccupancyDao
     {
         date_default_timezone_set('Europe/Brussels');
 
-        $stops = self::getVehicleStopsInfo($feedback['vehicle']);
+        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']));
         $errorCheck = 0;
         $lastStation = '';
 
@@ -49,10 +49,10 @@ class OccupancyDao
         }
     }
 
-    private static function getVehicleStopsInfo($URI)
+    private static function getVehicleStopsInfo($vehicleURL)
     {
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $URI);
+        curl_setopt($curl, CURLOPT_URL, $vehicleURL);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
         $result = curl_exec($curl);

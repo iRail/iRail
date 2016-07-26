@@ -76,7 +76,7 @@ class APIPost
      */
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->connection) && !is_null($this->postData->occupancy)) {
+        if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
@@ -84,7 +84,7 @@ class APIPost
 
                     // Delete the ips who are longer there than 1 minute
                     $epoch = time();
-                    $epochMinuteAgo = $epoch - 60;
+                    $epochMinuteAgo = $epoch - 0;
                     $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
                     // Find if the same IP posted the last minute
@@ -94,25 +94,19 @@ class APIPost
                     if (is_null($ipLastMinute)) {
                         $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
-                        // Extract information from connection URI
-                        $splittedURI = explode("/", $this->postData->connection);
-                        $from = "http://irail.be/stations/NMBS/00" . $splittedURI[4];
-                        $date = $splittedURI[5];
-                        $vehicle = "http://api.irail.be/vehicle/?id=BE.NMBS." . $splittedURI[6];
-
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
                         header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                         $postInfo = array(
                             'connection' => $this->postData->connection,
-                            'vehicle' => $vehicle,
-                            'from' => $from,
-                            'date' => $date,
+                            'from' => $this->postData->from,
+                            'date' => $this->postData->date,
+                            'vehicle' => $this->postData->vehicle,
                             'occupancy' => $this->postData->occupancy
                         );
 
-                        // Add optional to parameter
+                        // Add optional to parameters
                         if(!is_null($this->postData->to)) {
                             $postInfo['to'] = $this->postData->to;
                         }
@@ -132,7 +126,7 @@ class APIPost
                 throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high', 400);
             }
         } else {
-            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
+            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).', 400);
         }
     }
 

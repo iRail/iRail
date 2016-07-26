@@ -117,7 +117,7 @@ class liveboard
         $departureStation = null;
 
         if(!is_null($station)) {
-            $departureStation = "http://irail.be/stations/NMBS/" . substr(strrchr($station->id, "."), 1);
+            $departureStation = "http://irail.be/stations/NMBS/" . substr($station->id, strrpos($station->id, '.') + 1);;
         }
 
         while (isset($data->Journey[$i]) && ($hour_ - $hour) * 60 + ($minutes_ - $minutes) <= 60) {
@@ -177,7 +177,7 @@ class liveboard
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
-            $vehicle = 'http://api.irail.be/vehicle/?id=BE.NMBS.'.$veh;
+            $vehicle = 'http://irail.be/vehicle/'.$veh;
 
             $date = date('Ymd');
 

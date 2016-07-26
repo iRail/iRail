@@ -411,7 +411,7 @@ class connections
                 $vehicle = $departure->vehicle;
                 $from = $departure->station->{"@id"};
 
-                $vehicleURI = 'http://api.irail.be/vehicle/?id=' . $vehicle;
+                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($vehicle, "."), 1);
                 $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
                 $occupancyArr = [];
 
@@ -422,9 +422,9 @@ class connections
                 if (!is_null($connection->via)) {
                     foreach ($connection->via as $key => $via) {
                         if ($key < count($connection->via) - 1) {
-                            $vehicleURI = 'http://api.irail.be/vehicle/?id=' . $connection->via[$key + 1]->vehicle;
+                            $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
                         } else {
-                            $vehicleURI = 'http://api.irail.be/vehicle/?id=' . $connection->arrival->vehicle;
+                            $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($connection->arrival->vehicle, "."), 1);
                         }
 
                         $from = $via->station->{'@id'};
