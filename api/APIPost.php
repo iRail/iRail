@@ -65,15 +65,20 @@ class APIPost
         }
     }
 
+    /*
+     * Required:
+     * - connection
+     * - occupancy
+     * Optional:
+     * - to
+     *
+     * Optional TODO: Test if the connection URI exists.
+     */
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+        if (!is_null($this->postData->connection) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    //Test if departureTime is ISO compatible
-                    $dateISO = strtotime($this->postData->departureTime);
-                    $date = date("Ymd", $dateISO);
-
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
                     $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
@@ -89,21 +94,31 @@ class APIPost
                     if (is_null($ipLastMinute)) {
                         $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
 
+                        // Extract information from connection URI
+                        $splittedURI = explode("/", $this->postData->connection);
+                        $from = "http://irail.be/stations/NMBS/00" . $splittedURI[4];
+                        $date = $splittedURI[5];
+                        $vehicle = "http://api.irail.be/vehicle/?id=BE.NMBS." . $splittedURI[6];
+
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
                         header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                         $postInfo = array(
-                            'vehicle' => $this->postData->vehicle,
-                            'from' => $this->postData->from,
-                            'to' => $this->postData->to,
-                            'occupancy' => $this->postData->occupancy,
+                            'connection' => $this->postData->connection,
+                            'vehicle' => $vehicle,
+                            'from' => $from,
                             'date' => $date,
-                            'time' => $this->postData->departureTime
+                            'occupancy' => $this->postData->occupancy
                         );
 
+                        // Add optional to parameter
+                        if(!is_null($this->postData->to)) {
+                            $postInfo['to'] = $this->postData->to;
+                        }
+
                         // Log the post in the iRail log file
-                        array_push($postInfo, $ip);
+                        $postInfo['ip'] = $ip;
                         $this->writeLog($postInfo);
 
                         OccupancyDao::processFeedback($postInfo, $epoch);

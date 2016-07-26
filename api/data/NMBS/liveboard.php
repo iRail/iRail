@@ -177,16 +177,16 @@ class liveboard
             $veh = $journey['hafasname'];
             $veh = substr($veh, 0, 8);
             $veh = str_replace(' ', '', $veh);
-            $vehicle = 'BE.NMBS.'.$veh;
+            $vehicle = 'http://api.irail.be/vehicle/?id=BE.NMBS.'.$veh;
 
-            $vehicleShort = substr(strrchr($vehicle, "."), 1);
             $date = date('Ymd');
 
             $nodes[$i] = new DepartureArrival();
             $nodes[$i]->delay = $delay;
             $nodes[$i]->station = $stationNode;
             $nodes[$i]->time = $unixtime;
-            $nodes[$i]->vehicle = $vehicle;
+            $nodes[$i]->vehicle->name = $veh;
+            $nodes[$i]->vehicle->{'@id'} = $vehicle;
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
             $nodes[$i]->platform->normal = $platformNormal;
@@ -195,7 +195,7 @@ class liveboard
 
             if(!is_null($departureStation)) {
                 try {
-                    $occupancy = OccupancyOperations::getOccupancyURI($vehicleShort, $departureStation, $date);
+                    $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
 
                     $nodes[$i]->occupancy->name = basename($occupancy);
                     $nodes[$i]->occupancy->{'@id'} = $occupancy;

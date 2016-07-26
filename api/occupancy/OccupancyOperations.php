@@ -12,10 +12,10 @@ use MongoDB\Collection;
 
 class OccupancyOperations
 {
-    const UNKNOWN = 'https://api.irail.be/terms/unknown';
-    const LOW = 'https://api.irail.be/terms/low';
-    const MEDIUM = 'https://api.irail.be/terms/medium';
-    const HIGH = 'https://api.irail.be/terms/high';
+    const UNKNOWN = 'http://api.irail.be/terms/unknown';
+    const LOW = 'http://api.irail.be/terms/low';
+    const MEDIUM = 'http://api.irail.be/terms/medium';
+    const HIGH = 'http://api.irail.be/terms/high';
 
     public static function getOccupancyURI($vehicle, $from, $date) {
         try {
