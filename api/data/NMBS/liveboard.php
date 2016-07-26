@@ -4,7 +4,7 @@
  */
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
-include_once 'spitsgids/OccupancyOperations.php';
+include_once 'occupancy/OccupancyOperations.php';
 
 class liveboard
 {
@@ -27,10 +27,10 @@ class liveboard
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'arr');
-            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts());
+            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null);
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'dep');
-            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts());
+            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station);
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
@@ -85,7 +85,7 @@ class liveboard
      * @param bool $showAlerts
      * @return array
      */
-    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false)
+    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false, $station)
     {
         //clean XML
         if (class_exists('tidy', false)) {
@@ -97,11 +97,12 @@ class liveboard
         $data = new SimpleXMLElement($xml);
         $hour = substr($time, 0, 2);
         $data = $data->StationTable;
-//<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
-//platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
-//dir="Eeklo [B]" is_reachable="0" />
 
-    $nodes = [];
+        //<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
+        //platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
+        //dir="Eeklo [B]" is_reachable="0" />
+
+        $nodes = [];
         $i = 0;
 
         $hour = substr($time, 0, 2);
@@ -112,6 +113,12 @@ class liveboard
 
         $minutes = substr($time, 3, 2);
         $minutes_ = substr((string) $data->Journey[0]['fpTime'], 3, 2);
+
+        $departureStation = null;
+
+        if(!is_null($station)) {
+            $departureStation = "http://irail.be/stations/NMBS/" . substr(strrchr($station->id, "."), 1);
+        }
 
         while (isset($data->Journey[$i]) && ($hour_ - $hour) * 60 + ($minutes_ - $minutes) <= 60) {
             $journey = $data->Journey[$i];
@@ -172,11 +179,8 @@ class liveboard
             $veh = str_replace(' ', '', $veh);
             $vehicle = 'BE.NMBS.'.$veh;
 
-            $station = $stationNode->{'@id'};
             $vehicleShort = substr(strrchr($vehicle, "."), 1);
             $date = date('Ymd');
-
-            $occupancy = OccupancyOperations::getOccupancyURI($station, $vehicleShort, $date);
 
             $nodes[$i] = new DepartureArrival();
             $nodes[$i]->delay = $delay;
@@ -188,9 +192,18 @@ class liveboard
             $nodes[$i]->platform->normal = $platformNormal;
             $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
-            $nodes[$i]->occupancy->name = basename($occupancy);
-            $nodes[$i]->occupancy->{'@id'} = $occupancy;
 
+            if(!is_null($departureStation)) {
+                try {
+                    $occupancy = OccupancyOperations::getOccupancyURI($vehicleShort, $departureStation, $date);
+
+                    $nodes[$i]->occupancy->name = basename($occupancy);
+                    $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                } catch (Exception $e) {
+                    // Database connection failed, in the future a warning could be given to the owner of iRail
+                    $departureStation == null;
+                }
+            }
 
             $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
             if ($hour_ != '23' && $hour == '23') {
