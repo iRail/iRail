@@ -58,7 +58,7 @@ class connections
         $now = new DateTime();
         $daysDiff = $now->diff($requestedDate);
 
-        if(intval($daysDiff->format('%R%a')) >= 2) {
+        if (intval($daysDiff->format('%R%a')) >= 2) {
             return $connections;
         } else {
             return self::addOccupancy($connections, $date);

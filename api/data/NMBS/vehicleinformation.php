@@ -243,7 +243,7 @@ class vehicleinformation
                 $stops[$j]->canceled = $departureCanceled;
 
                 // Check if it is in less than 2 days
-                if($occupancyDate) {
+                if ($occupancyDate) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
@@ -261,7 +261,7 @@ class vehicleinformation
                         $k++;
                     }
 
-                    if(is_null($stops[$j]->occupancy->{'@id'})) {
+                    if (is_null($stops[$j]->occupancy->{'@id'})) {
                         $unknown = OccupancyOperations::getUnknown();
 
                         $stops[$j]->occupancy->{'@id'} = $unknown;

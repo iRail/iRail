@@ -99,9 +99,9 @@ class APIPost
 
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
-                        header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
+                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
-                        $postInfo = array(
+                    $postInfo = array(
                             'connection' => $this->postData->connection,
                             'from' => $this->postData->from,
                             'date' => $this->postData->date,
@@ -110,7 +110,7 @@ class APIPost
                         );
 
                         // Add optional to parameters
-                        if(!is_null($this->postData->to)) {
+                        if (!is_null($this->postData->to)) {
                             $postInfo['to'] = $this->postData->to;
                         }
 
@@ -118,7 +118,7 @@ class APIPost
                         //$postInfo['ip'] = $ip;
                         $this->writeLog($postInfo);
 
-                        OccupancyDao::processFeedback($postInfo, $epoch);
+                    OccupancyDao::processFeedback($postInfo, $epoch);
                     /*} else {
                         throw new Exception('Too Many Requests', 429);
                     }*/
