@@ -175,7 +175,7 @@ class connections
         if (isset($xml->ConRes->ConnectionList->Connection)) {
             $fromstation = self::getStationFromHafasDescription($xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['name'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['x'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Departure->BasicStop->Station['y'], $lang);
             $tostation = self::getStationFromHafasDescription($xml->ConRes->ConnectionList->Connection[0]->Overview->Arrival->BasicStop->Station['name'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Arrival->BasicStop->Station['x'], $xml->ConRes->ConnectionList->Connection[0]->Overview->Arrival->BasicStop->Station['y'], $lang);
-            
+
             foreach ($xml->ConRes->ConnectionList->Connection as $conn) {
                 $connection[$i] = new Connection();
                 $connection[$i]->duration = tools::transformDuration($conn->Overview->Duration->Time);
@@ -209,7 +209,7 @@ class connections
                 $departureDelay = 0;
                 $departurePlatform = trim($conn->Overview->Departure->BasicStop->Dep->Platform->Text);
                 $departurePlatformNormal = true;
-                
+
                 $arrivalDelay = 0;
                 $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->Arr->Platform->Text);
                 $arrivalPlatformNormal = true;
@@ -240,7 +240,7 @@ class connections
                     foreach ($conn->IList->I as $info) {
                         $alert = new Alert();
                         $alert->header = trim($info['header']);
-                        $alert->description = trim($info['text']);
+                        $alert->description = trim(addslashes($info['text']));
                         array_push($alerts, $alert);
                     }
                     $connection[$i]->alert = $alerts;
@@ -289,14 +289,14 @@ class connections
                                 if ($departDelay < 0) {
                                     $departDelay = 0;
                                 }
-                                
+
                                 if ($connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
                                     $connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_ARR") {
                                     $departcanceled = false;
                                 } else {
                                     $departcanceled = true;
                                 }
-                                
+
                                 $departPlatformNormal = true;
                                 if (isset($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
                                     $departPlatform = trim($connarray[$connectionindex+1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
@@ -305,19 +305,19 @@ class connections
 
                                 $arrivalTime = tools::transformTime($connsection->Arrival->BasicStop->Arr->Time, $conn->Overview->Date);
                                 $arrivalPlatform = trim($connsection->Arrival->BasicStop->Arr->Platform->Text);
-                                
+
                                 $arrivalDelay = tools::transformTime($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Time, $conn->Overview->Date) - $arrivalTime;
                                 if ($arrivalDelay < 0) {
                                     $arrivalDelay = 0;
                                 }
-                                
+
                                 if ($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Status == "SCHEDULED" ||
                                     $connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Status == "PARTIAL_FAILURE_AT_DEP") {
                                     $arrivalcanceled = false;
                                 } else {
                                     $arrivalcanceled = true;
                                 }
-                                
+
                                 $arrivalPlatformNormal = true;
                                 if (isset($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
                                     $arrivalPlatform = trim($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
