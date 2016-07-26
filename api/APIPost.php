@@ -65,20 +65,28 @@ class APIPost
         }
     }
 
+    /*
+     * Required:
+     * - connection
+     * - occupancy
+     * Optional:
+     * - to
+     *
+     * Optional TODO: Test if the connection URI exists.
+     */
     private function occupancyToMongo($ip)
     {
-        if (!is_null($this->postData->vehicle) && !is_null($this->postData->from) && !is_null($this->postData->to) && !is_null($this->postData->occupancy) && !is_null($this->postData->departureTime)) {
+        if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    //Test if departureTime is ISO compatible
-                    $dateISO = strtotime($this->postData->departureTime);
-                    $date = date("Ymd", $dateISO);
-
                     $m = new MongoDB\Driver\Manager($this->mongodb_url);
-                    $ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
+                    //$ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
-                    // Delete the ips who are longer there than 1 minute
                     $epoch = time();
+
+                    /*
+                     * TODO: Find new way to secure the data by making sure a user can't just do a lot of posts in a short period of time.
+                    // Delete the ips who are longer there than 1 minute
                     $epochMinuteAgo = $epoch - 60;
                     $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
 
@@ -87,29 +95,33 @@ class APIPost
 
                     // If it didn't put it in the table and execute the post
                     if (is_null($ipLastMinute)) {
-                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));
+                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));*/
 
                         // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
                         header("HTTP/1.0 201 Created");
                         header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                         $postInfo = array(
-                            'vehicle' => $this->postData->vehicle,
+                            'connection' => $this->postData->connection,
                             'from' => $this->postData->from,
-                            'to' => $this->postData->to,
-                            'occupancy' => $this->postData->occupancy,
-                            'date' => $date,
-                            'time' => $this->postData->departureTime
+                            'date' => $this->postData->date,
+                            'vehicle' => $this->postData->vehicle,
+                            'occupancy' => $this->postData->occupancy
                         );
 
+                        // Add optional to parameters
+                        if(!is_null($this->postData->to)) {
+                            $postInfo['to'] = $this->postData->to;
+                        }
+
                         // Log the post in the iRail log file
-                        array_push($postInfo, $ip);
+                        //$postInfo['ip'] = $ip;
                         $this->writeLog($postInfo);
 
                         OccupancyDao::processFeedback($postInfo, $epoch);
-                    } else {
+                    /*} else {
                         throw new Exception('Too Many Requests', 429);
-                    }
+                    }*/
                 } catch (Exception $e) {
                     $this->buildError($e);
                 }
@@ -117,7 +129,7 @@ class APIPost
                 throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high', 400);
             }
         } else {
-            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: vehicle, from, to and occupancy.', 400);
+            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).', 400);
         }
     }
 

@@ -15,42 +15,44 @@ class OccupancyDao
     {
         date_default_timezone_set('Europe/Brussels');
 
-        $stops = self::getVehicleStopsInfo($feedback["vehicle"]);
+        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']));
         $errorCheck = 0;
-        $lastStation = "";
+        $lastStation = '';
 
-        foreach ($stops->stop as $stop) {
-            if ($errorCheck > 0) {
-                if ($epochFeedback < intval($stop->time) + intval($stop["delay"])) {
-                    $feedback["from"] = $lastStation;
+        if (!is_null($feedback['to'])) {
+            foreach ($stops->stop as $stop) {
+                if ($errorCheck > 0) {
+                    if ($epochFeedback < intval($stop->time) + intval($stop['delay'])) {
+                        $feedback['from'] = $lastStation;
+                        self::processFeedbackOneConnection($feedback);
+                        break;
+                    } else {
+                        $lastStation = $stop->station['URI'][0];
+                    }
+                }
+
+                if ($stop->station['URI'] == $feedback['from'] || $stop->station['URI'] == $feedback['to']) {
+                    if ($errorCheck == 0) {
+                        $lastStation = $stop->station['URI'][0];
+                    }
+
+                    $errorCheck += 1;
+                }
+
+                if ($errorCheck == 2) {
                     self::processFeedbackOneConnection($feedback);
                     break;
-                } else {
-                    $lastStation = $stop->station["URI"][0];
                 }
             }
-
-            if ($stop->station["URI"] == $feedback["from"] || $stop->station["URI"] == $feedback["to"]) {
-                if ($errorCheck == 0) {
-                    $lastStation = $stop->station["URI"][0];
-                }
-
-                $errorCheck += 1;
-            }
-
-            if ($errorCheck == 2) {
-                self::processFeedbackOneConnection($feedback);
-                break;
-            }
+        } else {
+            self::processFeedbackOneConnection($feedback);
         }
     }
 
-    private static function getVehicleStopsInfo($vehicle)
+    private static function getVehicleStopsInfo($vehicleURL)
     {
-        $url = "http://api.irail.be/vehicle/?id=BE.NMBS." . $vehicle;
-
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_URL, $vehicleURL);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
         $result = curl_exec($curl);
@@ -62,8 +64,8 @@ class OccupancyDao
 
     private static function processFeedbackOneConnection($feedback)
     {
-        $fromArr = (Array)$feedback["from"];
-        $feedback["from"] = $fromArr[0];
+        $fromArr = (Array)$feedback['from'];
+        $feedback['from'] = $fromArr[0];
 
         self::feedbackOneConnectionToOccupancyTable($feedback);
         self::feedbackOneConnectionToFeedbackTable($feedback);
@@ -78,37 +80,33 @@ class OccupancyDao
         
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
-        
-        //Create a connection URI
-        $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
 
-        $occupancyExists = $occupancy->findOne(array('id' => $connectionid));
+        $occupancyExists = $occupancy->findOne(array('connection' => $feedback['connection']));
 
         $occupancyData = array(
-            'connection' => $connectionid,
-            'vehicle' => $feedback["vehicle"],
-            'from' => $feedback["from"],
-            'date' => $feedback["date"],
-            'time' => $feedback["time"],
-            'feedback' => OccupancyOperations::URIToNumber($feedback["occupancy"]),
+            'connection' => $feedback['connection'],
+            'vehicle' => $feedback['vehicle'],
+            'from' => $feedback['from'],
+            'date' => $feedback['date'],
+            'feedback' => OccupancyOperations::URIToNumber($feedback['occupancy']),
             'feedbackAmount' => 1,
-            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
+            'occupancy' => OccupancyOperations::URIToNumber($feedback['occupancy'])
         );
 
         if (is_null($occupancyExists)) {
             $occupancy->insertOne($occupancyData);
         } else {
-            if (is_null($occupancyExists["feedback"])) {
+            if (is_null($occupancyExists['feedback'])) {
                 $occupancy->updateOne(
-                    array('connection' => $connectionid),
-                    array('$set' => array('feedback' => $occupancyData["feedback"], 'occupancy' => $occupancyData["feedback"]))
+                    array('connection' => $feedback['connection']),
+                    array('$set' => array('feedback' => $occupancyData['feedback'], 'occupancy' => $occupancyData['feedback']))
                 );
             } else {
                 $feedbackAmount = $occupancyExists->feedbackAmount + 1;
-                $feedbackScore = ((double)$occupancyExists->feedback * (double)$occupancyExists->feedbackAmount + (double)$occupancyData["feedback"]) / (double)$feedbackAmount;
+                $feedbackScore = ((double)$occupancyExists->feedback * (double)$occupancyExists->feedbackAmount + (double)$occupancyData['feedback']) / (double)$feedbackAmount;
 
                 $occupancy->updateOne(
-                    array('connection' => $connectionid),
+                    array('connection' => $feedback['connection']),
                     array('$set' => array('feedbackAmount' => $feedbackAmount, 'feedback' => $feedbackScore, 'occupancy' => $feedbackScore))
                 );
             }
@@ -124,16 +122,12 @@ class OccupancyDao
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $feedbackTable = new MongoDB\Collection($m, $mongodb_db, 'feedback');
 
-        //Create a connection URI
-        $connectionid = 'http://irail.be/connections/'.substr(basename($feedback["from"]), 2)."/".$feedback["date"]."/".$feedback["vehicle"];
-
         $feedbackData = array(
-            'connection' => $connectionid,
-            'vehicle' => $feedback["vehicle"],
-            'from' => $feedback["from"],
-            'date' => $feedback["date"],
-            'time' => $feedback["time"],
-            'occupancy' => OccupancyOperations::URIToNumber($feedback["occupancy"])
+            'connection' => $feedback['connection'],
+            'vehicle' => $feedback['vehicle'],
+            'from' => $feedback['from'],
+            'date' => $feedback['date'],
+            'occupancy' => OccupancyOperations::URIToNumber($feedback['occupancy'])
         );
 
         $feedbackTable->insertOne($feedbackData);
