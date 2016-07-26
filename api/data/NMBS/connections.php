@@ -9,7 +9,6 @@
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once 'occupancy/OccupancyOperations.php';
-use MongoDB\Collection;
 
 class connections
 {

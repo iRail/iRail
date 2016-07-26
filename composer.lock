@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "42b09dc5d675cc39cbed2f0b0398e04c",
-    "content-hash": "ea62134d7e431ac080f1b97220f29744",
+    "hash": "f380620a9d7bb3b720c61ceffc062aef",
+    "content-hash": "1e98703b008034aec3adfd869fa5e347",
     "packages": [
         {
             "name": "irail/stations",
@@ -13,12 +13,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-                "reference": "a48a0360b02d520f6c0e21780adb58fb59f5aee5"
+                "reference": "999177226c14541996268aac2c3a0d21b2e7716a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iRail/stations/zipball/a48a0360b02d520f6c0e21780adb58fb59f5aee5",
-                "reference": "a48a0360b02d520f6c0e21780adb58fb59f5aee5",
+                "url": "https://api.github.com/repos/iRail/stations/zipball/999177226c14541996268aac2c3a0d21b2e7716a",
+                "reference": "999177226c14541996268aac2c3a0d21b2e7716a",
                 "shasum": ""
             },
             "require": {
@@ -44,7 +44,7 @@
                 }
             ],
             "description": "Use the Belgian railway's station in your PHP project",
-            "time": "2016-06-29 10:58:35"
+            "time": "2016-07-26 10:03:05"
         },
         {
             "name": "ml/iri",
@@ -148,12 +148,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mongodb/mongo-php-library.git",
-                "reference": "07cbd47b0eca2587f91cdfbb843cc1bc0076ece7"
+                "reference": "7a6bb13d2eb73df31f2a560905cfdf7526ef88c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/07cbd47b0eca2587f91cdfbb843cc1bc0076ece7",
-                "reference": "07cbd47b0eca2587f91cdfbb843cc1bc0076ece7",
+                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/7a6bb13d2eb73df31f2a560905cfdf7526ef88c4",
+                "reference": "7a6bb13d2eb73df31f2a560905cfdf7526ef88c4",
                 "shasum": ""
             },
             "require": {
@@ -203,7 +203,7 @@
                 "mongodb",
                 "persistence"
             ],
-            "time": "2016-06-30 18:37:01"
+            "time": "2016-07-15 19:16:24"
         },
         {
             "name": "monolog/monolog",
@@ -679,12 +679,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "58a8137754bc24b25740d4281399a4a3596058e0"
+                "reference": "d883566b83ae601a50b38b249e92450dc57cf875"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/58a8137754bc24b25740d4281399a4a3596058e0",
-                "reference": "58a8137754bc24b25740d4281399a4a3596058e0",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/d883566b83ae601a50b38b249e92450dc57cf875",
+                "reference": "d883566b83ae601a50b38b249e92450dc57cf875",
                 "shasum": ""
             },
             "require": {
@@ -733,7 +733,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2016-06-07 08:13:47"
+            "time": "2016-07-19 16:08:43"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -984,12 +984,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "b9cf8c5ff8bc658bebf8e9a5473fc513c38473de"
+                "reference": "c062dddcb68e44b563f66ee319ddae2b5a322a90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/b9cf8c5ff8bc658bebf8e9a5473fc513c38473de",
-                "reference": "b9cf8c5ff8bc658bebf8e9a5473fc513c38473de",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c062dddcb68e44b563f66ee319ddae2b5a322a90",
+                "reference": "c062dddcb68e44b563f66ee319ddae2b5a322a90",
                 "shasum": ""
             },
             "require": {
@@ -1048,7 +1048,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2016-06-17 15:17:43"
+            "time": "2016-07-21 06:48:14"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1434,12 +1434,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "b69648974b39cc6f76aea9d3aee8212cd0c0d75d"
+                "reference": "cd3288cd749886aa1ff43038f17db6494e883262"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/b69648974b39cc6f76aea9d3aee8212cd0c0d75d",
-                "reference": "b69648974b39cc6f76aea9d3aee8212cd0c0d75d",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/cd3288cd749886aa1ff43038f17db6494e883262",
+                "reference": "cd3288cd749886aa1ff43038f17db6494e883262",
                 "shasum": ""
             },
             "require": {
@@ -1481,7 +1481,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-07-01 16:08:10"
+            "time": "2016-07-17 14:08:33"
         },
         {
             "name": "webmozart/assert",

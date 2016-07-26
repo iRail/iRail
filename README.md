@@ -14,11 +14,19 @@ All information can be found on [our blog at hello.iRail.be](http://hello.irail.
 
 _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and PHP curl extension installed on your system_
 
- * Step 1: clone this repo
+ * Step 1: Clone this repo
  * Step 2: `composer install`
- * Step 3: make sure storage is writable: `chmod 777 storage`
+ * Step 3: Make sure storage is writable: `chmod 777 storage`
  * Step 4: Run your test server: `php -S localhost:8008 -t api`
  * Step 5: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
+
+**Optional**, if you want to set up the iRail API with occupancy scores you will need to set up a MongoDB database:
+
+ * Step 6: Install MongoDB: `brew install mongodb`
+ * Step 7: Install the MongoDB module for PHP: `pecl install mongodb`
+ * Step 8: Include MongoDB: `composer require mongodb/mongodb:^1.0` (make sure to not commit the composer.json file)
+ * Step 9: Run MongoDB: `mongod`
+ * Step 10: Enjoy the POST request and the occupancy scores in all the GET requests.
 
 ## Update stations list ##
 
