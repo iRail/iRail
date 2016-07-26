@@ -8,6 +8,8 @@
  */
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
+include_once 'occupancy/OccupancyOperations.php';
+use MongoDB\Collection;
 
 class connections
 {
@@ -50,7 +52,17 @@ class connections
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
-        return self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
+        $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
+
+        $requestedDate = DateTime::createFromFormat('Ymd', $date);
+        $now = new DateTime();
+        $daysDiff = $now->diff($requestedDate);
+
+        if(intval($daysDiff->format('%R%a')) >= 2) {
+            return $connections;
+        } else {
+            return self::addOccupancy($connections, $date);
+        }
     }
 
     /**
@@ -387,6 +399,54 @@ class connections
         }
 
         return $connection;
+    }
+
+    private static function addOccupancy($connections, $date)
+    {
+        $occupancyConnections = $connections;
+
+        try {
+            foreach ($occupancyConnections as $connection) {
+                $departure = $connection->departure;
+                $vehicle = substr(strrchr($departure->vehicle, "."), 1);
+                $from = $departure->station->{"@id"};
+
+                $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
+                $occupancyArr = [];
+
+                $connection->departure->occupancy->{'@id'} = $URI;
+                $connection->departure->occupancy->name = basename($URI);
+                array_push($occupancyArr, $URI);
+
+                if (!is_null($connection->via)) {
+                    foreach ($connection->via as $key => $via) {
+                        if ($key < count($connection->via) - 1) {
+                            $vehicle = substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
+                        } else {
+                            $vehicle = substr(strrchr($connection->arrival->vehicle, "."), 1);
+                        }
+
+                        $from = $via->station->{'@id'};
+
+                        $URI = OccupancyOperations::getOccupancyURI($vehicle, $from, $date);
+
+                        $via->departure->occupancy->{'@id'} = $URI;
+                        $via->departure->occupancy->name = basename($URI);
+                        array_push($occupancyArr, $URI);
+                    }
+                }
+
+                $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
+
+                $connection->occupancy->{'@id'} = $URI;
+                $connection->occupancy->name = basename($URI);
+            }
+        } catch (Exception $e) {
+            // Here one can implement a reporting to the iRail owner that the database has problems.
+            return $connections;
+        }
+
+        return $occupancyConnections;
     }
 
     /**
