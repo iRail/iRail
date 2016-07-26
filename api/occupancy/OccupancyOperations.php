@@ -12,10 +12,11 @@ use MongoDB\Collection;
 
 class OccupancyOperations
 {
-    const UNKNOWN = 'https://api.irail.be/terms/unknown';
-    const LOW = 'https://api.irail.be/terms/low';
-    const MEDIUM = 'https://api.irail.be/terms/medium';
-    const HIGH = 'https://api.irail.be/terms/high';
+    const UNKNOWN = 'http://api.irail.be/terms/unknown';
+    const LOW = 'http://api.irail.be/terms/low';
+    const MEDIUM = 'http://api.irail.be/terms/medium';
+    const HIGH = 'http://api.irail.be/terms/high';
+    const CONNECTIONBASEURI = 'http://irail.be/connections/';
 
     public static function getOccupancyURI($vehicle, $from, $date) {
         try {
@@ -40,7 +41,8 @@ class OccupancyOperations
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-        return $occupancy->findOne(array('vehicle' => $vehicle, 'from' => $from, 'date' => $date));
+        $connection = self::buildConnectionURI($vehicle, $from, $date);
+        return $occupancy->findOne(array('connection' => $connection));
     }
 
     public static function getOccupancy($vehicle, $date)
@@ -141,5 +143,9 @@ class OccupancyOperations
     public static function getUnknown()
     {
         return self::UNKNOWN;
+    }
+
+    private static function buildConnectionURI($vehicle, $from, $date) {
+        return self::CONNECTIONBASEURI . substr(basename($from), 2) . '/' . $date . '/' . basename($vehicle);
     }
 }

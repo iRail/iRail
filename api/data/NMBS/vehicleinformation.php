@@ -45,7 +45,8 @@ class vehicleinformation
             $dataroot->alert = self::getAlerts($html);
         }
 
-        $vehicleOccupancy = OccupancyOperations::getOccupancy(substr(strrchr($request->getVehicleId(), "."), 1), DateTime::createFromFormat('dmy', $date)->format('Ymd'));
+        $vehicle = 'http://irail.be/vehicle/' . substr(strrchr($request->getVehicleId(), "."), 1);
+        $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
         $dataroot->stop = [];
 
         $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date);

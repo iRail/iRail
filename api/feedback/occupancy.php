@@ -29,6 +29,13 @@ include_once '../../vendor/autoload.php';
 include_once '../APIPost.php';
 date_default_timezone_set('Europe/Brussels');
 
+/*
+ * Required:
+ * - connection
+ * - occupancy
+ * Optional:
+ * - to
+ */
 $postdata = file_get_contents("php://input");
 $post = new APIPost('occupancy', $postdata, $_SERVER['REQUEST_METHOD']);
 $post->writeToMongo($_SERVER['REMOTE_ADDR']);
