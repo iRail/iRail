@@ -193,6 +193,7 @@ class liveboard
             $nodes[$i]->platform->normal = $platformNormal;
             $nodes[$i]->canceled = $canceled;
             $nodes[$i]->left = $left;
+            $nodes[$i]->departureConnection = 'http://irail.be/connections/' . substr(basename($station->{'@id'}), 2) . '/' . date('Ymd', $unixtime) . '/' . basename($vehicle);
 
             if (!is_null($departureStation)) {
                 try {
