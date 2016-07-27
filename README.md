@@ -25,9 +25,11 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
  * Step 6: Install [MongoDB](https://www.mongodb.com/download-center?jmp=nav#community)
  * Step 7: Install the MongoDB module for PHP: `pecl install mongodb`
  * Step 8: Include MongoDB: `composer require mongodb/mongodb:^1.0` (make sure to not commit the composer.json file)
- * Step 9: Import the data (the structural.csv file) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data): `mongoimport -d irail -c structural --type csv --file structural.csv --headerline`
- * Step 10: Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
- * Step 11: Enjoy the occupancy scores in all the GET requests and the POST request: `curl -H "Content-Type: application/json" -X POST -d '{"vehicle":"IC2214","from":"http://irail.be/stations/NMBS/008812005","to":"http://irail.be/stations/NMBS/008892007","occupancy":"https://api.irail.be/terms/medium","departureTime":"20160722T1440"}' http://localhost:8008/feedback/occupancy.php`
+ * Step 9: Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
+ * Step 10: Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
+ * Step 11: Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php occupancy/scripts/cronjob.php`
+ * Step 12: Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
+ * Step 13: Enjoy the occupancy scores in all the GET requests and the POST request: `curl -H "Content-Type: application/json" -X POST -d '{"vehicle":"IC2214","from":"http://irail.be/stations/NMBS/008812005","to":"http://irail.be/stations/NMBS/008892007","occupancy":"https://api.irail.be/terms/medium","departureTime":"20160722T1440"}' http://localhost:8008/feedback/occupancy.php`
 
 ## Update stations list ##
 
