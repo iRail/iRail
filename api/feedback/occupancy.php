@@ -48,4 +48,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     $post = new APIPost('occupancy', $postdata, $_SERVER['REQUEST_METHOD']);
     $post->writeToMongo($_SERVER['REMOTE_ADDR']);
 }
-
