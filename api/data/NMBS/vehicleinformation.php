@@ -276,7 +276,7 @@ class vehicleinformation
                         $k++;
                     }
 
-                    if (is_null($stops[$j]->occupancy)) {
+                    if (!isset($stops[$j]->occupancy)) {
                         $unknown = OccupancyOperations::getUnknown();
                         $stops[$j]->occupancy = new \stdClass();
                         $stops[$j]->occupancy->{'@id'} = $unknown;
