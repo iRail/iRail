@@ -241,7 +241,9 @@ class vehicleinformation
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
 
                 $pointInVehicle = strrpos($vehicle, '.');
-                if($pointInVehicle != 0) $pointInVehicle += 1;
+                if ($pointInVehicle != 0) {
+                    $pointInVehicle += 1;
+                }
 
                 $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
                 $stops[$j]->platform = new Platform();
