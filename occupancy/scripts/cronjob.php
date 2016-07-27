@@ -16,7 +16,7 @@ date_default_timezone_set('Europe/Brussels');
 $dayOfTheWeek = date('N');
 $isWeekday = 1;
 
-if($dayOfTheWeek == 5 || $dayOfTheWeek == 6) {
+if ($dayOfTheWeek == 5 || $dayOfTheWeek == 6) {
     $isWeekday = 0;
 }
 
@@ -37,5 +37,3 @@ foreach ($structuralData as $structuralElement) {
 
     $occupancy->insertOne($structuralToOccupancy);
 }
-
-?>

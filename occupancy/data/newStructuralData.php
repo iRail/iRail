@@ -7,7 +7,7 @@
 // 4 = crowding (0=empty, 1=in between, 2=busy)
 // 5 = weekday (0=weekend, 1=weekday)
 
-if(count($argv) == 6) {
+if (count($argv) == 6) {
     $curl = curl_init();
 
     $url = "http://api.irail.be/vehicle/?id=BE.NMBS." . $argv[1];
@@ -26,9 +26,11 @@ if(count($argv) == 6) {
     $text = "";
     $crowding = "?";
 
-    foreach($stops->stop as $stop) {
-        if($stop->station == $argv[2]) {
-            if($errorCheck != 0) $errorCheck += 1;
+    foreach ($stops->stop as $stop) {
+        if ($stop->station == $argv[2]) {
+            if ($errorCheck != 0) {
+                $errorCheck += 1;
+            }
 
             $crowding = $argv[4];
             $errorCheck += 1;
@@ -37,20 +39,21 @@ if(count($argv) == 6) {
         $arr = (Array)($stop->scheduledDepartureTime);
         $formattedTime = date('Hi', $arr[0]);
 
-        if($crowding != "?") {
+        if ($crowding != "?") {
             $text .= $argv[1] . "," . $crowding . "," . $argv[5] . "," . $stop->station["URI"] . "," . $formattedTime . "\n";
         }
 
-        if($stop->station == $argv[3] && $errorCheck == 1) {
+        if ($stop->station == $argv[3] && $errorCheck == 1) {
             $errorCheck += 1;
             $crowding = "?";
         }
     }
 
-    if($errorCheck != 2) echo "Error: stations niet overlopen\n";
-    else $myfile = file_put_contents('structural.csv', $text.PHP_EOL, FILE_APPEND);
+    if ($errorCheck != 2) {
+        echo "Error: stations niet overlopen\n";
+    } else {
+        $myfile = file_put_contents('structural.csv', $text.PHP_EOL, FILE_APPEND);
+    }
 } else {
     echo "Error: geef 5 argumenten\n";
 }
-
-?>

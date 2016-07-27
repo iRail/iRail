@@ -17,7 +17,7 @@ $dayOfTheWeek = date('N') + 2;
 
 $weekendCheck = 6;
 
-for($i=0; $i<2; $i++) {
+for ($i=0; $i<2; $i++) {
     $isWeekday = 1;
 
     if ($dayOfTheWeek == $weekendCheck-$i || $dayOfTheWeek == $weekendCheck-$i+1) {
@@ -44,5 +44,3 @@ for($i=0; $i<2; $i++) {
         $occupancy->insertOne($structuralToOccupancy);
     }
 }
-
-?>
