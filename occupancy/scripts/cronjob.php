@@ -3,7 +3,7 @@
 include_once 'vendor/autoload.php';
 use MongoDB\Collection as Collection;
 
-$dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+$dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
 $dotenv->load();
 $mongodb_url = getenv('MONGODB_URL');
 $mongodb_db = getenv('MONGODB_DB');
