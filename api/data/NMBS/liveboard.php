@@ -200,7 +200,7 @@ class liveboard
                     $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
 
                     // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
-                    if(!is_null($occupancy)) {
+                    if (!is_null($occupancy)) {
                         $nodes[$i]->occupancy->name = basename($occupancy);
                         $nodes[$i]->occupancy->{'@id'} = $occupancy;
                     }
