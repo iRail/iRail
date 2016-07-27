@@ -35,16 +35,20 @@ class OccupancyOperations
 
     private static function getOccupancyTrip($vehicle, $from, $date)
     {
-        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
-        $dotenv->load();
-        $mongodb_url = getenv('MONGODB_URL');
-        $mongodb_db = getenv('MONGODB_DB');
+        try {
+            $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+            $dotenv->load();
+            $mongodb_url = getenv('MONGODB_URL');
+            $mongodb_db = getenv('MONGODB_DB');
 
-        $m = new MongoDB\Driver\Manager($mongodb_url);
-        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+            $m = new MongoDB\Driver\Manager($mongodb_url);
+            $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-        $connection = self::buildConnectionURI($vehicle, $from, $date);
-        return $occupancy->findOne(array('connection' => $connection));
+            $connection = self::buildConnectionURI($vehicle, $from, $date);
+            return $occupancy->findOne(array('connection' => $connection));
+        } catch(Exception $e) {
+            throw new Exception($e, 503);
+        }
     }
 
     public static function getOccupancy($vehicle, $date)
