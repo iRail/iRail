@@ -11,6 +11,8 @@ include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once '../includes/simple_html_dom.php';
 include_once '../includes/getUA.php';
+include_once 'occupancy/OccupancyOperations.php';
+
 class vehicleinformation
 {
     /**
@@ -21,8 +23,9 @@ class vehicleinformation
     public static function fillDataRoot($dataroot, $request)
     {
         $lang = $request->getLang();
+        $date = $request->getDate();
 
-        $serverData = self::getServerData($request->getVehicleId(), $lang);
+        $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
         $html = str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
@@ -36,12 +39,27 @@ class vehicleinformation
             $html = str_get_html($serverData);
         }
 
+
         $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
         if ($request->getAlerts() && self::getAlerts($html)) {
             $dataroot->alert = self::getAlerts($html);
         }
+
+        $pointInVehicle = strrpos($request->getVehicleId(), '.');
+        if ($pointInVehicle != 0) {
+            $pointInVehicle += 1;
+        }
+
+        $vehicle = 'http://irail.be/vehicle/' . substr($request->getVehicleId(), $pointInVehicle);
+        $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
+
+        // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
+        if (!is_null($vehicleOccupancy)) {
+            $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
+        }
+
         $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast());
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
     }
 
     /**
@@ -49,7 +67,7 @@ class vehicleinformation
      * @param $lang
      * @return mixed
      */
-    private static function getServerData($id, $lang)
+    private static function getServerData($id, $date, $lang)
     {
         global $irailAgent; // from ../includes/getUA.php
 
@@ -61,7 +79,7 @@ class vehicleinformation
         $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/'.$lang.'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.date('d%2fm%2fY').'&realtimeMode=Show';
+        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY').'&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -86,8 +104,17 @@ class vehicleinformation
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast)
+    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle)
     {
+        $now = new DateTime();
+        $requestedDate = DateTime::createFromFormat('dmy', $date);
+        $daysBetweenNowAndRequest = $now->diff($requestedDate);
+        $occupancyDate = true;
+
+        if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
+            $occupancyDate = false;
+        }
+
         try {
             $stops = [];
             $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
@@ -207,23 +234,58 @@ class vehicleinformation
                     $nextDayArrival = 1;
                 }
                 $previousHour = (int)substr($departureTime, 0, 2);
+                $dateDatetime = DateTime::createFromFormat('dmy', $date);
 
                 $stops[$j] = new Stop();
                 $stops[$j]->station = $station;
                 $stops[$j]->departureDelay = $departureDelay;
                 $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
-                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', date('Ymd'));
+                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
+                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
+
+                $pointInVehicle = strrpos($vehicle, '.');
+                if ($pointInVehicle != 0) {
+                    $pointInVehicle += 1;
+                }
+
+                $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
                 //for backward compatibility
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', date('Ymd'));
+                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
+                // Check if it is in less than 2 days and MongoDB is available
+                if ($occupancyDate && !is_null($occupancyArr)) {
+                    // Add occupancy
+                    $occupancyOfStationFound = false;
+                    $k = 0;
+
+                    while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
+                        if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
+                            $URI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+
+                            $stops[$j]->occupancy->{'@id'} = $URI;
+                            $stops[$j]->occupancy->name = basename($URI);
+
+                            $occupancyOfStationFound = true;
+                        }
+
+                        $k++;
+                    }
+
+                    if (is_null($stops[$j]->occupancy)) {
+                        $unknown = OccupancyOperations::getUnknown();
+
+                        $stops[$j]->occupancy->{'@id'} = $unknown;
+                        $stops[$j]->occupancy->name = basename($unknown);
+                    }
+                }
+                
                 $j++;
             }
 

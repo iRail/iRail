@@ -6,4 +6,6 @@ push.php
 api/push.php
 .idea/
 /vendor/
+composer.json
 composer.lock
+.env
