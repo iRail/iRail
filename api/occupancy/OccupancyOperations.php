@@ -17,16 +17,21 @@ class OccupancyOperations
     const MEDIUM = 'http://api.irail.be/terms/medium';
     const HIGH = 'http://api.irail.be/terms/high';
     const CONNECTIONBASEURI = 'http://irail.be/connections/';
+    const MONGODBCLASS = 'MongoDB\Driver\Manager';
 
     public static function getOccupancyURI($vehicle, $from, $date)
     {
         try {
-            $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
+            if(class_exists(self::MONGODBCLASS)) {
+                $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
-            if (!is_null($occupancyDeparture)) {
-                return self::NumberToURI($occupancyDeparture->occupancy);
+                if (!is_null($occupancyDeparture)) {
+                    return self::NumberToURI($occupancyDeparture->occupancy);
+                } else {
+                    return self::getUnknown();
+                }
             } else {
-                return self::getUnknown();
+                return null;
             }
         } catch (Exception $e) {
             throw new Exception($e, 503);
@@ -35,20 +40,16 @@ class OccupancyOperations
 
     private static function getOccupancyTrip($vehicle, $from, $date)
     {
-        try {
-            $dotenv = new Dotenv(dirname(dirname(__DIR__)));
-            $dotenv->load();
-            $mongodb_url = getenv('MONGODB_URL');
-            $mongodb_db = getenv('MONGODB_DB');
+        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+        $dotenv->load();
+        $mongodb_url = getenv('MONGODB_URL');
+        $mongodb_db = getenv('MONGODB_DB');
 
-            $m = new MongoDB\Driver\Manager($mongodb_url);
-            $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+        $m = new MongoDB\Driver\Manager($mongodb_url);
+        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-            $connection = self::buildConnectionURI($vehicle, $from, $date);
-            return $occupancy->findOne(array('connection' => $connection));
-        } catch(Exception $e) {
-            throw new Exception($e, 503);
-        }
+        $connection = self::buildConnectionURI($vehicle, $from, $date);
+        return $occupancy->findOne(array('connection' => $connection));
     }
 
     public static function getOccupancy($vehicle, $date)
