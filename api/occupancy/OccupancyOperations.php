@@ -1,11 +1,11 @@
 <?php
-/* Copyright (C) 2011 by iRail vzw/asbl
-   * © 2015 by Open Knowledge Belgium vzw/asbl
-   *
-   * This class converts occupancy scores and URIs
-   *
-   * @author Stan Callewaert
-   */
+/** Copyright (C) 2011 by iRail vzw/asbl
+ * © 2015 by Open Knowledge Belgium vzw/asbl
+ *
+ * This class converts occupancy scores and URIs
+ *
+ * @author Stan Callewaert
+ */
 
 use Dotenv\Dotenv;
 use MongoDB\Collection;
@@ -65,8 +65,12 @@ class OccupancyOperations
 
             $m = new MongoDB\Driver\Manager($mongodb_url);
             $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
-
-            return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+            try {
+                return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+            } catch (Exception $e) {
+                //Could not connect to db - give a response anyway
+                return null;
+            }
         } else {
             return null;
         }

@@ -1,11 +1,11 @@
 <?php
-/* Copyright (C) 2011 by iRail vzw/asbl
-   * © 2015 by Open Knowledge Belgium vzw/asbl
-   *
-   * This class handles the data transfer from occupancy score tables.
-   *
-   * @author Stan Callewaert
-   */
+/** Copyright (C) 2011 by iRail vzw/asbl
+ * © 2015 by Open Knowledge Belgium vzw/asbl
+ *
+ * This class handles the data transfer from occupancy score tables.
+ *
+ * @author Stan Callewaert
+ */
 
 use MongoDB\Collection;
 
@@ -19,7 +19,7 @@ class OccupancyDao
         $errorCheck = 0;
         $lastStation = '';
 
-        if (!is_null($feedback['to'])) {
+        if (isset($feedback['to'])) {
             foreach ($stops->stop as $stop) {
                 if ($errorCheck > 0) {
                     if ($epochFeedback < intval($stop->time) + intval($stop['delay'])) {

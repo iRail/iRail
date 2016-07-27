@@ -34,7 +34,7 @@ class vehicleinformation
         }
         // Check if train splits
         if (self::trainSplits($html)) {
-            // Two URL's, fetch serverData from matching URL
+            // Two URLs, fetch serverData from matching URL
             $serverData = self::parseCorrectUrl($html);
             $html = str_get_html($serverData);
         }
@@ -260,27 +260,25 @@ class vehicleinformation
                 $stops[$j]->canceled = $departureCanceled;
 
                 // Check if it is in less than 2 days and MongoDB is available
-                if ($occupancyDate && !is_null($occupancyArr)) {
+                if ($occupancyDate && isset($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
 
                     while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
                         if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
-                            $URI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
-
-                            $stops[$j]->occupancy->{'@id'} = $URI;
-                            $stops[$j]->occupancy->name = basename($URI);
-
+                            $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+                            $stops[$j]->occupancy = new \stdClass();
+                            $stops[$j]->occupancy->{'@id'} = $occupancyURI;
+                            $stops[$j]->occupancy->name = basename($occupancyURI);
                             $occupancyOfStationFound = true;
                         }
-
                         $k++;
                     }
 
-                    if (is_null($stops[$j]->occupancy)) {
+                    if (!isset($stops[$j]->occupancy)) {
                         $unknown = OccupancyOperations::getUnknown();
-
+                        $stops[$j]->occupancy = new \stdClass();
                         $stops[$j]->occupancy->{'@id'} = $unknown;
                         $stops[$j]->occupancy->name = basename($unknown);
                     }
@@ -401,7 +399,7 @@ class vehicleinformation
 
     private static function trainDrives($html)
     {
-        return is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
+        return $html && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
     }
 
     private static function parseCorrectUrl($html)
