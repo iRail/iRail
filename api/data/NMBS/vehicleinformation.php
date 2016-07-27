@@ -46,7 +46,9 @@ class vehicleinformation
         }
 
         $pointInVehicle = strrpos($request->getVehicleId(), '.');
-        if($pointInVehicle != 0) $pointInVehicle += 1;
+        if ($pointInVehicle != 0) {
+            $pointInVehicle += 1;
+        }
 
         $vehicle = 'http://irail.be/vehicle/' . substr($request->getVehicleId(), $pointInVehicle);
         $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
