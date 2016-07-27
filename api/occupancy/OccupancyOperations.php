@@ -17,16 +17,23 @@ class OccupancyOperations
     const MEDIUM = 'http://api.irail.be/terms/medium';
     const HIGH = 'http://api.irail.be/terms/high';
     const CONNECTIONBASEURI = 'http://irail.be/connections/';
+    const MONGODBCLASS = 'MongoDB\Driver\Manager';
 
     public static function getOccupancyURI($vehicle, $from, $date)
     {
         try {
-            $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
+            // Check if the MongoDB module is installed, if not just return null
+            if (class_exists(self::MONGODBCLASS)) {
+                $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
-            if (!is_null($occupancyDeparture)) {
-                return self::NumberToURI($occupancyDeparture->occupancy);
+                // If there is no occupancy for that connection, return unknown
+                if (!is_null($occupancyDeparture)) {
+                    return self::NumberToURI($occupancyDeparture->occupancy);
+                } else {
+                    return self::getUnknown();
+                }
             } else {
-                return self::getUnknown();
+                return null;
             }
         } catch (Exception $e) {
             throw new Exception($e, 503);
@@ -49,15 +56,20 @@ class OccupancyOperations
 
     public static function getOccupancy($vehicle, $date)
     {
-        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
-        $dotenv->load();
-        $mongodb_url = getenv('MONGODB_URL');
-        $mongodb_db = getenv('MONGODB_DB');
+        // Check if the MongoDB module is installed, if not just return null
+        if (class_exists(self::MONGODBCLASS)) {
+            $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+            $dotenv->load();
+            $mongodb_url = getenv('MONGODB_URL');
+            $mongodb_db = getenv('MONGODB_DB');
 
-        $m = new MongoDB\Driver\Manager($mongodb_url);
-        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+            $m = new MongoDB\Driver\Manager($mongodb_url);
+            $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-        return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+            return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+        } else {
+            return null;
+        }
     }
 
     /**

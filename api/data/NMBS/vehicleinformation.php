@@ -47,9 +47,14 @@ class vehicleinformation
 
         $vehicle = 'http://irail.be/vehicle/' . substr(strrchr($request->getVehicleId(), "."), 1);
         $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
-        $dataroot->stop = [];
 
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date, $request->getVehicleId());
+        // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
+        if (!is_null($vehicleOccupancy)) {
+            $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
+        }
+
+        $dataroot->stop = [];
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
     }
 
     /**
@@ -234,7 +239,11 @@ class vehicleinformation
                 $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
-                $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, strrpos($vehicle, '.') + 1);
+
+                $pointInVehicle = strrpos($vehicle, '.');
+                if($pointInVehicle != 0) $pointInVehicle += 1;
+
+                $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
@@ -243,9 +252,8 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
-
-                // Check if it is in less than 2 days
-                if ($occupancyDate) {
+                // Check if it is in less than 2 days and MongoDB is available
+                if ($occupancyDate && !is_null($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;

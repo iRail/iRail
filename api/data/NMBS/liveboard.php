@@ -199,8 +199,11 @@ class liveboard
                 try {
                     $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
 
-                    $nodes[$i]->occupancy->name = basename($occupancy);
-                    $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                    // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
+                    if (!is_null($occupancy)) {
+                        $nodes[$i]->occupancy->name = basename($occupancy);
+                        $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                    }
                 } catch (Exception $e) {
                     // Database connection failed, in the future a warning could be given to the owner of iRail
                     $departureStation == null;
