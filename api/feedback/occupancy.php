@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Request-Method: POST, OPTIONS');
     header('Access-Control-Request-Headers: Content-Type');
+    header('Access-Control-Allow-Headers: Content-Type');
     header('Allow: POST, OPTIONS');
 } else {
     $post = new APIPost('occupancy', $postdata, $_SERVER['REQUEST_METHOD']);

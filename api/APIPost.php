@@ -102,6 +102,7 @@ class APIPost
                     header('Access-Control-Allow-Origin: *');
                     header('Access-Control-Request-Method: POST, OPTIONS');
                     header('Access-Control-Request-Headers: Content-Type');
+                    header('Access-Control-Allow-Headers: Content-Type');
                     header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                     $postInfo = array(
