@@ -97,8 +97,11 @@ class APIPost
                     if (is_null($ipLastMinute)) {
                         $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));*/
 
-                        // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
-                        header("HTTP/1.0 201 Created");
+                    // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+                    header('HTTP/1.1 201 Created');
+                    header('Access-Control-Allow-Origin: *');
+                    header('Access-Control-Request-Method: POST, OPTIONS');
+                    header('Access-Control-Request-Headers: Content-Type');
                     header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
 
                     $postInfo = array(

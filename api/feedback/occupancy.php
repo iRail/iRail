@@ -37,5 +37,14 @@ date_default_timezone_set('Europe/Brussels');
  * - to
  */
 $postdata = file_get_contents("php://input");
-$post = new APIPost('occupancy', $postdata, $_SERVER['REQUEST_METHOD']);
-$post->writeToMongo($_SERVER['REMOTE_ADDR']);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('HTTP/1.1 200 OK');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Request-Method: POST, OPTIONS');
+    header('Access-Control-Request-Headers: Content-Type');
+    header('Allow: POST, OPTIONS');
+} else {
+    $post = new APIPost('occupancy', $postdata, $_SERVER['REQUEST_METHOD']);
+    $post->writeToMongo($_SERVER['REMOTE_ADDR']);
+}
+
