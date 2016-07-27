@@ -9,7 +9,6 @@
 include_once 'data/NMBS/tools.php';
 include_once 'data/NMBS/stations.php';
 include_once 'occupancy/OccupancyOperations.php';
-use MongoDB\Collection;
 
 class connections
 {
@@ -407,42 +406,52 @@ class connections
     {
         $occupancyConnections = $connections;
 
+        // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned.
+        $mongodbExists = true;
+        $i = 0;
+
         try {
-            foreach ($occupancyConnections as $connection) {
-                $departure = $connection->departure;
+            while($i < count($occupancyConnections) && $mongodbExists) {
+                $departure = $occupancyConnections[$i]->departure;
                 $vehicle = $departure->vehicle;
                 $from = $departure->station->{"@id"};
 
                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($vehicle, "."), 1);
                 $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
-                $occupancyArr = [];
 
-                $connection->departure->occupancy->{'@id'} = $URI;
-                $connection->departure->occupancy->name = basename($URI);
-                array_push($occupancyArr, $URI);
+                if(!is_null($URI)) {
+                    $occupancyArr = [];
 
-                if (!is_null($connection->via)) {
-                    foreach ($connection->via as $key => $via) {
-                        if ($key < count($connection->via) - 1) {
-                            $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($connection->via[$key + 1]->vehicle, "."), 1);
-                        } else {
-                            $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($connection->arrival->vehicle, "."), 1);
+                    $occupancyConnections[$i]->departure->occupancy->{'@id'} = $URI;
+                    $occupancyConnections[$i]->departure->occupancy->name = basename($URI);
+                    array_push($occupancyArr, $URI);
+
+                    if (!is_null($occupancyConnections[$i]->via)) {
+                        foreach ($occupancyConnections[$i]->via as $key => $via) {
+                            if ($key < count($occupancyConnections[$i]->via) - 1) {
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle, "."), 1);
+                            } else {
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->arrival->vehicle, "."), 1);
+                            }
+
+                            $from = $via->station->{'@id'};
+
+                            $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
+
+                            $via->departure->occupancy->{'@id'} = $URI;
+                            $via->departure->occupancy->name = basename($URI);
+                            array_push($occupancyArr, $URI);
                         }
-
-                        $from = $via->station->{'@id'};
-
-                        $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
-
-                        $via->departure->occupancy->{'@id'} = $URI;
-                        $via->departure->occupancy->name = basename($URI);
-                        array_push($occupancyArr, $URI);
                     }
+
+                    $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
+
+                    $occupancyConnections[$i]->occupancy->{'@id'} = $URI;
+                    $occupancyConnections[$i]->occupancy->name = basename($URI);
+                    $i++;
+                } else {
+                    $mongodbExists = false;
                 }
-
-                $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
-
-                $connection->occupancy->{'@id'} = $URI;
-                $connection->occupancy->name = basename($URI);
             }
         } catch (Exception $e) {
             // Here one can implement a reporting to the iRail owner that the database has problems.
