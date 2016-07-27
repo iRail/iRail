@@ -34,7 +34,7 @@ class vehicleinformation
         }
         // Check if train splits
         if (self::trainSplits($html)) {
-            // Two URL's, fetch serverData from matching URL
+            // Two URLs, fetch serverData from matching URL
             $serverData = self::parseCorrectUrl($html);
             $html = str_get_html($serverData);
         }

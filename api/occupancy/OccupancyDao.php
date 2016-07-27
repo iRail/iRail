@@ -19,7 +19,7 @@ class OccupancyDao
         $errorCheck = 0;
         $lastStation = '';
 
-        if (!is_null($feedback['to'])) {
+        if (isset($feedback['to'])) {
             foreach ($stops->stop as $stop) {
                 if ($errorCheck > 0) {
                     if ($epochFeedback < intval($stop->time) + intval($stop['delay'])) {

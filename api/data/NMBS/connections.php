@@ -74,13 +74,18 @@ class connections
      */
     private static function getHafasIDsFromNames($from, $to, $lang, $request)
     {
-        $station1 = stations::getStationFromName($from, $lang);
-        $station2 = stations::getStationFromName($to, $lang);
-        if (isset($request)) {
-            $request->setFrom($station1);
-            $request->setTo($station2);
+        try {
+            $station1 = stations::getStationFromName($from, $lang);
+        
+            $station2 = stations::getStationFromName($to, $lang);
+            if (isset($request)) {
+                $request->setFrom($station1);
+                $request->setTo($station2);
+            }
+            return [$station1->getHID(), $station2->getHID()];
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 404);
         }
-        return [$station1->getHID(), $station2->getHID()];
     }
 
     /**
