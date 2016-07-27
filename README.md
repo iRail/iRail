@@ -22,17 +22,16 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
 
 **Optional**, if you want to set up the iRail API with occupancy scores you will need to set up a MongoDB database:
 
- * Step 6: Install MongoDB: `brew install mongodb`
+ * Step 6: Install [MongoDB](https://www.mongodb.com/download-center?jmp=nav#community)
  * Step 7: Install the MongoDB module for PHP: `pecl install mongodb`
  * Step 8: Include MongoDB: `composer require mongodb/mongodb:^1.0` (make sure to not commit the composer.json file)
  * Step 9: Import the data (the structural.csv file) in MongoDB that already exists in the [Spitsgids-data repo](https://github.com/osoc16/Spitsgids-data): `mongoimport -d irail -c structural --type csv --file structural.csv --headerline`
  * Step 10: Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
- * Step 11: Run MongoDB: `mongod`
- * Step 12: Enjoy the POST request and the occupancy scores in all the GET requests.
+ * Step 11: Enjoy the occupancy scores in all the GET requests and the POST request: `curl -H "Content-Type: application/json" -X POST -d '{"vehicle":"IC2214","from":"http://irail.be/stations/NMBS/008812005","to":"http://irail.be/stations/NMBS/008892007","occupancy":"https://api.irail.be/terms/medium","departureTime":"20160722T1440"}' http://localhost:8008/feedback/occupancy.php`
 
 ## Update stations list ##
 
-Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project
+Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project.
 
 ## More links ##
 

@@ -22,9 +22,11 @@ class OccupancyOperations
     public static function getOccupancyURI($vehicle, $from, $date)
     {
         try {
+            // Check if the MongoDB module is installed, if not just return null
             if(class_exists(self::MONGODBCLASS)) {
                 $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
+                // If there is no occupancy for that connection, return unknown
                 if (!is_null($occupancyDeparture)) {
                     return self::NumberToURI($occupancyDeparture->occupancy);
                 } else {
@@ -54,6 +56,7 @@ class OccupancyOperations
 
     public static function getOccupancy($vehicle, $date)
     {
+        // Check if the MongoDB module is installed, if not just return null
         if(class_exists(self::MONGODBCLASS)) {
             $dotenv = new Dotenv(dirname(dirname(__DIR__)));
             $dotenv->load();

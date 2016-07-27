@@ -405,6 +405,8 @@ class connections
     private static function addOccupancy($connections, $date)
     {
         $occupancyConnections = $connections;
+
+        // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned.
         $mongodbExists = true;
         $i = 0;
 
