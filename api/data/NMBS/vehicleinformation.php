@@ -47,9 +47,13 @@ class vehicleinformation
 
         $vehicle = 'http://irail.be/vehicle/' . substr(strrchr($request->getVehicleId(), "."), 1);
         $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
-        $dataroot->stop = [];
 
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), iterator_to_array($vehicleOccupancy), $date, $request->getVehicleId());
+        if (!is_null($vehicleOccupancy)) {
+            $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
+        }
+
+        $dataroot->stop = [];
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
     }
 
     /**
@@ -243,9 +247,8 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
 
-
-                // Check if it is in less than 2 days
-                if ($occupancyDate) {
+                // Check if it is in less than 2 days and MongoDB is available
+                if ($occupancyDate && !is_null($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;

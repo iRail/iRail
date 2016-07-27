@@ -54,15 +54,19 @@ class OccupancyOperations
 
     public static function getOccupancy($vehicle, $date)
     {
-        $dotenv = new Dotenv(dirname(dirname(__DIR__)));
-        $dotenv->load();
-        $mongodb_url = getenv('MONGODB_URL');
-        $mongodb_db = getenv('MONGODB_DB');
+        if(class_exists(self::MONGODBCLASS)) {
+            $dotenv = new Dotenv(dirname(dirname(__DIR__)));
+            $dotenv->load();
+            $mongodb_url = getenv('MONGODB_URL');
+            $mongodb_db = getenv('MONGODB_DB');
 
-        $m = new MongoDB\Driver\Manager($mongodb_url);
-        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+            $m = new MongoDB\Driver\Manager($mongodb_url);
+            $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
-        return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+            return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
+        } else {
+            return null;
+        }
     }
 
     /**

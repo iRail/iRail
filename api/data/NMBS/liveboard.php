@@ -199,8 +199,10 @@ class liveboard
                 try {
                     $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
 
-                    $nodes[$i]->occupancy->name = basename($occupancy);
-                    $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                    if(!is_null($occupancy)) {
+                        $nodes[$i]->occupancy->name = basename($occupancy);
+                        $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                    }
                 } catch (Exception $e) {
                     // Database connection failed, in the future a warning could be given to the owner of iRail
                     $departureStation == null;
