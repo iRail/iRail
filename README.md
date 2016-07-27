@@ -29,7 +29,7 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
  * Step 10: Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
  * Step 11: Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
  * Step 12: Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
- * Step 13: Enjoy the occupancy scores in all the GET requests and the POST request: `curl -H "Content-Type: application/json" -X POST -d '{"vehicle":"IC2214","from":"http://irail.be/stations/NMBS/008812005","to":"http://irail.be/stations/NMBS/008892007","occupancy":"https://api.irail.be/terms/medium","departureTime":"20160722T1440"}' http://localhost:8008/feedback/occupancy.php`
+ * Step 13: Enjoy the occupancy scores in all the GET requests and the POST request: `curl -H "Content-Type: application/json" -X POST -d '{"connection": "http://irail.be/connections/8871308/20160722/IC4516","from": "http://irail.be/station/NMBS/008871308","date": "20160722","vehicle": "http://irail.be/vehicle/IC4516","occupancy":"http://api.irail.be/terms/medium","to":"http://irail.be/stations/NMBS/008872009"}' http://localhost:8008/feedback/occupancy.php`
 
 ## Update stations list ##
 
