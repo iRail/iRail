@@ -1,11 +1,11 @@
 <?php
-/* Copyright (C) 2011 by iRail vzw/asbl
-   * © 2015 by Open Knowledge Belgium vzw/asbl
-   *
-   * This class handles the data transfer from occupancy score tables.
-   *
-   * @author Stan Callewaert
-   */
+/** Copyright (C) 2011 by iRail vzw/asbl
+ * © 2015 by Open Knowledge Belgium vzw/asbl
+ *
+ * This class handles the data transfer from occupancy score tables.
+ *
+ * @author Stan Callewaert
+ */
 
 use MongoDB\Collection;
 
