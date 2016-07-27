@@ -23,7 +23,7 @@ if ($dayOfTheWeek == 5 || $dayOfTheWeek == 6) {
 $structuralData = $structural->find(array('weekday' => $isWeekday));
 
 foreach ($structuralData as $structuralElement) {
-    $date = date('Ymd', strtotime(date() . ' + 1 days'));
+    $date = date('Ymd', strtotime(date('Y-m-d') . ' + 1 days'));
     $connection = 'http://irail.be/connections/'.substr(basename($structuralElement->from), 2)."/".$date."/".$structuralElement->vehicle;
 
     $structuralToOccupancy = array(

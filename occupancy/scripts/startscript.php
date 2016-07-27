@@ -13,7 +13,7 @@ $structural = new Collection($m, $mongodb_db, 'structural');
 $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
 date_default_timezone_set('Europe/Brussels');
-$dayOfTheWeek = date('N') + 2;
+$dayOfTheWeek = date('N');
 
 $weekendCheck = 6;
 
@@ -29,7 +29,7 @@ for ($i=0; $i<2; $i++) {
     foreach ($structuralData as $structuralElement) {
         $extra = $i;
 
-        $date = date('Ymd', strtotime(date() . ' + ' . $extra . ' days'));
+        $date = date('Ymd', strtotime(date('Y-m-d') . ' + ' . $extra . ' days'));
         $connection = 'http://irail.be/connections/'.substr(basename($structuralElement->from), 2)."/".$date."/".$structuralElement->vehicle;
 
         $structuralToOccupancy = array(
