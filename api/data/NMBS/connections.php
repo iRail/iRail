@@ -411,7 +411,7 @@ class connections
         $i = 0;
 
         try {
-            while($i < count($occupancyConnections) && $mongodbExists) {
+            while ($i < count($occupancyConnections) && $mongodbExists) {
                 $departure = $occupancyConnections[$i]->departure;
                 $vehicle = $departure->vehicle;
                 $from = $departure->station->{"@id"};
@@ -419,7 +419,7 @@ class connections
                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($vehicle, "."), 1);
                 $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
 
-                if(!is_null($URI)) {
+                if (!is_null($URI)) {
                     $occupancyArr = [];
 
                     $occupancyConnections[$i]->departure->occupancy->{'@id'} = $URI;
