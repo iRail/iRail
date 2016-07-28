@@ -187,7 +187,7 @@ class liveboard
             $nodes[$i]->station = $stationNode;
             $nodes[$i]->time = $unixtime;
             $nodes[$i]->vehicle = new \stdClass();
-            $nodes[$i]->vehicle->name = $veh;
+            $nodes[$i]->vehicle->name = 'BE.NMBS.'.$veh;
             $nodes[$i]->vehicle->{'@id'} = $vehicle;
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
