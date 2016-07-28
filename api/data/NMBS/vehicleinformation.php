@@ -109,10 +109,10 @@ class vehicleinformation
         $now = new DateTime();
         $requestedDate = DateTime::createFromFormat('dmy', $date);
         $daysBetweenNowAndRequest = $now->diff($requestedDate);
-        $occupancyDate = true;
+        $isOccupancyDate = true;
 
         if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
-            $occupancyDate = false;
+            $isOccupancyDate = false;
         }
 
         try {
@@ -249,8 +249,9 @@ class vehicleinformation
                 if ($pointInVehicle != 0) {
                     $pointInVehicle += 1;
                 }
-
-                $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
+                if (!$fast) {
+                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
+                }
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
                 $stops[$j]->platform->normal = $normalplatform;
@@ -260,7 +261,7 @@ class vehicleinformation
                 $stops[$j]->canceled = $departureCanceled;
 
                 // Check if it is in less than 2 days and MongoDB is available
-                if ($occupancyDate && isset($occupancyArr)) {
+                if (!$fast && $isOccupancyDate && isset($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
