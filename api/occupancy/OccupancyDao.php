@@ -14,8 +14,9 @@ class OccupancyDao
     public static function processFeedback($feedback, $epochFeedback)
     {
         date_default_timezone_set('Europe/Brussels');
+        $dateParameter = substr($feedback['date'], -2) . substr($feedback['date'], -4, 2) . substr($feedback['date'], -6, 2);
 
-        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']));
+        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']) . '&date=' . $dateParameter);
         $errorCheck = 0;
         $lastStation = '';
 
