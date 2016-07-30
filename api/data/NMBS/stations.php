@@ -100,7 +100,7 @@ class stations
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
         if (! isset($stationsgraph->{'@graph'}[0])) {
-            throw new Exception('Could not match '.$name.' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new');
+            throw new Exception('Could not match "'.$name.'" with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
         $station = $stationsgraph->{'@graph'}[0];
 

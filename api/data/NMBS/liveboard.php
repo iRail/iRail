@@ -186,7 +186,8 @@ class liveboard
             $nodes[$i]->delay = $delay;
             $nodes[$i]->station = $stationNode;
             $nodes[$i]->time = $unixtime;
-            $nodes[$i]->vehicle->name = $veh;
+            $nodes[$i]->vehicle = new \stdClass();
+            $nodes[$i]->vehicle->name = 'BE.NMBS.'.$veh;
             $nodes[$i]->vehicle->{'@id'} = $vehicle;
             $nodes[$i]->platform = new Platform();
             $nodes[$i]->platform->name = $platform;
@@ -201,6 +202,7 @@ class liveboard
 
                     // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
                     if (!is_null($occupancy)) {
+                        $nodes[$i]->occupancy = new \stdClass();
                         $nodes[$i]->occupancy->name = basename($occupancy);
                         $nodes[$i]->occupancy->{'@id'} = $occupancy;
                     }

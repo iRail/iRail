@@ -26,12 +26,12 @@ RewriteEngine On
 RewriteBase /
 
 # API => api.domain
-RewriteRule ^connections/$              connections.php                 [NC,L]
-RewriteRule ^stations/$                 stations.php                    [NC,L]
-RewriteRule ^liveboard/$                liveboard.php                   [NC,L]
-RewriteRule ^vehicle/$                  vehicle.php                     [NC,L]
+RewriteRule ^connections/?$              connections.php                 [NC,L]
+RewriteRule ^stations/?$                 stations.php                    [NC,L]
+RewriteRule ^liveboard/?$                liveboard.php                   [NC,L]
+RewriteRule ^vehicle/?$                  vehicle.php                     [NC,L]
 
-RewriteRule ^feedback/occupancy/$       feedback/occupancy.php          [NC,L]
+RewriteRule ^feedback/occupancy/?$       feedback/occupancy.php          [NC,L]
 
 # Linked Data terms
 RewriteRule ^terms/unknown$             terms/unknown.html              [R=303]

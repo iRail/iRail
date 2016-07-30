@@ -74,13 +74,18 @@ class connections
      */
     private static function getHafasIDsFromNames($from, $to, $lang, $request)
     {
-        $station1 = stations::getStationFromName($from, $lang);
-        $station2 = stations::getStationFromName($to, $lang);
-        if (isset($request)) {
-            $request->setFrom($station1);
-            $request->setTo($station2);
+        try {
+            $station1 = stations::getStationFromName($from, $lang);
+        
+            $station2 = stations::getStationFromName($to, $lang);
+            if (isset($request)) {
+                $request->setFrom($station1);
+                $request->setTo($station2);
+            }
+            return [$station1->getHID(), $station2->getHID()];
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 404);
         }
-        return [$station1->getHID(), $station2->getHID()];
     }
 
     /**
@@ -417,16 +422,17 @@ class connections
                 $from = $departure->station->{"@id"};
 
                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($vehicle, "."), 1);
-                $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
+                $occupancyURI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
 
-                if (!is_null($URI)) {
+                if (!is_null($occupancyURI)) {
                     $occupancyArr = [];
+                    
+                    $occupancyConnections[$i]->departure->occupancy = new \stdClass();
+                    $occupancyConnections[$i]->departure->occupancy->{'@id'} = $occupancyURI;
+                    $occupancyConnections[$i]->departure->occupancy->name = basename($occupancyURI);
+                    array_push($occupancyArr, $occupancyURI);
 
-                    $occupancyConnections[$i]->departure->occupancy->{'@id'} = $URI;
-                    $occupancyConnections[$i]->departure->occupancy->name = basename($URI);
-                    array_push($occupancyArr, $URI);
-
-                    if (!is_null($occupancyConnections[$i]->via)) {
+                    if (isset($occupancyConnections[$i]->via)) {
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle, "."), 1);
@@ -436,18 +442,20 @@ class connections
 
                             $from = $via->station->{'@id'};
 
-                            $URI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
+                            $occupancyURI = OccupancyOperations::getOccupancyURI($vehicleURI, $from, $date);
 
-                            $via->departure->occupancy->{'@id'} = $URI;
-                            $via->departure->occupancy->name = basename($URI);
-                            array_push($occupancyArr, $URI);
+                            $via->departure->occupancy = new \stdClass();
+                            $via->departure->occupancy->{'@id'} = $occupancyURI;
+                            $via->departure->occupancy->name = basename($occupancyURI);
+                            array_push($occupancyArr, $occupancyURI);
                         }
                     }
 
-                    $URI = OccupancyOperations::getMaxOccupancy($occupancyArr);
+                    $occupancyURI = OccupancyOperations::getMaxOccupancy($occupancyArr);
 
-                    $occupancyConnections[$i]->occupancy->{'@id'} = $URI;
-                    $occupancyConnections[$i]->occupancy->name = basename($URI);
+                    $occupancyConnections[$i]->occupancy = new \stdClass();
+                    $occupancyConnections[$i]->occupancy->{'@id'} = $occupancyURI;
+                    $occupancyConnections[$i]->occupancy->name = basename($occupancyURI);
                     $i++;
                 } else {
                     $mongodbExists = false;
