@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="skos: http://www.w3.org/2004/02/skos/core#">
   <head>
     <meta charset="UTF-8">
     <title>iRail terminology</title>
   </head>
-  <body>
-    <h1>iRail terminology</h1>
+  <body typeof="skos:ConceptScheme" resource="https://api.irail.be/terms/">
+    <h1 property="dct:title">iRail terminology</h1>
     <p>Terminology used throughout the iRail project can be found here:</p>
-    <section id="occupancy">
-      <h2>Occupancy</h2>
+    <section id="occupancy" typeof="skos:Concept">
+      <h2 resource="skos:prefLabel">Occupancy</h2>
       <ul>
-        <li><a href="http://api.irail.be/terms/unknown">terms/unknown</a>. Unknown: there is insufficient information to define an occupancy level.</li>
-        <li><a href="http://api.irail.be/terms/low">terms/low</a>. Low occupancy: there are plenty of seats left</li>
-        <li><a href="http://api.irail.be/terms/medium">terms/medium</a>. Medium occupancy: it is hard to find a seat and it is difficult to sit together.</li>
-        <li><a href="http://api.irail.be/terms/high">terms/high</a>. High occupancy: there are no seats left and people have to stand up</li>
+        <li typeof="skos:inScheme" resource="http://api.irail.be/terms/unknown"><a href="http://api.irail.be/terms/unknown">terms/unknown</a>. <span typeof="skos:prefLabel">Unknown: there is insufficient information to define an occupancy level.</span></li>
+        <li typeof="skos:inScheme" resource="http://api.irail.be/terms/low"><a href="http://api.irail.be/terms/low">terms/low</a>. <span typeof="skos:prefLabel">Low occupancy: there are plenty of seats left.</span></li>
+        <li typeof="skos:inScheme" resource="http://api.irail.be/terms/medium"><a href="http://api.irail.be/terms/medium">terms/medium</a>.<span typeof="skos:prefLabel"> Medium occupancy: it is hard to find a seat and it is difficult to sit together.</span></li>
+        <li typeof="skos:inScheme" resource="http://api.irail.be/terms/high"><a href="http://api.irail.be/terms/high">terms/high</a>. <span typeof="skos:prefLabel">High occupancy: there are no seats left and people have to stand up.</span></li>
       </ul>
     </section>
   </body>
