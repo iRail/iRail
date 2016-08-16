@@ -40,7 +40,7 @@ for ($i=0; $i<2; $i++) {
             'structural' => $structuralElement->occupancy,
             'occupancy' => $structuralElement->occupancy
         );
-
+        echo 'Inserting '.$connection."\n";
         $occupancy->insertOne($structuralToOccupancy);
     }
 }
