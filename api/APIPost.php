@@ -108,6 +108,7 @@ class APIPost
                     $postInfo = array(
                             'connection' => $this->postData->connection,
                             'from' => $this->postData->from,
+                            'to' => $this->postData->to,
                             'date' => $this->postData->date,
                             'vehicle' => $this->postData->vehicle,
                             'occupancy' => $this->postData->occupancy
