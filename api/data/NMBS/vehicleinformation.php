@@ -261,7 +261,7 @@ class vehicleinformation
                 $stops[$j]->canceled = $departureCanceled;
 
                 // Check if it is in less than 2 days and MongoDB is available
-                if (!$fast && $isOccupancyDate && isset($occupancyArr)) {
+                if ($isOccupancyDate && isset($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
