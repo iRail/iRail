@@ -249,7 +249,7 @@ class vehicleinformation
                 if ($pointInVehicle != 0) {
                     $pointInVehicle += 1;
                 }
-                if (!$fast) {
+                if ($fast != 'true') {
                     $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
                 }
                 $stops[$j]->platform = new Platform();
@@ -261,7 +261,7 @@ class vehicleinformation
                 $stops[$j]->canceled = $departureCanceled;
 
                 // Check if it is in less than 2 days and MongoDB is available
-                if (!$fast && $isOccupancyDate && isset($occupancyArr)) {
+                if ($fast != 'true' && $isOccupancyDate && isset($occupancyArr)) {
                     // Add occupancy
                     $occupancyOfStationFound = false;
                     $k = 0;
