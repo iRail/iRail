@@ -161,9 +161,10 @@ class liveboard
             }
             
             $time = '00d'.(string) $journey['fpTime'].':00';
-            preg_match("/(..)\/(..)\/(..)/si", (string) $journey['fpDate'], $dayxplode);
+            
+            preg_match("/(..)\/(..)\/..(..)/si", (string) $journey['fpDate'], $dayxplode);
             $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
-
+            
             $unixtime = tools::transformtime($time, $dateparam);
 
             if ($fast) {
@@ -181,7 +182,7 @@ class liveboard
             $vehicle = 'http://irail.be/vehicle/'.$veh;
 
             $date = date('Ymd');
-
+                       
             $nodes[$i] = new DepartureArrival();
             $nodes[$i]->delay = $delay;
             $nodes[$i]->station = $stationNode;
