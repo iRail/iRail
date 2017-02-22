@@ -26,10 +26,10 @@ class liveboard
         $request->setStation($dataroot->station);
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
-            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'arr');
+            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'arr');
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null);
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
-            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getLang(), 'dep');
+            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'dep');
             $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station);
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
@@ -43,7 +43,7 @@ class liveboard
      * @param $timeSel
      * @return string
      */
-    private static function fetchData($station, $time, $lang, $timeSel)
+    private static function fetchData($station, $time, $date, $lang, $timeSel)
     {
         include '../includes/getUA.php';
         $request_options = [
@@ -62,7 +62,12 @@ class liveboard
         $scrapeUrl .= $lang.'?start=yes';
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
-        $scrapeUrl .= '&time='.$time.'&date='.date('d').'.'.date('m').'.'.date('Y').'&inputTripelId='.urlencode('A=1@O=@X=@Y=@U=80@L='.$hafasid.'@B=1@p=@').'&maxJourneys=50&boardType='.$timeSel.'&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000';
+
+        $day = substr($date, 6, 2);
+        $month = substr($date, 4, 2);
+        $year = substr($date, 0, 4);
+
+        $scrapeUrl .= '&time='.$time.'&date='.$day.'.'.$month.'.'.$year.'&inputTripelId='.urlencode('A=1@O=@X=@Y=@U=80@L='.$hafasid.'@B=1@p=@').'&maxJourneys=50&boardType='.$timeSel.'&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeUrl);
