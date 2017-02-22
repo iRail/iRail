@@ -63,9 +63,9 @@ class liveboard
         $hafasid = $station->getHID();
         //important TODO: date parameters - parse from URI first
 
-        $day = substr($date,6,2);
-        $month = substr($date,4,2);
-        $year = substr($date,0,4);
+        $day = substr($date, 6, 2);
+        $month = substr($date, 4, 2);
+        $year = substr($date, 0, 4);
 
         $scrapeUrl .= '&time='.$time.'&date='.$day.'.'.$month.'.'.$year.'&inputTripelId='.urlencode('A=1@O=@X=@Y=@U=80@L='.$hafasid.'@B=1@p=@').'&maxJourneys=50&boardType='.$timeSel.'&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000';
 
