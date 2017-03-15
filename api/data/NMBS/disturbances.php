@@ -72,7 +72,9 @@ class disturbances
             $disturbance->description = preg_replace('/<.*?>/','',$disturbance->description);
 
             $disturbance->link = trim((String) $item->link,"\r\n ");
-            $disturbance->pubdate = trim((String) $item->pubDate,"\r\n ");
+
+            $pubdate = $item->pubDate;
+            $disturbance->timestamp = strtotime($pubdate);
 
             $disturbances[] = $disturbance;
         }
