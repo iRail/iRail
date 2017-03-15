@@ -11,7 +11,7 @@ class disturbances
     {
         $xml = self::fetchData($request->getLang());
         $data = self::parseData($xml);
-        $dataroot->disturbances = $data;
+        $dataroot->disturbance = $data;
     }
 
     /**
