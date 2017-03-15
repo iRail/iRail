@@ -65,13 +65,13 @@ class disturbances
             $disturbance = new stdClass();
 
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
-            $disturbance->title = trim((String) $item->title,"\r\n ");
-            $disturbance->description = trim((String) $item->description,"\r\n ");
+            $disturbance->title = trim((String) $item->title, "\r\n ");
+            $disturbance->description = trim((String) $item->description, "\r\n ");
 
             // Trim the description from any html
-            $disturbance->description = preg_replace('/<.*?>/','',$disturbance->description);
+            $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
 
-            $disturbance->link = trim((String) $item->link,"\r\n ");
+            $disturbance->link = trim((String) $item->link, "\r\n ");
 
             $pubdate = $item->pubDate;
             $disturbance->timestamp = strtotime($pubdate);
