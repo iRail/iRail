@@ -4,6 +4,9 @@ use Dotenv\Dotenv;
 
 class configurationTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @group testDotEnvVars
+     */
     public function testDotEnvVars()
     {
         $dotenv = new Dotenv(dirname(__DIR__));
