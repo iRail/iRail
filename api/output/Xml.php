@@ -116,7 +116,7 @@ class Xml extends Printer
             echo "<$key formatted=\"$form\">$val";
         } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
             echo "<$key>";
-            if ($key == 'header' || $key == 'description') {
+            if ($key == 'header' || $key == 'description' || $key == 'link') {
                 echo "<![CDATA[";
             }
             echo $val;
@@ -129,7 +129,7 @@ class Xml extends Printer
      */
     public function endElement($name)
     {
-        if ($name == 'header' || $name == 'description') {
+        if ($name == 'header' || $name == 'description' || $name == 'link') {
             echo ']]>';
         }
         
