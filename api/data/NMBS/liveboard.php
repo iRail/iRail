@@ -27,10 +27,10 @@ class liveboard
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'arr');
-            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null);
+            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null, $request->getFormat());
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'dep');
-            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station);
+            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station, $request->getFormat());
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
@@ -90,7 +90,7 @@ class liveboard
      * @param bool $showAlerts
      * @return array
      */
-    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false, $station)
+    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false, $station, $format)
     {
         //clean XML
         if (class_exists('tidy', false)) {
@@ -232,6 +232,15 @@ class liveboard
                     $alert = new Alert();
                     $alert->header = trim($himmessage[$a]['header']);
                     $alert->description = trim($himmessage[$a]['lead']);
+
+                    // Keep <a> elements, those are valueable
+                    $alert->description = strip_tags($alert->description, '<a>');
+
+                    // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
+                    if ($format == 'json') {
+                        $alert->description = trim(json_encode($alert->description), '"');
+                    }
+
                     array_push($alerts, $alert);
                 }
                 $nodes[$i]->alert = $alerts;
