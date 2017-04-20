@@ -41,8 +41,8 @@ class vehicleinformation
 
 
         $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
-        if ($request->getAlerts() && self::getAlerts($html)) {
-            $dataroot->alert = self::getAlerts($html);
+        if ($request->getAlerts() && self::getAlerts($html, $request->getFormat())) {
+            $dataroot->alert = self::getAlerts($html, $request->getFormat());
         }
 
         $pointInVehicle = strrpos($request->getVehicleId(), '.');
@@ -299,7 +299,7 @@ class vehicleinformation
      * @return null|Alerts
      * @throws Exception
      */
-    private static function getAlerts($html)
+    private static function getAlerts($html, $format)
     {
         $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
         if (! is_object($test)) {
@@ -322,6 +322,14 @@ class vehicleinformation
             $alert = new Alert();
             $alert->header = trim($header);
             $alert->description = trim($alertelements[1]);
+
+            // Keep <a> elements, those are valueable
+            $alert->description = strip_tags($alert->description, '<a>');
+
+            // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
+            if ($format == 'json') {
+                $alert->description = trim(json_encode($alert->description), '"');
+            }
 
             array_push($alerts, $alert);
         }

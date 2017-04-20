@@ -51,7 +51,7 @@ class connections
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
         $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
-        $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts);
+        $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts, $request->getFormat());
 
         $requestedDate = DateTime::createFromFormat('Ymd', $date);
         $now = new DateTime();
@@ -170,7 +170,7 @@ class connections
         return $response;
     }
 
-    public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false)
+    public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false, $format)
     {
         $xml = new SimpleXMLElement($serverData);
         $connection = [];
@@ -245,6 +245,15 @@ class connections
                         $alert = new Alert();
                         $alert->header = trim($info['header']);
                         $alert->description = trim(addslashes($info['text']));
+
+                        // Keep <a> elements, those are valueable
+                        $alert->description = strip_tags($alert->description, '<a>');
+
+                        // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
+                        if ($format == 'json') {
+                            $alert->description = trim(json_encode($alert->description), '"');
+                        }
+
                         array_push($alerts, $alert);
                     }
                     $connection[$i]->alert = $alerts;
