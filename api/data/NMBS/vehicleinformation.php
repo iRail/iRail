@@ -160,6 +160,15 @@ class vehicleinformation
                     $departureCanceled = true;
                 }
 
+                // Departed
+                $departureImgNode = $node->children[0]->children[0];
+
+                if (strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
+                    $departed = true;
+                } else {
+                    $departed = false;
+                }
+
                 // Time
                 $timenodearray = $node->children[1]->find('span');
                 $arrivalTime = reset($timenodearray[0]->nodes[0]->_);
@@ -259,6 +268,7 @@ class vehicleinformation
                 $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
+                $stops[$j]->left = $departed;
 
                 // Check if it is in less than 2 days and MongoDB is available
                 if ($fast != 'true' && $isOccupancyDate && isset($occupancyArr)) {
