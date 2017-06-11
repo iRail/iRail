@@ -140,7 +140,7 @@ class vehicleinformation
 
                 $arrivalDelay = trim($delayelements[0]);
                 $arrivalCanceled = false;
-                if (!$arrivalDelay) {
+                if (! $arrivalDelay) {
                     $arrivalDelay = 0;
                 } elseif (stripos($arrivalDelay, '+') !== false) {
                     $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
@@ -151,7 +151,7 @@ class vehicleinformation
 
                 $departureDelay = trim($delayelements[1]);
                 $departureCanceled = false;
-                if (!$departureDelay) {
+                if (! $departureDelay) {
                     $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
                 } elseif (stripos($departureDelay, '+') !== false) {
                     $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
@@ -161,11 +161,25 @@ class vehicleinformation
                 }
 
                 // Departed
-                $departureImgNode = $node->children[0]->children[0];
+                // Based on timeline images on the NMBS site.
+                // A filled timeline, meaning arrived/departed, has an image ending in "reported.png".
+                // Example:
+                // <img src="/as/hafas-res/img/pearl/realtime_pearl_middle_arr_dep_reported.png" alt="" title="" width="20" height="44">
+                if (isset($node->children[0]) && isset($node->children[0]->children[0])) {
+                    $departureImgNode = $node->children[0]->children[0];
 
-                if (strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
-                    $departed = true;
+                    // Check if this element has a src attribute.
+                    if (key_exists('src', $departureImgNode->attr) &&
+                        strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
+                        $departed = true;
+                    } else {
+                        // Default to false if we don't have any information. This keeps API output consistent.
+                        // (Always include the field)
+                        $departed = false;
+                    }
                 } else {
+                    // Default to false if we don't have any information. This keeps API output consistent.
+                    // (Always include the field)
                     $departed = false;
                 }
 
