@@ -140,7 +140,7 @@ class vehicleinformation
 
                 $arrivalDelay = trim($delayelements[0]);
                 $arrivalCanceled = false;
-                if (!$arrivalDelay) {
+                if (! $arrivalDelay) {
                     $arrivalDelay = 0;
                 } elseif (stripos($arrivalDelay, '+') !== false) {
                     $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
@@ -151,13 +151,36 @@ class vehicleinformation
 
                 $departureDelay = trim($delayelements[1]);
                 $departureCanceled = false;
-                if (!$departureDelay) {
+                if (! $departureDelay) {
                     $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
                 } elseif (stripos($departureDelay, '+') !== false) {
                     $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
                 } else {
                     $departureDelay = 0;
                     $departureCanceled = true;
+                }
+
+                // Departed
+                // Based on timeline images on the NMBS site.
+                // A filled timeline, meaning arrived/departed, has an image ending in "reported.png".
+                // Example:
+                // <img src="/as/hafas-res/img/pearl/realtime_pearl_middle_arr_dep_reported.png" alt="" title="" width="20" height="44">
+                if (isset($node->children[0]) && isset($node->children[0]->children[0])) {
+                    $departureImgNode = $node->children[0]->children[0];
+
+                    // Check if this element has a src attribute.
+                    if (key_exists('src', $departureImgNode->attr) &&
+                        strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
+                        $departed = true;
+                    } else {
+                        // Default to false if we don't have any information. This keeps API output consistent.
+                        // (Always include the field)
+                        $departed = false;
+                    }
+                } else {
+                    // Default to false if we don't have any information. This keeps API output consistent.
+                    // (Always include the field)
+                    $departed = false;
                 }
 
                 // Time
@@ -259,6 +282,7 @@ class vehicleinformation
                 $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
+                $stops[$j]->left = $departed;
 
                 // Check if it is in less than 2 days and MongoDB is available
                 if ($fast != 'true' && $isOccupancyDate && isset($occupancyArr)) {
