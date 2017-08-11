@@ -22,7 +22,8 @@
 */
 include 'getVersion.php';
 // add trailing "-" to prevent RH/Apache/NMBS error: HTTP header: invalid date
-$irailAgent = "iRail.be by Open Knowledge Belgium (https://hello.irail.be); Git version: $irailVersion -";
+// $irailAgent = "iRail.be by Open Knowledge Belgium (https://hello.irail.be); Git version: $irailVersion -";
+$irailAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36";
 
 // result example:
 // 85.12.6.130 - - [20/Sep/2010:14:57:58 +0200] "POST / HTTP/1.1" 200 119564 "http://irail.be/" "iRail.be by Project iRail (http://yeri.be/dx); Git version: 902542a"
