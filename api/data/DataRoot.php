@@ -40,13 +40,6 @@ class DataRoot
         $this->rootname = $rootname;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPrinter()
-    {
-        return $printer;
-    }
 
     /**
      * Print everything.
@@ -66,13 +59,29 @@ class DataRoot
 
     /**
      * @param $request
-     * @param $SYSTEM
+     * Print everything.
+     */
+    public function printAll()
+    {
+        $this->printer->printAll();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRootname()
+    {
+        return $this->rootname;
+    }
+
+    /**
+     * @param Request $request
      * @throws Exception
      */
-    public function fetchData($request, $SYSTEM)
+    public function fetchData($request)
     {
         try {
-            include_once "data/$SYSTEM/$this->rootname.php";
+            include_once "data/NMBS/$this->rootname.php";
             $rn = $this->rootname;
             $rn::fillDataRoot($this, $request);
         } catch (Exception $e) {
@@ -81,7 +90,13 @@ class DataRoot
             } elseif ($e->getCode() == '300') {
                 throw new Exception($e->getMessage(), 300);
             } else {
-                throw new Exception('Could not get data. Please report this issue at https://github.com/irail/irail/issues/new', 500);
+                if ($request->isDebug()) {
+                    throw new Exception('Could not get data: ' . $e->getMessage() . '. Please report this issue at https://github.com/irail/irail/issues/new',
+                      500);
+                } else {
+                    throw new Exception('Could not get data. Please report this issue at https://github.com/irail/irail/issues/new',
+                      500);
+                }
             }
         }
     }
