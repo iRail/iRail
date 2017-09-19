@@ -9,9 +9,20 @@ class disturbances
      */
     public static function fillDataRoot($dataroot, $request)
     {
-        $xml = self::fetchData($request->getLang());
+        $nmbsCacheKey = getNmbsCacheKey($request->getLang());
+        $xml = Tools::getCachedObject($nmbsCacheKey);
+        if ($xml === false) {
+            $xml = self::fetchData($request->getLang());
+            Tools::setCachedObject($nmbsCacheKey, $xml);
+        }
+
         $data = self::parseData($xml);
         $dataroot->disturbance = $data;
+    }
+
+    public static function getNmbsCacheKey($lang)
+    {
+        return 'NMBSDisturbances.' . $lang;
     }
 
     /**

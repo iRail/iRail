@@ -50,7 +50,16 @@ class connections
     private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $showAlerts, $timeSel = 'depart', $typeOfTransport = 'trains', $request)
     {
         $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
-        $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
+
+        $nmbsCacheKey = self::getNmbsCacheKey($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel,
+            $typeOfTransport);
+        $xml = Tools::getCachedObject($nmbsCacheKey);
+
+        if ($xml === false) {
+            $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
+            Tools::setCachedObject($nmbsCacheKey, $xml);
+        }
+
         $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts, $request->getFormat());
 
         $requestedDate = DateTime::createFromFormat('Ymd', $date);
@@ -62,6 +71,21 @@ class connections
         } else {
             return self::addOccupancy($connections, $date);
         }
+    }
+
+    public static function getNmbsCacheKey($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
+    {
+        return join('.', [
+            'NMBSConnections',
+            $idfrom,
+            $idto,
+            $lang,
+            str_replace(':', '.', $time),
+            $date,
+            $timeSel,
+            $results,
+            $typeOfTransport,
+        ]);
     }
 
     /**
