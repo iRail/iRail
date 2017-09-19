@@ -141,14 +141,14 @@ class APICall
     /**
      * Writes an entry to the log in level "INFO"
      */
-     protected function writeLog()
-     {
-         $query = $this->getQuery();
-         $this->log->addInfo($this->resourcename, [
+    protected function writeLog()
+    {
+        $query = $this->getQuery();
+        $this->log->addInfo($this->resourcename, [
              'querytype' => $this->resourcename,
              'querytime' => date('c'),
              'query' => $query,
              'user_agent' => $_SERVER['HTTP_USER_AGENT'],
         ]);
-     }
+    }
 }
