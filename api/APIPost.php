@@ -114,14 +114,14 @@ class APIPost
                             'occupancy' => $this->postData->occupancy
                         );
 
-                        // Add optional to parameters
-                        if (!is_null($this->postData->to)) {
-                            $postInfo['to'] = $this->postData->to;
-                        }
+                    // Add optional to parameters
+                    if (!is_null($this->postData->to)) {
+                        $postInfo['to'] = $this->postData->to;
+                    }
 
-                        // Log the post in the iRail log file
-                        //$postInfo['ip'] = $ip;
-                        $this->writeLog($postInfo);
+                    // Log the post in the iRail log file
+                    //$postInfo['ip'] = $ip;
+                    $this->writeLog($postInfo);
 
                     OccupancyDao::processFeedback($postInfo, $epoch);
                     /*} else {
@@ -190,13 +190,13 @@ class APIPost
     /**
      * Writes an entry to the log in level "INFO"
      */
-     private function writeLog($postInfo)
-     {
-         $this->log->addInfo($this->resourcename, [
+    private function writeLog($postInfo)
+    {
+        $this->log->addInfo($this->resourcename, [
              'querytype' => $this->resourcename,
              'querytime' => date('c'),
              'post' => $postInfo,
              'user_agent' => $_SERVER['HTTP_USER_AGENT']
         ]);
-     }
+    }
 }

@@ -61,7 +61,6 @@ class liveboard
         $scrapeUrl = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/stboard.exe/';
         $scrapeUrl .= $lang.'?start=yes';
         $hafasid = $station->getHID();
-        //important TODO: date parameters - parse from URI first
 
         $day = substr($date, 6, 2);
         $month = substr($date, 4, 2);
@@ -98,9 +97,12 @@ class liveboard
             $tidy->parseString($xml, ['input-xml' => true, 'output-xml' => true], 'utf8');
             $tidy->cleanRepair();
             $xml = $tidy;
+        } else {
+            throw new Exception("PHP Tidy is required to clean the data sources.", 500);
         }
+
         $data = new SimpleXMLElement($xml);
-        $hour = substr($time, 0, 2);
+
         $data = $data->StationTable;
 
         //<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
