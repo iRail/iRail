@@ -453,7 +453,7 @@ class vehicleinformation
 
     private static function trainDrives($html)
     {
-        return $html && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
+        return $html && is_object($html->getElementById('HFSResult')) && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
     }
 
     private static function parseCorrectUrl($html)
