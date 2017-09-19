@@ -72,7 +72,8 @@ class Request
         return 'EN';
     }
 
-    public function isDebug(){
+    public function isDebug()
+    {
         return $this->debug;
     }
 }
