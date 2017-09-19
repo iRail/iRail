@@ -26,14 +26,44 @@ class liveboard
         $request->setStation($dataroot->station);
         
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
-            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'arr');
+            $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
+                $request->getLang(), 'arr');
+            $html = Tools::getCachedObject($nmbsCacheKey);
+
+            if ($html === false) {
+                $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(),
+                    $request->getLang(), 'arr');
+                Tools::setCachedObject($nmbsCacheKey, $html);
+            }
+
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null, $request->getFormat());
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
-            $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(), $request->getLang(), 'dep');
+            $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
+                $request->getLang(), 'dep');
+            $html = Tools::getCachedObject($nmbsCacheKey);
+
+            if ($html === false) {
+                $html = self::fetchData($dataroot->station, $request->getTime(), $request->getDate(),
+                    $request->getLang(), 'dep');
+                Tools::setCachedObject($nmbsCacheKey, $html);
+            }
+
             $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station, $request->getFormat());
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
+    }
+
+    public static function getNmbsCacheKey($station, $time, $date, $lang, $timeSel)
+    {
+        return join('.', [
+            'NMBSLiveboard',
+            $station->id,
+            str_replace(':', '.', $time),
+            $date,
+            $timeSel,
+            $lang,
+        ]);
     }
 
     /**
@@ -51,7 +81,7 @@ class liveboard
             'timeout' => '30',
             'useragent' => $irailAgent,
         ];
-        $body = '';
+
         /*
           For example, run this in command line:
 

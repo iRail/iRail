@@ -58,13 +58,12 @@ class DataRoot
 
     /**
      * @param Request $request
-     * @param $SYSTEM
      * @throws Exception
      */
-    public function fetchData($request, $SYSTEM)
+    public function fetchData($request)
     {
         try {
-            include_once "data/$SYSTEM/$this->rootname.php";
+            include_once "data/NMBS/$this->rootname.php";
             $rn = $this->rootname;
             $rn::fillDataRoot($this, $request);
         } catch (Exception $e) {

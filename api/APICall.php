@@ -81,7 +81,7 @@ class APICall
     public function executeCall()
     {
         try {
-            $this->dataRoot->fetchData($this->request, $this->request->getSystem());
+            $this->dataRoot->fetchData($this->request);
             $this->dataRoot->printAll();
             $this->writeLog();
         } catch (Exception $e) {

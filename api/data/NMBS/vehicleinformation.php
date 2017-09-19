@@ -25,7 +25,13 @@ class vehicleinformation
         $lang = $request->getLang();
         $date = $request->getDate();
 
-        $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+        $nmbsCacheKey = self::getNmbsCacheKey($request->getVehicleId(), $date, $lang);
+        $serverData = Tools::getCachedObject($nmbsCacheKey);
+        if ($serverData === false) {
+            $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+            Tools::setCachedObject($nmbsCacheKey, $serverData);
+        }
+
         $html = str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
@@ -62,6 +68,15 @@ class vehicleinformation
         $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
     }
 
+    public static function getNmbsCacheKey($id, $date, $lang)
+    {
+        return join('.', [
+            'NMBSVehicle',
+            $id,
+            $date,
+            $lang,
+        ]);
+    }
     /**
      * @param $id
      * @param $lang

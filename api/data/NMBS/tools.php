@@ -1,14 +1,23 @@
 <?php
+use Cache\Namespaced\NamespacedCachePool;
+
 /** Copyright (C) 2011 by iRail vzw/asbl
  * This is a class with static tools for you to use on the NMBS scraper. It contains stuff that is needed by all other classes.
  */
 class tools
 {
+
     /**
-      * @param <type> $time -> in 00d15:24:00
-      * @param <type> $date -> in 20100915
-      * @return seconds since the Unix epoch
-      */
+     * @var $cache Cache\Adapter\Common\AbstractCachePool cache pool which will be used throughout the application.
+     */
+    private static $cache;
+    const cache_TTL = 15;
+
+    /**
+     * @param <type> $time -> in 00d15:24:00
+     * @param <type> $date -> in 20100915
+     * @return seconds since the Unix epoch
+     */
     public static function transformTime($time, $date)
     {
         date_default_timezone_set('Europe/Brussels');
@@ -53,7 +62,7 @@ class tools
         if ($minutes >= 45) {
             $minutes = ($minutes + 15) - 60;
             if ($minutes < 10) {
-                $minutes = '0'.$minutes;
+                $minutes = '0' . $minutes;
             }
             $hours++;
             if ($hours > 23) {
@@ -63,6 +72,61 @@ class tools
             $minutes += 15;
         }
 
-        return $hours.':'.$minutes;
+        return $hours . ':' . $minutes;
+    }
+
+    /**
+     * @return \Cache\Adapter\Common\AbstractCachePool the cachePool for this application
+     */
+    private static function createCachePool()
+    {
+        if (self::$cache == null) {
+            // Try to use APC when available
+            if (extension_loaded('apc')) {
+                self::$cache = new \Cache\Adapter\Apcu\ApcuCachePool();
+            } else {
+                // Fall back to array cache
+                self::$cache = new \Cache\Adapter\PHPArray\ArrayCachePool();
+            }
+        }
+
+        return self::$cache;
+    }
+
+
+    /**
+     * Get an item from the cache.
+     *
+     * @param String $key The key to search for.
+     * @return bool|object The cached object if found. If not found, false.
+     */
+    public static function getCachedObject($key)
+    {
+        self::createCachePool();
+
+        if (self::$cache->hasItem($key)) {
+            return self::$cache->getItem($key)->get();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Store an item in the cache
+     *
+     * @param String        $key   The key to store the object under
+     * @param object|string $value The object to store
+     */
+    public static function setCachedObject($key, $value)
+    {
+        self::createCachePool();
+        $item = self::$cache->getItem($key);
+
+        $item->set($value);
+        if (self::cache_TTL > 0) {
+            $item->expiresAfter(self::cache_TTL);
+        }
+
+        self::$cache->save($item);
     }
 }
