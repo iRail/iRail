@@ -37,7 +37,21 @@ class ConnectionsRequest extends Request
 
         // reform date and time to wanted structure for hafas and railtime
         preg_match('/(..)(..)(..)/si', $this->date, $m);
-        $this->date = '20'.$m[3].$m[2].$m[1];
+
+        if (count($m) > 3) {
+            $this->date = '20'.$m[3].$m[2].$m[1];
+            if ($m[2] > 12 || $m[1] > 31 || $m[2] == 0 || $m[1] == 0){
+                throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+            }
+        } elseif (count($m) > 2) {
+            $this->date = date('Y').$m[2].$m[1];
+            if ($m[2] > 12 || $m[1] > 31 || $m[2] == 0 || $m[1] == 0){
+                throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+            }
+        } else {
+            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+        }
+
         preg_match('/(..)(..)/si', $this->time, $m);
         $this->time = $m[1].':'.$m[2];
     }
