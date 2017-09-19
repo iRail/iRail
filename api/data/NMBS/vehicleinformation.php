@@ -25,7 +25,13 @@ class vehicleinformation
         $lang = $request->getLang();
         $date = $request->getDate();
 
-        $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+        $nmbsCacheKey = self::getNmbsCacheKey($request->getVehicleId(), $date, $lang);
+        $serverData = Tools::getCachedObject($nmbsCacheKey);
+        if ($serverData === false) {
+            $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+            Tools::setCachedObject($nmbsCacheKey, $serverData);
+        }
+
         $html = str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
@@ -62,6 +68,15 @@ class vehicleinformation
         $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
     }
 
+    public static function getNmbsCacheKey($id, $date, $lang)
+    {
+        return join('.', [
+            'NMBSVehicle',
+            $id,
+            $date,
+            $lang,
+        ]);
+    }
     /**
      * @param $id
      * @param $lang
@@ -208,17 +223,23 @@ class vehicleinformation
                 }
 
                 // Platform
-                $platformnodearray = $node->children[5]->find('span');
-                if (count($platformnodearray) > 0) {
-                    $normalplatform = 0;
-                    $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
+                // This is not always included, for example BUSxxxx vehicles don't have platforms
+                if (count($node->children) > 5) {
+                    $platformnodearray = $node->children[5]->find('span');
+                    if (count($platformnodearray) > 0) {
+                        $normalplatform = 0;
+                        $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
+                    } else {
+                        $normalplatform = 1;
+                        $platform = trim(reset($node->children[5]->nodes[0]->_));
+                    }
+
+                    if ($platform == "&nbsp;") {
+                        $platform = '?'; // Indicate to end user platform is unknown
+                    }
                 } else {
+                    $platform = "?";
                     $normalplatform = 1;
-                    $platform = trim(reset($node->children[5]->nodes[0]->_));
-                }
-                
-                if ($platform == "&nbsp;") {
-                    $platform = '?'; // Indicate to end user platform is unknown
                 }
 
                 if (isset($node->children[3]->children[0])) {
