@@ -104,17 +104,11 @@ class tools
     {
         self::createCachePool();
 
-        try {
-            if (self::$cache->hasItem($key)) {
-                return self::$cache->getItem($key)->get();
-            } else {
-                return false;
-            }
-        } catch (Exception $e) {
-            echo($e);
+        if (self::$cache->hasItem($key)) {
+            return self::$cache->getItem($key)->get();
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     /**
