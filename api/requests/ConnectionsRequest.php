@@ -35,22 +35,23 @@ class ConnectionsRequest extends Request
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['from', 'to']);
 
-        // reform date and time to wanted structure for hafas and railtime
-        preg_match('/(..)(..)(..)/si', $this->date, $m);
-
-        if (count($m) > 3) {
-            $this->date = '20'.$m[3].$m[2].$m[1];
-            if ($m[2] > 12 || $m[1] > 31 || $m[2] == 0 || $m[1] == 0){
-                throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
-            }
-        } elseif (count($m) > 2) {
-            $this->date = date('Y').$m[2].$m[1];
-            if ($m[2] > 12 || $m[1] > 31 || $m[2] == 0 || $m[1] == 0){
-                throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
-            }
+        // reform date and time to wanted structure for hafas and railtime (Ymd)
+        if (strlen($this->date) == 6) {
+            $y = '20' . substr($this->date, 4, 2);
+        } elseif (strlen($this->date) == 4) {
+            $y = date('Y');
         } else {
             throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
         }
+
+        $d = substr($this->date, 0, 2);
+        $m = substr($this->date, 2, 2);
+        if ($d > 31 || $m > 12) {
+            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+        }
+
+        // Store as Ymd
+        $this->date = $y . $m . $d;
 
         preg_match('/(..)(..)/si', $this->time, $m);
         $this->time = $m[1].':'.$m[2];
