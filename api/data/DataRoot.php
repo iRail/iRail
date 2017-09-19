@@ -40,25 +40,7 @@ class DataRoot
         $this->rootname = $rootname;
     }
 
-
     /**
-     * Print everything.
-     */
-    public function printAll()
-    {
-        $this->printer->printAll();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRootname()
-    {
-        return $this->rootname;
-    }
-
-    /**
-     * @param $request
      * Print everything.
      */
     public function printAll()
