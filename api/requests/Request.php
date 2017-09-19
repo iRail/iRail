@@ -10,11 +10,10 @@
 class Request
 {
     public static $SUPPORTED_LANGUAGES = ['EN', 'NL', 'FR', 'DE'];
-    public static $SUPPORTED_SYSTEMS = ['NMBS'];
 
     private $format = 'xml';
     private $lang = 'EN';
-    private $system = 'NMBS';
+    protected $debug = false;
 
     /**
      * @param  array , $array
@@ -48,7 +47,6 @@ class Request
     {
         $this->setGetVar('format', 'xml');
         $this->setGetVar('lang', 'EN');
-        $this->setGetVar('system', 'NMBS');
         $this->setGetVar('debug', false);
     }
 
@@ -74,17 +72,7 @@ class Request
         return 'EN';
     }
 
-    /**
-     * @return string
-     */
-    public function getSystem()
-    {
-        $this->system = strtoupper($this->system);
-
-        if (in_array($this->system, self::$SUPPORTED_SYSTEMS)) {
-            return $this->system;
-        } else {
-            return 'NMBS';
-        }
+    public function isDebug(){
+        return $this->debug;
     }
 }

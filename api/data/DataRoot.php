@@ -73,7 +73,7 @@ class DataRoot
           } elseif ($e->getCode() == '300') {
               throw new Exception($e->getMessage(), 300);
           } else {
-              if ($request->debug) {
+              if ($request->isDebug()) {
                   throw new Exception('Could not get data: ' . $e->getMessage() . '. Please report this issue at https://github.com/irail/irail/issues/new',
                       500);
               } else {
