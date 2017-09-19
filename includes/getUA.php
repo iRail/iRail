@@ -20,9 +20,11 @@
 
     source available at http://github.com/Tuinslak/iRail
 */
-include 'getVersion.php';
+
 // add trailing "-" to prevent RH/Apache/NMBS error: HTTP header: invalid date
 // $irailAgent = "iRail.be by Open Knowledge Belgium (https://hello.irail.be); Git version: $irailVersion -";
+
+// Fake Mozilla Firefox since the NMBS blocked our user agent without any communication.
 $irailAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36";
 
 // result example:

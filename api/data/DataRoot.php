@@ -41,14 +41,6 @@ class DataRoot
     }
 
     /**
-     * @return mixed
-     */
-    public function getPrinter()
-    {
-        return $printer;
-    }
-
-    /**
      * Print everything.
      */
     public function printAll()
@@ -65,7 +57,7 @@ class DataRoot
     }
 
     /**
-     * @param $request
+     * @param Request $request
      * @param $SYSTEM
      * @throws Exception
      */
@@ -81,7 +73,13 @@ class DataRoot
             } elseif ($e->getCode() == '300') {
                 throw new Exception($e->getMessage(), 300);
             } else {
-                throw new Exception('Could not get data. Please report this issue at https://github.com/irail/irail/issues/new', 500);
+                if ($request->isDebug()) {
+                    throw new Exception('Could not get data: ' . $e->getMessage() . '. Please report this issue at https://github.com/irail/irail/issues/new',
+                      500);
+                } else {
+                    throw new Exception('Could not get data. Please report this issue at https://github.com/irail/irail/issues/new',
+                      500);
+                }
             }
         }
     }
