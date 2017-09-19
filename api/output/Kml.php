@@ -23,6 +23,7 @@ class Kml extends Printer
     {
         header('Access-Control-Allow-Origin: *');
         header('Content-Type: application/vnd.google-earth.kml+xml');
+        header('Cache-Control: public, max-age=15');
         echo '<?xml version="1.0" encoding="UTF-8"?>';
     }
 
