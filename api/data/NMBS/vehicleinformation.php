@@ -208,17 +208,23 @@ class vehicleinformation
                 }
 
                 // Platform
-                $platformnodearray = $node->children[5]->find('span');
-                if (count($platformnodearray) > 0) {
-                    $normalplatform = 0;
-                    $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
+                // This is not always included, for example BUSxxxx vehicles don't have platforms
+                if (count($node->children) > 5) {
+                    $platformnodearray = $node->children[5]->find('span');
+                    if (count($platformnodearray) > 0) {
+                        $normalplatform = 0;
+                        $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
+                    } else {
+                        $normalplatform = 1;
+                        $platform = trim(reset($node->children[5]->nodes[0]->_));
+                    }
+
+                    if ($platform == "&nbsp;") {
+                        $platform = '?'; // Indicate to end user platform is unknown
+                    }
                 } else {
+                    $platform = "?";
                     $normalplatform = 1;
-                    $platform = trim(reset($node->children[5]->nodes[0]->_));
-                }
-                
-                if ($platform == "&nbsp;") {
-                    $platform = '?'; // Indicate to end user platform is unknown
                 }
 
                 if (isset($node->children[3]->children[0])) {
