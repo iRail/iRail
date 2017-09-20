@@ -26,38 +26,38 @@ class OccupancyDao
         date_default_timezone_set('Europe/Brussels');
         $dateParameter = substr($feedback['date'], -2) . substr($feedback['date'], -4, 2) . substr($feedback['date'], -6, 2);
 
-        // Get information on this vehicle from the API
-        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']) . '&date=' . $dateParameter);
+        /*
+         // If a destination is set, update the load for all stations inbetween. If not, only update in the given station.
+         if (isset($feedback['to'])) {
+             // Get information on this vehicle from the API
+             $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']) . '&date=' . $dateParameter);
 
-        // If a destination is set, update the load for all stations inbetween. If not, only update in the given station.
-        if (isset($feedback['to'])) {
+             // Whether or not the station is inbetween the from and to station(including from).
+             $stationIsInbetween = false;
 
-            // Whether or not the station is inbetween the from and to station(including from).
-            $stationIsInbetween = false;
+             // Loop through all stops
+             foreach ($stops->stop as $stop) {
+                 if ($stop->station['URI'] == $feedback['from']) {
+                     $stationIsInbetween = true;
+                 }
+                 if ($stop->station['URI'] == $feedback['to']) {
+                     $stationIsInbetween = false;
+                 }
 
-            // Loop through all stops
-            foreach ($stops->stop as $stop) {
-                if ($stop->station['URI'] == $feedback['from']) {
-                    $stationIsInbetween = true;
-                }
-                if ($stop->station['URI'] == $feedback['to']) {
-                    $stationIsInbetween = false;
-                }
-
-                if ($stationIsInbetween) {
-                    $feedbackInBetween = $feedback;
-                    // Set the from station (the station for which we are reporting) to the current station inbetween
-                    $feedbackInBetween['from'] = (string) $stop->station['URI'];
-                    // We store this data by id, but an id also contains the station for which we are reporting. Replace to resolve this.
-                    // WARNING: this will break when the id format changes!
-                    $feedbackInBetween['connection'] = str_replace(substr(basename($feedback['from']),2), substr(basename($feedbackInBetween['from']),2),
-                        $feedbackInBetween['connection']);
-                    self::processFeedbackOneConnection($feedbackInBetween);
-                }
-            }
-        } else {
+                 if ($stationIsInbetween) {
+                     $feedbackInBetween = $feedback;
+                     // Set the from station (the station for which we are reporting) to the current station inbetween
+                     $feedbackInBetween['from'] = (string) $stop->station['URI'];
+                     // We store this data by id, but an id also contains the station for which we are reporting. Replace to resolve this.
+                     // WARNING: this will break when the id format changes!
+                     $feedbackInBetween['connection'] = str_replace(substr(basename($feedback['from']),2), substr(basename($feedbackInBetween['from']),2),
+                         $feedbackInBetween['connection']);
+                     self::processFeedbackOneConnection($feedbackInBetween);
+                 }
+             }
+         } else {*/
             self::processFeedbackOneConnection($feedback);
-        }
+        /*}*/
     }
 
     private static function getVehicleStopsInfo($vehicleURL)
