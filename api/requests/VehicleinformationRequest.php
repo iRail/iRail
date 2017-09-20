@@ -28,13 +28,13 @@ class VehicleinformationRequest extends Request
         } elseif (strlen($this->date) == 4) {
             $y = date('y');
         } else {
-            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.", 400);
         }
 
         $d = substr($this->date, 0, 2);
         $m = substr($this->date, 2, 2);
         if ($d > 31 || $m > 12) {
-            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.",400);
+            throw new Exception("Invalid date supplied! Date should be in a ddmmyy or ddmm format.", 400);
         }
 
         // Store as Ymd
