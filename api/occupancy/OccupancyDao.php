@@ -47,10 +47,10 @@ class OccupancyDao
                 if ($stationIsInbetween) {
                     $feedbackInBetween = $feedback;
                     // Set the from station (the station for which we are reporting) to the current station inbetween
-                    $feedbackInBetween['from'] = $stop->station['URI'];
+                    $feedbackInBetween['from'] = (string) $stop->station['URI'];
                     // We store this data by id, but an id also contains the station for which we are reporting. Replace to resolve this.
                     // WARNING: this will break when the id format changes!
-                    $feedbackInBetween['connection'] = str_replace($feedback['from'], $feedbackInBetween['from'],
+                    $feedbackInBetween['connection'] = str_replace(substr(basename($feedback['from']),2), substr(basename($feedbackInBetween['from']),2),
                         $feedbackInBetween['connection']);
                     self::processFeedbackOneConnection($feedbackInBetween);
                 }
