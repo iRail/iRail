@@ -7,6 +7,7 @@ abstract class Printer
 {
     protected $documentRoot;
     protected $root;
+    private $hash;
 
     /**
      * @param $documentRoot
@@ -18,6 +19,9 @@ abstract class Printer
 
     public function printAll()
     {
+        // Only create this hash once
+        $this->hash = get_object_vars($this->documentRoot);
+        $this->printCacheHeaders();
         $this->printHeader();
         $this->printBody();
     }
@@ -42,15 +46,14 @@ abstract class Printer
             $this->documentRoot->timestamp
         );
 
-        $hash = get_object_vars($this->documentRoot);
         $counter = 0;
-        foreach ($hash as $key => $val) {
+        foreach ($this->hash as $key => $val) {
             if ($key == 'version' || $key == 'timestamp') {
                 $counter++;
                 continue;
             }
             $this->printElement($key, $val, true);
-            if ($counter < count($hash) - 1) {
+            if ($counter < count($this->hash) - 1) {
                 $this->nextObjectElement();
             }
             $counter++;
@@ -179,4 +182,12 @@ abstract class Printer
      * @return mixed
      */
     abstract public function printError($ec, $msg);
+
+    private function printCacheHeaders()
+    {
+        unset($this->hash['timestamp']);
+        // json_encode is faster than serialize
+        header('ETag: "' . md5(json_encode($this->hash)) . '"');
+        header('Cache-Control: Public');
+    }
 }
