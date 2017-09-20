@@ -23,7 +23,6 @@ class Xml extends Printer
     {
         header('Access-Control-Allow-Origin: *');
         header('Content-Type: text/xml; charset=UTF-8');
-        header('Cache-Control: public, max-age=15');
     }
 
     /**
