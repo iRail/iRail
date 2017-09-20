@@ -75,8 +75,7 @@ class connections
 
     public static function getNmbsCacheKey($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
     {
-        return join('.', [
-            'NMBSConnections',
+        return 'NMBSConnections|' . join('.', [
             $idfrom,
             $idto,
             $lang,

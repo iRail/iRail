@@ -56,8 +56,7 @@ class liveboard
 
     public static function getNmbsCacheKey($station, $time, $date, $lang, $timeSel)
     {
-        return join('.', [
-            'NMBSLiveboard',
+        return  'NMBSLiveboard|' . join('.', [
             $station->id,
             str_replace(':', '.', $time),
             $date,

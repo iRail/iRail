@@ -70,8 +70,7 @@ class vehicleinformation
 
     public static function getNmbsCacheKey($id, $date, $lang)
     {
-        return join('.', [
-            'NMBSVehicle',
+        return 'NMBSVehicle|' .join('.', [
             $id,
             $date,
             $lang,
