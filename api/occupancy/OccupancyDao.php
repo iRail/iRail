@@ -56,7 +56,7 @@ class OccupancyDao
                  }
              }
          } else {*/
-            self::processFeedbackOneConnection($feedback);
+        self::processFeedbackOneConnection($feedback);
         /*}*/
     }
 

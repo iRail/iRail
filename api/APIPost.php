@@ -107,16 +107,16 @@ class APIPost
 
                     // Ensure noone accidentally posts with https prefix.
                     $postInfo = array(
-                            'connection' => str_replace("https","http",$this->postData->connection),
-                            'from' =>str_replace("https","http",$this->postData->from),
+                            'connection' => str_replace("https", "http", $this->postData->connection),
+                            'from' =>str_replace("https", "http", $this->postData->from),
                             'date' => $this->postData->date,
-                            'vehicle' => str_replace("https","http",$this->postData->vehicle),
+                            'vehicle' => str_replace("https", "http", $this->postData->vehicle),
                             'occupancy' => $this->postData->occupancy
                         );
 
                     // Add optional to parameters
                     if (isset($this->postData->to)) {
-                        $postInfo['to'] = str_replace("https","http",$this->postData->to),
+                        $postInfo['to'] = str_replace("https", "http", $this->postData->to);
                     }
 
                     // Log the post in the iRail log file

@@ -22,7 +22,7 @@ class VehicleinformationRequest extends Request
         parent::processRequiredVars(['id']);
 
         // Ensure consistent ids from here on
-        if (strpos($this->id,'BE.NMBS.') === false){
+        if (strpos($this->id, 'BE.NMBS.') === false) {
             $this->id = 'BE.NMBS.' . $this->id;
         }
     }
