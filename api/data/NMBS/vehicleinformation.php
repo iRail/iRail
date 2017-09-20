@@ -51,12 +51,8 @@ class vehicleinformation
             $dataroot->alert = self::getAlerts($html, $request->getFormat());
         }
 
-        $pointInVehicle = strrpos($request->getVehicleId(), '.');
-        if ($pointInVehicle != 0) {
-            $pointInVehicle += 1;
-        }
 
-        $vehicle = 'http://irail.be/vehicle/' . substr($request->getVehicleId(), $pointInVehicle);
+        $vehicle = 'http://irail.be/vehicle/' . substr(basename($request->getVehicleId()),8);
         $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned

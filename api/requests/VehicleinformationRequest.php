@@ -20,6 +20,11 @@ class VehicleinformationRequest extends Request
         parent::setGetVar('fast', 'false');
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['id']);
+
+        // Ensure consistent ids from here on
+        if (strpos($this->id,'BE.NMBS.') === false){
+            $this->id = 'BE.NMBS.' . $this->id;
+        }
     }
 
     /**

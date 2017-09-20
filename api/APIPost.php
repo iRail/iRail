@@ -103,20 +103,20 @@ class APIPost
                     header('Access-Control-Request-Method: POST, OPTIONS');
                     header('Access-Control-Request-Headers: Content-Type');
                     header('Access-Control-Allow-Headers: Content-Type');
-                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . $this->postData->vehicle);
+                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . basename($this->postData->vehicle));
 
+                    // Ensure noone accidentally posts with https prefix.
                     $postInfo = array(
-                            'connection' => $this->postData->connection,
-                            'from' => $this->postData->from,
-                            'to' => $this->postData->to,
+                            'connection' => str_replace("https","http",$this->postData->connection),
+                            'from' =>str_replace("https","http",$this->postData->from),
                             'date' => $this->postData->date,
-                            'vehicle' => $this->postData->vehicle,
+                            'vehicle' => str_replace("https","http",$this->postData->vehicle),
                             'occupancy' => $this->postData->occupancy
                         );
 
                     // Add optional to parameters
-                    if (!is_null($this->postData->to)) {
-                        $postInfo['to'] = $this->postData->to;
+                    if (isset($this->postData->to)) {
+                        $postInfo['to'] = str_replace("https","http",$this->postData->to),
                     }
 
                     // Log the post in the iRail log file
