@@ -10,7 +10,7 @@ include_once 'Printer.php';
  */
 class Xml extends Printer
 {
-    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'canceled', 'normal'];
+    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'canceled', 'normal', 'shortname'];
     private $rootname;
 
     // make a stack of array information, always work on the last one
