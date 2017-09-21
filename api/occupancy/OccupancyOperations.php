@@ -63,8 +63,8 @@ class OccupancyOperations
             $mongodb_url = getenv('MONGODB_URL');
             $mongodb_db = getenv('MONGODB_DB');
 
-            $m = new MongoDB\Driver\Manager($mongodb_url);
-            $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+            $manager = new MongoDB\Driver\Manager($mongodb_url);
+            $occupancy = new MongoDB\Collection($manager, $mongodb_db, 'occupancy');
             try {
                 return $occupancy->find(array('vehicle' => $vehicle, 'date' => $date));
             } catch (Exception $e) {
