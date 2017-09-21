@@ -7,8 +7,6 @@
  * @author Stan Callewaert
  */
 
-use MongoDB\Collection;
-
 /**
  * Class OccupancyDao This class handles interactions with the feedback and occupancy collections in MongoDB
  * The feedback collection contains every feedback entry ever reported.
@@ -19,12 +17,10 @@ class OccupancyDao
 {
     /**
      * @param $feedback       array An array containing all the feedback data
-     * @param $epochTimestamp int The timestamp when the request was received
      */
-    public static function processFeedback($feedback, $epochTimestamp)
+    public static function processFeedback($feedback)
     {
         date_default_timezone_set('Europe/Brussels');
-        $dateParameter = substr($feedback['date'], -2) . substr($feedback['date'], -4, 2) . substr($feedback['date'], -6, 2);
 
         /*
          // If a destination is set, update the load for all stations inbetween. If not, only update in the given station.
@@ -84,6 +80,12 @@ class OccupancyDao
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
 
+    /**
+     * Update the occupancy table. The occupancy table keeps one entry per connection id for which feedback has been
+     * posted. This entry contains the average vote.
+     *
+     * @param $feedback
+     */
     private static function feedbackOneConnectionToOccupancyTable($feedback)
     {
         $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
@@ -126,6 +128,11 @@ class OccupancyDao
         }
     }
 
+    /**
+     * Add a feedback entry to the feedback collection. The feedback collection is used to keep track of all feedback
+     * ever posted.
+     * @param $feedback
+     */
     private static function feedbackOneConnectionToFeedbackTable($feedback)
     {
         $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));

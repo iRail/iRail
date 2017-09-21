@@ -74,59 +74,75 @@ class APIPost
      *
      * Optional TODO: Test if the connection URI exists.
      */
-    private function occupancyToMongo($ip)
+    private function occupancyToMongo()
     {
         if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    $m = new MongoDB\Driver\Manager($this->mongodb_url);
-                    //$ips = new MongoDB\Collection($m, $this->mongodb_db, 'IPsUsersLastMinute');
 
-                    $epoch = time();
+                    if (! in_array($this->postData->occupancy,
+                        [OccupancyOperations::LOW, OccupancyOperations::MEDIUM, OccupancyOperations::HIGH])
+                    ) {
+                        header('HTTP/1.1 400 Invalid Request');
+                        die();
+                    }
 
-                    /*
-                     * TODO: Find new way to secure the data by making sure a user can't just do a lot of posts in a short period of time.
-                    // Delete the ips who are longer there than 1 minute
-                    $epochMinuteAgo = $epoch - 60;
-                    $ips->deleteMany(array('timestamp' => array('$lt' => $epochMinuteAgo)));
+                    // validate connection ids.
+                    if (preg_match("/^http:\/\/irail\.be\/connections\/\d{7}\/\d{8}\/.{4,7}$/",
+                            $this->postData->connection) === 0
+                    ) {
+                        header('HTTP/1.1 400 Invalid Connection ID');
+                        die();
+                    }
 
-                    // Find if the same IP posted the last minute
-                    $ipLastMinute = $ips->findOne(array('ip' => $ip));
+                    // validate station id (should be an irail identifier).
+                    if (preg_match("/^http:\/\/irail\.be/", $this->postData->connection) === 0
+                    ) {
+                        header('HTTP/1.1 400 Invalid station ID');
+                        die();
+                    }
 
-                    // If it didn't put it in the table and execute the post
-                    if (is_null($ipLastMinute)) {
-                        $ips->insertOne(array('ip' => $ip, 'timestamp' => time()));*/
+                    // validate vehicle id (should be an irail identifier).
+                    if (preg_match("/^http:\/\/irail\.be/", $this->postData->vehicle) === 0
+                    ) {
+                        header('HTTP/1.1 400 Invalid vehicle ID');
+                        die();
+                    }
+
+                    // validate vehicle id (should be an irail identifier).
+                    if (preg_match("/^\d{8}$/", $this->postData->date) === 0
+                    ) {
+                        header('HTTP/1.1 400 Invalid date');
+                        die();
+                    }
 
                     // Return a 201 message and redirect the user to the iRail api GET page of a vehicle
+
                     header('HTTP/1.1 201 Created');
                     header('Access-Control-Allow-Origin: *');
                     header('Access-Control-Request-Method: POST, OPTIONS');
                     header('Access-Control-Request-Headers: Content-Type');
                     header('Access-Control-Allow-Headers: Content-Type');
-                    header('Location: https://irail.be/vehicle/?id=BE.NMBS.' . basename($this->postData->vehicle));
+                    header('Location: https://api.irail.be/vehicle/?id=BE.NMBS.' . basename($this->postData->vehicle));
 
-                    // Ensure noone accidentally posts with https prefix.
                     $postInfo = array(
-                            'connection' => str_replace("https", "http", $this->postData->connection),
-                            'from' =>str_replace("https", "http", $this->postData->from),
-                            'date' => $this->postData->date,
-                            'vehicle' => str_replace("https", "http", $this->postData->vehicle),
-                            'occupancy' => $this->postData->occupancy
+                        'connection' => $this->postData->connection,
+                        'from' => $this->postData->from,
+                        'date' => $this->postData->date,
+                        'vehicle' => $this->postData->vehicle,
+                        'occupancy' => $this->postData->occupancy,
                         );
 
                     // Add optional to parameters
                     if (isset($this->postData->to)) {
-                        $postInfo['to'] = str_replace("https", "http", $this->postData->to);
+                        $postInfo['to'] = $this->postData->to;
                     }
 
                     // Log the post in the iRail log file
-                    //$postInfo['ip'] = $ip;
                     $this->writeLog($postInfo);
 
-                    OccupancyDao::processFeedback($postInfo, $epoch);
-                    /*} else {
-                        throw new Exception('Too Many Requests', 429);
-                    }*/
+                    OccupancyDao::processFeedback($postInfo);
+
                 } catch (Exception $e) {
                     $this->buildError($e);
                 }
