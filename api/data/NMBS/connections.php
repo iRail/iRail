@@ -308,12 +308,18 @@ class connections
                                 } elseif ($att->Attribute['type'] == 'DIRECTION') {
                                     $__stat = new stdClass();
                                     //This recently changed: only fetch direction name, nothing else.
-                                    $__stat->name = str_replace(' [NMBS/SNCB]', '', trim($att->Attribute->AttributeVariant->Text));
+                                    $__stat->name = str_replace(' [NMBS/SNCB]', '',
+                                        trim($att->Attribute->AttributeVariant->Text));
                                     $directions[$k] = $__stat;
                                     $k++;
                                 }
                             }
-
+                        }
+                    }
+                    $j = 0;
+                    $k = 0;
+                    foreach ($conn->ConSectionList->ConSection as $connsection) {
+                        if (isset($connsection->Journey->JourneyAttributeList->JourneyAttribute)) {
                             if ($conn->Overview->Transfers > 0 && strcmp($connsection->Arrival->BasicStop->Station['name'], $conn->Overview->Arrival->BasicStop->Station['name']) != 0) {
                                 //current index for the train: j-1
                                 $connarray = $conn->ConSectionList->ConSection;
@@ -387,7 +393,7 @@ class connections
                                     $vias[$connectionindex]->departingDirection = 'unknown';
                                 }
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
-                                $vias[$connectionindex]->departingVehicle = 'BE.NMBS.'.$trains[$j];
+                                $vias[$connectionindex]->departingVehicle = 'BE.NMBS.' . $trains[$j];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
                                 $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->vehicle, strrpos($vias[$connectionindex]->vehicle, '.') + 1);
                                 $connectionindex++;
