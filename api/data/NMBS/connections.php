@@ -410,7 +410,7 @@ class connections
                                 $vias[$connectionindex]->departure->vehicle = 'BE.NMBS.' . $trains[$j];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
                                 $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle, strrpos($vias[$connectionindex]->departure->vehicle, '.') + 1);
-                                $vias[$connectionindex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle, strrpos($vias[$connectionindex]->arrival->vehicle, '.') + 1);
+                                $vias[$connectionindex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->arrival->vehicle, strrpos($vias[$connectionindex]->arrival->vehicle, '.') + 1);
                                 $connectionindex++;
                             }
                         }
