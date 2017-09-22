@@ -320,7 +320,6 @@ class connections
                     $k = 0;
                     foreach ($conn->ConSectionList->ConSection as $connsection) {
                         if (isset($connsection->Journey->JourneyAttributeList->JourneyAttribute)) {
-
                             $j++;
                             $k++;
 
@@ -391,7 +390,7 @@ class connections
                                     $vias[$connectionindex]->direction = $directions[$k - 1];
 
                                     // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
-                                    $vias[$connectionindex]->arrival->direction = Stations::getStationFromName($directions[$k-1]->name,$lang);
+                                    $vias[$connectionindex]->arrival->direction = Stations::getStationFromName($directions[$k-1]->name, $lang);
                                     // $vias[$connectionindex]->arrival->direction = $directions[$k];
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
@@ -399,7 +398,8 @@ class connections
                                 }
                                 if (isset($directions[$k])) {
                                     // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
-                                    $vias[$connectionindex]->departure->direction = Stations::getStationFromName($directions[$k]->name,$lang);;
+                                    $vias[$connectionindex]->departure->direction = Stations::getStationFromName($directions[$k]->name, $lang);
+                                    ;
                                     // $vias[$connectionindex]->departure->direction = $directions[$k];
                                 } else {
                                     $vias[$connectionindex]->departure->direction = 'unknown';
