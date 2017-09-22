@@ -381,7 +381,13 @@ class connections
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
                                 }
+                                if (isset($directions[$k])) {
+                                    $vias[$connectionindex]->departingDirection = $directions[$k];
+                                } else {
+                                    $vias[$connectionindex]->departingDirection = 'unknown';
+                                }
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
+                                $vias[$connectionindex]->departingVehicle = 'BE.NMBS.'.$trains[$j];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
                                 $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->vehicle, strrpos($vias[$connectionindex]->vehicle, '.') + 1);
                                 $connectionindex++;
