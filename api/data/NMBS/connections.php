@@ -386,18 +386,25 @@ class connections
                                 $vias[$connectionindex]->departure->platform->normal = $departPlatformNormal;
                                 $vias[$connectionindex]->departure->canceled = $departcanceled;
                                 $vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
+
                                 if (isset($directions[$k - 1])) {
                                     $vias[$connectionindex]->direction = $directions[$k - 1];
-                                    $vias[$connectionindex]->arrival->direction = $directions[$k - 1];
+
+                                    // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
+                                    $vias[$connectionindex]->arrival->direction = Stations::getStationFromName($directions[$k-1]->name,$lang);
+                                    // $vias[$connectionindex]->arrival->direction = $directions[$k];
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
                                     $vias[$connectionindex]->arrival->direction = 'unknown';
                                 }
                                 if (isset($directions[$k])) {
-                                    $vias[$connectionindex]->departure->direction = $directions[$k];
+                                    // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
+                                    $vias[$connectionindex]->departure->direction = Stations::getStationFromName($directions[$k]->name,$lang);;
+                                    // $vias[$connectionindex]->departure->direction = $directions[$k];
                                 } else {
                                     $vias[$connectionindex]->departure->direction = 'unknown';
                                 }
+
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
                                 $vias[$connectionindex]->arrival->vehicle = 'BE.NMBS.'.$trains[$j - 1];
                                 $vias[$connectionindex]->departure->vehicle = 'BE.NMBS.' . $trains[$j];
