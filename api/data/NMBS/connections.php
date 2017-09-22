@@ -388,8 +388,10 @@ class connections
                                 $vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
                                 if (isset($directions[$k - 1])) {
                                     $vias[$connectionindex]->direction = $directions[$k - 1];
+                                    $vias[$connectionindex]->arrival->direction = $directions[$k - 1];
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
+                                    $vias[$connectionindex]->arrival->direction = 'unknown';
                                 }
                                 if (isset($directions[$k])) {
                                     $vias[$connectionindex]->departure->direction = $directions[$k];
@@ -397,9 +399,11 @@ class connections
                                     $vias[$connectionindex]->departure->direction = 'unknown';
                                 }
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
+                                $vias[$connectionindex]->arrival->vehicle = 'BE.NMBS.'.$trains[$j - 1];
                                 $vias[$connectionindex]->departure->vehicle = 'BE.NMBS.' . $trains[$j];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
-                                $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->vehicle, strrpos($vias[$connectionindex]->vehicle, '.') + 1);
+                                $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle, strrpos($vias[$connectionindex]->departure->vehicle, '.') + 1);
+                                $vias[$connectionindex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle, strrpos($vias[$connectionindex]->arrival->vehicle, '.') + 1);
                                 $connectionindex++;
                             }
                         }
