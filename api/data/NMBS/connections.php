@@ -320,6 +320,8 @@ class connections
                     $k = 0;
                     foreach ($conn->ConSectionList->ConSection as $connsection) {
                         if (isset($connsection->Journey->JourneyAttributeList->JourneyAttribute)) {
+                            $j++;
+                            $k++;
                             if ($conn->Overview->Transfers > 0 && strcmp($connsection->Arrival->BasicStop->Station['name'], $conn->Overview->Arrival->BasicStop->Station['name']) != 0) {
                                 //current index for the train: j-1
                                 $connarray = $conn->ConSectionList->ConSection;
