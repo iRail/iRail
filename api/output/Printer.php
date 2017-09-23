@@ -75,11 +75,14 @@ abstract class Printer
         if (is_array($val)) {
             if (count($val) > 0) {
                 $this->startArray($key, count($val), $root);
+                $i = 0;
                 foreach ($val as $elementval) {
                     $this->printElement($key, $elementval);
-                    if ($val[count($val) - 1] != $elementval) {
+                    // Keep count of where we are, and as long as this isn't the last element, print the array divider
+                    if ($i < (count($val)-1)) {
                         $this->nextArrayElement();
                     }
+                    $i++;
                 }
                 $this->endArray($key, $root);
             } else {
