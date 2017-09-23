@@ -79,7 +79,6 @@ class APIPost
         if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-
                     if (! in_array($this->postData->occupancy,
                         [OccupancyOperations::LOW, OccupancyOperations::MEDIUM, OccupancyOperations::HIGH])
                     ) {
@@ -142,7 +141,6 @@ class APIPost
                     $this->writeLog($postInfo);
 
                     OccupancyDao::processFeedback($postInfo);
-
                 } catch (Exception $e) {
                     $this->buildError($e);
                 }
