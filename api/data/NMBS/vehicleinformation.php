@@ -373,7 +373,13 @@ class vehicleinformation
 
             $alert = new Alert();
             $alert->header = trim($header);
-            $alert->description = trim($alertelements[1]);
+
+            // TODO: verify this code, is there a case where alertelements[1] is set? Maybe this was earlier, and NMBS changed?
+            if (count($alertelements) > 1) {
+                $alert->description = trim($alertelements[1]);
+            } else {
+                $alert->description = trim($alertelements[0]);
+            }
 
             // Keep <a> elements, those are valueable
             $alert->description = strip_tags($alert->description, '<a>');
