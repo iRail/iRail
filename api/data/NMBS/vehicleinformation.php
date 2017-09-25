@@ -65,8 +65,11 @@ class vehicleinformation
         $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date,
             $request->getVehicleId(), $lastStop);
 
-        $dataroot->vehicle->locationX = $lastStop->locationX;
-        $dataroot->vehicle->locationY = $lastStop->locationY;
+        // When fast=true, this data will not be available
+        if (property_exists($lastStop, "locationX")) {
+            $dataroot->vehicle->locationX = $lastStop->locationX;
+            $dataroot->vehicle->locationY = $lastStop->locationY;
+        }
     }
 
     public static function getNmbsCacheKey($id, $date, $lang)
