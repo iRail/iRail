@@ -101,17 +101,27 @@ class APIPost
                         die();
                     }
 
-                    // validate vehicle id (should be an irail identifier).
-                    if (preg_match("/^http:\/\/irail\.be/", $this->postData->vehicle) === 0
+                    // validate vehicle id (should be an irail identifier). http://irail.be/IC817
+                    if (preg_match("/^http:\/\/irail\.be\/vehicle\/[\w\d]+$/", $this->postData->vehicle) === 0
                     ) {
                         header('HTTP/1.1 400 Invalid vehicle ID');
                         die();
                     }
 
-                    // validate vehicle id (should be an irail identifier).
+                    // validate date.
                     if (preg_match("/^\d{8}$/", $this->postData->date) === 0
                     ) {
                         header('HTTP/1.1 400 Invalid date');
+                        die();
+                    }
+
+                    if (substr($this->postData->date,4,2) > 12){
+                        header('HTTP/1.1 400 Invalid date (month > 12)');
+                        die();
+                    }
+
+                    if (substr($this->postData->date,6,2) > 31){
+                        header('HTTP/1.1 400 Invalid date (day > 31)');
                         die();
                     }
 
