@@ -1,5 +1,7 @@
 <?php
 
+include_once 'data/NMBS/tools.php';
+
 class disturbances
 {
     /**
@@ -10,10 +12,10 @@ class disturbances
     public static function fillDataRoot($dataroot, $request)
     {
         $nmbsCacheKey = self::getNmbsCacheKey($request->getLang());
-        $xml = Tools::getCachedObject($nmbsCacheKey);
+        $xml = tools::getCachedObject($nmbsCacheKey);
         if ($xml === false) {
             $xml = self::fetchData($request->getLang());
-            Tools::setCachedObject($nmbsCacheKey, $xml);
+            tools::setCachedObject($nmbsCacheKey, $xml);
         }
 
         $data = self::parseData($xml);
