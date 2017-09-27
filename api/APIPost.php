@@ -115,12 +115,12 @@ class APIPost
                         die();
                     }
 
-                    if (substr($this->postData->date,4,2) > 12){
+                    if (substr($this->postData->date, 4, 2) > 12) {
                         header('HTTP/1.1 400 Invalid date (month > 12)');
                         die();
                     }
 
-                    if (substr($this->postData->date,6,2) > 31){
+                    if (substr($this->postData->date, 6, 2) > 31) {
                         header('HTTP/1.1 400 Invalid date (day > 31)');
                         die();
                     }
