@@ -21,9 +21,40 @@ abstract class Printer
     {
         // Only create this hash once
         $this->hash = get_object_vars($this->documentRoot);
-        $this->printCacheHeaders();
+
+        unset($this->hash['timestamp']);
+        $etag = md5(json_encode($this->hash));
+
+        // Print caching and etag headers
+        $this->printCacheHeaders($etag);
+
+        $headers = $this->getallheaders();
+        if (key_exists('If-None-Match', $headers) && $headers['If-None-Match'] == '"' . $etag . '"') {
+            // Print the unchanged response code. Don't transmit a body
+            http_response_code("304");
+            return;
+        }
+
         $this->printHeader();
         $this->printBody();
+    }
+
+    /**
+     * Use our own function to be compatible with nginx.
+     * Source: http://php.net/manual/en/function.getallheaders.php
+     *
+     * @return array
+     */
+    private function getallheaders()
+    {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+
+        return $headers;
     }
 
     /**
@@ -186,11 +217,9 @@ abstract class Printer
      */
     abstract public function printError($ec, $msg);
 
-    private function printCacheHeaders()
+    private function printCacheHeaders($etag)
     {
-        unset($this->hash['timestamp']);
-        // json_encode is faster than serialize
-        header('ETag: "' . md5(json_encode($this->hash)) . '"');
+        header('ETag: "' . $etag . '"');
         header('Cache-Control: Public');
     }
 }
