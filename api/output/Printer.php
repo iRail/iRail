@@ -220,6 +220,6 @@ abstract class Printer
     private function printCacheHeaders($etag)
     {
         header('ETag: "' . $etag . '"');
-        header('Cache-Control: Public');
+        header('Cache-Control: max-age=15');
     }
 }
