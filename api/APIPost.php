@@ -95,7 +95,7 @@ class APIPost
                     }
 
                     // validate station id (should be an irail identifier).
-                    if (preg_match("/^http:\/\/irail\.be/", $this->postData->connection) === 0
+                    if (preg_match("/^http:\/\/irail\.be\/stations\//", $this->postData->connection) === 0
                     ) {
                         header('HTTP/1.1 400 Invalid station ID');
                         die();
