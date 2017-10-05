@@ -29,7 +29,7 @@ abstract class Printer
         $this->printCacheHeaders($etag);
 
         $headers = $this->getallheaders();
-        if (key_exists('If-None-Match', $headers) && $headers['If-None-Match'] == '"' . $etag . '"') {
+        if (key_exists('If-None-Match', $headers) && ($headers['If-None-Match'] == '"' . $etag . '"' ||$headers['If-None-Match'] == 'W/"' . $etag . '"')) {
             // Print the unchanged response code. Don't transmit a body
             http_response_code("304");
             return;
