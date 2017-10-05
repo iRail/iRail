@@ -196,6 +196,11 @@ class connections
     public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false, $format)
     {
         $xml = new SimpleXMLElement($serverData);
+
+        if ($xml->ConRes->Err && $xml->ConRes->Err['code'] == "K9360") {
+            throw new Exception("Date outside of the timetable period.", 404);
+        }
+
         $connection = [];
         $journeyoptions = [];
         $i = 0;
