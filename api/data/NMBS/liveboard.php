@@ -132,9 +132,9 @@ class liveboard
 
         $data = new SimpleXMLElement($xml);
 
-        if (property_exists($data,'Err') && isset($data->Err)){
-            if ($data->Err['code'] == "H730"){
-                throw new Exception("The data for which you requested data is too far in the past or future.",404);
+        if (property_exists($data, 'Err') && isset($data->Err)) {
+            if ($data->Err['code'] == "H730") {
+                throw new Exception("The data for which you requested data is too far in the past or future.", 404);
             }
         }
 
