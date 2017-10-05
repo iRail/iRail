@@ -12,6 +12,7 @@ class tools
      */
     private static $cache;
     const cache_TTL = 15;
+    const cache_prefix = "|Irail|Api|";
 
     /**
      * @param <type> $time -> in 00d15:24:00
@@ -102,6 +103,8 @@ class tools
      */
     public static function getCachedObject($key)
     {
+        $key = self::cache_prefix . $key;
+
         self::createCachePool();
 
         if (self::$cache->hasItem($key)) {
@@ -119,6 +122,8 @@ class tools
      */
     public static function setCachedObject($key, $value)
     {
+        $key = self::cache_prefix . $key;
+
         self::createCachePool();
         $item = self::$cache->getItem($key);
 

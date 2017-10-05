@@ -64,6 +64,7 @@ class Vehicle
     public $locationX;
     public $locationY;
     public $name;
+    public $shortname;
 }
 
 class ViaDepartureArrival

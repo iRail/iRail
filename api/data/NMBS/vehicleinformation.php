@@ -51,27 +51,30 @@ class vehicleinformation
             $dataroot->alert = self::getAlerts($html, $request->getFormat());
         }
 
-        $pointInVehicle = strrpos($request->getVehicleId(), '.');
-        if ($pointInVehicle != 0) {
-            $pointInVehicle += 1;
-        }
-
-        $vehicle = 'http://irail.be/vehicle/' . substr($request->getVehicleId(), $pointInVehicle);
-        $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicle, DateTime::createFromFormat('dmy', $date)->format('Ymd'));
+        $vehicleOccupancy = OccupancyOperations::getOccupancy($dataroot->vehicle->{'@id'},
+            DateTime::createFromFormat('dmy', $date)->format('Ymd'));
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
         if (!is_null($vehicleOccupancy)) {
             $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
         }
 
+        $lastStop = null;
+
         $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date, $request->getVehicleId());
+        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date,
+            $request->getVehicleId(), $lastStop);
+
+        // When fast=true, this data will not be available
+        if (property_exists($lastStop, "locationX")) {
+            $dataroot->vehicle->locationX = $lastStop->locationX;
+            $dataroot->vehicle->locationY = $lastStop->locationY;
+        }
     }
 
     public static function getNmbsCacheKey($id, $date, $lang)
     {
-        return join('.', [
-            'NMBSVehicle',
+        return 'NMBSVehicle|' .join('.', [
             $id,
             $date,
             $lang,
@@ -119,7 +122,7 @@ class vehicleinformation
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle)
+    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle, &$laststop)
     {
         $now = new DateTime();
         $requestedDate = DateTime::createFromFormat('dmy', $date);
@@ -289,12 +292,9 @@ class vehicleinformation
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
 
-                $pointInVehicle = strrpos($vehicle, '.');
-                if ($pointInVehicle != 0) {
-                    $pointInVehicle += 1;
-                }
                 if ($fast != 'true') {
-                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}), 2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, $pointInVehicle);
+                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}),
+                            2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
                 }
                 $stops[$j]->platform = new Platform();
                 $stops[$j]->platform->name = $platform;
@@ -304,6 +304,11 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
                 $stops[$j]->left = $departed;
+
+                // Store the last station to get vehicle coordinates
+                if ($departed) {
+                    $laststop = $stops[$j]->station;
+                }
 
                 // Check if it is in less than 2 days and MongoDB is available
                 if ($fast != 'true' && $isOccupancyDate && isset($occupancyArr)) {
@@ -331,6 +336,11 @@ class vehicleinformation
                 }
                 
                 $j++;
+            }
+
+            // When the train hasn't left yet, set location to first station
+            if (is_null($laststop)) {
+                $laststop = $stops[0]->station;
             }
 
             return $stops;
@@ -366,7 +376,13 @@ class vehicleinformation
 
             $alert = new Alert();
             $alert->header = trim($header);
-            $alert->description = trim($alertelements[1]);
+
+            // TODO: verify this code, is there a case where alertelements[1] is set? Maybe this was earlier, and NMBS changed?
+            if (count($alertelements) > 1) {
+                $alert->description = trim($alertelements[1]);
+            } else {
+                $alert->description = trim($alertelements[0]);
+            }
 
             // Keep <a> elements, those are valueable
             $alert->description = strip_tags($alert->description, '<a>');
@@ -383,67 +399,22 @@ class vehicleinformation
     }
 
     /**
-     * @param $html
-     * @param $id
+     * @param $html String the HTML received from NMBS
+     * @param $id   String the ID of the vehicle in BE.NMBS.XXXXXX format
      * @param $lang
      * @return null|Vehicle
      * @throws Exception
      */
     private static function getVehicleData($html, $id, $lang)
     {
-        // determine the location of the vehicle
-        $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        if (! is_object($test)) {
-            throw new Exception('Vehicle not found', 500);
-        } // catch errors
+        $vehicle = new Vehicle();
+        $vehicle->name = $id;
+        $vehicle->locationX = 0;
+        $vehicle->locationY = 0;
+        $vehicle->shortname = substr($id, 8);
+        $vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->shortname;
 
-        $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementByTagName('table')->children;
-
-        for ($i = 1; $i < count($nodes); $i++) {
-            $node = $nodes[$i];
-            if (! count($node->attr)) {
-                continue;
-            } // row with no class-attribute contain no data
-
-            if (count($node->children[3]->find('a'))) {
-                $as = $node->children[3]->find('a');
-                $stationname = reset($as[0]->nodes[0]->_);
-            } else {
-                // Foreign station, no anchorlink
-                $stationname = reset($node->children[3]->nodes[0]->_);
-            }
-
-            $locationX = 0;
-            $locationY = 0;
-            // Station ID can be parsed from the station URL
-            if (isset($node->children[3]->children[0])) {
-                $link = $node->children[3]->children[0]->{'attr'}['href'];
-                // With capital S
-                if (strpos($link, 'StationId=')) {
-                    $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
-                } else {
-                    $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
-                }
-                $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
-                $stationId = '00'.$nr;
-                $station = stations::getStationFromID($stationId, $lang);
-            } else {
-                $station = stations::getStationFromName($stationname, $lang);
-            }
-
-            if (isset($station)) {
-                $locationX = $station->locationX;
-                $locationY = $station->locationY;
-            }
-            $vehicle = new Vehicle();
-            $vehicle->name = $id;
-            $vehicle->locationX = $locationX;
-            $vehicle->locationY = $locationY;
-
-            return $vehicle;
-        }
-
-        return;
+        return $vehicle;
     }
 
     private static function trainSplits($html)
@@ -453,7 +424,7 @@ class vehicleinformation
 
     private static function trainDrives($html)
     {
-        return $html && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
+        return $html && is_object($html->getElementById('HFSResult')) && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
     }
 
     private static function parseCorrectUrl($html)

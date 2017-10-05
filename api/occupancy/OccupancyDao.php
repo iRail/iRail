@@ -7,47 +7,53 @@
  * @author Stan Callewaert
  */
 
-use MongoDB\Collection;
-
+/**
+ * Class OccupancyDao This class handles interactions with the feedback and occupancy collections in MongoDB
+ * The feedback collection contains every feedback entry ever reported.
+ * The occupancy collection contains one entry for every vehicle/date combination for which data has been reported,
+ * containing the average feedback.
+ */
 class OccupancyDao
 {
-    public static function processFeedback($feedback, $epochFeedback)
+    /**
+     * @param $feedback       array An array containing all the feedback data
+     */
+    public static function processFeedback($feedback)
     {
         date_default_timezone_set('Europe/Brussels');
-        $dateParameter = substr($feedback['date'], -2) . substr($feedback['date'], -4, 2) . substr($feedback['date'], -6, 2);
 
-        $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']) . '&date=' . $dateParameter);
-        $errorCheck = 0;
-        $lastStation = '';
+        /*
+         // If a destination is set, update the load for all stations inbetween. If not, only update in the given station.
+         if (isset($feedback['to'])) {
+             // Get information on this vehicle from the API
+             $stops = self::getVehicleStopsInfo("http://api.irail.be/vehicle/?id=BE.NMBS." . basename($feedback['vehicle']) . '&date=' . $dateParameter);
 
-        if (isset($feedback['to'])) {
-            foreach ($stops->stop as $stop) {
-                if ($errorCheck > 0) {
-                    if ($epochFeedback < intval($stop->time) + intval($stop['delay'])) {
-                        $feedback['from'] = $lastStation;
-                        self::processFeedbackOneConnection($feedback);
-                        break;
-                    } else {
-                        $lastStation = $stop->station['URI'][0];
-                    }
-                }
+             // Whether or not the station is inbetween the from and to station(including from).
+             $stationIsInbetween = false;
 
-                if ($stop->station['URI'] == $feedback['from'] || $stop->station['URI'] == $feedback['to']) {
-                    if ($errorCheck == 0) {
-                        $lastStation = $stop->station['URI'][0];
-                    }
+             // Loop through all stops
+             foreach ($stops->stop as $stop) {
+                 if ($stop->station['URI'] == $feedback['from']) {
+                     $stationIsInbetween = true;
+                 }
+                 if ($stop->station['URI'] == $feedback['to']) {
+                     $stationIsInbetween = false;
+                 }
 
-                    $errorCheck += 1;
-                }
-
-                if ($errorCheck == 2) {
-                    self::processFeedbackOneConnection($feedback);
-                    break;
-                }
-            }
-        } else {
-            self::processFeedbackOneConnection($feedback);
-        }
+                 if ($stationIsInbetween) {
+                     $feedbackInBetween = $feedback;
+                     // Set the from station (the station for which we are reporting) to the current station inbetween
+                     $feedbackInBetween['from'] = (string) $stop->station['URI'];
+                     // We store this data by id, but an id also contains the station for which we are reporting. Replace to resolve this.
+                     // WARNING: this will break when the id format changes!
+                     $feedbackInBetween['connection'] = str_replace(substr(basename($feedback['from']),2), substr(basename($feedbackInBetween['from']),2),
+                         $feedbackInBetween['connection']);
+                     self::processFeedbackOneConnection($feedbackInBetween);
+                 }
+             }
+         } else {*/
+        self::processFeedbackOneConnection($feedback);
+        /*}*/
     }
 
     private static function getVehicleStopsInfo($vehicleURL)
@@ -55,30 +61,38 @@ class OccupancyDao
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $vehicleURL);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        // When using self-signed certificates:
+        // curl_setopt($curl, CURLOPT_SSL_VERIFYSTATUS, false);
+        // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
         $result = curl_exec($curl);
         curl_close($curl);
 
         $xml = simplexml_load_string($result);
+
         return $xml->stops;
     }
 
     private static function processFeedbackOneConnection($feedback)
     {
-        $fromArr = (Array)$feedback['from'];
-        $feedback['from'] = $fromArr[0];
-
         self::feedbackOneConnectionToOccupancyTable($feedback);
         self::feedbackOneConnectionToFeedbackTable($feedback);
     }
 
+    /**
+     * Update the occupancy table. The occupancy table keeps one entry per connection id for which feedback has been
+     * posted. This entry contains the average vote.
+     *
+     * @param $feedback
+     */
     private static function feedbackOneConnectionToOccupancyTable($feedback)
     {
         $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
         $dotenv->load();
         $mongodb_url = getenv('MONGODB_URL');
         $mongodb_db = getenv('MONGODB_DB');
-        
+
         $m = new MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
 
@@ -114,6 +128,11 @@ class OccupancyDao
         }
     }
 
+    /**
+     * Add a feedback entry to the feedback collection. The feedback collection is used to keep track of all feedback
+     * ever posted.
+     * @param $feedback
+     */
     private static function feedbackOneConnectionToFeedbackTable($feedback)
     {
         $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));

@@ -75,8 +75,7 @@ class connections
 
     public static function getNmbsCacheKey($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
     {
-        return join('.', [
-            'NMBSConnections',
+        return 'NMBSConnections|' . join('.', [
             $idfrom,
             $idto,
             $lang,
@@ -197,6 +196,11 @@ class connections
     public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false, $format)
     {
         $xml = new SimpleXMLElement($serverData);
+
+        if ($xml->ConRes->Err && $xml->ConRes->Err['code'] == "K9360") {
+            throw new Exception("Date outside of the timetable period.", 404);
+        }
+
         $connection = [];
         $journeyoptions = [];
         $i = 0;
@@ -309,11 +313,20 @@ class connections
                                 } elseif ($att->Attribute['type'] == 'DIRECTION') {
                                     $__stat = new stdClass();
                                     //This recently changed: only fetch direction name, nothing else.
-                                    $__stat->name = str_replace(' [NMBS/SNCB]', '', trim($att->Attribute->AttributeVariant->Text));
+                                    $__stat->name = str_replace(' [NMBS/SNCB]', '',
+                                        trim($att->Attribute->AttributeVariant->Text));
                                     $directions[$k] = $__stat;
                                     $k++;
                                 }
                             }
+                        }
+                    }
+                    $j = 0;
+                    $k = 0;
+                    foreach ($conn->ConSectionList->ConSection as $connsection) {
+                        if (isset($connsection->Journey->JourneyAttributeList->JourneyAttribute)) {
+                            $j++;
+                            $k++;
 
                             if ($conn->Overview->Transfers > 0 && strcmp($connsection->Arrival->BasicStop->Station['name'], $conn->Overview->Arrival->BasicStop->Station['name']) != 0) {
                                 //current index for the train: j-1
@@ -377,14 +390,31 @@ class connections
                                 $vias[$connectionindex]->departure->platform->normal = $departPlatformNormal;
                                 $vias[$connectionindex]->departure->canceled = $departcanceled;
                                 $vias[$connectionindex]->timeBetween = $departTime - $arrivalTime;
+
                                 if (isset($directions[$k - 1])) {
                                     $vias[$connectionindex]->direction = $directions[$k - 1];
+
+                                    // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
+                                    // $vias[$connectionindex]->arrival->direction = Stations::getStationFromName($directions[$k-1]->name, $lang);
+                                    $vias[$connectionindex]->arrival->direction = $directions[$k - 1];
                                 } else {
                                     $vias[$connectionindex]->direction = 'unknown';
+                                    $vias[$connectionindex]->arrival->direction = 'unknown';
                                 }
+                                if (isset($directions[$k])) {
+                                    // If wanted, we can drop in full station information without breaking any compatibility. Requires more (CPU) time though.
+                                    //$vias[$connectionindex]->departure->direction = Stations::getStationFromName($directions[$k]->name, $lang);
+                                    $vias[$connectionindex]->departure->direction = $directions[$k];
+                                } else {
+                                    $vias[$connectionindex]->departure->direction = 'unknown';
+                                }
+
                                 $vias[$connectionindex]->vehicle = 'BE.NMBS.'.$trains[$j - 1];
+                                $vias[$connectionindex]->arrival->vehicle = 'BE.NMBS.'.$trains[$j - 1];
+                                $vias[$connectionindex]->departure->vehicle = 'BE.NMBS.' . $trains[$j];
                                 $vias[$connectionindex]->station = self::getStationFromHafasDescription($connsection->Arrival->BasicStop->Station['name'], $connsection->Arrival->BasicStop->Station['x'], $connsection->Arrival->BasicStop->Station['y'], $lang);
-                                $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->vehicle, strrpos($vias[$connectionindex]->vehicle, '.') + 1);
+                                $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle, strrpos($vias[$connectionindex]->departure->vehicle, '.') + 1);
+                                $vias[$connectionindex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}), 2) . '/' . date('Ymd', $departTime) . '/' . substr($vias[$connectionindex]->arrival->vehicle, strrpos($vias[$connectionindex]->arrival->vehicle, '.') + 1);
                                 $connectionindex++;
                             }
                         }

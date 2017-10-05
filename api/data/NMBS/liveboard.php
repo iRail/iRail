@@ -56,8 +56,7 @@ class liveboard
 
     public static function getNmbsCacheKey($station, $time, $date, $lang, $timeSel)
     {
-        return join('.', [
-            'NMBSLiveboard',
+        return  'NMBSLiveboard|' . join('.', [
             $station->id,
             str_replace(':', '.', $time),
             $date,
@@ -132,6 +131,12 @@ class liveboard
         }
 
         $data = new SimpleXMLElement($xml);
+
+        if (property_exists($data, 'Err') && isset($data->Err)) {
+            if ($data->Err['code'] == "H730") {
+                throw new Exception("The data for which you requested data is too far in the past or future.", 404);
+            }
+        }
 
         $data = $data->StationTable;
 
