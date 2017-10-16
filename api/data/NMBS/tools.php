@@ -49,6 +49,20 @@ class tools
     }
 
     /**
+     * This function transforms the brail formatted timestring and reformats it to seconds.
+     * @param int $time
+     * @return int Duration in seconds
+     */
+    public static function transformDurationHHMMSS($time)
+    {
+        $hour = intval(substr($time, 0, 2));
+        $minute = intval(substr($time, 2, 2));
+        $second = intval(substr($time, 4, 2));
+
+        return  $hour * 3600 + $minute * 60 + $second;
+    }
+
+    /**
      * Adds a quarter and responds with a time.
      *
      * @param $time
