@@ -502,8 +502,17 @@ class connections
                     $trains[$connectionindex]->direction = new StdClass();
                     $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
 
-                    $trains[$connectionindex]->left = ($trainRide['dep']['dProgType'] == "REPORTED");
-                    $trains[$connectionindex]->arrived = ($trainRide['arr']['aProgType'] == "REPORTED");
+                    if ($trainRide['dep']['dProgType'] == "REPORTED") {
+                        $trains[$connectionindex]->left = 1;
+                    } else {
+                        $trains[$connectionindex]->left = 0;
+                    }
+
+                    if ($trainRide['arr']['aProgType'] == "REPORTED") {
+                        $trains[$connectionindex]->arrived = 1;
+                    } else {
+                        $trains[$connectionindex]->arrived = 0;
+                    }
 
                     $ctxRecon = trim($trainRide['jny']['ctxRecon'], '$');
                     $trainName = explode('$', $ctxRecon);
@@ -549,7 +558,7 @@ class connections
                     $vias[$viaIndex]->arrival->vehicle = $trains[$viaIndex]->vehicle;
                     $vias[$viaIndex]->departure->vehicle = $trains[$viaIndex + 1]->vehicle;
 
-                    $vias[$viaIndex]->station =  $trains[$viaIndex + 1]->departureStation;
+                    $vias[$viaIndex]->station = $trains[$viaIndex + 1]->departureStation;
 
                     $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}),
                             2) . '/' . date('Ymd',
@@ -571,9 +580,11 @@ class connections
                 $connection[$i]->departure->vehicle = $trains[0]->vehicle;
                 $connection[$i]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($fromstation->{'@id'}), 2) . '/' . date('Ymd', $connection[$i]->departure->time) . '/' . $trains[0]->vehicle;
                 $connection[$i]->departure->direction = $trains[0]->direction;
+                $connection[$i]->departure->left = $trains[0]->left;
 
                 $connection[$i]->arrival->vehicle = $trains[count($trains) - 1]->vehicle;
                 $connection[$i]->arrival->direction = $trains[count($trains) - 1]->direction;
+                $connection[$i]->arrival->left = end($trains)->arrived;
 
                 //Add journey options to the logs of iRail
                 $journeyoptions[$i] = ["journeys" => [] ];
