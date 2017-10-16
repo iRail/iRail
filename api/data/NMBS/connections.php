@@ -315,7 +315,7 @@ class connections
 
                 $connection[$i]->departure = new DepartureArrival();
                 $connection[$i]->departure->station = $fromstation;
-                $connection[$i]->departure->direction = $conn['secL'][0]['jny']['dirTxt'];
+
                 if (key_exists('dTimeR', $conn['dep'])) {
                     $connection[$i]->departure->delay = $conn['dep']['dTimeR'] - $conn['dep']['dTimeS'];
                 } else {
@@ -338,10 +338,9 @@ class connections
 
                 $connection[$i]->departure->canceled = $departurecanceled;
 
-                $numberOfVehicles = count($conn['secL']);
                 $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->arrival->station = $tostation;
-                $connection[$i]->departure->direction = $conn['secL'][$numberOfVehicles - 1]['jny']['dirTxt'];
+
                 if (key_exists('aTimeR', $conn['arr'])) {
                     $connection[$i]->arrival->delay = $conn['arr']['aTimeR'] - $conn['arr']['aTimeS'];
                 } else {
@@ -409,7 +408,6 @@ class connections
 
                 $trains = [];
                 $vias = [];
-                $directions = [];
 
                 $connectionindex = 0;
 
@@ -496,7 +494,9 @@ class connections
                     $trains[$connectionindex]->departure->platform->normal = $departPlatformNormal;
                     $trains[$connectionindex]->departure->canceled = $departcanceled;
                     $trains[$connectionindex]->duration = $arrivalTime - $departTime;
-                    $trains[$connectionindex]->direction = $trainRide['jny']['dirTxt'];
+
+                    $trains[$connectionindex]->direction = new StdClass();
+                    $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
 
                     $trains[$connectionindex]->left = ($trainRide['dep']['dProgType'] == "REPORTED");
                     $trains[$connectionindex]->arrived = ($trainRide['arr']['aProgType'] == "REPORTED");
