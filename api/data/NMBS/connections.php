@@ -159,7 +159,7 @@ class connections
         "depLocL":[{"lid":"L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
         "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
         "outDate":"' . $date . '",
-        "outTime":"' . $time . '00",
+        "outTime":"' . str_replace(':','',$time) . '00",
         "economic":false,
         "extChgTime":-1,
         "getIST":false,
@@ -321,7 +321,7 @@ class connections
                 } else {
                     $connection[$i]->departure->delay = 0;
                 }
-                $connection[$i]->departure->time = tools::transformTime($conn['dep']['dTimeS'], $conn['date']);
+                $connection[$i]->departure->time = tools::transformTimeHHMMSS($conn['dep']['dTimeS'], $conn['date']);
 
                 //Delay and platform changes
                 $departurePlatform = $conn['dep']['dPlatfS'];
@@ -348,7 +348,7 @@ class connections
                     $connection[$i]->arrival->delay = 0;
                 }
                 //$connection[$i]->departure->delay = $conn['secL'][$numberOfVehicles - 1]['jny']['stopL'][$numberOfStopsInLastVehicle - 1]['dTimeS'] - $conn['secL'][$numberOfVehicles - 1]['jny']['stopL'][$numberOfStopsInLastVehicle - 1]['aTimeS'];
-                $connection[$i]->arrival->time = tools::transformTime($conn['arr']['aTimeS'], $conn['date']);
+                $connection[$i]->arrival->time = tools::transformTimeHHMMSS($conn['arr']['aTimeS'], $conn['date']);
 
                 $arrivalPlatform = $conn['arr']['aPlatfS'];
                 $arrivalPlatformNormal = true;
@@ -482,14 +482,14 @@ class connections
                     */
                     $trains[$connectionindex] = new StdClass();
                     $trains[$connectionindex]->arrival = new ViaDepartureArrival();
-                    $trains[$connectionindex]->arrival->time = $arrivalTime;
+                    $trains[$connectionindex]->arrival->time = tools::transformTimeHHMMSS($arrivalTime,$conn['date']);
                     $trains[$connectionindex]->arrival->delay = $arrivalDelay;
                     $trains[$connectionindex]->arrival->platform = new Platform();
                     $trains[$connectionindex]->arrival->platform->name = $arrivalPlatform;
                     $trains[$connectionindex]->arrival->platform->normal = $arrivalPlatformNormal;
                     $trains[$connectionindex]->arrival->canceled = $arrivalcanceled;
                     $trains[$connectionindex]->departure = new ViaDepartureArrival();
-                    $trains[$connectionindex]->departure->time = $departTime;
+                    $trains[$connectionindex]->departure->time = tools::transformTimeHHMMSS($departTime,$conn['date']);
                     $trains[$connectionindex]->departure->delay = $departDelay;
                     $trains[$connectionindex]->departure->platform = new Platform();
                     $trains[$connectionindex]->departure->platform->name = $departPlatform;
@@ -520,7 +520,7 @@ class connections
                 for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
                     $vias[$viaIndex] = new Via();
                     $vias[$viaIndex]->arrival = new ViaDepartureArrival();
-                    $vias[$viaIndex]->arrival->time = $trains[$viaIndex]->arrival->time;
+                    $vias[$viaIndex]->arrival->time = tools::transformTimeHHMMSS($trains[$viaIndex]->arrival->time,$conn['date']);
                     $vias[$viaIndex]->arrival->delay = $trains[$viaIndex]->arrival->delay;
                     $vias[$viaIndex]->arrival->platform = $trains[$viaIndex]->arrival->platform;
                     $vias[$viaIndex]->arrival->canceled = $trains[$viaIndex]->arrival->canceled;
@@ -528,7 +528,7 @@ class connections
                     $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex]->arrived;
 
                     $vias[$viaIndex]->departure = new ViaDepartureArrival();
-                    $vias[$viaIndex]->departure->time = $trains[$viaIndex + 1]->departure->time;
+                    $vias[$viaIndex]->departure->time = tools::transformTimeHHMMSS($trains[$viaIndex + 1]->departure->time,$conn['date']);
                     $vias[$viaIndex]->departure->delay = $trains[$viaIndex + 1]->departure->delay;
                     $vias[$viaIndex]->departure->platform = $trains[$viaIndex + 1]->departure->platform;
                     $vias[$viaIndex]->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
