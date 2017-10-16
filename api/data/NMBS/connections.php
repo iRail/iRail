@@ -194,8 +194,6 @@ class connections
         $journeyoptions = [];
         $i = 0;
         if ($json['svcResL'][0]['err'] == 'OK') {
-
-
             $fromstation = Stations::getStationFromID('00' . $json['svcResL'][0]['res']['common']['locL'][0]['extId'],
                 $lang);
             $tostation = Stations::getStationFromID('00' . $json['svcResL'][0]['res']['common']['locL'][1]['extId'],
@@ -419,7 +417,6 @@ class connections
                 // This is way more readable compared to instantly creating the vias
                 // Loop over all train rides in the list. This will also include the first train ride.
                 foreach ($conn['secL'] as $trainRide) {
-
                     $departTime = tools::transformTime($trainRide['dep']['dTimeS'],
                         $conn['date']);
                     $departPlatform = $trainRide['dep']['dPlatfS'];
@@ -516,13 +513,11 @@ class connections
                             $lang);
                     }
                     $connectionindex++;
-
                 }
 
                 $connectionindex = 0;
                 $viaCount = count($trains) - 1;
                 for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
-
                     $vias[$viaIndex] = new Via();
                     $vias[$viaIndex]->arrival = new ViaDepartureArrival();
                     $vias[$viaIndex]->arrival->time = $trains[$viaIndex]->arrival->time;
