@@ -18,7 +18,6 @@ class connections
      */
     public static function fillDataRoot($dataroot, $request)
     {
-        //detect whether from was an id and change from accordingly
         $from = $request->getFrom();
         if (count(explode('.', $request->getFrom())) > 1) {
             $from = stations::getStationFromID($request->getFrom(), $request->getLang());
@@ -151,21 +150,22 @@ class connections
         } else {
             $timeSel = 1;
         }
+
         $postdata = '{"auth":{"aid":"sncb-mobi","type":"AID"},
         "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
         "lang":"' . $lang . '","svcReqL":[{"cfg":{"polyEnc":"GPA"},
         "meth":"TripSearch",
-        "req":{"arrLocL":[{"lid":"A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035896@U=80@L=008892007@B=1@p=1429490515@","name":"Gent-Sint-Pieters","type":"S"}],
-        "depLocL":[{"lid":"A=1@O=Halle@X=4240634@Y=50733931@U=80@L=008814308@B=1@p=1481329402@n=ac.1=GA@","name":"Halle","type":"S"}],
-        "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"11101111111111"}],
+        "req":{"arrLocL":[{"lid":"L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
+        "depLocL":[{"lid":"L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
+        "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
         "outDate":"' . $date . '",
         "outTime":"' . $time . '00",
         "economic":false,
         "extChgTime":-1,
         "getIST":false,
         "getPasslist":true,
-        "getPolyline":true,
-        "liveSearch":false}}],
+        "getPolyline":false,
+        "liveSearch":true}}],
         "ver":"1.11","formatted":false}';
 
         $ch = curl_init();
@@ -501,6 +501,9 @@ class connections
                     $trains[$connectionindex]->duration = $arrivalTime - $departTime;
                     $trains[$connectionindex]->direction = $trainRide['jny']['dirTxt'];
 
+                    $trains[$connectionindex]->left = ($trainRide['dep']['dProgType'] == "REPORTED");
+                    $trains[$connectionindex]->arrived = ($trainRide['arr']['aProgType'] == "REPORTED");
+
                     $ctxRecon = trim($trainRide['jny']['ctxRecon'], '$');
                     $trainName = explode('$', $ctxRecon);
                     $trainName = end($trainName);
@@ -526,11 +529,17 @@ class connections
                     $vias[$viaIndex]->arrival->delay = $trains[$viaIndex]->arrival->delay;
                     $vias[$viaIndex]->arrival->platform = $trains[$viaIndex]->arrival->platform;
                     $vias[$viaIndex]->arrival->canceled = $trains[$viaIndex]->arrival->canceled;
+
+                    $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex]->arrived;
+
                     $vias[$viaIndex]->departure = new ViaDepartureArrival();
                     $vias[$viaIndex]->departure->time = $trains[$viaIndex + 1]->departure->time;
                     $vias[$viaIndex]->departure->delay = $trains[$viaIndex + 1]->departure->delay;
                     $vias[$viaIndex]->departure->platform = $trains[$viaIndex + 1]->departure->platform;
-                    $vias[$viaIndex]->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;;
+                    $vias[$viaIndex]->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
+
+                    $vias[$viaIndex]->departure->left = $trains[$viaIndex + 1]->left;
+
                     $vias[$viaIndex]->timeBetween = $vias[$viaIndex]->departure->time - $trains[$viaIndex]->arrival->time;
 
                     $vias[$viaIndex]->direction = $trains[$viaIndex]->direction;
