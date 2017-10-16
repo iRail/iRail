@@ -43,7 +43,7 @@ class tools
         $month = intval(substr($date, 4, 2));
         $day = intval(substr($date, 6, 2));
 
-        return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
+        return mktime($hour, $minute, $second, $month, $day, $year);
     }
 
     /**
