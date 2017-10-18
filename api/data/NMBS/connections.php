@@ -134,13 +134,13 @@ class connections
             'useragent' => $irailAgent,
         ];
         if ($typeOfTransport == 'trains') {
-            $trainsonly = '1111111000000000';
+            $trainsonly = '01101111000111';
         } elseif ($typeOfTransport == 'nointernationaltrains') {
-            $trainsonly = '0111111000000000';
+            $trainsonly = '0111111000000000'; // TODO: update
         } elseif ($typeOfTransport == 'all') {
-            $trainsonly = '1111111111111111';
+            $trainsonly = '1111111111111111'; // TODO: update
         } else {
-            $trainsonly = '1111111000000000';
+            $trainsonly = '01101111000111';
         }
 
         if ($timeSel == 'depart') {
@@ -151,21 +151,37 @@ class connections
             $timeSel = 1;
         }
 
+        // numF: number of results: server-side capped to 5, but ask 10 in case they'd let us
         $postdata = '{"auth":{"aid":"sncb-mobi","type":"AID"},
-        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
-        "lang":"' . $lang . '","svcReqL":[{"cfg":{"polyEnc":"GPA"},
-        "meth":"TripSearch",
-        "req":{"arrLocL":[{"lid":"L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
-        "depLocL":[{"lid":"L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
-        "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
-        "outDate":"' . $date . '",
-        "outTime":"' . str_replace(':','',$time) . '00",
-        "economic":false,
-        "extChgTime":-1,
-        "getIST":false,
-        "getPasslist":true,
-        "getPolyline":false,
-        "liveSearch":true}}],
+        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"","v":302132},
+        "lang":"' . $lang . '",
+        "svcReqL":[
+            {
+                "cfg":{"polyEnc":"GPA"},
+                "meth":"TripSearch",
+                "req":{
+                    "arrLocL":[{"lid":"L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
+                    "depLocL":[{"lid":"L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
+                    "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
+                    "outDate":"' . $date . '",
+                    "outTime":"' . str_replace(':','',$time) . '00",
+                    "economic":false,
+                    "extChgTime":-1,
+                    "getIST":false,
+                    "getPasslist":true,
+                    "getPolyline":false,
+                    "numF":10,';
+
+        // search by arrival
+        if ($timeSel == 1) {
+            $postdata .= '"outFrwd": false,';
+        }
+
+        $postdata .= '"liveSearch":true
+        
+                }
+            }
+        ],
         "ver":"1.11","formatted":false}';
 
         $ch = curl_init();
@@ -324,8 +340,13 @@ class connections
                 $connection[$i]->departure->time = tools::transformTimeHHMMSS($conn['dep']['dTimeS'], $conn['date']);
 
                 //Delay and platform changes
-                $departurePlatform = $conn['dep']['dPlatfS'];
-                $departurePlatformNormal = true;
+                if (key_exists('dPlatfR',$conn['dep'])){
+                    $departurePlatform = $conn['dep']['dPlatfR'];
+                    $departurePlatformNormal = false;
+                } else {
+                    $departurePlatform = $conn['dep']['dPlatfS'];
+                    $departurePlatformNormal = true;
+                }
 
                 if ($conn['dep']['dProgType'] == "SCHEDULED" ||
                     $conn['dep']['dProgType'] == "REPORTED" ||
@@ -349,8 +370,14 @@ class connections
                 //$connection[$i]->departure->delay = $conn['secL'][$numberOfVehicles - 1]['jny']['stopL'][$numberOfStopsInLastVehicle - 1]['dTimeS'] - $conn['secL'][$numberOfVehicles - 1]['jny']['stopL'][$numberOfStopsInLastVehicle - 1]['aTimeS'];
                 $connection[$i]->arrival->time = tools::transformTimeHHMMSS($conn['arr']['aTimeS'], $conn['date']);
 
-                $arrivalPlatform = $conn['arr']['aPlatfS'];
-                $arrivalPlatformNormal = true;
+                //Delay and platform changes
+                if (key_exists('aPlatfR',$conn['arr'])){
+                    $arrivalPlatform = $conn['arr']['aPlatfR'];
+                    $arrivalPlatformNormal = false;
+                } else {
+                    $arrivalPlatform = $conn['arr']['aPlatfS'];
+                    $arrivalPlatformNormal = true;
+                }
 
                 if ($conn['arr']['aProgType'] == "SCHEDULED" ||
                     $conn['arr']['aProgType'] == "REPORTED" ||
@@ -361,18 +388,6 @@ class connections
                     $arrivalcanceled = true;
                 }
                 $connection[$i]->arrival->canceled = $arrivalcanceled;
-
-
-                // TODO: detect abnormal departure platform
-                /*    if (isset($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
-                        $departurePlatform = trim($conn->Overview->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
-                        $departurePlatformNormal = false;
-                    }
-                    if (isset($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
-                        $arrivalPlatform = trim($conn->Overview->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
-                        $arrivalPlatformNormal = false;
-                    }
-                */
 
                 // Alerts
                 // TODO: support alerts
@@ -417,7 +432,14 @@ class connections
                 foreach ($conn['secL'] as $trainRide) {
                     $departTime = tools::transformTime($trainRide['dep']['dTimeS'],
                         $conn['date']);
-                    $departPlatform = $trainRide['dep']['dPlatfS'];
+
+                    if (key_exists('dPlatfR',$trainRide['dep'])){
+                        $departPlatform = $trainRide['dep']['dPlatfR'];
+                        $departPlatformNormal = false;
+                    } else {
+                        $departPlatform = $trainRide['dep']['dPlatfS'];
+                        $departPlatformNormal = true;
+                    }
 
                     if (key_exists('dTimeR', $trainRide['dep'])) {
                         $departDelay = $trainRide['dep']['dTimeR'] - $trainRide['dep']['dTimeS'];
@@ -438,18 +460,15 @@ class connections
                         $departcanceled = false;
                     }
 
-                    $departPlatformNormal = true;
-                    // TODO: detect abnormal platforms
-                    /*
-                    if (isset($connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text)) {
-                        $departPlatform = trim($connarray[$connectionindex + 1]->Departure->BasicStop->StopPrognosis->Dep->Platform->Text);
-                        $departPlatformNormal = false;
-                    }
-                    */
-
                     $arrivalTime = tools::transformTime($trainRide['arr']['aTimeS'],
                         $conn['date']);
-                    $arrivalPlatform = $trainRide['arr']['aPlatfS'];
+                    if (key_exists('aPlatfR',$trainRide['arr'])){
+                        $arrivalPlatform = $trainRide['arr']['aPlatfR'];
+                        $arrivalPlatformNormal = false;
+                    } else {
+                        $arrivalPlatform = $trainRide['arr']['aPlatfS'];
+                        $arrivalPlatformNormal = true;
+                    }
 
                     if (key_exists('aTimeR', $trainRide['arr'])) {
                         $arrivalDelay = $trainRide['arr']['aTimeR'] - $trainRide['arr']['aTimeS'];
@@ -470,14 +489,6 @@ class connections
                         $arrivalcanceled = true;
                     }
 
-                    $arrivalPlatformNormal = true;
-                    // TODO: detect abnormal platforms
-                    /*
-                    if (isset($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text)) {
-                        $arrivalPlatform = trim($connarray[$connectionindex]->Arrival->BasicStop->StopPrognosis->Arr->Platform->Text);
-                        $arrivalPlatformNormal = false;
-                    }
-                    */
                     $trains[$connectionindex] = new StdClass();
                     $trains[$connectionindex]->arrival = new ViaDepartureArrival();
                     $trains[$connectionindex]->arrival->time = tools::transformTimeHHMMSS($trainRide['arr']['aTimeS'],$conn['date']);
@@ -498,8 +509,17 @@ class connections
                     $trains[$connectionindex]->direction = new StdClass();
                     $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
 
-                    $trains[$connectionindex]->left = ($trainRide['dep']['dProgType'] == "REPORTED");
-                    $trains[$connectionindex]->arrived = ($trainRide['arr']['aProgType'] == "REPORTED");
+                    if ($trainRide['dep']['dProgType'] == "REPORTED") {
+                        $trains[$connectionindex]->left = 1;
+                    } else {
+                        $trains[$connectionindex]->left = 0;
+                    }
+
+                    if ($trainRide['arr']['aProgType'] == "REPORTED") {
+                        $trains[$connectionindex]->arrived = 1;
+                    } else {
+                        $trains[$connectionindex]->arrived = 0;
+                    }
 
                     $ctxRecon = trim($trainRide['jny']['ctxRecon'], '$');
                     $trainName = explode('$', $ctxRecon);
@@ -545,7 +565,7 @@ class connections
                     $vias[$viaIndex]->arrival->vehicle = $trains[$viaIndex]->vehicle;
                     $vias[$viaIndex]->departure->vehicle = $trains[$viaIndex + 1]->vehicle;
 
-                    $vias[$viaIndex]->station =  $trains[$viaIndex + 1]->departureStation;
+                    $vias[$viaIndex]->station = $trains[$viaIndex + 1]->departureStation;
 
                     $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}),
                             2) . '/' . date('Ymd',
@@ -567,9 +587,11 @@ class connections
                 $connection[$i]->departure->vehicle = $trains[0]->vehicle;
                 $connection[$i]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($fromstation->{'@id'}), 2) . '/' . date('Ymd', $connection[$i]->departure->time) . '/' . $trains[0]->vehicle;
                 $connection[$i]->departure->direction = $trains[0]->direction;
+                $connection[$i]->departure->left = $trains[0]->left;
 
                 $connection[$i]->arrival->vehicle = $trains[count($trains) - 1]->vehicle;
                 $connection[$i]->arrival->direction = $trains[count($trains) - 1]->direction;
+                $connection[$i]->arrival->left = end($trains)->arrived;
 
                 //Add journey options to the logs of iRail
                 $journeyoptions[$i] = ["journeys" => [] ];
