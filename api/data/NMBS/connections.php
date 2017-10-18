@@ -134,13 +134,13 @@ class connections
             'useragent' => $irailAgent,
         ];
         if ($typeOfTransport == 'trains') {
-            $trainsonly = '1111111000000000';
+            $trainsonly = '01101111000111';
         } elseif ($typeOfTransport == 'nointernationaltrains') {
-            $trainsonly = '0111111000000000';
+            $trainsonly = '0111111000000000'; // TODO: update
         } elseif ($typeOfTransport == 'all') {
-            $trainsonly = '1111111111111111';
+            $trainsonly = '1111111111111111'; // TODO: update
         } else {
-            $trainsonly = '1111111000000000';
+            $trainsonly = '01101111000111';
         }
 
         if ($timeSel == 'depart') {
@@ -153,7 +153,7 @@ class connections
 
         // numF: number of results: server-side capped to 5, but ask 10 in case they'd let us
         $postdata = '{"auth":{"aid":"sncb-mobi","type":"AID"},
-        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
+        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"","v":302132},
         "lang":"' . $lang . '",
         "svcReqL":[
             {
@@ -170,8 +170,15 @@ class connections
                     "getIST":false,
                     "getPasslist":true,
                     "getPolyline":false,
-                    "numF":10,
-                    "liveSearch":true
+                    "numF":10,';
+
+        // search by arrival
+        if ($timeSel == 1) {
+            $postdata .= '"outFrwd": false,';
+        }
+
+        $postdata .= '"liveSearch":true
+        
                 }
             }
         ],
