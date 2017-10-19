@@ -10,7 +10,19 @@ include_once 'Printer.php';
  */
 class Xml extends Printer
 {
-    private $ATTRIBUTES = ['id', '@id', 'locationX', 'locationY', 'standardname', 'left', 'delay', 'canceled', 'normal', 'shortname'];
+    private $ATTRIBUTES = [
+        'id',
+        '@id',
+        'locationX',
+        'locationY',
+        'standardname',
+        'left',
+        'arrived',
+        'delay',
+        'canceled',
+        'normal',
+        'shortname',
+    ];
     private $rootname;
 
     // make a stack of array information, always work on the last one
@@ -111,7 +123,7 @@ class Xml extends Printer
      */
     public function startKeyVal($key, $val)
     {
-        if ($key == 'time' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
+        if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
         } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
