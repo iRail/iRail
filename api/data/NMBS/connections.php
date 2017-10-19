@@ -418,7 +418,9 @@ class connections
                 $connection[$i]->departure->station = $departureStation;
 
                 if (key_exists('dTimeR', $conn['dep'])) {
-                    $connection[$i]->departure->delay = $conn['dep']['dTimeR'] - $conn['dep']['dTimeS'];
+                    // TODO: will this work when crossing a day boundary?
+                    $connection[$i]->departure->delay = tools::calculateSecondsHHMMSS($conn['dep']['dTimeR'],
+                        $conn['date'], $conn['dep']['dTimeS'], $conn['date']);
                 } else {
                     $connection[$i]->departure->delay = 0;
                 }
@@ -448,7 +450,9 @@ class connections
                 $connection[$i]->arrival->station = $arrivalStation;
 
                 if (key_exists('aTimeR', $conn['arr'])) {
-                    $connection[$i]->arrival->delay = $conn['arr']['aTimeR'] - $conn['arr']['aTimeS'];
+                    // TODO: will this work when crossing a day boundary?
+                    $connection[$i]->arrival->delay = Tools::calculateSecondsHHMMSS($conn['arr']['aTimeR'],
+                        $conn['date'], $conn['arr']['aTimeS'], $conn['date']);
                 } else {
                     $connection[$i]->arrival->delay = 0;
                 }
@@ -503,7 +507,9 @@ class connections
                     }
 
                     if (key_exists('dTimeR', $trainRide['dep'])) {
-                        $departDelay = $trainRide['dep']['dTimeR'] - $trainRide['dep']['dTimeS'];
+                        // TODO: will this work when crossing a day boundary?
+                        $departDelay = tools::calculateSecondsHHMMSS($trainRide['dep']['dTimeR'],
+                            $conn['date'], $trainRide['dep']['dTimeS'], $conn['date']);
                     } else {
                         $departDelay = 0;
                     }
@@ -532,7 +538,8 @@ class connections
                     }
 
                     if (key_exists('aTimeR', $trainRide['arr'])) {
-                        $arrivalDelay = $trainRide['arr']['aTimeR'] - $trainRide['arr']['aTimeS'];
+                        $arrivalDelay = tools::calculateSecondsHHMMSS($trainRide['arr']['aTimeR'],
+                            $conn['date'], $trainRide['arr']['aTimeS'], $conn['date']);
                     } else {
                         $arrivalDelay = 0;
                     }
@@ -565,7 +572,8 @@ class connections
                     $trains[$connectionindex]->departure->platform->name = $departPlatform;
                     $trains[$connectionindex]->departure->platform->normal = $departPlatformNormal;
                     $trains[$connectionindex]->departure->canceled = $departcanceled;
-                    $trains[$connectionindex]->duration = $arrivalTime - $departTime;
+                    $trains[$connectionindex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
+                        $departTime, $conn['date']);
 
                     $trains[$connectionindex]->direction = new StdClass();
                     $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
@@ -618,7 +626,10 @@ class connections
                                 $conn['date']);
 
                             if (key_exists('dTimeR', $rawIntermediateStop)) {
-                                $intermediateStop->departureDelay = $rawIntermediateStop['dTimeR'] - $rawIntermediateStop['dTimeS'];
+                                // TODO: will this work when crossing a day boundary?
+                                $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
+                                    $conn['date'], $rawIntermediateStop['dTimeS'],
+                                    $conn['date']);
                             } else {
                                 $intermediateStop->departureDelay = 0;
                             }
@@ -654,7 +665,9 @@ class connections
                             }
 
                             if (key_exists('aTimeR', $rawIntermediateStop)) {
-                                $intermediateStop->arrivalDelay = $rawIntermediateStop['aTimeR'] - $rawIntermediateStop['aTimeS'];
+                                // TODO: will this work when crossing a day boundary?
+                                $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
+                                    $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
                             } else {
                                 $intermediateStop->arrivalDelay = 0;
                             }
@@ -715,8 +728,9 @@ class connections
                     $vias[$viaIndex]->departure->left = $trains[$viaIndex + 1]->left;
                     $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex + 1]->arrived;
 
-                    $vias[$viaIndex]->timeBetween = $vias[$viaIndex]->departure->time - $trains[$viaIndex]->arrival->time;
-
+                    // TODO: will this work when crossing a day boundary?
+                    $vias[$viaIndex]->timeBetween = tools::calculateSecondsHHMMSS($vias[$viaIndex]->departure->time,
+                        $conn['date'], $trains[$viaIndex]->arrival->time, $conn['date']);
                     $vias[$viaIndex]->direction = $trains[$viaIndex]->direction;
                     $vias[$viaIndex]->arrival->direction = $trains[$viaIndex]->direction;
                     $vias[$viaIndex]->departure->direction = $trains[$viaIndex + 1]->direction;

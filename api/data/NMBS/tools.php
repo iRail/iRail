@@ -46,6 +46,10 @@ class tools
         return mktime($hour, $minute, $second, $month, $day, $year);
     }
 
+    public static function calculateSecondsHHMMSS($realtime, $rtdate, $planned, $pdate)
+    {
+        return tools::transformTimeHHMMSS($realtime, $rtdate) - tools::transformTimeHHMMSS($planned, $pdate);
+    }
     /**
      * This function transforms the brail formatted timestring and reformats it to seconds.
      * @param int $time
