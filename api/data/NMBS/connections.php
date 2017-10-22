@@ -59,7 +59,7 @@ class connections
             Tools::setCachedObject($nmbsCacheKey, $xml);
         }
 
-        $connections = self::parseHafasXml($xml, $lang, $fast, $request, $showAlerts, $request->getFormat());
+        $connections = self::parseConnectionsAPI($xml, $lang, $fast, $request, $showAlerts, $request->getFormat());
 
         $requestedDate = DateTime::createFromFormat('Ymd', $date);
         $now = new DateTime();
@@ -194,11 +194,12 @@ class connections
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
 
         $response = curl_exec($ch);
+
         curl_close($ch);
         return $response;
     }
 
-    public static function parseHafasXml($serverData, $lang, $fast, $request, $showAlerts = false, $format)
+    public static function parseConnectionsAPI($serverData, $lang, $fast, $request, $showAlerts = false, $format)
     {
         $json = json_decode($serverData, true);
 
@@ -290,9 +291,9 @@ class connections
                     $alert->lead = strip_tags($rawAlert['lead']);
 
                     if (key_exists('pubChL', $rawAlert)) {
-                        $alert->startTime = Tools::transformTimeHHMMSS($rawAlert['pubChL'][0]['fTime'],
+                        $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
                             $rawAlert['pubChL'][0]['fDate']);
-                        $alert->endTime = Tools::transformTimeHHMMSS($rawAlert['pubChL'][0]['tTime'],
+                        $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
                             $rawAlert['pubChL'][0]['tDate']);
                     }
 
@@ -424,14 +425,18 @@ class connections
                 } else {
                     $connection[$i]->departure->delay = 0;
                 }
-                $connection[$i]->departure->time = tools::transformTimeHHMMSS($conn['dep']['dTimeS'], $conn['date']);
+                $connection[$i]->departure->time = tools::transformTime($conn['dep']['dTimeS'], $conn['date']);
 
                 //Delay and platform changes
                 if (key_exists('dPlatfR',$conn['dep'])){
                     $departurePlatform = $conn['dep']['dPlatfR'];
                     $departurePlatformNormal = false;
-                } else {
+                } elseif (key_exists('dPlatfS', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfS'];
+                    $departurePlatformNormal = true;
+                } else {
+                    // TODO: is this what we want when we don't know the platform?
+                    $departurePlatform = "?";
                     $departurePlatformNormal = true;
                 }
 
@@ -457,14 +462,18 @@ class connections
                     $connection[$i]->arrival->delay = 0;
                 }
 
-                $connection[$i]->arrival->time = tools::transformTimeHHMMSS($conn['arr']['aTimeS'], $conn['date']);
+                $connection[$i]->arrival->time = tools::transformTime($conn['arr']['aTimeS'], $conn['date']);
 
                 //Delay and platform changes
                 if (key_exists('aPlatfR',$conn['arr'])){
                     $arrivalPlatform = $conn['arr']['aPlatfR'];
                     $arrivalPlatformNormal = false;
-                } else {
+                } elseif (key_exists('aPlatfS', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfS'];
+                    $arrivalPlatformNormal = true;
+                } else {
+                    // TODO: is this what we want when we don't know the platform?
+                    $arrivalPlatform = "?";
                     $arrivalPlatformNormal = true;
                 }
 
@@ -501,8 +510,12 @@ class connections
                     if (key_exists('dPlatfR',$trainRide['dep'])){
                         $departPlatform = $trainRide['dep']['dPlatfR'];
                         $departPlatformNormal = false;
-                    } else {
+                    } else if (key_exists('dPlatfS', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfS'];
+                        $departPlatformNormal = true;
+                    } else {
+                        // TODO: is this what we want when we don't know the platform?
+                        $departPlatform = "?";
                         $departPlatformNormal = true;
                     }
 
@@ -532,8 +545,12 @@ class connections
                     if (key_exists('aPlatfR',$trainRide['arr'])){
                         $arrivalPlatform = $trainRide['arr']['aPlatfR'];
                         $arrivalPlatformNormal = false;
-                    } else {
+                    } elseif (key_exists('aPlatfS', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfS'];
+                        $arrivalPlatformNormal = true;
+                    } else {
+                        // TODO: is this what we want when we don't know the platform?
+                        $arrivalPlatform = "?";
                         $arrivalPlatformNormal = true;
                     }
 
@@ -559,14 +576,14 @@ class connections
 
                     $trains[$connectionindex] = new StdClass();
                     $trains[$connectionindex]->arrival = new ViaDepartureArrival();
-                    $trains[$connectionindex]->arrival->time = tools::transformTimeHHMMSS($trainRide['arr']['aTimeS'],$conn['date']);
+                    $trains[$connectionindex]->arrival->time = tools::transformTime($trainRide['arr']['aTimeS'],$conn['date']);
                     $trains[$connectionindex]->arrival->delay = $arrivalDelay;
                     $trains[$connectionindex]->arrival->platform = new Platform();
                     $trains[$connectionindex]->arrival->platform->name = $arrivalPlatform;
                     $trains[$connectionindex]->arrival->platform->normal = $arrivalPlatformNormal;
                     $trains[$connectionindex]->arrival->canceled = $arrivalcanceled;
                     $trains[$connectionindex]->departure = new ViaDepartureArrival();
-                    $trains[$connectionindex]->departure->time = tools::transformTimeHHMMSS($trainRide['dep']['dTimeS'],$conn['date']);
+                    $trains[$connectionindex]->departure->time = tools::transformTime($trainRide['dep']['dTimeS'],$conn['date']);
                     $trains[$connectionindex]->departure->delay = $departDelay;
                     $trains[$connectionindex]->departure->platform = new Platform();
                     $trains[$connectionindex]->departure->platform->name = $departPlatform;
@@ -622,7 +639,7 @@ class connections
 
                         if (key_exists('dProgType', $rawIntermediateStop)) {
 
-                            $intermediateStop->scheduledDepartureTime = tools::transformTimeHHMMSS($rawIntermediateStop['dTimeS'],
+                            $intermediateStop->scheduledDepartureTime = tools::transformTime($rawIntermediateStop['dTimeS'],
                                 $conn['date']);
 
                             if (key_exists('dTimeR', $rawIntermediateStop)) {
@@ -652,7 +669,7 @@ class connections
                         }
 
                         if (key_exists('aProgType', $rawIntermediateStop)) {
-                            $intermediateStop->scheduledArrivalTime = tools::transformTimeHHMMSS($rawIntermediateStop['aTimeS'],
+                            $intermediateStop->scheduledArrivalTime = tools::transformTime($rawIntermediateStop['aTimeS'],
                                 $conn['date']);
 
                             if ($rawIntermediateStop['aProgType'] == "SCHEDULED" ||
@@ -882,14 +899,4 @@ class connections
         return $occupancyConnections;
     }
 
-    /**
-     * @param $locationX
-     * @param $locationY
-     * @param $lang
-     * @return Station
-     */
-    private static function getStationFromHafasDescription($name, $locationX, $locationY, $lang)
-    {
-        return stations::getStationFromName($name, $lang);
-    }
 }

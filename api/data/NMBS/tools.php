@@ -15,17 +15,25 @@ class tools
     const cache_prefix = "|Irail|Api|";
 
     /**
-     * @param <type> $time -> in 00d15:24:00
+     * @param <type> $time -> in 00d15:24:00 or hhmmss or ddhhmmss format
      * @param <type> $date -> in 20100915
      * @return seconds since the Unix epoch
      */
     public static function transformTime($time, $date)
     {
+        // Fixing inconsistent NMBS formatting. Again.
+        if (strlen($time) == 6) {
+            $time = '00' . $time;
+        } else {
+            $time = str_replace('d', '', $time);
+        }
+        $time = str_replace(':', '', $time);
+
         date_default_timezone_set('Europe/Brussels');
         $dayoffset = intval(substr($time, 0, 2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6, 2));
-        $second = intval(substr($time, 9, 2));
+        $hour = intval(substr($time, 2, 2));
+        $minute = intval(substr($time, 4, 2));
+        $second = intval(substr($time, 6, 2));
         $year = intval(substr($date, 0, 4));
         $month = intval(substr($date, 4, 2));
         $day = intval(substr($date, 6, 2));
@@ -33,22 +41,9 @@ class tools
         return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
     }
 
-    public static function transformTimeHHMMSS($time, $date)
-    {
-        date_default_timezone_set('Europe/Brussels');
-        $hour = intval(substr($time, 0, 2));
-        $minute = intval(substr($time, 2, 2));
-        $second = intval(substr($time, 4, 2));
-        $year = intval(substr($date, 0, 4));
-        $month = intval(substr($date, 4, 2));
-        $day = intval(substr($date, 6, 2));
-
-        return mktime($hour, $minute, $second, $month, $day, $year);
-    }
-
     public static function calculateSecondsHHMMSS($realtime, $rtdate, $planned, $pdate)
     {
-        return tools::transformTimeHHMMSS($realtime, $rtdate) - tools::transformTimeHHMMSS($planned, $pdate);
+        return tools::transformTime($realtime, $rtdate) - tools::transformTime($planned, $pdate);
     }
     /**
      * This function transforms the brail formatted timestring and reformats it to seconds.
