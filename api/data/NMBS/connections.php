@@ -683,7 +683,8 @@ class connections
 
                             if (key_exists('aTimeR', $rawIntermediateStop)) {
                                 // TODO: will this work when crossing a day boundary?
-                                $intermediateStop->departureDelay = $rawIntermediateStop['aTimeR'] - $rawIntermediateStop['aTimeS'];
+                                $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
+                                    $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
                             } else {
                                 $intermediateStop->arrivalDelay = 0;
                             }
@@ -745,8 +746,7 @@ class connections
                     $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex + 1]->arrived;
 
                     // TODO: will this work when crossing a day boundary?
-                    $vias[$viaIndex]->timeBetween = tools::calculateSecondsHHMMSS($vias[$viaIndex]->departure->time,
-                        $conn['date'], $trains[$viaIndex]->arrival->time, $conn['date']);
+                    $vias[$viaIndex]->timeBetween = $vias[$viaIndex]->departure->time - $trains[$viaIndex]->arrival->time;
                     $vias[$viaIndex]->direction = $trains[$viaIndex]->direction;
                     $vias[$viaIndex]->arrival->direction = $trains[$viaIndex]->direction;
                     $vias[$viaIndex]->departure->direction = $trains[$viaIndex + 1]->direction;
