@@ -195,6 +195,7 @@ class connections
 
         $response = curl_exec($ch);
 
+        // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents('../storage/debug-connections-' . $idfrom . '-' . $idto . '-' . time() . '.log',
                 $response);
@@ -445,14 +446,7 @@ class connections
                     $departurePlatformNormal = true;
                 }
 
-                if ($conn['dep']['dProgType'] == "SCHEDULED" ||
-                    $conn['dep']['dProgType'] == "REPORTED" ||
-                    $conn['dep']['dProgType'] == "PROGNOSED" ||
-                    $conn['dep']['dProgType'] == "PARTIAL_FAILURE_AT_ARR") {
-                    $departurecanceled = false;
-                } else {
-                    $departurecanceled = false;
-                }
+                $departurecanceled = self::departureCanceled($conn['dep']['dProgType']);
 
                 $connection[$i]->departure->canceled = $departurecanceled;
 
@@ -482,14 +476,10 @@ class connections
                     $arrivalPlatformNormal = true;
                 }
 
-                if ($conn['arr']['aProgType'] == "SCHEDULED" ||
-                    $conn['arr']['aProgType'] == "REPORTED" ||
-                    $conn['arr']['aProgType'] == "PROGNOSED" ||
-                    $conn['arr']['aProgType'] == "PARTIAL_FAILURE_AT_DEP") {
-                    $arrivalcanceled = false;
-                } else {
-                    $arrivalcanceled = true;
-                }
+
+                $arrivalcanceled = self::arrivalCanceled($conn['arr']['aProgType']);
+
+
                 $connection[$i]->arrival->canceled = $arrivalcanceled;
 
                 $connection[$i]->departure->platform = new Platform();
@@ -536,14 +526,7 @@ class connections
                         $departDelay = 0;
                     }
 
-                    if ($trainRide['dep']['dProgType'] == "SCHEDULED" ||
-                        $trainRide['dep']['dProgType'] == "REPORTED" ||
-                        $trainRide['dep']['dProgType'] == "PROGNOSED" ||
-                        $trainRide['dep']['dProgType'] == "PARTIAL_FAILURE_AT_ARR") {
-                        $departcanceled = false;
-                    } else {
-                        $departcanceled = false;
-                    }
+                    $departcanceled = self::departureCanceled($trainRide['dep']['dProgType']);
 
                     $arrivalTime = tools::transformTime($trainRide['arr']['aTimeS'],
                         $conn['date']);
@@ -570,14 +553,7 @@ class connections
                         $arrivalDelay = 0;
                     }
 
-                    if ($trainRide['arr']['aProgType'] == "SCHEDULED" ||
-                        $trainRide['arr']['aProgType'] == "REPORTED" ||
-                        $trainRide['arr']['aProgType'] == "PROGNOSED" ||
-                        $trainRide['arr']['aProgType'] == "PARTIAL_FAILURE_AT_DEP") {
-                        $arrivalcanceled = false;
-                    } else {
-                        $arrivalcanceled = true;
-                    }
+                    $arrivalcanceled = self::arrivalCanceled($trainRide['arr']['aProgType']);
 
                     $trains[$connectionindex] = new StdClass();
                     $trains[$connectionindex]->arrival = new ViaDepartureArrival();
@@ -656,15 +632,7 @@ class connections
                                 $intermediateStop->departureDelay = 0;
                             }
 
-                            if ($rawIntermediateStop['dProgType'] == "SCHEDULED" ||
-                                $rawIntermediateStop['dProgType'] == "REPORTED" ||
-                                $rawIntermediateStop['dProgType'] == "PROGNOSED" ||
-                                $rawIntermediateStop['dProgType'] == "PARTIAL_FAILURE_AT_ARR") {
-                                $intermediateStop->departureCanceled = false;
-                            } else {
-                                $intermediateStop->departureCanceled = false;
-                            }
-
+                            $intermediateStop->departureCanceled = self::departureCanceled($rawIntermediateStop['dProgType']);
 
                             if ($rawIntermediateStop['dProgType'] == "REPORTED") {
                                 $intermediateStop->left = 1;
@@ -677,18 +645,11 @@ class connections
                             $intermediateStop->scheduledArrivalTime = tools::transformTime($rawIntermediateStop['aTimeS'],
                                 $conn['date']);
 
-                            if ($rawIntermediateStop['aProgType'] == "SCHEDULED" ||
-                                $rawIntermediateStop['aProgType'] == "REPORTED" ||
-                                $rawIntermediateStop['aProgType'] == "PROGNOSED" ||
-                                $rawIntermediateStop['aProgType'] == "PARTIAL_FAILURE_AT_ARR") {
-                                $intermediateStop->arrivalCanceled = false;
-                            } else {
-                                $intermediateStop->arrivalCanceled = false;
-                            }
+                            $intermediateStop->arrivalCanceled = self::arrivalCanceled($rawIntermediateStop['aProgType']);
 
                             if (key_exists('aTimeR', $rawIntermediateStop)) {
 
-                                $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
+                                $intermediateStop->arrivalDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
                                     $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
                             } else {
                                 $intermediateStop->arrivalDelay = 0;
@@ -901,6 +862,32 @@ class connections
         }
 
         return $occupancyConnections;
+    }
+
+    private static function departureCanceled($status)
+    {
+        if ($status == "SCHEDULED" ||
+            $status == "REPORTED" ||
+            $status == "PROGNOSED" ||
+            $status == "CALCULATED" ||
+            $status == "PARTIAL_FAILURE_AT_ARR") {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private static function arrivalCanceled($status)
+    {
+        if ($status == "SCHEDULED" ||
+            $status == "REPORTED" ||
+            $status == "PROGNOSED" ||
+            $status == "CALCULATED" ||
+            $status == "PARTIAL_FAILURE_AT_DEP") {
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }
