@@ -683,8 +683,7 @@ class connections
 
                             if (key_exists('aTimeR', $rawIntermediateStop)) {
                                 // TODO: will this work when crossing a day boundary?
-                                $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
-                                    $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
+                                $intermediateStop->departureDelay = $rawIntermediateStop['aTimeR'] - $rawIntermediateStop['aTimeS'];
                             } else {
                                 $intermediateStop->arrivalDelay = 0;
                             }
