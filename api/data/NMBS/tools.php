@@ -143,10 +143,11 @@ class tools
     /**
      * Store an item in the cache
      *
-     * @param String        $key   The key to store the object under
-     * @param object|string $value The object to store
+     * @param String              $key   The key to store the object under
+     * @param object|array|string $value The object to store
+     * @param int                 $ttl   The number of seconds to keep this in cache
      */
-    public static function setCachedObject($key, $value)
+    public static function setCachedObject($key, $value, $ttl = self::cache_TTL)
     {
         $key = self::cache_prefix . $key;
 
@@ -154,8 +155,8 @@ class tools
         $item = self::$cache->getItem($key);
 
         $item->set($value);
-        if (self::cache_TTL > 0) {
-            $item->expiresAfter(self::cache_TTL);
+        if ($ttl > 0) {
+            $item->expiresAfter($ttl);
         }
 
         self::$cache->save($item);
