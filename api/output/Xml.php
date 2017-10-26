@@ -22,6 +22,7 @@ class Xml extends Printer
         'canceled',
         'normal',
         'shortname',
+        'walking',
     ];
     private $rootname;
 
