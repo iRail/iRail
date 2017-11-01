@@ -637,19 +637,6 @@ class connections
                         $trains[$connectionindex]->arrived = 0;
                     }
 
-                    if ($trainRide['type'] == 'WALK') {
-                        $trains[$connectionindex]->direction = new StdClass();
-                        $trains[$connectionindex]->direction->name = "WALK";
-                        $trains[$connectionindex]->vehicle = 'WALK';
-                        $trains[$connectionindex]->walking = 1;
-                    } else {
-                        $trains[$connectionindex]->walking = 0;
-                        $trains[$connectionindex]->direction = new StdClass();
-                        $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
-                        $trains[$connectionindex]->vehicle = 'BE.NMBS.' . $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
-                    }
-
-
                     $trains[$connectionindex]->departure->station = Stations::getStationFromID($locationDefinitions[$trainRide['dep']['locX']]->id,
                         $lang);
                     $trains[$connectionindex]->arrival->station = Stations::getStationFromID($locationDefinitions[$trainRide['arr']['locX']]->id,
@@ -722,6 +709,30 @@ class connections
 
                             $trains[$connectionindex]->stops[] = $intermediateStop;
                         }
+
+
+                        if ($trainRide['type'] == 'WALK') {
+                            // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
+                            $trains[$connectionindex]->direction = new StdClass();
+                            $trains[$connectionindex]->direction->name = "WALK";
+                            $trains[$connectionindex]->vehicle = 'WALK';
+                            $trains[$connectionindex]->walking = 1;
+                        } else {
+                            $trains[$connectionindex]->walking = 0;
+                            $trains[$connectionindex]->direction = new StdClass();
+                            if (key_exists('dirTxt', $trainRide['jny'])) {
+                                // Get the direction from the API
+                                $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
+                            } else {
+                                // If we can't load the direction from the data (direction is missing),
+                                // fill in the gap by using the furthest stop we know on this trains route.
+                                // This typically is the stop where the user leaves this train
+                                $trains[$connectionindex]->direction->name = end($trains[$connectionindex]->stops)->station->name;
+                            }
+                            $trains[$connectionindex]->vehicle = 'BE.NMBS.' . $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
+                        }
+
+
                         // first and last stop are just arrival and departure, clear those
                         unset($trains[$connectionindex]->stops[0]);
                         unset($trains[$connectionindex]->stops[count($trains[$connectionindex]->stops) - 1]);
