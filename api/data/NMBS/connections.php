@@ -862,7 +862,7 @@ class connections
                 $connection[$i]->arrival->direction = $trains[count($trains) - 1]->direction;
                 $connection[$i]->arrival->arrived = end($trains)->arrived;
                 if (property_exists(end($trains), 'alerts') && count(end($trains)->alerts) > 0) {
-                    $connection[$i]->departure->alert = end($trains)->alerts;
+                    $connection[$i]->arrival->alert = end($trains)->alerts;
                 }
 
                 //Add journey options to the logs of iRail
