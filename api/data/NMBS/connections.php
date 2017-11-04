@@ -539,7 +539,7 @@ class connections
                 $trains = [];
                 $vias = [];
 
-                $connectionindex = 0;
+                $trainIndex = 0;
 
                 // For the sake of readability: the response contains trains, not vias. Therefore, just parse the trains, and create via's based on the trains later.
                 // This is way more readable compared to instantly creating the vias
@@ -607,42 +607,42 @@ class connections
                         $arrivalcanceled = self::arrivalCanceled($trainRide['arr']['aProgType']);
                     }
 
-                    $trains[$connectionindex] = new StdClass();
-                    $trains[$connectionindex]->arrival = new ViaDepartureArrival();
-                    $trains[$connectionindex]->arrival->time = tools::transformTime($trainRide['arr']['aTimeS'],$conn['date']);
-                    $trains[$connectionindex]->arrival->delay = $arrivalDelay;
-                    $trains[$connectionindex]->arrival->platform = new Platform();
-                    $trains[$connectionindex]->arrival->platform->name = $arrivalPlatform;
-                    $trains[$connectionindex]->arrival->platform->normal = $arrivalPlatformNormal;
-                    $trains[$connectionindex]->arrival->canceled = $arrivalcanceled;
-                    $trains[$connectionindex]->departure = new ViaDepartureArrival();
-                    $trains[$connectionindex]->departure->time = tools::transformTime($trainRide['dep']['dTimeS'],$conn['date']);
-                    $trains[$connectionindex]->departure->delay = $departDelay;
-                    $trains[$connectionindex]->departure->platform = new Platform();
-                    $trains[$connectionindex]->departure->platform->name = $departPlatform;
-                    $trains[$connectionindex]->departure->platform->normal = $departPlatformNormal;
-                    $trains[$connectionindex]->departure->canceled = $departcanceled;
-                    $trains[$connectionindex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
+                    $trains[$trainIndex] = new StdClass();
+                    $trains[$trainIndex]->arrival = new ViaDepartureArrival();
+                    $trains[$trainIndex]->arrival->time = tools::transformTime($trainRide['arr']['aTimeS'],$conn['date']);
+                    $trains[$trainIndex]->arrival->delay = $arrivalDelay;
+                    $trains[$trainIndex]->arrival->platform = new Platform();
+                    $trains[$trainIndex]->arrival->platform->name = $arrivalPlatform;
+                    $trains[$trainIndex]->arrival->platform->normal = $arrivalPlatformNormal;
+                    $trains[$trainIndex]->arrival->canceled = $arrivalcanceled;
+                    $trains[$trainIndex]->departure = new ViaDepartureArrival();
+                    $trains[$trainIndex]->departure->time = tools::transformTime($trainRide['dep']['dTimeS'],$conn['date']);
+                    $trains[$trainIndex]->departure->delay = $departDelay;
+                    $trains[$trainIndex]->departure->platform = new Platform();
+                    $trains[$trainIndex]->departure->platform->name = $departPlatform;
+                    $trains[$trainIndex]->departure->platform->normal = $departPlatformNormal;
+                    $trains[$trainIndex]->departure->canceled = $departcanceled;
+                    $trains[$trainIndex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
                         $departTime, $conn['date']);
 
                     if (key_exists('dProgType', $trainRide['dep']) && $trainRide['dep']['dProgType'] == "REPORTED") {
-                        $trains[$connectionindex]->left = 1;
+                        $trains[$trainIndex]->left = 1;
                     } else {
-                        $trains[$connectionindex]->left = 0;
+                        $trains[$trainIndex]->left = 0;
                     }
 
                     if (key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED") {
-                        $trains[$connectionindex]->arrived = 1;
+                        $trains[$trainIndex]->arrived = 1;
                     } else {
-                        $trains[$connectionindex]->arrived = 0;
+                        $trains[$trainIndex]->arrived = 0;
                     }
 
-                    $trains[$connectionindex]->departure->station = Stations::getStationFromID($locationDefinitions[$trainRide['dep']['locX']]->id,
+                    $trains[$trainIndex]->departure->station = Stations::getStationFromID($locationDefinitions[$trainRide['dep']['locX']]->id,
                         $lang);
-                    $trains[$connectionindex]->arrival->station = Stations::getStationFromID($locationDefinitions[$trainRide['arr']['locX']]->id,
+                    $trains[$trainIndex]->arrival->station = Stations::getStationFromID($locationDefinitions[$trainRide['arr']['locX']]->id,
                         $lang);
 
-                    $trains[$connectionindex]->stops = [];
+                    $trains[$trainIndex]->stops = [];
                     if (key_exists('jny', $trainRide)) {
                         foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
 
@@ -707,43 +707,20 @@ class connections
                                 }
                             }
 
-                            $trains[$connectionindex]->stops[] = $intermediateStop;
+                            $trains[$trainIndex]->stops[] = $intermediateStop;
                         }
-
-
-                        if ($trainRide['type'] == 'WALK') {
-                            // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
-                            $trains[$connectionindex]->direction = new StdClass();
-                            $trains[$connectionindex]->direction->name = "WALK";
-                            $trains[$connectionindex]->vehicle = 'WALK';
-                            $trains[$connectionindex]->walking = 1;
-                        } else {
-                            $trains[$connectionindex]->walking = 0;
-                            $trains[$connectionindex]->direction = new StdClass();
-                            if (key_exists('dirTxt', $trainRide['jny'])) {
-                                // Get the direction from the API
-                                $trains[$connectionindex]->direction->name = $trainRide['jny']['dirTxt'];
-                            } else {
-                                // If we can't load the direction from the data (direction is missing),
-                                // fill in the gap by using the furthest stop we know on this trains route.
-                                // This typically is the stop where the user leaves this train
-                                $trains[$connectionindex]->direction->name = end($trains[$connectionindex]->stops)->station->name;
-                            }
-                            $trains[$connectionindex]->vehicle = 'BE.NMBS.' . $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
-                        }
-
 
                         // first and last stop are just arrival and departure, clear those
-                        unset($trains[$connectionindex]->stops[0]);
-                        unset($trains[$connectionindex]->stops[count($trains[$connectionindex]->stops) - 1]);
+                        unset($trains[$trainIndex]->stops[0]);
+                        unset($trains[$trainIndex]->stops[count($trains[$trainIndex]->stops) - 1]);
 
 
                         // Don't trust this code yet
-                        $trains[$connectionindex]->alerts = [];
+                        $trains[$trainIndex]->alerts = [];
                         try {
                             if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
                                 foreach ($trainRide['jny']['himL'] as $himX) {
-                                    $trains[$connectionindex]->alerts[] = $alertDefinitions[$himX['himX']];
+                                    $trains[$trainIndex]->alerts[] = $alertDefinitions[$himX['himX']];
                                 }
 
                             }
@@ -752,10 +729,33 @@ class connections
                         }
                     }
 
-                    $connectionindex++;
+                    if ($trainRide['type'] == 'WALK') {
+                        // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
+                        $trains[$trainIndex]->direction = new StdClass();
+                        $trains[$trainIndex]->direction->name = "WALK";
+                        $trains[$trainIndex]->vehicle = 'WALK';
+                        $trains[$trainIndex]->walking = 1;
+                    } else {
+                        $trains[$trainIndex]->walking = 0;
+                        $trains[$trainIndex]->direction = new StdClass();
+                        if (key_exists('dirTxt', $trainRide['jny'])) {
+                            // Get the direction from the API
+                            $trains[$trainIndex]->direction->name = $trainRide['jny']['dirTxt'];
+                        } else {
+                            // If we can't load the direction from the data (direction is missing),
+                            // fill in the gap by using the furthest stop we know on this trains route.
+                            // This typically is the stop where the user leaves this train
+                            $trains[$trainIndex]->direction->name = end($trains[$trainIndex]->stops)->station->name;
+                        }
+                        $trains[$trainIndex]->vehicle = 'BE.NMBS.' . $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
+                    }
+
+                    $trainIndex++;
                 }
 
-                $connectionindex = 0;
+                // Don't need this variable anymore. Clean up for easier debugging.
+                unset($trainIndex);
+
                 $viaCount = count($trains) - 1;
                 for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
                     $vias[$viaIndex] = new Via();
@@ -765,7 +765,7 @@ class connections
                     $vias[$viaIndex]->arrival->platform = $trains[$viaIndex]->arrival->platform;
                     $vias[$viaIndex]->arrival->canceled = $trains[$viaIndex]->arrival->canceled;
                     if (property_exists($trains[$viaIndex], 'alerts') && count($trains[$viaIndex]->alerts) > 0) {
-                        $vias[$viaIndex]->arrival->alerts = $trains[$viaIndex]->alerts;
+                        $vias[$viaIndex]->arrival->alert = $trains[$viaIndex]->alerts;
                     }
 
                     $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex]->arrived;
@@ -777,7 +777,7 @@ class connections
                     $vias[$viaIndex]->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
                     if (property_exists($trains[$viaIndex + 1],
                             'alerts') && count($trains[$viaIndex + 1]->alerts) > 0) {
-                        $vias[$viaIndex]->departure->alerts = $trains[$viaIndex + 1]->alerts;
+                        $vias[$viaIndex]->departure->alert = $trains[$viaIndex + 1]->alerts;
                     }
 
                     $vias[$viaIndex]->departure->left = $trains[$viaIndex + 1]->left;
@@ -800,14 +800,14 @@ class connections
                     //$vias[$viaIndex]->nextIntermediateStop = $trains[$viaIndex + 1]->stops;
                     $vias[$viaIndex]->station = $trains[$viaIndex]->arrival->station;
 
-                    $vias[$connectionindex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}),
+                    $vias[$viaIndex]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$viaIndex]->station->{'@id'}),
                             2) . '/' . date('Ymd',
-                            $departTime) . '/' . substr($vias[$connectionindex]->departure->vehicle,
-                            strrpos($vias[$connectionindex]->departure->vehicle, '.') + 1);
-                    $vias[$connectionindex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$connectionindex]->station->{'@id'}),
+                            $departTime) . '/' . substr($vias[$viaIndex]->departure->vehicle,
+                            strrpos($vias[$viaIndex]->departure->vehicle, '.') + 1);
+                    $vias[$viaIndex]->arrival->departureConnection = 'http://irail.be/connections/' . substr(basename($vias[$viaIndex]->station->{'@id'}),
                             2) . '/' . date('Ymd',
-                            $departTime) . '/' . substr($vias[$connectionindex]->arrival->vehicle,
-                            strrpos($vias[$connectionindex]->arrival->vehicle, '.') + 1);
+                            $departTime) . '/' . substr($vias[$viaIndex]->arrival->vehicle,
+                            strrpos($vias[$viaIndex]->arrival->vehicle, '.') + 1);
                 }
 
                 // All the train alerts should go together in the connection alerts
@@ -868,15 +868,15 @@ class connections
                 //Add journey options to the logs of iRail
                 $journeyoptions[$i] = ["journeys" => [] ];
                 $departureStop = $connection[$i]->departure->station;
-                for ($viaindex = 0; $viaindex < count($vias); $viaindex++) {
-                    $arrivalStop = $vias[$viaindex]->station;
+                for ($viaIndex = 0; $viaIndex < count($vias); $viaIndex++) {
+                    $arrivalStop = $vias[$viaIndex]->station;
                     $journeyoptions[$i]["journeys"][] = [
-                        "trip" => substr($vias[$viaindex]->vehicle, 8),
+                        "trip" => substr($vias[$viaIndex]->vehicle, 8),
                         "departureStop" => $departureStop->{'@id'},
                         "arrivalStop" => $arrivalStop->{'@id'}
                     ];
                     //set the next departureStop
-                    $departureStop = $vias[$viaindex]->station;
+                    $departureStop = $vias[$viaIndex]->station;
                 }
                 //add last journey
                 $journeyoptions[$i]["journeys"][] = [
