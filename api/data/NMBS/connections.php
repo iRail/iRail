@@ -962,6 +962,7 @@ class connections
             $status == "REPORTED" ||
             $status == "PROGNOSED" ||
             $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
             $status == "PARTIAL_FAILURE_AT_ARR") {
             return false;
         } else {
@@ -975,6 +976,7 @@ class connections
             $status == "REPORTED" ||
             $status == "PROGNOSED" ||
             $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
             $status == "PARTIAL_FAILURE_AT_DEP") {
             return false;
         } else {
