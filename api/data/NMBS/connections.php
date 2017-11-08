@@ -781,8 +781,6 @@ class connections
                     }
 
                     $vias[$viaIndex]->departure->left = $trains[$viaIndex + 1]->left;
-                    $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex + 1]->arrived;
-
 
                     $vias[$viaIndex]->timeBetween = $vias[$viaIndex]->departure->time - $trains[$viaIndex]->arrival->time;
                     $vias[$viaIndex]->direction = $trains[$viaIndex]->direction;
