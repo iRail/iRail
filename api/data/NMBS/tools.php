@@ -168,6 +168,7 @@ class tools
             $status == "REPORTED" ||
             $status == "PROGNOSED" ||
             $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
             $status == "PARTIAL_FAILURE_AT_ARR") {
             return false;
         } else {
@@ -181,6 +182,7 @@ class tools
             $status == "REPORTED" ||
             $status == "PROGNOSED" ||
             $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
             $status == "PARTIAL_FAILURE_AT_DEP") {
             return false;
         } else {
