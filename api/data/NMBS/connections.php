@@ -866,6 +866,7 @@ class connections
 
             $connection[$i]->departure->direction = $trains[0]->direction;
             $connection[$i]->departure->left = $trains[0]->left;
+            $connection[$i]->departure->walking = 0;
             if (property_exists($trains[0], 'alerts') && count($trains[0]->alerts) > 0) {
                 $connection[$i]->departure->alert = $trains[0]->alerts;
             }
@@ -873,6 +874,7 @@ class connections
             $connection[$i]->arrival->vehicle = $trains[count($trains) - 1]->vehicle;
             $connection[$i]->arrival->direction = $trains[count($trains) - 1]->direction;
             $connection[$i]->arrival->arrived = end($trains)->arrived;
+            $connection[$i]->arrival->walking = 0;
             if (property_exists(end($trains), 'alerts') && count(end($trains)->alerts) > 0) {
                 $connection[$i]->departure->alert = end($trains)->alerts;
             }
