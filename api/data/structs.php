@@ -71,6 +71,7 @@ class ViaDepartureArrival
 {
     public $time;
     public $platform;
+    public $isExtraStop;
 }
 
 class Stop

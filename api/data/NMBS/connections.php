@@ -177,7 +177,7 @@ class connections
             $postdata .= '"outFrwd": false,';
         }
 
-        $postdata .= '"liveSearch":true
+        $postdata .= '"liveSearch":false
         
                 }
             }
@@ -351,7 +351,6 @@ class connections
             }
 
             $departureStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
-            $arrivalStation = Stations::getStationFromID($locationDefinitions[1]->id, $lang);
 
             foreach ($json['svcResL'][0]['res']['outConL'] as $conn) {
 
@@ -470,6 +469,11 @@ class connections
                 $connection[$i]->departure = new DepartureArrival();
                 $connection[$i]->departure->station = $departureStation;
 
+                // When a train has been cancelled mid-run, the arrival station can be different than the planned one!
+                // Therefore, always parse it from the planner results
+                $arrivalStation = Stations::getStationFromID($locationDefinitions[$conn['arr']['locX']]->id, $lang);
+
+
                 if (key_exists('dTimeR', $conn['dep'])) {
 
                     $connection[$i]->departure->delay = tools::calculateSecondsHHMMSS($conn['dep']['dTimeR'],
@@ -492,9 +496,6 @@ class connections
                     $departurePlatformNormal = true;
                 }
 
-                $departurecanceled = self::departureCanceled($conn['dep']['dProgType']);
-
-                $connection[$i]->departure->canceled = $departurecanceled;
 
                 $connection[$i]->arrival = new DepartureArrival();
                 $connection[$i]->arrival->station = $arrivalStation;
@@ -521,12 +522,6 @@ class connections
                     $arrivalPlatform = "?";
                     $arrivalPlatformNormal = true;
                 }
-
-
-                $arrivalcanceled = self::arrivalCanceled($conn['arr']['aProgType']);
-
-
-                $connection[$i]->arrival->canceled = $arrivalcanceled;
 
                 $connection[$i]->departure->platform = new Platform();
                 $connection[$i]->departure->platform->name = $departurePlatform;
@@ -572,11 +567,6 @@ class connections
                         $departDelay = 0;
                     }
 
-                    $departcanceled = false;
-                    if (key_exists('dProgType', $trainRide['dep'])) {
-                        $departcanceled = self::departureCanceled($trainRide['dep']['dProgType']);
-                    }
-
                     $arrivalTime = tools::transformTime($trainRide['arr']['aTimeS'],
                         $conn['date']);
                     if (key_exists('aPlatfR',$trainRide['arr'])){
@@ -602,9 +592,25 @@ class connections
                         $arrivalDelay = 0;
                     }
 
+                    $arrivalIsExtraStop = 0;
+                    if (key_exists('isAdd', $trainRide['arr'])) {
+                        $arrivalIsExtraStop = $trainRide['arr']['isAdd'];
+                    }
+
+                    $departureIsExtraStop = 0;
+                    if (key_exists('isAdd', $trainRide['dep'])) {
+                        $departureIsExtraStop = $trainRide['dep']['isAdd'];
+                    }
+
+                    $departurecanceled = false;
                     $arrivalcanceled = false;
-                    if (key_exists('aProgType', $trainRide['arr'])) {
-                        $arrivalcanceled = self::arrivalCanceled($trainRide['arr']['aProgType']);
+
+                    if (key_exists('dCncl', $trainRide['dep'])) {
+                        $departurecanceled = $trainRide['dep']['dCncl'];
+                    }
+
+                    if (key_exists('aCncl', $trainRide['arr'])) {
+                        $arrivalcanceled = $trainRide['arr']['aCncl'];
                     }
 
                     $trains[$trainIndex] = new StdClass();
@@ -615,13 +621,15 @@ class connections
                     $trains[$trainIndex]->arrival->platform->name = $arrivalPlatform;
                     $trains[$trainIndex]->arrival->platform->normal = $arrivalPlatformNormal;
                     $trains[$trainIndex]->arrival->canceled = $arrivalcanceled;
+                    $trains[$trainIndex]->arrival->isExtraStop = $arrivalIsExtraStop;
                     $trains[$trainIndex]->departure = new ViaDepartureArrival();
                     $trains[$trainIndex]->departure->time = tools::transformTime($trainRide['dep']['dTimeS'],$conn['date']);
                     $trains[$trainIndex]->departure->delay = $departDelay;
                     $trains[$trainIndex]->departure->platform = new Platform();
                     $trains[$trainIndex]->departure->platform->name = $departPlatform;
                     $trains[$trainIndex]->departure->platform->normal = $departPlatformNormal;
-                    $trains[$trainIndex]->departure->canceled = $departcanceled;
+                    $trains[$trainIndex]->departure->canceled = $departurecanceled;
+                    $trains[$trainIndex]->departure->isExtraStop = $departureIsExtraStop;
                     $trains[$trainIndex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
                         $departTime, $conn['date']);
 
@@ -642,8 +650,14 @@ class connections
                     $trains[$trainIndex]->arrival->station = Stations::getStationFromID($locationDefinitions[$trainRide['arr']['locX']]->id,
                         $lang);
 
+                    $trains[$trainIndex]->isPartiallyCancelled = false;
                     $trains[$trainIndex]->stops = [];
                     if (key_exists('jny', $trainRide)) {
+
+                        if (key_exists('isPartCncl', $trainRide['jny'])) {
+                            $trains[$trainIndex]->isPartiallyCancelled = $trainRide['jny']['isPartCncl'];
+                        }
+
                         foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
 
                             /* "locX": 2,
@@ -665,8 +679,13 @@ class connections
 
                             if (key_exists('dProgType', $rawIntermediateStop)) {
 
+                                if (key_exists('dTimeS', $rawIntermediateStop)) {
                                 $intermediateStop->scheduledDepartureTime = tools::transformTime($rawIntermediateStop['dTimeS'],
                                     $conn['date']);
+                                } else {
+                                    // TODO: ensure this doesn't cause trouble in the printer
+                                    $intermediateStop->scheduledDepartureTime = null;
+                                }
 
                                 if (key_exists('dTimeR', $rawIntermediateStop)) {
 
@@ -706,14 +725,37 @@ class connections
                                     $intermediateStop->arrived = 0;
                                 }
                             }
+                            // Some boolean about scheduled departure? First seen on an added stop
+                            if (key_exists('dInS', $rawIntermediateStop)) {
+
+                            }
+
+                            // Some boolean about realtime departure? First seen on an added stop
+                            if (key_exists('dInR', $rawIntermediateStop)) {
+
+                            }
+
+                            // Some boolean about realtime departure? First seen on an added stop
+                            if (key_exists('aOutR', $rawIntermediateStop)) {
+
+                            }
+
+                            if (key_exists('dCncl', $rawIntermediateStop)) {
+                                $intermediateStop->departureCanceled = $rawIntermediateStop['dCncl'];
+                            }
+
+                            if (key_exists('aCncl', $rawIntermediateStop)) {
+                                $intermediateStop->arrivalCanceled = $rawIntermediateStop['aCncl'];
+                            }
+
+                            if (key_exists('isAdd', $rawIntermediateStop)) {
+                                $intermediateStop->isExtraStop = 1;
+                            } else {
+                                $intermediateStop->isExtraStop = 0;
+                            }
 
                             $trains[$trainIndex]->stops[] = $intermediateStop;
                         }
-
-                        // first and last stop are just arrival and departure, clear those
-                        unset($trains[$trainIndex]->stops[0]);
-                        unset($trains[$trainIndex]->stops[count($trains[$trainIndex]->stops) - 1]);
-
 
                         // Don't trust this code yet
                         $trains[$trainIndex]->alerts = [];
@@ -753,6 +795,9 @@ class connections
                     $trainIndex++;
                 }
 
+                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;;
+                $connection[$i]->arrival->canceled = end($trains)->arrival->canceled;
+
                 // Don't need this variable anymore. Clean up for easier debugging.
                 unset($trainIndex);
 
@@ -764,6 +809,7 @@ class connections
                     $vias[$viaIndex]->arrival->delay = $trains[$viaIndex]->arrival->delay;
                     $vias[$viaIndex]->arrival->platform = $trains[$viaIndex]->arrival->platform;
                     $vias[$viaIndex]->arrival->canceled = $trains[$viaIndex]->arrival->canceled;
+                    $vias[$viaIndex]->arrival->isExtraStop = $trains[$viaIndex]->arrival->isExtraStop;
                     if (property_exists($trains[$viaIndex], 'alerts') && count($trains[$viaIndex]->alerts) > 0) {
                         $vias[$viaIndex]->arrival->alert = $trains[$viaIndex]->alerts;
                     }
@@ -775,6 +821,7 @@ class connections
                     $vias[$viaIndex]->departure->delay = $trains[$viaIndex + 1]->departure->delay;
                     $vias[$viaIndex]->departure->platform = $trains[$viaIndex + 1]->departure->platform;
                     $vias[$viaIndex]->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
+                    $vias[$viaIndex]->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
                     if (property_exists($trains[$viaIndex + 1],
                             'alerts') && count($trains[$viaIndex + 1]->alerts) > 0) {
                         $vias[$viaIndex]->departure->alert = $trains[$viaIndex + 1]->alerts;
