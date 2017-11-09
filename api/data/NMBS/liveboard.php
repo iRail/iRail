@@ -342,12 +342,32 @@ class liveboard
                 $departurePlatformNormal = true;
             }
 
-            $canceled = Tools::departureCanceled( $departure['stbStop']['dProgType']);
+            // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
+            // DepartureCanceled gives information if this stop has been canceled.
+            $canceled = 0;
+            $partiallyCanceled = 0;
+            $departureCanceled = 0;
+            if (key_exists('isCncl', $departure)) {
+                $canceled = $departure['isCncl'];
+            }
+            if (key_exists('isPartCncl', $departure)) {
+                $partiallyCanceled = $departure['isPartCncl'];
+            }
+            if ($canceled){
+                $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
+            }
 
             $left = 0;
-            if ($departure['stbStop']['dProgType'] == 'REPORTED') {
-                $left = 1;
+            if (key_exists('dProgType', $departure['stbStop'])) {
+                if ($departure['stbStop']['dProgType'] == 'REPORTED') {
+                    $left = 1;
+                }
+                if (key_exists('dCncl', $departure['stbStop'])) {
+                    $departureCanceled =  $departure['stbStop']['dCncl'];
+                }
             }
+
+
             $station = stations::getStationFromName($departure['dirTxt'],$lang);
 
             $nodes[$departureIndex] = new DepartureArrival();
@@ -360,7 +380,11 @@ class liveboard
             $nodes[$departureIndex]->platform = new Platform();
             $nodes[$departureIndex]->platform->name = $departurePlatform;
             $nodes[$departureIndex]->platform->normal = $departurePlatformNormal;
-            $nodes[$departureIndex]->canceled = $canceled;
+            $nodes[$departureIndex]->canceled = $departureCanceled;
+            // Include partiallyCanceled, but don't include canceled.
+            // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
+            // Canceled means all stations are canceled, including this one
+            $nodes[$departureIndex]->partiallyCanceled = $partiallyCanceled;
             $nodes[$departureIndex]->left = $left;
             $nodes[$departureIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
                     2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
