@@ -641,6 +641,8 @@ class connections
 
                     if (key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED") {
                         $trains[$trainIndex]->arrived = 1;
+                        // A train can only arrive if it left first in the previous station
+                        $trains[$trainIndex]->left = 1;
                     } else {
                         $trains[$trainIndex]->arrived = 0;
                     }
@@ -677,34 +679,6 @@ class connections
                                 $lang);
 
 
-                            if (key_exists('dProgType', $rawIntermediateStop)) {
-
-                                if (key_exists('dTimeS', $rawIntermediateStop)) {
-                                $intermediateStop->scheduledDepartureTime = tools::transformTime($rawIntermediateStop['dTimeS'],
-                                    $conn['date']);
-                                } else {
-                                    // TODO: ensure this doesn't cause trouble in the printer
-                                    $intermediateStop->scheduledDepartureTime = null;
-                                }
-
-                                if (key_exists('dTimeR', $rawIntermediateStop)) {
-
-                                    $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
-                                        $conn['date'], $rawIntermediateStop['dTimeS'],
-                                        $conn['date']);
-                                } else {
-                                    $intermediateStop->departureDelay = 0;
-                                }
-
-                                $intermediateStop->departureCanceled = self::departureCanceled($rawIntermediateStop['dProgType']);
-
-                                if ($rawIntermediateStop['dProgType'] == "REPORTED") {
-                                    $intermediateStop->left = 1;
-                                } else {
-                                    $intermediateStop->left = 0;
-                                }
-                            }
-
                             if (key_exists('aProgType', $rawIntermediateStop)) {
                                 $intermediateStop->scheduledArrivalTime = tools::transformTime($rawIntermediateStop['aTimeS'],
                                     $conn['date']);
@@ -725,6 +699,37 @@ class connections
                                     $intermediateStop->arrived = 0;
                                 }
                             }
+
+                            if (key_exists('dProgType', $rawIntermediateStop)) {
+
+                                if (key_exists('dTimeS', $rawIntermediateStop)) {
+                                    $intermediateStop->scheduledDepartureTime = tools::transformTime($rawIntermediateStop['dTimeS'],
+                                        $conn['date']);
+                                } else {
+                                    // TODO: ensure this doesn't cause trouble in the printer
+                                    $intermediateStop->scheduledDepartureTime = null;
+                                }
+
+                                if (key_exists('dTimeR', $rawIntermediateStop)) {
+
+                                    $intermediateStop->departureDelay = tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
+                                        $conn['date'], $rawIntermediateStop['dTimeS'],
+                                        $conn['date']);
+                                } else {
+                                    $intermediateStop->departureDelay = 0;
+                                }
+
+                                $intermediateStop->departureCanceled = self::departureCanceled($rawIntermediateStop['dProgType']);
+
+                                if ($rawIntermediateStop['dProgType'] == "REPORTED") {
+                                    $intermediateStop->left = 1;
+                                    // A train can only leave a stop if he arrived first
+                                    $intermediateStop->arrived = 1;
+                                } else {
+                                    $intermediateStop->left = 0;
+                                }
+                            }
+
                             // Some boolean about scheduled departure? First seen on an added stop
                             if (key_exists('dInS', $rawIntermediateStop)) {
 
