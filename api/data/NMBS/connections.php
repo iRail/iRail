@@ -862,6 +862,8 @@ class connections
                         $connectionAlerts = array_merge($connectionAlerts, $train->alerts);
                     }
                 }
+                $connectionAlerts = array_unique($connectionAlerts, SORT_REGULAR);
+
                 $connectionRemarks = [];
                 if (key_exists('ovwMsgL', $conn)) {
                     foreach ($conn['ovwMsgL'] as $message) {
