@@ -119,7 +119,7 @@ class liveboard
           "name": "' . $station->name . '",
           "type": "S"
         },
-        "time": "' . str_replace(':','',$time) . '00",
+        "time": "' . str_replace(':', '', $time) . '00",
         "getPasslist": false,
         "getTrainComposition": false,
         "maxJny": 50
@@ -353,7 +353,7 @@ class liveboard
             if (key_exists('isPartCncl', $departure)) {
                 $partiallyCanceled = $departure['isPartCncl'];
             }
-            if ($canceled){
+            if ($canceled) {
                 $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
             }
 
@@ -368,7 +368,7 @@ class liveboard
             }
 
 
-            $station = stations::getStationFromName($departure['dirTxt'],$lang);
+            $station = stations::getStationFromName($departure['dirTxt'], $lang);
 
             $nodes[$departureIndex] = new DepartureArrival();
             $nodes[$departureIndex]->delay = $delay;

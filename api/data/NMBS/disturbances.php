@@ -22,12 +22,11 @@ class disturbances
             $data = self::parseData($xml);
 
             // Store a backup copy to deal with nmbs outages
-            tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()),$data,3600);
-
+            tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $data, 3600);
         } catch (Exception $exception) {
             $data = tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
 
-            if ($data === false){
+            if ($data === false) {
                 // No cached copy available
                 throw $exception;
             }
@@ -37,7 +36,7 @@ class disturbances
             $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available.";
             $disturbance->link = "https://belgianrail.be/";
             $disturbance->timestamp = round(microtime(true));
-            array_unshift($data,$disturbance);
+            array_unshift($data, $disturbance);
         }
 
         $dataroot->disturbance = $data;
