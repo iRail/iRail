@@ -189,16 +189,38 @@ class vehicleinformation
                     // Check if this element has a src attribute.
                     if (key_exists('src', $departureImgNode->attr) &&
                         strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
-                        $departed = true;
+                        $departed = 1;
                     } else {
                         // Default to false if we don't have any information. This keeps API output consistent.
                         // (Always include the field)
-                        $departed = false;
+                        $departed = 0;
                     }
                 } else {
                     // Default to false if we don't have any information. This keeps API output consistent.
                     // (Always include the field)
-                    $departed = false;
+                    $departed = 0;
+                }
+
+                if(isset($node->children[2]) && isset ($node->children[2]->children[0])){
+                    // This node can be 3 things
+                    // - canceled arrival/departure icon
+                    // - extra stop icon
+                    // - delay span, in case it's normal
+                    // We're just checking for the extra stop icon here
+                    $isExtraImgNode = $node->children[2]->children[0];
+
+                    if (key_exists('src', $isExtraImgNode->attr) &&
+                        strpos($isExtraImgNode->attr['src'], '/as/hafas-res/img/rt_additional_stop.gif') !== false) {
+                        $isExtra = 1;
+                    } else {
+                        // Default to false if we don't have any information. This keeps API output consistent.
+                        // (Always include the field)
+                        $isExtra = 0;
+                    }
+                } else {
+                    // Default to false if we don't have any information. This keeps API output consistent.
+                    // (Always include the field)
+                    $isExtra = 0;
                 }
 
                 // Time
@@ -304,6 +326,7 @@ class vehicleinformation
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
                 $stops[$j]->left = $departed;
+                $stops[$j]->isExtraStop = $isExtra;
 
                 // Store the last station to get vehicle coordinates
                 if ($departed) {

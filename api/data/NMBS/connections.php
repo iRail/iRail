@@ -607,6 +607,7 @@ class connections
 
                     if (key_exists('dCncl', $trainRide['dep'])) {
                         $departurecanceled = $trainRide['dep']['dCncl'];
+
                     }
 
                     if (key_exists('aCncl', $trainRide['arr'])) {
