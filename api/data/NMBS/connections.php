@@ -815,9 +815,10 @@ class connections
                     $vias[$viaIndex]->arrival->platform = $trains[$viaIndex]->arrival->platform;
                     $vias[$viaIndex]->arrival->canceled = $trains[$viaIndex]->arrival->canceled;
                     $vias[$viaIndex]->arrival->isExtraStop = $trains[$viaIndex]->arrival->isExtraStop;
-                    if (property_exists($trains[$viaIndex], 'alerts') && count($trains[$viaIndex]->alerts) > 0) {
+                    // No alerts for arrival objects
+                    /*if (property_exists($trains[$viaIndex], 'alerts') && count($trains[$viaIndex]->alerts) > 0) {
                         $vias[$viaIndex]->arrival->alert = $trains[$viaIndex]->alerts;
-                    }
+                    }*/
 
                     $vias[$viaIndex]->arrival->arrived = $trains[$viaIndex]->arrived;
 
@@ -917,9 +918,10 @@ class connections
                 $connection[$i]->arrival->direction = $trains[count($trains) - 1]->direction;
                 $connection[$i]->arrival->arrived = end($trains)->arrived;
                 $connection[$i]->arrival->walking = 0;
-                if (property_exists(end($trains), 'alerts') && count(end($trains)->alerts) > 0) {
+                // No alerts for arrival objects
+                /*if (property_exists(end($trains), 'alerts') && count(end($trains)->alerts) > 0) {
                     $connection[$i]->arrival->alert = end($trains)->alerts;
-                }
+                }*/
 
                 //Add journey options to the logs of iRail
                 $journeyoptions[$i] = ["journeys" => [] ];
