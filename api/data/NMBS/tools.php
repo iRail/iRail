@@ -161,4 +161,33 @@ class tools
 
         self::$cache->save($item);
     }
+
+
+    public static function departureCanceled($status)
+    {
+        if ($status == "SCHEDULED" ||
+            $status == "REPORTED" ||
+            $status == "PROGNOSED" ||
+            $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
+            $status == "PARTIAL_FAILURE_AT_ARR") {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static function arrivalCanceled($status)
+    {
+        if ($status == "SCHEDULED" ||
+            $status == "REPORTED" ||
+            $status == "PROGNOSED" ||
+            $status == "CALCULATED" ||
+            $status == "CORRECTED" ||
+            $status == "PARTIAL_FAILURE_AT_DEP") {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

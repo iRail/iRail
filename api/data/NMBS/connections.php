@@ -75,15 +75,15 @@ class connections
     public static function getNmbsCacheKey($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
     {
         return 'NMBSConnections|' . join('.', [
-            $idfrom,
-            $idto,
-            $lang,
-            str_replace(':', '.', $time),
-            $date,
-            $timeSel,
-            $results,
-            $typeOfTransport,
-        ]);
+                $idfrom,
+                $idto,
+                $lang,
+                str_replace(':', '.', $time),
+                $date,
+                $timeSel,
+                $results,
+                $typeOfTransport,
+            ]);
     }
 
     /**
@@ -98,7 +98,7 @@ class connections
     {
         try {
             $station1 = stations::getStationFromName($from, $lang);
-        
+
             $station2 = stations::getStationFromName($to, $lang);
             if (isset($request)) {
                 $request->setFrom($station1);
@@ -607,6 +607,7 @@ class connections
 
                     if (key_exists('dCncl', $trainRide['dep'])) {
                         $departurecanceled = $trainRide['dep']['dCncl'];
+
                     }
 
                     if (key_exists('aCncl', $trainRide['arr'])) {
@@ -969,7 +970,7 @@ class connections
 
                 if (!is_null($occupancyURI)) {
                     $occupancyArr = [];
-                    
+
                     $occupancyConnections[$i]->departure->occupancy = new \stdClass();
                     $occupancyConnections[$i]->departure->occupancy->{'@id'} = $occupancyURI;
                     $occupancyConnections[$i]->departure->occupancy->name = basename($occupancyURI);
