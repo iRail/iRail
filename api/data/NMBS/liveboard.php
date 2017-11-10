@@ -384,7 +384,8 @@ class liveboard
             // Include partiallyCanceled, but don't include canceled.
             // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
             // Canceled means all stations are canceled, including this one
-            $nodes[$departureIndex]->partiallyCanceled = $partiallyCanceled;
+            // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
+            // $nodes[$departureIndex]->partiallyCanceled = $partiallyCanceled;
             $nodes[$departureIndex]->left = $left;
             $nodes[$departureIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
                     2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
