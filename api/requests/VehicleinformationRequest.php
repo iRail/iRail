@@ -23,7 +23,7 @@ class VehicleinformationRequest extends Request
 
         // Ensure consistent ids from here on
         if (strpos($this->id, 'BE.NMBS.') === false) {
-            $this->id = 'BE.NMBS.' . $this->id;
+            $this->id = 'BE.NMBS.' . strtoupper($this->id);
         }
     }
 
