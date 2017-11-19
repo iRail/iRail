@@ -17,14 +17,14 @@ class liveboard
     {
         $stationr = $request->getStation();
         $dataroot->station = new \stdClass();
-        
+
         try {
             $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
         } catch (Exception $e) {
             throw new Exception('Could not find station ' . $stationr, 404);
         }
         $request->setStation($dataroot->station);
-        
+
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'arr');
@@ -36,7 +36,8 @@ class liveboard
                 Tools::setCachedObject($nmbsCacheKey, $html);
             }
 
-            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), null, $request->getFormat());
+            $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(),
+                $request->getAlerts(), null, $request->getFormat());
         } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'dep');
@@ -48,7 +49,8 @@ class liveboard
                 Tools::setCachedObject($nmbsCacheKey, $html);
             }
 
-            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(), $request->getAlerts(), $dataroot->station, $request->getFormat());
+            $dataroot->departure = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(),
+                $request->getAlerts(), $dataroot->station, $request->getFormat());
         } else {
             throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
         }
@@ -56,13 +58,13 @@ class liveboard
 
     public static function getNmbsCacheKey($station, $time, $date, $lang, $timeSel)
     {
-        return  'NMBSLiveboard|' . join('.', [
-            $station->id,
-            str_replace(':', '.', $time),
-            $date,
-            $timeSel,
-            $lang,
-        ]);
+        return 'NMBSLiveboard|' . join('.', [
+                $station->id,
+                str_replace(':', '.', $time),
+                $date,
+                $timeSel,
+                $lang,
+            ]);
     }
 
     /**
@@ -81,24 +83,55 @@ class liveboard
             'useragent' => $irailAgent,
         ];
 
-        /*
-          For example, run this in command line:
+        $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
-          $ curl "http://hari.b-rail.be/Hafas/bin/stboard.exe/en?start=yes&time=15%3a12&date=01.09.2011&inputTripelId=A=1@O=@X=@Y=@U=80@L=008892007@B=1@p=@&maxJourneys=50&boardType=dep&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=00010000001111"
-        */
-        //$scrapeUrl = "http://hari.b-rail.be/Hafas/bin/stboard.exe/";
-        $scrapeUrl = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/stboard.exe/';
-        $scrapeUrl .= $lang.'?start=yes';
-        $hafasid = $station->getHID();
-
-        $day = substr($date, 6, 2);
-        $month = substr($date, 4, 2);
-        $year = substr($date, 0, 4);
-
-        $scrapeUrl .= '&time='.$time.'&date='.$day.'.'.$month.'.'.$year.'&inputTripelId='.urlencode('A=1@O=@X=@Y=@U=80@L='.$hafasid.'@B=1@p=@').'&maxJourneys=50&boardType='.$timeSel.'&hcount=1&htype=NokiaC7-00%2f022.014%2fsw_platform%3dS60%3bsw_platform_version%3d5.2%3bjava_build_version%3d2.2.54&L=vs_java3&productsFilter=0111111000000000';
-
+        $postdata = '{
+  "auth": {
+    "aid": "sncb-mobi",
+    "type": "AID"
+  },
+  "client": {
+    "id": "SNCB",
+    "name": "NMBS",
+    "os": "Android 5.0.2",
+    "type": "AND",
+    "ua": "SNCB\/302132 (Android_5.0.2) Dalvik\/2.1.0 (Linux; U; Android 5.0.2; HTC One Build\/LRX22G)",
+    "v": 302132
+  },
+ "lang":"' . $lang . '",
+  "svcReqL": [
+    {
+      "cfg": {
+        "polyEnc": "GPA"
+      },
+      "meth": "StationBoard",
+      "req": {
+        "date": "' . $date . '",
+        "jnyFltrL": [
+          {
+            "mode": "BIT",
+            "type": "PROD",
+            "value": "11101111000111"
+          }
+        ],
+        "stbLoc": {
+          "lid": "A=1@O=' . $station->name . '@U=80@L=00' . $station->getHID() . '@B=1@p=1429490515@",
+          "name": "' . $station->name . '",
+          "type": "S"
+        },
+        "time": "' . str_replace(':', '', $time) . '00",
+        "getPasslist": false,
+        "getTrainComposition": false,
+        "maxJny": 50
+      }
+    }
+  ],
+  "ver": "1.11",
+  "formatted": false
+}';
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $scrapeUrl);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
@@ -106,186 +139,278 @@ class liveboard
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
         $response = curl_exec($ch);
         curl_close($ch);
-        //Strangly, the response didn't have a root-tag
-        return '<xml>'.$response.'</xml>';
+
+        return $response;
     }
 
     /**
-     * @param $xml
-     * @param $time
-     * @param $lang
+     * @param      $serverData
+     * @param      $time
+     * @param      $lang
      * @param bool $fast
      * @param bool $showAlerts
      * @return array
      */
-    private static function parseData($xml, $time, $lang, $fast = false, $showAlerts = false, $station, $format)
+    private static function parseData($serverData, $time, $lang, $fast = false, $showAlerts = false, $station, $format)
     {
-        //clean XML
-        if (class_exists('tidy', false)) {
-            $tidy = new tidy();
-            $tidy->parseString($xml, ['input-xml' => true, 'output-xml' => true], 'utf8');
-            $tidy->cleanRepair();
-            $xml = $tidy;
-        } else {
-            throw new Exception("PHP Tidy is required to clean the data sources.", 500);
+        $json = json_decode($serverData, true);
+
+        if ($json['svcResL'][0]['err'] == "H9360") {
+            throw new Exception("Date outside of the timetable period.", 404);
+        }
+        if ($json['svcResL'][0]['err'] != 'OK') {
+            throw new Exception("We're sorry, we could not parse the correct data from our sources", 500);
         }
 
-        $data = new SimpleXMLElement($xml);
+        $locationDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
+                /*
+                  {
+                      "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
+                      "type": "S",
+                      "name": "Namur",
+                      "icoX": 1,
+                      "extId": "8863008",
+                      "crd": {
+                        "x": 4862220,
+                        "y": 50468794
+                      },
+                      "pCls": 100,
+                      "rRefL": [
+                        0
+                      ]
+                    }
+                 */
 
-        if (property_exists($data, 'Err') && isset($data->Err)) {
-            if ($data->Err['code'] == "H730") {
-                throw new Exception("The data for which you requested data is too far in the past or future.", 404);
+                // S stand for station, P for Point of Interest, A for address
+
+                $location = new StdClass();
+                $location->name = $rawLocation['name'];
+                $location->id = '00' . $rawLocation['extId'];
+                $locationDefinitions[] = $location;
             }
         }
 
-        $data = $data->StationTable;
+        $vehicleDefinitions = [];
+        if (key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
+                /*
+                     {
+                       "name": "IC 545",
+                       "number": "545",
+                       "icoX": 3,
+                       "cls": 4,
+                       "prodCtx": {
+                         "name": "IC   545",
+                         "num": "545",
+                         "catOut": "IC      ",
+                         "catOutS": "007",
+                         "catOutL": "IC ",
+                         "catIn": "007",
+                         "catCode": "2",
+                         "admin": "88____"
+                       }
+                     },
+                 */
 
-        //<Journey fpTime="08:36" fpDate="03/09/11" delay="-"
-        //platform="2" targetLoc="Gent-Dampoort [B]" prod="L    758#L"
-        //dir="Eeklo [B]" is_reachable="0" />
+                $vehicle = new StdClass();
+                $vehicle->name = str_replace(" ", '', $rawTrain['name']);
+                $vehicle->num = trim($rawTrain['prodCtx']['num']);
+                $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
+                $vehicleDefinitions[] = $vehicle;
+            }
+        }
 
+
+        $remarkDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
+                /**
+                 *  "type": "I",
+                 * "code": "VIA",
+                 * "icoX": 5,
+                 * "txtN": "Opgelet: voor deze reis heb je 2 biljetten nodig.
+                 *          <a href=\"http:\/\/www.belgianrail.be\/nl\/klantendienst\/faq\/biljetten.aspx?cat=reisweg\">Meer info.<\/a>"
+                 */
+
+                $remark = new StdClass();
+                $remark->code = $rawRemark['code'];
+                $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
+                    $rawRemark['txtN']));
+
+                $matches = [];
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
+
+                if (count($matches[1]) > 0) {
+                    $remark->link = urlencode($matches[1][0]);
+                }
+
+                $remarkDefinitions[] = $remark;
+            }
+        }
+
+        $alertDefinitions = [];
+        if (key_exists('himL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
+                /*
+                    "hid": "23499",
+                    "type": "LOC",
+                    "act": true,
+                    "head": "S Gravenbrakel: Wisselstoring.",
+                    "lead": "Wisselstoring.",
+                    "text": "Vertraagd verkeer.<br \/><br \/> Vertragingen tussen 5 en 10 minuten zijn mogelijk.<br \/><br \/> Dienst op enkel spoor tussen Tubeke en S Gravenbrakel.",
+                    "icoX": 3,
+                    "prio": 25,
+                    "prod": 1893,
+                    "pubChL": [
+                      {
+                          "name": "timetable",
+                        "fDate": "20171016",
+                        "fTime": "082000",
+                        "tDate": "20171018",
+                        "tTime": "235900"
+                      }
+                    ]
+                  }*/
+
+                $alert = new StdClass();
+                $alert->header = strip_tags($rawAlert['head']);
+                $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
+                $alert->lead = strip_tags($rawAlert['lead']);
+
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
+                if (count($matches[1]) > 1) {
+                    $alert->link = urlencode($matches[1][0]);
+                }
+
+                if (key_exists('pubChL', $rawAlert)) {
+                    $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
+                        $rawAlert['pubChL'][0]['fDate']);
+                    $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
+                        $rawAlert['pubChL'][0]['tDate']);
+                }
+
+                $alertDefinitions[] = $alert;
+            }
+        }
+
+        $departureIndex = 0;
         $nodes = [];
-        $i = 0;
+        $departureStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
+        foreach ($json['svcResL'][0]['res']['jnyL'] as $departure) {
+            /*
+             *   "jid": "1|586|1|80|26102017",
+                                    "date": "20171026",
+                                    "prodX": 0,
+                                    "dirTxt": "Eeklo",
+                                    "status": "P",
+                                    "isRchbl": true,
+                                    "stbStop": {
+                                        "locX": 0,
+                                        "idx": 7,
+                                        "dProdX": 0,
+                                        "dPlatfS": "2",
+                                        "dPlatfR": "1",
+                                        "dTimeS": "141200",
+                                        "dTimeR": "141200",
+                                        "dProgType": "PROGNOSED"
+                                    }
+             */
 
-        $hour = substr($time, 0, 2);
-        $hour_ = substr((string) $data->Journey[0]['fpTime'], 0, 2);
-        if ($hour_ != '23' && $hour == '23') {
-            $hour_ = 24;
-        }
+            $date = $departure['date'];
+            if (key_exists('dTimeR', $departure['stbStop'])) {
+                $delay = tools::calculateSecondsHHMMSS($departure['stbStop']['dTimeR'],
+                    $date, $departure['stbStop']['dTimeS'], $date);
+            } else {
+                $delay = 0;
+            }
+            $unixtime = tools::transformTime($departure['stbStop']['dTimeS'], $date);
 
-        $minutes = substr($time, 3, 2);
-        $minutes_ = substr((string) $data->Journey[0]['fpTime'], 3, 2);
+            $vehicle = $vehicleDefinitions[ $departure['stbStop']['dProdX']];
 
-        $departureStation = null;
+            //Delay and platform changes
+            if (key_exists('dPlatfR', $departure['stbStop'])) {
+                $departurePlatform =  $departure['stbStop']['dPlatfR'];
+                $departurePlatformNormal = false;
+            } elseif (key_exists('dPlatfS', $departure['stbStop'])) {
+                $departurePlatform =  $departure['stbStop']['dPlatfS'];
+                $departurePlatformNormal = true;
+            } else {
+                // TODO: is this what we want when we don't know the platform?
+                $departurePlatform = "?";
+                $departurePlatformNormal = true;
+            }
 
-        if (!is_null($station)) {
-            $departureStation = "http://irail.be/stations/NMBS/" . substr($station->id, strrpos($station->id, '.') + 1);
-            ;
-        }
-
-        while (isset($data->Journey[$i]) && ($hour_ - $hour) * 60 + ($minutes_ - $minutes) <= 60) {
-            $journey = $data->Journey[$i];
+            // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
+            // DepartureCanceled gives information if this stop has been canceled.
+            $canceled = 0;
+            $partiallyCanceled = 0;
+            $departureCanceled = 0;
+            if (key_exists('isCncl', $departure)) {
+                $canceled = $departure['isCncl'];
+            }
+            if (key_exists('isPartCncl', $departure)) {
+                $partiallyCanceled = $departure['isPartCncl'];
+            }
+            if ($canceled) {
+                $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
+            }
 
             $left = 0;
-            $canceled = false;
-            $delay = (string) $journey['delay'];
-            if ($delay == '-') {
-                $delay = '0';
-            }
-            
-            if ($delay == 'cancel') {
-                $delay = 0;
-                $canceled = true;
-            }
-            
-            if (isset($journey['e_delay'])) {
-                $delay = $journey['e_delay'] * 60;
-            }
-            
-            preg_match("/\+\s*(\d+)/", $delay, $d);
-            if (isset($d[1])) {
-                $delay = $d[1] * 60;
-            }
-            preg_match("/\+\s*(\d):(\d+)/", $delay, $d);
-            if (isset($d[1])) {
-                $delay = $d[1] * 3600 + $d[2] * 60;
+            if (key_exists('dProgType', $departure['stbStop'])) {
+                if ($departure['stbStop']['dProgType'] == 'REPORTED') {
+                    $left = 1;
+                }
+                if (key_exists('dCncl', $departure['stbStop'])) {
+                    $departureCanceled =  $departure['stbStop']['dCncl'];
+                }
             }
 
-            $platform = '?'; // Indicate to end user platform is unknown
-            $platformNormal = true;
-            if (isset($journey['platform'])) {
-                $platform = (string) $journey['platform'];
-            }
-            
-            if (isset($journey['newpl'])) {
-                $platform = (string) $journey['newpl'];
-                $platformNormal = false;
-            }
-            
-            $time = '00d'.(string) $journey['fpTime'].':00';
-            
-            preg_match("/(..)\/(..)\/..(..)/si", (string) $journey['fpDate'], $dayxplode);
-            $dateparam = '20'.$dayxplode[3].$dayxplode[2].$dayxplode[1];
-            
-            $unixtime = tools::transformtime($time, $dateparam);
 
-            if ($fast) {
-                $stationNode = new Station();
-                $stationNode->name = (string) $journey['targetLoc'];
-                $stationNode->name = str_replace(' [B]', '', $stationNode->name);
-                $stationNode->name = str_replace(' [NMBS/SNCB]', '', $stationNode->name);
-            } else {
-                $stationNode = stations::getStationFromName($journey['targetLoc'], $lang);
-            }
+            $station = stations::getStationFromName($departure['dirTxt'], $lang);
 
-            $veh = $journey['hafasname'];
-            $veh = substr($veh, 0, 8);
-            $veh = str_replace(' ', '', $veh);
-            $vehicle = 'http://irail.be/vehicle/'.$veh;
+            $nodes[$departureIndex] = new DepartureArrival();
+            $nodes[$departureIndex]->delay = $delay;
+            $nodes[$departureIndex]->station = $station;
+            $nodes[$departureIndex]->time = $unixtime;
+            $nodes[$departureIndex]->vehicle = new \stdClass();
+            $nodes[$departureIndex]->vehicle->name = 'BE.NMBS.' . $vehicle->name;
+            $nodes[$departureIndex]->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
+            $nodes[$departureIndex]->platform = new Platform();
+            $nodes[$departureIndex]->platform->name = $departurePlatform;
+            $nodes[$departureIndex]->platform->normal = $departurePlatformNormal;
+            $nodes[$departureIndex]->canceled = $departureCanceled;
+            // Include partiallyCanceled, but don't include canceled.
+            // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
+            // Canceled means all stations are canceled, including this one
+            // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
+            // $nodes[$departureIndex]->partiallyCanceled = $partiallyCanceled;
+            $nodes[$departureIndex]->left = $left;
+            $nodes[$departureIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
+                    2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
-            $date = date('Ymd');
-                       
-            $nodes[$i] = new DepartureArrival();
-            $nodes[$i]->delay = $delay;
-            $nodes[$i]->station = $stationNode;
-            $nodes[$i]->time = $unixtime;
-            $nodes[$i]->vehicle = new \stdClass();
-            $nodes[$i]->vehicle->name = 'BE.NMBS.'.$veh;
-            $nodes[$i]->vehicle->{'@id'} = $vehicle;
-            $nodes[$i]->platform = new Platform();
-            $nodes[$i]->platform->name = $platform;
-            $nodes[$i]->platform->normal = $platformNormal;
-            $nodes[$i]->canceled = $canceled;
-            $nodes[$i]->left = $left;
-            $nodes[$i]->departureConnection = 'http://irail.be/connections/' . substr(basename($station->{'@id'}), 2) . '/' . date('Ymd', $unixtime) . '/' . basename($vehicle);
-
-            if (!is_null($departureStation)) {
+            if (! is_null($departureStation)) {
                 try {
-                    $occupancy = OccupancyOperations::getOccupancyURI($vehicle, $departureStation, $date);
+                    $occupancy = OccupancyOperations::getOccupancyURI($nodes[$departureIndex]->vehicle->{'@id'}, $departureStation->{'@id'}, $date);
 
                     // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
-                    if (!is_null($occupancy)) {
-                        $nodes[$i]->occupancy = new \stdClass();
-                        $nodes[$i]->occupancy->name = basename($occupancy);
-                        $nodes[$i]->occupancy->{'@id'} = $occupancy;
+                    if (! is_null($occupancy)) {
+                        $nodes[$departureIndex]->occupancy = new \stdClass();
+                        $nodes[$departureIndex]->occupancy->name = basename($occupancy);
+                        $nodes[$departureIndex]->occupancy->{'@id'} = $occupancy;
                     }
                 } catch (Exception $e) {
                     // Database connection failed, in the future a warning could be given to the owner of iRail
-                    $departureStation == null;
+                    $departureStation = null;
                 }
             }
 
-            $hour_ = substr((string) $data->Journey[$i]['fpTime'], 0, 2);
-            if ($hour_ != '23' && $hour == '23') {
-                $hour_ = 24;
-            }
-            $minutes_ = substr((string) $data->Journey[$i]['fpTime'], 3, 2);
-            
-            // Alerts
-            if ($showAlerts && isset($journey->HIMMessage)) {
-                $alerts = [];
-                $himmessage = $journey->HIMMessage;
-                for ($a = 0; $a < count($himmessage); $a++) {
-                    $alert = new Alert();
-                    $alert->header = trim($himmessage[$a]['header']);
-                    $alert->description = trim($himmessage[$a]['lead']);
-
-                    // Keep <a> elements, those are valueable
-                    $alert->description = strip_tags($alert->description, '<a>');
-
-                    // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
-                    if ($format == 'json') {
-                        $alert->description = trim(json_encode($alert->description), '"');
-                    }
-
-                    array_push($alerts, $alert);
-                }
-                $nodes[$i]->alert = $alerts;
-            }
-
-            $i++;
+            $departureIndex++;
         }
 
         return array_merge($nodes); //array merge reindexes the array
     }
-};
+}
+
+;

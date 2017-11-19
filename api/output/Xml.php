@@ -20,6 +20,7 @@ class Xml extends Printer
         'arrived',
         'delay',
         'canceled',
+        'partiallyCanceled',
         'normal',
         'shortname',
         'walking',

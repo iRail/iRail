@@ -13,18 +13,50 @@ class disturbances
     {
         $nmbsCacheKey = self::getNmbsCacheKey($request->getLang());
         $xml = tools::getCachedObject($nmbsCacheKey);
-        if ($xml === false) {
-            $xml = self::fetchData($request->getLang());
-            tools::setCachedObject($nmbsCacheKey, $xml);
+
+        try {
+            if ($xml === false) {
+                $xml = self::fetchData($request->getLang());
+                tools::setCachedObject($nmbsCacheKey, $xml);
+            }
+            $data = self::parseData($xml);
+
+            // Store a backup copy to deal with nmbs outages
+            tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $data, 3600);
+        } catch (Exception $exception) {
+            $data = tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
+
+            if ($data === false) {
+                // No cached copy available
+                throw $exception;
+            }
+
+            $disturbance = new stdClass();
+            $disturbance->title = "Website issues";
+            $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available.";
+            $disturbance->link = "https://belgianrail.be/";
+            $disturbance->timestamp = round(microtime(true));
+            array_unshift($data, $disturbance);
         }
 
-        $data = self::parseData($xml);
         $dataroot->disturbance = $data;
     }
 
     public static function getNmbsCacheKey($lang)
     {
         return 'NMBSDisturbances|' . $lang;
+    }
+
+    /**
+     * A second key, where we store results for 30 minutes. This way we can still provide data when the NMBS goes
+     * offline.
+     *
+     * @param $lang
+     * @return string
+     */
+    public static function getNmbsCacheKeyLongStorage($lang)
+    {
+        return 'NMBSDisturbances|' . $lang . '|backup';
     }
 
     /**

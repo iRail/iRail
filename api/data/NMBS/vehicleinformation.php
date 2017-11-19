@@ -201,7 +201,7 @@ class vehicleinformation
                     $departed = 0;
                 }
 
-                if(isset($node->children[2]) && isset ($node->children[2]->children[0])){
+                if (isset($node->children[2]) && isset($node->children[2]->children[0])) {
                     // This node can be 3 things
                     // - canceled arrival/departure icon
                     // - extra stop icon
