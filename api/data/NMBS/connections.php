@@ -892,7 +892,7 @@ class connections
                 //$connection[$i]->departure->nextIntermediateStop = $trains[0]->stops;
 
                 $connection[$i]->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
-                        2) . '/' . date('Ymd', $connection[$i]->departure->time) . '/' . substr($trains[0]->vehicle,strrpos($trains[0]->vehicle, '.') + 1);
+                        2) . '/' . date('Ymd', $connection[$i]->departure->time) . '/' . substr($trains[0]->vehicle, strrpos($trains[0]->vehicle, '.') + 1);
 
 
                 $connection[$i]->departure->direction = $trains[0]->direction;
