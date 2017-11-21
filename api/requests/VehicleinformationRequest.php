@@ -21,9 +21,17 @@ class VehicleinformationRequest extends Request
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['id']);
 
+        preg_match('/(..)(..)(..)/si', $this->date, $m);
+
+        if (count($m) > 3) {
+            $this->date = '20'.$m[3].$m[2].$m[1];
+        } elseif (count($m) > 2) {
+            $this->date = date('Y').$m[2].$m[1];
+        }
+
         // Ensure consistent ids from here on
         if (strpos($this->id, 'BE.NMBS.') === false) {
-            $this->id = 'BE.NMBS.' . $this->id;
+            $this->id = 'BE.NMBS.' . strtoupper($this->id);
         }
     }
 

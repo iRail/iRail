@@ -2,9 +2,7 @@
 /**
  * Copyright (C) 2011 by iRail vzw/asbl
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
- *
  * This will fetch all vehicledata for the NMBS.
- *
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
 include_once 'data/NMBS/tools.php';
@@ -32,37 +30,24 @@ class vehicleinformation
             Tools::setCachedObject($nmbsCacheKey, $serverData);
         }
 
-        $html = str_get_html($serverData);
 
-        // Check if there is a valid result from the belgianrail website
-        if (! self::trainDrives($html)) {
-            throw new Exception('Route not available.', 404);
-        }
-        // Check if train splits
-        if (self::trainSplits($html)) {
-            // Two URLs, fetch serverData from matching URL
-            $serverData = self::parseCorrectUrl($html);
-            $html = str_get_html($serverData);
-        }
-
-
-        $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
-        if ($request->getAlerts() && self::getAlerts($html, $request->getFormat())) {
-            $dataroot->alert = self::getAlerts($html, $request->getFormat());
-        }
-
-        $vehicleOccupancy = OccupancyOperations::getOccupancy($dataroot->vehicle->{'@id'},
-            DateTime::createFromFormat('dmy', $date)->format('Ymd'));
+        $vehicleOccupancy = OccupancyOperations::getOccupancy($request->getVehicleId(), $date);
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
-        if (!is_null($vehicleOccupancy)) {
+        if (! is_null($vehicleOccupancy)) {
             $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
         }
 
         $lastStop = null;
 
-        $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date,
+        $dataroot->vehicle = new Vehicle();
+        $dataroot->vehicle->name = "BE.NMBS." . $request->getVehicleId();
+        $dataroot->vehicle->locationX = 0;
+        $dataroot->vehicle->locationY = 0;
+        $dataroot->vehicle->shortname = $request->getVehicleId();
+        $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $request->getVehicleId();
+
+        $dataroot->stop = self::getData($serverData, $lang, $request->getFast(), $vehicleOccupancy, $date,
             $request->getVehicleId(), $lastStop);
 
         // When fast=true, this data will not be available
@@ -74,12 +59,13 @@ class vehicleinformation
 
     public static function getNmbsCacheKey($id, $date, $lang)
     {
-        return 'NMBSVehicle|' .join('.', [
-            $id,
-            $date,
-            $lang,
-        ]);
+        return 'NMBSVehicle|' . join('.', [
+                $id,
+                $date,
+                $lang,
+            ]);
     }
+
     /**
      * @param $id
      * @param $lang
@@ -94,419 +80,433 @@ class vehicleinformation
             'timeout' => '30',
             'useragent' => $irailAgent,
         ];
-        $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/'.$lang.'ld=std&seqnr=1&ident=at.02043113.1429435556&';
-        $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY').'&realtimeMode=Show';
+        $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
+
+        $postdata = '{
+                      "auth": {
+                        "aid": "sncb-mobi",
+                        "type": "AID"
+                      },
+                      "client": {
+                        "id": "SNCB",
+                        "name": "NMBS",
+                        "os": "Android 5.0.2",
+                        "type": "AND",
+                        "ua": "SNCB\/302132 (Android_5.0.2) Dalvik\/2.1.0 (Linux; U; Android 5.0.2; HTC One Build\/LRX22G)",
+                        "v": 302132
+                      },
+                     "lang":"' . $lang . '",
+                      "svcReqL": [
+                        {
+                          "cfg": {
+                            "polyEnc": "GPA"
+                          },
+                          "meth": "JourneyMatch",
+                          "req": {
+                            "date": "' . $date . '",
+                            "jnyFltrL": [
+                              {
+                                "mode": "BIT",
+                                "type": "PROD",
+                                "value": "11101111000111"
+                              }
+                            ],
+                            "input":"' . substr($id, 8) . '"
+                          }
+                        }
+                      ],
+                      "ver": "1.11",
+                      "formatted": false
+                    }';
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $scrapeURL);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $request_options['timeout']);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        $result = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
+        $jidlookup = json_decode($response, true);
+        $jid = $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
+
+        $postdata = '{
+        "auth":{"aid":"sncb-mobi","type":"AID"},
+        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND",
+            "ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
+        "lang":"nld",
+        "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
+        "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $result = curl_exec($ch);
         curl_close($ch);
 
         return $result;
     }
 
     /**
-     * @param $html
+     * @param $json
      * @param $lang
      * @param $fast
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle, &$laststop)
+    private static function getData($serverData, $lang, $fast, $occupancyArr, $date, $vehicle, &$laststop)
     {
+        $json = json_decode($serverData, true);
+
+        if ($json['svcResL'][0]['err'] == "H9360") {
+            throw new Exception("Date outside of the timetable period.", 404);
+        }
+        if ($json['svcResL'][0]['err'] != 'OK') {
+            throw new Exception("We're sorry, we could not parse the correct data from our sources", 500);
+        }
+
+        $locationDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
+                /*
+                  {
+                      "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
+                      "type": "S",
+                      "name": "Namur",
+                      "icoX": 1,
+                      "extId": "8863008",
+                      "crd": {
+                        "x": 4862220,
+                        "y": 50468794
+                      },
+                      "pCls": 100,
+                      "rRefL": [
+                        0
+                      ]
+                    }
+                 */
+
+                // S stand for station, P for Point of Interest, A for address
+
+                $location = new StdClass();
+                $location->name = $rawLocation['name'];
+                $location->id = '00' . $rawLocation['extId'];
+                $locationDefinitions[] = $location;
+            }
+        }
+
+        $vehicleDefinitions = [];
+        if (key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
+                /*
+                     {
+                       "name": "IC 545",
+                       "number": "545",
+                       "icoX": 3,
+                       "cls": 4,
+                       "prodCtx": {
+                         "name": "IC   545",
+                         "num": "545",
+                         "catOut": "IC      ",
+                         "catOutS": "007",
+                         "catOutL": "IC ",
+                         "catIn": "007",
+                         "catCode": "2",
+                         "admin": "88____"
+                       }
+                     },
+                 */
+
+                $vehicle = new StdClass();
+                $vehicle->name = str_replace(" ", '', $rawTrain['name']);
+                $vehicle->num = trim($rawTrain['prodCtx']['num']);
+                $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
+                $vehicleDefinitions[] = $vehicle;
+            }
+        }
+
+
+        $remarkDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
+                /**
+                 *  "type": "I",
+                 * "code": "VIA",
+                 * "icoX": 5,
+                 * "txtN": "Opgelet: voor deze reis heb je 2 biljetten nodig.
+                 *          <a href=\"http:\/\/www.belgianrail.be\/nl\/klantendienst\/faq\/biljetten.aspx?cat=reisweg\">Meer info.<\/a>"
+                 */
+
+                $remark = new StdClass();
+                $remark->code = $rawRemark['code'];
+                $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
+                    $rawRemark['txtN']));
+
+                $matches = [];
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
+
+                if (count($matches[1]) > 0) {
+                    $remark->link = urlencode($matches[1][0]);
+                }
+
+                $remarkDefinitions[] = $remark;
+            }
+        }
+
+        $alertDefinitions = [];
+        if (key_exists('himL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
+                /*
+                    "hid": "23499",
+                    "type": "LOC",
+                    "act": true,
+                    "head": "S Gravenbrakel: Wisselstoring.",
+                    "lead": "Wisselstoring.",
+                    "text": "Vertraagd verkeer.<br \/><br \/> Vertragingen tussen 5 en 10 minuten zijn mogelijk.<br \/><br \/> Dienst op enkel spoor tussen Tubeke en S Gravenbrakel.",
+                    "icoX": 3,
+                    "prio": 25,
+                    "prod": 1893,
+                    "pubChL": [
+                      {
+                          "name": "timetable",
+                        "fDate": "20171016",
+                        "fTime": "082000",
+                        "tDate": "20171018",
+                        "tTime": "235900"
+                      }
+                    ]
+                  }*/
+
+                $alert = new StdClass();
+                $alert->header = strip_tags($rawAlert['head']);
+                $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
+                $alert->lead = strip_tags($rawAlert['lead']);
+
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
+                if (count($matches[1]) > 1) {
+                    $alert->link = urlencode($matches[1][0]);
+                }
+
+                if (key_exists('pubChL', $rawAlert)) {
+                    $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
+                        $rawAlert['pubChL'][0]['fDate']);
+                    $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
+                        $rawAlert['pubChL'][0]['tDate']);
+                }
+
+                $alertDefinitions[] = $alert;
+            }
+        }
+
+        $stops = [];
+        $rawVehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
+        $direction = $json['svcResL'][0]['res']['journey']['dirTxt'];
+
+        $date = $json['svcResL'][0]['res']['journey']['date'];
+
+        // Determine if this date is in the spitsgids range
         $now = new DateTime();
-        $requestedDate = DateTime::createFromFormat('dmy', $date);
+        $requestedDate = DateTime::createFromFormat('Ymd', $date);
         $daysBetweenNowAndRequest = $now->diff($requestedDate);
         $isOccupancyDate = true;
-
         if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
             $isOccupancyDate = false;
         }
 
-        try {
-            $stops = [];
-            $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
-                ->getElementByTagName('table')
-                ->children;
+        $stopIndex = 0;
+        // TODO: pick the right train here, a train which splits has multiple parts here.
+        foreach ($json['svcResL'][0]['res']['journey']['stopL'] as $rawStop) {
 
-            $j = 0;
+            if (key_exists('dTimeR', $rawStop)) {
+                $departureDelay = tools::calculateSecondsHHMMSS($rawStop['dTimeR'],
+                    $date, $rawStop['dTimeS'], $date);
+            } else {
+                $departureDelay = 0;
+            }
+            if (key_exists('dTimeS', $rawStop)) {
+                $departureTime = tools::transformTime($rawStop['dTimeS'], $date);
+            } else {
+                // If the train doesn't depart from here, just use the arrival time
+                $departureTime = null;
+            }
 
-            $previousHour = 0;
-            $nextDay = 0;
-            $nextDayArrival = 0;
-            for ($i = 1; $i < count($nodes); $i++) {
-                $node = $nodes[$i];
-                if (! count($node->attr)) {
-                    continue;
-                } // row with no class-attribute contain no data
+            if (key_exists('aTimeR', $rawStop)) {
+                $arrivalDelay = tools::calculateSecondsHHMMSS($rawStop['aTimeR'],
+                    $date, $rawStop['aTimeS'], $date);
+            } else {
+                $arrivalDelay = 0;
+            }
 
-                // Delay and canceled
-                $splitter = '***';
-                $delaycontent = preg_replace("/<br\W*?\/>/", $splitter, $node->children[2]);
-                $delayelements = explode($splitter, strip_tags($delaycontent));
-                //print_r($delayelements);
+            if (key_exists('aTimeS', $rawStop)) {
+                $arrivalTime = tools::transformTime($rawStop['aTimeS'], $date);
+            } else {
+                $arrivalTime = $departureTime;
+            }
 
-                $arrivalDelay = trim($delayelements[0]);
-                $arrivalCanceled = false;
-                if (! $arrivalDelay) {
-                    $arrivalDelay = 0;
-                } elseif (stripos($arrivalDelay, '+') !== false) {
-                    $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
+
+            //Delay and platform changes
+            if (key_exists('dPlatfR', $rawStop)) {
+                $departurePlatform = $rawStop['dPlatfR'];
+                $departurePlatformNormal = false;
+            } elseif (key_exists('dPlatfS', $rawStop)) {
+                $departurePlatform = $rawStop['dPlatfS'];
+                $departurePlatformNormal = true;
+            } else {
+                // TODO: is this what we want when we don't know the platform?
+                $departurePlatform = "?";
+                $departurePlatformNormal = true;
+            }
+
+            //Delay and platform changes
+            if (key_exists('aPlatfR', $rawStop)) {
+                $arrivalPlatform = $rawStop['aPlatfR'];
+                $arrivalPlatformNormal = false;
+            } elseif (key_exists('aPlatfS', $rawStop)) {
+                $arrivalPlatform = $rawStop['aPlatfS'];
+                $arrivalPlatformNormal = true;
+            } else {
+                $arrivalPlatform = "?";
+                $arrivalPlatformNormal = true;
+            }
+
+            // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
+            // DepartureCanceled gives information if this stop has been canceled.
+            $canceled = 0;
+            $departureCanceled = 0;
+            $arrivalCanceled = 0;
+            if (key_exists('isCncl', $rawStop)) {
+                $canceled = $rawStop['isCncl'];
+            }
+            if ($canceled) {
+                $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
+            }
+
+            $left = 0;
+            if (key_exists('dProgType', $rawStop)) {
+                if ($rawStop['dProgType'] == 'REPORTED') {
+                    $left = 1;
+                }
+                if (key_exists('dCncl', $rawStop)) {
+                    $departureCanceled = $rawStop['dCncl'];
+                }
+                if (key_exists('aCncl', $rawStop)) {
+                    $arrivalCanceled = $rawStop['aCncl'];
+                }
+            }
+
+            if (key_exists('aProgType', $rawStop)) {
+                if ($rawStop['aProgType'] == 'REPORTED') {
+                    $arrived = 1;
                 } else {
-                    $arrivalDelay = 0;
-                    $arrivalCanceled = true;
+                    $arrived = 0;
                 }
+            } else {
+                $arrived = 0;
+            }
+            // If the train left, it also arrived
+            if ($left) {
+                $arrived = 1;
+            }
 
-                $departureDelay = trim($delayelements[1]);
-                $departureCanceled = false;
-                if (! $departureDelay) {
-                    $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
-                } elseif (stripos($departureDelay, '+') !== false) {
-                    $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
-                } else {
-                    $departureDelay = 0;
-                    $departureCanceled = true;
-                }
+            // Clean the data up, sometimes arrivals don't register properly
+            if ($arrived && $stopIndex > 0){
+                $stops[$stopIndex-1]->arrived = true;
+                $stops[$stopIndex-1]->left = true;
+            }
 
-                // Departed
-                // Based on timeline images on the NMBS site.
-                // A filled timeline, meaning arrived/departed, has an image ending in "reported.png".
-                // Example:
-                // <img src="/as/hafas-res/img/pearl/realtime_pearl_middle_arr_dep_reported.png" alt="" title="" width="20" height="44">
-                if (isset($node->children[0]) && isset($node->children[0]->children[0])) {
-                    $departureImgNode = $node->children[0]->children[0];
+            $station = stations::getStationFromID($locationDefinitions[$rawStop['locX']]->id, $lang);
 
-                    // Check if this element has a src attribute.
-                    if (key_exists('src', $departureImgNode->attr) &&
-                        strpos($departureImgNode->attr['src'], 'reported.png') !== false) {
-                        $departed = 1;
-                    } else {
-                        // Default to false if we don't have any information. This keeps API output consistent.
-                        // (Always include the field)
-                        $departed = 0;
-                    }
-                } else {
-                    // Default to false if we don't have any information. This keeps API output consistent.
-                    // (Always include the field)
-                    $departed = 0;
-                }
+            $stop = new Stop();
+            $stop->station = $station;
 
-                if (isset($node->children[2]) && isset($node->children[2]->children[0])) {
-                    // This node can be 3 things
-                    // - canceled arrival/departure icon
-                    // - extra stop icon
-                    // - delay span, in case it's normal
-                    // We're just checking for the extra stop icon here
-                    $isExtraImgNode = $node->children[2]->children[0];
+            if ($departureTime != null) {
+                $stop->departureDelay = $departureDelay;
+                $stop->departureCanceled = $departureCanceled;
+                $stop->scheduledDepartureTime = $departureTime;
 
-                    if (key_exists('src', $isExtraImgNode->attr) &&
-                        strpos($isExtraImgNode->attr['src'], '/as/hafas-res/img/rt_additional_stop.gif') !== false) {
-                        $isExtra = 1;
-                    } else {
-                        // Default to false if we don't have any information. This keeps API output consistent.
-                        // (Always include the field)
-                        $isExtra = 0;
-                    }
-                } else {
-                    // Default to false if we don't have any information. This keeps API output consistent.
-                    // (Always include the field)
-                    $isExtra = 0;
-                }
+                $stop->platform = new Platform();
+                $stop->platform->name = $departurePlatform;
+                $stop->platform->normal = $departurePlatformNormal;
 
-                // Time
-                $timenodearray = $node->children[1]->find('span');
-                $arrivalTime = reset($timenodearray[0]->nodes[0]->_);
-                $departureTime = "";
+                $stop->time = $departureTime;
+            } else {
+                $stop->departureDelay = 0;
+                $stop->departureCanceled = 0;
+                $stop->scheduledDepartureTime = $arrivalTime;
 
-                if (count($nodes[$i]->children[1]->children) == 3) {
-                    $departureTime = reset($nodes[$i]->children[1]->children[2]->nodes[0]->_);
-                } else {
-                    // Handle first and last stop: time, delay and canceled info
-                    $departureTime = $arrivalTime;
+                $stop->platform = new Platform();
+                $stop->platform->name = $arrivalPlatform;
+                $stop->platform->normal = $arrivalPlatformNormal;
 
-                    if ($j != 0) {
-                        $departureDelay = $arrivalDelay;
-                        $departureCanceled = $arrivalCanceled;
-                    }
-                }
-                
-                if (count($node->children[3]->find('a'))) {
-                    $as = $node->children[3]->find('a');
-                    $stationname = trim(reset($as[0]->nodes[0]->_));
-                } else {
-                    $stationname = trim(reset($node->children[3]->nodes[0]->_));
-                }
+                $stop->time = $arrivalTime;
+            }
 
-                // Platform
-                // This is not always included, for example BUSxxxx vehicles don't have platforms
-                if (count($node->children) > 5) {
-                    $platformnodearray = $node->children[5]->find('span');
-                    if (count($platformnodearray) > 0) {
-                        $normalplatform = 0;
-                        $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
-                    } else {
-                        $normalplatform = 1;
-                        $platform = trim(reset($node->children[5]->nodes[0]->_));
-                    }
+            $stop->scheduledArrivalTime = $arrivalTime;
+            $stop->arrivalDelay = $arrivalDelay;
+            $stop->arrivalCanceled = $arrivalCanceled;
 
-                    if ($platform == "&nbsp;") {
-                        $platform = '?'; // Indicate to end user platform is unknown
-                    }
-                } else {
-                    $platform = "?";
-                    $normalplatform = 1;
-                }
+            // TODO: verify date here
+            $stop->departureConnection = 'http://irail.be/connections/' . substr(basename($stop->station->{'@id'}),
+                    2) . '/' . $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
 
-                if (isset($node->children[3]->children[0])) {
-                    $link = $node->children[3]->children[0]->{'attr'}['href'];
-                    // With capital S
-                    if (strpos($link, 'StationId=')) {
-                        $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
-                    } else {
-                        $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
-                    }
-                    $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
-                    $stationId = '00'.$nr;
-                } else {
-                    $stationId = null;
-                }
 
-                $station = new Station();
-                if ($fast == 'true') {
-                    $station->name = $stationname;
-                    if ($stationId) {
-                        $station->id = "BE.NMBS." . $stationId;
-                    }
-                } else {
-                    // Station ID can be parsed from the station URL
-                    if ($stationId) {
-                        $station = stations::getStationFromID($stationId, $lang);
-                    } else {
-                        $station = stations::getStationFromName($stationname, $lang);
-                    }
-                }
-                // The HTML file is ordered chronologically: so once we crossed midnight, we will alway have a next day set to 1.
-                if ($previousHour > (int)substr($departureTime, 0, 2)) {
-                    $nextDay = 1;
-                }
-                if ($previousHour > (int)substr($arrivalTime, 0, 2)) {
-                    $nextDayArrival = 1;
-                }
-                $previousHour = (int)substr($departureTime, 0, 2);
-                $dateDatetime = DateTime::createFromFormat('dmy', $date);
-
-                $stops[$j] = new Stop();
-                $stops[$j]->station = $station;
-                $stops[$j]->departureDelay = $departureDelay;
-                $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->arrivalDelay = $arrivalDelay;
-                $stops[$j]->arrivalCanceled = $arrivalCanceled;
-
-                if ($fast != 'true') {
-                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}),
-                            2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
-                }
-                $stops[$j]->platform = new Platform();
-                $stops[$j]->platform->name = $platform;
-                $stops[$j]->platform->normal = $normalplatform;
-                //for backward compatibility
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->delay = $departureDelay;
-                $stops[$j]->canceled = $departureCanceled;
-                $stops[$j]->left = $departed;
-                $stops[$j]->isExtraStop = $isExtra;
+            //for backward compatibility
+            $stop->delay = $departureDelay;
+            $stop->canceled = $departureCanceled;
+            $stop->arrived = $arrived;
+            $stop->left = $left;
+            // TODO: detect
+            $stop->isExtraStop = 0;
+            $stops[] = $stop;
 
                 // Store the last station to get vehicle coordinates
-                if ($departed) {
-                    $laststop = $stops[$j]->station;
+            if ($arrived) {
+                $laststop = $stop;
+            }
+
+            // TODO: verify date here
+            // Check if it is in less than 2 days and MongoDB is available
+            if ($isOccupancyDate && isset($occupancyArr)) {
+                // Add occupancy
+                $occupancyOfStationFound = false;
+                $k = 0;
+
+                while ($k < count($occupancyArr) && ! $occupancyOfStationFound) {
+                    if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
+                        $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+                        $stop->occupancy = new \stdClass();
+                        $stop->occupancy->{'@id'} = $occupancyURI;
+                        $stop->occupancy->name = basename($occupancyURI);
+                        $occupancyOfStationFound = true;
+                    }
+                    $k++;
                 }
 
-                // Check if it is in less than 2 days and MongoDB is available
-                if ($fast != 'true' && $isOccupancyDate && isset($occupancyArr)) {
-                    // Add occupancy
-                    $occupancyOfStationFound = false;
-                    $k = 0;
-
-                    while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
-                        if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
-                            $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
-                            $stops[$j]->occupancy = new \stdClass();
-                            $stops[$j]->occupancy->{'@id'} = $occupancyURI;
-                            $stops[$j]->occupancy->name = basename($occupancyURI);
-                            $occupancyOfStationFound = true;
-                        }
-                        $k++;
-                    }
-
-                    if (!isset($stops[$j]->occupancy)) {
-                        $unknown = OccupancyOperations::getUnknown();
-                        $stops[$j]->occupancy = new \stdClass();
-                        $stops[$j]->occupancy->{'@id'} = $unknown;
-                        $stops[$j]->occupancy->name = basename($unknown);
-                    }
+                if (! isset($stop->occupancy)) {
+                    $unknown = OccupancyOperations::getUnknown();
+                    $stop->occupancy = new \stdClass();
+                    $stop->occupancy->{'@id'} = $unknown;
+                    $stop->occupancy->name = basename($unknown);
                 }
-                
-                $j++;
             }
 
-            // When the train hasn't left yet, set location to first station
-            if (is_null($laststop)) {
-                $laststop = $stops[0]->station;
-            }
-
-            return $stops;
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * @param $html
-     * @return null|Alerts
-     * @throws Exception
-     */
-    private static function getAlerts($html, $format)
-    {
-        $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        if (! is_object($test)) {
-            throw new Exception('Vehicle not found', 500);
-        }
-        
-        $tables = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementsByTagName('table');
-        $nodes = $tables[1]->getElementsByTagName('div');
-
-        $alerts = [];
-
-        foreach ($nodes as $alertnode) {
-            $bodysplitter = "*#*";
-            $alertbody = strip_tags($alertnode, '<strong>, <br>, <a>');
-            $alertbody = str_replace('</strong>', $bodysplitter, $alertbody);
-            $alertbody = str_replace('<strong>', '', $alertbody);
-            $alertelements = explode($bodysplitter, $alertbody);
-            $header = preg_replace("/&nbsp;|\s*\(.*?\)\s*/i", '', $alertelements[0]);
-
-            $alert = new Alert();
-            $alert->header = trim($header);
-
-            // TODO: verify this code, is there a case where alertelements[1] is set? Maybe this was earlier, and NMBS changed?
-            if (count($alertelements) > 1) {
-                $alert->description = trim($alertelements[1]);
-            } else {
-                $alert->description = trim($alertelements[0]);
-            }
-
-            // Keep <a> elements, those are valueable
-            $alert->description = strip_tags($alert->description, '<a>');
-
-            // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
-            if ($format == 'json') {
-                $alert->description = trim(json_encode($alert->description), '"');
-            }
-
-            array_push($alerts, $alert);
-        }
-        
-        return $alerts;
-    }
-
-    /**
-     * @param $html String the HTML received from NMBS
-     * @param $id   String the ID of the vehicle in BE.NMBS.XXXXXX format
-     * @param $lang
-     * @return null|Vehicle
-     * @throws Exception
-     */
-    private static function getVehicleData($html, $id, $lang)
-    {
-        $vehicle = new Vehicle();
-        $vehicle->name = $id;
-        $vehicle->locationX = 0;
-        $vehicle->locationY = 0;
-        $vehicle->shortname = substr($id, 8);
-        $vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->shortname;
-
-        return $vehicle;
-    }
-
-    private static function trainSplits($html)
-    {
-        return ! is_object($html->getElementById('tq_trainroute_content_table_alteAnsicht'));
-    }
-
-    private static function trainDrives($html)
-    {
-        return $html && is_object($html->getElementById('HFSResult')) && is_object($html->getElementById('HFSResult')->getElementByTagName('table'));
-    }
-
-    private static function parseCorrectUrl($html)
-    {
-        $test = $html->getElementById('HFSResult')->getElementByTagName('table');
-        if (! is_object($test)) {
-            throw new Exception('Vehicle not found', 500);
-        } // catch errors
-
-        // Try first url
-        $url = $html->getElementById('HFSResult')
-            ->getElementByTagName('table')
-            ->children[1]->children[0]->children[0]->attr['href'];
-
-        $serverData = self::getServerDataByUrl($url);
-
-        // Check if no other route id in trainname column
-        if (self::isOtherTrain($serverData)) {
-            // Second url must be the right one
-            $url = $html->getElementById('HFSResult')
-                ->getElementByTagName('table')
-                ->children[2]->children[0]->children[0]->attr['href'];
-
-            $serverData = self::getServerDataByUrl($url);
+            $stopIndex++;
         }
 
-        return $serverData;
+        // When the train hasn't left yet, set location to first station
+        if (is_null($laststop)) {
+            $laststop = $stops[0]->station;
+        }
+
+        return $stops;
     }
-
-    private static function isOtherTrain($serverData)
-    {
-        $html = str_get_html($serverData);
-        $traindata = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        return ! is_object($traindata);
-    }
-
-    private static function getServerDataByUrl($url)
-    {
-        global $irailAgent; // from ../includes/getUA.php
-
-        include_once '../includes/getUA.php';
-        $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
-            'useragent' => $irailAgent,
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        $result = curl_exec($ch);
-
-        curl_close($ch);
-
-        return $result;
-    }
-};
+}
