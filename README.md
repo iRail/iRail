@@ -34,6 +34,10 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
  * Step 11: Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
  * Step 12: Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
  * Step 13: Enjoy the occupancy scores in all the GET requests. [Read the docs](https://docs.irail.be/) on how to post occupancy data.
+ 
+**Imporant**: If you plan on using spitsgids in a production environment, don't forget to add indices. Most queries check either the connection (routes, liveboards endpoints) or vehicle field (vehicle endpoint). Example indices can be found below.
+- For queries on vehicles: `db.occupancy.createIndex({vehicle: 1})` or `db.occupancy.createIndex({date: -1, vehicle: 1})`
+- For queries on connections: `db.occupancy.createIndex({connection: 1})`
 
 **Optional**: you can improve performance by using [APCu](http://php.net/manual/en/book.apcu.php). APCu in-memory caching will automaticly be used when the APCu extension is available. When installed, every request to the NMBS will be cached for 15 seconds.
 ## Update stations list ##
