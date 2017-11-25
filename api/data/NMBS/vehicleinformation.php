@@ -419,8 +419,8 @@ class vehicleinformation
 
             // Clean the data up, sometimes arrivals don't register properly
             if ($arrived && $stopIndex > 0){
-                $stops[$stopIndex-1]->arrived = true;
-                $stops[$stopIndex-1]->left = true;
+                $stops[$stopIndex-1]->arrived = 1;
+                $stops[$stopIndex-1]->left = 1;
             }
 
             $station = stations::getStationFromID($locationDefinitions[$rawStop['locX']]->id, $lang);
