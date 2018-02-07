@@ -19,27 +19,30 @@ API Documentation can be found at [https://docs.irail.be]().
 _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and PHP curl extension installed on your system_
 
  * Step 1: Clone this repo
- * Step 2: `composer install`
+ * Step 2: If you don't need the occupancy functionality, you can remove the `mongodb/mongodb` requirement from the composer file. You can now run `composer install`. If you'd like to have support for the occupancy scores, read below on how to setup mongo before proceeding to run `composer install`.
  * Step 3: Make sure storage is writable: `chmod 777 storage`
  * Step 4: Run your test server: `php -S localhost:8008 -t api`
  * Step 5: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
 
+### MongoDB / Spitsgids setup ###
 **Optional**: if you want to set up the iRail API with occupancy scores you will need to set up a MongoDB database:
 
- * Step 6: Install [MongoDB](https://www.mongodb.com/download-center?jmp=nav#community)
- * Step 7: Install the MongoDB module for PHP: `pecl install mongodb`
- * Step 8: Include MongoDB: `composer require mongodb/mongodb:^1.0` (make sure to not commit the composer.json file)
- * Step 9: Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
- * Step 10: Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
- * Step 11: Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
- * Step 12: Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
- * Step 13: Enjoy the occupancy scores in all the GET requests. [Read the docs](https://docs.irail.be/) on how to post occupancy data.
+ * Install [MongoDB](https://www.mongodb.com/download-center?jmp=nav#community)
+ * Install the MongoDB module for PHP: `pecl install mongodb`
+ Make sure PHP loads the module: the conf.d folder for your PHP installation should contain a file with contents `extension=mongodb.so` in order to load the module. Both the CLI and web version need this, as Composer will run from the CLI
+ * Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
+ * Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
+ * Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
+ * Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
+ * Enjoy the occupancy scores in all the GET requests. [Read the docs](https://docs.irail.be/) on how to post occupancy data.
  
 **Imporant**: If you plan on using spitsgids in a production environment, don't forget to add indices. Most queries check either the connection (routes, liveboards endpoints) or vehicle field (vehicle endpoint). Example indices can be found below.
 - For queries on vehicles: `db.occupancy.createIndex({vehicle: 1})` or `db.occupancy.createIndex({date: -1, vehicle: 1})`
 - For queries on connections: `db.occupancy.createIndex({connection: 1})`
 
+### Improving performance ###
 **Optional**: you can improve performance by using [APCu](http://php.net/manual/en/book.apcu.php). APCu in-memory caching will automaticly be used when the APCu extension is available. When installed, every request to the NMBS will be cached for 15 seconds.
+
 ## Update stations list ##
 
 Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project.
