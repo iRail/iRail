@@ -158,6 +158,9 @@ class liveboard
         if ($json['svcResL'][0]['err'] == "H9360") {
             throw new Exception("Date outside of the timetable period.", 404);
         }
+        if ($json['svcResL'][0]['err'] == "H890"){
+            throw new Exception('No results found', 404);
+        }
         if ($json['svcResL'][0]['err'] != 'OK') {
             throw new Exception("We're sorry, we could not parse the correct data from our sources", 500);
         }
@@ -412,5 +415,3 @@ class liveboard
         return array_merge($nodes); //array merge reindexes the array
     }
 }
-
-;
