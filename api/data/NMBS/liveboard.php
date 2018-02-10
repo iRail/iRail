@@ -84,7 +84,7 @@ class liveboard
         ];
 
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
-
+        $arrdep = ($timeSel == 'arr') ? '"type": "ARR",' : '';
         $postdata = '{
   "auth": {
     "aid": "sncb-mobi",
@@ -120,6 +120,7 @@ class liveboard
           "type": "S"
         },
         "time": "' . str_replace(':', '', $time) . '00",
+        ' . $arrdep . '
         "getPasslist": false,
         "getTrainComposition": false,
         "maxJny": 50
@@ -129,6 +130,7 @@ class liveboard
   "ver": "1.11",
   "formatted": false
 }';
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
@@ -158,7 +160,7 @@ class liveboard
         if ($json['svcResL'][0]['err'] == "H9360") {
             throw new Exception("Date outside of the timetable period.", 404);
         }
-        if ($json['svcResL'][0]['err'] == "H890"){
+        if ($json['svcResL'][0]['err'] == "H890") {
             throw new Exception('No results found', 404);
         }
         if ($json['svcResL'][0]['err'] != 'OK') {
@@ -298,10 +300,10 @@ class liveboard
             }
         }
 
-        $departureIndex = 0;
+        $stopIndex = 0;
         $nodes = [];
-        $departureStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
-        foreach ($json['svcResL'][0]['res']['jnyL'] as $departure) {
+        $currentStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
+        foreach ($json['svcResL'][0]['res']['jnyL'] as $stop) {
             /*
              *   "jid": "1|586|1|80|26102017",
                                     "date": "20171026",
@@ -321,95 +323,121 @@ class liveboard
                                     }
              */
 
-            $date = $departure['date'];
-            if (key_exists('dTimeR', $departure['stbStop'])) {
-                $delay = tools::calculateSecondsHHMMSS($departure['stbStop']['dTimeR'],
-                    $date, $departure['stbStop']['dTimeS'], $date);
+            $date = $stop['date'];
+            if (key_exists('dTimeR', $stop['stbStop'])) {
+                $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
+                    $date, $stop['stbStop']['dTimeS'], $date);
             } else {
                 $delay = 0;
             }
-            $unixtime = tools::transformTime($departure['stbStop']['dTimeS'], $date);
 
-            $vehicle = $vehicleDefinitions[ $departure['stbStop']['dProdX']];
-
-            //Delay and platform changes
-            if (key_exists('dPlatfR', $departure['stbStop'])) {
-                $departurePlatform =  $departure['stbStop']['dPlatfR'];
-                $departurePlatformNormal = false;
-            } elseif (key_exists('dPlatfS', $departure['stbStop'])) {
-                $departurePlatform =  $departure['stbStop']['dPlatfS'];
-                $departurePlatformNormal = true;
+            // Depending on whether we're showing departures or arrivals, we should load different fields
+            if (key_exists('dProdX', $stop['stbStop'])) {
+                // Departures
+                $unixtime = tools::transformTime($stop['stbStop']['dTimeS'], $date);
+                $vehicle = $vehicleDefinitions[$stop['stbStop']['dProdX']];
+                if (key_exists('dPlatfR', $stop['stbStop'])) {
+                    $platform = $stop['stbStop']['dPlatfR'];
+                    $isPlatformNormal = false;
+                } elseif (key_exists('dPlatfS', $stop['stbStop'])) {
+                    $platform = $stop['stbStop']['dPlatfS'];
+                    $isPlatformNormal = true;
+                } else {
+                    // TODO: is this what we want when we don't know the platform?
+                    $platform = "?";
+                    $isPlatformNormal = true;
+                }
             } else {
-                // TODO: is this what we want when we don't know the platform?
-                $departurePlatform = "?";
-                $departurePlatformNormal = true;
+                // Arrivals
+                $unixtime = tools::transformTime($stop['stbStop']['aTimeS'], $date);
+                $vehicle = $vehicleDefinitions[$stop['stbStop']['aProdX']];
+
+                if (key_exists('aPlatfR', $stop['stbStop'])) {
+                    $platform = $stop['stbStop']['aPlatfR'];
+                    $isPlatformNormal = false;
+                } elseif (key_exists('aPlatfS', $stop['stbStop'])) {
+                    $platform = $stop['stbStop']['aPlatfS'];
+                    $isPlatformNormal = true;
+                } else {
+                    // TODO: is this what we want when we don't know the platform?
+                    $platform = "?";
+                    $isPlatformNormal = true;
+                }
             }
 
             // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
             // DepartureCanceled gives information if this stop has been canceled.
             $canceled = 0;
             $partiallyCanceled = 0;
-            $departureCanceled = 0;
-            if (key_exists('isCncl', $departure)) {
-                $canceled = $departure['isCncl'];
+            $stopCanceled = 0;
+            if (key_exists('isCncl', $stop)) {
+                $canceled = $stop['isCncl'];
             }
-            if (key_exists('isPartCncl', $departure)) {
-                $partiallyCanceled = $departure['isPartCncl'];
+            if (key_exists('isPartCncl', $stop)) {
+                $partiallyCanceled = $stop['isPartCncl'];
             }
             if ($canceled) {
                 $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
             }
 
             $left = 0;
-            if (key_exists('dProgType', $departure['stbStop'])) {
-                if ($departure['stbStop']['dProgType'] == 'REPORTED') {
+            // Again we need to distinguish departures and arrivals
+            if (key_exists('dProgType', $stop['stbStop'])) {
+                if ($stop['stbStop']['dProgType'] == 'REPORTED') {
                     $left = 1;
                 }
-                if (key_exists('dCncl', $departure['stbStop'])) {
-                    $departureCanceled =  $departure['stbStop']['dCncl'];
+                if (key_exists('dCncl', $stop['stbStop'])) {
+                    $stopCanceled = $stop['stbStop']['dCncl'];
+                }
+            } else if (key_exists('aProgType', $stop['stbStop'])) {
+                if ($stop['stbStop']['aProgType'] == 'REPORTED') {
+                    $left = 1;
+                }
+                if (key_exists('aCncl', $stop['stbStop'])) {
+                    $stopCanceled = $stop['stbStop']['aCncl'];
                 }
             }
 
 
-            $station = stations::getStationFromName($departure['dirTxt'], $lang);
+            $station = stations::getStationFromName($stop['dirTxt'], $lang);
 
-            $nodes[$departureIndex] = new DepartureArrival();
-            $nodes[$departureIndex]->delay = $delay;
-            $nodes[$departureIndex]->station = $station;
-            $nodes[$departureIndex]->time = $unixtime;
-            $nodes[$departureIndex]->vehicle = new \stdClass();
-            $nodes[$departureIndex]->vehicle->name = 'BE.NMBS.' . $vehicle->name;
-            $nodes[$departureIndex]->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
-            $nodes[$departureIndex]->platform = new Platform();
-            $nodes[$departureIndex]->platform->name = $departurePlatform;
-            $nodes[$departureIndex]->platform->normal = $departurePlatformNormal;
-            $nodes[$departureIndex]->canceled = $departureCanceled;
+            $nodes[$stopIndex] = new DepartureArrival();
+            $nodes[$stopIndex]->delay = $delay;
+            $nodes[$stopIndex]->station = $station;
+            $nodes[$stopIndex]->time = $unixtime;
+            $nodes[$stopIndex]->vehicle = new \stdClass();
+            $nodes[$stopIndex]->vehicle->name = 'BE.NMBS.' . $vehicle->name;
+            $nodes[$stopIndex]->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
+            $nodes[$stopIndex]->platform = new Platform();
+            $nodes[$stopIndex]->platform->name = $platform;
+            $nodes[$stopIndex]->platform->normal = $isPlatformNormal;
+            $nodes[$stopIndex]->canceled = $stopCanceled;
             // Include partiallyCanceled, but don't include canceled.
             // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
             // Canceled means all stations are canceled, including this one
             // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
-            // $nodes[$departureIndex]->partiallyCanceled = $partiallyCanceled;
-            $nodes[$departureIndex]->left = $left;
-            $nodes[$departureIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
+            // $nodes[$stopIndex]->partiallyCanceled = $partiallyCanceled;
+            $nodes[$stopIndex]->left = $left;
+            $nodes[$stopIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($currentStation->{'@id'}),
                     2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
-            if (! is_null($departureStation)) {
+            if (!is_null($currentStation)) {
                 try {
-                    $occupancy = OccupancyOperations::getOccupancyURI($nodes[$departureIndex]->vehicle->{'@id'}, $departureStation->{'@id'}, $date);
+                    $occupancy = OccupancyOperations::getOccupancyURI($nodes[$stopIndex]->vehicle->{'@id'}, $currentStation->{'@id'}, $date);
 
                     // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
-                    if (! is_null($occupancy)) {
-                        $nodes[$departureIndex]->occupancy = new \stdClass();
-                        $nodes[$departureIndex]->occupancy->name = basename($occupancy);
-                        $nodes[$departureIndex]->occupancy->{'@id'} = $occupancy;
+                    if (!is_null($occupancy)) {
+                        $nodes[$stopIndex]->occupancy = new \stdClass();
+                        $nodes[$stopIndex]->occupancy->name = basename($occupancy);
+                        $nodes[$stopIndex]->occupancy->{'@id'} = $occupancy;
                     }
                 } catch (Exception $e) {
                     // Database connection failed, in the future a warning could be given to the owner of iRail
-                    $departureStation = null;
+                    $currentStation = null;
                 }
             }
 
-            $departureIndex++;
+            $stopIndex++;
         }
 
         return array_merge($nodes); //array merge reindexes the array
