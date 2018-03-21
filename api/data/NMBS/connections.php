@@ -26,7 +26,6 @@ class connections
         $to = $request->getTo();
         if (count(explode('.', $request->getTo())) > 1) {
             $to = stations::getStationFromID($request->getTo(), $request->getLang());
-            $request->setTo($to);
             $to = $to->name;
         }
         $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getResults(), $request->getLang(), $request->getFast(), $request->getAlerts(), $request->getTimeSel(), $request->getTypeOfTransport(), $request);
@@ -52,8 +51,8 @@ class connections
 
         $nmbsCacheKey = self::getNmbsCacheKey($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel,
             $typeOfTransport);
+
         $xml = Tools::getCachedObject($nmbsCacheKey);
-        $xml = false;
         if ($xml === false) {
             $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
             Tools::setCachedObject($nmbsCacheKey, $xml);
@@ -98,8 +97,8 @@ class connections
     {
         try {
             $station1 = stations::getStationFromName($from, $lang);
-
             $station2 = stations::getStationFromName($to, $lang);
+
             if (isset($request)) {
                 $request->setFrom($station1);
                 $request->setTo($station2);
