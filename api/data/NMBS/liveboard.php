@@ -38,7 +38,7 @@ class liveboard
 
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(),
                 $request->getAlerts(), null, $request->getFormat());
-        } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
+        } else if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'dep');
             $html = Tools::getCachedObject($nmbsCacheKey);
@@ -78,8 +78,8 @@ class liveboard
     {
         include '../includes/getUA.php';
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
             'useragent' => $irailAgent,
         ];
 
@@ -327,6 +327,9 @@ class liveboard
             if (key_exists('dTimeR', $stop['stbStop'])) {
                 $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
                     $date, $stop['stbStop']['dTimeS'], $date);
+            } else if (key_exists('aTimeR', $stop['stbStop'])) {
+                $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['aTimeR'],
+                    $date, $stop['stbStop']['aTimeS'], $date);
             } else {
                 $delay = 0;
             }
@@ -339,7 +342,7 @@ class liveboard
                 if (key_exists('dPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('dPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('dPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfS'];
                     $isPlatformNormal = true;
                 } else {
@@ -355,7 +358,7 @@ class liveboard
                 if (key_exists('aPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('aPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('aPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfS'];
                     $isPlatformNormal = true;
                 } else {
