@@ -159,8 +159,8 @@ class connections
                 "cfg":{"polyEnc":"GPA"},
                 "meth":"TripSearch",
                 "req":{
-                    "arrLocL":[{"lid":"L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
-                    "depLocL":[{"lid":"L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
+                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
+                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
                     "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
                     "outDate":"' . $date . '",
                     "outTime":"' . str_replace(':', '', $time) . '00",
