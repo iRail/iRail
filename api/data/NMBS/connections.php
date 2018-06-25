@@ -159,8 +159,8 @@ class connections
                 "cfg":{"polyEnc":"GPA"},
                 "meth":"TripSearch",
                 "req":{
-                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S"}],
-                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S"}],
+                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S", "extId":"'. substr($idto,2) .'"}],
+                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom,2) .'"}],
                     "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
                     "outDate":"' . $date . '",
                     "outTime":"' . str_replace(':', '', $time) . '00",
@@ -170,6 +170,11 @@ class connections
                     "getPasslist":true,
                     "getPolyline":false,
                     "numF":10,';
+
+        // TODO: include as many parameters as possible in locations to prevent future issues
+        // Official Location ID (lid): "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@"
+        // "eteId": "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@Zaventem",
+        // "extId": "8811221",
 
         // search by arrival
         if ($timeSel == 1) {
