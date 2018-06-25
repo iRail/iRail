@@ -547,6 +547,13 @@ class connections
                 // This is way more readable compared to instantly creating the vias
                 // Loop over all train rides in the list. This will also include the first train ride.
                 foreach ($conn['secL'] as $trainRide) {
+
+                    if ($trainRide['dep']['locX'] == $trainRide['arr']['locX']) {
+                        // Don't parse a train ride from station X to that same station X.
+                        // NMBS/SNCB likes to include this utterly useless information to clutter their UI.
+                        continue;
+                    }
+
                     $departTime = tools::transformTime($trainRide['dep']['dTimeS'], $conn['date']);
 
                     if (key_exists('dPlatfR', $trainRide['dep'])) {
