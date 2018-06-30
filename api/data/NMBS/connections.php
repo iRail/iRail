@@ -159,8 +159,8 @@ class connections
                 "cfg":{"polyEnc":"GPA"},
                 "meth":"TripSearch",
                 "req":{
-                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S", "extId":"'. substr($idto,2) .'"}],
-                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom,2) .'"}],
+                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S", "extId":"'. substr($idto, 2) .'"}],
+                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom, 2) .'"}],
                     "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
                     "outDate":"' . $date . '",
                     "outTime":"' . str_replace(':', '', $time) . '00",
@@ -216,7 +216,7 @@ class connections
         if ($json['svcResL'][0]['err'] == "H9360") {
             throw new Exception("Date outside of the timetable period.", 404);
         }
-        if ($json['svcResL'][0]['err'] == "H890"){
+        if ($json['svcResL'][0]['err'] == "H890") {
             throw new Exception('No results found', 404);
         }
         if ($json['svcResL'][0]['err'] != 'OK') {
@@ -547,7 +547,6 @@ class connections
                 // This is way more readable compared to instantly creating the vias
                 // Loop over all train rides in the list. This will also include the first train ride.
                 foreach ($conn['secL'] as $trainRide) {
-
                     if ($trainRide['dep']['locX'] == $trainRide['arr']['locX']) {
                         // Don't parse a train ride from station X to that same station X.
                         // NMBS/SNCB likes to include this utterly useless information to clutter their UI.

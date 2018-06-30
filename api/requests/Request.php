@@ -38,7 +38,7 @@ class Request
     {
         if (isset($_GET[$varName])) {
             $this->$varName = $_GET[$varName];
-        } else if (isset($_GET[strtolower($varName)])) {
+        } elseif (isset($_GET[strtolower($varName)])) {
             $this->$varName = $_GET[strtolower($varName)];
         } else {
             $this->$varName = $default;
