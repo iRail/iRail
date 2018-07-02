@@ -142,10 +142,8 @@ class connections
             $trainsonly = '01101111000111';
         }
 
-        if ($timeSel == 'depart') {
+        if (strpos($timeSel,'dep') === 0) {
             $timeSel = 0;
-        } elseif ($timeSel == 'arrive') {
-            $timeSel = 1;
         } else {
             $timeSel = 1;
         }
