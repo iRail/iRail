@@ -370,16 +370,15 @@ class liveboard
 
             // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
             // DepartureCanceled gives information if this stop has been canceled.
-            $canceled = 0;
             $partiallyCanceled = 0;
             $stopCanceled = 0;
             if (key_exists('isCncl', $stop)) {
-                $canceled = $stop['isCncl'];
+                $stopCanceled = $stop['isCncl'];
             }
             if (key_exists('isPartCncl', $stop)) {
                 $partiallyCanceled = $stop['isPartCncl'];
             }
-            if ($canceled) {
+            if ($stopCanceled) {
                 $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
             }
 
