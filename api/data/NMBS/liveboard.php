@@ -400,6 +400,10 @@ class liveboard
                 }
             }
 
+            $isExtraTrain = 0;
+            if (key_exists('status', $stop) && $stop['status'] == 'A'){
+                $isExtraTrain = 1;
+            }
 
             $station = stations::getStationFromName($stop['dirTxt'], $lang);
 
@@ -420,6 +424,7 @@ class liveboard
             // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
             // $nodes[$stopIndex]->partiallyCanceled = $partiallyCanceled;
             $nodes[$stopIndex]->left = $left;
+            $nodes[$stopIndex]->isExtra = $isExtraTrain;
             $nodes[$stopIndex]->departureConnection = 'http://irail.be/connections/' . substr(basename($currentStation->{'@id'}),
                     2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
