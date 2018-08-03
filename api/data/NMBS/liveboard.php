@@ -111,7 +111,7 @@ class liveboard
           {
             "mode": "BIT",
             "type": "PROD",
-            "value": "11101111000111"
+            "value": "1010111"
           }
         ],
         "stbLoc": {
@@ -401,7 +401,7 @@ class liveboard
             }
 
             $isExtraTrain = 0;
-            if (key_exists('status', $stop) && $stop['status'] == 'A'){
+            if (key_exists('status', $stop) && $stop['status'] == 'A') {
                 $isExtraTrain = 1;
             }
 

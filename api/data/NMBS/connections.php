@@ -135,14 +135,14 @@ class connections
 
         if ($typeOfTransport == 'nointernationaltrains') {
             $typeOfTransportCode = '0010111';
-        } else if ($typeOfTransport == 'all') {
+        } elseif ($typeOfTransport == 'all') {
             $typeOfTransportCode = '10101110111';
         } else {
             // All trains is the default
             $typeOfTransportCode = '1010111';
         }
 
-        if (strpos($timeSel,'dep') === 0) {
+        if (strpos($timeSel, 'dep') === 0) {
             $timeSel = 0;
         } else {
             $timeSel = 1;
@@ -157,7 +157,7 @@ class connections
                 "cfg":{"polyEnc":"GPA"},
                 "meth":"TripSearch",
                 "req":{
-                    "arrLocL":[{"lid":"L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@","type":"S", "extId":"'. substr($idto, 2) .'""}],
+                    "arrLocL":[{"lid":"L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@","type":"S", "extId":"'. substr($idto, 2) .'"}],
                     "depLocL":[{"lid":"L=' . $idfrom . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom, 2) .'"}],
                     "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $typeOfTransportCode . '"}],
                     "outDate":"' . $date . '",
