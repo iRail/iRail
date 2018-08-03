@@ -135,14 +135,14 @@ class connections
 
         if ($typeOfTransport == 'nointernationaltrains') {
             $typeOfTransportCode = '0010111';
-        } else if ($typeOfTransport == 'all') {
+        } elseif ($typeOfTransport == 'all') {
             $typeOfTransportCode = '10101110111';
         } else {
             // All trains is the default
             $typeOfTransportCode = '1010111';
         }
 
-        if (strpos($timeSel,'dep') === 0) {
+        if (strpos($timeSel, 'dep') === 0) {
             $timeSel = 0;
         } else {
             $timeSel = 1;
