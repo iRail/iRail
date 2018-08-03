@@ -32,14 +32,14 @@ class connections
     }
 
     /**
-     * @param $from
-     * @param $to
-     * @param $time
-     * @param $date
-     * @param $results
-     * @param $lang
-     * @param $fast
-     * @param bool $showAlerts
+     * @param        $from
+     * @param        $to
+     * @param        $time
+     * @param        $date
+     * @param        $results
+     * @param        $lang
+     * @param        $fast
+     * @param bool   $showAlerts
      * @param string $timeSel
      * @param string $typeOfTransport
      * @return array
@@ -128,18 +128,18 @@ class connections
         // OLDER URL: $url = "http://hari.b-rail.be/Hafas/bin/extxml.exe";
 
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
             'useragent' => $irailAgent,
         ];
-        if ($typeOfTransport == 'trains') {
-            $trainsonly = '01101111000111';
-        } elseif ($typeOfTransport == 'nointernationaltrains') {
-            $trainsonly = '0111111000000000'; // TODO: update
-        } elseif ($typeOfTransport == 'all') {
-            $trainsonly = '1111111111111111'; // TODO: update
+
+        if ($typeOfTransport == 'nointernationaltrains') {
+            $typeOfTransportCode = '0010111';
+        } else if ($typeOfTransport == 'all') {
+            $typeOfTransportCode = '10101110111';
         } else {
-            $trainsonly = '01101111000111';
+            // All trains is the default
+            $typeOfTransportCode = '1010111';
         }
 
         if (strpos($timeSel,'dep') === 0) {
@@ -157,9 +157,9 @@ class connections
                 "cfg":{"polyEnc":"GPA"},
                 "meth":"TripSearch",
                 "req":{
-                    "arrLocL":[{"lid":"A=1@L=' . $idto . '@B=1@p=1429490515@","type":"S", "extId":"'. substr($idto, 2) .'"}],
-                    "depLocL":[{"lid":"A=1@L=' . $idfrom . '@B=1@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom, 2) .'"}],
-                    "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $trainsonly . '"}],
+                    "arrLocL":[{"lid":"L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@","type":"S", "extId":"'. substr($idto, 2) .'""}],
+                    "depLocL":[{"lid":"L=' . $idfrom . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom, 2) .'"}],
+                    "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $typeOfTransportCode . '"}],
                     "outDate":"' . $date . '",
                     "outTime":"' . str_replace(':', '', $time) . '00",
                     "economic":false,
