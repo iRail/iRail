@@ -38,7 +38,7 @@ class liveboard
 
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(),
                 $request->getAlerts(), null, $request->getFormat());
-        } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
+        } else if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'dep');
             $html = Tools::getCachedObject($nmbsCacheKey);
@@ -115,7 +115,7 @@ class liveboard
           }
         ],
         "stbLoc": {
-          "lid": "A=1@O=' . $station->name . '@U=80@L=00' . $station->getHID() . '@B=1@p=1429490515@",
+          "lid": "A=1@O=' . $station->name . '@U=80@L=00' . $station->hafasId . '@B=1@p=1429490515@",
           "name": "' . $station->name . '",
           "type": "S"
         },
@@ -327,7 +327,7 @@ class liveboard
             if (key_exists('dTimeR', $stop['stbStop'])) {
                 $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
                     $date, $stop['stbStop']['dTimeS'], $date);
-            } elseif (key_exists('aTimeR', $stop['stbStop'])) {
+            } else if (key_exists('aTimeR', $stop['stbStop'])) {
                 $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['aTimeR'],
                     $date, $stop['stbStop']['aTimeS'], $date);
             } else {
@@ -342,7 +342,7 @@ class liveboard
                 if (key_exists('dPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('dPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('dPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfS'];
                     $isPlatformNormal = true;
                 } else {
@@ -358,7 +358,7 @@ class liveboard
                 if (key_exists('aPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('aPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('aPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfS'];
                     $isPlatformNormal = true;
                 } else {
@@ -391,7 +391,7 @@ class liveboard
                 if (key_exists('dCncl', $stop['stbStop'])) {
                     $stopCanceled = $stop['stbStop']['dCncl'];
                 }
-            } elseif (key_exists('aProgType', $stop['stbStop'])) {
+            } else if (key_exists('aProgType', $stop['stbStop'])) {
                 if ($stop['stbStop']['aProgType'] == 'REPORTED') {
                     $left = 1;
                 }

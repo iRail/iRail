@@ -30,7 +30,7 @@ class ConnectionsRequest extends Request
         parent::setGetVar('date', date('dmy'));
         parent::setGetVar('time', date('Hi'));
         parent::setGetVar('timeSel', 'depart');
-        parent::setGetVar('typeOfTransport', 'train');
+        parent::setGetVar('typeOfTransport', 'automatic');
         parent::setGetVar('fast', 'false');
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['from', 'to']);
