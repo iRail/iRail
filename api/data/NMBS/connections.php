@@ -148,9 +148,9 @@ class connections
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
             }
-        } else if ($typeOfTransport == 'nointernationaltrains') {
+        } elseif ($typeOfTransport == 'nointernationaltrains') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
-        } else if ($typeOfTransport == 'all') {
+        } elseif ($typeOfTransport == 'all') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         } else {
             // All trains is the default
@@ -554,7 +554,7 @@ class connections
                 if (key_exists('dPlatfR', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfR'];
                     $departurePlatformNormal = false;
-                } else if (key_exists('dPlatfS', $conn['dep'])) {
+                } elseif (key_exists('dPlatfS', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfS'];
                     $departurePlatformNormal = true;
                 } else {
@@ -580,7 +580,7 @@ class connections
                 if (key_exists('aPlatfR', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfR'];
                     $arrivalPlatformNormal = false;
-                } else if (key_exists('aPlatfS', $conn['arr'])) {
+                } elseif (key_exists('aPlatfS', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfS'];
                     $arrivalPlatformNormal = true;
                 } else {
@@ -617,7 +617,7 @@ class connections
                     if (key_exists('dPlatfR', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfR'];
                         $departPlatformNormal = false;
-                    } else if (key_exists('dPlatfS', $trainRide['dep'])) {
+                    } elseif (key_exists('dPlatfS', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfS'];
                         $departPlatformNormal = true;
                     } else {
@@ -642,7 +642,7 @@ class connections
                     if (key_exists('aPlatfR', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfR'];
                         $arrivalPlatformNormal = false;
-                    } else if (key_exists('aPlatfS', $trainRide['arr'])) {
+                    } elseif (key_exists('aPlatfS', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfS'];
                         $arrivalPlatformNormal = true;
                     } else {
@@ -862,7 +862,8 @@ class connections
                     $trainIndex++;
                 }
 
-                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;;
+                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;
+                ;
                 $connection[$i]->arrival->canceled = end($trains)->arrival->canceled;
 
                 // Don't need this variable anymore. Clean up for easier debugging.

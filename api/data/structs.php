@@ -26,7 +26,6 @@ class Station
     public $locationX;
     public $locationY;
     public $id;
-
 }
 
 class DepartureArrival
