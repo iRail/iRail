@@ -16,6 +16,10 @@ class connections
      * @param $dataroot
      * @param $request
      */
+    const TYPE_TRANSPORT_ALL = '10101110111';
+
+    const TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS = '0010111';
+
     public static function fillDataRoot($dataroot, $request)
     {
         $from = $request->getFrom();
@@ -32,29 +36,30 @@ class connections
     }
 
     /**
-     * @param        $from
-     * @param        $to
-     * @param        $time
-     * @param        $date
-     * @param        $results
-     * @param        $lang
-     * @param        $fast
-     * @param bool   $showAlerts
-     * @param string $timeSel
-     * @param string $typeOfTransport
+     * @param string    $from
+     * @param    string $to
+     * @param           $time
+     * @param           $date
+     * @param           $results
+     * @param           $lang
+     * @param           $fast
+     * @param bool      $showAlerts
+     * @param string    $timeSel
+     * @param string    $typeOfTransport
      * @return array
      * @throws Exception
      */
     private static function scrapeConnections($from, $to, $time, $date, $results, $lang, $fast, $showAlerts, $timeSel = 'depart', $typeOfTransport = 'trains', $request)
     {
-        $ids = self::getHafasIDsFromNames($from, $to, $lang, $request);
+        // TODO: clean the whole station name/id to object flow
+        $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel,
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date, $results, $timeSel,
             $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
         if ($xml === false) {
-            $xml = self::requestHafasXml($ids[0], $ids[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
+            $xml = self::requestHafasXml($stations[0], $stations[1], $lang, $time, $date, $results, $timeSel, $typeOfTransport);
             Tools::setCachedObject($nmbsCacheKey, $xml);
         }
 
@@ -86,14 +91,15 @@ class connections
     }
 
     /**
-     * This function scrapes the ID from the HAFAS system. Since hafas IDs will be requested in pairs, it also returns 2 id's and asks for 2 names.
+     * This function converts 2 station names into two stations, which are returned as an array
      *
-     * @param $from
-     * @param $to
-     * @param $lang
+     * @param string $from
+     * @param string $to
+     * @param        $lang
      * @return array
+     * @throws Exception
      */
-    private static function getHafasIDsFromNames($from, $to, $lang, $request)
+    private static function getStationsFromName($from, $to, $lang, $request)
     {
         try {
             $station1 = stations::getStationFromName($from, $lang);
@@ -103,24 +109,24 @@ class connections
                 $request->setFrom($station1);
                 $request->setTo($station2);
             }
-            return [$station1->getHID(), $station2->getHID()];
+            return [$station1, $station2];
         } catch (Exception $e) {
             throw new Exception($e->getMessage(), 404);
         }
     }
 
     /**
-     * @param $idfrom
-     * @param $idto
-     * @param $lang
-     * @param $time
-     * @param $date
-     * @param $results
-     * @param $timeSel
-     * @param $typeOfTransport
-     * @return mixed
+     * @param Station $stationFrom
+     * @param Station $stationTo
+     * @param string  $lang
+     * @param         $time
+     * @param         $date
+     * @param int     $results
+     * @param int     $timeSel
+     * @param string  $typeOfTransport
+     * @return string
      */
-    private static function requestHafasXml($idfrom, $idto, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
+    private static function requestHafasXml($stationFrom, $stationTo, $lang, $time, $date, $results, $timeSel, $typeOfTransport)
     {
         include '../includes/getUA.php';
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
@@ -133,14 +139,24 @@ class connections
             'useragent' => $irailAgent,
         ];
 
-        if ($typeOfTransport == 'nointernationaltrains') {
-            $typeOfTransportCode = '0010111';
-        } else if ($typeOfTransport == 'all') {
-            $typeOfTransportCode = '10101110111';
+        // Automatic is the default type, which prevents that local trains aren't shown because a high-speed train provides a faster connection
+        if ($typeOfTransport == 'automatic') {
+            // 2 national stations: no international trains
+            // Internation station: all
+            if ($stationFrom->country == 'BE' && $stationTo->country == 'BE') {
+                $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+            } else {
+                $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
+            }
+        } elseif ($typeOfTransport == 'nointernationaltrains') {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+        } elseif ($typeOfTransport == 'all') {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         } else {
             // All trains is the default
-            $typeOfTransportCode = '1010111';
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         }
+
 
         if (strpos($timeSel, 'dep') === 0) {
             $timeSel = 0;
@@ -178,14 +194,14 @@ class connections
                         // Departure station
                         'depLocL'  => [
                             [
-                                'lid' => 'L=' . $idfrom . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($idfrom, 2)
+                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->hafasId, 2)
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL'  => [
                             [
-                                'lid' => 'L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($idto, 2)
+                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->hafasId, 2)
                             ]
                         ],
 
@@ -234,7 +250,7 @@ class connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $idfrom . '-' . $idto . '-' . time() . '.log',
+            file_put_contents('../storage/debug-connections-' . $stationFrom->hafasId . '-' . $stationTo->hafasId . '-' . time() . '.log',
                 $response);
         }
 
@@ -242,6 +258,16 @@ class connections
         return $response;
     }
 
+    /**
+     * @param string   $serverData
+     * @param string   $lang
+     * @param          $fast
+     * @param          $request
+     * @param bool     $showAlerts
+     * @param          $format
+     * @return array
+     * @throws Exception
+     */
     public static function parseConnectionsAPI($serverData, $lang, $fast, $request, $showAlerts = false, $format)
     {
         $json = json_decode($serverData, true);
@@ -528,7 +554,7 @@ class connections
                 if (key_exists('dPlatfR', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfR'];
                     $departurePlatformNormal = false;
-                } else if (key_exists('dPlatfS', $conn['dep'])) {
+                } elseif (key_exists('dPlatfS', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfS'];
                     $departurePlatformNormal = true;
                 } else {
@@ -554,7 +580,7 @@ class connections
                 if (key_exists('aPlatfR', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfR'];
                     $arrivalPlatformNormal = false;
-                } else if (key_exists('aPlatfS', $conn['arr'])) {
+                } elseif (key_exists('aPlatfS', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfS'];
                     $arrivalPlatformNormal = true;
                 } else {
@@ -591,7 +617,7 @@ class connections
                     if (key_exists('dPlatfR', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfR'];
                         $departPlatformNormal = false;
-                    } else if (key_exists('dPlatfS', $trainRide['dep'])) {
+                    } elseif (key_exists('dPlatfS', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfS'];
                         $departPlatformNormal = true;
                     } else {
@@ -616,7 +642,7 @@ class connections
                     if (key_exists('aPlatfR', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfR'];
                         $arrivalPlatformNormal = false;
-                    } else if (key_exists('aPlatfS', $trainRide['arr'])) {
+                    } elseif (key_exists('aPlatfS', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfS'];
                         $arrivalPlatformNormal = true;
                     } else {
@@ -836,7 +862,8 @@ class connections
                     $trainIndex++;
                 }
 
-                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;;
+                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;
+                ;
                 $connection[$i]->arrival->canceled = end($trains)->arrival->canceled;
 
                 // Don't need this variable anymore. Clean up for easier debugging.

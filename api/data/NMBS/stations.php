@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2011 by iRail vzw/asbl
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
@@ -27,10 +28,18 @@ class stations
     {
         $station = new Station();
         $id = str_replace('http://irail.be/stations/NMBS/', '', $newstation->{'@id'});
-        $station->id = 'BE.NMBS.'.$id; //old-style iRail ids
+        $station->id = 'BE.NMBS.' . $id; //old-style iRail ids
+        $station->hafasId = $id;
         $station->locationX = $newstation->longitude;
         $station->locationY = $newstation->latitude;
         $station->{'@id'} = $newstation->{'@id'};
+
+        if ($newstation->country == "http://sws.geonames.org/2802361/") {
+            $station->country = "BE";
+        } else {
+            $station->country = "Unknown";
+        }
+
         if (isset($newstation->{'alternative'})) {
             foreach ($newstation->{'alternative'} as $alternatives) {
                 if ($alternatives->{'@language'} == strtolower($lang)) {
@@ -40,11 +49,9 @@ class stations
         }
         $station->standardname = $newstation->name;
 
-        if (! isset($station->name)) {
+        if (!isset($station->name)) {
             $station->name = $station->standardname;
         }
-        $station->setHID($id);
-
         return $station;
     }
 
@@ -61,7 +68,7 @@ class stations
         return $station;
     }
 
-    
+
     /**
      * @param $id
      * @param $lang
@@ -92,7 +99,7 @@ class stations
         if (substr($name, 0, 1) == '0' || substr($name, 0, 7) == 'BE.NMBS' || substr($name, 0, 7) == 'http://') {
             return self::getStationFromID($name, $lang);
         }
-        
+
         $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, 'UTF-8');
         $name = preg_replace("/[ ]?\([a-zA-Z]+\)/", '', $name);
         $name = str_replace(' [NMBS/SNCB]', '', $name);
@@ -100,8 +107,8 @@ class stations
         $name = explode('/', $name);
         $name = trim($name[0]);
         $stationsgraph = irail\stations\Stations::getStations($name);
-        if (! isset($stationsgraph->{'@graph'}[0])) {
-            throw new Exception('Could not match \''.$name.'\' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
+        if (!isset($stationsgraph->{'@graph'}[0])) {
+            throw new Exception('Could not match \'' . $name . '\' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
         $station = $stationsgraph->{'@graph'}[0];
 
@@ -140,4 +147,6 @@ class stations
 
         return $stations;
     }
-};
+}
+
+;

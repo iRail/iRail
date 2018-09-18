@@ -21,17 +21,11 @@ class Connection
 
 class Station
 {
-    private $hafasid;
-
-    public function setHID($id)
-    {
-        $this->hafasid = $id;
-    }
-
-    public function getHID()
-    {
-        return $this->hafasid;
-    }
+    public $hafasId;
+    public $country;
+    public $locationX;
+    public $locationY;
+    public $id;
 }
 
 class DepartureArrival
