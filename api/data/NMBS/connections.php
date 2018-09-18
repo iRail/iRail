@@ -135,7 +135,7 @@ class connections
 
         if ($typeOfTransport == 'nointernationaltrains') {
             $typeOfTransportCode = '0010111';
-        } elseif ($typeOfTransport == 'all') {
+        } else if ($typeOfTransport == 'all') {
             $typeOfTransportCode = '10101110111';
         } else {
             // All trains is the default
@@ -149,42 +149,77 @@ class connections
         }
 
         // numF: number of results: server-side capped to 5, but ask 10 in case they'd let us
-        $postdata = '{"auth":{"aid":"sncb-mobi","type":"AID"},
-        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND","ua":"","v":302132},
-        "lang":"' . $lang . '",
-        "svcReqL":[
-            {
-                "cfg":{"polyEnc":"GPA"},
-                "meth":"TripSearch",
-                "req":{
-                    "arrLocL":[{"lid":"L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@","type":"S", "extId":"'. substr($idto, 2) .'"}],
-                    "depLocL":[{"lid":"L=' . $idfrom . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@","type":"S", "extId":"'. substr($idfrom, 2) .'"}],
-                    "jnyFltrL":[{"mode":"BIT","type":"PROD","value":"' . $typeOfTransportCode . '"}],
-                    "outDate":"' . $date . '",
-                    "outTime":"' . str_replace(':', '', $time) . '00",
-                    "economic":false,
-                    "extChgTime":-1,
-                    "getIST":false,
-                    "getPasslist":true,
-                    "getPolyline":false,
-                    "numF":10,';
+        $postdata = [
+            'auth'      => [
+                'aid'  => 'sncb-mobi',
+                'type' => 'AID'
+            ],
+            'client'    => [
+                'id'   => 'SNCB',
+                'name' => 'NMBS',
+                'os'   => 'Android 5.0.2', 'type' => 'AND', 'ua' => '', 'v' => 302132
+            ],
+            // Response language (for station names)
+            'lang'      => $lang,
+            'svcReqL'   => [
+                [
+                    'cfg'  => [
+                        'polyEnc' => 'GPA'
+                    ],
+                    // Route query
+                    'meth' => 'TripSearch',
+                    'req'  => [
 
-        // TODO: include as many parameters as possible in locations to prevent future issues
-        // Official Location ID (lid): "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@"
-        // "eteId": "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@Zaventem",
-        // "extId": "8811221",
+                        // TODO: include as many parameters as possible in locations to prevent future issues
+                        // Official Location ID (lid): "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@"
+                        // "eteId": "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@Zaventem",
+                        // "extId": "8811221",
 
-        // search by arrival
+                        // Departure station
+                        'depLocL'  => [
+                            [
+                                'lid' => 'L=' . $idfrom . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($idfrom, 2)
+                            ]
+                        ],
+
+                        // Arrival station
+                        'arrLocL'  => [
+                            [
+                                'lid' => 'L=' . $idto . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($idto, 2)
+                            ]
+                        ],
+
+                        // Transport type filters
+                        'jnyFltrL' => [['mode' => 'BIT', 'type' => 'PROD', 'value' => $typeOfTransportCode]],
+                        // Search date
+                        'outDate'  => $date,
+                        // Search time
+                        'outTime'  => str_replace(':', '', $time) . '00',
+
+                        'economic'    => false,
+                        'extChgTime'  => -1,
+                        'getIST'      => false,
+                        // Intermediate stops
+                        'getPasslist' => true,
+                        // Coordinates of a line visualizing the trip (direct lines between stations, doesn't show the tracks)
+                        'getPolyline' => false,
+                        // Number of results
+                        'numF'        => 10,
+                        'liveSearch'  => false
+                    ]
+                ]
+            ],
+            'ver'       => '1.11',
+            // Don't pretty print json replies (costs time and bandwidth)
+            'formatted' => false
+        ];
+
+        // search by arrival time instead of by departure time
         if ($timeSel == 1) {
-            $postdata .= '"outFrwd": false,';
+            $postdata['svcReqL'][0]['req']['outFrwd'] = false;
         }
 
-        $postdata .= '"liveSearch":false
-        
-                }
-            }
-        ],
-        "ver":"1.11","formatted":false}';
+        $postdata = json_encode($postdata);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -493,7 +528,7 @@ class connections
                 if (key_exists('dPlatfR', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfR'];
                     $departurePlatformNormal = false;
-                } elseif (key_exists('dPlatfS', $conn['dep'])) {
+                } else if (key_exists('dPlatfS', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfS'];
                     $departurePlatformNormal = true;
                 } else {
@@ -519,7 +554,7 @@ class connections
                 if (key_exists('aPlatfR', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfR'];
                     $arrivalPlatformNormal = false;
-                } elseif (key_exists('aPlatfS', $conn['arr'])) {
+                } else if (key_exists('aPlatfS', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfS'];
                     $arrivalPlatformNormal = true;
                 } else {
@@ -556,7 +591,7 @@ class connections
                     if (key_exists('dPlatfR', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfR'];
                         $departPlatformNormal = false;
-                    } elseif (key_exists('dPlatfS', $trainRide['dep'])) {
+                    } else if (key_exists('dPlatfS', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfS'];
                         $departPlatformNormal = true;
                     } else {
@@ -581,7 +616,7 @@ class connections
                     if (key_exists('aPlatfR', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfR'];
                         $arrivalPlatformNormal = false;
-                    } elseif (key_exists('aPlatfS', $trainRide['arr'])) {
+                    } else if (key_exists('aPlatfS', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfS'];
                         $arrivalPlatformNormal = true;
                     } else {
@@ -801,8 +836,7 @@ class connections
                     $trainIndex++;
                 }
 
-                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;
-                ;
+                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;;
                 $connection[$i]->arrival->canceled = end($trains)->arrival->canceled;
 
                 // Don't need this variable anymore. Clean up for easier debugging.
@@ -926,23 +960,23 @@ class connections
                 }*/
 
                 //Add journey options to the logs of iRail
-                $journeyoptions[$i] = ["journeys" => [] ];
+                $journeyoptions[$i] = ["journeys" => []];
                 $departureStop = $connection[$i]->departure->station;
                 for ($viaIndex = 0; $viaIndex < count($vias); $viaIndex++) {
                     $arrivalStop = $vias[$viaIndex]->station;
                     $journeyoptions[$i]["journeys"][] = [
-                        "trip" => substr($vias[$viaIndex]->vehicle, 8),
+                        "trip"          => substr($vias[$viaIndex]->vehicle, 8),
                         "departureStop" => $departureStop->{'@id'},
-                        "arrivalStop" => $arrivalStop->{'@id'}
+                        "arrivalStop"   => $arrivalStop->{'@id'}
                     ];
                     //set the next departureStop
                     $departureStop = $vias[$viaIndex]->station;
                 }
                 //add last journey
                 $journeyoptions[$i]["journeys"][] = [
-                    "trip" => substr($connection[$i]->arrival->vehicle, 8),
+                    "trip"          => substr($connection[$i]->arrival->vehicle, 8),
                     "departureStop" => $departureStop->{'@id'},
-                    "arrivalStop" => $connection[$i]->arrival->station->{'@id'}
+                    "arrivalStop"   => $connection[$i]->arrival->station->{'@id'}
                 ];
                 $request->setJourneyOptions($journeyoptions);
                 $i++;
