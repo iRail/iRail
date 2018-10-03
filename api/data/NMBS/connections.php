@@ -143,7 +143,7 @@ class connections
         if ($typeOfTransport == 'automatic') {
             // 2 national stations: no international trains
             // Internation station: all
-            if (strpos($stationFrom->priv__hafasId,'0088') === 0 && strpos($stationTo->priv__hafasId,'0088') === 0) {
+            if (strpos($stationFrom->priv__hafasId, '0088') === 0 && strpos($stationTo->priv__hafasId, '0088') === 0) {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;

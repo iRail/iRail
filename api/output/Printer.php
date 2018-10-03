@@ -107,7 +107,7 @@ abstract class Printer
     {
         if (strpos($key, "priv__") === 0) {
             // Don't print private var
-        } else if (is_array($val)) {
+        } elseif (is_array($val)) {
             if (count($val) > 0) {
                 $this->startArray($key, count($val), $root);
                 $i = 0;
@@ -125,7 +125,7 @@ abstract class Printer
                 $this->startKeyVal('empty', '');
                 $this->endElement('empty');
             }
-        } else if (is_object($val)) {
+        } elseif (is_object($val)) {
             $this->startObject($key, $val);
             $hash = get_object_vars($val);
             $counter = 0;
@@ -141,11 +141,11 @@ abstract class Printer
                 $counter++;
             }
             $this->endObject($key);
-        } else if (is_bool($val)) {
+        } elseif (is_bool($val)) {
             $val = $val ? 1 : 0; //turn boolean into an int
             $this->startKeyVal($key, $val);
             $this->endElement($key);
-        } else if (!is_null($val)) {
+        } elseif (!is_null($val)) {
             $this->startKeyVal($key, $val);
             $this->endElement($key);
         } else {
