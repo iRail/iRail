@@ -29,15 +29,15 @@ class stations
         $station = new Station();
         $id = str_replace('http://irail.be/stations/NMBS/', '', $newstation->{'@id'});
         $station->id = 'BE.NMBS.' . $id; //old-style iRail ids
-        $station->hafasId = $id;
+        $station->priv__hafasId = $id;
         $station->locationX = $newstation->longitude;
         $station->locationY = $newstation->latitude;
         $station->{'@id'} = $newstation->{'@id'};
 
         if ($newstation->country == "http://sws.geonames.org/2802361/") {
-            $station->country = "BE";
+            $station->priv__country = "BE";
         } else {
-            $station->country = "Unknown";
+            $station->priv__country = "Unknown";
         }
 
         if (isset($newstation->{'alternative'})) {

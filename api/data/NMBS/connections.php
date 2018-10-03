@@ -54,7 +54,7 @@ class connections
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date, $results, $timeSel,
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->priv__hafasId, $stations[1]->priv__hafasId, $lang, $time, $date, $results, $timeSel,
             $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
@@ -143,7 +143,7 @@ class connections
         if ($typeOfTransport == 'automatic') {
             // 2 national stations: no international trains
             // Internation station: all
-            if ($stationFrom->country == 'BE' && $stationTo->country == 'BE') {
+            if ($stationFrom->priv__country == 'BE' && $stationTo->priv__country == 'BE') {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
@@ -194,14 +194,14 @@ class connections
                         // Departure station
                         'depLocL'  => [
                             [
-                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->hafasId, 2)
+                                'lid' => 'L=' . $stationFrom->priv__hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->priv__hafasId, 2)
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL'  => [
                             [
-                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->hafasId, 2)
+                                'lid' => 'L=' . $stationTo->priv__hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->priv__hafasId, 2)
                             ]
                         ],
 
@@ -250,7 +250,7 @@ class connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $stationFrom->hafasId . '-' . $stationTo->hafasId . '-' . time() . '.log',
+            file_put_contents('../storage/debug-connections-' . $stationFrom->priv__hafasId . '-' . $stationTo->priv__hafasId . '-' . time() . '.log',
                 $response);
         }
 
