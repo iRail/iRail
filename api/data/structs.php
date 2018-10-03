@@ -22,7 +22,6 @@ class Connection
 class Station
 {
     public $priv__hafasId;
-    public $priv__country;
     public $locationX;
     public $locationY;
     public $id;

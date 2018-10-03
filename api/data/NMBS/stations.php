@@ -34,12 +34,6 @@ class stations
         $station->locationY = $newstation->latitude;
         $station->{'@id'} = $newstation->{'@id'};
 
-        if ($newstation->country == "http://sws.geonames.org/2802361/") {
-            $station->priv__country = "BE";
-        } else {
-            $station->priv__country = "Unknown";
-        }
-
         if (isset($newstation->{'alternative'})) {
             foreach ($newstation->{'alternative'} as $alternatives) {
                 if ($alternatives->{'@language'} == strtolower($lang)) {

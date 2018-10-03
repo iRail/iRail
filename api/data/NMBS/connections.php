@@ -17,8 +17,8 @@ class connections
      * @param $request
      */
     const TYPE_TRANSPORT_ALL = '10101110111';
-
-    const TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS = '0010111';
+    const TYPE_TRANSPORT_ONLY_TRAINS = '1010111';
+    const TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS = '0010111';
 
     public static function fillDataRoot($dataroot, $request)
     {
@@ -143,18 +143,20 @@ class connections
         if ($typeOfTransport == 'automatic') {
             // 2 national stations: no international trains
             // Internation station: all
-            if ($stationFrom->priv__country == 'BE' && $stationTo->priv__country == 'BE') {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+            if (strpos($stationFrom->priv__hafasId,'0088') === 0 && strpos($stationTo->priv__hafasId,'0088') === 0) {
+                $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
             } else {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
+                $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
             }
         } elseif ($typeOfTransport == 'nointernationaltrains') {
-            $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
+        } elseif ($typeOfTransport == 'trains') {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
         } elseif ($typeOfTransport == 'all') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         } else {
-            // All trains is the default
-            $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
+            // Only trains is the default
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
         }
 
 
