@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../structs.php';
+
 /**
  * Copyright (C) 2011 by iRail vzw/asbl
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
@@ -117,14 +119,14 @@ class stations
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
-            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
                     if (strlen($alt->{'@value'}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
                 }
-            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
+            } else if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                 $station = $stationitem;
                 break;
             }

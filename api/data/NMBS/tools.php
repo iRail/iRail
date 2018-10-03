@@ -15,9 +15,9 @@ class tools
     const cache_prefix = "|Irail|Api|";
 
     /**
-     * @param <type> $time -> in 00d15:24:00 or hhmmss or ddhhmmss format
-     * @param <type> $date -> in 20100915
-     * @return seconds since the Unix epoch
+     * @param string $time -> in 00d15:24:00 or hhmmss or ddhhmmss format
+     * @param string $date -> in 20100915
+     * @return int seconds since the Unix epoch
      */
     public static function transformTime($time, $date)
     {

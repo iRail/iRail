@@ -19,7 +19,7 @@ class ConnectionsRequest extends Request
     protected $fast;
     protected $alerts;
     protected $typeOfTransport;
-    protected $journeyoptions;
+    protected $journeyoptions = [];
 
     public function __construct()
     {
@@ -118,7 +118,7 @@ class ConnectionsRequest extends Request
 
     /**
      * Set the journey options when a result has been found. This will be stored in the logs.
-     * @param $jo is an array of journey options
+     * @param array $jo is an array of journey options
      */
     public function setJourneyOptions($jo)
     {
