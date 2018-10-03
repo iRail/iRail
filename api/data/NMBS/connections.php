@@ -17,8 +17,8 @@ class connections
      * @param $request
      */
     const TYPE_TRANSPORT_ALL = '10101110111';
-
-    const TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS = '0010111';
+    const TYPE_TRANSPORT_ONLY_TRAINS = '1010111';
+    const TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS = '0010111';
 
     public static function fillDataRoot($dataroot, $request)
     {
@@ -54,7 +54,7 @@ class connections
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date, $results, $timeSel,
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->priv__hafasId, $stations[1]->priv__hafasId, $lang, $time, $date, $results, $timeSel,
             $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
@@ -143,18 +143,20 @@ class connections
         if ($typeOfTransport == 'automatic') {
             // 2 national stations: no international trains
             // Internation station: all
-            if ($stationFrom->country == 'BE' && $stationTo->country == 'BE') {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+            if (strpos($stationFrom->priv__hafasId, '0088') === 0 && strpos($stationTo->priv__hafasId, '0088') === 0) {
+                $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
             } else {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
+                $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
             }
         } elseif ($typeOfTransport == 'nointernationaltrains') {
-            $typeOfTransportCode = self::TYPE_TRANSPORT_NO_INTERNATIONAL_TRAINS;
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
+        } elseif ($typeOfTransport == 'trains') {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
         } elseif ($typeOfTransport == 'all') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         } else {
-            // All trains is the default
-            $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
+            // Only trains is the default
+            $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
         }
 
 
@@ -194,14 +196,14 @@ class connections
                         // Departure station
                         'depLocL'  => [
                             [
-                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->hafasId, 2)
+                                'lid' => 'L=' . $stationFrom->priv__hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->priv__hafasId, 2)
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL'  => [
                             [
-                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->hafasId, 2)
+                                'lid' => 'L=' . $stationTo->priv__hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->priv__hafasId, 2)
                             ]
                         ],
 
@@ -250,7 +252,7 @@ class connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $stationFrom->hafasId . '-' . $stationTo->hafasId . '-' . time() . '.log',
+            file_put_contents('../storage/debug-connections-' . $stationFrom->priv__hafasId . '-' . $stationTo->priv__hafasId . '-' . time() . '.log',
                 $response);
         }
 
