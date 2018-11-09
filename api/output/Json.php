@@ -112,7 +112,7 @@ class Json extends Printer
      */
     public function startKeyVal($key, $val)
     {
-        $val = trim(json_encode($val),'"');
+        $val = trim(json_encode($val), '"');
         echo "\"$key\":\"$val\"";
     }
 
