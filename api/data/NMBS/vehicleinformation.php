@@ -411,9 +411,9 @@ class vehicleinformation
             $alert->description = strip_tags($alert->description, '<a>');
 
             // Only encode json, since xml can use CDATA. Trim ", since these are added later on.
-            if ($format == 'json') {
-                $alert->description = trim(json_encode($alert->description), '"');
-            }
+            //if ($format == 'json') {
+            //    $alert->description = trim(json_encode($alert->description), '"');
+            //}
 
             array_push($alerts, $alert);
         }
