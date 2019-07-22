@@ -114,6 +114,18 @@ class disturbances
             $disturbance->description = trim((String) $item->description, "\r\n ");
 
             // Trim the description from any html
+            $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
+
+            if (strpos($disturbance->description, '<a href="http://www.belgianrail.be/jp/download/brail_him/') !== false) {
+                preg_match('/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/', $disturbance->description, $documentMatches);
+                $disturbance->attachment = $documentMatches['url'];
+                $disturbance->description = preg_replace('/<a href="http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?">.*?<\/a>/', '', $disturbance->description);
+            }
+
+            $disturbance->description = trim((String) $item->description, "\r\n ");
+
+            // This replaces a special character with a normal space, just to be sure
+            $disturbance->description = str_replace(' ', ' ', $disturbance->description);
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
 
             $disturbance->link = trim((String) $item->link, "\r\n ");
