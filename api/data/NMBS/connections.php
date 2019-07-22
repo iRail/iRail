@@ -37,7 +37,7 @@ class connections
 
     /**
      * @param string    $from
-     * @param    string $to
+     * @param string    $to
      * @param           $time
      * @param           $date
      * @param           $results
@@ -148,11 +148,11 @@ class connections
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
             }
-        } elseif ($typeOfTransport == 'nointernationaltrains') {
+        } else if ($typeOfTransport == 'nointernationaltrains') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS_NO_INTERNATIONAL_TRAINS;
-        } elseif ($typeOfTransport == 'trains') {
+        } else if ($typeOfTransport == 'trains') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ONLY_TRAINS;
-        } elseif ($typeOfTransport == 'all') {
+        } else if ($typeOfTransport == 'all') {
             $typeOfTransportCode = self::TYPE_TRANSPORT_ALL;
         } else {
             // Only trains is the default
@@ -556,7 +556,7 @@ class connections
                 if (key_exists('dPlatfR', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfR'];
                     $departurePlatformNormal = false;
-                } elseif (key_exists('dPlatfS', $conn['dep'])) {
+                } else if (key_exists('dPlatfS', $conn['dep'])) {
                     $departurePlatform = $conn['dep']['dPlatfS'];
                     $departurePlatformNormal = true;
                 } else {
@@ -582,7 +582,7 @@ class connections
                 if (key_exists('aPlatfR', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfR'];
                     $arrivalPlatformNormal = false;
-                } elseif (key_exists('aPlatfS', $conn['arr'])) {
+                } else if (key_exists('aPlatfS', $conn['arr'])) {
                     $arrivalPlatform = $conn['arr']['aPlatfS'];
                     $arrivalPlatformNormal = true;
                 } else {
@@ -619,7 +619,7 @@ class connections
                     if (key_exists('dPlatfR', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfR'];
                         $departPlatformNormal = false;
-                    } elseif (key_exists('dPlatfS', $trainRide['dep'])) {
+                    } else if (key_exists('dPlatfS', $trainRide['dep'])) {
                         $departPlatform = $trainRide['dep']['dPlatfS'];
                         $departPlatformNormal = true;
                     } else {
@@ -644,7 +644,7 @@ class connections
                     if (key_exists('aPlatfR', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfR'];
                         $arrivalPlatformNormal = false;
-                    } elseif (key_exists('aPlatfS', $trainRide['arr'])) {
+                    } else if (key_exists('aPlatfS', $trainRide['arr'])) {
                         $arrivalPlatform = $trainRide['arr']['aPlatfS'];
                         $arrivalPlatformNormal = true;
                     } else {
@@ -705,16 +705,19 @@ class connections
                     $trains[$trainIndex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
                         $departTime, $conn['date']);
 
-                    // When reported, either marked by progType or by InReported/OutReported.
-                    if (key_exists('dProgType', $trainRide['dep']) && $trainRide['dep']['dProgType'] == "REPORTED"
-                        || key_exists('dInR', $trainRide['dep']) && $trainRide['dep']['dInR'] == "1") {
+                    var_dump($trainRide);
+                    var_dump($trainRide['jny']);
+
+                    // When reported, either marked by progType or by InReported/OutReported. TODO: verify if this is correct. No documentation or source.
+                    if ((key_exists('dProgType', $trainRide['dep']) && $trainRide['dep']['dProgType'] == "REPORTED")
+                        || (key_exists('dInR', $trainRide['dep']) && $trainRide['dep']['dInR'] == "true")) {
                         $trains[$trainIndex]->left = 1;
                     } else {
                         $trains[$trainIndex]->left = 0;
                     }
 
-                    if (key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED"
-                    || key_exists('aOutR', $trainRide['arr']) && $trainRide['arr']['aOutR'] == "1") {
+                    if ((key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED")
+                        || (key_exists('aOutR', $trainRide['arr']) && $trainRide['arr']['aOutR'] == "true")) {
                         $trains[$trainIndex]->arrived = 1;
                         // A train can only arrive if it left first in the previous station
                         $trains[$trainIndex]->left = 1;
@@ -867,8 +870,7 @@ class connections
                     $trainIndex++;
                 }
 
-                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;
-                ;
+                $connection[$i]->departure->canceled = $trains[0]->departure->canceled;;
                 $connection[$i]->arrival->canceled = end($trains)->arrival->canceled;
 
                 // Don't need this variable anymore. Clean up for easier debugging.
