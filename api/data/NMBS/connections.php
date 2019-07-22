@@ -705,13 +705,16 @@ class connections
                     $trains[$trainIndex]->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $conn['date'],
                         $departTime, $conn['date']);
 
-                    if (key_exists('dProgType', $trainRide['dep']) && $trainRide['dep']['dProgType'] == "REPORTED") {
+                    // When reported, either marked by progType or by InReported/OutReported.
+                    if (key_exists('dProgType', $trainRide['dep']) && $trainRide['dep']['dProgType'] == "REPORTED"
+                        || key_exists('dInR', $trainRide['dep']) && $trainRide['dep']['dInR'] == "1") {
                         $trains[$trainIndex]->left = 1;
                     } else {
                         $trains[$trainIndex]->left = 0;
                     }
 
-                    if (key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED") {
+                    if (key_exists('aProgType', $trainRide['arr']) && $trainRide['arr']['aProgType'] == "REPORTED"
+                    || key_exists('aOutR', $trainRide['arr']) && $trainRide['arr']['aOutR'] == "1") {
                         $trains[$trainIndex]->arrived = 1;
                         // A train can only arrive if it left first in the previous station
                         $trains[$trainIndex]->left = 1;
