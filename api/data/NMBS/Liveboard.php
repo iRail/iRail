@@ -2,9 +2,9 @@
 /** Copyright (C) 2011 by iRail vzw/asbl
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station.
  */
-include_once 'data/NMBS/tools.php';
-include_once 'data/NMBS/stations.php';
-include_once 'occupancy/OccupancyOperations.php';
+require_once __DIR__ . 'Tools.php';
+require_once __DIR__ . 'Stations.php';
+require_once  __DIR__ . '../../occupancy/OccupancyOperations.php';
 
 class liveboard
 {
@@ -19,7 +19,7 @@ class liveboard
         $dataroot->station = new \stdClass();
 
         try {
-            $dataroot->station = stations::getStationFromName($stationr, strtolower($request->getLang()));
+            $dataroot->station = Stations::getStationFromName($stationr, strtolower($request->getLang()));
         } catch (Exception $e) {
             throw new Exception('Could not find station ' . $stationr, 404);
         }
@@ -38,7 +38,7 @@ class liveboard
 
             $dataroot->arrival = self::parseData($html, $request->getTime(), $request->getLang(), $request->isFast(),
                 $request->getAlerts(), null, $request->getFormat());
-        } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
+        } else if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
             $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'dep');
             $html = Tools::getCachedObject($nmbsCacheKey);
@@ -76,11 +76,10 @@ class liveboard
      */
     private static function fetchData($station, $time, $date, $lang, $timeSel)
     {
-        include '../includes/getUA.php';
         $request_options = [
             'referer'   => 'http://api.irail.be/',
             'timeout'   => '30',
-            'useragent' => $irailAgent,
+            'useragent' => Tools::getUserAgent(),
         ];
 
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
@@ -325,10 +324,10 @@ class liveboard
 
             $date = $stop['date'];
             if (key_exists('dTimeR', $stop['stbStop'])) {
-                $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
+                $delay = Tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
                     $date, $stop['stbStop']['dTimeS'], $date);
-            } elseif (key_exists('aTimeR', $stop['stbStop'])) {
-                $delay = tools::calculateSecondsHHMMSS($stop['stbStop']['aTimeR'],
+            } else if (key_exists('aTimeR', $stop['stbStop'])) {
+                $delay = Tools::calculateSecondsHHMMSS($stop['stbStop']['aTimeR'],
                     $date, $stop['stbStop']['aTimeS'], $date);
             } else {
                 $delay = 0;
@@ -337,12 +336,12 @@ class liveboard
             // Depending on whether we're showing departures or arrivals, we should load different fields
             if (key_exists('dProdX', $stop['stbStop'])) {
                 // Departures
-                $unixtime = tools::transformTime($stop['stbStop']['dTimeS'], $date);
+                $unixtime = Tools::transformTime($stop['stbStop']['dTimeS'], $date);
                 $vehicle = $vehicleDefinitions[$stop['stbStop']['dProdX']];
                 if (key_exists('dPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('dPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('dPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['dPlatfS'];
                     $isPlatformNormal = true;
                 } else {
@@ -352,13 +351,13 @@ class liveboard
                 }
             } else {
                 // Arrivals
-                $unixtime = tools::transformTime($stop['stbStop']['aTimeS'], $date);
+                $unixtime = Tools::transformTime($stop['stbStop']['aTimeS'], $date);
                 $vehicle = $vehicleDefinitions[$stop['stbStop']['aProdX']];
 
                 if (key_exists('aPlatfR', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfR'];
                     $isPlatformNormal = false;
-                } elseif (key_exists('aPlatfS', $stop['stbStop'])) {
+                } else if (key_exists('aPlatfS', $stop['stbStop'])) {
                     $platform = $stop['stbStop']['aPlatfS'];
                     $isPlatformNormal = true;
                 } else {
@@ -391,7 +390,7 @@ class liveboard
                 if (key_exists('dCncl', $stop['stbStop'])) {
                     $stopCanceled = $stop['stbStop']['dCncl'];
                 }
-            } elseif (key_exists('aProgType', $stop['stbStop'])) {
+            } else if (key_exists('aProgType', $stop['stbStop'])) {
                 if ($stop['stbStop']['aProgType'] == 'REPORTED') {
                     $left = 1;
                 }
@@ -405,7 +404,7 @@ class liveboard
                 $isExtraTrain = 1;
             }
 
-            $station = stations::getStationFromName($stop['dirTxt'], $lang);
+            $station = Stations::getStationFromName($stop['dirTxt'], $lang);
 
             $nodes[$stopIndex] = new DepartureArrival();
             $nodes[$stopIndex]->delay = $delay;
@@ -414,9 +413,7 @@ class liveboard
             $nodes[$stopIndex]->vehicle = new \stdClass();
             $nodes[$stopIndex]->vehicle->name = 'BE.NMBS.' . $vehicle->name;
             $nodes[$stopIndex]->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
-            $nodes[$stopIndex]->platform = new Platform();
-            $nodes[$stopIndex]->platform->name = $platform;
-            $nodes[$stopIndex]->platform->normal = $isPlatformNormal;
+            $nodes[$stopIndex]->platform = new Platform($platform, $isPlatformNormal);
             $nodes[$stopIndex]->canceled = $stopCanceled;
             // Include partiallyCanceled, but don't include canceled.
             // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.

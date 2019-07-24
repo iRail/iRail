@@ -1,8 +1,8 @@
 <?php
 
-include_once 'data/NMBS/tools.php';
+require_once __DIR__ . 'Tools.php';
 
-class disturbances
+class Disturbances
 {
     /**
      * @param $dataroot
@@ -12,19 +12,19 @@ class disturbances
     public static function fillDataRoot($dataroot, $request)
     {
         $nmbsCacheKey = self::getNmbsCacheKey($request->getLang());
-        $xml = tools::getCachedObject($nmbsCacheKey);
+        $xml = Tools::getCachedObject($nmbsCacheKey);
 
         try {
             if ($xml === false) {
                 $xml = self::fetchData($request->getLang());
-                tools::setCachedObject($nmbsCacheKey, $xml);
+                Tools::setCachedObject($nmbsCacheKey, $xml);
             }
             $data = self::parseData($xml);
 
             // Store a backup copy to deal with nmbs outages
-            tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $data, 3600);
+            Tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $data, 3600);
         } catch (Exception $exception) {
-            $data = tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
+            $data = Tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
 
             if ($data === false) {
                 // No cached copy available
@@ -67,11 +67,10 @@ class disturbances
      */
     private static function fetchData($lang)
     {
-        include '../includes/getUA.php';
         $request_options = [
             'referer' => 'http://api.irail.be/',
             'timeout' => '30',
-            'useragent' => $irailAgent,
+            'useragent' => Tools::getUserAgent(),
         ];
 
         $scrapeUrl = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/" . strtolower($lang) . "?tpl=rss_feed";

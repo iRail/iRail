@@ -6,7 +6,7 @@
  * @author pieterc
  */
 include_once 'Request.php';
-include_once 'data/NMBS/stations.php';
+include_once 'data/NMBS/Stations.php';
 
 class ConnectionsRequest extends Request
 {
@@ -80,7 +80,7 @@ class ConnectionsRequest extends Request
      */
     public function setFrom($from)
     {
-        $from = stations::transformOldToNewStyle($from);
+        $from = Stations::transformOldToNewStyle($from);
         //save the original text search string
         $from['query'] = $this->from;
         $this->from = $from;
@@ -100,7 +100,7 @@ class ConnectionsRequest extends Request
      */
     public function setTo($to)
     {
-        $to = stations::transformOldToNewStyle($to);
+        $to = Stations::transformOldToNewStyle($to);
         //save the original text search string
         $to['query'] = $this->to;
         $this->to = $to;

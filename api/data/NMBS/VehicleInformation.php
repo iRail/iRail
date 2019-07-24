@@ -7,13 +7,12 @@
  *
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
-include_once 'data/NMBS/tools.php';
-include_once 'data/NMBS/stations.php';
-include_once '../includes/simple_html_dom.php';
-include_once '../includes/getUA.php';
-include_once 'occupancy/OccupancyOperations.php';
+require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/Stations.php';
+require_once __DIR__ . '../../../includes/simple_html_dom.php';
+require_once __DIR__ . '../../occupancy/OccupancyOperations.php';
 
-class vehicleinformation
+class VehicleInformation
 {
     /**
      * @param $dataroot
@@ -35,7 +34,7 @@ class vehicleinformation
         $html = str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
-        if (! self::trainDrives($html)) {
+        if (!self::trainDrives($html)) {
             throw new Exception('Route not available.', 404);
         }
         // Check if train splits
@@ -74,12 +73,13 @@ class vehicleinformation
 
     public static function getNmbsCacheKey($id, $date, $lang)
     {
-        return 'NMBSVehicle|' .join('.', [
-            $id,
-            $date,
-            $lang,
-        ]);
+        return 'NMBSVehicle|' . join('.', [
+                $id,
+                $date,
+                $lang,
+            ]);
     }
+
     /**
      * @param $id
      * @param $lang
@@ -87,17 +87,15 @@ class vehicleinformation
      */
     private static function getServerData($id, $date, $lang)
     {
-        global $irailAgent; // from ../includes/getUA.php
-
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
             'useragent' => $irailAgent,
         ];
-        $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/'.$lang.'ld=std&seqnr=1&ident=at.02043113.1429435556&';
+        $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/' . $lang . 'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname='.$id.'&start=Zoeken&selectDate=oneday&date='.DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY').'&realtimeMode=Show';
+        $post_data = 'trainname=' . $id . '&start=Zoeken&selectDate=oneday&date=' . DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY') . '&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -146,7 +144,7 @@ class vehicleinformation
             $nextDayArrival = 0;
             for ($i = 1; $i < count($nodes); $i++) {
                 $node = $nodes[$i];
-                if (! count($node->attr)) {
+                if (!count($node->attr)) {
                     continue;
                 } // row with no class-attribute contain no data
 
@@ -158,9 +156,9 @@ class vehicleinformation
 
                 $arrivalDelay = trim($delayelements[0]);
                 $arrivalCanceled = false;
-                if (! $arrivalDelay) {
+                if (!$arrivalDelay) {
                     $arrivalDelay = 0;
-                } elseif (stripos($arrivalDelay, '+') !== false) {
+                } else if (stripos($arrivalDelay, '+') !== false) {
                     $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
                 } else {
                     $arrivalDelay = 0;
@@ -169,9 +167,9 @@ class vehicleinformation
 
                 $departureDelay = trim($delayelements[1]);
                 $departureCanceled = false;
-                if (! $departureDelay) {
+                if (!$departureDelay) {
                     $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
-                } elseif (stripos($departureDelay, '+') !== false) {
+                } else if (stripos($departureDelay, '+') !== false) {
                     $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
                 } else {
                     $departureDelay = 0;
@@ -239,7 +237,7 @@ class vehicleinformation
                         $departureCanceled = $arrivalCanceled;
                     }
                 }
-                
+
                 if (count($node->children[3]->find('a'))) {
                     $as = $node->children[3]->find('a');
                     $stationname = trim(reset($as[0]->nodes[0]->_));
@@ -276,7 +274,7 @@ class vehicleinformation
                         $nr = substr($link, strpos($link, 'stationId=') + strlen('stationId='));
                     }
                     $nr = substr($nr, 0, strlen($nr) - 1); // delete ampersand on the end
-                    $stationId = '00'.$nr;
+                    $stationId = '00' . $nr;
                 } else {
                     $stationId = null;
                 }
@@ -290,9 +288,9 @@ class vehicleinformation
                 } else {
                     // Station ID can be parsed from the station URL
                     if ($stationId) {
-                        $station = stations::getStationFromID($stationId, $lang);
+                        $station = Stations::getStationFromID($stationId, $lang);
                     } else {
-                        $station = stations::getStationFromName($stationname, $lang);
+                        $station = Stations::getStationFromName($stationname, $lang);
                     }
                 }
                 // The HTML file is ordered chronologically: so once we crossed midnight, we will alway have a next day set to 1.
@@ -309,8 +307,8 @@ class vehicleinformation
                 $stops[$j]->station = $station;
                 $stops[$j]->departureDelay = $departureDelay;
                 $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->scheduledArrivalTime = tools::transformTime('0' . $nextDayArrival . 'd'.$arrivalTime.':00', $dateDatetime->format('Ymd'));
+                $stops[$j]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$j]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->arrivalDelay = $arrivalDelay;
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
 
@@ -318,11 +316,9 @@ class vehicleinformation
                     $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}),
                             2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
                 }
-                $stops[$j]->platform = new Platform();
-                $stops[$j]->platform->name = $platform;
-                $stops[$j]->platform->normal = $normalplatform;
+                $stops[$j]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility
-                $stops[$j]->time = tools::transformTime('0' . $nextDay . 'd'.$departureTime.':00', $dateDatetime->format('Ymd'));
+                $stops[$j]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
                 $stops[$j]->delay = $departureDelay;
                 $stops[$j]->canceled = $departureCanceled;
                 $stops[$j]->left = $departed;
@@ -357,7 +353,7 @@ class vehicleinformation
                         $stops[$j]->occupancy->name = basename($unknown);
                     }
                 }
-                
+
                 $j++;
             }
 
@@ -380,10 +376,10 @@ class vehicleinformation
     private static function getAlerts($html, $format)
     {
         $test = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        if (! is_object($test)) {
+        if (!is_object($test)) {
             throw new Exception('Vehicle not found', 500);
         }
-        
+
         $tables = $html->getElementById('tq_trainroute_content_table_alteAnsicht')->getElementsByTagName('table');
         $nodes = $tables[1]->getElementsByTagName('div');
 
@@ -417,7 +413,7 @@ class vehicleinformation
 
             array_push($alerts, $alert);
         }
-        
+
         return $alerts;
     }
 
@@ -442,7 +438,7 @@ class vehicleinformation
 
     private static function trainSplits($html)
     {
-        return ! is_object($html->getElementById('tq_trainroute_content_table_alteAnsicht'));
+        return !is_object($html->getElementById('tq_trainroute_content_table_alteAnsicht'));
     }
 
     private static function trainDrives($html)
@@ -453,14 +449,14 @@ class vehicleinformation
     private static function parseCorrectUrl($html)
     {
         $test = $html->getElementById('HFSResult')->getElementByTagName('table');
-        if (! is_object($test)) {
+        if (!is_object($test)) {
             throw new Exception('Vehicle not found', 500);
         } // catch errors
 
         // Try first url
         $url = $html->getElementById('HFSResult')
-            ->getElementByTagName('table')
-            ->children[1]->children[0]->children[0]->attr['href'];
+                   ->getElementByTagName('table')
+                   ->children[1]->children[0]->children[0]->attr['href'];
 
         $serverData = self::getServerDataByUrl($url);
 
@@ -468,8 +464,8 @@ class vehicleinformation
         if (self::isOtherTrain($serverData)) {
             // Second url must be the right one
             $url = $html->getElementById('HFSResult')
-                ->getElementByTagName('table')
-                ->children[2]->children[0]->children[0]->attr['href'];
+                       ->getElementByTagName('table')
+                       ->children[2]->children[0]->children[0]->attr['href'];
 
             $serverData = self::getServerDataByUrl($url);
         }
@@ -481,18 +477,15 @@ class vehicleinformation
     {
         $html = str_get_html($serverData);
         $traindata = $html->getElementById('tq_trainroute_content_table_alteAnsicht');
-        return ! is_object($traindata);
+        return !is_object($traindata);
     }
 
     private static function getServerDataByUrl($url)
     {
-        global $irailAgent; // from ../includes/getUA.php
-
-        include_once '../includes/getUA.php';
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
-            'useragent' => $irailAgent,
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
+            'useragent' => Tools::getUserAgent(),
         ];
 
         $ch = curl_init();
@@ -509,4 +502,6 @@ class vehicleinformation
 
         return $result;
     }
-};
+}
+
+;

@@ -11,7 +11,7 @@ require_once __DIR__ . '/../structs.php';
  *   * fillDataRoot will fill the entire dataroot with stations
  *   * getStationFromName will return the right station object for a Name
  */
-class stations
+class Stations
 {
     /**
      * @param $dataroot

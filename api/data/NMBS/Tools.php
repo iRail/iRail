@@ -1,10 +1,11 @@
 <?php
+
 use Cache\Namespaced\NamespacedCachePool;
 
 /** Copyright (C) 2011 by iRail vzw/asbl
  * This is a class with static tools for you to use on the NMBS scraper. It contains stuff that is needed by all other classes.
  */
-class tools
+class Tools
 {
 
     /**
@@ -43,8 +44,9 @@ class tools
 
     public static function calculateSecondsHHMMSS($realtime, $rtdate, $planned, $pdate)
     {
-        return tools::transformTime($realtime, $rtdate) - tools::transformTime($planned, $pdate);
+        return Tools::transformTime($realtime, $rtdate) - Tools::transformTime($planned, $pdate);
     }
+
     /**
      * This function transforms the brail formatted timestring and reformats it to seconds.
      * @param int $time
@@ -71,7 +73,7 @@ class tools
         $minute = intval(substr($time, 2, 2));
         $second = intval(substr($time, 4, 2));
 
-        return  $hour * 3600 + $minute * 60 + $second;
+        return $hour * 3600 + $minute * 60 + $second;
     }
 
     /**
@@ -126,6 +128,7 @@ class tools
      *
      * @param String $key The key to search for.
      * @return bool|object The cached object if found. If not found, false.
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public static function getCachedObject($key)
     {
@@ -143,9 +146,10 @@ class tools
     /**
      * Store an item in the cache
      *
-     * @param String              $key   The key to store the object under
+     * @param String              $key The key to store the object under
      * @param object|array|string $value The object to store
-     * @param int                 $ttl   The number of seconds to keep this in cache
+     * @param int                 $ttl The number of seconds to keep this in cache
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public static function setCachedObject($key, $value, $ttl = self::cache_TTL)
     {
@@ -163,31 +167,17 @@ class tools
     }
 
 
-    public static function departureCanceled($status)
+    public static function createDepartureUri(Station $station, DateTime $departureTime, string $vehicleId)
     {
-        if ($status == "SCHEDULED" ||
-            $status == "REPORTED" ||
-            $status == "PROGNOSED" ||
-            $status == "CALCULATED" ||
-            $status == "CORRECTED" ||
-            $status == "PARTIAL_FAILURE_AT_ARR") {
-            return false;
-        } else {
-            return true;
-        }
+
+        return 'http://irail.be/connections/' . substr(basename($station->{'@id'}),
+                2) . '/' . date('Ymd',
+                $departureTime) . '/' . substr($vehicleId,
+                strrpos($vehicleId, '.') + 1);
     }
 
-    public static function arrivalCanceled($status)
+    public static function getUserAgent(): string
     {
-        if ($status == "SCHEDULED" ||
-            $status == "REPORTED" ||
-            $status == "PROGNOSED" ||
-            $status == "CALCULATED" ||
-            $status == "CORRECTED" ||
-            $status == "PARTIAL_FAILURE_AT_DEP") {
-            return false;
-        } else {
-            return true;
-        }
+        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36";
     }
 }

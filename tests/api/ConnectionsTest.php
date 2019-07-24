@@ -1,24 +1,24 @@
 <?php
 
-require_once __DIR__ . '/../../api/data/NMBS/connections.php';
-require_once __DIR__ . '/../../api/data/NMBS/stations.php';
+require_once __DIR__ . '/../../api/data/NMBS/Connections.php';
+require_once __DIR__ . '/../../api/data/NMBS/Stations.php';
 
-class ConnectionsTest extends \PHPUnit_Framework_TestCase
+class ConnectionsTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @throws Exception
      */
     public function testCreateNmbsPayload()
     {
-        $from = stations::getStationFromName("Brussel-zuid", "NL");
-        $to = stations::getStationFromName("Brussel-noord", "NL");
+        $from = Stations::getStationFromName("Brussel-zuid", "NL");
+        $to = Stations::getStationFromName("Brussel-noord", "NL");
         $lang = "NL";
         $time = "10:00";
         $date = "20181001";
         $timesel = 'depart';
-        $ypeOfTransportCode = connections::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
+        $ypeOfTransportCode = Connections::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
 
-        $payload = connections::createNmbsPayload($from, $to, $lang, $time, $date, $timesel, $ypeOfTransportCode);
+        $payload = Connections::createNmbsPayload($from, $to, $lang, $time, $date, $timesel, $ypeOfTransportCode);
 
         // Should be valid json
         $payloadArray = json_decode($payload, true);

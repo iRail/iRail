@@ -15,6 +15,7 @@ use Monolog\Formatter\LineFormatter;
 ini_set('include_path', '.:data');
 include_once 'data/DataRoot.php';
 include_once 'data/structs.php';
+
 class APICall
 {
     private $VERSION = 1.1;
@@ -22,8 +23,9 @@ class APICall
     protected $request;
     protected $dataRoot;
     protected $log;
+
     /**
-     * @param $functionname
+     * @param $resourcename
      */
     public function __construct($resourcename)
     {
@@ -45,7 +47,7 @@ class APICall
             $requestname = ucfirst(strtolower($resourcename)).'Request';
             include_once "requests/$requestname.php";
             $this->request = new $requestname();
-            $this->dataRoot = new DataRoot($resourcename, $this->VERSION, $this->request->getFormat());
+            $this->dataRoot = new DataRoot(ucfirst($resourcename), $this->VERSION, $this->request->getFormat());
         } catch (Exception $e) {
             $this->buildError($e);
         }
@@ -72,6 +74,7 @@ class APICall
         if (! file_exists("output/$format.php")) {
             $format = 'Xml';
         }
+        // TODO: user input is executed without validation! FIX THIS SECURITY ISSUE.
         include_once "output/$format.php";
         $printer = new $format(null);
         $printer->printError($e->getCode(), $e->getMessage());
@@ -119,7 +122,7 @@ class APICall
                 'serialization' => $this->request->getFormat(),
                 'language' => $this->request->getLang()
             ];
-            if ($this->resourcename === 'connections') {
+            if ($this->resourcename === 'Connections') {
                 $query['departureStop'] = $this->request->getFrom();
                 $query['arrivalStop'] = $this->request->getTo();
                 //transform to ISO8601
@@ -128,7 +131,7 @@ class APICall
             } elseif ($this->resourcename === 'liveboard') {
                 $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['departureStop'] = $this->request->getStation();
-            } elseif ($this->resourcename === 'vehicleinformation') {
+            } elseif ($this->resourcename === 'VehicleInformation') {
                 $query['vehicle'] = $this->request->getVehicleId();
             }
             return $query;

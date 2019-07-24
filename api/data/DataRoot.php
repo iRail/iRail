@@ -30,6 +30,7 @@ class DataRoot
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
+        // TODO: user input is executed without validation! FIX THIS SECURITY ISSUE.
         if (! file_exists("output/$format.php")) {
             throw new Exception('Incorrect format specified. Please correct this and try again', 402);
         }
