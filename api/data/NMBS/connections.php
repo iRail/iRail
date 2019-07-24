@@ -17,8 +17,8 @@ class connections
      * @param $request
      */
     const TYPE_TRANSPORT_BITCODE_ALL = '10101110111';
+    const TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = '1010111';
     const TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS = '0010111';
-
 
     const TYPE_TRANSPORT_KEY_AUTOMATIC = 'automatic';
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
