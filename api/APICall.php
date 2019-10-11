@@ -18,6 +18,7 @@ include_once 'data/structs.php';
 
 class APICall
 {
+    const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Kml', 'Xml'];
     private $VERSION = 1.1;
 
     protected $request;
@@ -71,10 +72,10 @@ class APICall
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
-        if (! file_exists("output/$format.php")) {
+        if (! in_array($format, self::SUPPORTED_FILE_FORMATS)) {
             $format = 'Xml';
         }
-        // TODO: user input is executed without validation! FIX THIS SECURITY ISSUE.
+
         include_once "output/$format.php";
         $printer = new $format(null);
         $printer->printError($e->getCode(), $e->getMessage());
