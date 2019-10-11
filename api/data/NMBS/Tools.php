@@ -169,7 +169,6 @@ class Tools
 
     public static function createDepartureUri(Station $station, DateTime $departureTime, string $vehicleId)
     {
-
         return 'http://irail.be/connections/' . substr(basename($station->{'@id'}),
                 2) . '/' . date('Ymd',
                 $departureTime) . '/' . substr($vehicleId,

@@ -16,7 +16,6 @@ include_once __DIR__ . 'occupancy/OccupancyOperations.php';
 
 class APIPost
 {
-
     const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Xml'];
     private $postData;
     private $resourcename;

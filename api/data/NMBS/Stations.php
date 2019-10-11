@@ -113,14 +113,14 @@ class Stations
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
-            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
                     if (strlen($alt->{'@value'}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
                 }
-            } else if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
+            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                 $station = $stationitem;
                 break;
             }

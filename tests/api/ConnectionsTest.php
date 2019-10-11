@@ -32,9 +32,7 @@ class ConnectionsTest extends PHPUnit_Framework_TestCase
         self::assertArrayHasKey('svcReqL', $payloadArray);
         self::assertArrayHasKey(0, $payloadArray['svcReqL']);
         self::assertEquals('TripSearch', $payloadArray['svcReqL'][0]['meth']);
-        self::assertEquals(1,$this->count($payloadArray['svcReqL']));
+        self::assertEquals(1, $this->count($payloadArray['svcReqL']));
         self::assertArrayHasKey('ver', $payloadArray);
     }
-
-
 }

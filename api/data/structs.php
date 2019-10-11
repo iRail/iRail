@@ -52,7 +52,6 @@ class Platform
         $this->name = $name;
         $this->normal = $normal;
     }
-
 }
 
 class Via

@@ -203,9 +203,9 @@ class Connections
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
             }
-        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
+        } elseif ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
             $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
-        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
+        } elseif ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
             $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
         } else {
             // All trains is the default
@@ -492,7 +492,8 @@ class Connections
 
         $trainsInConnection = self::parseHafasTrainsForConnection($hafasConnection, $locationDefinitions, $vehicleDefinitions, $alertDefinitions, $lang);
 
-        $connection->departure->canceled = $trainsInConnection[0]->departure->canceled;;
+        $connection->departure->canceled = $trainsInConnection[0]->departure->canceled;
+        ;
         $connection->arrival->canceled = end($trainsInConnection)->arrival->canceled;
 
 
@@ -605,7 +606,7 @@ class Connections
             // Realtime correction exists
             $result->name = $data[$realTimeFieldName];
             $result->normal = false;
-        } else if (key_exists($scheduledFieldName, $data)) {
+        } elseif (key_exists($scheduledFieldName, $data)) {
             // Only scheduled data exists
             $result->name = $data[$scheduledFieldName];
             $result->normal = true;
@@ -630,7 +631,6 @@ class Connections
      */
     private static function parseHafasTrainsForConnection(array $hafasConnection, array $locationDefinitions, array $vehicleDefinitions, array $alertDefinitions, string $lang): array
     {
-
         $trainsInConnection = [];
 
         // For the sake of readability: the response contains trains, not vias. Therefore, just parse the trains, and create via's based on the trains later.

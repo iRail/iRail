@@ -158,7 +158,7 @@ class VehicleInformation
                 $arrivalCanceled = false;
                 if (!$arrivalDelay) {
                     $arrivalDelay = 0;
-                } else if (stripos($arrivalDelay, '+') !== false) {
+                } elseif (stripos($arrivalDelay, '+') !== false) {
                     $arrivalDelay = preg_replace('/[^0-9]/', '', $arrivalDelay) * 60;
                 } else {
                     $arrivalDelay = 0;
@@ -169,7 +169,7 @@ class VehicleInformation
                 $departureCanceled = false;
                 if (!$departureDelay) {
                     $departureDelay = $arrivalDelay ? $arrivalDelay : 0;
-                } else if (stripos($departureDelay, '+') !== false) {
+                } elseif (stripos($departureDelay, '+') !== false) {
                     $departureDelay = preg_replace('/[^0-9]/', '', $departureDelay) * 60;
                 } else {
                     $departureDelay = 0;
