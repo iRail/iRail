@@ -5,11 +5,11 @@
  *
  * fillDataRoot will fill the entire dataroot with data.
  */
-include_once 'data/NMBS/tools.php';
-include_once 'data/NMBS/stations.php';
-include_once '../includes/getUA.php';
 
-class composition
+require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/Stations.php';
+
+class Composition
 {
     public static function fillDataRoot($dataroot, $request)
     {
@@ -69,12 +69,10 @@ class composition
      */
     private static function getNmbsData(string $vehicleId, string $language): array
     {
-
-        include __DIR__ . '/../../../includes/getUA.php';
         $request_options = [
             'referer'   => 'http://api.irail.be/',
             'timeout'   => '30',
-            'useragent' => $irailAgent,
+            'useragent' => Tools::getUserAgent(),
         ];
 
         $ch = curl_init();
