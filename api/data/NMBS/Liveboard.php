@@ -2,9 +2,10 @@
 /** Copyright (C) 2011 by iRail vzw/asbl
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station.
  */
-require_once __DIR__ . 'Tools.php';
-require_once __DIR__ . 'Stations.php';
-require_once __DIR__ . '../../occupancy/OccupancyOperations.php';
+require_once __DIR__ . '/HafasCommon.php';
+require_once __DIR__ . '/Stations.php';
+require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
 class Liveboard
 {
@@ -168,11 +169,13 @@ class Liveboard
             'ver' => '1.11',
             'formatted' => false,
         ];
-        $arrdep = ($timeSel == 'arr') ? '"type": "ARR",' : '';
+        if ($timeSel == 'arr') {
+            $postdata['svcReqL'][0]['req']['type'] = 'ARR';
+        }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postdata, JSON_UNESCAPED_SLASHES));
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
@@ -196,7 +199,7 @@ class Liveboard
     {
         $json = json_decode($serverData, true);
 
-        HafasCommon::throwExceptionOnInvalidResponse($serverData);
+        HafasCommon::throwExceptionOnInvalidResponse($json);
 
         // A Hafas API response contains all locations, trains, ... in separate lists to prevent duplicate data.
         // Get all those lists so we can read the actual data.

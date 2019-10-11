@@ -9,8 +9,8 @@
  */
 require_once __DIR__ . '/Tools.php';
 require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '../../../includes/simple_html_dom.php';
-require_once __DIR__ . '../../occupancy/OccupancyOperations.php';
+require_once __DIR__ . '/../../../includes/simple_html_dom.php';
+require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
 class VehicleInformation
 {

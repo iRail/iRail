@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . 'Tools.php';
+require_once __DIR__ . '/Tools.php';
 
 class Disturbances
 {
