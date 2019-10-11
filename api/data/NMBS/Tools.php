@@ -1,5 +1,8 @@
 <?php
 
+use Cache\Adapter\Apcu\ApcuCachePool;
+use Cache\Adapter\Common\AbstractCachePool;
+use Cache\Adapter\PHPArray\ArrayCachePool;
 use Cache\Namespaced\NamespacedCachePool;
 
 /** Copyright (C) 2011 by iRail vzw/asbl
@@ -105,17 +108,17 @@ class Tools
     }
 
     /**
-     * @return \Cache\Adapter\Common\AbstractCachePool the cachePool for this application
+     * @return AbstractCachePool the cachePool for this application
      */
     private static function createCachePool()
     {
         if (self::$cache == null) {
             // Try to use APC when available
             if (extension_loaded('apc')) {
-                self::$cache = new \Cache\Adapter\Apcu\ApcuCachePool();
+                self::$cache = new ApcuCachePool();
             } else {
                 // Fall back to array cache
-                self::$cache = new \Cache\Adapter\PHPArray\ArrayCachePool();
+                self::$cache = new ArrayCachePool();
             }
         }
 
@@ -128,7 +131,6 @@ class Tools
      *
      * @param String $key The key to search for.
      * @return bool|object The cached object if found. If not found, false.
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public static function getCachedObject($key)
     {
@@ -136,9 +138,14 @@ class Tools
 
         self::createCachePool();
 
-        if (self::$cache->hasItem($key)) {
-            return self::$cache->getItem($key)->get();
-        } else {
+        try {
+            if (self::$cache->hasItem($key)) {
+                return self::$cache->getItem($key)->get();
+            } else {
+                return false;
+            }
+        } catch (\Psr\Cache\InvalidArgumentException $e) {
+            // Todo: log something here
             return false;
         }
     }
@@ -146,17 +153,21 @@ class Tools
     /**
      * Store an item in the cache
      *
-     * @param String              $key The key to store the object under
+     * @param String $key The key to store the object under
      * @param object|array|string $value The object to store
-     * @param int                 $ttl The number of seconds to keep this in cache
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @param int $ttl The number of seconds to keep this in cache
      */
     public static function setCachedObject($key, $value, $ttl = self::cache_TTL)
     {
         $key = self::cache_prefix . $key;
 
         self::createCachePool();
-        $item = self::$cache->getItem($key);
+        try {
+            $item = self::$cache->getItem($key);
+        } catch (\Psr\Cache\InvalidArgumentException $e) {
+            // Todo: log something here
+            return;
+        }
 
         $item->set($value);
         if ($ttl > 0) {
@@ -167,7 +178,7 @@ class Tools
     }
 
 
-    public static function createDepartureUri(Station $station, DateTime $departureTime, string $vehicleId)
+    public static function createDepartureUri(Station $station, DateTime $departureTime, string $vehicleId): string
     {
         return 'http://irail.be/connections/' . substr(basename($station->{'@id'}),
                 2) . '/' . date('Ymd',

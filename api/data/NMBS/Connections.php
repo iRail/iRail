@@ -26,11 +26,12 @@ class Connections
     const TYPE_TRANSPORT_KEY_ALL = 'all';
 
     /**
+     * This is the entry point for the data fetching and transformation.
      * @param                    $dataroot
      * @param ConnectionsRequest $request
      * @throws Exception
      */
-    public static function fillDataRoot($dataroot, $request)
+    public static function fillDataRoot(DataRoot $dataroot, ConnectionsRequest $request): void
     {
         $from = $request->getFrom();
         if (count(explode('.', $request->getFrom())) > 1) {
@@ -42,27 +43,38 @@ class Connections
             $to = Stations::getStationFromID($request->getTo(), $request->getLang());
             $to = $to->name;
         }
-        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(), $request->getLang(), $request->getTimeSel(), $request->getTypeOfTransport(), $request);
+        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(),
+            $request->getLang(), $request->getTimeSel(),
+            $request->getTypeOfTransport(), $request);
     }
 
     /**
-     * @param string       $from The name of the origin station
-     * @param string       $to The name of the destination station
-     * @param string       $time The time, in hh:mm format
-     * @param string       $date The date, in YYYYmmdd format
-     * @param string       $lang The ISO2 language code, indicating in which language station names should be returned
-     * @param string       $timeSel Whether to filter by departure or arrival time
-     * @param string       $typeOfTransport The key identifying the types of transport which can be used
+     * @param string $from The name of the origin station
+     * @param string $to The name of the destination station
+     * @param string $time The time, in hh:mm format
+     * @param string $date The date, in YYYYmmdd format
+     * @param string $lang The ISO2 language code, indicating in which language station names should be returned
+     * @param string $timeSel Whether to filter by departure or arrival time
+     * @param string $typeOfTransport The key identifying the types of transport which can be used
      * @param              $request
      * @return array
      * @throws Exception
      */
-    private static function scrapeConnections($from, $to, $time, $date, $lang, $timeSel = 'depart', $typeOfTransport = self::TYPE_TRANSPORT_KEY_AUTOMATIC, $request)
-    {
+    private static function scrapeConnections(
+        string $from,
+        string $to,
+        string $time,
+        string $date,
+        string $lang,
+        string $timeSel = 'depart',
+        string $typeOfTransport = self::TYPE_TRANSPORT_KEY_AUTOMATIC,
+        ConnectionsRequest $request
+    ) {
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date, $timeSel, $typeOfTransport);
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date,
+            $timeSel, $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
         if ($xml === false) {
@@ -88,11 +100,12 @@ class Connections
      *
      * @param string $from
      * @param string $to
-     * @param        $lang
+     * @param string $lang
+     * @param ConnectionsRequest $request
      * @return array
      * @throws Exception
      */
-    private static function getStationsFromName($from, $to, $lang, $request)
+    private static function getStationsFromName(string $from, string $to, string $lang, ConnectionsRequest $request)
     {
         try {
             $station1 = Stations::getStationFromName($from, $lang);
@@ -119,8 +132,15 @@ class Connections
      * @param $typeOfTransport
      * @return string
      */
-    public static function getNmbsCacheKey($idfrom, $idto, $lang, $time, $date, $timeSel, $typeOfTransport)
-    {
+    public static function getNmbsCacheKey(
+        string $idfrom,
+        string $idto,
+        string $lang,
+        string $time,
+        string $date,
+        string $timeSel,
+        string $typeOfTransport
+    ) {
         return 'NMBSConnections|' . join('.', [
                 $idfrom,
                 $idto,
@@ -135,20 +155,27 @@ class Connections
     /**
      * @param Station $stationFrom
      * @param Station $stationTo
-     * @param string  $lang
+     * @param string $lang
      * @param         $time
      * @param         $date
-     * @param int     $timeSel
-     * @param string  $typeOfTransport
+     * @param int $timeSel
+     * @param string $typeOfTransport
      * @return string
      */
-    private static function requestHafasXml($stationFrom, $stationTo, $lang, $time, $date, $timeSel, $typeOfTransport)
-    {
+    private static function requestHafasXml(
+        string $stationFrom,
+        string $stationTo,
+        string $lang,
+        string $time,
+        string $date,
+        string $timeSel,
+        string $typeOfTransport
+    ) {
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
         $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
+            'referer' => 'http://api.irail.be/',
+            'timeout' => '30',
             'useragent' => Tools::getUserAgent(),
         ];
 
@@ -161,7 +188,8 @@ class Connections
             $timeSel = 1;
         }
 
-        $postdata = self::createNmbsPayload($stationFrom, $stationTo, $lang, $time, $date, $timeSel, $typeOfTransportCode);
+        $postdata = self::createNmbsPayload($stationFrom, $stationTo, $lang, $time, $date, $timeSel,
+            $typeOfTransportCode);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -188,10 +216,10 @@ class Connections
      * Get a string of bits indicating which types of transport are allowed.
      * @param Station $stationFrom The station from where the traveller will start.
      * @param Station $stationTo The station where the traveller will travel to.
-     * @param string  $typeOfTransportKey The allowed types of transport. Should be one of the TYPE_TRANSPORT_KEY_* constants.
+     * @param string $typeOfTransportKey The allowed types of transport. Should be one of the TYPE_TRANSPORT_KEY_* constants.
      * @return string
      */
-    private static function getTypeOfTransportBitcode(Station $stationFrom, Station $stationTo, string $typeOfTransportKey)
+    private static function getTypeOfTransportBitcode(Station $stationFrom, Station $stationTo, string $typeOfTransportKey): string
     {
         // Convert the type of transport key to a bitcode needed in the request payload
         // Automatic is the default type, which prevents that local trains aren't shown because a high-speed train provides a faster connection
@@ -217,36 +245,46 @@ class Connections
     /**
      * @param Station $stationFrom
      * @param Station $stationTo
-     * @param string  $lang
-     * @param string  $time
-     * @param string  $date
-     * @param string  $timeSel
-     * @param string  $typeOfTransportBitCode A string of 1s and 0s, indicating which types of transport are allowed.
+     * @param string $lang
+     * @param string $time
+     * @param string $date
+     * @param string $timeSel
+     * @param string $typeOfTransportBitCode A string of 1s and 0s, indicating which types of transport are allowed.
      * @return string The HTTP POST payload for the request to the NMBS.
      */
-    public static function createNmbsPayload(Station $stationFrom, Station $stationTo, string $lang, string $time, string $date, string $timeSel, string $typeOfTransportBitCode): string
-    {
+    public static function createNmbsPayload(
+        Station $stationFrom,
+        Station $stationTo,
+        string $lang,
+        string $time,
+        string $date,
+        string $timeSel,
+        string $typeOfTransportBitCode
+    ): string {
         // numF: number of results: server-side capped to 5, but ask 10 in case they'd let us
         $postdata = [
-            'auth'      => [
-                'aid'  => 'sncb-mobi',
+            'auth' => [
+                'aid' => 'sncb-mobi',
                 'type' => 'AID'
             ],
-            'client'    => [
-                'id'   => 'SNCB',
+            'client' => [
+                'id' => 'SNCB',
                 'name' => 'NMBS',
-                'os'   => 'Android 5.0.2', 'type' => 'AND', 'ua' => '', 'v' => 302132
+                'os' => 'Android 5.0.2',
+                'type' => 'AND',
+                'ua' => '',
+                'v' => 302132
             ],
             // Response language (for station names)
-            'lang'      => $lang,
-            'svcReqL'   => [
+            'lang' => $lang,
+            'svcReqL' => [
                 [
-                    'cfg'  => [
+                    'cfg' => [
                         'polyEnc' => 'GPA'
                     ],
                     // Route query
                     'meth' => 'TripSearch',
-                    'req'  => [
+                    'req' => [
 
                         // TODO: include as many parameters as possible in locations to prevent future issues
                         // Official Location ID (lid): "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@"
@@ -254,40 +292,44 @@ class Connections
                         // "extId": "8811221",
 
                         // Departure station
-                        'depLocL'  => [
+                        'depLocL' => [
                             [
-                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@', 'type' => 'S', 'extId' => substr($stationFrom->hafasId, 2)
+                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@',
+                                'type' => 'S',
+                                'extId' => substr($stationFrom->hafasId, 2)
                             ]
                         ],
 
                         // Arrival station
-                        'arrLocL'  => [
+                        'arrLocL' => [
                             [
-                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@', 'type' => 'S', 'extId' => substr($stationTo->hafasId, 2)
+                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@',
+                                'type' => 'S',
+                                'extId' => substr($stationTo->hafasId, 2)
                             ]
                         ],
 
                         // Transport type filters
                         'jnyFltrL' => [['mode' => 'BIT', 'type' => 'PROD', 'value' => $typeOfTransportBitCode]],
                         // Search date
-                        'outDate'  => $date,
+                        'outDate' => $date,
                         // Search time
-                        'outTime'  => str_replace(':', '', $time) . '00',
+                        'outTime' => str_replace(':', '', $time) . '00',
 
-                        'economic'    => false,
-                        'extChgTime'  => -1,
-                        'getIST'      => false,
+                        'economic' => false,
+                        'extChgTime' => -1,
+                        'getIST' => false,
                         // Intermediate stops
                         'getPasslist' => true,
                         // Coordinates of a line visualizing the trip (direct lines between stations, doesn't show the tracks)
                         'getPolyline' => false,
                         // Number of results
-                        'numF'        => 10,
-                        'liveSearch'  => false
+                        'numF' => 10,
+                        'liveSearch' => false
                     ]
                 ]
             ],
-            'ver'       => '1.11',
+            'ver' => '1.11',
             // Don't pretty print json replies from NMBS (costs time and bandwidth)
             'formatted' => false
         ];
@@ -302,17 +344,17 @@ class Connections
     }
 
     /**
-     * @param string   $serverData
-     * @param string   $lang
+     * @param string $serverData
+     * @param string $lang
      * @param          $request
      * @return array
      * @throws Exception
      */
-    public static function parseConnectionsAPI($serverData, $lang, $request)
+    public static function parseConnectionsAPI(string $serverData, string $lang, ConnectionsRequest $request)
     {
         $json = json_decode($serverData, true);
 
-        self::throwExceptionOnInvalidResponse($json);
+        HafasCommon::throwExceptionOnInvalidResponse($json);
 
         $locationDefinitions = [];
         if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
@@ -336,7 +378,8 @@ class Connections
 
         $connections = [];
         foreach ($json['svcResL'][0]['res']['outConL'] as $conn) {
-            $connections[] = self::parseHafasConnection($request, $conn, $locationDefinitions, $vehicleDefinitions, $alertDefinitions, $remarkDefinitions, $lang);
+            $connections[] = self::parseHafasConnection($request, $conn, $locationDefinitions, $vehicleDefinitions,
+                $alertDefinitions, $remarkDefinitions, $lang);
         }
 
         return $connections;
@@ -446,8 +489,15 @@ class Connections
      * @return mixed
      * @throws Exception
      */
-    private static function parseHafasConnection($request, $hafasConnection, $locationDefinitions, $vehicleDefinitions, $alertDefinitions, $remarkDefinitions, $lang)
-    {
+    private static function parseHafasConnection(
+        $request,
+        $hafasConnection,
+        $locationDefinitions,
+        $vehicleDefinitions,
+        $alertDefinitions,
+        $remarkDefinitions,
+        $lang
+    ) {
         $connection = new Connection();
         $connection->duration = Tools::transformDurationHHMMSS($hafasConnection['dur']);
 
@@ -467,7 +517,8 @@ class Connections
         } else {
             $connection->departure->delay = 0;
         }
-        $connection->departure->time = Tools::transformTime($hafasConnection['dep']['dTimeS'], $hafasConnection['date']);
+        $connection->departure->time = Tools::transformTime($hafasConnection['dep']['dTimeS'],
+            $hafasConnection['date']);
 
 
         list($departurePlatform, $departurePlatformNormal) = self::parseDeparturePlatform($hafasConnection['dep']);
@@ -490,10 +541,10 @@ class Connections
         $connection->departure->platform = new Platform($departurePlatform, $departurePlatformNormal);
         $connection->arrival->platform = new Platform($arrivalPlatform, $arrivalPlatformNormal);
 
-        $trainsInConnection = self::parseHafasTrainsForConnection($hafasConnection, $locationDefinitions, $vehicleDefinitions, $alertDefinitions, $lang);
+        $trainsInConnection = self::parseHafasTrainsForConnection($hafasConnection, $locationDefinitions,
+            $vehicleDefinitions, $alertDefinitions, $lang);
 
         $connection->departure->canceled = $trainsInConnection[0]->departure->canceled;
-        ;
         $connection->arrival->canceled = end($trainsInConnection)->arrival->canceled;
 
 
@@ -546,7 +597,8 @@ class Connections
         //$connection->departure->nextIntermediateStop = $trains[0]->stops;
 
         $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
-                2) . '/' . date('Ymd', $connection->departure->time) . '/' . substr($trainsInConnection[0]->vehicle, strrpos($trainsInConnection[0]->vehicle, '.') + 1);
+                2) . '/' . date('Ymd', $connection->departure->time) . '/' . substr($trainsInConnection[0]->vehicle,
+                strrpos($trainsInConnection[0]->vehicle, '.') + 1);
 
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
@@ -593,7 +645,7 @@ class Connections
     }
 
     /**
-     * @param array  $data The data object containing the platform information, for example a departure or arrival.
+     * @param array $data The data object containing the platform information, for example a departure or arrival.
      * @param string $scheduledFieldName The name of the field containing information about the scheduled platform.
      * @param string $realTimeFieldName The name of the field containing information about the realtime platform.
      * @return Platform The platform for this departure/arrival.
@@ -621,16 +673,21 @@ class Connections
 
     /**
      * Parse all train objects in a connection (route/trip).
-     * @param array  $hafasConnection The connection object for which trains should be parsed.
-     * @param array  $locationDefinitions The location definitions, defined in the API response.
-     * @param array  $vehicleDefinitions The vehicle definitions, defined in the API response.
-     * @param array  $alertDefinitions The alert definitions, defined in the API response.
+     * @param array $hafasConnection The connection object for which trains should be parsed.
+     * @param array $locationDefinitions The location definitions, defined in the API response.
+     * @param array $vehicleDefinitions The vehicle definitions, defined in the API response.
+     * @param array $alertDefinitions The alert definitions, defined in the API response.
      * @param string $lang The language for station names etc.
      * @return array All trains in this connection.
      * @throws Exception
      */
-    private static function parseHafasTrainsForConnection(array $hafasConnection, array $locationDefinitions, array $vehicleDefinitions, array $alertDefinitions, string $lang): array
-    {
+    private static function parseHafasTrainsForConnection(
+        array $hafasConnection,
+        array $locationDefinitions,
+        array $vehicleDefinitions,
+        array $alertDefinitions,
+        string $lang
+    ): array {
         $trainsInConnection = [];
 
         // For the sake of readability: the response contains trains, not vias. Therefore, just parse the trains, and create via's based on the trains later.
@@ -643,24 +700,31 @@ class Connections
                 continue;
             }
 
-            $trainsInConnection[] = self::parseHafasTrain($trainRide, $hafasConnection, $locationDefinitions, $vehicleDefinitions, $alertDefinitions, $lang);
+            $trainsInConnection[] = self::parseHafasTrain($trainRide, $hafasConnection, $locationDefinitions,
+                $vehicleDefinitions, $alertDefinitions, $lang);
         }
         return $trainsInConnection;
     }
 
     /**
      * Parse a single train object in a connection (route/trip).
-     * @param array  $trainRide The specific trainride to parse.
-     * @param array  $hafasConnection The connection object for which trains should be parsed.
-     * @param array  $locationDefinitions The location definitions, defined in the API response.
-     * @param array  $vehicleDefinitions The vehicle definitions, defined in the API response.
-     * @param array  $alertDefinitions The alert definitions, defined in the API response.
+     * @param array $trainRide The specific trainride to parse.
+     * @param array $hafasConnection The connection object for which trains should be parsed.
+     * @param array $locationDefinitions The location definitions, defined in the API response.
+     * @param array $vehicleDefinitions The vehicle definitions, defined in the API response.
+     * @param array $alertDefinitions The alert definitions, defined in the API response.
      * @param string $lang The language for station names etc.
      * @return StdClass The parsed train
      * @throws Exception
      */
-    private static function parseHafasTrain(array $trainRide, array $hafasConnection, array $locationDefinitions, array $vehicleDefinitions, array $alertDefinitions, string $lang): StdClass
-    {
+    private static function parseHafasTrain(
+        array $trainRide,
+        array $hafasConnection,
+        array $locationDefinitions,
+        array $vehicleDefinitions,
+        array $alertDefinitions,
+        string $lang
+    ): StdClass {
         list($departPlatform, $departPlatformNormal) = self::parseDeparturePlatform($trainRide['dep']);
 
         if (key_exists('dTimeR', $trainRide['dep'])) {
@@ -716,7 +780,8 @@ class Connections
         $parsedTrain->arrival = new ViaDepartureArrival();
         $parsedTrain->arrival->time = Tools::transformTime($trainRide['arr']['aTimeS'], $hafasConnection['date']);
         $parsedTrain->arrival->delay = $arrivalDelay;
-        $parsedTrain->arrival->platform = new Platform($arrivalPlatform, $parsedTrain->arrival->platform->normal = $arrivalPlatformNormal);
+        $parsedTrain->arrival->platform = new Platform($arrivalPlatform,
+            $parsedTrain->arrival->platform->normal = $arrivalPlatformNormal);
         $parsedTrain->arrival->canceled = $arrivalcanceled;
         $parsedTrain->arrival->isExtraStop = $arrivalIsExtraStop;
         $parsedTrain->departure = new ViaDepartureArrival();
@@ -758,7 +823,8 @@ class Connections
             }
 
             foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
-                self::parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $hafasConnection, $parsedTrain);
+                self::parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $hafasConnection,
+                    $parsedTrain);
             }
 
             // Don't trust this code yet
@@ -950,8 +1016,12 @@ class Connections
         //$constructedVia->nextIntermediateStop = $trains[$viaIndex + 1]->stops;
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
-        $constructedVia->departure->departureConnection = Tools::createDepartureUri($constructedVia->station, $constructedVia->departure->time, $constructedVia->departure->vehicle);
-        $constructedVia->arrival->departureConnection = Tools::createDepartureUri($constructedVia->station, $constructedVia->arrival->time, $constructedVia->arrival->vehicle);
+        $constructedVia->departure->departureConnection = Tools::createDepartureUri($constructedVia->station,
+            $constructedVia->departure->time,
+            $constructedVia->departure->vehicle);
+        $constructedVia->arrival->departureConnection = Tools::createDepartureUri($constructedVia->station,
+            $constructedVia->arrival->time,
+            $constructedVia->arrival->vehicle);
 
         $vias[$viaIndex] = $constructedVia;
         return $vias;
@@ -970,18 +1040,18 @@ class Connections
         for ($viaIndex = 0; $viaIndex < count($vias); $viaIndex++) {
             $arrivalStop = $vias[$viaIndex]->station;
             $journeyoptions["journeys"][] = [
-                "trip"          => substr($vias[$viaIndex]->vehicle, 8),
+                "trip" => substr($vias[$viaIndex]->vehicle, 8),
                 "departureStop" => $departureStop->{'@id'},
-                "arrivalStop"   => $arrivalStop->{'@id'}
+                "arrivalStop" => $arrivalStop->{'@id'}
             ];
             //set the next departureStop
             $departureStop = $vias[$viaIndex]->station;
         }
         //add last journey
         $journeyoptions["journeys"][] = [
-            "trip"          => substr($connection->arrival->vehicle, 8),
+            "trip" => substr($connection->arrival->vehicle, 8),
             "departureStop" => $departureStop->{'@id'},
-            "arrivalStop"   => $connection->arrival->station->{'@id'}
+            "arrivalStop" => $connection->arrival->station->{'@id'}
         ];
 
         $existing = $request->getJourneyOptions();
@@ -1025,9 +1095,11 @@ class Connections
                     if (isset($occupancyConnections[$i]->via)) {
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle, "."), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle,
+                                        "."), 1);
                             } else {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->arrival->vehicle, "."), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->arrival->vehicle,
+                                        "."), 1);
                             }
 
                             $from = $via->station->{'@id'};

@@ -5,15 +5,15 @@ require_once __DIR__ . 'Tools.php';
 class Disturbances
 {
     /**
-     * @param $dataroot
-     * @param $request
+     * This is the entry point for the data fetching and transformation.
+     * @param DataRoot $dataroot
+     * @param DisturbancesRequest $request
      * @throws Exception
      */
-    public static function fillDataRoot($dataroot, $request)
+    public static function fillDataRoot(DataRoot $dataroot, DisturbancesRequest $request): void
     {
         $nmbsCacheKey = self::getNmbsCacheKey($request->getLang());
         $xml = Tools::getCachedObject($nmbsCacheKey);
-
         try {
             if ($xml === false) {
                 $xml = self::fetchData($request->getLang());
@@ -42,7 +42,7 @@ class Disturbances
         $dataroot->disturbance = $data;
     }
 
-    public static function getNmbsCacheKey($lang)
+    public static function getNmbsCacheKey(string $lang): string
     {
         return 'NMBSDisturbances|' . $lang;
     }
@@ -54,7 +54,7 @@ class Disturbances
      * @param $lang
      * @return string
      */
-    public static function getNmbsCacheKeyLongStorage($lang)
+    public static function getNmbsCacheKeyLongStorage($lang): string
     {
         return 'NMBSDisturbances|' . $lang . '|backup';
     }
@@ -65,7 +65,7 @@ class Disturbances
      * @param string $lang The language in which the disturbances hsould be retrieved
      * @return string Broken XML
      */
-    private static function fetchData($lang)
+    private static function fetchData(string $lang): string
     {
         $request_options = [
             'referer' => 'http://api.irail.be/',
@@ -91,7 +91,7 @@ class Disturbances
      * @param string $xml The XML retrieved from the NMBS' broken RSS feed
      * @return array Array of StdClass objects containing the structured disturbance data
      */
-    private static function parseData($xml)
+    private static function parseData(string $xml): array
     {
         // Clean XML. Their RSS XML is completely broken, so this step cannot be skipped!
         if (class_exists('tidy', false)) {
@@ -109,25 +109,28 @@ class Disturbances
             $disturbance = new stdClass();
 
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
-            $disturbance->title = trim((String) $item->title, "\r\n ");
-            $disturbance->description = trim((String) $item->description, "\r\n ");
+            $disturbance->title = trim((String)$item->title, "\r\n ");
+            $disturbance->description = trim((String)$item->description, "\r\n ");
 
             // Trim the description from any html
             $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
 
-            if (strpos($disturbance->description, '<a href="http://www.belgianrail.be/jp/download/brail_him/') !== false) {
-                preg_match('/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/', $disturbance->description, $documentMatches);
+            if (strpos($disturbance->description,
+                    '<a href="http://www.belgianrail.be/jp/download/brail_him/') !== false) {
+                preg_match('/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/',
+                    $disturbance->description, $documentMatches);
                 $disturbance->attachment = $documentMatches['url'];
-                $disturbance->description = preg_replace('/<a href="http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?">.*?<\/a>/', '', $disturbance->description);
+                $disturbance->description = preg_replace('/<a href="http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?">.*?<\/a>/',
+                    '', $disturbance->description);
             }
 
-            $disturbance->description = trim((String) $item->description, "\r\n ");
+            $disturbance->description = trim((String)$item->description, "\r\n ");
 
             // This replaces a special character with a normal space, just to be sure
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
 
-            $disturbance->link = trim((String) $item->link, "\r\n ");
+            $disturbance->link = trim((String)$item->link, "\r\n ");
 
             $pubdate = $item->pubDate;
             $disturbance->timestamp = strtotime($pubdate);

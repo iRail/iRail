@@ -8,9 +8,9 @@
    * @author Pieter Colpaert
    */
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 ini_set('include_path', '.:data');
 include_once 'data/DataRoot.php';

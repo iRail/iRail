@@ -15,11 +15,13 @@ require_once __DIR__ . '../../occupancy/OccupancyOperations.php';
 class VehicleInformation
 {
     /**
+     * This is the entry point for the data fetching and transformation.
+     *
      * @param $dataroot
      * @param $request
      * @throws Exception
      */
-    public static function fillDataRoot($dataroot, $request)
+    public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request) : void
     {
         $lang = $request->getLang();
         $date = $request->getDate();
@@ -70,6 +72,7 @@ class VehicleInformation
             $dataroot->vehicle->locationY = $lastStop->locationY;
         }
     }
+
 
     public static function getNmbsCacheKey($id, $date, $lang)
     {

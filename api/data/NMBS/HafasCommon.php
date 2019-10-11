@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * This class offers utility methods to work with HaCon/HAFAS data, which is used by the NMBS/SNCB.
+ */
 class HafasCommon
 {
 
