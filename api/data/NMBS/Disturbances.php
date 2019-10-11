@@ -31,6 +31,7 @@ class Disturbances
                 throw $exception;
             }
 
+            // This fallback ensures travellers get information if everything goes down.
             $disturbance = new stdClass();
             $disturbance->title = "Website issues";
             $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available.";
@@ -42,6 +43,13 @@ class Disturbances
         $dataroot->disturbance = $data;
     }
 
+    /**
+     * Get a key to identify this request in the in-memory cache. Note that this doesn't cache the iRail response, but the source data from the NMBS.
+     * This way the cache is shared between XML and Json responses.
+     *
+     * @param string $lang
+     * @return string
+     */
     public static function getNmbsCacheKey(string $lang): string
     {
         return 'NMBSDisturbances|' . $lang;
@@ -88,6 +96,8 @@ class Disturbances
     }
 
     /**
+     * Parse the RSS data from the NMBS.
+     *
      * @param string $xml The XML retrieved from the NMBS' broken RSS feed
      * @return array Array of StdClass objects containing the structured disturbance data
      */
