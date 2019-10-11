@@ -54,5 +54,5 @@ A pull request against this repo has the following things:
 
 - **PSR-2 coding standard.**
 - **Must pass StyleCI and TravisCI.**
-- **A good description of what u have changed and/or added**
+- **A good description of what you have changed and/or added**
 - **A specific PR title. No general title like: Improvements**

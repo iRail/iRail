@@ -7,5 +7,5 @@ include_once '../vendor/autoload.php';
 include_once 'requests/VehicleinformationRequest.php';
 include_once 'APICall.php';
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('vehicleinformation');
+$call = new APICall('VehicleInformation');
 $call->executeCall();

@@ -67,7 +67,7 @@ class Xml extends Printer
 
     public function startArray($name, $number, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'VehicleInformation') {
             echo '<'.$name."s number=\"$number\">";
         }
 
@@ -161,7 +161,7 @@ class Xml extends Printer
      */
     public function endArray($name, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'VehicleInformation') {
             echo '</'.$name.'s>';
         }
         $this->stack[$this->currentarrayindex] = '';
