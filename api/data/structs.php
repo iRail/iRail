@@ -5,11 +5,11 @@
  * @author pieterc
  */
 
-  //class Liveboard {
-  //  public $station;
-     //public $departure;
-     //public $arrival;
-  // }
+//class Liveboard {
+//  public $station;
+//public $departure;
+//public $arrival;
+// }
 
 class Connection
 {
@@ -80,4 +80,36 @@ class Alert
 {
     public $header;
     public $description;
+}
+
+class TrainCompositionResult
+{
+    public $segments;
+}
+
+
+class TrainCompositionInSegment
+{
+    public $origin;
+    public $destination;
+
+    public $composition;
+}
+
+class TrainComposition
+{
+    /**
+     * @var String internal source of this data, for example "Atlas"
+     */
+    public $source;
+
+    /**
+     * @var TrainCompositionUnit[] the units in this composition
+     */
+    public $units;
+}
+
+class TrainCompositionUnit
+{
+// TODO: specify exact model
 }
