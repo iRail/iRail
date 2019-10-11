@@ -24,6 +24,6 @@ class CompositionRequest extends Request
      */
     public function getId()
     {
-        return $this->arrdep;
+        return $this->id;
     }
 }

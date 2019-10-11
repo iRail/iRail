@@ -24,12 +24,14 @@ class composition
      */
     private static function scrapeComposition(string $vehicleId, string $language): TrainCompositionResult
     {
-        $vehicleId = preg_replace("[^0-9]", "", $vehicleId);
+        $vehicleId = preg_replace("/S1[0-9] /", "", $vehicleId); // S10 3381 should become 3381
+        $vehicleId = preg_replace("/S[0-9]/", "", $vehicleId); // S5 3381 or S53381 should become 3381
+        $vehicleId = preg_replace("/[^0-9]/", "", $vehicleId);
         $data = self::getNmbsData($vehicleId, $language);
 
         $result = new TrainCompositionResult;
         foreach ($data as $travelsegmentWithCompositionData) {
-            $result->segments[] = self::parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, $language);
+            $result->segment[] = self::parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, $language);
         }
 
         return $result;
@@ -38,8 +40,8 @@ class composition
     private static function parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, $language): TrainCompositionInSegment
     {
         $result = new TrainCompositionInSegment;
-        $result->origin = stations::getStationFromID($travelsegmentWithCompositionData->ptCarFrom->uicCode, $language);
-        $result->destination = stations::getStationFromID($travelsegmentWithCompositionData->ptCarTo->uicCode, $language);
+        $result->origin = stations::getStationFromID('00' . $travelsegmentWithCompositionData->ptCarFrom->uicCode, $language);
+        $result->destination = stations::getStationFromID('00' . $travelsegmentWithCompositionData->ptCarTo->uicCode, $language);
         $result->composition = self::parseCompositionData($travelsegmentWithCompositionData);
         return $result;
     }
@@ -47,15 +49,15 @@ class composition
     private static function parseCompositionData($travelsegmentWithCompositionData): TrainComposition
     {
         $result = new TrainComposition();
-        $result->source = $travelsegmentWithCompositionData->{"confirmedBy"};
-        $result->units = [];
-        foreach ($travelsegmentWithCompositionData as $compositionUnit) {
-            $result->units[] = self::parseCompositionUnit($compositionUnit);
+        $result->source = $travelsegmentWithCompositionData->confirmedBy;
+        $result->unit = [];
+        foreach ($travelsegmentWithCompositionData->materialUnits as $compositionUnit) {
+            $result->unit[] = self::parseCompositionUnit($compositionUnit);
         }
         return $result;
     }
 
-    private static function parseCompositionUnit($compositionUnit): TrainCompositionUnit
+    private static function parseCompositionUnit($compositionUnit)
     {
         return $compositionUnit; // TODO: ensure this always follows the same model
     }
@@ -76,7 +78,9 @@ class composition
         ];
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://trainmapjs.azureedge.net/data/composition/" . $vehicleId);
+        $url = "https://trainmapjs.azureedge.net/data/composition/" . $vehicleId;
+
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
@@ -84,6 +88,6 @@ class composition
         $response = curl_exec($ch);
         curl_close($ch);
 
-        return json_decode($response, true);
+        return json_decode($response);
     }
 }

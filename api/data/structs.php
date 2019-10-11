@@ -84,7 +84,7 @@ class Alert
 
 class TrainCompositionResult
 {
-    public $segments;
+    public $segment;
 }
 
 
@@ -106,7 +106,7 @@ class TrainComposition
     /**
      * @var TrainCompositionUnit[] the units in this composition
      */
-    public $units;
+    public $unit;
 }
 
 class TrainCompositionUnit
