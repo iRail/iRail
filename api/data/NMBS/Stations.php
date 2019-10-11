@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../structs.php';
+
 /**
  * Copyright (C) 2011 by iRail vzw/asbl
  * Copyright (C) 2015 by Open Knowledge Belgium vzw/asbl.
@@ -9,7 +11,7 @@
  *   * fillDataRoot will fill the entire dataroot with stations
  *   * getStationFromName will return the right station object for a Name
  */
-class stations
+class Stations
 {
     /**
      * @param $dataroot

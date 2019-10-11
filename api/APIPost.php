@@ -1,22 +1,22 @@
 <?php
-  /* Copyright (C) 2011 by iRail vzw/asbl
-   * © 2015 by Open Knowledge Belgium vzw/asbl
-   *
-   * This class foresees in basic HTTP functionality. It will get all the POST vars and put it in a request.
-   *
-   * @author Stan Callewaert
-   */
+/* Copyright (C) 2011 by iRail vzw/asbl
+ * © 2015 by Open Knowledge Belgium vzw/asbl
+ *
+ * This class foresees in basic HTTP functionality. It will get all the POST vars and put it in a request.
+ *
+ * @author Stan Callewaert
+ */
 
-use MongoDB\Collection;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
-include_once 'occupancy/OccupancyDao.php';
-include_once 'occupancy/OccupancyOperations.php';
+include_once __DIR__ . 'occupancy/OccupancyDao.php';
+include_once __DIR__ . 'occupancy/OccupancyOperations.php';
 
 class APIPost
 {
+    const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Xml'];
     private $postData;
     private $resourcename;
     private $log;
@@ -79,7 +79,7 @@ class APIPost
         if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    if (! in_array($this->postData->occupancy,
+                    if (!in_array($this->postData->occupancy,
                         [OccupancyOperations::LOW, OccupancyOperations::MEDIUM, OccupancyOperations::HIGH])
                     ) {
                         header('HTTP/1.1 400 Invalid Request');
@@ -134,13 +134,13 @@ class APIPost
                     header('Access-Control-Allow-Headers: Content-Type');
                     header('Location: https://api.irail.be/vehicle/?id=BE.NMBS.' . basename($this->postData->vehicle));
 
-                    $postInfo = array(
+                    $postInfo = [
                         'connection' => $this->postData->connection,
-                        'from' => $this->postData->from,
-                        'date' => $this->postData->date,
-                        'vehicle' => $this->postData->vehicle,
-                        'occupancy' => $this->postData->occupancy,
-                        );
+                        'from'       => $this->postData->from,
+                        'date'       => $this->postData->date,
+                        'vehicle'    => $this->postData->vehicle,
+                        'occupancy'  => $this->postData->occupancy,
+                    ];
 
                     // Add optional to parameters
                     if (isset($this->postData->to)) {
@@ -180,7 +180,7 @@ class APIPost
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
-        if (! file_exists("output/$format.php")) {
+        if (!in_array($format, self::SUPPORTED_FILE_FORMATS)) {
             $format = 'Xml';
         }
         include_once "output/$format.php";
@@ -197,16 +197,16 @@ class APIPost
         if ($e->getCode() >= 500) {
             $this->log->addCritical($this->resourcename, [
                 "querytype" => $this->resourcename,
-                "error" => $e->getMessage(),
-                "code" => $e->getCode(),
-                "query" => $this->postData
+                "error"     => $e->getMessage(),
+                "code"      => $e->getCode(),
+                "query"     => $this->postData
             ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
-                "error" => $e->getMessage(),
-                "code" => $e->getCode(),
-                "query" => $this->postData
+                "error"     => $e->getMessage(),
+                "code"      => $e->getCode(),
+                "query"     => $this->postData
             ]);
         }
     }
@@ -217,10 +217,10 @@ class APIPost
     private function writeLog($postInfo)
     {
         $this->log->addInfo($this->resourcename, [
-             'querytype' => $this->resourcename,
-             'querytime' => date('c'),
-             'post' => $postInfo,
-             'user_agent' => $_SERVER['HTTP_USER_AGENT']
+            'querytype'  => $this->resourcename,
+            'querytime'  => date('c'),
+            'post'       => $postInfo,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT']
         ]);
     }
 }

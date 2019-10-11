@@ -31,5 +31,5 @@ include_once 'requests/DisturbancesRequest.php';
 
 date_default_timezone_set('Europe/Brussels');
 
-$call = new APICall('disturbances');
+$call = new APICall('Disturbances');
 $call->executeCall();

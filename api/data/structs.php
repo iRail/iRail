@@ -15,7 +15,7 @@ class Connection
 {
     public $departure;
     public $arrival;
-//     public $via; // not compulsory
+    public $via; // not compulsory
     public $duration;
 }
 
@@ -25,6 +25,7 @@ class Station
     public $locationX;
     public $locationY;
     public $id;
+    public $name;
 }
 
 class DepartureArrival
@@ -41,6 +42,17 @@ class Platform
 {
     public $name;
     public $normal;
+
+    /**
+     * Platform constructor.
+     * @param $name
+     * @param $normal
+     */
+    public function __construct($name = null, $normal = null)
+    {
+        $this->name = $name;
+        $this->normal = $normal;
+    }
 }
 
 class Via
