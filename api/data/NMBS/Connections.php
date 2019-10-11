@@ -163,8 +163,8 @@ class Connections
      * @return string
      */
     private static function requestHafasXml(
-        string $stationFrom,
-        string $stationTo,
+        Station $stationFrom,
+        Station $stationTo,
         string $lang,
         string $time,
         string $date,
@@ -521,7 +521,7 @@ class Connections
             $hafasConnection['date']);
 
 
-        list($departurePlatform, $departurePlatformNormal) = self::parseDeparturePlatform($hafasConnection['dep']);
+        $connection->departure->platform = self::parseDeparturePlatform($hafasConnection['dep']);
 
 
         $connection->arrival = new DepartureArrival();
@@ -536,10 +536,7 @@ class Connections
 
         $connection->arrival->time = Tools::transformTime($hafasConnection['arr']['aTimeS'], $hafasConnection['date']);
 
-        list($arrivalPlatform, $arrivalPlatformNormal) = self::parseArrivalPlatform($arrival = $hafasConnection['arr']);
-
-        $connection->departure->platform = new Platform($departurePlatform, $departurePlatformNormal);
-        $connection->arrival->platform = new Platform($arrivalPlatform, $arrivalPlatformNormal);
+        $connection->arrival->platform = self::parseArrivalPlatform($arrival = $hafasConnection['arr']);
 
         $trainsInConnection = self::parseHafasTrainsForConnection($hafasConnection, $locationDefinitions,
             $vehicleDefinitions, $alertDefinitions, $lang);
@@ -551,15 +548,14 @@ class Connections
         $viaCount = count($trainsInConnection) - 1;
 
         $vias = [];
-
         //check if there were vias at all. Ignore the first
         if ($viaCount != 0) {
             for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
                 // Update the via array
                 $vias = self::constructVia($vias, $viaIndex, $trainsInConnection);
             }
-            $connection->via = $vias;
         }
+        $connection->via = $vias;
 
         // All the train alerts should go together in the connection alerts
         $connectionAlerts = [];
@@ -725,7 +721,7 @@ class Connections
         array $alertDefinitions,
         string $lang
     ): StdClass {
-        list($departPlatform, $departPlatformNormal) = self::parseDeparturePlatform($trainRide['dep']);
+        $departPlatform = self::parseDeparturePlatform($trainRide['dep']);
 
         if (key_exists('dTimeR', $trainRide['dep'])) {
             $departDelay = Tools::calculateSecondsHHMMSS($trainRide['dep']['dTimeR'],
@@ -741,7 +737,7 @@ class Connections
         $arrivalTime = Tools::transformTime($trainRide['arr']['aTimeS'],
             $hafasConnection['date']);
 
-        list($arrivalPlatform, $arrivalPlatformNormal) = self::parseArrivalPlatform($trainRide['arr']);
+       $arrivalPlatform = self::parseArrivalPlatform($trainRide['arr']);
 
 
         if (key_exists('aTimeR', $trainRide['arr'])) {
@@ -780,14 +776,13 @@ class Connections
         $parsedTrain->arrival = new ViaDepartureArrival();
         $parsedTrain->arrival->time = Tools::transformTime($trainRide['arr']['aTimeS'], $hafasConnection['date']);
         $parsedTrain->arrival->delay = $arrivalDelay;
-        $parsedTrain->arrival->platform = new Platform($arrivalPlatform,
-            $parsedTrain->arrival->platform->normal = $arrivalPlatformNormal);
+        $parsedTrain->arrival->platform = $arrivalPlatform;
         $parsedTrain->arrival->canceled = $arrivalcanceled;
         $parsedTrain->arrival->isExtraStop = $arrivalIsExtraStop;
         $parsedTrain->departure = new ViaDepartureArrival();
         $parsedTrain->departure->time = Tools::transformTime($trainRide['dep']['dTimeS'], $hafasConnection['date']);
         $parsedTrain->departure->delay = $departDelay;
-        $parsedTrain->departure->platform = new Platform($departPlatform, $departPlatformNormal);
+        $parsedTrain->departure->platform = $departPlatform;
         $parsedTrain->departure->canceled = $departurecanceled;
         $parsedTrain->departure->isExtraStop = $departureIsExtraStop;
 
