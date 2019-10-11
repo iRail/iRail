@@ -468,7 +468,7 @@ class Liveboard
      */
     private static function parsePlatformData($stop): array
     {
-// Depending on whether we're showing departures or arrivals, we should load different fields
+        // Depending on whether we're showing departures or arrivals, we should load different fields
         if (key_exists('dProdX', $stop['stbStop'])) {
             // Departures
             if (key_exists('dPlatfR', $stop['stbStop'])) {
