@@ -30,7 +30,21 @@ class Composition
         $vehicleId = preg_replace("/S1[0-9] /", "", $vehicleId); // S10 3381 should become 3381
         $vehicleId = preg_replace("/S[0-9]/", "", $vehicleId); // S5 3381 or S53381 should become 3381
         $vehicleId = preg_replace("/[^0-9]/", "", $vehicleId);
-        $data = self::getNmbsData($vehicleId, $language);
+
+        $nmbsCacheKey = self::getNmbsCacheKey($vehicleId);
+
+        $data = Tools::getCachedObject($nmbsCacheKey);
+        if ($data === false) {
+            $data = self::getNmbsData($vehicleId, $language);
+
+            if ($data == null) {
+                throw new Exception('Could not find vehicle ' . $vehicleId, 404);
+            }
+
+            // This data is static
+            Tools::setCachedObject($nmbsCacheKey, $data, 3600);
+        }
+
 
         if ($data == null) {
             throw new Exception('Could not find vehicle ' . $vehicleId, 404);
@@ -141,9 +155,13 @@ class Composition
 
         if ($returnAllData) {
             // If the user wants all data, copy everything over
-            foreach (get_object_vars($object) as $propertyName) {
-                if (!in_array($propertyName, $wellDefinedProperties)) {
-                    $trainCompositionUnit->$propertyName = $object->$propertyName;
+            foreach (get_object_vars($object) as $propertyName => $value) {
+                if (!key_exists($propertyName, $wellDefinedProperties)) {
+                    $trainCompositionUnit->$propertyName = $value;
+                    if ($value == null) {
+                        // replace null by a default value to prevent errors in the printers.
+                        $trainCompositionUnit->$propertyName = false;
+                    }
                 }
             }
         }
@@ -177,4 +195,15 @@ class Composition
 
         return json_decode($response);
     }
+
+    /**
+     * Get a unique key to identify data in the in-memory cache which reduces the number of requests to the NMBS.
+     * @param string $id The train id.
+     * @return string The key for the cached data.
+     */
+    public static function getNmbsCacheKey(string $id): string
+    {
+        return 'NMBSComposition|' . $id;
+    }
+
 }
