@@ -31,6 +31,8 @@ class VehicleInformation
         if ($serverData === false) {
             $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
             Tools::setCachedObject($nmbsCacheKey, $serverData);
+        } else {
+            Tools::sendIrailCacheResponseHeader(true);
         }
 
         $html = str_get_html($serverData);

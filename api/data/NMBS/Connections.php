@@ -80,6 +80,8 @@ class Connections
         if ($xml === false) {
             $xml = self::requestHafasXml($stations[0], $stations[1], $lang, $time, $date, $timeSel, $typeOfTransport);
             Tools::setCachedObject($nmbsCacheKey, $xml);
+        } else {
+            Tools::sendIrailCacheResponseHeader(true);
         }
 
         $connections = self::parseConnectionsAPI($xml, $lang, $request);

@@ -18,6 +18,8 @@ class Disturbances
             if ($xml === false) {
                 $xml = self::fetchData($request->getLang());
                 Tools::setCachedObject($nmbsCacheKey, $xml);
+            } else {
+                Tools::sendIrailCacheResponseHeader(true);
             }
             $data = self::parseData($xml);
 

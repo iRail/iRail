@@ -43,6 +43,8 @@ class Composition
 
             // This data is static
             Tools::setCachedObject($nmbsCacheKey, $data, 3600);
+        } else {
+            Tools::sendIrailCacheResponseHeader(true);
         }
 
 

@@ -51,6 +51,8 @@ class Liveboard
             $html = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'arr');
             Tools::setCachedObject($nmbsCacheKey, $html);
+        } else {
+            Tools::sendIrailCacheResponseHeader(true);
         }
 
         $dataroot->arrival = self::parseNmbsData($html, $request->getLang());
@@ -71,6 +73,8 @@ class Liveboard
             $html = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'dep');
             Tools::setCachedObject($nmbsCacheKey, $html);
+        } else {
+            Tools::sendIrailCacheResponseHeader(true);
         }
 
         $dataroot->departure = self::parseNmbsData($html, $request->getLang());
