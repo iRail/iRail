@@ -5,16 +5,17 @@
  * @author Bert Marcelis
  */
 include_once 'Request.php';
-include_once 'data/NMBS/stations.php';
 
 class CompositionRequest extends Request
 {
     protected $id;
+    protected $data;
 
     public function __construct()
     {
         parent::__construct();
         parent::setGetVar('id', '');
+        parent::setGetVar('data', '');
         parent::processRequiredVars(['id']);
     }
 
@@ -25,5 +26,14 @@ class CompositionRequest extends Request
     public function getId()
     {
         return $this->id;
+    }
+
+
+    /**
+     * @return boolean True if raw source data should be returned as well, for people who need more data.
+     */
+    public function getShouldReturnRawData()
+    {
+        return $this->data == 'all';
     }
 }
