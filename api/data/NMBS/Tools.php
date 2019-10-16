@@ -114,7 +114,7 @@ class Tools
     {
         if (self::$cache == null) {
             // Try to use APC when available
-            if (extension_loaded('apc')) {
+            if (extension_loaded('apcu')) {
                 self::$cache = new ApcuCachePool();
             } else {
                 // Fall back to array cache
