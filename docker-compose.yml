@@ -1,0 +1,42 @@
+version: '3'
+
+
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    volumes:
+        - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        - ./docker/nginx/logs:/var/log/nginx
+        - ./:/var/www/html
+    expose:
+        - "80"
+    ports:
+      - 8008:80
+    restart: always
+    depends_on:
+        - php
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "9000"
+    volumes:
+      - ./:/var/www/html/
+      - ./docker/php/crontab:/etc/cron.d/myCrontab
+  mongo:
+      image: mongo:4.0.0
+      volumes:
+        - ./docker/mongo/data/db:/data/db
+        - ./occupancy/data/:/data
+      expose:
+        - 27017
+      ports:
+        - "127.0.0.1:27017:27017"
+      command: mongod
+      restart: always
+      depends_on:
+        - php
