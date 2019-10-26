@@ -66,8 +66,8 @@ class Connections
         string $time,
         string $date,
         string $lang,
-        string $timeSel = 'depart',
-        string $typeOfTransport = self::TYPE_TRANSPORT_KEY_AUTOMATIC,
+        string $timeSel,
+        string $typeOfTransport,
         ConnectionsRequest $request
     ) {
         // TODO: clean the whole station name/id to object flow
@@ -591,8 +591,7 @@ class Connections
 
 
         $connection->departure->vehicle = $trainsInConnection[0]->vehicle;
-        // TODO: evaluate if we want to include the intermediate stops, and if so, where
-        //$connection->departure->nextIntermediateStop = $trains[0]->stops;
+        $connection->departure->stop = $trainsInConnection[0]->stops;
 
         $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
                 2) . '/' . date('Ymd', $connection->departure->time) . '/' . substr($trainsInConnection[0]->vehicle,
@@ -1009,8 +1008,7 @@ class Connections
         $constructedVia->arrival->vehicle = $trains[$viaIndex]->vehicle;
         $constructedVia->departure->vehicle = $trains[$viaIndex + 1]->vehicle;
 
-        // TODO: evaluate if we want to include the intermediate stops, and if so, where
-        //$constructedVia->nextIntermediateStop = $trains[$viaIndex + 1]->stops;
+        $constructedVia->stop = $trains[$viaIndex + 1]->stops;
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
         $constructedVia->departure->departureConnection = Tools::createDepartureUri($constructedVia->station,
