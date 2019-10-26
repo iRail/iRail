@@ -207,5 +207,4 @@ class Composition
     {
         return 'NMBSComposition|' . $id;
     }
-
 }
