@@ -1,6 +1,7 @@
 <?php
 
 /* Copyright (C) 2011 by iRail vzw/asbl */
+
 /**
  * This is the root of every document. It will specify a version and timestamp. It also has the printer class to print the entire document.
  */
@@ -30,8 +31,11 @@ class DataRoot
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
-        // TODO: user input is executed without validation! FIX THIS SECURITY ISSUE.
-        if (! file_exists("output/$format.php")) {
+        if (!in_array($format, ["Xml", "Json", "Kml", "Jsonp"])) {
+            // For security reasons.
+            throw new Exception('Incorrect format specified. Please correct this and try again', 402);
+        }
+        if (!file_exists("output/$format.php")) {
             throw new Exception('Incorrect format specified. Please correct this and try again', 402);
         }
         include_once "output/$format.php";
@@ -75,10 +79,10 @@ class DataRoot
             } else {
                 if ($request->isDebug()) {
                     throw new Exception('Could not get data: ' . $e->getMessage() . '. Please report this issue at https://github.com/irail/irail/issues/new',
-                      500);
+                        500);
                 } else {
                     throw new Exception('Could not get data. Please report this issue at https://github.com/irail/irail/issues/new',
-                      500);
+                        500);
                 }
             }
         }
