@@ -738,7 +738,7 @@ class Connections
         $arrivalTime = Tools::transformTime($trainRide['arr']['aTimeS'],
             $hafasConnection['date']);
 
-       $arrivalPlatform = self::parseArrivalPlatform($trainRide['arr']);
+        $arrivalPlatform = self::parseArrivalPlatform($trainRide['arr']);
 
 
         if (key_exists('aTimeR', $trainRide['arr'])) {

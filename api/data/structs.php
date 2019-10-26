@@ -21,9 +21,8 @@ class Connection
     public $arrival;
 
     public $via;
- // not compulsory
+    // not compulsory
     public $duration;
-
 }
 
 class Station
@@ -37,7 +36,6 @@ class Station
     public $id;
 
     public $name;
-
 }
 
 class DepartureArrival
@@ -53,7 +51,6 @@ class DepartureArrival
     public $platform;
 
     public $canceled;
-
 }
 
 class Platform
@@ -73,7 +70,6 @@ class Platform
         $this->name = $name;
 
         $this->normal = $normal;
-
     }
 }
 
@@ -88,7 +84,6 @@ class Via
     public $station;
 
     public $vehicle;
-
 }
 
 class Vehicle
@@ -100,7 +95,6 @@ class Vehicle
     public $name;
 
     public $shortname;
-
 }
 
 class ViaDepartureArrival
@@ -110,7 +104,6 @@ class ViaDepartureArrival
     public $platform;
 
     public $isExtraStop;
-
 }
 
 class Stop
@@ -124,7 +117,6 @@ class Stop
     public $platform;
 
     public $canceled;
-
 }
 
 class Alert
@@ -132,7 +124,6 @@ class Alert
     public $header;
 
     public $description;
-
 }
 
 class TrainCompositionResult
@@ -141,7 +132,6 @@ class TrainCompositionResult
      * @var $segment TrainCompositionInSegment[] A list of all segments with their own composition for this train ride.
      */
     public $segment;
-
 }
 
 
@@ -156,7 +146,6 @@ class TrainCompositionInSegment
      * @var $composition TrainComposition.
      */
     public $composition;
-
 }
 
 class TrainComposition
@@ -171,7 +160,6 @@ class TrainComposition
      * @var TrainCompositionUnit[] the units in this composition.
      */
     public $unit;
-
 }
 
 class TrainCompositionUnit
@@ -288,7 +276,8 @@ class TrainCompositionUnit
     //-- Other types can be included dynamically but aren't guaranteed to be present
 }
 
-class RollingMaterialType {
+class RollingMaterialType
+{
     /**
      * @var $parent_type string the parent type, such as I6, M5, HLE27, AM86 ...
      */
