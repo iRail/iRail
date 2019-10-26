@@ -54,7 +54,7 @@ class Json extends Printer
      */
     public function startArray($name, $number, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'VehicleInformation') {
+        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             echo '"'.$name."s\":{\"number\":\"$number\",";
         }
 
@@ -127,7 +127,7 @@ class Json extends Printer
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->currentarrayindex--;
 
-        if ($root && $this->rootname != 'liveboard' && $this->rootname != 'VehicleInformation') {
+        if ($root && $this->rootname != 'liveboard' && $this->rootname != 'vehicleinformation') {
             echo ']';
         } else {
             echo ']}';

@@ -61,7 +61,6 @@ class Xml extends Printer
      */
     public function startRootElement($name, $version, $timestamp)
     {
-        $name = strtolower($name);
         $this->rootname = $name;
         echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
     }
@@ -176,7 +175,6 @@ class Xml extends Printer
      */
     public function endRootElement($name)
     {
-        $name = strtolower($name);
         echo "</$name>";
     }
 
