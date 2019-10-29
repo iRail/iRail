@@ -9,3 +9,4 @@ api/push.php
 composer.json
 composer.lock
 .env
+docker/nginx/logs/
