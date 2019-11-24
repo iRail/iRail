@@ -7,7 +7,7 @@
  * @author pieterc
  */
 
-class Request
+abstract class Request
 {
     public static $SUPPORTED_LANGUAGES = ['EN', 'NL', 'FR', 'DE'];
 
@@ -50,6 +50,7 @@ class Request
         $this->setGetVar('format', 'xml');
         $this->setGetVar('lang', 'EN');
         $this->setGetVar('debug', false);
+        $this->setGetVar('version', 10);
     }
 
     /**

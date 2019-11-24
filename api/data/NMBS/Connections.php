@@ -492,7 +492,7 @@ class Connections
      * @throws Exception
      */
     private static function parseHafasConnection(
-        $request,
+        Request $request,
         $hafasConnection,
         $locationDefinitions,
         $vehicleDefinitions,
@@ -522,9 +522,7 @@ class Connections
         $connection->departure->time = Tools::transformTime($hafasConnection['dep']['dTimeS'],
             $hafasConnection['date']);
 
-
         $connection->departure->platform = self::parseDeparturePlatform($hafasConnection['dep']);
-
 
         $connection->arrival = new DepartureArrival();
         $connection->arrival->station = $arrivalStation;
@@ -591,12 +589,15 @@ class Connections
 
 
         $connection->departure->vehicle = $trainsInConnection[0]->vehicle;
+
         $connection->departure->stop = $trainsInConnection[0]->stops;
+        array_shift($connection->departure->stop);
+        array_pop($connection->departure->stop);
+
 
         $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
                 2) . '/' . date('Ymd', $connection->departure->time) . '/' . substr($trainsInConnection[0]->vehicle,
                 strrpos($trainsInConnection[0]->vehicle, '.') + 1);
-
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
         $connection->departure->left = $trainsInConnection[0]->left;
@@ -819,11 +820,10 @@ class Connections
             }
 
             foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
-                self::parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $hafasConnection,
-                    $parsedTrain);
+                $parsedTrain->stops[] = self::parseHafasIntermediateStop($lang, $locationDefinitions,
+                    $rawIntermediateStop, $hafasConnection);
             }
 
-            // Don't trust this code yet
             $parsedTrain->alerts = [];
             try {
                 if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
@@ -865,10 +865,10 @@ class Connections
      * @param $locationDefinitions
      * @param $rawIntermediateStop
      * @param $conn
-     * @param $train
+     * @return StdClass The parsed intermediate stop.
      * @throws Exception
      */
-    private static function parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $conn, $train)
+    private static function parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $conn)
     {
         /* "locX": 2,
                                   "idx": 19,
@@ -888,8 +888,12 @@ class Connections
 
 
         if (key_exists('aProgType', $rawIntermediateStop)) {
-            $intermediateStop->scheduledArrivalTime = Tools::transformTime($rawIntermediateStop['aTimeS'],
-                $conn['date']);
+            if (key_exists('aTimeS', $rawIntermediateStop)) {
+                $intermediateStop->scheduledArrivalTime = Tools::transformTime($rawIntermediateStop['aTimeS'],
+                    $conn['date']);
+            } else {
+                $intermediateStop->scheduledArrivalTime = null;
+            }
 
             $intermediateStop->arrivalCanceled = HafasCommon::isArrivalCanceledBasedOnState($rawIntermediateStop['aProgType']);
 
@@ -912,7 +916,6 @@ class Connections
                 $intermediateStop->scheduledDepartureTime = Tools::transformTime($rawIntermediateStop['dTimeS'],
                     $conn['date']);
             } else {
-                // TODO: ensure this doesn't cause trouble in the printer
                 $intermediateStop->scheduledDepartureTime = null;
             }
 
@@ -935,6 +938,15 @@ class Connections
             }
         }
 
+        // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
+        // are null, hope for the best
+        if ($intermediateStop->scheduledDepartureTime == null) {
+            $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
+        }
+        if ($intermediateStop->scheduledArrivalTime == null) {
+            $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
+        }
+
         // Some boolean about scheduled departure? First seen on an added stop
         // dInS, dInR, aOutS, aOutR are not processed at this moment
         if (key_exists('dCncl', $rawIntermediateStop)) {
@@ -950,8 +962,7 @@ class Connections
         } else {
             $intermediateStop->isExtraStop = 0;
         }
-
-        $train->stops[] = $intermediateStop;
+        return $intermediateStop;
     }
 
 
