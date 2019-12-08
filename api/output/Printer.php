@@ -92,7 +92,7 @@ abstract class Printer
 
             $counter++;
         }
-        $this->endRootElement($this->documentRoot->getRootname());
+        $this->endRootElement(strtolower($this->documentRoot->getRootname()));
     }
 
     /**
