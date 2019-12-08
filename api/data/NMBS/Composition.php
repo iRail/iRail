@@ -128,6 +128,7 @@ class Composition
         $wellDefinedProperties = [
             'hasToilets' => false,
             'hasTables' => false,
+            'hasBikeSection' => false,
             'hasSecondClassOutlets' => false,
             'hasFirstClassOutlets' => false,
             'hasHeating' => false,
