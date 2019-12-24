@@ -75,6 +75,10 @@ class Composition
         $result->destination = stations::getStationFromID('00' . $travelsegmentWithCompositionData->ptCarTo->uicCode,
             $language);
         $result->composition = self::parseCompositionData($travelsegmentWithCompositionData, $returnAllData);
+
+        // Set the left/right orientation on carriages. This can only be done by evaluating all carriages at the same time
+        $result->composition = self::setCorrectDirectionForCarriages($result->composition);
+
         return $result;
     }
 
@@ -113,13 +117,19 @@ class Composition
             // "materialSubTypeName": "AM80_c",
             // "parentMaterialSubTypeName": "AM80",
             $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName; //AM80
-            $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+            if (property_exists($rawCompositionUnit, "materialSubTypeName")) { // Some AM08 might be missing a type
+                $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+            } else {
+                // This data isn't available in the planning stage
+                $materialType->sub_type = "";
+            }
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
-            $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 2); //M6
-            $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 2);
+            preg_match('/([A-Z]\d+)\s?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+            $materialType->parent_type = $matches[1]; // M6, I11
+            $materialType->sub_type = $matches[2]; // A, B, BDX, BUH, ...
         } elseif (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
             $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
@@ -149,6 +159,7 @@ class Composition
             'seatsSecondClass' => 0,
             'seatsFirstClass' => 0,
             'lengthInMeter' => 0,
+            'tractionPosition' => 0,
             'hasSemiAutomaticInteriorDoors' => false,
             'hasLuggageSection' => false,
             'materialSubTypeName' => "unknown"
@@ -219,5 +230,27 @@ class Composition
     public static function getNmbsCacheKey(string $id): string
     {
         return 'NMBSComposition|' . $id;
+    }
+
+    /**
+     * Guess the correct orientation for rolling stock. This way we only need to code this once, instead of every user for themselves.
+     * - The carriages are looped over from left to right. The train drives to the left, so the first vehicle is in front.
+     * - The default orientation is LEFT. This means a potential drivers cab is to the LEFT.
+     * - The last carriage in a traction group has a RIGHT orientation. This means a potential drivers cab is to the RIGHT.
+     *
+     * @param TrainComposition $composition
+     * @return TrainComposition
+     */
+    private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
+    {
+        $lastTractionGroup = 1;
+        for ($i = 0; $i < count($composition->unit); $i++) {
+            if ($composition->unit[$i]->tractionPosition > $lastTractionGroup) {
+                $composition->unit[$i]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle in each traction group
+            }
+            $lastTractionGroup = $composition->unit[$i]->tractionPosition;
+        }
+        $composition->unit[count($composition->unit) - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle of the train
+        return $composition;
     }
 }

@@ -273,6 +273,10 @@ class TrainCompositionUnit
      */
     public $materialSubTypeName;
 
+    /**
+     * @var $tractionPosition int The traction group in which this carriage belongs. For example, two trains coupled together have 2 tractionpositions.
+     */
+    public $tractionPosition;
     //-- Other types can be included dynamically but aren't guaranteed to be present
 }
 
