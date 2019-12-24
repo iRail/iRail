@@ -27,8 +27,14 @@ class Composition
      */
     private static function scrapeComposition(string $vehicleId, string $language, bool $returnAllData): TrainCompositionResult
     {
-        $vehicleId = preg_replace("/S1[0-9] /", "", $vehicleId); // S10 3381 should become 3381
-        $vehicleId = preg_replace("/S[0-9]/", "", $vehicleId); // S5 3381 or S53381 should become 3381
+        // Handle S trains. For example, S5 3381 or S53381 should become 3381
+        $vehicleId = preg_replace("/S[12]0 ?/", "", $vehicleId); // S10, S20
+        $vehicleId = preg_replace("/S3[234] ?/", "", $vehicleId); // S32, S33, S34
+        $vehicleId = preg_replace("/S4[1234] ?/", "", $vehicleId); // S41, 42, 43, 44
+        $vehicleId = preg_replace("/S5[123] ?/", "", $vehicleId); // S51, 52, 53
+        $vehicleId = preg_replace("/S6[1234] ?/", "", $vehicleId); // S61, 62, 63, 64
+        $vehicleId = preg_replace("/S81 ?/", "", $vehicleId); // S81
+        $vehicleId = preg_replace("/S[0-9] ?/", "", $vehicleId); // S1-S9
         $vehicleId = preg_replace("/[^0-9]/", "", $vehicleId);
 
         $nmbsCacheKey = self::getNmbsCacheKey($vehicleId);
