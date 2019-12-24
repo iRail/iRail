@@ -243,7 +243,7 @@ class Composition
      */
     private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
     {
-        $lastTractionGroup = 1;
+        $lastTractionGroup = $composition->unit[0]->tractionPosition;
         for ($i = 0; $i < count($composition->unit); $i++) {
             if ($composition->unit[$i]->tractionPosition > $lastTractionGroup) {
                 $composition->unit[$i - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle in each traction group
