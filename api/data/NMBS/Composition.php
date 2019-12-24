@@ -246,7 +246,7 @@ class Composition
         $lastTractionGroup = 1;
         for ($i = 0; $i < count($composition->unit); $i++) {
             if ($composition->unit[$i]->tractionPosition > $lastTractionGroup) {
-                $composition->unit[$i]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle in each traction group
+                $composition->unit[$i - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle in each traction group
             }
             $lastTractionGroup = $composition->unit[$i]->tractionPosition;
         }
