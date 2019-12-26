@@ -47,8 +47,15 @@ class Composition
                 throw new Exception('Could not find vehicle ' . $vehicleId, 404);
             }
 
-            // This data is static
-            Tools::setCachedObject($nmbsCacheKey, $data, 3600);
+            // This data is static. Cache depending on the "state" of the data.
+            if ($data[0]->confirmedBy == "Planning") {
+                // Planning data often lacks detail. Store it for 5 minutes
+                Tools::setCachedObject($nmbsCacheKey, $data, 5 * 60);
+            } else {
+                // Confirmed data doesn't change and contains all details. This data dissapears after the train ride,
+                // so cache it long enough so it doesn't dissapear instantly after the ride.
+                Tools::setCachedObject($nmbsCacheKey, $data, 60 * 60 * 6);
+            }
         } else {
             Tools::sendIrailCacheResponseHeader(true);
         }
@@ -58,6 +65,7 @@ class Composition
             throw new Exception('Could not find vehicle ' . $vehicleId, 404);
         }
 
+        // Build a result
         $result = new TrainCompositionResult;
         foreach ($data as $travelsegmentWithCompositionData) {
             $result->segment[] = self::parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, $language,
@@ -114,17 +122,10 @@ class Composition
         $materialType->orientation = "LEFT";
 
         if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR") {
-            // "materialSubTypeName": "AM80_c",
-            // "parentMaterialSubTypeName": "AM80",
-            $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName; //AM80
-            if (property_exists($rawCompositionUnit, "materialSubTypeName")) { // Some AM08 might be missing a type
-                $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
-            } else {
-                // This data isn't available in the planning stage
-                $materialType->sub_type = "";
-            }
+            self::setAmMrMaterialType($materialType, $rawCompositionUnit);
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
-            if (property_exists($rawCompositionUnit, "materialSubTypeName") 
+            self::setHleMaterialType($materialType, $rawCompositionUnit);
+            if (property_exists($rawCompositionUnit, "materialSubTypeName")
                     && strpos($rawCompositionUnit->materialSubTypeName, 'HLE') === 0) {
                 $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
                 $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
@@ -133,10 +134,9 @@ class Composition
                 $materialType->sub_type = substr($rawCompositionUnit->materialTypeName, 5);
             }
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
-            preg_match('/([A-Z]\d+)\s?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
-            $materialType->parent_type = $matches[1]; // M6, I11
-            $materialType->sub_type = $matches[2]; // A, B, BDX, BUH, ...
+            self::setHvMaterialType($materialType, $rawCompositionUnit);
         } elseif (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
+            // Anything else, defaul fallback
             $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
         }
@@ -258,5 +258,70 @@ class Composition
         }
         $composition->unit[count($composition->unit) - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle of the train
         return $composition;
+    }
+
+    /**
+     * Handle the material type for AM/MR vehicles ( trains consisting of a type-specific number of motorized carriages which are always together, opposed to having a locomotive and unmotorized carriages).
+     * @param RollingMaterialType $materialType
+     * @param $rawCompositionUnit
+     */
+    private static function setAmMrMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
+    {
+        // "materialSubTypeName": "AM80_c",
+        // "parentMaterialSubTypeName": "AM80",
+        if (property_exists($rawCompositionUnit, "parentMaterialTypeName")) {
+            // Sub type might not be set yet when in planning.
+            $materialType->parent_type = $rawCompositionUnit->parentMaterialTypeName;
+        } elseif (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
+            $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
+            //AM80
+            if (property_exists($rawCompositionUnit, "materialSubTypeName")) { // Some AM08 might be missing a type
+                $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+            } else {
+                // This data isn't available in the planning stage
+                $materialType->sub_type = "";
+            }
+        } else {
+            $materialType->parent_type = "Unknown AM/MR";
+            $materialType->sub_type = "";
+        }
+    }
+
+
+    /**
+     * Handle Electric Locomotives (HLE XX).
+     * @param RollingMaterialType $materialType
+     * @param $rawCompositionUnit
+     */
+    private static function setHleMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
+    {
+        // Electric locomotives
+        $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
+        $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
+    }
+
+    /**
+     * Handle HV rolling stock (carriages which can be linked together however you want).
+     * @param RollingMaterialType $materialType
+     * @param $rawCompositionUnit
+     * @param $matches
+     * @return mixed
+     */
+    private static function setHvMaterialType(RollingMaterialType $materialType, $rawCompositionUnit)
+    {
+        // Separate carriages
+        if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
+            preg_match('/([A-Z]\d+)\s?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+            $materialType->parent_type = $matches[1]; // M6, I11
+            $materialType->sub_type = $matches[2]; // A, B, BDX, BUH, ...
+        } else {
+            // Some special cases, typically when data is missing
+            if (property_exists($rawCompositionUnit, 'materialTypeName')) {
+                $materialType->parent_type = $rawCompositionUnit->materialTypeName;
+            } else {
+                $materialType->parent_type = "unknown";
+            }
+            $materialType->sub_type = "unknown";
+        }
     }
 }
