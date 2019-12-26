@@ -125,14 +125,6 @@ class Composition
             self::setAmMrMaterialType($materialType, $rawCompositionUnit);
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             self::setHleMaterialType($materialType, $rawCompositionUnit);
-            if (property_exists($rawCompositionUnit, "materialSubTypeName")
-                    && strpos($rawCompositionUnit->materialSubTypeName, 'HLE') === 0) {
-                $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
-                $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
-            } else {
-                $materialType->parent_type = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
-                $materialType->sub_type = substr($rawCompositionUnit->materialTypeName, 5);
-            }
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
             self::setHvMaterialType($materialType, $rawCompositionUnit);
         } elseif (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
@@ -296,8 +288,14 @@ class Composition
     private static function setHleMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
     {
         // Electric locomotives
-        $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
-        $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
+        if (property_exists($rawCompositionUnit, "materialSubTypeName")
+            && strpos($rawCompositionUnit->materialSubTypeName, 'HLE') === 0) {
+            $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
+            $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
+        } else {
+            $materialType->parent_type = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
+            $materialType->sub_type = substr($rawCompositionUnit->materialTypeName, 5);
+        }
     }
 
     /**
