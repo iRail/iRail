@@ -95,8 +95,8 @@ class Composition
         $result = new TrainComposition();
         $result->source = $travelsegmentWithCompositionData->confirmedBy;
         $result->unit = [];
-        foreach ($travelsegmentWithCompositionData->materialUnits as $compositionUnit) {
-            $result->unit[] = self::parseCompositionUnit($compositionUnit, $returnAllData);
+        foreach ($travelsegmentWithCompositionData->materialUnits as $i => $compositionUnit) {
+            $result->unit[] = self::parseCompositionUnit($compositionUnit, $returnAllData, $i);
         }
         return $result;
     }
@@ -105,16 +105,17 @@ class Composition
      * Parse a train composition unit, typically one carriage or locomotive.
      * @param $rawCompositionUnit StdClass the raw composition unit data.
      * @param bool $returnAllData True if all source data should be printed, even the unstable fields.
+     * @param int $position The index/position of this vehicle.
      * @return TrainCompositionUnit The parsed and cleaned TrainCompositionUnit.
      */
-    private static function parseCompositionUnit($rawCompositionUnit, bool $returnAllData): TrainCompositionUnit
+    private static function parseCompositionUnit($rawCompositionUnit, bool $returnAllData, int $position): TrainCompositionUnit
     {
         $compositionUnit = self::transformRawCompositionUnitToTrainCompositionUnit($rawCompositionUnit, $returnAllData);
-        $compositionUnit->materialType = self::getMaterialType($rawCompositionUnit);
+        $compositionUnit->materialType = self::getMaterialType($rawCompositionUnit, $position);
         return $compositionUnit;
     }
 
-    private static function getMaterialType($rawCompositionUnit): RollingMaterialType
+    private static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
         $materialType = new RollingMaterialType();
         $materialType->parent_type = "unknown";
@@ -122,7 +123,7 @@ class Composition
         $materialType->orientation = "LEFT";
 
         if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR") {
-            self::setAmMrMaterialType($materialType, $rawCompositionUnit);
+            self::setAmMrMaterialType($materialType, $rawCompositionUnit, $position);
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             self::setHleMaterialType($materialType, $rawCompositionUnit);
         } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
@@ -257,13 +258,15 @@ class Composition
      * @param RollingMaterialType $materialType
      * @param $rawCompositionUnit
      */
-    private static function setAmMrMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
+    private static function setAmMrMaterialType(RollingMaterialType $materialType, $rawCompositionUnit, int $position): void
     {
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
         if (property_exists($rawCompositionUnit, "parentMaterialTypeName")) {
             // Sub type might not be set yet when in planning.
             $materialType->parent_type = $rawCompositionUnit->parentMaterialTypeName;
+            // NMBS doesn't know the subtype yet, but we can calculate this based on the position.
+            self::calculateAmMrSubType($materialType, $position);
         } elseif (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
             $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
             //AM80
@@ -320,6 +323,61 @@ class Composition
                 $materialType->parent_type = "unknown";
             }
             $materialType->sub_type = "unknown";
+        }
+    }
+
+    /**
+     * @param RollingMaterialType $materialType
+     * @param int $position
+     */
+    private static function calculateAmMrSubType(RollingMaterialType $materialType, int $position): void
+    {
+// The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
+        // We can "fix" their planning data for these types by setting A, B, C, ourselves.
+        // We still communicate that this is unconfirmed data, so there isn't a problem if one of the trains has a wrong orientation.
+        // Trains with 3 carriages:
+        if (in_array($materialType->parent_type, ['AM62-66', 'AM62', 'AM66'])) {
+            switch ($position % 3) {
+                case 0:
+                    $materialType->sub_type = "a";
+                    break;
+                case 1:
+                    $materialType->sub_type = "b";
+                    break;
+            }
+        }
+
+        // Trains with 3 carriages:
+        if (in_array($materialType->parent_type, ['AM08', 'AM96'])) {
+            switch ($position % 3) {
+                case 0:
+                    $materialType->sub_type = "a";
+                    break;
+                case 1:
+                    $materialType->sub_type = "b";
+                    break;
+                case 2:
+                    $materialType->sub_type = "c";
+                    break;
+            }
+        }
+
+        // Trains with 4 carriages:
+        if (in_array($materialType->parent_type, ['AM80'])) {
+            switch ($position % 3) {
+                case 0:
+                    $materialType->sub_type = "a";
+                    break;
+                case 1:
+                    $materialType->sub_type = "b";
+                    break;
+                case 2:
+                    $materialType->sub_type = "c";
+                    break;
+                case 3:
+                    $materialType->sub_type = "d";
+                    break;
+            }
         }
     }
 }
