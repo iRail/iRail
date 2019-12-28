@@ -183,7 +183,7 @@ class TrainCompositionUnit
      * @var $hasTables boolean Indicates if this unit has tables.
      */
     public $hasTables;
-    
+
     /**
      * @var $hasSecondClassOutlets boolean Indicates if this unit has 230v power outlets in 2nd class.
      */
@@ -277,6 +277,16 @@ class TrainCompositionUnit
      * @var $tractionPosition int The traction group in which this carriage belongs. For example, two trains coupled together have 2 tractionpositions.
      */
     public $tractionPosition;
+
+    /**
+     * @var $hasPrmSection boolean Zhether or not this carriage has a section for persons with a reduced mobility.
+     */
+    public $hasPrmSection;
+
+    /**
+     * @var $hasPriorityPlaces boolean Whether or not this carriage has priority places (places with priority for those who are old, pregnant, ...)
+     */
+    public $hasPriorityPlaces;
     //-- Other types can be included dynamically but aren't guaranteed to be present
 }
 

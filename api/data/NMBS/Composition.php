@@ -27,15 +27,7 @@ class Composition
      */
     private static function scrapeComposition(string $vehicleId, string $language, bool $returnAllData): TrainCompositionResult
     {
-        // Handle S trains. For example, S5 3381 or S53381 should become 3381
-        $vehicleId = preg_replace("/S[12]0 ?/", "", $vehicleId); // S10, S20
-        $vehicleId = preg_replace("/S3[234] ?/", "", $vehicleId); // S32, S33, S34
-        $vehicleId = preg_replace("/S4[1234] ?/", "", $vehicleId); // S41, 42, 43, 44
-        $vehicleId = preg_replace("/S5[123] ?/", "", $vehicleId); // S51, 52, 53
-        $vehicleId = preg_replace("/S6[1234] ?/", "", $vehicleId); // S61, 62, 63, 64
-        $vehicleId = preg_replace("/S81 ?/", "", $vehicleId); // S81
-        $vehicleId = preg_replace("/S[0-9] ?/", "", $vehicleId); // S1-S9
-        $vehicleId = preg_replace("/[^0-9]/", "", $vehicleId);
+        $vehicleId = self::extractTrainNumber($vehicleId);
 
         $nmbsCacheKey = self::getNmbsCacheKey($vehicleId);
 
@@ -48,7 +40,8 @@ class Composition
             }
 
             // This data is static. Cache depending on the "state" of the data.
-            if ($data[0]->confirmedBy == "Planning") {
+            // We don't cache suport short trains. If it's only a locomotive, it's incorrect data, and we don't want to cache incorrect data too long.
+            if ($data[0]->confirmedBy == "Planning" || count($data[0]->materialUnits) < 2) {
                 // Planning data often lacks detail. Store it for 5 minutes
                 Tools::setCachedObject($nmbsCacheKey, $data, 5 * 60);
             } else {
@@ -148,6 +141,8 @@ class Composition
             'hasFirstClassOutlets' => false,
             'hasHeating' => false,
             'hasAirco' => false,
+            'hasPrmSection' => false, // Persons with Reduced Mobility
+            'hasPriorityPlaces' => false,
             'materialNumber' => 0,
             'tractionType' => "unknown",
             'canPassToNextUnit' => false,
@@ -379,5 +374,24 @@ class Composition
                     break;
             }
         }
+    }
+
+    /**
+     * @param string $vehicleId
+     * @return string|string[]|null
+     */
+    private static function extractTrainNumber(string $vehicleId)
+    {
+        $vehicleId = strtoupper($vehicleId);
+        // Handle S trains. For example, S5 3381 or S53381 should become 3381
+        $vehicleId = preg_replace("/S[12]0 ?(\d{3,})/", "$1", $vehicleId); // S10, S20
+        $vehicleId = preg_replace("/S3[234] ?(\d{3,})/", "$1", $vehicleId); // S32, S33, S34
+        $vehicleId = preg_replace("/S4[1234] ?(\d{3,})/", "$1", $vehicleId); // S41, 42, 43, 44
+        $vehicleId = preg_replace("/S5[123] ?(\d{3,})/", "$1", $vehicleId); // S51, 52, 53
+        $vehicleId = preg_replace("/S6[1234] ?(\d{3,})/", "$1", $vehicleId); // S61, 62, 63, 64
+        $vehicleId = preg_replace("/S81 ?(\d{3,})/", "$1", $vehicleId); // S81
+        $vehicleId = preg_replace("/S[0-9] ?/", "", $vehicleId); // S1-S9
+        $vehicleId = preg_replace("/[^0-9]/", "", $vehicleId);
+        return $vehicleId;
     }
 }
