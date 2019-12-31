@@ -5,14 +5,16 @@
  * This will fetch all vehicledata for the NMBS.
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
-include_once 'data/NMBS/tools.php';
-include_once 'data/NMBS/stations.php';
-include_once '../includes/simple_html_dom.php';
-include_once '../includes/getUA.php';
-include_once 'occupancy/OccupancyOperations.php';
+require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/HafasCommon.php';
+require_once __DIR__ . '/Stations.php';
+require_once __DIR__ . '/../../../includes/simple_html_dom.php';
+require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
 class vehicleinformation
 {
+    const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
+
     /**
      * @param $dataroot
      * @param $request
@@ -30,27 +32,29 @@ class vehicleinformation
             Tools::setCachedObject($nmbsCacheKey, $serverData);
         }
 
-
         $vehicleOccupancy = OccupancyOperations::getOccupancy($request->getVehicleId(), $date);
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
-        if (! is_null($vehicleOccupancy)) {
+        if (!is_null($vehicleOccupancy)) {
             $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
         }
 
         $lastStop = null;
 
         $dataroot->vehicle = new Vehicle();
-        $dataroot->vehicle->name = "BE.NMBS." . $request->getVehicleId();
+        if (strpos($request->getVehicleId(), "BE.NMBS.") === 0) {
+            $dataroot->vehicle->name = $request->getVehicleId();
+        } else {
+            $dataroot->vehicle->name = "BE.NMBS." . $request->getVehicleId();
+        }
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
         $dataroot->vehicle->shortname = $request->getVehicleId();
         $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $request->getVehicleId();
 
-        $dataroot->stop = self::getData($serverData, $lang, $request->getFast(), $vehicleOccupancy, $date,
-            $request->getVehicleId(), $lastStop);
+        $dataroot->stop = self::getData($serverData, $lang, $vehicleOccupancy, $date, $request->getVehicleId(),
+            $lastStop);
 
-        // When fast=true, this data will not be available
         if (property_exists($lastStop, "locationX")) {
             $dataroot->vehicle->locationX = $lastStop->locationX;
             $dataroot->vehicle->locationY = $lastStop->locationY;
@@ -73,239 +77,39 @@ class vehicleinformation
      */
     private static function getServerData($id, $date, $lang)
     {
-        global $irailAgent; // from ../includes/getUA.php
-
         $request_options = [
             'referer' => 'http://api.irail.be/',
             'timeout' => '30',
-            'useragent' => $irailAgent,
+            'useragent' => Tools::getUserAgent(),
         ];
 
-        $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
-
-        $postdata = '{
-                      "auth": {
-                        "aid": "sncb-mobi",
-                        "type": "AID"
-                      },
-                      "client": {
-                        "id": "SNCB",
-                        "name": "NMBS",
-                        "os": "Android 5.0.2",
-                        "type": "AND",
-                        "ua": "SNCB\/302132 (Android_5.0.2) Dalvik\/2.1.0 (Linux; U; Android 5.0.2; HTC One Build\/LRX22G)",
-                        "v": 302132
-                      },
-                     "lang":"' . $lang . '",
-                      "svcReqL": [
-                        {
-                          "cfg": {
-                            "polyEnc": "GPA"
-                          },
-                          "meth": "JourneyMatch",
-                          "req": {
-                            "date": "' . $date . '",
-                            "jnyFltrL": [
-                              {
-                                "mode": "BIT",
-                                "type": "PROD",
-                                "value": "11101111000111"
-                              }
-                            ],
-                            "input":"' . substr($id, 8) . '"
-                          }
-                        }
-                      ],
-                      "ver": "1.11",
-                      "formatted": false
-                    }';
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $jidlookup = json_decode($response, true);
-        $jid = $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
-
-        $postdata = '{
-        "auth":{"aid":"sncb-mobi","type":"AID"},
-        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND",
-            "ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
-        "lang":"nld",
-        "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
-        "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $result = curl_exec($ch);
-        curl_close($ch);
+        $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
+        $result = self::getVehicleDataForJourneyId($jid, $request_options);
 
         return $result;
     }
 
     /**
-     * @param $json
+     * @param $serverData
      * @param $lang
-     * @param $fast
+     * @param $occupancyArr
+     * @param $date
+     * @param $vehicleId
+     * @param $laststop
      * @return array
      * @throws Exception
      */
-    private static function getData($serverData, $lang, $fast, $occupancyArr, $date, $vehicle, &$laststop)
+    private static function getData($serverData, $lang, $occupancyArr, $date, $vehicleId, &$laststop)
     {
         $json = json_decode($serverData, true);
 
-        if ($json['svcResL'][0]['err'] == "H9360") {
-            throw new Exception("Date outside of the timetable period.", 404);
-        }
-        if ($json['svcResL'][0]['err'] != 'OK') {
-            throw new Exception("We're sorry, we could not parse the correct data from our sources", 500);
-        }
+        HafasCommon::throwExceptionOnInvalidResponse($json);
 
-        $locationDefinitions = [];
-        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
-                /*
-                  {
-                      "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
-                      "type": "S",
-                      "name": "Namur",
-                      "icoX": 1,
-                      "extId": "8863008",
-                      "crd": {
-                        "x": 4862220,
-                        "y": 50468794
-                      },
-                      "pCls": 100,
-                      "rRefL": [
-                        0
-                      ]
-                    }
-                 */
+        $locationDefinitions = self::parseLocationDefinitions($json);
+        $vehicleDefinitions = self::parseVehicleDefinitions($json);
+        $remarkDefinitions = self::parseRemarkDefinitions($json);
+        $alertDefinitions = self::parseAlertDefinitions($json);
 
-                // S stand for station, P for Point of Interest, A for address
-
-                $location = new StdClass();
-                $location->name = $rawLocation['name'];
-                $location->id = '00' . $rawLocation['extId'];
-                $locationDefinitions[] = $location;
-            }
-        }
-
-        $vehicleDefinitions = [];
-        if (key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
-            foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
-                /*
-                     {
-                       "name": "IC 545",
-                       "number": "545",
-                       "icoX": 3,
-                       "cls": 4,
-                       "prodCtx": {
-                         "name": "IC   545",
-                         "num": "545",
-                         "catOut": "IC      ",
-                         "catOutS": "007",
-                         "catOutL": "IC ",
-                         "catIn": "007",
-                         "catCode": "2",
-                         "admin": "88____"
-                       }
-                     },
-                 */
-
-                $vehicle = new StdClass();
-                $vehicle->name = str_replace(" ", '', $rawTrain['name']);
-                $vehicle->num = trim($rawTrain['prodCtx']['num']);
-                $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
-                $vehicleDefinitions[] = $vehicle;
-            }
-        }
-
-
-        $remarkDefinitions = [];
-        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
-                /**
-                 *  "type": "I",
-                 * "code": "VIA",
-                 * "icoX": 5,
-                 * "txtN": "Opgelet: voor deze reis heb je 2 biljetten nodig.
-                 *          <a href=\"http:\/\/www.belgianrail.be\/nl\/klantendienst\/faq\/biljetten.aspx?cat=reisweg\">Meer info.<\/a>"
-                 */
-
-                $remark = new StdClass();
-                $remark->code = $rawRemark['code'];
-                $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
-                    $rawRemark['txtN']));
-
-                $matches = [];
-                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
-
-                if (count($matches[1]) > 0) {
-                    $remark->link = urlencode($matches[1][0]);
-                }
-
-                $remarkDefinitions[] = $remark;
-            }
-        }
-
-        $alertDefinitions = [];
-        if (key_exists('himL', $json['svcResL'][0]['res']['common'])) {
-            foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
-                /*
-                    "hid": "23499",
-                    "type": "LOC",
-                    "act": true,
-                    "head": "S Gravenbrakel: Wisselstoring.",
-                    "lead": "Wisselstoring.",
-                    "text": "Vertraagd verkeer.<br \/><br \/> Vertragingen tussen 5 en 10 minuten zijn mogelijk.<br \/><br \/> Dienst op enkel spoor tussen Tubeke en S Gravenbrakel.",
-                    "icoX": 3,
-                    "prio": 25,
-                    "prod": 1893,
-                    "pubChL": [
-                      {
-                          "name": "timetable",
-                        "fDate": "20171016",
-                        "fTime": "082000",
-                        "tDate": "20171018",
-                        "tTime": "235900"
-                      }
-                    ]
-                  }*/
-
-                $alert = new StdClass();
-                $alert->header = strip_tags($rawAlert['head']);
-                $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
-                $alert->lead = strip_tags($rawAlert['lead']);
-
-                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
-                if (count($matches[1]) > 1) {
-                    $alert->link = urlencode($matches[1][0]);
-                }
-
-                if (key_exists('pubChL', $rawAlert)) {
-                    $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
-                        $rawAlert['pubChL'][0]['fDate']);
-                    $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
-                        $rawAlert['pubChL'][0]['tDate']);
-                }
-
-                $alertDefinitions[] = $alert;
-            }
-        }
 
         $stops = [];
         $rawVehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
@@ -361,7 +165,6 @@ class vehicleinformation
                 $departurePlatform = $rawStop['dPlatfS'];
                 $departurePlatformNormal = true;
             } else {
-                // TODO: is this what we want when we don't know the platform?
                 $departurePlatform = "?";
                 $departurePlatformNormal = true;
             }
@@ -418,9 +221,9 @@ class vehicleinformation
             }
 
             // Clean the data up, sometimes arrivals don't register properly
-            if ($arrived && $stopIndex > 0){
-                $stops[$stopIndex-1]->arrived = 1;
-                $stops[$stopIndex-1]->left = 1;
+            if ($arrived && $stopIndex > 0) {
+                $stops[$stopIndex - 1]->arrived = 1;
+                $stops[$stopIndex - 1]->left = 1;
             }
 
             $station = stations::getStationFromID($locationDefinitions[$rawStop['locX']]->id, $lang);
@@ -468,7 +271,7 @@ class vehicleinformation
             $stop->isExtraStop = 0;
             $stops[] = $stop;
 
-                // Store the last station to get vehicle coordinates
+            // Store the last station to get vehicle coordinates
             if ($arrived) {
                 $laststop = $stop;
             }
@@ -480,7 +283,7 @@ class vehicleinformation
                 $occupancyOfStationFound = false;
                 $k = 0;
 
-                while ($k < count($occupancyArr) && ! $occupancyOfStationFound) {
+                while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
                     if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
                         $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
                         $stop->occupancy = new \stdClass();
@@ -491,7 +294,7 @@ class vehicleinformation
                     $k++;
                 }
 
-                if (! isset($stop->occupancy)) {
+                if (!isset($stop->occupancy)) {
                     $unknown = OccupancyOperations::getUnknown();
                     $stop->occupancy = new \stdClass();
                     $stop->occupancy->{'@id'} = $unknown;
@@ -503,10 +306,265 @@ class vehicleinformation
         }
 
         // When the train hasn't left yet, set location to first station
-        if (is_null($laststop)) {
+        if (!is_null($laststop)) {
             $laststop = $stops[0]->station;
         }
 
         return $stops;
+    }
+
+    /**
+     * @param $json
+     * @param array $matches
+     * @return array
+     */
+    private static function parseAlertDefinitions($json): array
+    {
+        $alertDefinitions = [];
+        if (key_exists('himL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
+                /*
+                    "hid": "23499",
+                    "type": "LOC",
+                    "act": true,
+                    "head": "S Gravenbrakel: Wisselstoring.",
+                    "lead": "Wisselstoring.",
+                    "text": "Vertraagd verkeer.<br \/><br \/> Vertragingen tussen 5 en 10 minuten zijn mogelijk.<br \/><br \/> Dienst op enkel spoor tussen Tubeke en S Gravenbrakel.",
+                    "icoX": 3,
+                    "prio": 25,
+                    "prod": 1893,
+                    "pubChL": [
+                      {
+                          "name": "timetable",
+                        "fDate": "20171016",
+                        "fTime": "082000",
+                        "tDate": "20171018",
+                        "tTime": "235900"
+                      }
+                    ]
+                  }*/
+
+                $alert = new StdClass();
+                $alert->header = strip_tags($rawAlert['head']);
+                $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
+                $alert->lead = strip_tags($rawAlert['lead']);
+
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
+                if (count($matches[1]) > 1) {
+                    $alert->link = urlencode($matches[1][0]);
+                }
+
+                if (key_exists('pubChL', $rawAlert)) {
+                    $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
+                        $rawAlert['pubChL'][0]['fDate']);
+                    $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
+                        $rawAlert['pubChL'][0]['tDate']);
+                }
+
+                $alertDefinitions[] = $alert;
+            }
+        }
+        return $alertDefinitions;
+    }
+
+    /**
+     * @param $json
+     * @return array
+     */
+    private static function parseRemarkDefinitions($json): array
+    {
+        $remarkDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
+                /**
+                 *  "type": "I",
+                 * "code": "VIA",
+                 * "icoX": 5,
+                 * "txtN": "Opgelet: voor deze reis heb je 2 biljetten nodig.
+                 *          <a href=\"http:\/\/www.belgianrail.be\/nl\/klantendienst\/faq\/biljetten.aspx?cat=reisweg\">Meer info.<\/a>"
+                 */
+
+                $remark = new StdClass();
+                $remark->code = $rawRemark['code'];
+                $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
+                    $rawRemark['txtN']));
+
+                $matches = [];
+                preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
+
+                if (count($matches[1]) > 0) {
+                    $remark->link = urlencode($matches[1][0]);
+                }
+
+                $remarkDefinitions[] = $remark;
+            }
+        }
+        return $remarkDefinitions;
+    }
+
+    /**
+     * @param $json
+     * @return array
+     */
+    private static function parseVehicleDefinitions($json): array
+    {
+        $vehicleDefinitions = [];
+        if (key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
+                /*
+                     {
+                       "name": "IC 545",
+                       "number": "545",
+                       "icoX": 3,
+                       "cls": 4,
+                       "prodCtx": {
+                         "name": "IC   545",
+                         "num": "545",
+                         "catOut": "IC      ",
+                         "catOutS": "007",
+                         "catOutL": "IC ",
+                         "catIn": "007",
+                         "catCode": "2",
+                         "admin": "88____"
+                       }
+                     },
+                 */
+
+                $vehicle = new StdClass();
+                $vehicle->name = str_replace(" ", '', $rawTrain['name']);
+                $vehicle->num = trim($rawTrain['prodCtx']['num']);
+                $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
+                $vehicleDefinitions[] = $vehicle;
+            }
+        }
+        return $vehicleDefinitions;
+    }
+
+    /**
+     * @param $json
+     * @return array
+     */
+    private static function parseLocationDefinitions($json): array
+    {
+        $locationDefinitions = [];
+        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+            foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
+                /*
+                  {
+                      "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
+                      "type": "S",
+                      "name": "Namur",
+                      "icoX": 1,
+                      "extId": "8863008",
+                      "crd": {
+                        "x": 4862220,
+                        "y": 50468794
+                      },
+                      "pCls": 100,
+                      "rRefL": [
+                        0
+                      ]
+                    }
+                 */
+
+                // S stand for station, P for Point of Interest, A for address
+
+                $location = new StdClass();
+                $location->name = $rawLocation['name'];
+                $location->id = '00' . $rawLocation['extId'];
+                $locationDefinitions[] = $location;
+            }
+        }
+        return $locationDefinitions;
+    }
+
+    /**
+     * @param $jid
+     * @param array $request_options
+     * @return bool|string
+     */
+    private static function getVehicleDataForJourneyId($jid, array $request_options)
+    {
+        $postdata = '{
+        "auth":{"aid":"sncb-mobi","type":"AID"},
+        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND",
+            "ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
+        "lang":"nld",
+        "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
+        "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+
+    /**
+     * @param $id
+     * @param $date
+     * @param $lang
+     * @param array $request_options
+     * @return mixed
+     */
+    private static function getJourneyIdForVehicleId($id, $date, $lang, array $request_options)
+    {
+        $postdata = '{
+                      "auth": {
+                        "aid": "sncb-mobi",
+                        "type": "AID"
+                      },
+                      "client": {
+                        "id": "SNCB",
+                        "name": "NMBS",
+                        "os": "Android 5.0.2",
+                        "type": "AND",
+                        "ua": "SNCB\/302132 (Android_5.0.2) Dalvik\/2.1.0 (Linux; U; Android 5.0.2; HTC One Build\/LRX22G)",
+                        "v": 302132
+                      },
+                     "lang":"' . $lang . '",
+                      "svcReqL": [
+                        {
+                          "cfg": {
+                            "polyEnc": "GPA"
+                          },
+                          "meth": "JourneyMatch",
+                          "req": {
+                            "date": "' . $date . '",
+                            "jnyFltrL": [
+                              {
+                                "mode": "BIT",
+                                "type": "PROD",
+                                "value": "11101111000111"
+                              }
+                            ],
+                            "input":"' . substr($id, 8) . '"
+                          }
+                        }
+                      ],
+                      "ver": "1.11",
+                      "formatted": false
+                    }';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $jidlookup = json_decode($response, true);
+        $jid = $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
+        return $jid;
     }
 }
