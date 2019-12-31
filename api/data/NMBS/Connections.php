@@ -578,7 +578,6 @@ class Connections
             }
         }
 
-
         if (count($connectionAlerts) > 0) {
             $connection->alert = $connectionAlerts;
         }
@@ -586,7 +585,6 @@ class Connections
         if (count($connectionRemarks) > 0) {
             $connection->remark = $connectionRemarks;
         }
-
 
         $connection->departure->vehicle = $trainsInConnection[0]->vehicle;
 
@@ -1028,6 +1026,9 @@ class Connections
         $constructedVia->departure->vehicle = $trains[$viaIndex + 1]->vehicle;
 
         $constructedVia->stop = $trains[$viaIndex + 1]->stops;
+        array_shift($constructedVia->stop); // remove departure stop
+        array_pop($constructedVia->stop); // remove arrival stop
+
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
         $constructedVia->departure->departureConnection = Tools::createDepartureUri($constructedVia->station,
