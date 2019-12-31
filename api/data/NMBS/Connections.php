@@ -886,47 +886,50 @@ class Connections
         $intermediateStop->station = Stations::getStationFromID($locationDefinitions[$rawIntermediateStop['locX']]->id,
             $lang);
 
+        if (key_exists('aTimeS', $rawIntermediateStop)) {
+            $intermediateStop->scheduledArrivalTime = Tools::transformTime($rawIntermediateStop['aTimeS'],
+                $conn['date']);
+        } else {
+            $intermediateStop->scheduledArrivalTime = null;
+        }
 
         if (key_exists('aProgType', $rawIntermediateStop)) {
-            if (key_exists('aTimeS', $rawIntermediateStop)) {
-                $intermediateStop->scheduledArrivalTime = Tools::transformTime($rawIntermediateStop['aTimeS'],
-                    $conn['date']);
-            } else {
-                $intermediateStop->scheduledArrivalTime = null;
-            }
-
             $intermediateStop->arrivalCanceled = HafasCommon::isArrivalCanceledBasedOnState($rawIntermediateStop['aProgType']);
-
-            if (key_exists('aTimeR', $rawIntermediateStop)) {
-                $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
-                    $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
-            } else {
-                $intermediateStop->arrivalDelay = 0;
-            }
 
             if ($rawIntermediateStop['aProgType'] == "REPORTED") {
                 $intermediateStop->arrived = 1;
             } else {
                 $intermediateStop->arrived = 0;
             }
+        } else {
+            $intermediateStop->arrivalCanceled = false;
+            $intermediateStop->arrived = 0;
+        }
+
+        if (key_exists('aTimeR', $rawIntermediateStop)) {
+            $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
+                $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
+        } else {
+            $intermediateStop->arrivalDelay = 0;
+        }
+
+
+        if (key_exists('dTimeS', $rawIntermediateStop)) {
+            $intermediateStop->scheduledDepartureTime = Tools::transformTime($rawIntermediateStop['dTimeS'],
+                $conn['date']);
+        } else {
+            $intermediateStop->scheduledDepartureTime = null;
+        }
+
+        if (key_exists('dTimeR', $rawIntermediateStop)) {
+            $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
+                $conn['date'], $rawIntermediateStop['dTimeS'],
+                $conn['date']);
+        } else {
+            $intermediateStop->departureDelay = 0;
         }
 
         if (key_exists('dProgType', $rawIntermediateStop)) {
-            if (key_exists('dTimeS', $rawIntermediateStop)) {
-                $intermediateStop->scheduledDepartureTime = Tools::transformTime($rawIntermediateStop['dTimeS'],
-                    $conn['date']);
-            } else {
-                $intermediateStop->scheduledDepartureTime = null;
-            }
-
-            if (key_exists('dTimeR', $rawIntermediateStop)) {
-                $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
-                    $conn['date'], $rawIntermediateStop['dTimeS'],
-                    $conn['date']);
-            } else {
-                $intermediateStop->departureDelay = 0;
-            }
-
             $intermediateStop->departureCanceled = HafasCommon::isDepartureCanceledBasedOnState($rawIntermediateStop['dProgType']);
 
             if ($rawIntermediateStop['dProgType'] == "REPORTED") {
@@ -936,14 +939,19 @@ class Connections
             } else {
                 $intermediateStop->left = 0;
             }
+        } else {
+            $intermediateStop->departureCanceled = false;
+            $intermediateStop->left = 0;
         }
 
         // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
         // are null, hope for the best
-        if ($intermediateStop->scheduledDepartureTime == null) {
+        if (!property_exists($intermediateStop,
+                'scheduledDepartureTime') || $intermediateStop->scheduledDepartureTime == null) {
             $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
         }
-        if ($intermediateStop->scheduledArrivalTime == null) {
+        if (!property_exists($intermediateStop,
+                'scheduledArrivalTime') || $intermediateStop->scheduledArrivalTime == null) {
             $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
         }
 
