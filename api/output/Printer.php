@@ -29,7 +29,8 @@ abstract class Printer
         $this->printCacheHeaders($etag);
 
         $headers = $this->getallheaders();
-        if (key_exists('If-None-Match', $headers) && ($headers['If-None-Match'] == '"' . $etag . '"' ||$headers['If-None-Match'] == 'W/"' . $etag . '"')) {
+        if (key_exists('If-None-Match',
+                $headers) && ($headers['If-None-Match'] == '"' . $etag . '"' || $headers['If-None-Match'] == 'W/"' . $etag . '"')) {
             // Print the unchanged response code. Don't transmit a body
             http_response_code("304");
             return;
@@ -72,45 +73,49 @@ abstract class Printer
         //so that people would know that we have a child of the rootelement
         $this->root = true;
         $this->startRootElement(
-            $this->documentRoot->getRootname(),
+            strtolower($this->documentRoot->getRootname()),
             $this->documentRoot->version,
             $this->documentRoot->timestamp
         );
 
         $counter = 0;
         foreach ($this->hash as $key => $val) {
-            if ($key == 'version' || $key == 'timestamp') {
+            if ($key == 'version' || $key == 'timestamp' || strpos($key, "priv__") === 0) {
                 $counter++;
                 continue;
             }
+
             $this->printElement($key, $val, true);
             if ($counter < count($this->hash) - 1) {
                 $this->nextObjectElement();
             }
+
             $counter++;
         }
-        $this->endRootElement($this->documentRoot->getRootname());
+        $this->endRootElement(strtolower($this->documentRoot->getRootname()));
     }
 
     /**
      * It will detect what kind of element the element is and will print it accordingly.
      * If it contains more elements it will print more recursively.
      *
-     * @param $key
-     * @param $val
+     * @param      $key
+     * @param      $val
      * @param bool $root
      * @throws Exception
      */
     private function printElement($key, $val, $root = false)
     {
-        if (is_array($val)) {
+        if (strpos($key, "priv__") === 0) {
+            // Don't print private var
+        } elseif (is_array($val)) {
             if (count($val) > 0) {
                 $this->startArray($key, count($val), $root);
                 $i = 0;
                 foreach ($val as $elementval) {
                     $this->printElement($key, $elementval);
                     // Keep count of where we are, and as long as this isn't the last element, print the array divider
-                    if ($i < (count($val)-1)) {
+                    if ($i < (count($val) - 1)) {
                         $this->nextArrayElement();
                     }
                     $i++;
@@ -126,9 +131,13 @@ abstract class Printer
             $hash = get_object_vars($val);
             $counter = 0;
             foreach ($hash as $elementkey => $elementval) {
-                $this->printElement($elementkey, $elementval);
-                if ($counter < count($hash) - 1) {
-                    $this->nextObjectElement();
+                if (strpos($elementkey, "priv__") === 0) {
+                    // Don't print private var
+                } else {
+                    $this->printElement($elementkey, $elementval);
+                    if ($counter < count($hash) - 1) {
+                        $this->nextObjectElement();
+                    }
                 }
                 $counter++;
             }
@@ -137,11 +146,12 @@ abstract class Printer
             $val = $val ? 1 : 0; //turn boolean into an int
             $this->startKeyVal($key, $val);
             $this->endElement($key);
-        } elseif (! is_null($val)) {
+        } elseif (!is_null($val)) {
             $this->startKeyVal($key, $val);
             $this->endElement($key);
         } else {
-            throw new Exception('Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.', 500);
+            throw new Exception('Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.',
+                500);
         }
     }
 
@@ -162,8 +172,8 @@ abstract class Printer
     abstract public function startRootElement($name, $version, $timestamp);
 
     /**
-     * @param $name
-     * @param $number
+     * @param      $name
+     * @param      $number
      * @param bool $root
      * @return mixed
      */
@@ -184,7 +194,7 @@ abstract class Printer
     abstract public function startKeyVal($key, $val);
 
     /**
-     * @param $name
+     * @param      $name
      * @param bool $root
      * @return mixed
      */

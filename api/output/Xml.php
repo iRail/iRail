@@ -24,7 +24,8 @@ class Xml extends Printer
         'normal',
         'shortname',
         'walking',
-        'isExtraStop'
+        'isExtraStop',
+        'isExtra'
     ];
     private $rootname;
 
@@ -66,8 +67,8 @@ class Xml extends Printer
 
     public function startArray($name, $number, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '<'.$name."s number=\"$number\">";
+        if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '<' . $name . "s number=\"$number\">";
         }
 
         $this->currentarrayindex++;
@@ -91,7 +92,7 @@ class Xml extends Printer
         echo "<$name";
 
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != 'station') {
-            echo ' id="'.$this->arrayindices[$this->currentarrayindex].'"';
+            echo ' id="' . $this->arrayindices[$this->currentarrayindex] . '"';
         }
 
         // fallback for attributes and name tag
@@ -129,7 +130,7 @@ class Xml extends Printer
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
-        } elseif ($key != 'name' && ! in_array($key, $this->ATTRIBUTES)) {
+        } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             echo "<$key>";
             if ($key == 'header' || $key == 'description' || $key == 'link') {
                 echo "<![CDATA[";
@@ -147,8 +148,8 @@ class Xml extends Printer
         if ($name == 'header' || $name == 'description' || $name == 'link') {
             echo ']]>';
         }
-        
-        if (! in_array($name, $this->ATTRIBUTES) && $name != 'name') {
+
+        if (!in_array($name, $this->ATTRIBUTES) && $name != 'name') {
             echo "</$name>";
         }
     }
@@ -160,8 +161,8 @@ class Xml extends Printer
      */
     public function endArray($name, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '</'.$name.'s>';
+        if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '</' . $name . 's>';
         }
         $this->stack[$this->currentarrayindex] = '';
         $this->arrayindices[$this->currentarrayindex] = 0;
@@ -185,4 +186,6 @@ class Xml extends Printer
     {
         return date("Y-m-d\TH:i:s", $unixtime);
     }
-};
+}
+
+;

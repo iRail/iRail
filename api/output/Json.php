@@ -54,8 +54,8 @@ class Json extends Printer
      */
     public function startArray($name, $number, $root = false)
     {
-        if (! $root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '"'.$name."s\":{\"number\":\"$number\",";
+        if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
+            echo '"' . $name . "s\":{\"number\":\"$number\",";
         }
 
         echo "\"$name\":[";
@@ -87,18 +87,18 @@ class Json extends Printer
             echo '{';
             // Show id (in array) except if array of stations (compatibility issues)
             if ($name != 'station') {
-                echo '"id":"'.$this->arrayindices[$this->currentarrayindex].'",';
+                echo '"id":"' . $this->arrayindices[$this->currentarrayindex] . '",';
             }
         } else {
-            if ($this->rootname != 'stations' && $name == 'station' || $name == 'platform') {
+            if ($this->rootname != 'Stations' && $name == 'station' || $name == 'platform') {
                 // split station and platform into station/platform and stationinfo/platforminfox,
                 // to be compatible with 1.0
                 echo "\"$name\":\"$object->name\",";
-                echo '"'.$name.'info":{';
+                echo '"' . $name . 'info":{';
             } elseif ($this->rootname != 'vehicle' && $name == 'vehicle') {
                 // split vehicle into vehicle and vehicleinfo to be compatible with 1.0
                 echo "\"$name\":\"$object->name\",";
-                echo '"'.$name.'info":{';
+                echo '"' . $name . 'info":{';
             } else {
                 echo "\"$name\":{";
             }
@@ -112,6 +112,7 @@ class Json extends Printer
      */
     public function startKeyVal($key, $val)
     {
+        $val = trim(json_encode($val), '"');
         echo "\"$key\":\"$val\"";
     }
 
@@ -157,4 +158,6 @@ class Json extends Printer
     {
         echo '}';
     }
-};
+}
+
+;

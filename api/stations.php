@@ -30,5 +30,5 @@ include_once '../vendor/autoload.php';
 include_once 'requests/StationsRequest.php';
 include_once 'APICall.php';
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('stations');
+$call = new APICall('Stations');
 $call->executeCall();

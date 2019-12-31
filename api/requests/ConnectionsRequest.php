@@ -6,7 +6,7 @@
  * @author pieterc
  */
 include_once 'Request.php';
-include_once 'data/NMBS/stations.php';
+include_once 'data/NMBS/Stations.php';
 
 class ConnectionsRequest extends Request
 {
@@ -19,7 +19,7 @@ class ConnectionsRequest extends Request
     protected $fast;
     protected $alerts;
     protected $typeOfTransport;
-    protected $journeyoptions;
+    protected $journeyoptions = [];
 
     public function __construct()
     {
@@ -30,7 +30,7 @@ class ConnectionsRequest extends Request
         parent::setGetVar('date', date('dmy'));
         parent::setGetVar('time', date('Hi'));
         parent::setGetVar('timeSel', 'depart');
-        parent::setGetVar('typeOfTransport', 'train');
+        parent::setGetVar('typeOfTransport', 'automatic');
         parent::setGetVar('fast', 'false');
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['from', 'to']);
@@ -80,7 +80,7 @@ class ConnectionsRequest extends Request
      */
     public function setFrom($from)
     {
-        $from = stations::transformOldToNewStyle($from);
+        $from = Stations::transformOldToNewStyle($from);
         //save the original text search string
         $from['query'] = $this->from;
         $this->from = $from;
@@ -100,7 +100,7 @@ class ConnectionsRequest extends Request
      */
     public function setTo($to)
     {
-        $to = stations::transformOldToNewStyle($to);
+        $to = Stations::transformOldToNewStyle($to);
         //save the original text search string
         $to['query'] = $this->to;
         $this->to = $to;
@@ -118,7 +118,7 @@ class ConnectionsRequest extends Request
 
     /**
      * Set the journey options when a result has been found. This will be stored in the logs.
-     * @param $jo is an array of journey options
+     * @param array $jo is an array of journey options
      */
     public function setJourneyOptions($jo)
     {

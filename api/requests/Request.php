@@ -7,7 +7,7 @@
  * @author pieterc
  */
 
-class Request
+abstract class Request
 {
     public static $SUPPORTED_LANGUAGES = ['EN', 'NL', 'FR', 'DE'];
 
@@ -22,7 +22,7 @@ class Request
     protected function processRequiredVars($array)
     {
         foreach ($array as $var) {
-            if (! isset($this->$var) || $this->$var == '' || is_null($this->$var)) {
+            if (!isset($this->$var) || $this->$var == '' || is_null($this->$var)) {
                 throw new Exception("$var not set. Please review your request and add the right parameters", 400);
             }
         }
@@ -38,6 +38,8 @@ class Request
     {
         if (isset($_GET[$varName])) {
             $this->$varName = $_GET[$varName];
+        } elseif (isset($_GET[strtolower($varName)])) {
+            $this->$varName = $_GET[strtolower($varName)];
         } else {
             $this->$varName = $default;
         }
@@ -48,6 +50,7 @@ class Request
         $this->setGetVar('format', 'xml');
         $this->setGetVar('lang', 'EN');
         $this->setGetVar('debug', false);
+        $this->setGetVar('version', 10);
     }
 
     /**
