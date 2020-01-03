@@ -4,7 +4,6 @@ require_once __DIR__ . '/Tools.php';
 
 class Disturbances
 {
-
     const TYPE_DISTURBANCE = 'disturbance';
     const TYPE_PLANNED = 'planned';
 
