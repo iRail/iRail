@@ -327,7 +327,7 @@ class Composition
      */
     private static function calculateAmMrSubType(RollingMaterialType $materialType, int $position): void
     {
-// The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
+        // The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
         // We can "fix" their planning data for these types by setting A, B, C, ourselves.
         // We still communicate that this is unconfirmed data, so there isn't a problem if one of the trains has a wrong orientation.
         // Trains with 3 carriages:
@@ -380,7 +380,7 @@ class Composition
      * @param string $vehicleId
      * @return string|string[]|null
      */
-    static function extractTrainNumber(string $vehicleId)
+    public static function extractTrainNumber(string $vehicleId)
     {
         $vehicleId = strtoupper($vehicleId);
         // Handle S trains. For example, S5 3381 or S53381 should become 3381. Typically a number has 4 digits.

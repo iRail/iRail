@@ -15,7 +15,7 @@ class DisturbancesRequest extends Request
         parent::setGetVar('linebreaks', '');
     }
 
-    function getLinebreakCharacter(): string
+    public function getLinebreakCharacter(): string
     {
         return strip_tags(urldecode($this->linebreaks), '<br>');
     }
