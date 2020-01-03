@@ -17,21 +17,25 @@ class Disturbances
         try {
             if ($xml === false) {
                 $xml = self::fetchData($request->getLang());
+                // short-term cache
                 Tools::setCachedObject($nmbsCacheKey, $xml);
             } else {
                 Tools::sendIrailCacheResponseHeader(true);
             }
-            $data = self::parseData($xml);
 
-            // Store a backup copy to deal with nmbs outages
-            Tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $data, 3600);
+            $data = self::parseData($xml, $request->getLinebreakCharacter());
+
+            // Store a copy in a long-term cache to deal with nmbs outages. This is done after parsing to ensure we don't cache invalid data.
+            Tools::setCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()), $xml, 3600);
         } catch (Exception $exception) {
-            $data = Tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
+            $xml = Tools::getCachedObject(self::getNmbsCacheKeyLongStorage($request->getLang()));
 
-            if ($data === false) {
+            if ($xml === false) {
                 // No cached copy available
                 throw $exception;
             }
+
+            $data = self::parseData($xml, $request->getLinebreakCharacter());
 
             // This fallback ensures travellers get information if everything goes down.
             $disturbance = new stdClass();
@@ -101,9 +105,10 @@ class Disturbances
      * Parse the RSS data from the NMBS.
      *
      * @param string $xml The XML retrieved from the NMBS' broken RSS feed
+     * @param string $newlineChar The character to use for newlines
      * @return array Array of StdClass objects containing the structured disturbance data
      */
-    private static function parseData(string $xml): array
+    private static function parseData(string $xml, string $newlineChar): array
     {
         // Clean XML. Their RSS XML is completely broken, so this step cannot be skipped!
         if (class_exists('tidy', false)) {
@@ -138,10 +143,22 @@ class Disturbances
 
             $disturbance->description = trim((String)$item->description, "\r\n ");
 
+            $newlinePlaceHolder = "%%NEWLINE%%";
+
             // This replaces a special character with a normal space, just to be sure
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
+            $disturbance->description = preg_replace('/<br ?\/><br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
+            $disturbance->description = preg_replace('/<br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
+            // Replace the placeholder after stripping the HTML tags: the end user might want to use a <br> tag as placeholder
+            $disturbance->description = str_replace($newlinePlaceHolder, $newlineChar, $disturbance->description);
 
+            $disturbance->description = preg_replace('/Info NL( |\n)+$/', "", $disturbance->description);
+            $disturbance->description = preg_replace('/Info FR( |\n)+$/', "", $disturbance->description);
+            $disturbance->description = preg_replace('/Info EN( |\n)+$/', "", $disturbance->description);
+            $disturbance->description = preg_replace('/Info DE( |\n)+$/', "", $disturbance->description);
+
+            $disturbance->description = trim($disturbance->description, "\r\n ");
             $disturbance->link = trim((String)$item->link, "\r\n ");
 
             $pubdate = $item->pubDate;
