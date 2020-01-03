@@ -143,20 +143,18 @@ class Disturbances
 
             $disturbance->description = trim((String)$item->description, "\r\n ");
 
-            $newlinePlaceHolder = "%%NEWLINE%%";
+            $newlinePlaceHolder = "%%NEWLINE%%"; // ensures we don't filter the end users placeholder, also safer regex testing
 
             // This replaces a special character with a normal space, just to be sure
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
             $disturbance->description = preg_replace('/<br ?\/><br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
             $disturbance->description = preg_replace('/<br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
+            $disturbance->description = preg_replace("/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/", "", $disturbance->description);
+            $disturbance->description = preg_replace("/\s?$newlinePlaceHolder\s?$/", "", $disturbance->description);
+            $disturbance->description = preg_replace("/\s+/", " ", $disturbance->description);
             // Replace the placeholder after stripping the HTML tags: the end user might want to use a <br> tag as placeholder
             $disturbance->description = str_replace($newlinePlaceHolder, $newlineChar, $disturbance->description);
-
-            $disturbance->description = preg_replace('/Info NL( |\n)+$/', "", $disturbance->description);
-            $disturbance->description = preg_replace('/Info FR( |\n)+$/', "", $disturbance->description);
-            $disturbance->description = preg_replace('/Info EN( |\n)+$/', "", $disturbance->description);
-            $disturbance->description = preg_replace('/Info DE( |\n)+$/', "", $disturbance->description);
 
             $disturbance->description = trim($disturbance->description, "\r\n ");
             $disturbance->link = trim((String)$item->link, "\r\n ");
