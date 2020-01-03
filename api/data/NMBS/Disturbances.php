@@ -4,6 +4,10 @@ require_once __DIR__ . '/Tools.php';
 
 class Disturbances
 {
+
+    const TYPE_DISTURBANCE = 'disturbance';
+    const TYPE_PLANNED = 'planned';
+
     /**
      * This is the entry point for the data fetching and transformation.
      * @param DataRoot $dataroot
@@ -42,6 +46,7 @@ class Disturbances
             $disturbance->title = "Website issues";
             $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available.";
             $disturbance->link = "https://belgianrail.be/";
+            $disturbance->type = self::TYPE_DISTURBANCE;
             $disturbance->timestamp = round(microtime(true));
             array_unshift($data, $disturbance);
         }
@@ -161,6 +166,11 @@ class Disturbances
 
             $pubdate = $item->pubDate;
             $disturbance->timestamp = strtotime($pubdate);
+
+            $disturbance->type = self::TYPE_DISTURBANCE;
+            if (strpos($disturbance->link, 'tplParamHimMsgInfoGroup=works') !== false) {
+                $disturbance->type = self::TYPE_PLANNED;
+            }
 
             $disturbances[] = $disturbance;
         }
