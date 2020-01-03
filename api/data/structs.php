@@ -1,6 +1,6 @@
 <?php
 /** Copyright (C) 2011 by iRail vzw/asbl
- * This is the Connection class. It contains data.
+ * This file contains classes used in API responses.
  *
  * @author pieterc
  */
@@ -13,6 +13,16 @@
 //public $arrival;
 
 // }
+
+class Disturbance
+{
+    public $title;
+    public $description;
+    // public $attachment; // Not compulsory, commented to ensure null values don't cause issues in the printer
+    public $link; // Not compulsory
+    public $type;
+    public $timestamp;
+}
 
 class Connection
 {
