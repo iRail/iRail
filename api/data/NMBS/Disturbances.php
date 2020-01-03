@@ -128,7 +128,7 @@ class Disturbances
 
         // Loop through all news items.
         foreach ($data->channel->item as $item) {
-            $disturbance = new stdClass();
+            $disturbance = new Disturbance();
 
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
             $disturbance->title = trim((String)$item->title, "\r\n ");
