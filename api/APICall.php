@@ -1,12 +1,12 @@
 <?php
-  /* Copyright (C) 2011 by iRail vzw/asbl
-   * © 2015 by Open Knowledge Belgium vzw/asbl
-   *
-   * This class foresees in basic HTTP functionality. It will get all the GET vars and put it in a request.
-   * This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
-   *
-   * @author Pieter Colpaert
-   */
+/* Copyright (C) 2011 by iRail vzw/asbl
+ * © 2015 by Open Knowledge Belgium vzw/asbl
+ *
+ * This class foresees in basic HTTP functionality. It will get all the GET vars and put it in a request.
+ * This requestobject will be given as a parameter to the DataRoot object, which will fetch the data and will give us a printer to print the header and body of the HTTP response.
+ *
+ * @author Pieter Colpaert
+ */
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -15,6 +15,7 @@ use Monolog\Formatter\LineFormatter;
 ini_set('include_path', '.:data');
 include_once 'data/DataRoot.php';
 include_once 'data/structs.php';
+
 class APICall
 {
     private $VERSION = 1.1;
@@ -22,13 +23,14 @@ class APICall
     protected $request;
     protected $dataRoot;
     protected $log;
+
     /**
      * @param $functionname
      */
     public function __construct($resourcename)
     {
         //When the HTTP request didn't set a User Agent, set it to a blank
-        if (! isset($_SERVER['HTTP_USER_AGENT'])) {
+        if (!isset($_SERVER['HTTP_USER_AGENT'])) {
             $_SERVER['HTTP_USER_AGENT'] = '';
         }
         //Default timezone is Brussels
@@ -42,7 +44,7 @@ class APICall
             $streamHandler = new StreamHandler(__DIR__ . '/../storage/irapi.log', Logger::INFO);
             $streamHandler->setFormatter($logFormatter);
             $this->log->pushHandler($streamHandler);
-            $requestname = ucfirst(strtolower($resourcename)).'Request';
+            $requestname = ucfirst(strtolower($resourcename)) . 'Request';
             include_once "requests/$requestname.php";
             $this->request = new $requestname();
             $this->dataRoot = new DataRoot($resourcename, $this->VERSION, $this->request->getFormat());
@@ -69,7 +71,7 @@ class APICall
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
-        if (! file_exists("output/$format.php")) {
+        if (!file_exists("output/$format.php")) {
             $format = 'Xml';
         }
         include_once "output/$format.php";
@@ -123,10 +125,12 @@ class APICall
                 $query['departureStop'] = $this->request->getFrom();
                 $query['arrivalStop'] = $this->request->getTo();
                 //transform to ISO8601
-                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3',
+                        $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['journeyoptions'] = $this->request->getJourneyOptions();
             } elseif ($this->resourcename === 'liveboard') {
-                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3', $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                $query['dateTime'] = preg_replace('/(\d\d\d\d)(\d\d)(\d\d)/i', '$1-$2-$3',
+                        $this->request->getDate()) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['departureStop'] = $this->request->getStation();
             } elseif ($this->resourcename === 'vehicleinformation') {
                 $query['vehicle'] = $this->request->getVehicleId();
@@ -137,7 +141,7 @@ class APICall
             return $_GET;
         }
     }
-    
+
     /**
      * Writes an entry to the log in level "INFO"
      */
@@ -145,10 +149,33 @@ class APICall
     {
         $query = $this->getQuery();
         $this->log->addInfo($this->resourcename, [
-             'querytype' => $this->resourcename,
-             'querytime' => date('c'),
-             'query' => $query,
-             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'querytype' => $this->resourcename,
+            'querytime' => date('c'),
+            'query' => $query,
+            'user_agent' => $this->maskEmailAddress($_SERVER['HTTP_USER_AGENT']),
         ]);
+    }
+
+    /**
+     * Obfuscate an email address in a user agent. abcd@defg.be becomes a***@d***.be.
+     *
+     * @param $userAgent
+     * @return string
+     */
+    private function maskEmailAddress($userAgent): string
+    {
+        // Extract information
+        $hasMatch = preg_match("/([^\(\) @]+)@([^\(\) @]+)\.(\w{2,})/", $userAgent, $matches);
+        if (!$hasMatch) {
+            // No mail address in this user agent.
+            return $userAgent;
+        }
+        $mailReceiver = substr($matches[1], 0, 1) . str_repeat('*', strlen($matches[1]) - 1);
+        $mailDomain = substr($matches[2], 0, 1) . str_repeat('*', strlen($matches[2]) - 1);
+
+        $obfuscatedAddress = $mailReceiver . '@' . $mailDomain . '.' . $matches[3];
+
+        $userAgent = preg_replace("/([^\(\) ]+)@([^\(\) ]+)\.(\w{2,})/", $obfuscatedAddress, $userAgent);
+        return $userAgent;
     }
 }
