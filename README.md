@@ -43,9 +43,26 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
 ### Improving performance ###
 **Optional**: you can improve performance by using [APCu](http://php.net/manual/en/book.apcu.php). APCu in-memory caching will automaticly be used when the APCu extension is available. When installed, every request to the NMBS will be cached for 15 seconds.
 
+
+## Install with docker
+ 1. Clone this repo
+ 2. Run `docker-compose build` on the project root
+ 3. After building the container, start them using `docker-compose up -d`
+ 4. Run `docker-compose exec php composer install` to install project dependency
+ 5. Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
+ 
+ **Optional**: if you want to set up the iRail API with occupancy scores you will need to import data to MongoDB:
+ 
+1. First run `cp .env.example .env`
+2. Replace `MONGODB_URL="mongodb://localhost:27017"` with `MONGODB_URL="mongodb://mongo:27017"`
+3. Run this to to push structural data to the occupancy table : `docker-compose exec php php cupancy/scripts/startscript.php`
+4. Run this to import the data (the structural.csv file) in MongoDB `docker-compose exec mongo mongoimport -d irail -c structural --type csv --file /data/structural.csv --headerline`
+5. Once the startscript has ran, the task of pushing structural data to the occupancy table should be automated. In order to do this, edit the  `docker/php/crontab` file and uncomment the following line: `30 3 * * * root /usr/local/bin/php /var/www/html/occupancy/scripts/cronjob.php >> /var/log/cron.log 2>&1`
+
+
 ## Update stations list ##
 
-Stations are updated through the irail/stations composer package. Just perform a `composer update` in the root of the project.
+Stations are updated through the [irail/stations](https://github.com/irail/stations) composer package. Just perform a `composer update` in the root of the project.
 
 ## More links ##
 

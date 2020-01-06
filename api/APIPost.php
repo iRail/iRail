@@ -7,16 +7,16 @@
  * @author Stan Callewaert
  */
 
-use MongoDB\Collection;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
-include_once 'occupancy/OccupancyDao.php';
-include_once 'occupancy/OccupancyOperations.php';
+include_once __DIR__ . 'occupancy/OccupancyDao.php';
+include_once __DIR__ . 'occupancy/OccupancyOperations.php';
 
 class APIPost
 {
+    const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Xml'];
     private $postData;
     private $resourcename;
     private $log;
@@ -134,13 +134,13 @@ class APIPost
                     header('Access-Control-Allow-Headers: Content-Type');
                     header('Location: https://api.irail.be/vehicle/?id=BE.NMBS.' . basename($this->postData->vehicle));
 
-                    $postInfo = array(
+                    $postInfo = [
                         'connection' => $this->postData->connection,
                         'from' => $this->postData->from,
                         'date' => $this->postData->date,
                         'vehicle' => $this->postData->vehicle,
                         'occupancy' => $this->postData->occupancy,
-                    );
+                    ];
 
                     // Add optional to parameters
                     if (isset($this->postData->to)) {
@@ -182,7 +182,7 @@ class APIPost
         if (isset($_GET['callback']) && $format == 'Json') {
             $format = 'Jsonp';
         }
-        if (!file_exists("output/$format.php")) {
+        if (!in_array($format, self::SUPPORTED_FILE_FORMATS)) {
             $format = 'Xml';
         }
         include_once "output/$format.php";

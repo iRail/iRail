@@ -1,9 +1,0 @@
-AuthUserFile /var/www/irapi/sites/api/api/stats/.htpasswd
-AuthName "iRail API stats"
-AuthType Basic
-
-<FilesMatch "api-stats.php">
-require valid-user
-</FilesMatch>
-
-Options -Indexes

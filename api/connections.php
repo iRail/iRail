@@ -28,5 +28,5 @@
 include_once '../vendor/autoload.php';
 include_once 'APICall.php';
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('connections');
+$call = new APICall('Connections');
 $call->executeCall();
