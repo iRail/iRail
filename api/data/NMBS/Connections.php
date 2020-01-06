@@ -819,6 +819,7 @@ class Connections
 
             foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
                 $parsedTrain->stops[] = self::parseHafasIntermediateStop($lang, $locationDefinitions,
+                    $vehicleDefinitions,
                     $rawIntermediateStop, $hafasConnection);
             }
 
@@ -861,12 +862,13 @@ class Connections
      * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but the traveller stays on)
      * @param $lang
      * @param $locationDefinitions
+     * @param $vehicleDefinitions
      * @param $rawIntermediateStop
      * @param $conn
      * @return StdClass The parsed intermediate stop.
      * @throws Exception
      */
-    private static function parseHafasIntermediateStop($lang, $locationDefinitions, $rawIntermediateStop, $conn)
+    private static function parseHafasIntermediateStop($lang, $locationDefinitions, $vehicleDefinitions, $rawIntermediateStop, $conn)
     {
         /* "locX": 2,
                                   "idx": 19,
@@ -968,6 +970,11 @@ class Connections
         } else {
             $intermediateStop->isExtraStop = 0;
         }
+
+        $intermediateStop->departureConnection = 'http://irail.be/connections/' . substr($locationDefinitions[$rawIntermediateStop['locX']]->id,
+                2) . '/' . date('Ymd',
+                $intermediateStop->scheduledDepartureTime) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
+
         return $intermediateStop;
     }
 
