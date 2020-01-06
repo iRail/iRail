@@ -136,10 +136,10 @@ class APIPost
 
                     $postInfo = [
                         'connection' => $this->postData->connection,
-                        'from'       => $this->postData->from,
-                        'date'       => $this->postData->date,
-                        'vehicle'    => $this->postData->vehicle,
-                        'occupancy'  => $this->postData->occupancy,
+                        'from' => $this->postData->from,
+                        'date' => $this->postData->date,
+                        'vehicle' => $this->postData->vehicle,
+                        'occupancy' => $this->postData->occupancy,
                     ];
 
                     // Add optional to parameters
@@ -155,10 +155,12 @@ class APIPost
                     $this->buildError($e);
                 }
             } else {
-                throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high', 400);
+                throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high',
+                    400);
             }
         } else {
-            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).', 400);
+            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).',
+                400);
         }
     }
 
@@ -197,16 +199,16 @@ class APIPost
         if ($e->getCode() >= 500) {
             $this->log->addCritical($this->resourcename, [
                 "querytype" => $this->resourcename,
-                "error"     => $e->getMessage(),
-                "code"      => $e->getCode(),
-                "query"     => $this->postData
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "query" => $this->postData
             ]);
         } else {
             $this->log->addError($this->resourcename, [
                 "querytype" => $this->resourcename,
-                "error"     => $e->getMessage(),
-                "code"      => $e->getCode(),
-                "query"     => $this->postData
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "query" => $this->postData
             ]);
         }
     }
@@ -217,10 +219,33 @@ class APIPost
     private function writeLog($postInfo)
     {
         $this->log->addInfo($this->resourcename, [
-            'querytype'  => $this->resourcename,
-            'querytime'  => date('c'),
-            'post'       => $postInfo,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT']
+            'querytype' => $this->resourcename,
+            'querytime' => date('c'),
+            'post' => $postInfo,
+            'user_agent' => $this->maskEmailAddress($_SERVER['HTTP_USER_AGENT']),
         ]);
+    }
+
+    /**
+     * Obfuscate an email address in a user agent. abcd@defg.be becomes a***@d***.be.
+     *
+     * @param $userAgent
+     * @return string
+     */
+    private function maskEmailAddress($userAgent): string
+    {
+        // Extract information
+        $hasMatch = preg_match("/([^\(\) @]+)@([^\(\) @]+)\.(\w{2,})/", $userAgent, $matches);
+        if (!$hasMatch) {
+            // No mail address in this user agent.
+            return $userAgent;
+        }
+        $mailReceiver = substr($matches[1], 0, 1) . str_repeat('*', strlen($matches[1]) - 1);
+        $mailDomain = substr($matches[2], 0, 1) . str_repeat('*', strlen($matches[2]) - 1);
+
+        $obfuscatedAddress = $mailReceiver . '@' . $mailDomain . '.' . $matches[3];
+
+        $userAgent = preg_replace("/([^\(\) ]+)@([^\(\) ]+)\.(\w{2,})/", $obfuscatedAddress, $userAgent);
+        return $userAgent;
     }
 }
