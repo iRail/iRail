@@ -37,7 +37,7 @@ class Connection
 
 class Station
 {
-    private $hafasId;
+    public $hafasId;
 
     public $locationX;
 
