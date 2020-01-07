@@ -80,7 +80,7 @@ abstract class Printer
 
         $counter = 0;
         foreach ($this->hash as $key => $val) {
-            if ($key == 'version' || $key == 'timestamp' || strpos($key, "priv__") === 0) {
+            if ($key == 'version' || $key == 'timestamp' || strpos($key, "__") === 0) {
                 $counter++;
                 continue;
             }
@@ -131,7 +131,7 @@ abstract class Printer
             $hash = get_object_vars($val);
             $counter = 0;
             foreach ($hash as $elementkey => $elementval) {
-                if (strpos($elementkey, "priv__") === 0) {
+                if (strpos($elementkey, "__") === 0) {
                     // Don't print private var
                 } else {
                     $this->printElement($elementkey, $elementval);

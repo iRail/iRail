@@ -73,7 +73,7 @@ class Connections
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date,
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->_hafasId, $stations[1]->_hafasId, $lang, $time, $date,
             $timeSel, $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
@@ -272,10 +272,10 @@ class Connections
             'client' => [
                 'id' => 'SNCB',
                 'name' => 'NMBS',
-                'os' => 'Android 5.0.2',
+                'os' => 'Android 8.0.0',
                 'type' => 'AND',
                 'ua' => '',
-                'v' => 302132
+                'v' => 1000320
             ],
             // Response language (for station names)
             'lang' => $lang,
@@ -296,18 +296,14 @@ class Connections
                         // Departure station
                         'depLocL' => [
                             [
-                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@',
-                                'type' => 'S',
-                                'extId' => substr($stationFrom->_hafasId, 2)
+                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GA@'
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL' => [
                             [
-                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@',
-                                'type' => 'S',
-                                'extId' => substr($stationTo->_hafasId, 2)
+                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GI@'
                             ]
                         ],
 
@@ -331,7 +327,7 @@ class Connections
                     ]
                 ]
             ],
-            'ver' => '1.11',
+            'ver' => '1.21',
             // Don't pretty print json replies from NMBS (costs time and bandwidth)
             'formatted' => false
         ];
