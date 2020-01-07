@@ -106,7 +106,7 @@ abstract class Printer
      */
     private function printElement($key, $val, $root = false)
     {
-        if (strpos($key, "priv__") === 0) {
+        if (strpos($key, "_") === 0) {
             // Don't print private var
         } elseif (is_array($val)) {
             if (count($val) > 0) {

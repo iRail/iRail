@@ -206,7 +206,7 @@ class Connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $stationFrom->hafasId . '-' . $stationTo->hafasId . '-' . time() . '.log',
+            file_put_contents('../storage/debug-connections-' . $stationFrom->_hafasId . '-' . $stationTo->_hafasId . '-' . time() . '.log',
                 $response);
         }
 
@@ -228,7 +228,7 @@ class Connections
         if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_AUTOMATIC) {
             // 2 national stations: no international trains
             // Internation station: all
-            if (strpos($stationFrom->hafasId, '0088') === 0 && strpos($stationTo->hafasId, '0088') === 0) {
+            if (strpos($stationFrom->_hafasId, '0088') === 0 && strpos($stationTo->_hafasId, '0088') === 0) {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
@@ -296,18 +296,18 @@ class Connections
                         // Departure station
                         'depLocL' => [
                             [
-                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@',
+                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@',
                                 'type' => 'S',
-                                'extId' => substr($stationFrom->hafasId, 2)
+                                'extId' => substr($stationFrom->_hafasId, 2)
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL' => [
                             [
-                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@',
+                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@',
                                 'type' => 'S',
-                                'extId' => substr($stationTo->hafasId, 2)
+                                'extId' => substr($stationTo->_hafasId, 2)
                             ]
                         ],
 
