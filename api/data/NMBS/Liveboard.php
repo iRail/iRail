@@ -159,7 +159,7 @@ class Liveboard
                                         ],
                                     'stbLoc' =>
                                         [
-                                            'lid' => 'A=1@O=' . $station->name . '@U=80@L=00' . $station->hafasId . '@B=1@p=1429490515@',
+                                            'lid' => 'A=1@O=' . $station->name . '@U=80@L=00' . $station->_hafasId . '@B=1@p=1429490515@',
                                             'name' => '' . $station->name . '',
                                             'type' => 'S',
                                         ],

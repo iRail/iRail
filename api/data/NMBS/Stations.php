@@ -31,7 +31,7 @@ class Stations
         $station = new Station();
         $id = str_replace('http://irail.be/stations/NMBS/', '', $newstation->{'@id'});
         $station->id = 'BE.NMBS.' . $id; //old-style iRail ids
-        $station->hafasId = $id;
+        $station->_hafasId = $id;
         $station->locationX = $newstation->longitude;
         $station->locationY = $newstation->latitude;
         $station->{'@id'} = $newstation->{'@id'};

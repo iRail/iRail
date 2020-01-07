@@ -23,6 +23,7 @@ class Connections
 
     const TYPE_TRANSPORT_KEY_AUTOMATIC = 'automatic';
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
+    const TYPE_TRANSPORT_KEY_TRAINS = 'train';
     const TYPE_TRANSPORT_KEY_ALL = 'all';
 
     /**
@@ -73,7 +74,7 @@ class Connections
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->hafasId, $stations[1]->hafasId, $lang, $time, $date,
+        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->_hafasId, $stations[1]->_hafasId, $lang, $time, $date,
             $timeSel, $typeOfTransport);
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
@@ -206,7 +207,7 @@ class Connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $stationFrom->hafasId . '-' . $stationTo->hafasId . '-' . time() . '.log',
+            file_put_contents('../storage/debug-connections-' . $stationFrom->_hafasId . '-' . $stationTo->_hafasId . '-' . time() . '.log',
                 $response);
         }
 
@@ -228,18 +229,20 @@ class Connections
         if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_AUTOMATIC) {
             // 2 national stations: no international trains
             // Internation station: all
-            if (strpos($stationFrom->hafasId, '0088') === 0 && strpos($stationTo->hafasId, '0088') === 0) {
+            if (strpos($stationFrom->_hafasId, '0088') === 0 && strpos($stationTo->_hafasId, '0088') === 0) {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
             }
         } elseif ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
             $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
+        } elseif ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_TRAINS) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
         } elseif ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
             $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
         } else {
             // All trains is the default
-            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
         }
         return $typeOfTransportCode;
     }
@@ -272,10 +275,10 @@ class Connections
             'client' => [
                 'id' => 'SNCB',
                 'name' => 'NMBS',
-                'os' => 'Android 5.0.2',
+                'os' => 'Android 8.0.0',
                 'type' => 'AND',
                 'ua' => '',
-                'v' => 302132
+                'v' => 1000320
             ],
             // Response language (for station names)
             'lang' => $lang,
@@ -296,18 +299,14 @@ class Connections
                         // Departure station
                         'depLocL' => [
                             [
-                                'lid' => 'L=' . $stationFrom->hafasId . '@A=1@B=1@U=80@p=1481329402@n=ac.1=GA@',
-                                'type' => 'S',
-                                'extId' => substr($stationFrom->hafasId, 2)
+                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GA@'
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL' => [
                             [
-                                'lid' => 'L=' . $stationTo->hafasId . '@A=1@B=1@U=80@p=1533166603@n=ac.1=GI@',
-                                'type' => 'S',
-                                'extId' => substr($stationTo->hafasId, 2)
+                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GI@'
                             ]
                         ],
 
@@ -331,7 +330,7 @@ class Connections
                     ]
                 ]
             ],
-            'ver' => '1.11',
+            'ver' => '1.21',
             // Don't pretty print json replies from NMBS (costs time and bandwidth)
             'formatted' => false
         ];

@@ -35,5 +35,5 @@
   "autoload": {
     "psr-4": {"IRail\\": "src/"}
   },
-  "minimum-stability" : "dev"
+  "minimum-stability" : "stable"
 }
