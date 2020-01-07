@@ -5,6 +5,7 @@
  */
 abstract class Printer
 {
+    const PRIVATE_VAR_PREFIX = "_";
     protected $documentRoot;
     protected $root;
     private $hash;
@@ -80,7 +81,7 @@ abstract class Printer
 
         $counter = 0;
         foreach ($this->hash as $key => $val) {
-            if ($key == 'version' || $key == 'timestamp' || strpos($key, "__") === 0) {
+            if ($key == 'version' || $key == 'timestamp' || $this->isPrivateVariableName($key)) {
                 $counter++;
                 continue;
             }
@@ -106,9 +107,7 @@ abstract class Printer
      */
     private function printElement($key, $val, $root = false)
     {
-        if (strpos($key, "_") === 0) {
-            // Don't print private var
-        } elseif (is_array($val)) {
+        if (is_array($val)) {
             if (count($val) > 0) {
                 $this->startArray($key, count($val), $root);
                 $i = 0;
@@ -131,7 +130,7 @@ abstract class Printer
             $hash = get_object_vars($val);
             $counter = 0;
             foreach ($hash as $elementkey => $elementval) {
-                if (strpos($elementkey, "__") === 0) {
+                if ($this->isPrivateVariableName($elementkey)) {
                     // Don't print private var
                 } else {
                     $this->printElement($elementkey, $elementval);
@@ -231,5 +230,14 @@ abstract class Printer
     {
         header('ETag: "' . $etag . '"');
         header('Cache-Control: max-age=15');
+    }
+
+    /**
+     * @param $elementkey
+     * @return bool
+     */
+    private function isPrivateVariableName($elementkey): bool
+    {
+        return strpos($elementkey, self::PRIVATE_VAR_PREFIX) === 0;
     }
 }
