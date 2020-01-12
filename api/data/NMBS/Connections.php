@@ -1031,9 +1031,9 @@ class Connections
         $constructedVia->arrival->vehicle = $trains[$viaIndex]->vehicle;
         $constructedVia->departure->vehicle = $trains[$viaIndex + 1]->vehicle;
 
-        $constructedVia->stop = $trains[$viaIndex + 1]->stops;
-        array_shift($constructedVia->stop); // remove departure stop
-        array_pop($constructedVia->stop); // remove arrival stop
+        $constructedVia->departure->stop = $trains[$viaIndex + 1]->stops;
+        array_shift($constructedVia->departure->stop); // remove departure stop
+        array_pop($constructedVia->departure->stop); // remove arrival stop
 
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
