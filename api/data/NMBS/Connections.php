@@ -822,6 +822,15 @@ class Connections
                     $rawIntermediateStop, $hafasConnection);
             }
 
+            // Sanity check: ensure that the arrived/left status for intermediate stops is correct.
+            // If a train has reached the next intermediate stop, it must have passed the previous one.
+            for ($i = count($parsedTrain->stops) - 2; $i >= 0; $i--) {
+                if ($parsedTrain->stops[$i + 1]->arrived) {
+                    $parsedTrain->stops[$i]->left = 1;
+                    $parsedTrain->stops[$i]->arrived = 1;
+                }
+            }
+
             $parsedTrain->alerts = [];
             try {
                 if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
