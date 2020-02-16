@@ -23,7 +23,7 @@ class Connections
 
     const TYPE_TRANSPORT_KEY_AUTOMATIC = 'automatic';
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
-    const TYPE_TRANSPORT_KEY_TRAINS = 'train';
+    const TYPE_TRANSPORT_KEY_TRAINS = 'trains';
     const TYPE_TRANSPORT_KEY_ALL = 'all';
 
     /**
