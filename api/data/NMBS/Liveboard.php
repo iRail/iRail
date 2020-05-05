@@ -45,17 +45,22 @@ class Liveboard
     {
         $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
             $request->getLang(), 'arr');
-        $html = Tools::getCachedObject($nmbsCacheKey);
+        $xml = Tools::getCachedObject($nmbsCacheKey);
 
-        if ($html === false) {
-            $html = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
+        if ($xml === false) {
+            $xml = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
                 $request->getLang(), 'arr');
-            Tools::setCachedObject($nmbsCacheKey, $html);
+
+            if (empty($xml)) {
+                throw new Exception("No response from NMBS/SNCB", 504);
+            }
+
+            Tools::setCachedObject($nmbsCacheKey, $xml);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
         }
 
-        $dataroot->arrival = self::parseNmbsData($html, $request->getLang());
+        $dataroot->arrival = self::parseNmbsData($xml, $request->getLang());
     }
 
     /**

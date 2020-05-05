@@ -30,6 +30,11 @@ class VehicleInformation
         $serverData = Tools::getCachedObject($nmbsCacheKey);
         if ($serverData === false) {
             $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+
+            if (empty($serverData)) {
+                throw new Exception("No response from NMBS/SNCB", 504);
+            }
+
             Tools::setCachedObject($nmbsCacheKey, $serverData);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
