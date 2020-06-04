@@ -146,7 +146,7 @@ class Xml extends Printer
      */
     public function endElement($name)
     {
-        if ($name == 'header' || $key == 'title' || $name == 'description' || $name == 'link') {
+        if ($name == 'header' || $name == 'title' || $name == 'description' || $name == 'link') {
             echo ']]>';
         }
 
