@@ -80,6 +80,11 @@ class Connections
         $xml = Tools::getCachedObject($nmbsCacheKey);
         if ($xml === false) {
             $xml = self::requestHafasXml($stations[0], $stations[1], $lang, $time, $date, $timeSel, $typeOfTransport);
+
+            if (empty($xml)) {
+                throw new Exception("No response from NMBS/SNCB", 504);
+            }
+
             Tools::setCachedObject($nmbsCacheKey, $xml);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
