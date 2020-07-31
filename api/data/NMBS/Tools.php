@@ -187,9 +187,9 @@ class Tools
             'Ymd',
             $departureTime
         ) . '/' . substr(
-                    $vehicleId,
-                    strrpos($vehicleId, '.') + 1
-                );
+            $vehicleId,
+            strrpos($vehicleId, '.') + 1
+        );
     }
 
     public static function getUserAgent(): string
