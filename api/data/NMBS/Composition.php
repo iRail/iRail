@@ -13,8 +13,11 @@ class Composition
 {
     public static function fillDataRoot($dataroot, CompositionRequest $request)
     {
-        $dataroot->composition = self::scrapeComposition($request->getId(), $request->getLang(),
-            $request->getShouldReturnRawData());
+        $dataroot->composition = self::scrapeComposition(
+            $request->getId(),
+            $request->getLang(),
+            $request->getShouldReturnRawData()
+        );
     }
 
     /**
@@ -61,8 +64,11 @@ class Composition
         // Build a result
         $result = new TrainCompositionResult;
         foreach ($data as $travelsegmentWithCompositionData) {
-            $result->segment[] = self::parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, $language,
-                $returnAllData);
+            $result->segment[] = self::parseOneSegmentWithCompositionData(
+                $travelsegmentWithCompositionData,
+                $language,
+                $returnAllData
+            );
         }
 
         return $result;
@@ -71,10 +77,14 @@ class Composition
     private static function parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, string $language, bool $returnAllData): TrainCompositionInSegment
     {
         $result = new TrainCompositionInSegment;
-        $result->origin = stations::getStationFromID('00' . $travelsegmentWithCompositionData->ptCarFrom->uicCode,
-            $language);
-        $result->destination = stations::getStationFromID('00' . $travelsegmentWithCompositionData->ptCarTo->uicCode,
-            $language);
+        $result->origin = stations::getStationFromID(
+            '00' . $travelsegmentWithCompositionData->ptCarFrom->uicCode,
+            $language
+        );
+        $result->destination = stations::getStationFromID(
+            '00' . $travelsegmentWithCompositionData->ptCarTo->uicCode,
+            $language
+        );
         $result->composition = self::parseCompositionData($travelsegmentWithCompositionData, $returnAllData);
 
         // Set the left/right orientation on carriages. This can only be done by evaluating all carriages at the same time
@@ -209,8 +219,10 @@ class Composition
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-composition-' . $vehicleId . '-' . $language . '-' . time() . '.log',
-                $response);
+            file_put_contents(
+                '../storage/debug-composition-' . $vehicleId . '-' . $language . '-' . time() . '.log',
+                $response
+            );
         }
 
         return json_decode($response);

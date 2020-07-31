@@ -59,8 +59,10 @@ class VehicleInformation
             $dataroot->alert = self::getAlerts($html, $request->getFormat());
         }
 
-        $vehicleOccupancy = OccupancyOperations::getOccupancy($dataroot->vehicle->{'@id'},
-            DateTime::createFromFormat('dmy', $date)->format('Ymd'));
+        $vehicleOccupancy = OccupancyOperations::getOccupancy(
+            $dataroot->vehicle->{'@id'},
+            DateTime::createFromFormat('dmy', $date)->format('Ymd')
+        );
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
         if (!is_null($vehicleOccupancy)) {
@@ -70,8 +72,15 @@ class VehicleInformation
         $lastStop = null;
 
         $dataroot->stop = [];
-        $dataroot->stop = self::getData($html, $lang, $request->getFast(), $vehicleOccupancy, $date,
-            $request->getVehicleId(), $lastStop);
+        $dataroot->stop = self::getData(
+            $html,
+            $lang,
+            $request->getFast(),
+            $vehicleOccupancy,
+            $date,
+            $request->getVehicleId(),
+            $lastStop
+        );
 
         // When fast=true, this data will not be available
         if (property_exists($lastStop, "locationX")) {
@@ -323,8 +332,10 @@ class VehicleInformation
                 $stops[$j]->arrivalCanceled = $arrivalCanceled;
 
                 if ($fast != 'true') {
-                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(basename($stops[$j]->station->{'@id'}),
-                            2) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
+                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(
+                        basename($stops[$j]->station->{'@id'}),
+                        2
+                    ) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
                 }
                 $stops[$j]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility

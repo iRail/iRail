@@ -79,16 +79,20 @@ class APIPost
         if (!is_null($this->postData->connection) && !is_null($this->postData->from) && !is_null($this->postData->date) && !is_null($this->postData->vehicle) && !is_null($this->postData->occupancy)) {
             if (OccupancyOperations::isCorrectPostURI($this->postData->occupancy)) {
                 try {
-                    if (!in_array($this->postData->occupancy,
-                        [OccupancyOperations::LOW, OccupancyOperations::MEDIUM, OccupancyOperations::HIGH])
+                    if (!in_array(
+                        $this->postData->occupancy,
+                        [OccupancyOperations::LOW, OccupancyOperations::MEDIUM, OccupancyOperations::HIGH]
+                    )
                     ) {
                         header('HTTP/1.1 400 Invalid Request');
                         die();
                     }
 
                     // validate connection ids.
-                    if (preg_match("/^http:\/\/irail\.be\/connections\/\d{7}\/\d{8}\/.{4,7}$/",
-                            $this->postData->connection) === 0
+                    if (preg_match(
+                        "/^http:\/\/irail\.be\/connections\/\d{7}\/\d{8}\/.{4,7}$/",
+                        $this->postData->connection
+                    ) === 0
                     ) {
                         header('HTTP/1.1 400 Invalid Connection ID');
                         die();
@@ -155,12 +159,16 @@ class APIPost
                     $this->buildError($e);
                 }
             } else {
-                throw new Exception('Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high',
-                    400);
+                throw new Exception(
+                    'Make sure that the occupancy parameter is one of these URIs: https://api.irail.be/terms/low, https://api.irail.be/terms/medium or https://api.irail.be/terms/high',
+                    400
+                );
             }
         } else {
-            throw new Exception('Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).',
-                400);
+            throw new Exception(
+                'Incorrect post parameters, the occupancy post request must contain the following parameters: connection, from, date, vehicle and occupancy (optionally "to" can be given as a parameter).',
+                400
+            );
         }
     }
 

@@ -30,8 +30,10 @@ abstract class Printer
         $this->printCacheHeaders($etag);
 
         $headers = $this->getallheaders();
-        if (key_exists('If-None-Match',
-                $headers) && ($headers['If-None-Match'] == '"' . $etag . '"' || $headers['If-None-Match'] == 'W/"' . $etag . '"')) {
+        if (key_exists(
+            'If-None-Match',
+            $headers
+        ) && ($headers['If-None-Match'] == '"' . $etag . '"' || $headers['If-None-Match'] == 'W/"' . $etag . '"')) {
             // Print the unchanged response code. Don't transmit a body
             http_response_code("304");
             return;
@@ -149,8 +151,10 @@ abstract class Printer
             $this->startKeyVal($key, $val);
             $this->endElement($key);
         } else {
-            throw new Exception('Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.',
-                500);
+            throw new Exception(
+                'Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.',
+                500
+            );
         }
     }
 

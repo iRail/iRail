@@ -44,9 +44,16 @@ class Connections
             $to = Stations::getStationFromID($request->getTo(), $request->getLang());
             $to = $to->name;
         }
-        $dataroot->connection = self::scrapeConnections($from, $to, $request->getTime(), $request->getDate(),
-            $request->getLang(), $request->getTimeSel(),
-            $request->getTypeOfTransport(), $request);
+        $dataroot->connection = self::scrapeConnections(
+            $from,
+            $to,
+            $request->getTime(),
+            $request->getDate(),
+            $request->getLang(),
+            $request->getTimeSel(),
+            $request->getTypeOfTransport(),
+            $request
+        );
     }
 
     /**
@@ -74,8 +81,15 @@ class Connections
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
-        $nmbsCacheKey = self::getNmbsCacheKey($stations[0]->_hafasId, $stations[1]->_hafasId, $lang, $time, $date,
-            $timeSel, $typeOfTransport);
+        $nmbsCacheKey = self::getNmbsCacheKey(
+            $stations[0]->_hafasId,
+            $stations[1]->_hafasId,
+            $lang,
+            $time,
+            $date,
+            $timeSel,
+            $typeOfTransport
+        );
 
         $xml = Tools::getCachedObject($nmbsCacheKey);
         if ($xml === false) {
@@ -196,8 +210,15 @@ class Connections
             $timeSel = 1;
         }
 
-        $postdata = self::createNmbsPayload($stationFrom, $stationTo, $lang, $time, $date, $timeSel,
-            $typeOfTransportCode);
+        $postdata = self::createNmbsPayload(
+            $stationFrom,
+            $stationTo,
+            $lang,
+            $time,
+            $date,
+            $timeSel,
+            $typeOfTransportCode
+        );
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -212,8 +233,10 @@ class Connections
 
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents('../storage/debug-connections-' . $stationFrom->_hafasId . '-' . $stationTo->_hafasId . '-' . time() . '.log',
-                $response);
+            file_put_contents(
+                '../storage/debug-connections-' . $stationFrom->_hafasId . '-' . $stationTo->_hafasId . '-' . time() . '.log',
+                $response
+            );
         }
 
         curl_close($ch);
@@ -384,8 +407,15 @@ class Connections
 
         $connections = [];
         foreach ($json['svcResL'][0]['res']['outConL'] as $conn) {
-            $connections[] = self::parseHafasConnection($request, $conn, $locationDefinitions, $vehicleDefinitions,
-                $alertDefinitions, $remarkDefinitions, $lang);
+            $connections[] = self::parseHafasConnection(
+                $request,
+                $conn,
+                $locationDefinitions,
+                $vehicleDefinitions,
+                $alertDefinitions,
+                $remarkDefinitions,
+                $lang
+            );
         }
 
         return $connections;
@@ -438,8 +468,11 @@ class Connections
         foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
             $remark = new StdClass();
             $remark->code = $rawRemark['code'];
-            $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
-                $rawRemark['txtN']));
+            $remark->description = strip_tags(preg_replace(
+                "/<a href=\".*?\">.*?<\/a>/",
+                '',
+                $rawRemark['txtN']
+            ));
 
             $matches = [];
             preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
@@ -473,10 +506,14 @@ class Connections
             }
 
             if (key_exists('pubChL', $rawAlert)) {
-                $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
-                    $rawAlert['pubChL'][0]['fDate']);
-                $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
-                    $rawAlert['pubChL'][0]['tDate']);
+                $alert->startTime = Tools::transformTime(
+                    $rawAlert['pubChL'][0]['fTime'],
+                    $rawAlert['pubChL'][0]['fDate']
+                );
+                $alert->endTime = Tools::transformTime(
+                    $rawAlert['pubChL'][0]['tTime'],
+                    $rawAlert['pubChL'][0]['tDate']
+                );
             }
 
             $alertDefinitions[] = $alert;
@@ -518,13 +555,19 @@ class Connections
 
 
         if (key_exists('dTimeR', $hafasConnection['dep'])) {
-            $connection->departure->delay = Tools::calculateSecondsHHMMSS($hafasConnection['dep']['dTimeR'],
-                $hafasConnection['date'], $hafasConnection['dep']['dTimeS'], $hafasConnection['date']);
+            $connection->departure->delay = Tools::calculateSecondsHHMMSS(
+                $hafasConnection['dep']['dTimeR'],
+                $hafasConnection['date'],
+                $hafasConnection['dep']['dTimeS'],
+                $hafasConnection['date']
+            );
         } else {
             $connection->departure->delay = 0;
         }
-        $connection->departure->time = Tools::transformTime($hafasConnection['dep']['dTimeS'],
-            $hafasConnection['date']);
+        $connection->departure->time = Tools::transformTime(
+            $hafasConnection['dep']['dTimeS'],
+            $hafasConnection['date']
+        );
 
         $connection->departure->platform = self::parseDeparturePlatform($hafasConnection['dep']);
 
@@ -532,8 +575,12 @@ class Connections
         $connection->arrival->station = $arrivalStation;
 
         if (key_exists('aTimeR', $hafasConnection['arr'])) {
-            $connection->arrival->delay = Tools::calculateSecondsHHMMSS($hafasConnection['arr']['aTimeR'],
-                $hafasConnection['date'], $hafasConnection['arr']['aTimeS'], $hafasConnection['date']);
+            $connection->arrival->delay = Tools::calculateSecondsHHMMSS(
+                $hafasConnection['arr']['aTimeR'],
+                $hafasConnection['date'],
+                $hafasConnection['arr']['aTimeS'],
+                $hafasConnection['date']
+            );
         } else {
             $connection->arrival->delay = 0;
         }
@@ -542,8 +589,13 @@ class Connections
 
         $connection->arrival->platform = self::parseArrivalPlatform($arrival = $hafasConnection['arr']);
 
-        $trainsInConnection = self::parseHafasTrainsForConnection($hafasConnection, $locationDefinitions,
-            $vehicleDefinitions, $alertDefinitions, $lang);
+        $trainsInConnection = self::parseHafasTrainsForConnection(
+            $hafasConnection,
+            $locationDefinitions,
+            $vehicleDefinitions,
+            $alertDefinitions,
+            $lang
+        );
 
         $connection->departure->canceled = $trainsInConnection[0]->departure->canceled;
         $connection->arrival->canceled = end($trainsInConnection)->arrival->canceled;
@@ -597,9 +649,13 @@ class Connections
         array_pop($connection->departure->stop);
 
 
-        $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(basename($departureStation->{'@id'}),
-                2) . '/' . date('Ymd', $connection->departure->time) . '/' . substr($trainsInConnection[0]->vehicle,
-                strrpos($trainsInConnection[0]->vehicle, '.') + 1);
+        $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(
+            basename($departureStation->{'@id'}),
+            2
+        ) . '/' . date('Ymd', $connection->departure->time) . '/' . substr(
+                    $trainsInConnection[0]->vehicle,
+                    strrpos($trainsInConnection[0]->vehicle, '.') + 1
+                );
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
         $connection->departure->left = $trainsInConnection[0]->left;
@@ -700,8 +756,14 @@ class Connections
                 continue;
             }
 
-            $trainsInConnection[] = self::parseHafasTrain($trainRide, $hafasConnection, $locationDefinitions,
-                $vehicleDefinitions, $alertDefinitions, $lang);
+            $trainsInConnection[] = self::parseHafasTrain(
+                $trainRide,
+                $hafasConnection,
+                $locationDefinitions,
+                $vehicleDefinitions,
+                $alertDefinitions,
+                $lang
+            );
         }
         return $trainsInConnection;
     }
@@ -728,8 +790,12 @@ class Connections
         $departPlatform = self::parseDeparturePlatform($trainRide['dep']);
 
         if (key_exists('dTimeR', $trainRide['dep'])) {
-            $departDelay = Tools::calculateSecondsHHMMSS($trainRide['dep']['dTimeR'],
-                $hafasConnection['date'], $trainRide['dep']['dTimeS'], $hafasConnection['date']);
+            $departDelay = Tools::calculateSecondsHHMMSS(
+                $trainRide['dep']['dTimeR'],
+                $hafasConnection['date'],
+                $trainRide['dep']['dTimeS'],
+                $hafasConnection['date']
+            );
         } else {
             $departDelay = 0;
         }
@@ -738,15 +804,21 @@ class Connections
             $departDelay = 0;
         }
 
-        $arrivalTime = Tools::transformTime($trainRide['arr']['aTimeS'],
-            $hafasConnection['date']);
+        $arrivalTime = Tools::transformTime(
+            $trainRide['arr']['aTimeS'],
+            $hafasConnection['date']
+        );
 
         $arrivalPlatform = self::parseArrivalPlatform($trainRide['arr']);
 
 
         if (key_exists('aTimeR', $trainRide['arr'])) {
-            $arrivalDelay = Tools::calculateSecondsHHMMSS($trainRide['arr']['aTimeR'],
-                $hafasConnection['date'], $trainRide['arr']['aTimeS'], $hafasConnection['date']);
+            $arrivalDelay = Tools::calculateSecondsHHMMSS(
+                $trainRide['arr']['aTimeR'],
+                $hafasConnection['date'],
+                $trainRide['arr']['aTimeS'],
+                $hafasConnection['date']
+            );
         } else {
             $arrivalDelay = 0;
         }
@@ -792,8 +864,12 @@ class Connections
 
         $departTime = Tools::transformTime($trainRide['dep']['dTimeS'], $hafasConnection['date']);
 
-        $parsedTrain->duration = Tools::calculateSecondsHHMMSS($arrivalTime, $hafasConnection['date'],
-            $departTime, $hafasConnection['date']);
+        $parsedTrain->duration = Tools::calculateSecondsHHMMSS(
+            $arrivalTime,
+            $hafasConnection['date'],
+            $departTime,
+            $hafasConnection['date']
+        );
 
         if (self::hasConnectionTrainDepartureBeenReported($trainRide)) {
             $parsedTrain->left = 1;
@@ -809,10 +885,14 @@ class Connections
             $parsedTrain->arrived = 0;
         }
 
-        $parsedTrain->departure->station = Stations::getStationFromID($locationDefinitions[$trainRide['dep']['locX']]->id,
-            $lang);
-        $parsedTrain->arrival->station = Stations::getStationFromID($locationDefinitions[$trainRide['arr']['locX']]->id,
-            $lang);
+        $parsedTrain->departure->station = Stations::getStationFromID(
+            $locationDefinitions[$trainRide['dep']['locX']]->id,
+            $lang
+        );
+        $parsedTrain->arrival->station = Stations::getStationFromID(
+            $locationDefinitions[$trainRide['arr']['locX']]->id,
+            $lang
+        );
 
         $parsedTrain->isPartiallyCancelled = false;
         $parsedTrain->stops = [];
@@ -822,9 +902,17 @@ class Connections
             }
 
             foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
-                $parsedTrain->stops[] = self::parseHafasIntermediateStop($lang, $locationDefinitions,
+                $intermediateStop = self::parseHafasIntermediateStop(
+                    $lang,
+                    $locationDefinitions,
                     $vehicleDefinitions,
-                    $rawIntermediateStop, $hafasConnection);
+                    $rawIntermediateStop,
+                    $hafasConnection
+                );
+                $parsedTrain->stops[] = $intermediateStop;
+                if ($intermediateStop->left == 1 || $intermediateStop->arrived == 1) {
+                    $parsedTrain->left = 1; // If the train has left from an intermediate stop, it has automatically left from its first stop!
+                }
             }
 
             // Sanity check: ensure that the arrived/left status for intermediate stops is correct.
@@ -896,12 +984,16 @@ class Connections
                                   "isImp": true
                                         */
         $intermediateStop = new StdClass();
-        $intermediateStop->station = Stations::getStationFromID($locationDefinitions[$rawIntermediateStop['locX']]->id,
-            $lang);
+        $intermediateStop->station = Stations::getStationFromID(
+            $locationDefinitions[$rawIntermediateStop['locX']]->id,
+            $lang
+        );
 
         if (key_exists('aTimeS', $rawIntermediateStop)) {
-            $intermediateStop->scheduledArrivalTime = Tools::transformTime($rawIntermediateStop['aTimeS'],
-                $conn['date']);
+            $intermediateStop->scheduledArrivalTime = Tools::transformTime(
+                $rawIntermediateStop['aTimeS'],
+                $conn['date']
+            );
         } else {
             $intermediateStop->scheduledArrivalTime = null;
         }
@@ -920,24 +1012,33 @@ class Connections
         }
 
         if (key_exists('aTimeR', $rawIntermediateStop)) {
-            $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['aTimeR'],
-                $conn['date'], $rawIntermediateStop['aTimeS'], $conn['date']);
+            $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS(
+                $rawIntermediateStop['aTimeR'],
+                $conn['date'],
+                $rawIntermediateStop['aTimeS'],
+                $conn['date']
+            );
         } else {
             $intermediateStop->arrivalDelay = 0;
         }
 
 
         if (key_exists('dTimeS', $rawIntermediateStop)) {
-            $intermediateStop->scheduledDepartureTime = Tools::transformTime($rawIntermediateStop['dTimeS'],
-                $conn['date']);
+            $intermediateStop->scheduledDepartureTime = Tools::transformTime(
+                $rawIntermediateStop['dTimeS'],
+                $conn['date']
+            );
         } else {
             $intermediateStop->scheduledDepartureTime = null;
         }
 
         if (key_exists('dTimeR', $rawIntermediateStop)) {
-            $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS($rawIntermediateStop['dTimeR'],
-                $conn['date'], $rawIntermediateStop['dTimeS'],
-                $conn['date']);
+            $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS(
+                $rawIntermediateStop['dTimeR'],
+                $conn['date'],
+                $rawIntermediateStop['dTimeS'],
+                $conn['date']
+            );
         } else {
             $intermediateStop->departureDelay = 0;
         }
@@ -959,12 +1060,16 @@ class Connections
 
         // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
         // are null, hope for the best
-        if (!property_exists($intermediateStop,
-                'scheduledDepartureTime') || $intermediateStop->scheduledDepartureTime == null) {
+        if (!property_exists(
+            $intermediateStop,
+            'scheduledDepartureTime'
+        ) || $intermediateStop->scheduledDepartureTime == null) {
             $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
         }
-        if (!property_exists($intermediateStop,
-                'scheduledArrivalTime') || $intermediateStop->scheduledArrivalTime == null) {
+        if (!property_exists(
+            $intermediateStop,
+            'scheduledArrivalTime'
+        ) || $intermediateStop->scheduledArrivalTime == null) {
             $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
         }
 
@@ -984,9 +1089,13 @@ class Connections
             $intermediateStop->isExtraStop = 0;
         }
 
-        $intermediateStop->departureConnection = 'http://irail.be/connections/' . substr($locationDefinitions[$rawIntermediateStop['locX']]->id,
-                2) . '/' . date('Ymd',
-                $intermediateStop->scheduledDepartureTime) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
+        $intermediateStop->departureConnection = 'http://irail.be/connections/' . substr(
+            $locationDefinitions[$rawIntermediateStop['locX']]->id,
+            2
+        ) . '/' . date(
+                    'Ymd',
+                    $intermediateStop->scheduledDepartureTime
+                ) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
 
         return $intermediateStop;
     }
@@ -1025,8 +1134,10 @@ class Connections
         $constructedVia->departure->platform = $trains[$viaIndex + 1]->departure->platform;
         $constructedVia->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
         $constructedVia->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
-        if (property_exists($trains[$viaIndex + 1],
-                'alerts') && count($trains[$viaIndex + 1]->alerts) > 0) {
+        if (property_exists(
+            $trains[$viaIndex + 1],
+            'alerts'
+        ) && count($trains[$viaIndex + 1]->alerts) > 0) {
             $constructedVia->departure->alert = $trains[$viaIndex + 1]->alerts;
         }
 
@@ -1051,12 +1162,16 @@ class Connections
 
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
-        $constructedVia->departure->departureConnection = Tools::createDepartureUri($constructedVia->station,
+        $constructedVia->departure->departureConnection = Tools::createDepartureUri(
+            $constructedVia->station,
             $constructedVia->departure->time,
-            $constructedVia->departure->vehicle);
-        $constructedVia->arrival->departureConnection = Tools::createDepartureUri($constructedVia->station,
+            $constructedVia->departure->vehicle
+        );
+        $constructedVia->arrival->departureConnection = Tools::createDepartureUri(
+            $constructedVia->station,
             $constructedVia->arrival->time,
-            $constructedVia->arrival->vehicle);
+            $constructedVia->arrival->vehicle
+        );
 
         $vias[$viaIndex] = $constructedVia;
         return $vias;
@@ -1130,11 +1245,15 @@ class Connections
                     if (isset($occupancyConnections[$i]->via)) {
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle,
-                                        "."), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
+                                    $occupancyConnections[$i]->via[$key + 1]->vehicle,
+                                    "."
+                                ), 1);
                             } else {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($occupancyConnections[$i]->arrival->vehicle,
-                                        "."), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
+                                    $occupancyConnections[$i]->arrival->vehicle,
+                                    "."
+                                ), 1);
                             }
 
                             $from = $via->station->{'@id'};

@@ -180,10 +180,16 @@ class Tools
 
     public static function createDepartureUri(Station $station, $departureTime, string $vehicleId): string
     {
-        return 'http://irail.be/connections/' . substr(basename($station->{'@id'}),
-                2) . '/' . date('Ymd',
-                $departureTime) . '/' . substr($vehicleId,
-                strrpos($vehicleId, '.') + 1);
+        return 'http://irail.be/connections/' . substr(
+            basename($station->{'@id'}),
+            2
+        ) . '/' . date(
+            'Ymd',
+            $departureTime
+        ) . '/' . substr(
+            $vehicleId,
+            strrpos($vehicleId, '.') + 1
+        );
     }
 
     public static function getUserAgent(): string

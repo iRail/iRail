@@ -136,13 +136,21 @@ class Disturbances
             // Trim the description from any html
             $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
 
-            if (strpos($disturbance->description,
-                    '<a href="http://www.belgianrail.be/jp/download/brail_him/') !== false) {
-                preg_match('/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/',
-                    $disturbance->description, $documentMatches);
+            if (strpos(
+                $disturbance->description,
+                '<a href="http://www.belgianrail.be/jp/download/brail_him/'
+            ) !== false) {
+                preg_match(
+                    '/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/',
+                    $disturbance->description,
+                    $documentMatches
+                );
                 $disturbance->attachment = $documentMatches['url'];
-                $disturbance->description = preg_replace('/<a href="http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?">.*?<\/a>/',
-                    '', $disturbance->description);
+                $disturbance->description = preg_replace(
+                    '/<a href="http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?">.*?<\/a>/',
+                    '',
+                    $disturbance->description
+                );
             }
 
             $disturbance->description = trim((String)$item->description, "\r\n ");
