@@ -184,9 +184,9 @@ class Tools
             basename($station->{'@id'}),
             2
         ) . '/' . date(
-                    'Ymd',
-                    $departureTime
-                ) . '/' . substr(
+            'Ymd',
+            $departureTime
+        ) . '/' . substr(
                     $vehicleId,
                     strrpos($vehicleId, '.') + 1
                 );
