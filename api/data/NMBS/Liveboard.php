@@ -43,13 +43,23 @@ class Liveboard
      */
     private static function fillDataRootWithArrivalData(DataRoot $dataroot, LiveboardRequest $request): void
     {
-        $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
-            $request->getLang(), 'arr');
+        $nmbsCacheKey = self::getNmbsCacheKey(
+            $dataroot->station,
+            $request->getTime(),
+            $request->getDate(),
+            $request->getLang(),
+            'arr'
+        );
         $xml = Tools::getCachedObject($nmbsCacheKey);
 
         if ($xml === false) {
-            $xml = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
-                $request->getLang(), 'arr');
+            $xml = self::fetchDataFromNmbs(
+                $dataroot->station,
+                $request->getTime(),
+                $request->getDate(),
+                $request->getLang(),
+                'arr'
+            );
 
             if (empty($xml)) {
                 throw new Exception("No response from NMBS/SNCB", 504);
@@ -70,13 +80,23 @@ class Liveboard
      */
     private static function FillDataRootWithDepartureData(DataRoot $dataroot, LiveboardRequest $request): void
     {
-        $nmbsCacheKey = self::getNmbsCacheKey($dataroot->station, $request->getTime(), $request->getDate(),
-            $request->getLang(), 'dep');
+        $nmbsCacheKey = self::getNmbsCacheKey(
+            $dataroot->station,
+            $request->getTime(),
+            $request->getDate(),
+            $request->getLang(),
+            'dep'
+        );
         $html = Tools::getCachedObject($nmbsCacheKey);
 
         if ($html === false) {
-            $html = self::fetchDataFromNmbs($dataroot->station, $request->getTime(), $request->getDate(),
-                $request->getLang(), 'dep');
+            $html = self::fetchDataFromNmbs(
+                $dataroot->station,
+                $request->getTime(),
+                $request->getDate(),
+                $request->getLang(),
+                'dep'
+            );
             Tools::setCachedObject($nmbsCacheKey, $html);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
@@ -295,8 +315,10 @@ class Liveboard
             // $stopAtStation->partiallyCanceled = $partiallyCanceled;
             $stopAtStation->left = $left;
             $stopAtStation->isExtra = $isExtraTrain;
-            $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(basename($currentStation->{'@id'}),
-                    2) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
+            $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
+                basename($currentStation->{'@id'}),
+                2
+            ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
             // Add occuppancy data, if available
             $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($currentStation, $stopAtStation, $date);
@@ -403,8 +425,11 @@ class Liveboard
 
             $remark = new StdClass();
             $remark->code = $rawRemark['code'];
-            $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
-                $rawRemark['txtN']));
+            $remark->description = strip_tags(preg_replace(
+                "/<a href=\".*?\">.*?<\/a>/",
+                '',
+                $rawRemark['txtN']
+            ));
 
             $matches = [];
             preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
@@ -461,10 +486,14 @@ class Liveboard
             }
 
             if (key_exists('pubChL', $rawAlert)) {
-                $alert->startTime = Tools::transformTime($rawAlert['pubChL'][0]['fTime'],
-                    $rawAlert['pubChL'][0]['fDate']);
-                $alert->endTime = Tools::transformTime($rawAlert['pubChL'][0]['tTime'],
-                    $rawAlert['pubChL'][0]['tDate']);
+                $alert->startTime = Tools::transformTime(
+                    $rawAlert['pubChL'][0]['fTime'],
+                    $rawAlert['pubChL'][0]['fDate']
+                );
+                $alert->endTime = Tools::transformTime(
+                    $rawAlert['pubChL'][0]['tTime'],
+                    $rawAlert['pubChL'][0]['tDate']
+                );
             }
 
             $alertDefinitions[] = $alert;
@@ -582,11 +611,19 @@ class Liveboard
     private static function parseDelayInSeconds($stop, $date): int
     {
         if (key_exists('dTimeR', $stop['stbStop'])) {
-            $delay = Tools::calculateSecondsHHMMSS($stop['stbStop']['dTimeR'],
-                $date, $stop['stbStop']['dTimeS'], $date);
+            $delay = Tools::calculateSecondsHHMMSS(
+                $stop['stbStop']['dTimeR'],
+                $date,
+                $stop['stbStop']['dTimeS'],
+                $date
+            );
         } elseif (key_exists('aTimeR', $stop['stbStop'])) {
-            $delay = Tools::calculateSecondsHHMMSS($stop['stbStop']['aTimeR'],
-                $date, $stop['stbStop']['aTimeS'], $date);
+            $delay = Tools::calculateSecondsHHMMSS(
+                $stop['stbStop']['aTimeR'],
+                $date,
+                $stop['stbStop']['aTimeS'],
+                $date
+            );
         } else {
             $delay = 0;
         }
@@ -605,8 +642,11 @@ class Liveboard
     {
         if (!is_null($currentStation)) {
             try {
-                $occupancy = OccupancyOperations::getOccupancyURI($stopAtStation->vehicle->{'@id'},
-                    $currentStation->{'@id'}, $date);
+                $occupancy = OccupancyOperations::getOccupancyURI(
+                    $stopAtStation->vehicle->{'@id'},
+                    $currentStation->{'@id'},
+                    $date
+                );
 
                 // Check if the MongoDB module is set up. If not, the occupancy score will not be returned.
                 if (!is_null($occupancy)) {
