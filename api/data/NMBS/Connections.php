@@ -822,9 +822,13 @@ class Connections
             }
 
             foreach ($trainRide['jny']['stopL'] as $rawIntermediateStop) {
-                $parsedTrain->stops[] = self::parseHafasIntermediateStop($lang, $locationDefinitions,
+                $intermediateStop = self::parseHafasIntermediateStop($lang, $locationDefinitions,
                     $vehicleDefinitions,
                     $rawIntermediateStop, $hafasConnection);
+                $parsedTrain->stops[] = $intermediateStop;
+                if ($intermediateStop->left == 1 || $intermediateStop->arrived == 1 ){
+                    $parsedTrain->left = 1; // If the train has left from an intermediate stop, it has automatically left from its first stop!
+                }
             }
 
             // Sanity check: ensure that the arrived/left status for intermediate stops is correct.
