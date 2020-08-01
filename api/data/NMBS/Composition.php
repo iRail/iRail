@@ -388,5 +388,4 @@ class Composition
             }
         }
     }
-
 }

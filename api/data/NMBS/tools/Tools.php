@@ -205,6 +205,4 @@ class Tools
     {
         header("X-iRail-cache-hit: " . $cached);
     }
-
-
 }

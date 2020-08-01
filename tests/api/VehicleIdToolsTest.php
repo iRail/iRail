@@ -1,8 +1,10 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 require_once __DIR__ . '/../../api/data/NMBS/Composition.php';
 
-class VehicleIdToolsTest extends PHPUnit_Framework_TestCase
+class VehicleIdToolsTest extends TestCase
 {
     /**
      * @throws Exception

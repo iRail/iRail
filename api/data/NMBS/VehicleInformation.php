@@ -449,7 +449,7 @@ class VehicleInformation
     {
         $vehicle = new Vehicle();
         $vehicle->name = $id;
-        $vehicle->type = VehicleIdTools::extractTrainType(substr($id,8));
+        $vehicle->type = VehicleIdTools::extractTrainType(substr($id, 8));
         $vehicle->locationX = 0;
         $vehicle->locationY = 0;
         $vehicle->shortname = substr($id, 8);
