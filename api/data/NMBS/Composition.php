@@ -6,6 +6,7 @@
  * fillDataRoot will fill the entire dataroot with data.
  */
 
+require_once __DIR__ . '/tools/VehicleIdTools.php';
 require_once __DIR__ . '/tools/Tools.php';
 require_once __DIR__ . '/Stations.php';
 

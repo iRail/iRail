@@ -7,6 +7,7 @@
  *
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
+require_once __DIR__ . '/tools/VehicleIdTools.php';
 require_once __DIR__ . '/tools/Tools.php';
 require_once __DIR__ . '/Stations.php';
 require_once __DIR__ . '/../../../includes/simple_html_dom.php';
@@ -152,24 +153,23 @@ class VehicleInformation
 
         try {
             $stops = [];
-            $nodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
+            $vehicleStopNodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
                 ->getElementByTagName('table')
                 ->children;
 
-            $j = 0;
-
+            $stopNumber = 0;
             $previousHour = 0;
             $nextDay = 0;
             $nextDayArrival = 0;
-            for ($i = 1; $i < count($nodes); $i++) {
-                $node = $nodes[$i];
-                if (!count($node->attr)) {
+            for ($i = 1; $i < count($vehicleStopNodes); $i++) {
+                $vehicleStopNode = $vehicleStopNodes[$i];
+                if (!count($vehicleStopNode->attr)) {
                     continue;
                 } // row with no class-attribute contain no data
 
                 // Delay and canceled
                 $splitter = '***';
-                $delaycontent = preg_replace("/<br\W*?\/>/", $splitter, $node->children[2]);
+                $delaycontent = preg_replace("/<br\W*?\/>/", $splitter, $vehicleStopNode->children[2]);
                 $delayelements = explode($splitter, strip_tags($delaycontent));
                 //print_r($delayelements);
 
@@ -200,8 +200,8 @@ class VehicleInformation
                 // A filled timeline, meaning arrived/departed, has an image ending in "reported.png".
                 // Example:
                 // <img src="/as/hafas-res/img/pearl/realtime_pearl_middle_arr_dep_reported.png" alt="" title="" width="20" height="44">
-                if (isset($node->children[0]) && isset($node->children[0]->children[0])) {
-                    $departureImgNode = $node->children[0]->children[0];
+                if (isset($vehicleStopNode->children[0]) && isset($vehicleStopNode->children[0]->children[0])) {
+                    $departureImgNode = $vehicleStopNode->children[0]->children[0];
 
                     // Check if this element has a src attribute.
                     if (key_exists('src', $departureImgNode->attr) &&
@@ -218,13 +218,13 @@ class VehicleInformation
                     $departed = 0;
                 }
 
-                if (isset($node->children[2]) && isset($node->children[2]->children[0])) {
+                if (isset($vehicleStopNode->children[2]) && isset($vehicleStopNode->children[2]->children[0])) {
                     // This node can be 3 things
                     // - canceled arrival/departure icon
                     // - extra stop icon
                     // - delay span, in case it's normal
                     // We're just checking for the extra stop icon here
-                    $isExtraImgNode = $node->children[2]->children[0];
+                    $isExtraImgNode = $vehicleStopNode->children[2]->children[0];
 
                     if (key_exists('src', $isExtraImgNode->attr) &&
                         strpos($isExtraImgNode->attr['src'], '/as/hafas-res/img/rt_additional_stop.gif') !== false) {
@@ -241,39 +241,39 @@ class VehicleInformation
                 }
 
                 // Time
-                $timenodearray = $node->children[1]->find('span');
+                $timenodearray = $vehicleStopNode->children[1]->find('span');
                 $arrivalTime = reset($timenodearray[0]->nodes[0]->_);
                 $departureTime = "";
 
-                if (count($nodes[$i]->children[1]->children) == 3) {
-                    $departureTime = reset($nodes[$i]->children[1]->children[2]->nodes[0]->_);
+                if (count($vehicleStopNodes[$i]->children[1]->children) == 3) {
+                    $departureTime = reset($vehicleStopNodes[$i]->children[1]->children[2]->nodes[0]->_);
                 } else {
                     // Handle first and last stop: time, delay and canceled info
                     $departureTime = $arrivalTime;
 
-                    if ($j != 0) {
+                    if ($stopNumber != 0) {
                         $departureDelay = $arrivalDelay;
                         $departureCanceled = $arrivalCanceled;
                     }
                 }
 
-                if (count($node->children[3]->find('a'))) {
-                    $as = $node->children[3]->find('a');
+                if (count($vehicleStopNode->children[3]->find('a'))) {
+                    $as = $vehicleStopNode->children[3]->find('a');
                     $stationname = trim(reset($as[0]->nodes[0]->_));
                 } else {
-                    $stationname = trim(reset($node->children[3]->nodes[0]->_));
+                    $stationname = trim(reset($vehicleStopNode->children[3]->nodes[0]->_));
                 }
 
                 // Platform
                 // This is not always included, for example BUSxxxx vehicles don't have platforms
-                if (count($node->children) > 5) {
-                    $platformnodearray = $node->children[5]->find('span');
+                if (count($vehicleStopNode->children) > 5) {
+                    $platformnodearray = $vehicleStopNode->children[5]->find('span');
                     if (count($platformnodearray) > 0) {
                         $normalplatform = 0;
                         $platform = trim(reset($platformnodearray[0]->nodes[0]->_));
                     } else {
                         $normalplatform = 1;
-                        $platform = trim(reset($node->children[5]->nodes[0]->_));
+                        $platform = trim(reset($vehicleStopNode->children[5]->nodes[0]->_));
                     }
 
                     if ($platform == "&nbsp;") {
@@ -284,8 +284,8 @@ class VehicleInformation
                     $normalplatform = 1;
                 }
 
-                if (isset($node->children[3]->children[0])) {
-                    $link = $node->children[3]->children[0]->{'attr'}['href'];
+                if (isset($vehicleStopNode->children[3]->children[0])) {
+                    $link = $vehicleStopNode->children[3]->children[0]->{'attr'}['href'];
                     // With capital S
                     if (strpos($link, 'StationId=')) {
                         $nr = substr($link, strpos($link, 'StationId=') + strlen('StationId='));
@@ -322,32 +322,32 @@ class VehicleInformation
                 $previousHour = (int)substr($departureTime, 0, 2);
                 $dateDatetime = DateTime::createFromFormat('dmy', $date);
 
-                $stops[$j] = new Stop();
-                $stops[$j]->station = $station;
-                $stops[$j]->departureDelay = $departureDelay;
-                $stops[$j]->departureCanceled = $departureCanceled;
-                $stops[$j]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->arrivalDelay = $arrivalDelay;
-                $stops[$j]->arrivalCanceled = $arrivalCanceled;
+                $stops[$stopNumber] = new Stop();
+                $stops[$stopNumber]->station = $station;
+                $stops[$stopNumber]->departureDelay = $departureDelay;
+                $stops[$stopNumber]->departureCanceled = $departureCanceled;
+                $stops[$stopNumber]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->arrivalDelay = $arrivalDelay;
+                $stops[$stopNumber]->arrivalCanceled = $arrivalCanceled;
 
                 if ($fast != 'true') {
-                    $stops[$j]->departureConnection = 'http://irail.be/connections/' . substr(
-                        basename($stops[$j]->station->{'@id'}),
+                    $stops[$stopNumber]->departureConnection = 'http://irail.be/connections/' . substr(
+                        basename($stops[$stopNumber]->station->{'@id'}),
                         2
                     ) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
                 }
-                $stops[$j]->platform = new Platform($platform, $normalplatform);
+                $stops[$stopNumber]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility
-                $stops[$j]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
-                $stops[$j]->delay = $departureDelay;
-                $stops[$j]->canceled = $departureCanceled;
-                $stops[$j]->left = $departed;
-                $stops[$j]->isExtraStop = $isExtra;
+                $stops[$stopNumber]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->delay = $departureDelay;
+                $stops[$stopNumber]->canceled = $departureCanceled;
+                $stops[$stopNumber]->left = $departed;
+                $stops[$stopNumber]->isExtraStop = $isExtra;
 
                 // Store the last station to get vehicle coordinates
                 if ($departed) {
-                    $laststop = $stops[$j]->station;
+                    $laststop = $stops[$stopNumber]->station;
                 }
 
                 // Check if it is in less than 2 days and MongoDB is available
@@ -359,23 +359,23 @@ class VehicleInformation
                     while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
                         if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
                             $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
-                            $stops[$j]->occupancy = new \stdClass();
-                            $stops[$j]->occupancy->{'@id'} = $occupancyURI;
-                            $stops[$j]->occupancy->name = basename($occupancyURI);
+                            $stops[$stopNumber]->occupancy = new \stdClass();
+                            $stops[$stopNumber]->occupancy->{'@id'} = $occupancyURI;
+                            $stops[$stopNumber]->occupancy->name = basename($occupancyURI);
                             $occupancyOfStationFound = true;
                         }
                         $k++;
                     }
 
-                    if (!isset($stops[$j]->occupancy)) {
+                    if (!isset($stops[$stopNumber]->occupancy)) {
                         $unknown = OccupancyOperations::getUnknown();
-                        $stops[$j]->occupancy = new \stdClass();
-                        $stops[$j]->occupancy->{'@id'} = $unknown;
-                        $stops[$j]->occupancy->name = basename($unknown);
+                        $stops[$stopNumber]->occupancy = new \stdClass();
+                        $stops[$stopNumber]->occupancy->{'@id'} = $unknown;
+                        $stops[$stopNumber]->occupancy->name = basename($unknown);
                     }
                 }
 
-                $j++;
+                $stopNumber++;
             }
 
             // When the train hasn't left yet, set location to first station
@@ -391,7 +391,7 @@ class VehicleInformation
 
     /**
      * @param $html
-     * @return null|Alerts
+     * @return Alert[]
      * @throws Exception
      */
     private static function getAlerts($html, $format)
@@ -449,6 +449,7 @@ class VehicleInformation
     {
         $vehicle = new Vehicle();
         $vehicle->name = $id;
+        $vehicle->type = VehicleIdTools::extractTrainType(substr($id,8));
         $vehicle->locationX = 0;
         $vehicle->locationY = 0;
         $vehicle->shortname = substr($id, 8);
