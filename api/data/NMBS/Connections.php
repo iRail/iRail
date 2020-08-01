@@ -6,9 +6,9 @@
  *
  * fillDataRoot will fill the entire dataroot with connections
  */
-require_once __DIR__ . '/HafasCommon.php';
+require_once __DIR__ . '/tools/HafasCommon.php';
 require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/tools/Tools.php';
 require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
 class Connections

@@ -6,7 +6,7 @@
  * fillDataRoot will fill the entire dataroot with data.
  */
 
-require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/tools/Tools.php';
 require_once __DIR__ . '/Stations.php';
 
 class Composition
@@ -30,7 +30,7 @@ class Composition
      */
     private static function scrapeComposition(string $vehicleId, string $language, bool $returnAllData): TrainCompositionResult
     {
-        $vehicleId = Tools::extractTrainNumber($vehicleId);
+        $vehicleId = VehicleIdTools::extractTrainNumber($vehicleId);
 
         $nmbsCacheKey = self::getNmbsCacheKey($vehicleId);
 

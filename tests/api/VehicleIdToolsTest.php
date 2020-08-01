@@ -2,8 +2,60 @@
 
 require_once __DIR__ . '/../../api/data/NMBS/Composition.php';
 
-class ToolsTest extends PHPUnit_Framework_TestCase
+class VehicleIdToolsTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_icTrain_shouldReturnCorrectTrainNumber()
+    {
+        self::verify_extract_train_number("IC", "538");
+        self::verify_extract_train_number("IC", "3427");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_icTrain_shouldReturnCorrectTrainType()
+    {
+        self::verify_extract_train_number("IC", "538");
+        self::verify_extract_train_number("IC", "3427");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_lTrain_shouldReturnCorrectTrainNumber()
+    {
+        self::verify_extract_train_number("L", "855");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_lTrain_shouldReturnCorrectTrainType()
+    {
+        self::verify_extract_train_number("L", "855");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_pTrain_shouldReturnCorrectTrainNumber()
+    {
+        self::verify_extract_train_number("P", "7741");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_pTrain_shouldReturnCorrectTrainType()
+    {
+        self::verify_extract_train_number("P", "7741");
+    }
+
+
+
     /**
      * @throws Exception
      */
@@ -22,6 +74,7 @@ class ToolsTest extends PHPUnit_Framework_TestCase
         self::verify_extract_train_number("S52", "1870");
         self::verify_extract_train_number("S61", "4590");
     }
+
     /**
      * @throws Exception
      */
@@ -43,13 +96,13 @@ class ToolsTest extends PHPUnit_Framework_TestCase
 
     private static function verify_extract_train_number(string $type, string $number): void
     {
-        self::assertEquals($number, Tools::extractTrainNumber($type . ' ' . $number));
-        self::assertEquals($number, Tools::extractTrainNumber($type . $number));
+        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . ' ' . $number));
+        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . $number));
     }
 
     private static function verify_extract_train_type(string $type, string $number): void
     {
-        self::assertEquals($type, Tools::extractTrainType($type . ' ' . $number));
-        self::assertEquals($type, Tools::extractTrainType($type . $number));
+        self::assertEquals($type, VehicleIdTools::extractTrainType($type . ' ' . $number));
+        self::assertEquals($type, VehicleIdTools::extractTrainType($type . $number));
     }
 }
