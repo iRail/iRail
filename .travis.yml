@@ -1,0 +1,15 @@
+language: php
+php:
+  - "7.1"
+  - "7.4"
+  - hhvm
+sudo: false
+env:
+addons:
+  apt:
+    packages:
+      - nodejs
+before_script:
+  - composer install
+script:
+  - phpunit
