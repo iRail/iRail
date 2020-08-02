@@ -14,6 +14,8 @@ abstract class IntegrationTestCase extends TestCase
     {
         print(self::$serverProcess->getErrorOutput());
         self::$serverProcess->stop();
+
+        usleep(500000); //wait for server to stop
     }
 
     public static function setUpBeforeClass(): void
@@ -21,6 +23,6 @@ abstract class IntegrationTestCase extends TestCase
         self::$serverProcess = new Process("php -S localhost:8080 -t " . dirname(dirname(__DIR__)) . "/src/api/");
         self::$serverProcess->start();
 
-        usleep(100000); //wait for server to get going
+        usleep(500000); //wait for server to get going
     }
 }
