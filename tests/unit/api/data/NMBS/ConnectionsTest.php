@@ -1,11 +1,10 @@
 <?php
 
+namespace Tests\unit\api\data\NMBS;
+use Exception;
+use Irail\api\data\NMBS\Connections;
+use Irail\api\data\NMBS\Stations;
 use PHPUnit\Framework\TestCase;
-
-use log\
-
-require_once __DIR__ . '/../../../../api/data/NMBS/Connections.php';
-require_once __DIR__ . '/../../../../api/data/NMBS/Stations.php';
 
 class ConnectionsTest extends TestCase
 {

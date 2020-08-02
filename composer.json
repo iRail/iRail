@@ -39,5 +39,10 @@
   "autoload": {
     "psr-4": {"Irail\\": "src/"}
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "minimum-stability" : "stable"
 }

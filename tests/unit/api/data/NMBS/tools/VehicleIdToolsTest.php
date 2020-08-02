@@ -1,8 +1,9 @@
 <?php
 
+namespace Tests\unit\api\data\NMBS\tools;
+use Exception;
+use Irail\api\data\NMBS\tools\VehicleIdTools;
 use PHPUnit\Framework\TestCase;
-
-require_once __DIR__ . '/../../../../../api/data/NMBS/tools/VehicleIdTools.php';
 
 class VehicleIdToolsTest extends TestCase
 {
@@ -56,7 +57,21 @@ class VehicleIdToolsTest extends TestCase
         self::verify_extract_train_number("P", "7741");
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_iceTrain_shouldReturnCorrectTrainNumber()
+    {
+        self::verify_extract_train_number("ICE", "10");
+    }
 
+    /**
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_iceTrain_shouldReturnCorrectTrainType()
+    {
+        self::verify_extract_train_number("ICE", "10");
+    }
 
     /**
      * @throws Exception

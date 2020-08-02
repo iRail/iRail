@@ -1,13 +1,15 @@
 <?php
 
-use Tac\Tac;
-use log\JsonLog;
+namespace Tests\unit\log;
 
-class JsonLogTest extends PHPUnit\Framework\TestCase
+use Irail\log\JsonLog;
+use PHPUnit\Framework\TestCase;
+
+class JsonLogTest extends TestCase
 {
     public function testJsonLogTail()
     {
-        $log = new JsonLog(__DIR__ . '/fixtures/log_json_lines.txt');
+        $log = new JsonLog(__DIR__ . '/log_json_lines.txt');
         $jsonLog = $log->getLastEntries(5);
 
         $this->assertEquals(2, count($jsonLog));
@@ -17,7 +19,7 @@ class JsonLogTest extends PHPUnit\Framework\TestCase
 
     public function testJsonLogTailSingleLine()
     {
-        $log = new JsonLog(__DIR__ . '/fixtures/log_json_lines.txt');
+        $log = new JsonLog(__DIR__ . '/log_json_lines.txt');
         $jsonLog = $log->getLastEntries(1);
 
         $this->assertEquals(1, count($jsonLog));

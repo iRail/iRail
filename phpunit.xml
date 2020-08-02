@@ -9,17 +9,15 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         syntaxCheck="true"
-         strict="true"
          verbose="true"
         >
     <testsuites>
         <testsuite name="Unit Tests">
-            <directory suffix="Test.php">./tests/unitTests/</directory>
+            <directory suffix="Test.php">./tests/unit/</directory>
         </testsuite>
 
         <testsuite name="Integration Tests">
-            <directory suffix="IntegrationTest.php">./tests/integrationTests/</directory>
+            <directory suffix="IntegrationTest.php">./tests/integration/</directory>
         </testsuite>
     </testsuites>
     <filter>

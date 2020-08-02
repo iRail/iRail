@@ -7,8 +7,8 @@
 
 namespace Irail\api\requests;
 
+use Irail\api\data\models\Station;
 use Irail\api\data\NMBS\Stations;
-use Irail\api\data\Station;
 
 class LiveboardRequest extends Request
 {

@@ -9,6 +9,8 @@
 
 namespace Irail\api\requests;
 
+use Exception;
+
 abstract class Request
 {
     public static $SUPPORTED_LANGUAGES = ['EN', 'NL', 'FR', 'DE'];
