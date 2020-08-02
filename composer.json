@@ -22,10 +22,13 @@
     "ext-curl": "*",
     "ext-simplexml": "*",
     "ext-tidy": "*",
+    "ext-mongodb": "*",
     "php": ">=7.2"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.5.*"
+    "phpunit/phpunit": "8.5.*",
+    "guzzlehttp/guzzle": "^6.3",
+    "symfony/process": "^3.3"
   },
   "scripts": {
     "post-install-cmd": [
@@ -34,7 +37,7 @@
     "post-update-cmd" : "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
   },
   "autoload": {
-    "psr-4": {"IRail\\": "src/"}
+    "psr-4": {"Irail\\": "src/"}
   },
   "minimum-stability" : "stable"
 }

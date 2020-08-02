@@ -14,8 +14,12 @@
          verbose="true"
         >
     <testsuites>
-        <testsuite name="PHP Dotenv Test Suite">
-            <directory suffix="Test.php">./tests</directory>
+        <testsuite name="Unit Tests">
+            <directory suffix="Test.php">./tests/unitTests/</directory>
+        </testsuite>
+
+        <testsuite name="Integration Tests">
+            <directory suffix="IntegrationTest.php">./tests/integrationTests/</directory>
         </testsuite>
     </testsuites>
     <filter>
