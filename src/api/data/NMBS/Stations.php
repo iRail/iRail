@@ -1,10 +1,9 @@
 <?php
 
 namespace Irail\api\data\NMBS;
-use Exception;
-use Irail\api\data\Station;
 
-require_once __DIR__ . '/../structs.php';
+use Exception;
+use Irail\api\data\models\Station;
 
 /**
  * Copyright (C) 2011 by iRail vzw/asbl

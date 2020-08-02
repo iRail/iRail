@@ -6,18 +6,20 @@
  *
  * fillDataRoot will fill the entire dataroot with connections
  */
+
 namespace Irail\api\data\NMBS;
+
 use DateTime;
 use Exception;
-use Irail\api\data\Connection;
 use Irail\api\data\DataRoot;
-use Irail\api\data\DepartureArrival;
+use Irail\api\data\models\Connection;
+use Irail\api\data\models\DepartureArrival;
+use Irail\api\data\models\Platform;
+use Irail\api\data\models\Station;
+use Irail\api\data\models\Via;
+use Irail\api\data\models\ViaDepartureArrival;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\data\Platform;
-use Irail\api\data\Station;
-use Irail\api\data\Via;
-use Irail\api\data\ViaDepartureArrival;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\ConnectionsRequest;
 use stdClass;
@@ -666,12 +668,12 @@ class Connections
 
 
         $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(
-            basename($departureStation->{'@id'}),
-            2
-        ) . '/' . date('Ymd', $connection->departure->time) . '/' . substr(
-            $trainsInConnection[0]->vehicle,
-            strrpos($trainsInConnection[0]->vehicle, '.') + 1
-        );
+                basename($departureStation->{'@id'}),
+                2
+            ) . '/' . date('Ymd', $connection->departure->time) . '/' . substr(
+                $trainsInConnection[0]->vehicle,
+                strrpos($trainsInConnection[0]->vehicle, '.') + 1
+            );
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
         $connection->departure->left = $trainsInConnection[0]->left;
@@ -1077,15 +1079,15 @@ class Connections
         // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
         // are null, hope for the best
         if (!property_exists(
-            $intermediateStop,
-            'scheduledDepartureTime'
-        ) || $intermediateStop->scheduledDepartureTime == null) {
+                $intermediateStop,
+                'scheduledDepartureTime'
+            ) || $intermediateStop->scheduledDepartureTime == null) {
             $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
         }
         if (!property_exists(
-            $intermediateStop,
-            'scheduledArrivalTime'
-        ) || $intermediateStop->scheduledArrivalTime == null) {
+                $intermediateStop,
+                'scheduledArrivalTime'
+            ) || $intermediateStop->scheduledArrivalTime == null) {
             $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
         }
 
@@ -1106,12 +1108,12 @@ class Connections
         }
 
         $intermediateStop->departureConnection = 'http://irail.be/connections/' . substr(
-            $locationDefinitions[$rawIntermediateStop['locX']]->id,
-            2
-        ) . '/' . date(
-            'Ymd',
-            $intermediateStop->scheduledDepartureTime
-        ) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
+                $locationDefinitions[$rawIntermediateStop['locX']]->id,
+                2
+            ) . '/' . date(
+                'Ymd',
+                $intermediateStop->scheduledDepartureTime
+            ) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
 
         return $intermediateStop;
     }
@@ -1151,9 +1153,9 @@ class Connections
         $constructedVia->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
         $constructedVia->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
         if (property_exists(
-            $trains[$viaIndex + 1],
-            'alerts'
-        ) && count($trains[$viaIndex + 1]->alerts) > 0) {
+                $trains[$viaIndex + 1],
+                'alerts'
+            ) && count($trains[$viaIndex + 1]->alerts) > 0) {
             $constructedVia->departure->alert = $trains[$viaIndex + 1]->alerts;
         }
 
@@ -1262,14 +1264,14 @@ class Connections
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->via[$key + 1]->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->via[$key + 1]->vehicle,
+                                        "."
+                                    ), 1);
                             } else {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->arrival->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->arrival->vehicle,
+                                        "."
+                                    ), 1);
                             }
 
                             $from = $via->station->{'@id'};

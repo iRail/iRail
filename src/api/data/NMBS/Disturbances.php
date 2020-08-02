@@ -1,8 +1,10 @@
 <?php
+
 namespace Irail\api\data\NMBS;
+
 use Exception;
 use Irail\api\data\DataRoot;
-use Irail\api\data\Disturbance;
+use Irail\api\data\models\Disturbance;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\requests\DisturbancesRequest;
 use SimpleXMLElement;
@@ -139,16 +141,16 @@ class Disturbances
             $disturbance = new Disturbance();
 
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
-            $disturbance->title = trim((String)$item->title, "\r\n ");
-            $disturbance->description = trim((String)$item->description, "\r\n ");
+            $disturbance->title = trim((string)$item->title, "\r\n ");
+            $disturbance->description = trim((string)$item->description, "\r\n ");
 
             // Trim the description from any html
             $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
 
             if (strpos(
-                $disturbance->description,
-                '<a href="http://www.belgianrail.be/jp/download/brail_him/'
-            ) !== false) {
+                    $disturbance->description,
+                    '<a href="http://www.belgianrail.be/jp/download/brail_him/'
+                ) !== false) {
                 preg_match(
                     '/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/',
                     $disturbance->description,
@@ -162,23 +164,26 @@ class Disturbances
                 );
             }
 
-            $disturbance->description = trim((String)$item->description, "\r\n ");
+            $disturbance->description = trim((string)$item->description, "\r\n ");
 
             $newlinePlaceHolder = "%%NEWLINE%%"; // ensures we don't filter the end users placeholder, also safer regex testing
 
             // This replaces a special character with a normal space, just to be sure
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
-            $disturbance->description = preg_replace('/<br ?\/><br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
-            $disturbance->description = preg_replace('/<br ?\/>/', " " . $newlinePlaceHolder, $disturbance->description);
+            $disturbance->description = preg_replace('/<br ?\/><br ?\/>/', " " . $newlinePlaceHolder,
+                $disturbance->description);
+            $disturbance->description = preg_replace('/<br ?\/>/', " " . $newlinePlaceHolder,
+                $disturbance->description);
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
-            $disturbance->description = preg_replace("/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/", "", $disturbance->description);
+            $disturbance->description = preg_replace("/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/", "",
+                $disturbance->description);
             $disturbance->description = preg_replace("/\s?$newlinePlaceHolder\s?$/", "", $disturbance->description);
             $disturbance->description = preg_replace("/\s+/", " ", $disturbance->description);
             // Replace the placeholder after stripping the HTML tags: the end user might want to use a <br> tag as placeholder
             $disturbance->description = str_replace($newlinePlaceHolder, $newlineChar, $disturbance->description);
 
             $disturbance->description = trim($disturbance->description, "\r\n ");
-            $disturbance->link = trim((String)$item->link, "\r\n ");
+            $disturbance->link = trim((string)$item->link, "\r\n ");
 
             $pubdate = $item->pubDate;
             $disturbance->timestamp = strtotime($pubdate);

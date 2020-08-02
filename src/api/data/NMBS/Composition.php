@@ -7,15 +7,15 @@
  */
 
 namespace Irail\api\data\NMBS;
+
 use Exception;
-use Irail\api\data\NMBS\tools\VehicleIdTools;
+use Irail\api\data\models\RollingMaterialType;
+use Irail\api\data\models\TrainComposition;
+use Irail\api\data\models\TrainCompositionInSegment;
+use Irail\api\data\models\TrainCompositionResult;
+use Irail\api\data\models\TrainCompositionUnit;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\data\NMBS\Stations;
-use Irail\api\data\RollingMaterialType;
-use Irail\api\data\TrainComposition;
-use Irail\api\data\TrainCompositionInSegment;
-use Irail\api\data\TrainCompositionResult;
-use Irail\api\data\TrainCompositionUnit;
+use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\requests\CompositionRequest;
 use stdClass;
 

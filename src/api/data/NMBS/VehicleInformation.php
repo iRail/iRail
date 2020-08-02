@@ -7,17 +7,19 @@
  *
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
+
 namespace Irail\api\data\NMBS;
+
 use DateTime;
 use Exception;
-use Irail\api\data\Alert;
 use Irail\api\data\DataRoot;
+use Irail\api\data\models\Alert;
+use Irail\api\data\models\Platform;
+use Irail\api\data\models\Station;
+use Irail\api\data\models\Stop;
+use Irail\api\data\models\Vehicle;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\data\NMBS\tools\VehicleIdTools;
-use Irail\api\data\Platform;
-use Irail\api\data\Station;
-use Irail\api\data\Stop;
-use Irail\api\data\Vehicle;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\VehicleinformationRequest;
 
@@ -36,7 +38,7 @@ class VehicleInformation
      * @param $request
      * @throws Exception
      */
-    public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request) : void
+    public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request): void
     {
         $lang = $request->getLang();
         $date = $request->getDate();
@@ -122,14 +124,15 @@ class VehicleInformation
     private static function getServerData($id, $date, $lang)
     {
         $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
+            'referer' => 'http://api.irail.be/',
+            'timeout' => '30',
             'useragent' => Tools::getUserAgent(),
         ];
         $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/' . $lang . 'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname=' . $id . '&start=Zoeken&selectDate=oneday&date=' . DateTime::createFromFormat('dmy', $date)->format('d%2fm%2fY') . '&realtimeMode=Show';
+        $post_data = 'trainname=' . $id . '&start=Zoeken&selectDate=oneday&date=' . DateTime::createFromFormat('dmy',
+                $date)->format('d%2fm%2fY') . '&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -340,20 +343,23 @@ class VehicleInformation
                 $stops[$stopNumber]->station = $station;
                 $stops[$stopNumber]->departureDelay = $departureDelay;
                 $stops[$stopNumber]->departureCanceled = $departureCanceled;
-                $stops[$stopNumber]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
-                $stops[$stopNumber]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00',
+                    $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00',
+                    $dateDatetime->format('Ymd'));
                 $stops[$stopNumber]->arrivalDelay = $arrivalDelay;
                 $stops[$stopNumber]->arrivalCanceled = $arrivalCanceled;
 
                 if ($fast != 'true') {
                     $stops[$stopNumber]->departureConnection = 'http://irail.be/connections/' . substr(
-                        basename($stops[$stopNumber]->station->{'@id'}),
-                        2
-                    ) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
+                            basename($stops[$stopNumber]->station->{'@id'}),
+                            2
+                        ) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
                 }
                 $stops[$stopNumber]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility
-                $stops[$stopNumber]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00', $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00',
+                    $dateDatetime->format('Ymd'));
                 $stops[$stopNumber]->delay = $departureDelay;
                 $stops[$stopNumber]->canceled = $departureCanceled;
                 $stops[$stopNumber]->left = $departed;
@@ -493,8 +499,8 @@ class VehicleInformation
 
         // Try first url
         $url = $html->getElementById('HFSResult')
-                   ->getElementByTagName('table')
-                   ->children[1]->children[0]->children[0]->attr['href'];
+            ->getElementByTagName('table')
+            ->children[1]->children[0]->children[0]->attr['href'];
 
         $serverData = self::getServerDataByUrl($url);
 
@@ -502,8 +508,8 @@ class VehicleInformation
         if (self::isOtherTrain($serverData)) {
             // Second url must be the right one
             $url = $html->getElementById('HFSResult')
-                       ->getElementByTagName('table')
-                       ->children[2]->children[0]->children[0]->attr['href'];
+                ->getElementByTagName('table')
+                ->children[2]->children[0]->children[0]->attr['href'];
 
             $serverData = self::getServerDataByUrl($url);
         }
@@ -521,8 +527,8 @@ class VehicleInformation
     private static function getServerDataByUrl($url)
     {
         $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
+            'referer' => 'http://api.irail.be/',
+            'timeout' => '30',
             'useragent' => Tools::getUserAgent(),
         ];
 

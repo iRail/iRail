@@ -2,15 +2,17 @@
 /** Copyright (C) 2011 by iRail vzw/asbl
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station.
  */
+
 namespace Irail\api\data\NMBS;
+
 use Exception;
 use Irail\api\data\DataRoot;
-use Irail\api\data\DepartureArrival;
+use Irail\api\data\models\DepartureArrival;
+use Irail\api\data\models\Platform;
+use Irail\api\data\models\Station;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\data\NMBS\tools\VehicleIdTools;
-use Irail\api\data\Platform;
-use Irail\api\data\Station;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
 use stdClass;
@@ -332,9 +334,9 @@ class Liveboard
             $stopAtStation->left = $left;
             $stopAtStation->isExtra = $isExtraTrain;
             $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                basename($currentStation->{'@id'}),
-                2
-            ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
+                    basename($currentStation->{'@id'}),
+                    2
+                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
             // Add occuppancy data, if available
             $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($currentStation, $stopAtStation, $date);
