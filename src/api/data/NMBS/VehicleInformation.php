@@ -70,8 +70,7 @@ class VehicleInformation
             $html = str_get_html($serverData);
         }
 
-
-        $dataroot->vehicle = self::getVehicleData($html, $request->getVehicleId(), $lang);
+        $dataroot->vehicle = self::getVehicleData($html, $lang);
         if ($request->getAlerts() && self::getAlerts($html, $request->getFormat())) {
             $dataroot->alert = self::getAlerts($html, $request->getFormat());
         }
@@ -95,7 +94,7 @@ class VehicleInformation
             $request->getFast(),
             $vehicleOccupancy,
             $date,
-            $request->getVehicleId(),
+            $dataroot->vehicle->name,
             $lastStop
         );
 
@@ -152,12 +151,37 @@ class VehicleInformation
 
     /**
      * @param $html
+     * @return string
+     * @throws Exception
+     */
+    private static function getVehicleId($html)
+    {
+        $vehicleStopNodes = $html->getElementById('tq_trainroute_content_table_alteAnsicht')
+            ->getElementByTagName('table')
+            ->children;
+        for ($i = 1; $i < count($vehicleStopNodes); $i++) {
+            $vehicleStopNode = $vehicleStopNodes[$i];
+            if (!count($vehicleStopNode->attr)) {
+                continue;
+            } // row with no class-attribute contain no data
+
+            $vehicleId = trim(reset($vehicleStopNode->children[4]->nodes[0]->_));
+            $vehicleId = str_replace(" ", "", $vehicleId);
+            if (!empty($vehicleId) && preg_match("/[A-Z0-9]+/",$vehicleId)) {
+                return $vehicleId;
+            }
+        }
+        throw new Exception("Failed to parse vehicle id");
+    }
+
+    /**
+     * @param $html
      * @param $lang
      * @param $fast
      * @return array
      * @throws Exception
      */
-    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicle, &$laststop)
+    private static function getData($html, $lang, $fast, $occupancyArr, $date, $vehicleId, &$laststop)
     {
         $now = new DateTime();
         $requestedDate = DateTime::createFromFormat('dmy', $date);
@@ -281,6 +305,13 @@ class VehicleInformation
                     $stationname = trim(reset($vehicleStopNode->children[3]->nodes[0]->_));
                 }
 
+                $newVehicleId = trim(reset($vehicleStopNode->children[4]->nodes[0]->_));
+                $newVehicleId = str_replace(" ", "", $newVehicleId);
+
+                if (!empty($newVehicleId) && preg_match("/[A-Z0-9]+/",$newVehicleId)) {
+                    $vehicleId = $newVehicleId;
+                }
+
                 // Platform
                 // This is not always included, for example BUSxxxx vehicles don't have platforms
                 if (count($vehicleStopNode->children) > 5) {
@@ -354,7 +385,7 @@ class VehicleInformation
                     $stops[$stopNumber]->departureConnection = 'http://irail.be/connections/' . substr(
                             basename($stops[$stopNumber]->station->{'@id'}),
                             2
-                        ) . '/' . $dateDatetime->format('Ymd') . '/' . substr($vehicle, 8);
+                        ) . '/' . $dateDatetime->format('Ymd') . '/' . $vehicleId;
                 }
                 $stops[$stopNumber]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility
@@ -460,22 +491,20 @@ class VehicleInformation
 
     /**
      * @param $html String the HTML received from NMBS
-     * @param $id   String the ID of the vehicle in BE.NMBS.XXXXXX format
      * @param $lang
      * @return null|Vehicle
      * @throws Exception
      */
-    private static function getVehicleData($html, $id, $lang)
+    private static function getVehicleData($html, $lang)
     {
         $vehicle = new Vehicle();
-        $vehicle->name = $id;
-        // Take a substring to remove the BE.NMBS. part
-        $vehicle->type = VehicleIdTools::extractTrainType(substr($id, 8));
-        $vehicle->number = VehicleIdTools::extractTrainNumber(substr($id, 8));
+        $vehicle->shortname = self::getVehicleId($html);
+        $vehicle->type = VehicleIdTools::extractTrainType($vehicle->shortname);
+        $vehicle->number = VehicleIdTools::extractTrainNumber($vehicle->shortname);
+        $vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->shortname;
+        $vehicle->name = "BE.NMBS." . $vehicle->shortname;
         $vehicle->locationX = 0;
         $vehicle->locationY = 0;
-        $vehicle->shortname = substr($id, 8);
-        $vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->shortname;
 
         return $vehicle;
     }
