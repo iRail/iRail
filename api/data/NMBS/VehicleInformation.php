@@ -449,7 +449,9 @@ class VehicleInformation
     {
         $vehicle = new Vehicle();
         $vehicle->name = $id;
+        // Take a substring to remove the BE.NMBS. part
         $vehicle->type = VehicleIdTools::extractTrainType(substr($id, 8));
+        $vehicle->number = VehicleIdTools::extractTrainNumber(substr($id, 8));
         $vehicle->locationX = 0;
         $vehicle->locationY = 0;
         $vehicle->shortname = substr($id, 8);
