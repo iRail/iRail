@@ -551,7 +551,7 @@ class Connections
      * @throws Exception
      */
     private static function parseHafasConnection(
-        Request $request,
+        ConnectionsRequest $request,
         $hafasConnection,
         $locationDefinitions,
         $vehicleDefinitions,
