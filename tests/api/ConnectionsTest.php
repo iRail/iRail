@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 require_once __DIR__ . '/../../api/data/NMBS/Connections.php';
 require_once __DIR__ . '/../../api/data/NMBS/Stations.php';
 
-class ConnectionsTest extends PHPUnit_Framework_TestCase
+class ConnectionsTest extends TestCase
 {
     /**
      * @throws Exception

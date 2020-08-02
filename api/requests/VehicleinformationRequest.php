@@ -25,6 +25,10 @@ class VehicleinformationRequest extends Request
         if (strpos($this->id, 'BE.NMBS.') === false) {
             $this->id = 'BE.NMBS.' . strtoupper($this->id);
         }
+
+        if (strlen($this->id) > 24) {
+            throw new Exception("Invalid vehicle id! The id parameter should be 2 to 24 characters long");
+        }
     }
 
     /**

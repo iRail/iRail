@@ -26,7 +26,8 @@ class Xml extends Printer
         'walking',
         'isExtraStop',
         'isExtra',
-        'hafasId'
+        'hafasId',
+        'type'
     ];
     private $rootname;
 

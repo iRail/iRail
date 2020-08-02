@@ -2,9 +2,10 @@
 /** Copyright (C) 2011 by iRail vzw/asbl
  * fillDataRoot will fill the entire dataroot with a liveboard for a specific station.
  */
-require_once __DIR__ . '/HafasCommon.php';
+require_once __DIR__ . '/tools/HafasCommon.php';
 require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/Tools.php';
+require_once __DIR__ . '/tools/Tools.php';
+require_once __DIR__ . '/tools/VehicleIdTools.php';
 require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
 class Liveboard
@@ -306,6 +307,8 @@ class Liveboard
             $stopAtStation->vehicle = new stdClass();
             $stopAtStation->vehicle->name = 'BE.NMBS.' . $vehicle->name;
             $stopAtStation->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
+            $stopAtStation->vehicle->type = VehicleIdTools::extractTrainType($vehicle->name);
+            $stopAtStation->vehicle->number = VehicleIdTools::extractTrainNumber($vehicle->name);
             $stopAtStation->platform = new Platform($platform, $isPlatformNormal);
             $stopAtStation->canceled = $stopCanceled;
             // Include partiallyCanceled, but don't include canceled.

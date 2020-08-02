@@ -201,7 +201,7 @@ class Tools
      * Send a HTTP response header to the requester, idicating that this response was served from an internal cache.
      * @param bool $cached
      */
-    public static function sendIrailCacheResponseHeader(bool $cached)
+    public static function sendIrailCacheResponseHeader(bool $cached) : void
     {
         header("X-iRail-cache-hit: " . $cached);
     }

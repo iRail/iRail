@@ -1,0 +1,19 @@
+language: php
+php:
+  - "7.2"
+  - "7.3"
+  - "7.4"
+dist: xenial
+os: linux
+env:
+addons:
+  apt:
+    packages:
+      - nodejs
+before_script:
+  - composer install
+before_install:
+  - pecl channel-update pecl.php.net
+  - pecl install mongodb
+script:
+  - phpunit

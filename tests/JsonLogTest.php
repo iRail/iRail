@@ -3,7 +3,7 @@
 use Tac\Tac;
 use IRail\JsonLog;
 
-class JsonLogTest extends \PHPUnit_Framework_TestCase
+class JsonLogTest extends PHPUnit\Framework\TestCase
 {
     public function testJsonLogTail()
     {
