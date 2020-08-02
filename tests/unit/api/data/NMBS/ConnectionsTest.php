@@ -1,6 +1,7 @@
 <?php
 
 namespace Tests\unit\api\data\NMBS;
+
 use Exception;
 use Irail\api\data\NMBS\Connections;
 use Irail\api\data\NMBS\Stations;

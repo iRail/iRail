@@ -6,7 +6,6 @@ use GuzzleHttp\Client;
 
 class LiveboardIntegrationTest extends IntegrationTestCase
 {
-
     public function test400()
     {
         $client = new Client(['http_errors' => false]);

@@ -7,6 +7,7 @@
  * @author Stan Callewaert
  */
 namespace Irail\api\occupancy;
+
 use Dotenv\Dotenv;
 use Exception;
 

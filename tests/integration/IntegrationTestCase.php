@@ -1,5 +1,6 @@
 <?php
 namespace Tests\integration;
+
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 

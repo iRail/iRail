@@ -130,8 +130,10 @@ class VehicleInformation
         $scrapeURL = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/trainsearch.exe/' . $lang . 'ld=std&seqnr=1&ident=at.02043113.1429435556&';
         $id = preg_replace("/[a-z]+\.[a-z]+\.([a-zA-Z0-9]+)/smi", '\\1', $id);
 
-        $post_data = 'trainname=' . $id . '&start=Zoeken&selectDate=oneday&date=' . DateTime::createFromFormat('dmy',
-                $date)->format('d%2fm%2fY') . '&realtimeMode=Show';
+        $post_data = 'trainname=' . $id . '&start=Zoeken&selectDate=oneday&date=' . DateTime::createFromFormat(
+            'dmy',
+            $date
+        )->format('d%2fm%2fY') . '&realtimeMode=Show';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $scrapeURL);
@@ -167,7 +169,7 @@ class VehicleInformation
 
             $vehicleId = trim(reset($vehicleStopNode->children[4]->nodes[0]->_));
             $vehicleId = str_replace(" ", "", $vehicleId);
-            if (!empty($vehicleId) && preg_match("/[A-Z0-9]+/",$vehicleId)) {
+            if (!empty($vehicleId) && preg_match("/[A-Z0-9]+/", $vehicleId)) {
                 return $vehicleId;
             }
         }
@@ -308,7 +310,7 @@ class VehicleInformation
                 $newVehicleId = trim(reset($vehicleStopNode->children[4]->nodes[0]->_));
                 $newVehicleId = str_replace(" ", "", $newVehicleId);
 
-                if (!empty($newVehicleId) && preg_match("/[A-Z0-9]+/",$newVehicleId)) {
+                if (!empty($newVehicleId) && preg_match("/[A-Z0-9]+/", $newVehicleId)) {
                     $vehicleId = $newVehicleId;
                 }
 
@@ -374,23 +376,29 @@ class VehicleInformation
                 $stops[$stopNumber]->station = $station;
                 $stops[$stopNumber]->departureDelay = $departureDelay;
                 $stops[$stopNumber]->departureCanceled = $departureCanceled;
-                $stops[$stopNumber]->scheduledDepartureTime = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00',
-                    $dateDatetime->format('Ymd'));
-                $stops[$stopNumber]->scheduledArrivalTime = Tools::transformTime('0' . $nextDayArrival . 'd' . $arrivalTime . ':00',
-                    $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->scheduledDepartureTime = Tools::transformTime(
+                    '0' . $nextDay . 'd' . $departureTime . ':00',
+                    $dateDatetime->format('Ymd')
+                );
+                $stops[$stopNumber]->scheduledArrivalTime = Tools::transformTime(
+                    '0' . $nextDayArrival . 'd' . $arrivalTime . ':00',
+                    $dateDatetime->format('Ymd')
+                );
                 $stops[$stopNumber]->arrivalDelay = $arrivalDelay;
                 $stops[$stopNumber]->arrivalCanceled = $arrivalCanceled;
 
                 if ($fast != 'true') {
                     $stops[$stopNumber]->departureConnection = 'http://irail.be/connections/' . substr(
-                            basename($stops[$stopNumber]->station->{'@id'}),
-                            2
-                        ) . '/' . $dateDatetime->format('Ymd') . '/' . $vehicleId;
+                        basename($stops[$stopNumber]->station->{'@id'}),
+                        2
+                    ) . '/' . $dateDatetime->format('Ymd') . '/' . $vehicleId;
                 }
                 $stops[$stopNumber]->platform = new Platform($platform, $normalplatform);
                 //for backward compatibility
-                $stops[$stopNumber]->time = Tools::transformTime('0' . $nextDay . 'd' . $departureTime . ':00',
-                    $dateDatetime->format('Ymd'));
+                $stops[$stopNumber]->time = Tools::transformTime(
+                    '0' . $nextDay . 'd' . $departureTime . ':00',
+                    $dateDatetime->format('Ymd')
+                );
                 $stops[$stopNumber]->delay = $departureDelay;
                 $stops[$stopNumber]->canceled = $departureCanceled;
                 $stops[$stopNumber]->left = $departed;

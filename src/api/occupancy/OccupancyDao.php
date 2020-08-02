@@ -8,6 +8,7 @@
  */
 
 namespace Irail\api\occupancy;
+
 /**
  * Class OccupancyDao This class handles interactions with the feedback and occupancy collections in MongoDB
  * The feedback collection contains every feedback entry ever reported.

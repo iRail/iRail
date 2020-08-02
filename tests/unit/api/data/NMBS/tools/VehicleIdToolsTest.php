@@ -1,6 +1,7 @@
 <?php
 
 namespace Tests\unit\api\data\NMBS\tools;
+
 use Exception;
 use Irail\api\data\NMBS\tools\VehicleIdTools;
 use PHPUnit\Framework\TestCase;

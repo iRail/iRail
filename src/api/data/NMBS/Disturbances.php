@@ -148,9 +148,9 @@ class Disturbances
             $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
 
             if (strpos(
-                    $disturbance->description,
-                    '<a href="http://www.belgianrail.be/jp/download/brail_him/'
-                ) !== false) {
+                $disturbance->description,
+                '<a href="http://www.belgianrail.be/jp/download/brail_him/'
+            ) !== false) {
                 preg_match(
                     '/<a href="(?P<url>http:\/\/www.belgianrail.be\/jp\/download\/brail_him\/.*?)"/',
                     $disturbance->description,
@@ -170,13 +170,22 @@ class Disturbances
 
             // This replaces a special character with a normal space, just to be sure
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
-            $disturbance->description = preg_replace('/<br ?\/><br ?\/>/', " " . $newlinePlaceHolder,
-                $disturbance->description);
-            $disturbance->description = preg_replace('/<br ?\/>/', " " . $newlinePlaceHolder,
-                $disturbance->description);
+            $disturbance->description = preg_replace(
+                '/<br ?\/><br ?\/>/',
+                " " . $newlinePlaceHolder,
+                $disturbance->description
+            );
+            $disturbance->description = preg_replace(
+                '/<br ?\/>/',
+                " " . $newlinePlaceHolder,
+                $disturbance->description
+            );
             $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
-            $disturbance->description = preg_replace("/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/", "",
-                $disturbance->description);
+            $disturbance->description = preg_replace(
+                "/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/",
+                "",
+                $disturbance->description
+            );
             $disturbance->description = preg_replace("/\s?$newlinePlaceHolder\s?$/", "", $disturbance->description);
             $disturbance->description = preg_replace("/\s+/", " ", $disturbance->description);
             // Replace the placeholder after stripping the HTML tags: the end user might want to use a <br> tag as placeholder

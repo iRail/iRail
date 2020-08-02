@@ -334,9 +334,9 @@ class Liveboard
             $stopAtStation->left = $left;
             $stopAtStation->isExtra = $isExtraTrain;
             $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                    basename($currentStation->{'@id'}),
-                    2
-                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
+                basename($currentStation->{'@id'}),
+                2
+            ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
 
             // Add occuppancy data, if available
             $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($currentStation, $stopAtStation, $date);

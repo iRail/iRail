@@ -5,6 +5,7 @@
  */
 
 namespace Irail\api;
+
 require_once '../../vendor/autoload.php';
 
 date_default_timezone_set('Europe/Brussels');

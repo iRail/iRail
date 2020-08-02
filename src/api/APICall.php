@@ -11,20 +11,17 @@
 
 namespace Irail\api;
 
-use Irail\api\output\Jsonp;
+use Irail\api\data\DataRoot;
 use Irail\api\output\Printer;
-use Irail\api\output\Xml;
+use Irail\api\requests\CompositionRequest;
+use Irail\api\requests\ConnectionsRequest;
+use Irail\api\requests\DisturbancesRequest;
+use Irail\api\requests\LiveboardRequest;
+use Irail\api\requests\StationsRequest;
+use Irail\api\requests\VehicleinformationRequest;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Irail\api\data\DataRoot;
-use Irail\api\requests\VehicleinformationRequest;
-use Irail\api\requests\StationsRequest;
-use Irail\api\requests\LiveboardRequest;
-use Irail\api\requests\DisturbancesRequest;
-use Irail\api\requests\ConnectionsRequest;
-use Irail\api\requests\CompositionRequest;
-use function Webmozart\Assert\Tests\StaticAnalysis\null;
 
 class APICall
 {
@@ -151,17 +148,17 @@ class APICall
                 $query['arrivalStop'] = $this->request->getTo();
                 //transform to ISO8601
                 $query['dateTime'] = preg_replace(
-                        '/(\d\d\d\d)(\d\d)(\d\d)/i',
-                        '$1-$2-$3',
-                        $this->request->getDate()
-                    ) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                    '/(\d\d\d\d)(\d\d)(\d\d)/i',
+                    '$1-$2-$3',
+                    $this->request->getDate()
+                ) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['journeyoptions'] = $this->request->getJourneyOptions();
             } elseif ($this->resourcename === 'liveboard') {
                 $query['dateTime'] = preg_replace(
-                        '/(\d\d\d\d)(\d\d)(\d\d)/i',
-                        '$1-$2-$3',
-                        $this->request->getDate()
-                    ) . 'T' . $this->request->getTime() . ':00' . '+01:00';
+                    '/(\d\d\d\d)(\d\d)(\d\d)/i',
+                    '$1-$2-$3',
+                    $this->request->getDate()
+                ) . 'T' . $this->request->getTime() . ':00' . '+01:00';
                 $query['departureStop'] = $this->request->getStation();
             } elseif ($this->resourcename === 'VehicleInformation') {
                 $query['vehicle'] = $this->request->getVehicleId();
