@@ -3,7 +3,8 @@ php:
   - "7.2"
   - "7.3"
   - "7.4"
-sudo: false
+dist: xenial
+os: linux
 env:
 addons:
   apt:
