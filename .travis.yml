@@ -10,10 +10,14 @@ addons:
   apt:
     packages:
       - nodejs
-before_script:
+install:
   - composer install
 before_install:
   - pecl channel-update pecl.php.net
   - pecl install mongodb
 script:
-  - phpunit
+  - ./vendor/bin/phpunit
+notifications:
+  email:
+    on_success: never
+    on_failure: change
