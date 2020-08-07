@@ -14,7 +14,7 @@ install:
   - composer install
 before_install:
   - pecl channel-update pecl.php.net
-  - pecl install mongodb
+  - pecl install -f mongodb
 script:
   - ./vendor/bin/phpunit
 notifications:
