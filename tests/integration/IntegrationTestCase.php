@@ -46,10 +46,10 @@ abstract class IntegrationTestCase extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        print(self::$serverProcess->getErrorOutput());
-        self::$serverProcess->clearErrorOutput();
         print(self::$serverProcess->getOutput());
         self::$serverProcess->clearOutput();
+        print(self::$serverProcess->getErrorOutput());
+        self::$serverProcess->clearErrorOutput();
     }
 
 

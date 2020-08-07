@@ -22,6 +22,8 @@
     "ext-curl": "*",
     "ext-simplexml": "*",
     "ext-tidy": "*",
+    "ext-iconv": "*",
+    "ext-mbstring": "*",
     "ext-mongodb": "*",
     "php": ">=7.2"
   },

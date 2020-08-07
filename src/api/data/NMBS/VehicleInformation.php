@@ -22,12 +22,7 @@ use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\VehicleinformationRequest;
-
-require_once __DIR__ . '/tools/VehicleIdTools.php';
-require_once __DIR__ . '/tools/Tools.php';
-require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/../../../includes/simple_html_dom.php';
-require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
+use Irail\includes\SimpleHtmlDom;
 
 class VehicleInformation
 {
@@ -57,7 +52,7 @@ class VehicleInformation
             Tools::sendIrailCacheResponseHeader(true);
         }
 
-        $html = str_get_html($serverData);
+        $html = SimpleHtmlDom::str_get_html($serverData);
 
         // Check if there is a valid result from the belgianrail website
         if (!self::trainDrives($html)) {
@@ -67,7 +62,7 @@ class VehicleInformation
         if (self::trainSplits($html)) {
             // Two URLs, fetch serverData from matching URL
             $serverData = self::parseCorrectUrl($html);
-            $html = str_get_html($serverData);
+            $html = SimpleHtmlDom::str_get_html($serverData);
         }
 
         $dataroot->vehicle = self::getVehicleData($html, $lang);
