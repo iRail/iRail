@@ -25,18 +25,18 @@ abstract class IntegrationTestCase extends TestCase
     {
         self::$serverProcess->stop();
         echo PHP_EOL . "Integration test server stopped at " . self::getBaseUrl() . PHP_EOL;
-
+        self::$serverProcess->wait();
         self::$isRunning = false;
     }
 
     public static function setUpBeforeClass(): void
     {
-        while (self::$isRunning){
+        while (self::$isRunning) {
             sleep(1);
         }
         self::$isRunning = true;
         self::$host = "localhost:" . self::$port++;
-        self::$serverProcess = new Process("php -S " . self::$host . " -t " . dirname(dirname(__DIR__)) . "/src/api/");
+        self::$serverProcess = new Process(["php", "-S", self::$host, "-t", dirname(dirname(__DIR__)) . "/src/api/"]);
         self::$serverProcess->start();
 
         usleep(500000); //wait for server to get going

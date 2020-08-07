@@ -17,9 +17,8 @@ before_install:
   - pecl install -f mongodb
   # Ensure there is enough memory to run integration tests (server + client)
   - echo "memory_limit = 256M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - echo "error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 script:
-  - ./vendor/bin/phpunit
+  - ./vendor/bin/phpunit --verbose --testdox
 notifications:
   email:
     on_success: never
