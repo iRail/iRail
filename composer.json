@@ -9,8 +9,8 @@
     }
   ],
   "require": {
-    "irail/stations": "^1.6",
-    "monolog/monolog": "^1.18@dev",
+    "irail/stations": "^1.6.4",
+    "monolog/monolog": "^1.25",
     "ptachoire/tac": "1.0.*",
     "sebastian/environment": "4.2.*",
     "vlucas/phpdotenv": "^2.3",

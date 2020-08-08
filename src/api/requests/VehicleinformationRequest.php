@@ -7,32 +7,40 @@
 
 namespace Irail\api\requests;
 
+use Exception;
+
 class VehicleinformationRequest extends Request
 {
     protected $id;
     protected $fast;
     protected $alerts;
+    protected $date;
 
+    /**
+     * VehicleinformationRequest constructor.
+     * @throws Exception
+     */
     public function __construct()
     {
         parent::__construct();
         parent::setGetVar('id', '');
         parent::setGetVar('date', date('dmy'));
-        parent::setGetVar('fast', 'false');
         parent::setGetVar('alerts', 'false');
         parent::processRequiredVars(['id']);
 
-        // Ensure consistent ids from here on
-        if (strpos($this->id, 'BE.NMBS.') === false) {
-            $this->id = 'BE.NMBS.' . strtoupper($this->id);
+        preg_match('/(..)(..)(..)/si', $this->date, $m);
+
+        if (count($m) > 3) {
+            $this->date = '20' . $m[3] . $m[2] . $m[1];
+        } elseif (count($m) > 2) {
+            $this->date = date('Y') . $m[2] . $m[1];
         }
 
-        if (strlen($this->id) > 24) {
-            throw new Exception("Invalid vehicle id! The id parameter should be 2 to 24 characters long");
-        }
+        $this->cleanId();
     }
 
     /**
+     * The requested vehicle id, for example IC 538
      * @return mixed
      */
     public function getVehicleId()
@@ -51,16 +59,24 @@ class VehicleinformationRequest extends Request
     /**
      * @return mixed
      */
-    public function getFast()
-    {
-        return $this->fast;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getAlerts()
     {
         return $this->alerts == 'true';
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function cleanId(): void
+    {
+        $this->id = strtoupper($this->id);
+        $this->id = trim(urldecode($this->id));
+        // Ensure consistent ids from here on
+        if (strpos($this->id, 'BE.NMBS.') === 0) {
+            $this->id = substr($this->id, 8);
+        }
+        if (strlen($this->id) > 16) {
+            throw new Exception("Invalid vehicle id! The id parameter should be 2 to 16 characters long", 400);
+        }
     }
 }

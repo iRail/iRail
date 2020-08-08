@@ -397,26 +397,10 @@ class Connections
         $json = json_decode($serverData, true);
 
         HafasCommon::throwExceptionOnInvalidResponse($json);
-
-        $locationDefinitions = [];
-        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            $locationDefinitions = self::parseHafasLocations($json);
-        }
-
-        $vehicleDefinitions = [];
-        if (key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
-            $vehicleDefinitions = self::parseHafasVehicles($json);
-        }
-
-        $remarkDefinitions = [];
-        if (key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            $remarkDefinitions = self::parseHafasRemarks($json);
-        }
-
-        $alertDefinitions = [];
-        if (key_exists('himL', $json['svcResL'][0]['res']['common'])) {
-            $alertDefinitions = self::parseHafasAlerts($json);
-        }
+        $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
+        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
+        $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
+        $alertDefinitions = HafasCommon::parseAlertDefinitions($json);
 
         $connections = [];
         foreach ($json['svcResL'][0]['res']['outConL'] as $conn) {
@@ -432,106 +416,6 @@ class Connections
         }
 
         return $connections;
-    }
-
-    /**
-     * Parse locations from an API response.
-     * @param $json array The decoded JSON response.
-     * @return StdClass[] The locations defined in the API response.
-     */
-    private static function parseHafasLocations($json): array
-    {
-        $locationDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
-            // type: S stand for station, P for Point of Interest, A for address
-            $location = new StdClass();
-            $location->name = $rawLocation['name'];
-            $location->id = '00' . $rawLocation['extId'];
-            $locationDefinitions[] = $location;
-        }
-        return $locationDefinitions;
-    }
-
-    /**
-     * Parse vehicles from an API response.
-     * @param $json array The decoded JSON response.
-     * @return StdClass[] The vehicles defined in the API response.
-     */
-    private static function parseHafasVehicles($json): array
-    {
-        $vehicleDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
-            $vehicle = new StdClass();
-            $vehicle->name = str_replace(" ", '', $rawTrain['name']);
-            $vehicle->num = trim($rawTrain['prodCtx']['num']);
-            $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
-            $vehicleDefinitions[] = $vehicle;
-        }
-        return $vehicleDefinitions;
-    }
-
-    /**
-     * Parse remarks from an API response.
-     * @param $json array The decoded JSON response.
-     * @return StdClass[] The remarks defined in the API response.
-     */
-    private static function parseHafasRemarks($json): array
-    {
-        $remarkDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
-            $remark = new StdClass();
-            $remark->code = $rawRemark['code'];
-            $remark->description = strip_tags(preg_replace(
-                "/<a href=\".*?\">.*?<\/a>/",
-                '',
-                $rawRemark['txtN']
-            ));
-
-            $matches = [];
-            preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
-
-            if (count($matches[1]) > 0) {
-                $remark->link = urlencode($matches[1][0]);
-            }
-
-            $remarkDefinitions[] = $remark;
-        }
-        return $remarkDefinitions;
-    }
-
-    /**
-     * @param $json
-     * @return StdClass[]
-     */
-    private static function parseHafasAlerts($json): array
-    {
-        $alertDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
-            $alert = new StdClass();
-            $alert->header = strip_tags($rawAlert['head']);
-            $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
-            $alert->lead = strip_tags($rawAlert['lead']);
-
-            $matches = [];
-            preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
-            if (count($matches[1]) > 1) {
-                $alert->link = urlencode($matches[1][0]);
-            }
-
-            if (key_exists('pubChL', $rawAlert)) {
-                $alert->startTime = Tools::transformTime(
-                    $rawAlert['pubChL'][0]['fTime'],
-                    $rawAlert['pubChL'][0]['fDate']
-                );
-                $alert->endTime = Tools::transformTime(
-                    $rawAlert['pubChL'][0]['tTime'],
-                    $rawAlert['pubChL'][0]['tDate']
-                );
-            }
-
-            $alertDefinitions[] = $alert;
-        }
-        return $alertDefinitions;
     }
 
     /**
