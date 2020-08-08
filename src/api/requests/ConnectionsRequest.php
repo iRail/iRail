@@ -8,6 +8,7 @@
 
 namespace Irail\api\requests;
 
+use Irail\api\data\models\Station;
 use Irail\api\data\NMBS\Stations;
 
 class ConnectionsRequest extends Request
@@ -78,7 +79,7 @@ class ConnectionsRequest extends Request
 
     /**
      * When we have found a better description of the from, let the request know
-     * @param $from is a departure station
+     * @param Station $from is a departure station
      */
     public function setFrom($from)
     {
@@ -98,7 +99,7 @@ class ConnectionsRequest extends Request
 
     /**
      * When we have found a better description of the $to, let the request know
-     * @param $to a destination station
+     * @param Station $to  destination station
      */
     public function setTo($to)
     {

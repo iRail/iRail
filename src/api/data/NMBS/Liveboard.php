@@ -17,12 +17,6 @@ use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
 use stdClass;
 
-require_once __DIR__ . '/tools/HafasCommon.php';
-require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/tools/Tools.php';
-require_once __DIR__ . '/tools/VehicleIdTools.php';
-require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
-
 class Liveboard
 {
     /**

@@ -24,11 +24,6 @@ use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\ConnectionsRequest;
 use stdClass;
 
-require_once __DIR__ . '/tools/HafasCommon.php';
-require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/tools/Tools.php';
-require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
-
 class Connections
 {
     /**
@@ -196,9 +191,9 @@ class Connections
      * @param Station $stationFrom
      * @param Station $stationTo
      * @param string $lang
-     * @param         $time
-     * @param         $date
-     * @param int $timeSel
+     * @param string $time
+     * @param string $date
+     * @param string $timeSel
      * @param string $typeOfTransport
      * @return string
      */
@@ -210,7 +205,7 @@ class Connections
         string $date,
         string $timeSel,
         string $typeOfTransport
-    ) {
+    ): string {
         $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
         $request_options = [
@@ -394,10 +389,10 @@ class Connections
      * @param string $serverData
      * @param string $lang
      * @param          $request
-     * @return array
+     * @return Connection[]
      * @throws Exception
      */
-    public static function parseConnectionsAPI(string $serverData, string $lang, ConnectionsRequest $request)
+    public static function parseConnectionsAPI(string $serverData, string $lang, ConnectionsRequest $request): array
     {
         $json = json_decode($serverData, true);
 
@@ -442,9 +437,9 @@ class Connections
     /**
      * Parse locations from an API response.
      * @param $json array The decoded JSON response.
-     * @return array The locations defined in the API response.
+     * @return StdClass[] The locations defined in the API response.
      */
-    private static function parseHafasLocations($json)
+    private static function parseHafasLocations($json): array
     {
         $locationDefinitions = [];
         foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
@@ -460,9 +455,9 @@ class Connections
     /**
      * Parse vehicles from an API response.
      * @param $json array The decoded JSON response.
-     * @return array The vehicles defined in the API response.
+     * @return StdClass[] The vehicles defined in the API response.
      */
-    private static function parseHafasVehicles($json)
+    private static function parseHafasVehicles($json): array
     {
         $vehicleDefinitions = [];
         foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
@@ -478,9 +473,9 @@ class Connections
     /**
      * Parse remarks from an API response.
      * @param $json array The decoded JSON response.
-     * @return array The remarks defined in the API response.
+     * @return StdClass[] The remarks defined in the API response.
      */
-    private static function parseHafasRemarks($json)
+    private static function parseHafasRemarks($json): array
     {
         $remarkDefinitions = [];
         foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
@@ -506,9 +501,9 @@ class Connections
 
     /**
      * @param $json
-     * @return array
+     * @return StdClass[]
      */
-    private static function parseHafasAlerts($json)
+    private static function parseHafasAlerts($json): array
     {
         $alertDefinitions = [];
         foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
@@ -547,7 +542,7 @@ class Connections
      * @param $alertDefinitions
      * @param $remarkDefinitions
      * @param $lang
-     * @return mixed
+     * @return Connection
      * @throws Exception
      */
     private static function parseHafasConnection(
@@ -558,7 +553,7 @@ class Connections
         $alertDefinitions,
         $remarkDefinitions,
         $lang
-    ) {
+    ): Connection {
         $connection = new Connection();
         $connection->duration = Tools::transformDurationHHMMSS($hafasConnection['dur']);
 
@@ -667,12 +662,10 @@ class Connections
         array_pop($connection->departure->stop);
 
 
-        $connection->departure->departureConnection = 'http://irail.be/connections/' . substr(
-            basename($departureStation->{'@id'}),
-            2
-        ) . '/' . date('Ymd', $connection->departure->time) . '/' . substr(
-                $trainsInConnection[0]->vehicle,
-                strrpos($trainsInConnection[0]->vehicle, '.') + 1
+        $connection->departure->departureConnection = 'http://irail.be/connections/' .
+            substr(basename($departureStation->{'@id'}), 2) . '/' .
+            date('Ymd', $connection->departure->time) . '/' .
+            substr($trainsInConnection[0]->vehicle, strrpos($trainsInConnection[0]->vehicle, '.') + 1
             );
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
@@ -978,7 +971,9 @@ class Connections
     }
 
     /**
-     * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but the traveller stays on)
+     * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
+     * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
+     * the traveller stays on)
      * @param $lang
      * @param $locationDefinitions
      * @param $vehicleDefinitions
@@ -990,17 +985,17 @@ class Connections
     private static function parseHafasIntermediateStop($lang, $locationDefinitions, $vehicleDefinitions, $rawIntermediateStop, $conn)
     {
         /* "locX": 2,
-                                  "idx": 19,
-                                  "aProdX": 1,
-                                  "aTimeS": "162900",
-                                  "aTimeR": "162900",
-                                  "aProgType": "PROGNOSED",
-                                  "dProdX": 1,
-                                  "dTimeS": "163000",
-                                  "dTimeR": "163000",
-                                  "dProgType": "PROGNOSED",
-                                  "isImp": true
-                                        */
+           "idx": 19,
+           "aProdX": 1,
+           "aTimeS": "162900",
+           "aTimeR": "162900",
+           "aProgType": "PROGNOSED",
+           "dProdX": 1,
+           "dTimeS": "163000",
+           "dTimeR": "163000",
+           "dProgType": "PROGNOSED",
+           "isImp": true
+        */
         $intermediateStop = new StdClass();
         $intermediateStop->station = Stations::getStationFromID(
             $locationDefinitions[$rawIntermediateStop['locX']]->id,
@@ -1079,15 +1074,15 @@ class Connections
         // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
         // are null, hope for the best
         if (!property_exists(
-            $intermediateStop,
-            'scheduledDepartureTime'
-        ) || $intermediateStop->scheduledDepartureTime == null) {
+                $intermediateStop,
+                'scheduledDepartureTime'
+            ) || $intermediateStop->scheduledDepartureTime == null) {
             $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
         }
         if (!property_exists(
-            $intermediateStop,
-            'scheduledArrivalTime'
-        ) || $intermediateStop->scheduledArrivalTime == null) {
+                $intermediateStop,
+                'scheduledArrivalTime'
+            ) || $intermediateStop->scheduledArrivalTime == null) {
             $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
         }
 
@@ -1109,13 +1104,10 @@ class Connections
 
         // The last stop does not have a departure, and therefore we cannot construct a departure URI.
         if (key_exists('dProdX', $rawIntermediateStop)) {
-            $intermediateStop->departureConnection = 'http://irail.be/connections/' . substr(
-                $locationDefinitions[$rawIntermediateStop['locX']]->id,
-                2
-            ) . '/' . date(
-                    'Ymd',
-                    $intermediateStop->scheduledDepartureTime
-                ) . '/' . $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
+            $intermediateStop->departureConnection = 'http://irail.be/connections/' .
+                substr($locationDefinitions[$rawIntermediateStop['locX']]->id, 2) . '/' .
+                date('Ymd', $intermediateStop->scheduledDepartureTime) . '/' .
+                $vehicleDefinitions[$rawIntermediateStop['dProdX']]->name;
         }
         return $intermediateStop;
     }
@@ -1125,10 +1117,9 @@ class Connections
      * @param $vias
      * @param $viaIndex
      * @param $trains
-     * @param $lastDepartureTime
-     * @return mixed
+     * @return Via[]
      */
-    private static function constructVia($vias, $viaIndex, $trains)
+    private static function constructVia($vias, $viaIndex, $trains): array
     {
         // A via lies between two trains. This mean that for n trains, there are n-1 vias, with n >=1
         // The n-th via lies between train n and train n+1
@@ -1155,9 +1146,9 @@ class Connections
         $constructedVia->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
         $constructedVia->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
         if (property_exists(
-            $trains[$viaIndex + 1],
-            'alerts'
-        ) && count($trains[$viaIndex + 1]->alerts) > 0) {
+                $trains[$viaIndex + 1],
+                'alerts'
+            ) && count($trains[$viaIndex + 1]->alerts) > 0) {
             $constructedVia->departure->alert = $trains[$viaIndex + 1]->alerts;
         }
 
@@ -1202,7 +1193,7 @@ class Connections
      * @param                    $connection
      * @param                    $vias
      */
-    private static function storeIrailLogData($request, $connection, $vias)
+    private static function storeIrailLogData($request, $connection, $vias): void
     {
         //Add journey options to the logs of iRail
         $journeyoptions = ["journeys" => []];
@@ -1234,9 +1225,9 @@ class Connections
      *
      * @param $connections
      * @param $date
-     * @return mixed
+     * @return array
      */
-    private static function addOccupancy($connections, $date)
+    private static function addOccupancy($connections, $date): array
     {
         $occupancyConnections = $connections;
 
@@ -1266,14 +1257,14 @@ class Connections
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->via[$key + 1]->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->via[$key + 1]->vehicle,
+                                        "."
+                                    ), 1);
                             } else {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->arrival->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->arrival->vehicle,
+                                        "."
+                                    ), 1);
                             }
 
                             $from = $via->station->{'@id'};
