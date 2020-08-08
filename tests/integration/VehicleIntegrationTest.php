@@ -61,5 +61,4 @@ class VehicleIntegrationTest extends IntegrationTestCase
         $this->assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
-
 }

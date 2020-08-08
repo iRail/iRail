@@ -119,7 +119,7 @@ class SimpleHtmlDom
         'tr' => array('td' => 1, 'th' => 1, 'tr' => 1),
     );
 
-    function __construct(
+    public function __construct(
         $str = null,
         $lowercase = true,
         $forceTagsClosed = true,
@@ -152,12 +152,12 @@ class SimpleHtmlDom
         $this->_target_charset = $target_charset;
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->clear();
     }
 
-    static function file_get_html(
+    public static function file_get_html(
         $url,
         $use_include_path = false,
         $context = null,
@@ -205,7 +205,7 @@ class SimpleHtmlDom
         return $dom->load($contents, $lowercase, $stripRN);
     }
 
-    static function str_get_html(
+    public static function str_get_html(
         $str,
         $lowercase = true,
         $forceTagsClosed = true,
@@ -232,13 +232,13 @@ class SimpleHtmlDom
         return $dom->load($str, $lowercase, $stripRN);
     }
 
-    static function dump_html_tree($node, $show_attr = true, $deep = 0)
+    public static function dump_html_tree($node, $show_attr = true, $deep = 0)
     {
         $node->dump($node);
     }
 
 
-    function load(
+    public function load(
         $str,
         $lowercase = true,
         $stripRN = true,
@@ -292,7 +292,7 @@ class SimpleHtmlDom
         return $this;
     }
 
-    function load_file()
+    public function load_file()
     {
         $args = func_get_args();
 
@@ -303,17 +303,17 @@ class SimpleHtmlDom
         }
     }
 
-    function set_callback($function_name)
+    public function set_callback($function_name)
     {
         $this->callback = $function_name;
     }
 
-    function remove_callback()
+    public function remove_callback()
     {
         $this->callback = null;
     }
 
-    function save($filepath = '')
+    public function save($filepath = '')
     {
         $ret = $this->root->innertext();
         if ($filepath !== '') {
@@ -322,12 +322,12 @@ class SimpleHtmlDom
         return $ret;
     }
 
-    function find($selector, $idx = null, $lowercase = false)
+    public function find($selector, $idx = null, $lowercase = false)
     {
         return $this->root->find($selector, $idx, $lowercase);
     }
 
-    function clear()
+    public function clear()
     {
         if (isset($this->nodes)) {
             foreach ($this->nodes as $n) {
@@ -360,13 +360,14 @@ class SimpleHtmlDom
         unset($this->noise);
     }
 
-    function dump($show_attr = true)
+    public function dump($show_attr = true)
     {
         $this->root->dump($show_attr);
     }
 
     protected function prepare(
-        $str, $lowercase = true,
+        $str,
+        $lowercase = true,
         $defaultBRText = DEFAULT_BR_TEXT,
         $defaultSpanText = DEFAULT_SPAN_TEXT
     ) {
@@ -425,7 +426,8 @@ class SimpleHtmlDom
             if ($success) {
                 $charset = $matches[1];
                 if (is_object($debug_object)) {
-                    $debug_object->debug_log(2,
+                    $debug_object->debug_log(
+                        2,
                         'header content-type found charset of: '
                         . $charset
                     );
@@ -440,7 +442,8 @@ class SimpleHtmlDom
             if (!empty($el)) {
                 $fullvalue = $el->content;
                 if (is_object($debug_object)) {
-                    $debug_object->debug_log(2,
+                    $debug_object->debug_log(
+                        2,
                         'meta content-type tag found'
                         . $fullvalue
                     );
@@ -460,7 +463,8 @@ class SimpleHtmlDom
                         // character set, research says that it's typically
                         // ISO-8859-1
                         if (is_object($debug_object)) {
-                            $debug_object->debug_log(2,
+                            $debug_object->debug_log(
+                                2,
                                 'meta content-type tag couldn\'t be parsed. using iso-8859 default.'
                             );
                         }
@@ -538,7 +542,8 @@ class SimpleHtmlDom
             || (strtolower($charset) == 'latin-1')) {
             $charset = 'CP1252';
             if (is_object($debug_object)) {
-                $debug_object->debug_log(2,
+                $debug_object->debug_log(
+                    2,
                     'replacing ' . $charset . ' with CP1252 as its a superset'
                 );
             }
@@ -585,7 +590,6 @@ class SimpleHtmlDom
                 // Current tag is a block tag, so it may close an ancestor
                 if (isset($this->optional_closing_tags[$parent_lower])
                     && isset($this->block_tags[$tag_lower])) {
-
                     $this->parent->_[HDOM_INFO_END] = 0;
                     $org_parent = $this->parent;
 
@@ -841,8 +845,7 @@ class SimpleHtmlDom
     {
         $is_duplicate = isset($node->attr[$name]);
 
-        if (!$is_duplicate) // Copy whitespace between "=" and value
-        {
+        if (!$is_duplicate) { // Copy whitespace between "=" and value
             $space[2] = $this->copy_skip($this->token_blank);
         }
 
@@ -986,7 +989,7 @@ class SimpleHtmlDom
         }
     }
 
-    function restore_noise($text)
+    public function restore_noise($text)
     {
         global $debug_object;
         if (is_object($debug_object)) {
@@ -1034,7 +1037,7 @@ class SimpleHtmlDom
         return $text;
     }
 
-    function search_noise($text)
+    public function search_noise($text)
     {
         global $debug_object;
         if (is_object($debug_object)) {
@@ -1048,12 +1051,12 @@ class SimpleHtmlDom
         }
     }
 
-    function __toString()
+    public function __toString()
     {
         return $this->root->innertext();
     }
 
-    function __get($name)
+    public function __get($name)
     {
         switch ($name) {
             case 'outertext':
@@ -1069,52 +1072,52 @@ class SimpleHtmlDom
         }
     }
 
-    function childNodes($idx = -1)
+    public function childNodes($idx = -1)
     {
         return $this->root->childNodes($idx);
     }
 
-    function firstChild()
+    public function firstChild()
     {
         return $this->root->first_child();
     }
 
-    function lastChild()
+    public function lastChild()
     {
         return $this->root->last_child();
     }
 
-    function createElement($name, $value = null)
+    public function createElement($name, $value = null)
     {
         return @str_get_html("<$name>$value</$name>")->firstChild();
     }
 
-    function createTextNode($value)
+    public function createTextNode($value)
     {
         return @end(str_get_html($value)->nodes);
     }
 
-    function getElementById($id)
+    public function getElementById($id)
     {
         return $this->find("#$id", 0);
     }
 
-    function getElementsById($id, $idx = null)
+    public function getElementsById($id, $idx = null)
     {
         return $this->find("#$id", $idx);
     }
 
-    function getElementByTagName($name)
+    public function getElementByTagName($name)
     {
         return $this->find($name, 0);
     }
 
-    function getElementsByTagName($name, $idx = -1)
+    public function getElementsByTagName($name, $idx = -1)
     {
         return $this->find($name, $idx);
     }
 
-    function loadFile()
+    public function loadFile()
     {
         $args = func_get_args();
         $this->load_file($args);
