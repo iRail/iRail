@@ -20,6 +20,7 @@ use Irail\api\data\models\Via;
 use Irail\api\data\models\ViaDepartureArrival;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
+use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\ConnectionsRequest;
 use stdClass;
@@ -837,7 +838,7 @@ class Connections
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
             $parsedTrain->direction = new StdClass();
             $parsedTrain->direction->name = "WALK";
-            $parsedTrain->vehicle = 'WALK';
+            $parsedTrain->vehicle->name = 'WALK';
             $parsedTrain->walking = 1;
         } else {
             $parsedTrain->walking = 0;
@@ -851,7 +852,12 @@ class Connections
                 // This typically is the stop where the user leaves this train
                 $parsedTrain->direction->name = end($parsedTrain->stops)->station->name;
             }
-            $parsedTrain->vehicle = 'BE.NMBS.' . $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
+            $vehicleShortName = $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
+            $parsedTrain->vehicle = new stdClass();
+            $parsedTrain->vehicle->name = 'BE.NMBS.' . $vehicleShortName;
+            $parsedTrain->vehicle->{'@id'} = 'http://irail.be/vehicle/' .$vehicleShortName;
+            $parsedTrain->vehicle->type = VehicleIdTools::extractTrainType($vehicleShortName);
+            $parsedTrain->vehicle->number = VehicleIdTools::extractTrainNumber($vehicleShortName);
         }
         return $parsedTrain;
     }
@@ -1087,7 +1093,7 @@ class Connections
         for ($viaIndex = 0; $viaIndex < count($vias); $viaIndex++) {
             $arrivalStop = $vias[$viaIndex]->station;
             $journeyoptions["journeys"][] = [
-                "trip" => substr($vias[$viaIndex]->vehicle, 8),
+                "trip" => substr($vias[$viaIndex]->vehicle->name, 8),
                 "departureStop" => $departureStop->{'@id'},
                 "arrivalStop" => $arrivalStop->{'@id'}
             ];
@@ -1096,7 +1102,7 @@ class Connections
         }
         //add last journey
         $journeyoptions["journeys"][] = [
-            "trip" => substr($connection->arrival->vehicle, 8),
+            "trip" => substr($connection->arrival->vehicle->name, 8),
             "departureStop" => $departureStop->{'@id'},
             "arrivalStop" => $connection->arrival->station->{'@id'}
         ];
@@ -1125,7 +1131,7 @@ class Connections
         try {
             while ($i < count($occupancyConnections) && $mongodbExists) {
                 $departure = $occupancyConnections[$i]->departure;
-                $vehicle = $departure->vehicle;
+                $vehicle = $departure->vehicle->name;
                 $from = $departure->station->{"@id"};
 
                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr($vehicle, "."), 1);
@@ -1143,14 +1149,14 @@ class Connections
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->via[$key + 1]->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->via[$key + 1]->vehicle->name,
+                                        "."
+                                    ), 1);
                             } else {
                                 $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                    $occupancyConnections[$i]->arrival->vehicle,
-                                    "."
-                                ), 1);
+                                        $occupancyConnections[$i]->arrival->vehicle->name,
+                                        "."
+                                    ), 1);
                             }
 
                             $from = $via->station->{'@id'};
