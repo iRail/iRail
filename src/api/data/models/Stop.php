@@ -57,5 +57,4 @@ class Stop
      * @var string
      */
     public $departureConnection;
-
 }

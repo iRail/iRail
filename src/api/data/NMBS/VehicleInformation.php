@@ -129,8 +129,14 @@ class VehicleInformation
         $stopIndex = 0;
         // TODO: pick the right train here, a train which splits has multiple parts here.
         foreach ($json['svcResL'][0]['res']['journey']['stopL'] as $rawStop) {
-            $stop = self::parseVehicleStop($rawStop, $date, $requestedDate, $lang, $rawVehicle,
-                $locationDefinitions[$rawStop['locX']]);
+            $stop = self::parseVehicleStop(
+                $rawStop,
+                $date,
+                $requestedDate,
+                $lang,
+                $rawVehicle,
+                $locationDefinitions[$rawStop['locX']]
+            );
 
             // Clean the data up, sometimes arrivals don't register properly
             if ($stop->arrived && $stopIndex > 0) {
@@ -199,7 +205,8 @@ class VehicleInformation
                 $rawStop['dTimeR'],
                 $date,
                 $rawStop['dTimeS'],
-                $date);
+                $date
+            );
         } else {
             $departureDelay = 0;
         }
@@ -215,7 +222,8 @@ class VehicleInformation
                 $rawStop['aTimeR'],
                 $date,
                 $rawStop['aTimeS'],
-                $date);
+                $date
+            );
         } else {
             $arrivalDelay = 0;
         }

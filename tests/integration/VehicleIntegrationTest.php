@@ -4,7 +4,6 @@ namespace Tests\integration;
 
 class VehicleIntegrationTest extends IntegrationTestCase
 {
-
     public function test_xml_missingParameters_shouldReturn400()
     {
         $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php");
@@ -73,8 +72,10 @@ class VehicleIntegrationTest extends IntegrationTestCase
         $json = json_decode($response->getBody(), true);
         self::assertEquals("IC4310", $json['vehicleinfo']['shortname']);
         self::assertEquals("Antwerp-Central", $json['stops']['stop'][0]["station"]);
-        self::assertTrue(in_array(end($json['stops']['stop'])["station"],
-            ["Hamont", "Mol"])); // This train is reduced to Mol at this moment
+        self::assertTrue(in_array(
+            end($json['stops']['stop'])["station"],
+            ["Hamont", "Mol"]
+        )); // This train is reduced to Mol at this moment
 
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC4410");
         $this->assertEquals(200, $response->getStatusCode());
@@ -108,8 +109,10 @@ class VehicleIntegrationTest extends IntegrationTestCase
      */
     public function test_idTooLong_shouldCause400BadRequest()
     {
-        $response = self::getClient()->request("GET",
-            self::getBaseUrl() . "vehicle.php?format=json&id=ABCDEFGHIJKLMNOPQ");
+        $response = self::getClient()->request(
+            "GET",
+            self::getBaseUrl() . "vehicle.php?format=json&id=ABCDEFGHIJKLMNOPQ"
+        );
         $this->assertEquals(400, $response->getStatusCode());
     }
 
@@ -119,8 +122,10 @@ class VehicleIntegrationTest extends IntegrationTestCase
      */
     public function test_idNotTooLong_shouldNotCause400BadRequest()
     {
-        $response = self::getClient()->request("GET",
-            self::getBaseUrl() . "vehicle.php?format=json&id=ABCDEFGHIJKLMNOP");
+        $response = self::getClient()->request(
+            "GET",
+            self::getBaseUrl() . "vehicle.php?format=json&id=ABCDEFGHIJKLMNOP"
+        );
         $this->assertNotEquals(400, $response->getStatusCode());
     }
 
