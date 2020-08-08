@@ -46,6 +46,11 @@ class ConnectionsIntegrationTest extends IntegrationTestCase
         );
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
+        
+        $xml = simplexml_load_string($response->getBody());
+        self::assertTrue(count($xml->connection) > 0, "Routeplanner should at least have one connection");
+        self::assertEquals("Ghent-Dampoort", $xml->connection[0]->departure->station);
+        self::assertEquals("BE.NMBS.008814001", $xml->connection[0]->arrival->station->attributes()['id']);
     }
 
     public function test_json_missingParameters_shouldReturn400()
@@ -102,5 +107,10 @@ class ConnectionsIntegrationTest extends IntegrationTestCase
         );
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
+
+        $json = json_decode($response->getBody(), true);
+        self::assertTrue(count($json['connection']) > 0, "Routeplanner should at least have one connection");
+        self::assertEquals("Ghent-Dampoort", $json['connection'][0]['departure']['station']);
+        self::assertEquals("BE.NMBS.008814001", $json['connection'][0]['arrival']['stationinfo']['id']);
     }
 }
