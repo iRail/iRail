@@ -102,7 +102,7 @@ class Xml extends Printer
         $named = '';
 
         foreach ($hash as $elementkey => $elementval) {
-            if (isset($this->ATTRIBUTES[$elementkey])) {
+            if (in_array($elementkey, $this->ATTRIBUTES)) {
                 if ($elementkey == '@id') {
                     $elementkey = 'URI';
                 }
@@ -132,7 +132,7 @@ class Xml extends Printer
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
-        } elseif ($key != 'name' && !isset($this->ATTRIBUTES[$key])) {
+        } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             echo "<$key>";
             if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'link') {
                 echo "<![CDATA[";
@@ -151,7 +151,7 @@ class Xml extends Printer
             echo ']]>';
         }
 
-        if (!isset($this->ATTRIBUTES[$name]) && $name != 'name') {
+        if (!in_array($name, $this->ATTRIBUTES) && $name != 'name') {
             echo "</$name>";
         }
     }
