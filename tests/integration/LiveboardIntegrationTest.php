@@ -61,8 +61,10 @@ class LiveboardIntegrationTest extends IntegrationTestCase
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
-        $response = self::getClient()->request("GET",
-            self::getBaseUrl() . "liveboard.php?format=json&station=Welkenraedt");
+        $response = self::getClient()->request(
+            "GET",
+            self::getBaseUrl() . "liveboard.php?format=json&station=Welkenraedt"
+        );
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
