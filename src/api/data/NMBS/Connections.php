@@ -838,6 +838,7 @@ class Connections
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
             $parsedTrain->direction = new StdClass();
             $parsedTrain->direction->name = "WALK";
+            $parsedTrain->vehicle = new stdClass();
             $parsedTrain->vehicle->name = 'WALK';
             $parsedTrain->walking = 1;
         } else {
