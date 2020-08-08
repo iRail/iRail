@@ -28,7 +28,8 @@ class Xml extends Printer
         'isExtraStop',
         'isExtra',
         'hafasId',
-        'type'
+        'type', // Vehicle type
+        'number' // Vehicle number
     ];
     private $rootname;
 
