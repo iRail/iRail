@@ -5,13 +5,20 @@
  * This will fetch all vehicledata for the NMBS.
  *   * fillDataRoot will fill the entire dataroot with vehicleinformation
  */
-require_once __DIR__ . '/Tools.php';
-require_once __DIR__ . '/HafasCommon.php';
-require_once __DIR__ . '/Stations.php';
-require_once __DIR__ . '/../../../includes/simple_html_dom.php';
-require_once __DIR__ . '/../../occupancy/OccupancyOperations.php';
 
-class vehicleinformation
+namespace Irail\api\data\NMBS;
+
+use DateTime;
+use Exception;
+use Irail\api\data\models\Platform;
+use Irail\api\data\models\Stop;
+use Irail\api\data\models\Vehicle;
+use Irail\api\data\NMBS\tools\HafasCommon;
+use Irail\api\data\NMBS\tools\Tools;
+use Irail\api\occupancy\OccupancyOperations;
+use stdClass;
+
+class VehicleInformation
 {
     const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
