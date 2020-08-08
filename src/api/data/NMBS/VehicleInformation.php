@@ -16,6 +16,7 @@ use Irail\api\data\models\Stop;
 use Irail\api\data\models\Vehicle;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
+use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\VehicleinformationRequest;
 
@@ -51,6 +52,8 @@ class VehicleInformation
         $dataroot->vehicle = new Vehicle();
         $dataroot->vehicle->name = "BE.NMBS." . $rawVehicle->name;
         $dataroot->vehicle->shortname = $rawVehicle->name;
+        $dataroot->vehicle->number = VehicleIdTools::extractTrainNumber($rawVehicle->name);
+        $dataroot->vehicle->type = VehicleIdTools::extractTrainType($rawVehicle->name);
 
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
