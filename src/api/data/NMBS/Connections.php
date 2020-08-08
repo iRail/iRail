@@ -838,7 +838,7 @@ class Connections
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
             $parsedTrain->direction = new StdClass();
             $parsedTrain->direction->name = "WALK";
-            $parsedTrain->vehicle = new stdClass();
+            $parsedTrain->vehicle = new StdClass();
             $parsedTrain->vehicle->name = 'WALK';
             $parsedTrain->walking = 1;
         } else {
@@ -854,7 +854,7 @@ class Connections
                 $parsedTrain->direction->name = end($parsedTrain->stops)->station->name;
             }
             $vehicleShortName = $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
-            $parsedTrain->vehicle = new stdClass();
+            $parsedTrain->vehicle = new StdClass();
             $parsedTrain->vehicle->name = 'BE.NMBS.' . $vehicleShortName;
             $parsedTrain->vehicle->{'@id'} = 'http://irail.be/vehicle/' .$vehicleShortName;
             $parsedTrain->vehicle->type = VehicleIdTools::extractTrainType($vehicleShortName);
