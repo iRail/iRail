@@ -1149,15 +1149,11 @@ class Connections
                     if (isset($occupancyConnections[$i]->via)) {
                         foreach ($occupancyConnections[$i]->via as $key => $via) {
                             if ($key < count($occupancyConnections[$i]->via) - 1) {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                        $occupancyConnections[$i]->via[$key + 1]->vehicle->name,
-                                        "."
-                                    ), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' .
+                                    substr(strrchr($occupancyConnections[$i]->via[$key + 1]->vehicle->name, "."), 1);
                             } else {
-                                $vehicleURI = 'http://irail.be/vehicle/' . substr(strrchr(
-                                        $occupancyConnections[$i]->arrival->vehicle->name,
-                                        "."
-                                    ), 1);
+                                $vehicleURI = 'http://irail.be/vehicle/' .
+                                    substr(strrchr($occupancyConnections[$i]->arrival->vehicle->name, "."), 1);
                             }
 
                             $from = $via->station->{'@id'};
