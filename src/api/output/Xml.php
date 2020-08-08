@@ -6,8 +6,6 @@ namespace Irail\api\output;
 
 /**
  * Prints the Xml style output.
- *
- * Todo: change in_array to isset key lookups. This should make the whole faster
  */
 class Xml extends Printer
 {
@@ -104,7 +102,7 @@ class Xml extends Printer
         $named = '';
 
         foreach ($hash as $elementkey => $elementval) {
-            if (in_array($elementkey, $this->ATTRIBUTES)) {
+            if (isset($this->ATTRIBUTES[$elementkey])) {
                 if ($elementkey == '@id') {
                     $elementkey = 'URI';
                 }
@@ -134,7 +132,7 @@ class Xml extends Printer
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             echo "<$key formatted=\"$form\">$val";
-        } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
+        } elseif ($key != 'name' && !isset($this->ATTRIBUTES[$key])) {
             echo "<$key>";
             if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'link') {
                 echo "<![CDATA[";
@@ -153,7 +151,7 @@ class Xml extends Printer
             echo ']]>';
         }
 
-        if (!in_array($name, $this->ATTRIBUTES) && $name != 'name') {
+        if (!isset($this->ATTRIBUTES[$name]) && $name != 'name') {
             echo "</$name>";
         }
     }
