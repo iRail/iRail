@@ -85,8 +85,11 @@ class HafasCommon
 
                 $remark = new StdClass();
                 $remark->code = $rawRemark['code'];
-                $remark->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '',
-                    $rawRemark['txtN']));
+                $remark->description = strip_tags(preg_replace(
+                    "/<a href=\".*?\">.*?<\/a>/",
+                    '',
+                    $rawRemark['txtN']
+                ));
 
                 $matches = [];
                 preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
@@ -233,5 +236,4 @@ class HafasCommon
         }
         return $locationDefinitions;
     }
-
 }

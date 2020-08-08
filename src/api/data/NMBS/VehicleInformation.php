@@ -58,8 +58,14 @@ class VehicleInformation
         $dataroot->vehicle->shortname = $request->getVehicleId();
         $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $request->getVehicleId();
 
-        $dataroot->stop = self::getData($serverData, $lang, $vehicleOccupancy, $date, $request->getVehicleId(),
-            $lastStop);
+        $dataroot->stop = self::getData(
+            $serverData,
+            $lang,
+            $vehicleOccupancy,
+            $date,
+            $request->getVehicleId(),
+            $lastStop
+        );
 
         if (property_exists($lastStop, "locationX")) {
             $dataroot->vehicle->locationX = $lastStop->locationX;
@@ -108,7 +114,6 @@ class VehicleInformation
     private static function getData($serverData, $lang, $occupancyArr, $date, $vehicleId, &$laststop)
     {
         $json = json_decode($serverData, true);
-
         HafasCommon::throwExceptionOnInvalidResponse($json);
 
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
@@ -116,169 +121,32 @@ class VehicleInformation
         $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
         $alertDefinitions = HafasCommon::parseAlertDefinitions($json);
 
-
         $stops = [];
         $rawVehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
         $direction = $json['svcResL'][0]['res']['journey']['dirTxt'];
 
         $date = $json['svcResL'][0]['res']['journey']['date'];
 
-        // Determine if this date is in the spitsgids range
-        $now = new DateTime();
         $requestedDate = DateTime::createFromFormat('Ymd', $date);
-        $daysBetweenNowAndRequest = $now->diff($requestedDate);
-        $isOccupancyDate = true;
-        if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
-            $isOccupancyDate = false;
-        }
+        $isOccupancyDate = self::isSpitsgidsDataAvailable($requestedDate);
 
         $stopIndex = 0;
         // TODO: pick the right train here, a train which splits has multiple parts here.
         foreach ($json['svcResL'][0]['res']['journey']['stopL'] as $rawStop) {
 
-            if (key_exists('dTimeR', $rawStop)) {
-                $departureDelay = tools::calculateSecondsHHMMSS($rawStop['dTimeR'],
-                    $date, $rawStop['dTimeS'], $date);
-            } else {
-                $departureDelay = 0;
-            }
-            if (key_exists('dTimeS', $rawStop)) {
-                $departureTime = tools::transformTime($rawStop['dTimeS'], $date);
-            } else {
-                // If the train doesn't depart from here, just use the arrival time
-                $departureTime = null;
-            }
-
-            if (key_exists('aTimeR', $rawStop)) {
-                $arrivalDelay = tools::calculateSecondsHHMMSS($rawStop['aTimeR'],
-                    $date, $rawStop['aTimeS'], $date);
-            } else {
-                $arrivalDelay = 0;
-            }
-
-            if (key_exists('aTimeS', $rawStop)) {
-                $arrivalTime = tools::transformTime($rawStop['aTimeS'], $date);
-            } else {
-                $arrivalTime = $departureTime;
-            }
-
-
-            //Delay and platform changes
-            if (key_exists('dPlatfR', $rawStop)) {
-                $departurePlatform = $rawStop['dPlatfR'];
-                $departurePlatformNormal = false;
-            } elseif (key_exists('dPlatfS', $rawStop)) {
-                $departurePlatform = $rawStop['dPlatfS'];
-                $departurePlatformNormal = true;
-            } else {
-                $departurePlatform = "?";
-                $departurePlatformNormal = true;
-            }
-
-            //Delay and platform changes
-            if (key_exists('aPlatfR', $rawStop)) {
-                $arrivalPlatform = $rawStop['aPlatfR'];
-                $arrivalPlatformNormal = false;
-            } elseif (key_exists('aPlatfS', $rawStop)) {
-                $arrivalPlatform = $rawStop['aPlatfS'];
-                $arrivalPlatformNormal = true;
-            } else {
-                $arrivalPlatform = "?";
-                $arrivalPlatformNormal = true;
-            }
-
-            // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
-            // DepartureCanceled gives information if this stop has been canceled.
-            $canceled = 0;
-            $departureCanceled = 0;
-            $arrivalCanceled = 0;
-            if (key_exists('isCncl', $rawStop)) {
-                $canceled = $rawStop['isCncl'];
-            }
-            if ($canceled) {
-                $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
-            }
-
-            $left = 0;
-            if (key_exists('dProgType', $rawStop)) {
-                if ($rawStop['dProgType'] == 'REPORTED') {
-                    $left = 1;
-                }
-                if (key_exists('dCncl', $rawStop)) {
-                    $departureCanceled = $rawStop['dCncl'];
-                }
-                if (key_exists('aCncl', $rawStop)) {
-                    $arrivalCanceled = $rawStop['aCncl'];
-                }
-            }
-
-            if (key_exists('aProgType', $rawStop)) {
-                if ($rawStop['aProgType'] == 'REPORTED') {
-                    $arrived = 1;
-                } else {
-                    $arrived = 0;
-                }
-            } else {
-                $arrived = 0;
-            }
-            // If the train left, it also arrived
-            if ($left) {
-                $arrived = 1;
-            }
+            $stop = self::parseVehicleStop($rawStop, $date, $requestedDate, $lang, $rawVehicle,
+                $locationDefinitions[$rawStop['locX']]);
 
             // Clean the data up, sometimes arrivals don't register properly
-            if ($arrived && $stopIndex > 0) {
+            if ($stop->arrived && $stopIndex > 0) {
                 $stops[$stopIndex - 1]->arrived = 1;
                 $stops[$stopIndex - 1]->left = 1;
             }
 
-            $station = stations::getStationFromID($locationDefinitions[$rawStop['locX']]->id, $lang);
-
-            $stop = new Stop();
-            $stop->station = $station;
-
-            if ($departureTime != null) {
-                $stop->departureDelay = $departureDelay;
-                $stop->departureCanceled = $departureCanceled;
-                $stop->scheduledDepartureTime = $departureTime;
-
-                $stop->platform = new Platform();
-                $stop->platform->name = $departurePlatform;
-                $stop->platform->normal = $departurePlatformNormal;
-
-                $stop->time = $departureTime;
-            } else {
-                $stop->departureDelay = 0;
-                $stop->departureCanceled = 0;
-                $stop->scheduledDepartureTime = $arrivalTime;
-
-                $stop->platform = new Platform();
-                $stop->platform->name = $arrivalPlatform;
-                $stop->platform->normal = $arrivalPlatformNormal;
-
-                $stop->time = $arrivalTime;
-            }
-
-            $stop->scheduledArrivalTime = $arrivalTime;
-            $stop->arrivalDelay = $arrivalDelay;
-            $stop->arrivalCanceled = $arrivalCanceled;
-
-            // TODO: verify date here
-            $stop->departureConnection = 'http://irail.be/connections/' . substr(basename($stop->station->{'@id'}),
-                    2) . '/' . $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
-
-
-            //for backward compatibility
-            $stop->delay = $departureDelay;
-            $stop->canceled = $departureCanceled;
-            $stop->arrived = $arrived;
-            $stop->left = $left;
-            // TODO: detect
-            $stop->isExtraStop = 0;
             $stops[] = $stop;
 
             // Store the last station to get vehicle coordinates
-            if ($arrived) {
+            if ($stop->arrived) {
                 $laststop = $stop;
             }
 
@@ -290,7 +158,7 @@ class VehicleInformation
                 $k = 0;
 
                 while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
-                    if ($station->{'@id'} == $occupancyArr[$k]["from"]) {
+                    if ($stop->station->{'@id'} == $occupancyArr[$k]["from"]) {
                         $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
                         $stop->occupancy = new \stdClass();
                         $stop->occupancy->{'@id'} = $occupancyURI;
@@ -320,6 +188,157 @@ class VehicleInformation
     }
 
     /**
+     * @param $rawStop
+     * @param $date
+     * @param DateTime $requestedDate
+     * @param $lang
+     * @param $rawVehicle
+     * @param $locationDefinitions
+     * @return Stop
+     * @throws Exception
+     */
+    private static function parseVehicleStop($rawStop, $date, DateTime $requestedDate, $lang, $rawVehicle, $locationDefinitions): Stop
+    {
+        if (key_exists('dTimeR', $rawStop)) {
+            $departureDelay = tools::calculateSecondsHHMMSS(
+                $rawStop['dTimeR'],
+                $date,
+                $rawStop['dTimeS'],
+                $date);
+        } else {
+            $departureDelay = 0;
+        }
+        if (key_exists('dTimeS', $rawStop)) {
+            $departureTime = tools::transformTime($rawStop['dTimeS'], $date);
+        } else {
+            // If the train doesn't depart from here, just use the arrival time
+            $departureTime = null;
+        }
+
+        if (key_exists('aTimeR', $rawStop)) {
+            $arrivalDelay = tools::calculateSecondsHHMMSS(
+                $rawStop['aTimeR'],
+                $date,
+                $rawStop['aTimeS'],
+                $date);
+        } else {
+            $arrivalDelay = 0;
+        }
+
+        if (key_exists('aTimeS', $rawStop)) {
+            $arrivalTime = tools::transformTime($rawStop['aTimeS'], $date);
+        } else {
+            $arrivalTime = $departureTime;
+        }
+
+
+        //Delay and platform changes
+        if (key_exists('dPlatfR', $rawStop)) {
+            $departurePlatform = $rawStop['dPlatfR'];
+            $departurePlatformNormal = false;
+        } elseif (key_exists('dPlatfS', $rawStop)) {
+            $departurePlatform = $rawStop['dPlatfS'];
+            $departurePlatformNormal = true;
+        } else {
+            $departurePlatform = "?";
+            $departurePlatformNormal = true;
+        }
+
+        //Delay and platform changes
+        if (key_exists('aPlatfR', $rawStop)) {
+            $arrivalPlatform = $rawStop['aPlatfR'];
+            $arrivalPlatformNormal = false;
+        } elseif (key_exists('aPlatfS', $rawStop)) {
+            $arrivalPlatform = $rawStop['aPlatfS'];
+            $arrivalPlatformNormal = true;
+        } else {
+            $arrivalPlatform = "?";
+            $arrivalPlatformNormal = true;
+        }
+
+        // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
+        // DepartureCanceled gives information if this stop has been canceled.
+        $canceled = 0;
+        $departureCanceled = 0;
+        $arrivalCanceled = 0;
+        if (key_exists('isCncl', $rawStop)) {
+            $canceled = $rawStop['isCncl'];
+        }
+
+        $left = 0;
+        if (key_exists('dProgType', $rawStop)) {
+            if ($rawStop['dProgType'] == 'REPORTED') {
+                $left = 1;
+            }
+            if (key_exists('dCncl', $rawStop)) {
+                $departureCanceled = $rawStop['dCncl'];
+            }
+            if (key_exists('aCncl', $rawStop)) {
+                $arrivalCanceled = $rawStop['aCncl'];
+            }
+        }
+
+        if (key_exists('aProgType', $rawStop)) {
+            if ($rawStop['aProgType'] == 'REPORTED') {
+                $arrived = 1;
+            } else {
+                $arrived = 0;
+            }
+        } else {
+            $arrived = 0;
+        }
+        // If the train left, it also arrived
+        if ($left) {
+            $arrived = 1;
+        }
+
+        $station = stations::getStationFromID($locationDefinitions->id, $lang);
+
+        $stop = new Stop();
+        $stop->station = $station;
+
+        if ($departureTime != null) {
+            $stop->departureDelay = $departureDelay;
+            $stop->departureCanceled = $departureCanceled;
+            $stop->scheduledDepartureTime = $departureTime;
+
+            $stop->platform = new Platform();
+            $stop->platform->name = $departurePlatform;
+            $stop->platform->normal = $departurePlatformNormal;
+
+            $stop->time = $departureTime;
+        } else {
+            $stop->departureDelay = 0;
+            $stop->departureCanceled = 0;
+            $stop->scheduledDepartureTime = $arrivalTime;
+
+            $stop->platform = new Platform();
+            $stop->platform->name = $arrivalPlatform;
+            $stop->platform->normal = $arrivalPlatformNormal;
+
+            $stop->time = $arrivalTime;
+        }
+
+        $stop->scheduledArrivalTime = $arrivalTime;
+        $stop->arrivalDelay = $arrivalDelay;
+        $stop->arrivalCanceled = $arrivalCanceled;
+
+        // TODO: verify date here
+        $stop->departureConnection = 'http://irail.be/connections/' .
+            substr(basename($stop->station->{'@id'}), 2) . '/' .
+            $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
+
+        //for backward compatibility
+        $stop->delay = $departureDelay;
+        $stop->canceled = $departureCanceled;
+        $stop->arrived = $arrived;
+        $stop->left = $left;
+        // TODO: detect
+        $stop->isExtraStop = 0;
+        return $stop;
+    }
+
+    /**
      * @param $jid
      * @param array $request_options
      * @return bool|string
@@ -333,18 +352,7 @@ class VehicleInformation
         "lang":"nld",
         "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
         "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        return self::makeRequestToNmbs($postdata, $request_options);
     }
 
     /**
@@ -352,9 +360,9 @@ class VehicleInformation
      * @param $date
      * @param $lang
      * @param array $request_options
-     * @return mixed
+     * @return string Journey ID
      */
-    private static function getJourneyIdForVehicleId($id, $date, $lang, array $request_options)
+    private static function getJourneyIdForVehicleId(string $id, string $date, string $lang, array $request_options): string
     {
         $postdata = '{
                       "auth": {
@@ -393,6 +401,19 @@ class VehicleInformation
                       "formatted": false
                     }';
 
+        $response = self::makeRequestToNmbs($postdata, $request_options);
+
+        $jidlookup = json_decode($response, true);
+        return $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
+    }
+
+    /**
+     * @param string $postdata
+     * @param array $request_options
+     * @return string|False
+     */
+    private static function makeRequestToNmbs(string $postdata, array $request_options)
+    {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
@@ -403,9 +424,22 @@ class VehicleInformation
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
         $response = curl_exec($ch);
         curl_close($ch);
+        return $response;
+    }
 
-        $jidlookup = json_decode($response, true);
-        $jid = $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
-        return $jid;
+    /**
+     * @param DateTime $requestedDate
+     * @return bool
+     */
+    private static function isSpitsgidsDataAvailable(DateTime $requestedDate): bool
+    {
+// Determine if this date is in the spitsgids range
+        $now = new DateTime();
+        $daysBetweenNowAndRequest = $now->diff($requestedDate);
+        $isOccupancyDate = true;
+        if ($daysBetweenNowAndRequest->d > 1 && $daysBetweenNowAndRequest->invert == 0) {
+            $isOccupancyDate = false;
+        }
+        return $isOccupancyDate;
     }
 }
