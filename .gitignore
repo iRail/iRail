@@ -1,11 +1,12 @@
-storage
+src/storage
 nbproject/
-api/stats/.htpasswd
+src/api/stats/.htpasswd
 googlea35442edef93c3d8.html
 push.php
-api/push.php
+src/api/push.php
 .idea/
 /vendor/
 composer.json
 composer.lock
 .env
+docker/nginx/logs/

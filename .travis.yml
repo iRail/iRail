@@ -1,0 +1,25 @@
+language: php
+php:
+  - "7.2"
+  - "7.3"
+  - "7.4"
+dist: xenial
+os: linux
+env:
+addons:
+  apt:
+    packages:
+      - nodejs
+install:
+  - composer install
+before_install:
+  - pecl channel-update pecl.php.net
+  - pecl install -f mongodb
+  # Ensure there is enough memory to run integration tests (server + client)
+  - echo "memory_limit = 256M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+script:
+  - ./vendor/bin/phpunit --verbose --testdox
+notifications:
+  email:
+    on_success: never
+    on_failure: change
