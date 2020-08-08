@@ -10,23 +10,25 @@ namespace Irail\api\data\NMBS;
 
 use DateTime;
 use Exception;
+use Irail\api\data\DataRoot;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Stop;
 use Irail\api\data\models\Vehicle;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\occupancy\OccupancyOperations;
+use Irail\api\requests\VehicleinformationRequest;
 
 class VehicleInformation
 {
     const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
     /**
-     * @param $dataroot
-     * @param $request
+     * @param DataRoot $dataroot
+     * @param VehicleinformationRequest $request
      * @throws Exception
      */
-    public static function fillDataRoot($dataroot, $request)
+    public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request)
     {
         $lang = $request->getLang();
         $date = $request->getDate();
@@ -45,25 +47,22 @@ class VehicleInformation
             $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
         }
 
-        $lastStop = null;
-
+        $rawVehicle = self::getVehicleDetails($serverData);
         $dataroot->vehicle = new Vehicle();
-        if (strpos($request->getVehicleId(), "BE.NMBS.") === 0) {
-            $dataroot->vehicle->name = $request->getVehicleId();
-        } else {
-            $dataroot->vehicle->name = "BE.NMBS." . $request->getVehicleId();
-        }
+        $dataroot->vehicle->name = "BE.NMBS." . $rawVehicle->name;
+        $dataroot->vehicle->shortname = $rawVehicle->name;
+
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
-        $dataroot->vehicle->shortname = $request->getVehicleId();
-        $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $request->getVehicleId();
+        $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $dataroot->vehicle->shortname;
 
-        $dataroot->stop = self::getData(
+        $lastStop = null;
+        $dataroot->stop = self::getStops(
             $serverData,
             $lang,
             $vehicleOccupancy,
             $date,
-            $request->getVehicleId(),
+            $dataroot->vehicle->shortname,
             $lastStop
         );
 
@@ -86,6 +85,7 @@ class VehicleInformation
      * @param $id
      * @param $lang
      * @return mixed
+     * @throws Exception
      */
     private static function getServerData($id, $date, $lang)
     {
@@ -96,26 +96,22 @@ class VehicleInformation
         ];
 
         $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
-        $result = self::getVehicleDataForJourneyId($jid, $request_options);
-
-        return $result;
+        return self::getVehicleDataForJourneyId($jid, $request_options);
     }
 
     /**
-     * @param $serverData
-     * @param $lang
+     * @param string $serverData
+     * @param string $lang
      * @param $occupancyArr
-     * @param $date
-     * @param $vehicleId
-     * @param $laststop
+     * @param string $date
+     * @param string $vehicleId The Vehicle Id, in its short notation (e.g IC456)
+     * @param Stop | null $laststop
      * @return array
      * @throws Exception
      */
-    private static function getData($serverData, $lang, $occupancyArr, $date, $vehicleId, &$laststop)
+    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date, string $vehicleId, ?Stop &$laststop)
     {
         $json = json_decode($serverData, true);
-        HafasCommon::throwExceptionOnInvalidResponse($json);
-
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
         $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
@@ -133,7 +129,6 @@ class VehicleInformation
         $stopIndex = 0;
         // TODO: pick the right train here, a train which splits has multiple parts here.
         foreach ($json['svcResL'][0]['res']['journey']['stopL'] as $rawStop) {
-
             $stop = self::parseVehicleStop($rawStop, $date, $requestedDate, $lang, $rawVehicle,
                 $locationDefinitions[$rawStop['locX']]);
 
@@ -180,7 +175,7 @@ class VehicleInformation
         }
 
         // When the train hasn't left yet, set location to first station
-        if (!is_null($laststop)) {
+        if (is_null($laststop)) {
             $laststop = $stops[0]->station;
         }
 
@@ -292,7 +287,7 @@ class VehicleInformation
             $arrived = 1;
         }
 
-        $station = stations::getStationFromID($locationDefinitions->id, $lang);
+        $station = Stations::getStationFromID($locationDefinitions->id, $lang);
 
         $stop = new Stop();
         $stop->station = $station;
@@ -356,13 +351,14 @@ class VehicleInformation
     }
 
     /**
-     * @param $id
+     * @param $requestedVehicleId
      * @param $date
      * @param $lang
      * @param array $request_options
      * @return string Journey ID
+     * @throws Exception
      */
-    private static function getJourneyIdForVehicleId(string $id, string $date, string $lang, array $request_options): string
+    private static function getJourneyIdForVehicleId(string $requestedVehicleId, string $date, string $lang, array $request_options): string
     {
         $postdata = '{
                       "auth": {
@@ -393,18 +389,59 @@ class VehicleInformation
                                 "value": "11101111000111"
                               }
                             ],
-                            "input":"' . substr($id, 8) . '"
+                            "input":"' . $requestedVehicleId . '"
                           }
                         }
                       ],
                       "ver": "1.11",
                       "formatted": false
                     }';
-
+        // Result contains a list of journeys, with the vehicle short name, origin and destination
+        // including departure and arrival times.
+        /*
+         *           {
+         *   "jid": "1|1|0|80|8082020",
+         *   "date": "20200808",
+         *   "prodX": 0,
+         *   "stopL": [
+         *     {
+         *      "locX": 0,
+         *      "dTimeS": "182900"
+         *    },
+         *    {
+         *      "locX": 1,
+         *      "aTimeS": "213500"
+         *    }
+         *  ],
+         *  "sDaysL": [
+         *    {
+         *      "sDaysR": "not every day",
+         *      "sDaysI": "11. Apr until 12. Dec 2020 Sa, Su; also 13. Apr, 1., 21. May, 1. Jun, 21. Jul, 11. Nov",
+         *      "sDaysB": "000000000000000000000000000003860C383062C1C3060C183060D183060C183060C183060C183060C983060C10"
+         *    }
+         *   ]
+         * },
+         */
         $response = self::makeRequestToNmbs($postdata, $request_options);
+        $json = json_decode($response, true);
 
-        $jidlookup = json_decode($response, true);
-        return $jidlookup['svcResL'][0]['res']['jnyL'][0]['jid'];
+        // Verify that the vehicle number matches with the query.
+        // The best match should be on top, so we don't look further than the first response.
+        try {
+            HafasCommon::throwExceptionOnInvalidResponse($json);
+        } catch (Exception $exception) {
+            // An error in the journey id search should result in a 404, not a 500 error.
+            throw new Exception("Vehicle not found", 404, $exception);
+        }
+
+        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
+        $vehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['jnyL'][0]['prodX']];
+        if (preg_replace("/[^A-Z0-9]/", "", $vehicle->name) !=
+            preg_replace("/[^A-Z0-9]/", "", $requestedVehicleId)) {
+            throw new Exception("Vehicle not found", 404);
+        }
+
+        return $json['svcResL'][0]['res']['jnyL'][0]['jid'];
     }
 
     /**
@@ -433,7 +470,7 @@ class VehicleInformation
      */
     private static function isSpitsgidsDataAvailable(DateTime $requestedDate): bool
     {
-// Determine if this date is in the spitsgids range
+        // Determine if this date is in the spitsgids range
         $now = new DateTime();
         $daysBetweenNowAndRequest = $now->diff($requestedDate);
         $isOccupancyDate = true;
@@ -441,5 +478,17 @@ class VehicleInformation
             $isOccupancyDate = false;
         }
         return $isOccupancyDate;
+    }
+
+    /**
+     * @param string $serverData
+     * @return object
+     */
+    private static function getVehicleDetails(string $serverData): object
+    {
+        $json = json_decode($serverData, true);
+        HafasCommon::throwExceptionOnInvalidResponse($json);
+        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
+        return $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
     }
 }

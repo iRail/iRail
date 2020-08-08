@@ -2,6 +2,7 @@
 
 namespace Irail\api\data\NMBS\tools;
 
+use Exception;
 use stdClass;
 
 /**
@@ -22,6 +23,9 @@ class HafasCommon
         }
         if ($json['svcResL'][0]['err'] == "H890") {
             throw new Exception('No results found', 404);
+        }
+        if ($json['svcResL'][0]['err'] != 'OK') {
+            throw new Exception("This request failed. Please check your query. Error code " . $json['svcResL'][0]['err'], 500);
         }
         if ($json['svcResL'][0]['err'] != 'OK') {
             throw new Exception("We're sorry, this data is not available from our sources at this moment. Error code " . $json['svcResL'][0]['err'], 500);
@@ -187,12 +191,22 @@ class HafasCommon
                          "admin": "88____"
                        }
                      },
+
+                    OR
+
+                    {
+                      "name": "ICE 10",
+                      "number": "10",
+                      "line": "ICE 10",
+                      "icoX": 0,
+                      "cls": 1
+                    },
                  */
 
                 $vehicle = new StdClass();
                 $vehicle->name = str_replace(" ", '', $rawTrain['name']);
-                $vehicle->num = trim($rawTrain['prodCtx']['num']);
-                $vehicle->category = trim($rawTrain['prodCtx']['catOut']);
+                $vehicle->num = trim($rawTrain['number']);
+                $vehicle->category = trim($rawTrain['cls']);
                 $vehicleDefinitions[] = $vehicle;
             }
         }

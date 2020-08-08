@@ -17,6 +17,7 @@ before_install:
   - pecl install -f mongodb
   # Ensure there is enough memory to run integration tests (server + client)
   - echo "memory_limit = 256M" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - cp .env.example .env
 script:
   - ./vendor/bin/phpunit --verbose --testdox
 notifications:
