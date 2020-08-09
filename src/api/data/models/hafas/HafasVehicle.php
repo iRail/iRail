@@ -3,7 +3,6 @@
 
 namespace Irail\api\data\models\hafas;
 
-
 class HafasVehicle
 {
     /**

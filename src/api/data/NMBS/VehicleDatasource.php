@@ -63,8 +63,8 @@ class VehicleDatasource
         );
 
         $lastStop = $dataroot->stop[0];
-        foreach ($dataroot->stop as $stop){
-            if ($stop->arrived){
+        foreach ($dataroot->stop as $stop) {
+            if ($stop->arrived) {
                 $lastStop = $stop;
             }
         }

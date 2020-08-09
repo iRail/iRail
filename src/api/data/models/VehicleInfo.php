@@ -7,7 +7,6 @@ use Irail\api\data\NMBS\tools\VehicleIdTools;
 
 class VehicleInfo
 {
-
     public function __construct(HafasVehicle $hafasVehicle)
     {
         $this->{'@id'} = 'http://irail.be/vehicle/' . $hafasVehicle->name;
