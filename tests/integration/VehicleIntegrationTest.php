@@ -72,7 +72,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
         $json = json_decode($response->getBody(), true);
-        self::assertNotNull($json);
+        self::assertNotNull($json, json_last_error_msg());
         self::assertNotNull($json['vehicleinfo']);
         self::assertEquals("IC4310", $json['vehicleinfo']['shortname']);
         self::assertEquals("Antwerp-Central", $json['stops']['stop'][0]["station"]);
