@@ -11,6 +11,7 @@ namespace Irail\api\data\NMBS;
 use DateTime;
 use Exception;
 use Irail\api\data\DataRoot;
+use Irail\api\data\models\Alert;
 use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Stop;
@@ -53,13 +54,8 @@ class VehicleDatasource
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
 
-
         $dataroot->stop = self::getStops(
-            $serverData,
-            $lang,
-            $vehicleOccupancy,
-            $date,
-            $dataroot->vehicle->shortname
+            $serverData, $lang, $vehicleOccupancy, $date
         );
 
         $lastStop = $dataroot->stop[0];
@@ -67,6 +63,10 @@ class VehicleDatasource
             if ($stop->arrived) {
                 $lastStop = $stop;
             }
+        }
+
+        if ($request->getAlerts() && self::getAlerts($serverData)) {
+            $dataroot->alert = self::getAlerts($serverData);
         }
 
         if (!is_null($lastStop)) {
@@ -107,12 +107,10 @@ class VehicleDatasource
      * @param string $lang
      * @param $occupancyArr
      * @param string $date
-     * @param string $vehicleId The Vehicle Id, in its short notation (e.g IC456)
-     * @param Stop | null $laststop
      * @return array
      * @throws Exception
      */
-    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date, string $vehicleId)
+    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date)
     {
         $json = json_decode($serverData, true);
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
@@ -137,7 +135,7 @@ class VehicleDatasource
                 $date,
                 $requestedDate,
                 $lang,
-                $rawVehicle,
+                $vehicleDefinitions,
                 $locationDefinitions[$rawStop['locX']]
             );
 
@@ -198,8 +196,32 @@ class VehicleDatasource
      * @return Stop
      * @throws Exception
      */
-    private static function parseVehicleStop($rawStop, $date, DateTime $requestedDate, $lang, $rawVehicle, $locationDefinitions): Stop
+    private static function parseVehicleStop($rawStop, $date, DateTime $requestedDate, $lang, $vehiclesInJourney, $locationDefinitions): Stop
     {
+        /* A change in train number looks like this. The remark describes the change. Example S102063/S103863
+            {
+              "locX": 13,
+              "idx": 13,
+              "aProdX": 0,
+              "aPlatfS": "7",
+              "aOutR": true,
+              "aTimeS": "135400",
+              "aTimeR": "135400",
+              "aProgType": "REPORTED",
+              "dProdX": 1,
+              "dPlatfS": "7",
+              "dInR": true,
+              "dTimeS": "135700",
+              "dTimeR": "135700",
+              "dProgType": "REPORTED",
+              "msgListElement": [
+                {
+                  "type": "REM",
+                  "remX": 1
+                }
+              ]
+            },
+         */
         if (key_exists('dTimeR', $rawStop)) {
             $departureDelay = tools::calculateSecondsHHMMSS(
                 $rawStop['dTimeR'],
@@ -326,6 +348,7 @@ class VehicleDatasource
         $stop->arrivalDelay = $arrivalDelay;
         $stop->arrivalCanceled = $arrivalCanceled;
 
+        $rawVehicle = $vehiclesInJourney[$rawStop['dProdX']];
         // TODO: verify date here
         $stop->departureConnection = 'http://irail.be/connections/' .
             substr(basename($stop->station->{'@id'}), 2) . '/' .
@@ -507,5 +530,16 @@ class VehicleDatasource
         HafasCommon::throwExceptionOnInvalidResponse($json);
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
         return $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
+    }
+
+    /**
+     * @param string $serverData
+     * @return Alert[]
+     */
+    private static function getAlerts(string $serverData): array
+    {
+        $json = json_decode($serverData, true);
+        // These are formatted already
+        return HafasCommon::parseAlertDefinitions($json);
     }
 }

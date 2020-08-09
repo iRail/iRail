@@ -3,6 +3,7 @@
 namespace Irail\api\data\NMBS\tools;
 
 use Exception;
+use Irail\api\data\models\Alert;
 use Irail\api\data\models\hafas\HafasVehicle;
 use stdClass;
 
@@ -114,7 +115,7 @@ class HafasCommon
      * Alerts warn about service interruptions etc.
      *
      * @param $json
-     * @return array
+     * @return Alert[]
      */
     public static function parseAlertDefinitions($json): array
     {
@@ -141,7 +142,7 @@ class HafasCommon
                 ]
               }*/
 
-            $alert = new StdClass();
+            $alert = new Alert();
             $alert->header = strip_tags($rawAlert['head']);
             $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
             $alert->lead = strip_tags($rawAlert['lead']);
