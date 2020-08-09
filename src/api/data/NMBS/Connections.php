@@ -1069,12 +1069,12 @@ class Connections
         $constructedVia->departure->departureConnection = Tools::createDepartureUri(
             $constructedVia->station,
             $constructedVia->departure->time,
-            $constructedVia->departure->vehicle
+            $constructedVia->departure->vehicle->name
         );
         $constructedVia->arrival->departureConnection = Tools::createDepartureUri(
             $constructedVia->station,
             $constructedVia->arrival->time,
-            $constructedVia->arrival->vehicle
+            $constructedVia->arrival->vehicle->name
         );
 
         $vias[$viaIndex] = $constructedVia;
