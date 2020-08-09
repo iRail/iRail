@@ -288,20 +288,11 @@ class VehicleDatasource
         $canceled = 0;
         $departureCanceled = 0;
         $arrivalCanceled = 0;
-        if (key_exists('isCncl', $rawStop)) {
-            $canceled = $rawStop['isCncl'];
-        }
 
         $left = 0;
         if (key_exists('dProgType', $rawStop)) {
             if ($rawStop['dProgType'] == 'REPORTED') {
                 $left = 1;
-            }
-            if (key_exists('dCncl', $rawStop)) {
-                $departureCanceled = $rawStop['dCncl'];
-            }
-            if (key_exists('aCncl', $rawStop)) {
-                $arrivalCanceled = $rawStop['aCncl'];
             }
         }
 
@@ -314,6 +305,15 @@ class VehicleDatasource
         } else {
             $arrived = 0;
         }
+
+        if (key_exists('dCncl', $rawStop)) {
+            $departureCanceled = $rawStop['dCncl'];
+        }
+
+        if (key_exists('aCncl', $rawStop)) {
+            $arrivalCanceled = $rawStop['aCncl'];
+        }
+
         // If the train left, it also arrived
         if ($left) {
             $arrived = 1;
@@ -327,6 +327,7 @@ class VehicleDatasource
         if ($departureTime != null) {
             $stop->departureDelay = $departureDelay;
             $stop->departureCanceled = $departureCanceled;
+            $stop->canceled = $departureCanceled;
             $stop->scheduledDepartureTime = $departureTime;
 
             $stop->platform = new Platform();
@@ -335,8 +336,10 @@ class VehicleDatasource
 
             $stop->time = $departureTime;
         } else {
+            // This is the final stop, it doesnt have a departure.
             $stop->departureDelay = 0;
             $stop->departureCanceled = 0;
+            $stop->canceled = $arrivalCanceled;
             $stop->scheduledDepartureTime = $arrivalTime;
 
             $stop->platform = new Platform();
@@ -358,7 +361,6 @@ class VehicleDatasource
 
         //for backward compatibility
         $stop->delay = $departureDelay;
-        $stop->canceled = $departureCanceled;
         $stop->arrived = $arrived;
         $stop->left = $left;
         // TODO: detect
