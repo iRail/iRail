@@ -27,8 +27,10 @@
  */
 namespace Irail\api;
 
+use Irail\api\data\NMBS\ConnectionsDatasource;
+
 require_once '../../vendor/autoload.php';
 
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('Connections');
+$call = new APICall(ConnectionsDatasource::class);
 $call->executeCall();

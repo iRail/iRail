@@ -2,6 +2,7 @@
 
 namespace Irail\api\output;
 
+use Exception;
 use Irail\api\data\DataRoot;
 
 /**
@@ -166,8 +167,8 @@ abstract class Printer
             $hash = get_object_vars($val);
             $counter = 0;
             foreach ($hash as $elementkey => $elementval) {
-                if ($this->isPrivateVariableName($elementkey)) {
-                    // Don't print private var
+                if ($this->isPrivateVariableName($elementkey) || is_null($elementval)) {
+                    // Don't print private or null variables
                 } else {
                     $this->printElement($elementkey, $elementval);
                     if ($counter < count($hash) - 1) {

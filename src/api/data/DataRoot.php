@@ -4,11 +4,11 @@ namespace Irail\api\data;
 
 /* Copyright (C) 2011 by iRail vzw/asbl */
 
-use Irail\api\data\NMBS\Composition;
-use Irail\api\data\NMBS\Connections;
-use Irail\api\data\NMBS\Disturbances;
-use Irail\api\data\NMBS\Liveboard;
-use Irail\api\data\NMBS\VehicleInformation;
+use Irail\api\data\NMBS\CompositionDataSource;
+use Irail\api\data\NMBS\ConnectionsDatasource;
+use Irail\api\data\NMBS\DisturbancesDatasource;
+use Irail\api\data\NMBS\LiveboardDatasource;
+use Irail\api\data\NMBS\VehicleDatasource;
 use Irail\api\output\Printer;
 use Irail\api\requests\CompositionRequest;
 use Irail\api\requests\ConnectionsRequest;
@@ -77,15 +77,15 @@ class DataRoot
     {
         try {
             if ($request instanceof LiveboardRequest) {
-                Liveboard::fillDataRoot($this, $request);
+                LiveboardDatasource::fillDataRoot($this, $request);
             } elseif ($request instanceof ConnectionsRequest) {
-                Connections::fillDataRoot($this, $request);
+                ConnectionsDatasource::fillDataRoot($this, $request);
             } elseif ($request instanceof CompositionRequest) {
-                Composition::fillDataRoot($this, $request);
+                CompositionDataSource::fillDataRoot($this, $request);
             } elseif ($request instanceof VehicleinformationRequest) {
-                VehicleInformation::fillDataRoot($this, $request);
+                VehicleDatasource::fillDataRoot($this, $request);
             } elseif ($request instanceof DisturbancesRequest) {
-                Disturbances::fillDataRoot($this, $request);
+                DisturbancesDatasource::fillDataRoot($this, $request);
             }
         } catch (\Exception $e) {
             if ($e->getCode() == '404') {

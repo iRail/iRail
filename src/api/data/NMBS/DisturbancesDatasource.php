@@ -13,7 +13,7 @@ use tidy;
 
 require_once __DIR__ . '/tools/Tools.php';
 
-class Disturbances
+class DisturbancesDatasource
 {
     const TYPE_DISTURBANCE = 'disturbance';
     const TYPE_PLANNED = 'planned';

@@ -47,7 +47,7 @@ class Kml extends Printer
     public function startRootElement($name, $version, $timestamp)
     {
         $this->rootname = $name;
-        if ($name == 'Stations') {
+        if ($name == 'StationsDatasource') {
             echo '<kml xmlns="http://www.opengis.net/kml/2.2">';
         } else {
             $this->printError(400, 'KML only works for stations at this moment');

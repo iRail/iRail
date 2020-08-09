@@ -92,7 +92,7 @@ class Json extends Printer
                 echo '"id":"' . $this->arrayindices[$this->currentarrayindex] . '",';
             }
         } else {
-            if ($this->rootname != 'Stations' && $name == 'station' || $name == 'platform') {
+            if ($this->rootname != 'StationsDatasource' && $name == 'station' || $name == 'platform') {
                 // split station and platform into station/platform and stationinfo/platforminfox,
                 // to be compatible with 1.0
                 echo "\"$name\":\"$object->name\",";

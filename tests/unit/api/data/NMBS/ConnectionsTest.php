@@ -3,8 +3,8 @@
 namespace Tests\unit\api\data\NMBS;
 
 use Exception;
-use Irail\api\data\NMBS\Connections;
-use Irail\api\data\NMBS\Stations;
+use Irail\api\data\NMBS\ConnectionsDatasource;
+use Irail\api\data\NMBS\StationsDatasource;
 use PHPUnit\Framework\TestCase;
 
 class ConnectionsTest extends TestCase
@@ -14,15 +14,15 @@ class ConnectionsTest extends TestCase
      */
     public function testCreateNmbsPayload()
     {
-        $from = Stations::getStationFromName("Brussel-zuid", "NL");
-        $to = Stations::getStationFromName("Brussel-noord", "NL");
+        $from = StationsDatasource::getStationFromName("Brussel-zuid", "NL");
+        $to = StationsDatasource::getStationFromName("Brussel-noord", "NL");
         $lang = "NL";
         $time = "10:00";
         $date = "20181001";
         $timesel = 'depart';
-        $ypeOfTransportCode = Connections::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
+        $ypeOfTransportCode = ConnectionsDatasource::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
 
-        $payload = Connections::createNmbsPayload($from, $to, $lang, $time, $date, $timesel, $ypeOfTransportCode);
+        $payload = ConnectionsDatasource::createNmbsPayload($from, $to, $lang, $time, $date, $timesel, $ypeOfTransportCode);
 
         // Should be valid json
         $payloadArray = json_decode($payload, true);

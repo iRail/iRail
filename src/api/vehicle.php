@@ -6,8 +6,10 @@
 
 namespace Irail\api;
 
+use Irail\api\data\NMBS\VehicleDatasource;
+
 require_once '../../vendor/autoload.php';
 
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('VehicleInformation');
+$call = new APICall(VehicleDatasource::class);
 $call->executeCall();

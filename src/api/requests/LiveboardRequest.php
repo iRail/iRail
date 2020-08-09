@@ -8,7 +8,7 @@
 namespace Irail\api\requests;
 
 use Irail\api\data\models\Station;
-use Irail\api\data\NMBS\Stations;
+use Irail\api\data\NMBS\StationsDatasource;
 
 class LiveboardRequest extends Request
 {
@@ -77,7 +77,7 @@ class LiveboardRequest extends Request
      */
     public function setStation($station)
     {
-        $station = Stations::transformOldToNewStyle($station);
+        $station = StationsDatasource::transformOldToNewStyle($station);
         $station['query'] = $this->station;
         $this->station = $station;
     }

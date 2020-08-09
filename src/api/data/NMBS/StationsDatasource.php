@@ -14,7 +14,7 @@ use Irail\api\data\models\Station;
  *   * fillDataRoot will fill the entire dataroot with stations
  *   * getStationFromName will return the right station object for a Name
  */
-class Stations
+class StationsDatasource
 {
     /**
      * @param $dataroot

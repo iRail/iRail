@@ -9,7 +9,7 @@
 namespace Irail\api\requests;
 
 use Irail\api\data\models\Station;
-use Irail\api\data\NMBS\Stations;
+use Irail\api\data\NMBS\StationsDatasource;
 
 class ConnectionsRequest extends Request
 {
@@ -83,7 +83,7 @@ class ConnectionsRequest extends Request
      */
     public function setFrom($from)
     {
-        $from = Stations::transformOldToNewStyle($from);
+        $from = StationsDatasource::transformOldToNewStyle($from);
         //save the original text search string
         $from['query'] = $this->from;
         $this->from = $from;
@@ -103,7 +103,7 @@ class ConnectionsRequest extends Request
      */
     public function setTo($to)
     {
-        $to = Stations::transformOldToNewStyle($to);
+        $to = StationsDatasource::transformOldToNewStyle($to);
         //save the original text search string
         $to['query'] = $this->to;
         $this->to = $to;

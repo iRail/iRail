@@ -28,9 +28,11 @@
 
 namespace Irail\api;
 
+use Irail\api\data\NMBS\DisturbancesDatasource;
+
 require_once '../../vendor/autoload.php';
 
 date_default_timezone_set('Europe/Brussels');
 
-$call = new APICall('Disturbances');
+$call = new APICall(DisturbancesDatasource::class);
 $call->executeCall();

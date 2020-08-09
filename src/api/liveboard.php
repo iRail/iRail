@@ -27,7 +27,9 @@
  */
 namespace Irail\api;
 
+use Irail\api\data\NMBS\LiveboardDatasource;
+
 require_once '../../vendor/autoload.php';
 date_default_timezone_set('Europe/Brussels');
-$call = new APICall('liveboard');
+$call = new APICall(LiveboardDatasource::class);
 $call->executeCall();

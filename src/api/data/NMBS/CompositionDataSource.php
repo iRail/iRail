@@ -19,7 +19,7 @@ use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\requests\CompositionRequest;
 use stdClass;
 
-class Composition
+class CompositionDataSource
 {
     public static function fillDataRoot($dataroot, CompositionRequest $request)
     {
@@ -87,11 +87,11 @@ class Composition
     private static function parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, string $language, bool $returnAllData): TrainCompositionInSegment
     {
         $result = new TrainCompositionInSegment;
-        $result->origin = stations::getStationFromID(
+        $result->origin = StationsDatasource::getStationFromID(
             '00' . $travelsegmentWithCompositionData->ptCarFrom->uicCode,
             $language
         );
-        $result->destination = stations::getStationFromID(
+        $result->destination = StationsDatasource::getStationFromID(
             '00' . $travelsegmentWithCompositionData->ptCarTo->uicCode,
             $language
         );

@@ -16,16 +16,16 @@ use Irail\api\data\models\Connection;
 use Irail\api\data\models\DepartureArrival;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
+use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\models\Via;
 use Irail\api\data\models\ViaDepartureArrival;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\ConnectionsRequest;
 use stdClass;
 
-class Connections
+class ConnectionsDatasource
 {
     /**
      * @param $dataroot
@@ -50,12 +50,12 @@ class Connections
     {
         $from = $request->getFrom();
         if (count(explode('.', $request->getFrom())) > 1) {
-            $from = Stations::getStationFromID($request->getFrom(), $request->getLang());
+            $from = StationsDatasource::getStationFromID($request->getFrom(), $request->getLang());
             $from = $from->name;
         }
         $to = $request->getTo();
         if (count(explode('.', $request->getTo())) > 1) {
-            $to = Stations::getStationFromID($request->getTo(), $request->getLang());
+            $to = StationsDatasource::getStationFromID($request->getTo(), $request->getLang());
             $to = $to->name;
         }
         $dataroot->connection = self::scrapeConnections(
@@ -144,8 +144,8 @@ class Connections
     private static function getStationsFromName(string $from, string $to, string $lang, ConnectionsRequest $request)
     {
         try {
-            $station1 = Stations::getStationFromName($from, $lang);
-            $station2 = Stations::getStationFromName($to, $lang);
+            $station1 = StationsDatasource::getStationFromName($from, $lang);
+            $station2 = StationsDatasource::getStationFromName($to, $lang);
 
             if (isset($request)) {
                 $request->setFrom($station1);
@@ -444,12 +444,12 @@ class Connections
 
         $connection->departure = new DepartureArrival();
 
-        $departureStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
+        $departureStation = StationsDatasource::getStationFromID($locationDefinitions[0]->id, $lang);
         $connection->departure->station = $departureStation;
 
         // When a train has been cancelled mid-run, the arrival station can be different than the planned one!
         // Therefore, always parse it from the planner results
-        $arrivalStation = Stations::getStationFromID($locationDefinitions[$hafasConnection['arr']['locX']]->id, $lang);
+        $arrivalStation = StationsDatasource::getStationFromID($locationDefinitions[$hafasConnection['arr']['locX']]->id, $lang);
 
 
         if (key_exists('dTimeR', $hafasConnection['dep'])) {
@@ -783,11 +783,11 @@ class Connections
             $parsedTrain->arrived = 0;
         }
 
-        $parsedTrain->departure->station = Stations::getStationFromID(
+        $parsedTrain->departure->station = StationsDatasource::getStationFromID(
             $locationDefinitions[$trainRide['dep']['locX']]->id,
             $lang
         );
-        $parsedTrain->arrival->station = Stations::getStationFromID(
+        $parsedTrain->arrival->station = StationsDatasource::getStationFromID(
             $locationDefinitions[$trainRide['arr']['locX']]->id,
             $lang
         );
@@ -853,12 +853,8 @@ class Connections
                 // This typically is the stop where the user leaves this train
                 $parsedTrain->direction->name = end($parsedTrain->stops)->station->name;
             }
-            $vehicleShortName = $vehicleDefinitions[$trainRide['jny']['prodX']]->name;
-            $parsedTrain->vehicle = new StdClass();
-            $parsedTrain->vehicle->name = 'BE.NMBS.' . $vehicleShortName;
-            $parsedTrain->vehicle->{'@id'} = 'http://irail.be/vehicle/' .$vehicleShortName;
-            $parsedTrain->vehicle->type = VehicleIdTools::extractTrainType($vehicleShortName);
-            $parsedTrain->vehicle->number = VehicleIdTools::extractTrainNumber($vehicleShortName);
+            $hafasVehicle = $vehicleDefinitions[$trainRide['jny']['prodX']];
+            $parsedTrain->vehicle = new VehicleInfo($hafasVehicle);
         }
         return $parsedTrain;
     }
@@ -890,7 +886,7 @@ class Connections
            "isImp": true
         */
         $intermediateStop = new StdClass();
-        $intermediateStop->station = Stations::getStationFromID(
+        $intermediateStop->station = StationsDatasource::getStationFromID(
             $locationDefinitions[$rawIntermediateStop['locX']]->id,
             $lang
         );

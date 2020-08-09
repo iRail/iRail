@@ -3,6 +3,7 @@
 namespace Irail\api\data\NMBS\tools;
 
 use Exception;
+use Irail\api\data\models\hafas\HafasVehicle;
 use stdClass;
 
 /**
@@ -167,7 +168,7 @@ class HafasCommon
     }
     /**
      * @param $json
-     * @return array
+     * @return HafasVehicle[]
      */
     public static function parseVehicleDefinitions($json): array
     {
@@ -203,7 +204,7 @@ class HafasCommon
                     },
                  */
 
-                $vehicle = new StdClass();
+                $vehicle = new HafasVehicle();
                 $vehicle->name = str_replace(" ", '', $rawTrain['name']);
                 $vehicle->num = trim($rawTrain['number']);
                 $vehicle->category = trim($rawTrain['cls']);

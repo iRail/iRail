@@ -11,16 +11,16 @@ namespace Irail\api\data\NMBS;
 use DateTime;
 use Exception;
 use Irail\api\data\DataRoot;
+use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Stop;
-use Irail\api\data\models\Vehicle;
+use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\VehicleinformationRequest;
 
-class VehicleInformation
+class VehicleDatasource
 {
     const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
@@ -48,16 +48,10 @@ class VehicleInformation
             $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
         }
 
-        $rawVehicle = self::getVehicleDetails($serverData);
-        $dataroot->vehicle = new Vehicle();
-        $dataroot->vehicle->name = "BE.NMBS." . $rawVehicle->name;
-        $dataroot->vehicle->shortname = $rawVehicle->name;
-        $dataroot->vehicle->number = VehicleIdTools::extractTrainNumber($rawVehicle->name);
-        $dataroot->vehicle->type = VehicleIdTools::extractTrainType($rawVehicle->name);
-
+        $hafasVehicle = self::getVehicleDetails($serverData);
+        $dataroot->vehicle = new VehicleInfo($hafasVehicle);
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
-        $dataroot->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $dataroot->vehicle->shortname;
 
         $lastStop = null;
         $dataroot->stop = self::getStops(
@@ -298,7 +292,7 @@ class VehicleInformation
             $arrived = 1;
         }
 
-        $station = Stations::getStationFromID($locationDefinitions->id, $lang);
+        $station = StationsDatasource::getStationFromID($locationDefinitions->id, $lang);
 
         $stop = new Stop();
         $stop->station = $station;
@@ -493,7 +487,8 @@ class VehicleInformation
 
     /**
      * @param string $serverData
-     * @return object
+     * @return HafasVehicle
+     * @throws Exception
      */
     private static function getVehicleDetails(string $serverData): object
     {

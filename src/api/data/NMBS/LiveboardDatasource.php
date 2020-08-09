@@ -8,16 +8,17 @@ namespace Irail\api\data\NMBS;
 use Exception;
 use Irail\api\data\DataRoot;
 use Irail\api\data\models\DepartureArrival;
+use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
+use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\data\NMBS\tools\VehicleIdTools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
 use stdClass;
 
-class Liveboard
+class LiveboardDatasource
 {
     /**
      * This is the entry point for the data fetching and transformation.
@@ -31,7 +32,7 @@ class Liveboard
         $stationr = $request->getStation();
 
         try {
-            $dataroot->station = Stations::getStationFromName($stationr, strtolower($request->getLang()));
+            $dataroot->station = StationsDatasource::getStationFromName($stationr, strtolower($request->getLang()));
         } catch (Exception $e) {
             throw new Exception('Could not find station ' . $stationr, 404);
         }
@@ -249,7 +250,7 @@ class Liveboard
 
         // Now we'll actually read the departures/arrivals information.
         $nodes = [];
-        $currentStation = Stations::getStationFromID($locationDefinitions[0]->id, $lang);
+        $currentStation = StationsDatasource::getStationFromID($locationDefinitions[0]->id, $lang);
         foreach ($json['svcResL'][0]['res']['jnyL'] as $stop) {
             /*
              *   "jid": "1|586|1|80|26102017",
@@ -276,7 +277,7 @@ class Liveboard
             $delay = self::parseDelayInSeconds($stop, $date);
 
             // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
-            list($unixtime, $vehicle) = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
+            list($unixtime, $hafasVehicle) = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
             // parse information about which platform this train will depart from/arrive to.
             list($platform, $isPlatformNormal) = self::parsePlatformData($stop);
 
@@ -289,7 +290,7 @@ class Liveboard
                 $isExtraTrain = 1;
             }
 
-            $station = Stations::getStationFromName($stop['dirTxt'], $lang);
+            $station = StationsDatasource::getStationFromName($stop['dirTxt'], $lang);
 
             // Now all information has been parsed. Put it in a nice object.
 
@@ -297,11 +298,7 @@ class Liveboard
             $stopAtStation->delay = $delay;
             $stopAtStation->station = $station;
             $stopAtStation->time = $unixtime;
-            $stopAtStation->vehicle = new stdClass();
-            $stopAtStation->vehicle->name = 'BE.NMBS.' . $vehicle->name;
-            $stopAtStation->vehicle->{'@id'} = 'http://irail.be/vehicle/' . $vehicle->name;
-            $stopAtStation->vehicle->type = VehicleIdTools::extractTrainType($vehicle->name);
-            $stopAtStation->vehicle->number = VehicleIdTools::extractTrainNumber($vehicle->name);
+            $stopAtStation->vehicle = new VehicleInfo($hafasVehicle);
             $stopAtStation->platform = new Platform($platform, $isPlatformNormal);
             $stopAtStation->canceled = $stopCanceled;
             // Include partiallyCanceled, but don't include canceled.
@@ -314,7 +311,7 @@ class Liveboard
             $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
                 basename($currentStation->{'@id'}),
                 2
-            ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->name;
+            ) . '/' . date('Ymd', $unixtime) . '/' . $hafasVehicle->name;
 
             // Add occuppancy data, if available
             $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($currentStation, $stopAtStation, $date);
@@ -369,7 +366,7 @@ class Liveboard
      * Parse both the vehicle used and the scheduled time of departure or arrival.
      * @param $stop
      * @param $date
-     * @param array $vehicleDefinitions
+     * @param HafasVehicle[] $vehicleDefinitions
      * @return array
      */
     private static function parseScheduledTimeAndVehicle($stop, $date, array $vehicleDefinitions): array

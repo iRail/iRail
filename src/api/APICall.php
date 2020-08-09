@@ -12,6 +12,12 @@
 namespace Irail\api;
 
 use Irail\api\data\DataRoot;
+use Irail\api\data\NMBS\CompositionDataSource;
+use Irail\api\data\NMBS\ConnectionsDatasource;
+use Irail\api\data\NMBS\DisturbancesDatasource;
+use Irail\api\data\NMBS\LiveboardDatasource;
+use Irail\api\data\NMBS\StationsDatasource;
+use Irail\api\data\NMBS\VehicleDatasource;
 use Irail\api\output\Printer;
 use Irail\api\requests\CompositionRequest;
 use Irail\api\requests\ConnectionsRequest;
@@ -25,17 +31,17 @@ use Monolog\Logger;
 
 class APICall
 {
-    const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Kml', 'Xml'];
     private $VERSION = 1.1;
 
     protected $request;
     protected $dataRoot;
     protected $log;
+    private $resourcename;
 
     /**
-     * @param $resourcename
+     * @param $datasourceName
      */
-    public function __construct($resourcename)
+    public function __construct(string $datasourceName)
     {
         //When the HTTP request didn't set a User Agent, set it to a blank
         if (!isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -44,7 +50,6 @@ class APICall
         //Default timezone is Brussels
         date_default_timezone_set('Europe/Brussels');
         //This is the current resource that's handled. E.g., stations, connections, vehicleinfo or liveboard
-        $this->resourcename = $resourcename;
         try {
             $this->log = new Logger('irapi');
             //Create a formatter for the logs
@@ -52,34 +57,35 @@ class APICall
             $streamHandler = new StreamHandler(__DIR__ . '/../storage/irapi.log', Logger::INFO);
             $streamHandler->setFormatter($logFormatter);
             $this->log->pushHandler($streamHandler);
-            switch (strtolower($resourcename)) {
-                case "composition":
+            switch ($datasourceName) {
+                case CompositionDataSource::class:
                     $this->request = new CompositionRequest();
                     $rootname = "Composition";
                     break;
-                case "connections":
+                case ConnectionsDatasource::class:
                     $this->request = new ConnectionsRequest();
                     $rootname = "Connections";
                     break;
-                case "disturbances":
+                case DisturbancesDatasource::class:
                     $this->request = new DisturbancesRequest();
-                    $rootname = "Disturbances";
+                    $rootname = "Disturbance";
                     break;
-                case "liveboard":
+                case LiveboardDatasource::class:
                     $this->request = new LiveboardRequest();
                     $rootname = "Liveboard";
                     break;
-                case "stations":
+                case StationsDatasource::class:
                     $this->request = new StationsRequest();
                     $rootname = "Stations";
                     break;
-                case "vehicleinformation":
+                case VehicleDatasource::class:
                     $this->request = new VehicleinformationRequest();
-                    $rootname = "Vehicleinformation";
+                    $rootname = "VehicleInformation";
                     break;
                 default:
                     throw new \Exception("Invalid request type", 400);
             }
+            $this->resourcename = $rootname;
             $this->dataRoot = new DataRoot($rootname, $this->VERSION, $this->request->getFormat());
         } catch (\Exception $e) {
             $this->buildError($e);
