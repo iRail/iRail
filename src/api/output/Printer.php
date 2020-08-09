@@ -164,16 +164,25 @@ abstract class Printer
             }
         } elseif (is_object($val)) {
             $this->startObject($key, $val);
-            $hash = get_object_vars($val);
-            $counter = 0;
-            foreach ($hash as $elementkey => $elementval) {
+            $allObjectVars = get_object_vars($val);
+
+            // Remove all keys that won't be printed. If we don't do this before starting the loop, the nextObjectElement
+            // logic will fail
+            $keysToSkip = [];
+            foreach ($allObjectVars as $elementkey => $elementval) {
                 if ($this->isPrivateVariableName($elementkey) || is_null($elementval)) {
-                    // Don't print private or null variables
-                } else {
-                    $this->printElement($elementkey, $elementval);
-                    if ($counter < count($hash) - 1) {
-                        $this->nextObjectElement();
-                    }
+                    $keysToSkip[] = $elementkey;
+                }
+            }
+            foreach ($keysToSkip as $key) {
+                unset($allObjectVars[$key]);
+            }
+
+            $counter = 0;
+            foreach ($allObjectVars as $elementkey => $elementval) {
+                $this->printElement($elementkey, $elementval);
+                if ($counter < count($allObjectVars) - 1) {
+                    $this->nextObjectElement();
                 }
                 $counter++;
             }
