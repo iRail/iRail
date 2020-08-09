@@ -182,6 +182,8 @@ class VehicleDatasource
 
             $stopIndex++;
         }
+        // Use ArrivalDelay instead of DepartureDelay for the last stop, since DepartureDelay will always be 0 (there is no departure)
+        $stops[count($stops) - 1]->delay = $stops[count($stops) - 1]->arrivalDelay;
 
         return $stops;
     }
@@ -353,7 +355,15 @@ class VehicleDatasource
         "lang":"nld",
         "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
         "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
-        return self::makeRequestToNmbs($postdata, $request_options);
+        $response = self::makeRequestToNmbs($postdata, $request_options);
+        // Store the raw output to a file on disk, for debug purposes
+        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
+            file_put_contents(
+                '../storage/debug-vehicle-' . $jid . '-' . time() . '.log',
+                $response
+            );
+        }
+        return $response;
     }
 
     /**
