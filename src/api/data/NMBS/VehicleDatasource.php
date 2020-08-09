@@ -53,19 +53,25 @@ class VehicleDatasource
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
 
-        $lastStop = null;
+
         $dataroot->stop = self::getStops(
             $serverData,
             $lang,
             $vehicleOccupancy,
             $date,
-            $dataroot->vehicle->shortname,
-            $lastStop
+            $dataroot->vehicle->shortname
         );
 
-        if (property_exists($lastStop, "locationX")) {
-            $dataroot->vehicle->locationX = $lastStop->locationX;
-            $dataroot->vehicle->locationY = $lastStop->locationY;
+        $lastStop = $dataroot->stop[0];
+        foreach ($dataroot->stop as $stop){
+            if ($stop->arrived){
+                $lastStop = $stop;
+            }
+        }
+
+        if (!is_null($lastStop)) {
+            $dataroot->vehicle->locationX = $lastStop->station->locationX;
+            $dataroot->vehicle->locationY = $lastStop->station->locationY;
         }
     }
 
@@ -106,7 +112,7 @@ class VehicleDatasource
      * @return array
      * @throws Exception
      */
-    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date, string $vehicleId, ?Stop &$laststop)
+    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date, string $vehicleId)
     {
         $json = json_decode($serverData, true);
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
@@ -175,11 +181,6 @@ class VehicleDatasource
             }
 
             $stopIndex++;
-        }
-
-        // When the train hasn't left yet, set location to first station
-        if (is_null($laststop)) {
-            $laststop = $stops[0]->station;
         }
 
         return $stops;
