@@ -31,5 +31,4 @@ class ToolsTest extends TestCase
         self::assertEquals("20201016", $date);
         self::assertEquals("012345", $time);
     }
-
 }
