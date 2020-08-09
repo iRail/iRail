@@ -2,6 +2,8 @@
 
 namespace Tests\integration;
 
+use GuzzleHttp\Exception\GuzzleException;
+
 class LiveboardIntegrationTest extends IntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()
@@ -71,5 +73,16 @@ class LiveboardIntegrationTest extends IntegrationTestCase
         $json = json_decode($response->getBody(), true);
         self::assertEquals("Welkenraedt", $json['station']);
         self::assertTrue(count($json['departures']['departure']) > 0, "Liveboard should at least have one departure");
+    }
+
+    /**
+     * This test checks the behaviour when alerts are enabled
+     * @throws GuzzleException
+     */
+    public function test_correctSearchQueryWithAlertsEnabled_shouldReturn200Ok()
+    {
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "liveboard.php?format=json&id=008844503&alerts=true");
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 }

@@ -14,10 +14,17 @@ use Psr\Http\Message\ResponseInterface;
  */
 class IrailStagingVsProdTest extends TestCase
 {
-
     private static $PROD_BASE_URL = "https://api.irail.be/";
     private static $STAGING_BASE_URL = "https://staging.api.irail.be/";
 
+    protected function setUp(): void
+    {
+        $this->markTestSkipped("Run manually when needed");
+    }
+
+    /**
+     * Note that your IP address has to be whitelisted on the servers in order to run these tests. Otherwise your requests will be rate limited.
+     */
     public function testStagingData(): void
     {
         $stationNames = [
@@ -72,7 +79,8 @@ class IrailStagingVsProdTest extends TestCase
 
     private function verifyConnections(array $connectionOrigins, array $connectionDestinations)
     {
-
+        // TODO: implement when needed
+        $this->markTestSkipped("Connections verification not implemented yet");
     }
 
     private static function assertArraysAreEqual(array $expected, array $actual, string $parent = 'root')
@@ -84,7 +92,8 @@ class IrailStagingVsProdTest extends TestCase
                 self::assertArraysAreEqual($expected[$expectedKey], $actual[$expectedKey], $expectedKey);
             } else {
                 self::assertFalse(is_array($actual[$expectedKey]));
-                if ($expectedKey == "left" || $expectedKey == "arrived") {
+                // TODO: Update these values when you know that they will be different (e.g. bugfixes, data comes in a little faster or slower)
+                if ($expectedKey == "departureDelay" || $expectedKey = "platform") {
                     continue;
                 }
                 self::assertEquals($expectedValue, $actual[$expectedKey], "Array key $expectedKey in $parent");
@@ -142,7 +151,8 @@ class IrailStagingVsProdTest extends TestCase
     private function verifyAndDecodeResponse(ResponseInterface $response): array
     {
         self::assertEquals(200, $response->getStatusCode());
-        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
+        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0],
+            $response->getBody());
         return json_decode($response->getBody(), true);
     }
 }

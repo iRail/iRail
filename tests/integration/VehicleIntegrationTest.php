@@ -2,55 +2,57 @@
 
 namespace Tests\integration;
 
+use GuzzleHttp\Exception\GuzzleException;
+
 class VehicleIntegrationTest extends IntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()
     {
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php");
         $this->assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
-        
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=");
+
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=");
         $this->assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
     public function test_xml_invalidParameters_shouldReturn404()
     {
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC000");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC000");
         $this->assertEquals(404, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
 
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC900");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC900");
         $this->assertEquals(404, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
     public function test_xml_validParameters_shouldReturn200()
     {
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC538");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC538");
         $this->assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
     public function test_json_missingParameters_shouldReturn400()
     {
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json");
         $this->assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=");
         $this->assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
     public function test_json_invalidParameters_shouldReturn404()
     {
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC000");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC000");
         $this->assertEquals(404, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
-        $response =self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC900");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC900");
         $this->assertEquals(404, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
@@ -105,7 +107,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
 
     /**
      * This test checks the behaviour when the train number is too long.
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function test_idTooLong_shouldCause400BadRequest()
     {
@@ -118,7 +120,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
 
     /**
      * This test checks the behaviour when the train number isn't too long.
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function test_idNotTooLong_shouldNotCause400BadRequest()
     {
@@ -131,7 +133,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
 
     /**
      * This test checks the behaviour when the train number is incomplete, for various incomplete train numbers.
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function test_incompleteSearchQuery_shouldCause404NotFound()
     {
@@ -162,9 +164,9 @@ class VehicleIntegrationTest extends IntegrationTestCase
 
     /**
      * This test checks the behaviour when the train number is complete, for various complete train numbers.
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
-    public function test_correctSearchQuery_shouldCause200Ok()
+    public function test_correctSearchQuery_shouldReturn200Ok()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=ICE10");
         $this->assertEquals(200, $response->getStatusCode());
@@ -182,6 +184,17 @@ class VehicleIntegrationTest extends IntegrationTestCase
         $this->assertEquals(200, $response->getStatusCode());
 
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=S103890");
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    /**
+     * This test checks the behaviour when alerts are enabled
+     * @throws GuzzleException
+     */
+    public function test_correctSearchQueryWithAlertsEnabled_shouldReturn200Ok()
+    {
+        $response = self::getClient()->request("GET",
+            self::getBaseUrl() . "vehicle.php?format=json&id=S102063&alerts=true");
         $this->assertEquals(200, $response->getStatusCode());
     }
 }
