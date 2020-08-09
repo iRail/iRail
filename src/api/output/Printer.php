@@ -174,8 +174,8 @@ abstract class Printer
                     $keysToSkip[] = $elementkey;
                 }
             }
-            foreach ($keysToSkip as $key) {
-                unset($allObjectVars[$key]);
+            foreach ($keysToSkip as $keyToSkip) {
+                unset($allObjectVars[$keyToSkip]);
             }
 
             $counter = 0;
