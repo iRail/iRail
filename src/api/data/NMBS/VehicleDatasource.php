@@ -356,11 +356,14 @@ class VehicleDatasource
         $stop->arrivalDelay = $arrivalDelay;
         $stop->arrivalCanceled = $arrivalCanceled;
 
-        $rawVehicle = $vehiclesInJourney[$rawStop['dProdX']];
-        // TODO: verify date here
-        $stop->departureConnection = 'http://irail.be/connections/' .
-            substr(basename($stop->station->{'@id'}), 2) . '/' .
-            $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
+        // The final doesn't have a departure product
+        if (key_exists('dProdX', $rawStop)) {
+            $rawVehicle = $vehiclesInJourney[$rawStop['dProdX']];
+            // TODO: verify date here
+            $stop->departureConnection = 'http://irail.be/connections/' .
+                substr(basename($stop->station->{'@id'}), 2) . '/' .
+                $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
+        }
 
         //for backward compatibility
         $stop->delay = $departureDelay;
