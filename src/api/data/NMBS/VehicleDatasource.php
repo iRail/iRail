@@ -363,6 +363,9 @@ class VehicleDatasource
             $stop->departureConnection = 'http://irail.be/connections/' .
                 substr(basename($stop->station->{'@id'}), 2) . '/' .
                 $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
+        } else {
+            // Still include the field, just leave it empty.
+            $stop->departureConnection = "";
         }
 
         //for backward compatibility
