@@ -550,10 +550,7 @@ class ConnectionsDatasource
         $connection->departure->departureConnection = 'http://irail.be/connections/' .
             substr(basename($departureStation->{'@id'}), 2) . '/' .
             date('Ymd', $connection->departure->time) . '/' .
-            substr(
-                $trainsInConnection[0]->vehicle,
-                strrpos($trainsInConnection[0]->vehicle, '.') + 1
-            );
+            $trainsInConnection[0]->vehicle->shortname;
 
         $connection->departure->direction = $trainsInConnection[0]->direction;
         $connection->departure->left = $trainsInConnection[0]->left;
