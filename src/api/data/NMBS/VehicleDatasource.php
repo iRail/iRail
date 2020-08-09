@@ -350,7 +350,7 @@ class VehicleDatasource
         $stop->arrivalDelay = $arrivalDelay;
         $stop->arrivalCanceled = $arrivalCanceled;
         // In case the departure is canceled, the platform data needs to be retrieved from the arrival data.
-        if ($departureCanceled && !$arrivalCanceled){
+        if ($departureCanceled && !$arrivalCanceled) {
             $stop->platform->name = $arrivalPlatform;
             $stop->platform->normal = $arrivalPlatformNormal;
         }

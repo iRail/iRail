@@ -3,7 +3,6 @@
 
 namespace Tests\unit\api\data\NMBS;
 
-
 use Irail\api\data\NMBS\VehicleDatasource;
 use PHPUnit\Framework\TestCase;
 
@@ -44,5 +43,4 @@ class VehicleDataSourceProxy extends VehicleDatasource
     {
         return parent::getStops($serverData, $lang, $occupancyArr);
     }
-
 }
