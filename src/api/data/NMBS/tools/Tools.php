@@ -6,6 +6,7 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Cache\Namespaced\NamespacedCachePool;
+use Exception;
 use Irail\api\data\models\Station;
 
 /** Copyright (C) 2011 by iRail vzw/asbl
@@ -22,25 +23,26 @@ class Tools
     const cache_prefix = "|Irail|Api|";
 
     /**
-     * @param string $time -> in 00d15:24:00 or hhmmss or ddhhmmss format
+     * @param string $time -> in hhmmss or ddhhmmss format
      * @param string $date -> in 20100915
      * @return int seconds since the Unix epoch
+     * @throws Exception
      */
     public static function transformTime($time, $date)
     {
-        // Fixing inconsistent NMBS formatting. Again.
+        if (strlen($time) < 6) {
+            throw new Exception("Invalid time passed to transformTime, should be 6 or 8 digits!");
+        }
         if (strlen($time) == 6) {
             $time = '00' . $time;
-        } else {
-            $time = str_replace('d', '', $time);
         }
-        $time = str_replace(':', '', $time);
 
         date_default_timezone_set('Europe/Brussels');
         $dayoffset = intval(substr($time, 0, 2));
         $hour = intval(substr($time, 2, 2));
         $minute = intval(substr($time, 4, 2));
         $second = intval(substr($time, 6, 2));
+
         $year = intval(substr($date, 0, 4));
         $month = intval(substr($date, 4, 2));
         $day = intval(substr($date, 6, 2));
@@ -48,9 +50,18 @@ class Tools
         return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
     }
 
-    public static function calculateSecondsHHMMSS($realtime, $rtdate, $planned, $pdate)
+    /**
+     * Calculate the difference between two moments, in seconds.
+     * @param string $realTimeTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
+     * @param string $realTimeDate Date as a Ymd string.
+     * @param string $plannedTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
+     * @param string $plannedDate Date as a Ymd string.
+     * @return int The difference between the two datetimes, in seconds.
+     */
+    public static function calculateSecondsHHMMSS($realTimeTime, $realTimeDate, $plannedTime, $plannedDate)
     {
-        return Tools::transformTime($realtime, $rtdate) - Tools::transformTime($planned, $pdate);
+
+        return Tools::transformTime($realTimeTime, $realTimeDate) - Tools::transformTime($plannedTime, $plannedDate);
     }
 
     /**
@@ -80,34 +91,6 @@ class Tools
         $second = intval(substr($time, 4, 2));
 
         return $hour * 3600 + $minute * 60 + $second;
-    }
-
-    /**
-     * Adds a quarter and responds with a time.
-     *
-     * @param $time
-     * @return string
-     */
-    public static function addQuarter($time)
-    {
-        preg_match('/(..):(..)/', $time, $m);
-        $hours = $m[1];
-        $minutes = $m[2];
-        //echo $hours . " " . $minutes . "\n";
-        if ($minutes >= 45) {
-            $minutes = ($minutes + 15) - 60;
-            if ($minutes < 10) {
-                $minutes = '0' . $minutes;
-            }
-            $hours++;
-            if ($hours > 23) {
-                $hours = '00'; //no fallback for days?
-            }
-        } else {
-            $minutes += 15;
-        }
-
-        return $hours . ':' . $minutes;
     }
 
     /**

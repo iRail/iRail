@@ -112,88 +112,48 @@ class VehicleDatasource
         $json = json_decode($serverData, true);
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
-        $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
-        $alertDefinitions = HafasCommon::parseAlertDefinitions($json);
 
         $stops = [];
-        $rawVehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
-        $direction = $json['svcResL'][0]['res']['journey']['dirTxt'];
-
-        $date = $json['svcResL'][0]['res']['journey']['date'];
-
-        $requestedDate = DateTime::createFromFormat('Ymd', $date);
-        $isOccupancyDate = self::isSpitsgidsDataAvailable($requestedDate);
+        $dateOfFirstDeparture = $json['svcResL'][0]['res']['journey']['date'];
+        $dateOfFirstDeparture = DateTime::createFromFormat('Ymd', $dateOfFirstDeparture);
 
         $stopIndex = 0;
         // TODO: pick the right train here, a train which splits has multiple parts here.
         foreach ($json['svcResL'][0]['res']['journey']['stopL'] as $rawStop) {
             $stop = self::parseVehicleStop(
                 $rawStop,
-                $date,
-                $requestedDate,
+                $dateOfFirstDeparture,
                 $lang,
                 $vehicleDefinitions,
-                $locationDefinitions[$rawStop['locX']]
+                $locationDefinitions,
+                $stopIndex == 0,
+                $stopIndex == count($json['svcResL'][0]['res']['journey']['stopL']) - 1
             );
 
-            // Clean the data up, sometimes arrivals don't register properly
-            if ($stop->arrived && $stopIndex > 0) {
-                $stops[$stopIndex - 1]->arrived = 1;
-                $stops[$stopIndex - 1]->left = 1;
-            }
-
             $stops[] = $stop;
-
-            // Store the last station to get vehicle coordinates
-            if ($stop->arrived) {
-                $laststop = $stop;
-            }
-
-            // TODO: verify date here
-            // Check if it is in less than 2 days and MongoDB is available
-            if ($isOccupancyDate && isset($occupancyArr)) {
-                // Add occupancy
-                $occupancyOfStationFound = false;
-                $k = 0;
-
-                while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
-                    if ($stop->station->{'@id'} == $occupancyArr[$k]["from"]) {
-                        $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
-                        $stop->occupancy = new \stdClass();
-                        $stop->occupancy->{'@id'} = $occupancyURI;
-                        $stop->occupancy->name = basename($occupancyURI);
-                        $occupancyOfStationFound = true;
-                    }
-                    $k++;
-                }
-
-                if (!isset($stop->occupancy)) {
-                    $unknown = OccupancyOperations::getUnknown();
-                    $stop->occupancy = new \stdClass();
-                    $stop->occupancy->{'@id'} = $unknown;
-                    $stop->occupancy->name = basename($unknown);
-                }
-            }
-
+            self::addOccuppancyData($dateOfFirstDeparture, $occupancyArr, $stop);
             $stopIndex++;
         }
         // Use ArrivalDelay instead of DepartureDelay for the last stop, since DepartureDelay will always be 0 (there is no departure)
         $stops[count($stops) - 1]->delay = $stops[count($stops) - 1]->arrivalDelay;
+
+        self::ensureTrainHasLeftPreviousStop($stops);
 
         return $stops;
     }
 
     /**
      * @param $rawStop
-     * @param $date
-     * @param DateTime $requestedDate
+     * @param DateTime $firstStationDepartureDate date on which the train leaves the first station on its journey.
      * @param $lang
      * @param $vehiclesInJourney
      * @param $locationDefinitions
+     * @param bool $isFirstStop
+     * @param bool $isLastStop
      * @return Stop
      * @throws Exception
      */
-    private static function parseVehicleStop($rawStop, $date, DateTime $requestedDate, $lang, $vehiclesInJourney, $locationDefinitions): Stop
+    private static function parseVehicleStop($rawStop, DateTime $firstStationDepartureDate, string $lang, $vehiclesInJourney, $locationDefinitions, bool $isFirstStop, bool $isLastStop): Stop
     {
         /* A change in train number looks like this. The remark describes the change. Example S102063/S103863
             {
@@ -220,19 +180,19 @@ class VehicleDatasource
             },
          */
         // TODO: export remarks as they contain information about changes in the train designation.
-
+        $firstStationDepartureDateString = $firstStationDepartureDate->format("Ymd");
         if (key_exists('dTimeR', $rawStop)) {
             $departureDelay = tools::calculateSecondsHHMMSS(
                 $rawStop['dTimeR'],
-                $date,
+                $firstStationDepartureDateString,
                 $rawStop['dTimeS'],
-                $date
+                $firstStationDepartureDateString
             );
         } else {
             $departureDelay = 0;
         }
         if (key_exists('dTimeS', $rawStop)) {
-            $departureTime = tools::transformTime($rawStop['dTimeS'], $date);
+            $departureTime = tools::transformTime($rawStop['dTimeS'], $firstStationDepartureDateString);
         } else {
             // If the train doesn't depart from here, just use the arrival time
             $departureTime = null;
@@ -241,20 +201,19 @@ class VehicleDatasource
         if (key_exists('aTimeR', $rawStop)) {
             $arrivalDelay = tools::calculateSecondsHHMMSS(
                 $rawStop['aTimeR'],
-                $date,
+                $firstStationDepartureDateString,
                 $rawStop['aTimeS'],
-                $date
+                $firstStationDepartureDateString
             );
         } else {
             $arrivalDelay = 0;
         }
 
         if (key_exists('aTimeS', $rawStop)) {
-            $arrivalTime = tools::transformTime($rawStop['aTimeS'], $date);
+            $arrivalTime = tools::transformTime($rawStop['aTimeS'], $firstStationDepartureDateString);
         } else {
             $arrivalTime = $departureTime;
         }
-
 
         //Delay and platform changes
         if (key_exists('dPlatfR', $rawStop)) {
@@ -280,9 +239,6 @@ class VehicleDatasource
             $arrivalPlatformNormal = true;
         }
 
-        // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
-        // DepartureCanceled gives information if this stop has been canceled.
-        $canceled = 0;
         $departureCanceled = 0;
         $arrivalCanceled = 0;
 
@@ -316,23 +272,23 @@ class VehicleDatasource
             $arrived = 1;
         }
 
-        $station = StationsDatasource::getStationFromID($locationDefinitions->id, $lang);
+        $station = StationsDatasource::getStationFromID($locationDefinitions[$rawStop['locX']]->id, $lang);
 
         $stop = new Stop();
         $stop->station = $station;
 
-        if ($departureTime != null) {
-            $stop->departureDelay = $departureDelay;
-            $stop->departureCanceled = $departureCanceled;
-            $stop->canceled = $departureCanceled;
-            $stop->scheduledDepartureTime = $departureTime;
+        $stop->departureDelay = $departureDelay;
+        $stop->departureCanceled = $departureCanceled;
+        $stop->canceled = $departureCanceled;
+        $stop->scheduledDepartureTime = $departureTime;
 
-            $stop->platform = new Platform();
-            $stop->platform->name = $departurePlatform;
-            $stop->platform->normal = $departurePlatformNormal;
+        $stop->platform = new Platform();
+        $stop->platform->name = $departurePlatform;
+        $stop->platform->normal = $departurePlatformNormal;
 
-            $stop->time = $departureTime;
-        } else {
+        $stop->time = $departureTime;
+
+        if ($isLastStop) {
             // This is the final stop, it doesnt have a departure.
             $stop->departureDelay = 0;
             $stop->departureCanceled = 0;
@@ -356,15 +312,14 @@ class VehicleDatasource
         }
 
         // The final doesn't have a departure product
-        if (key_exists('dProdX', $rawStop)) {
-            $rawVehicle = $vehiclesInJourney[$rawStop['dProdX']];
-            // TODO: verify date here
-            $stop->departureConnection = 'http://irail.be/connections/' .
-                substr(basename($stop->station->{'@id'}), 2) . '/' .
-                $requestedDate->format('Ymd') . '/' . $rawVehicle->name;
-        } else {
+        if ($isLastStop) {
             // Still include the field, just leave it empty.
             $stop->departureConnection = "";
+        } else {
+            $rawVehicle = $vehiclesInJourney[$rawStop['dProdX']];
+            $stop->departureConnection = 'http://irail.be/connections/' .
+                substr(basename($stop->station->{'@id'}), 2) . '/' .
+                $firstStationDepartureDateString . '/' . $rawVehicle->name;
         }
 
         //for backward compatibility
@@ -553,5 +508,54 @@ class VehicleDatasource
         $json = json_decode($serverData, true);
         // These are formatted already
         return HafasCommon::parseAlertDefinitions($json);
+    }
+
+    /**
+     * @param DateTime $dateOfFirstDeparture  The date when the train leaves the first station on its journey.
+     * @param array $occupancyArr Occuppancy data for this train
+     * @param Stop $stop The stop on which occuppancy data needs to be added.
+     */
+    protected static function addOccuppancyData(DateTime $dateOfFirstDeparture, $occupancyArr, Stop $stop): void
+    {
+        $isOccupancyDate = self::isSpitsgidsDataAvailable($dateOfFirstDeparture);
+        // Check if it is in less than 2 days and MongoDB is available
+        if ($isOccupancyDate && isset($occupancyArr)) {
+            // Add occupancy
+            $occupancyOfStationFound = false;
+            $k = 0;
+
+            while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
+                if ($stop->station->{'@id'} == $occupancyArr[$k]["from"]) {
+                    $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+                    $stop->occupancy = new \stdClass();
+                    $stop->occupancy->{'@id'} = $occupancyURI;
+                    $stop->occupancy->name = basename($occupancyURI);
+                    $occupancyOfStationFound = true;
+                }
+                $k++;
+            }
+
+            if (!isset($stop->occupancy)) {
+                $unknown = OccupancyOperations::getUnknown();
+                $stop->occupancy = new \stdClass();
+                $stop->occupancy->{'@id'} = $unknown;
+                $stop->occupancy->name = basename($unknown);
+            }
+        }
+    }
+
+    /**
+     * @param array $stops
+     */
+    protected static function ensureTrainHasLeftPreviousStop(array $stops): void
+    {
+        for ($i = count($stops) - 1; $i > 0; $i--) {
+            if ($stops[$i]->arrived == 1) {
+                $stops[$i - 1]->arrived = 1;
+                $stops[$i - 1]->left = 1;
+            }
+        }
+        // The first stop can't have arrived == 1, since there is no arrival.
+        $stops[0]->arrived = 0;
     }
 }

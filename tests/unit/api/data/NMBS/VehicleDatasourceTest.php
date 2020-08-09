@@ -3,6 +3,7 @@
 
 namespace Tests\unit\api\data\NMBS;
 
+use Exception;
 use Irail\api\data\NMBS\VehicleDatasource;
 use PHPUnit\Framework\TestCase;
 
@@ -30,6 +31,45 @@ class VehicleDatasourceTest extends TestCase
         }
         self::assertEquals("?", $stops[13]->platform->name);
         self::assertEquals(1, $stops[13]->arrivalCanceled);
+    }
+
+    public function testTrn17302_canceledFirstAndSecondStop_shouldHaveLeftFirstStationIfArrivedAtOtherStations()
+    {
+        $serverData = file_get_contents(__DIR__ . "/fixtures/trn17302first_stops_cancelled_should_show_left_correct.json");
+        $stops = VehicleDataSourceProxy::getStops($serverData, "en", null);
+        self::assertNotNull($stops);
+        self::assertEquals(6, count($stops));
+        for ($i = 2; $i < count($stops); $i++) {
+            self::assertEquals(1, $stops[$i]->arrived, "Stop index $i");
+        }
+        self::assertEquals("?", $stops[0]->platform->name);
+        self::assertEquals("?", $stops[1]->platform->name);
+        // This train was reported at the third stop, therefore, the other stops should report it as arrived/left
+        // The second stop:
+        self::assertEquals(1, $stops[1]->arrived);
+        self::assertEquals(1, $stops[1]->left);
+        // The first stop:
+        self::assertEquals(1, $stops[0]->left);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testIc1545_trainOverMidnight_shouldHaveCorrectDepartureDates()
+    {
+        $serverData = file_get_contents(__DIR__ . "/fixtures/ic1545_trainOverMidnight.json");
+        $stops = VehicleDataSourceProxy::getStops($serverData, "en", null);
+        self::assertNotNull($stops);
+
+        $departureDateYmd = date("Ymd", $stops[8]->scheduledDepartureTime);
+        self::assertEquals("20200809", $departureDateYmd);
+        $arrivalDateYmd = date("Ymd", $stops[8]->scheduledArrivalTime);
+        self::assertEquals("20200809", $arrivalDateYmd);
+
+        $departureDateYmd = $date = date("Ymd", $stops[9]->scheduledDepartureTime);
+        self::assertEquals("20200810", $departureDateYmd);
+        $arrivalDateYmd = date("Ymd", $stops[9]->scheduledArrivalTime);
+        self::assertEquals("20200810", $arrivalDateYmd);
     }
 }
 
