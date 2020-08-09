@@ -72,7 +72,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
         $json = json_decode($response->getBody(), true);
-        self::assertEquals("IC4310", $json['vehicleinfo']['shortname']);
+        self::assertEquals("IC4310", $json['vehicleinfo']['shortname'], $response->getBody());
         self::assertEquals("Antwerp-Central", $json['stops']['stop'][0]["station"]);
         self::assertTrue(in_array(
             end($json['stops']['stop'])["station"],
@@ -84,7 +84,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
         $json = json_decode($response->getBody(), true);
-        self::assertEquals("IC4410", $json['vehicleinfo']['shortname']);
+        self::assertEquals("IC4410", $json['vehicleinfo']['shortname'], $response->getBody());
         self::assertEquals("Mol", $json['stops']['stop'][0]["station"]);
         self::assertEquals("Heusden", end($json['stops']['stop'])["station"]);
     }
@@ -97,7 +97,7 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
         $json = json_decode($response->getBody(), true);
-        self::assertEquals("ICE10", $json['vehicleinfo']['shortname']);
+        self::assertEquals("ICE10", $json['vehicleinfo']['shortname'], $response->getBody());
         self::assertEquals("BE.NMBS.008011068", $json['stops']['stop'][0]["stationinfo"]["id"]);
         self::assertEquals("Brussels-South/Brussels-Midi", end($json['stops']['stop'])["station"]);
 
