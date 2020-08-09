@@ -193,8 +193,10 @@ class VehicleIntegrationTest extends IntegrationTestCase
      */
     public function test_correctSearchQueryWithAlertsEnabled_shouldReturn200Ok()
     {
-        $response = self::getClient()->request("GET",
-            self::getBaseUrl() . "vehicle.php?format=json&id=S102063&alerts=true");
+        $response = self::getClient()->request(
+            "GET",
+            self::getBaseUrl() . "vehicle.php?format=json&id=S102063&alerts=true"
+        );
         $this->assertEquals(200, $response->getStatusCode());
     }
 }

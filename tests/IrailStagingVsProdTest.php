@@ -151,8 +151,11 @@ class IrailStagingVsProdTest extends TestCase
     private function verifyAndDecodeResponse(ResponseInterface $response): array
     {
         self::assertEquals(200, $response->getStatusCode());
-        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0],
-            $response->getBody());
+        self::assertEquals(
+            "application/json;charset=UTF-8",
+            $response->getHeader("content-type")[0],
+            $response->getBody()
+        );
         return json_decode($response->getBody(), true);
     }
 }

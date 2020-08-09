@@ -55,7 +55,10 @@ class VehicleDatasource
         $dataroot->vehicle->locationY = 0;
 
         $dataroot->stop = self::getStops(
-            $serverData, $lang, $vehicleOccupancy, $date
+            $serverData,
+            $lang,
+            $vehicleOccupancy,
+            $date
         );
 
         $lastStop = $dataroot->stop[0];
