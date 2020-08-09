@@ -54,12 +54,7 @@ class VehicleDatasource
         $dataroot->vehicle->locationX = 0;
         $dataroot->vehicle->locationY = 0;
 
-        $dataroot->stop = self::getStops(
-            $serverData,
-            $lang,
-            $vehicleOccupancy,
-            $date
-        );
+        $dataroot->stop = self::getStops($serverData, $lang, $vehicleOccupancy);
 
         $lastStop = $dataroot->stop[0];
         foreach ($dataroot->stop as $stop) {
@@ -109,11 +104,10 @@ class VehicleDatasource
      * @param string $serverData
      * @param string $lang
      * @param $occupancyArr
-     * @param string $date
-     * @return array
+     * @return Stop[]
      * @throws Exception
      */
-    private static function getStops(string $serverData, string $lang, $occupancyArr, string $date)
+    protected static function getStops(string $serverData, string $lang, $occupancyArr)
     {
         $json = json_decode($serverData, true);
         $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
@@ -194,7 +188,7 @@ class VehicleDatasource
      * @param $date
      * @param DateTime $requestedDate
      * @param $lang
-     * @param $rawVehicle
+     * @param $vehiclesInJourney
      * @param $locationDefinitions
      * @return Stop
      * @throws Exception

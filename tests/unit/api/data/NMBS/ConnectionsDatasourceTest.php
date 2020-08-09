@@ -7,7 +7,7 @@ use Irail\api\data\NMBS\ConnectionsDatasource;
 use Irail\api\data\NMBS\StationsDatasource;
 use PHPUnit\Framework\TestCase;
 
-class ConnectionsTest extends TestCase
+class ConnectionsDatasourceTest extends TestCase
 {
     /**
      * @throws Exception
