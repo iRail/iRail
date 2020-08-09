@@ -222,6 +222,8 @@ class VehicleDatasource
               ]
             },
          */
+        // TODO: export remarks as they contain information about changes in the train designation.
+
         if (key_exists('dTimeR', $rawStop)) {
             $departureDelay = tools::calculateSecondsHHMMSS(
                 $rawStop['dTimeR'],
