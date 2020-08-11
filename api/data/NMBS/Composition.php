@@ -264,11 +264,13 @@ class Composition
      * Handle the material type for AM/MR vehicles ( trains consisting of a type-specific number of motorized carriages which are always together, opposed to having a locomotive and unmotorized carriages).
      * @param RollingMaterialType $materialType
      * @param $rawCompositionUnit
+     * @param int $position
      */
     private static function setAmMrMaterialType(RollingMaterialType $materialType, $rawCompositionUnit, int $position): void
     {
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
+        // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailled data.
         if (property_exists($rawCompositionUnit, "parentMaterialTypeName")) {
             // Sub type might not be set yet when in planning.
             $materialType->parent_type = $rawCompositionUnit->parentMaterialTypeName;
@@ -276,8 +278,7 @@ class Composition
             self::calculateAmMrSubType($materialType, $position);
         } elseif (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
             $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
-            //AM80
-            if (property_exists($rawCompositionUnit, "materialSubTypeName")) { // Some AM08 might be missing a type
+            if (property_exists($rawCompositionUnit, "materialSubTypeName")) {
                 $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
             } else {
                 // This data isn't available in the planning stage
@@ -342,9 +343,9 @@ class Composition
         // The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
         // We can "fix" their planning data for these types by setting A, B, C, ourselves.
         // We still communicate that this is unconfirmed data, so there isn't a problem if one of the trains has a wrong orientation.
-        // Trains with 3 carriages:
-        if (in_array($materialType->parent_type, ['AM62-66', 'AM62', 'AM66'])) {
-            switch ($position % 3) {
+        // Trains with 2 carriages:
+        if (in_array($materialType->parent_type, ['AM62-66', 'AM62', 'AM66', 'AM86'])) {
+            switch ($position % 2) {
                 case 0:
                     $materialType->sub_type = "a";
                     break;
@@ -355,7 +356,7 @@ class Composition
         }
 
         // Trains with 3 carriages:
-        if (in_array($materialType->parent_type, ['AM08', 'AM96'])) {
+        if (in_array($materialType->parent_type, ['AM08', 'AM96', 'AM80', 'AM80m'])) {
             switch ($position % 3) {
                 case 0:
                     $materialType->sub_type = "a";
@@ -370,7 +371,7 @@ class Composition
         }
 
         // Trains with 4 carriages:
-        if (in_array($materialType->parent_type, ['AM80'])) {
+        if (in_array($materialType->parent_type, ['AM75'])) {
             switch ($position % 3) {
                 case 0:
                     $materialType->sub_type = "a";
