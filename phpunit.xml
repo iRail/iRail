@@ -9,13 +9,15 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         syntaxCheck="true"
-         strict="true"
          verbose="true"
         >
     <testsuites>
-        <testsuite name="PHP Dotenv Test Suite">
-            <directory suffix="Test.php">./tests</directory>
+        <testsuite name="Unit Tests">
+            <directory suffix="Test.php">./tests/unit/</directory>
+        </testsuite>
+
+        <testsuite name="Integration Tests">
+            <directory suffix="IntegrationTest.php">./tests/integration/</directory>
         </testsuite>
     </testsuites>
     <filter>
