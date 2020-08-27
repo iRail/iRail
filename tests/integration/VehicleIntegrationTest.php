@@ -182,9 +182,6 @@ class VehicleIntegrationTest extends IntegrationTestCase
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC538");
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=S23769");
-        $this->assertEquals(200, $response->getStatusCode());
-
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=S103890");
         $this->assertEquals(200, $response->getStatusCode());
     }
