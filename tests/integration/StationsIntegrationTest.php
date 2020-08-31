@@ -3,7 +3,6 @@
 
 namespace Tests\integration;
 
-
 class StationsIntegrationTest extends IntegrationTestCase
 {
     public function test_xml_noParameters_shouldReturn200()
@@ -32,7 +31,7 @@ class StationsIntegrationTest extends IntegrationTestCase
         self::assertTrue($brusselsCentralFound);
     }
 
-    function test_json_langNl_shouldTranslateCorrectly()
+    public function test_json_langNl_shouldTranslateCorrectly()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "stations.php?format=json&lang=nl");
         self::assertEquals(200, $response->getStatusCode());
@@ -49,4 +48,5 @@ class StationsIntegrationTest extends IntegrationTestCase
         }
         self::assertTrue($brusselsCentralFound);
     }
+
 }
