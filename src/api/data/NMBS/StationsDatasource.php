@@ -4,6 +4,7 @@ namespace Irail\api\data\NMBS;
 
 use Exception;
 use Irail\api\data\models\Station;
+use irail\stations\Stations;
 
 /**
  * Copyright (C) 2011 by iRail vzw/asbl
@@ -76,7 +77,7 @@ class StationsDatasource
      */
     public static function getStationFromID($id, $lang)
     {
-        $stationobject = \irail\stations\Stations::getStationFromID($id);
+        $stationobject = Stations::getStationFromID($id);
         if ($stationobject) {
             return self::transformNewToOldStyle($stationobject, $lang);
         } else {
@@ -105,7 +106,7 @@ class StationsDatasource
         $name = str_replace(' `', '', $name);
         $name = explode('/', $name);
         $name = trim($name[0]);
-        $stationsgraph = \irail\stations\Stations::getStations($name);
+        $stationsgraph = Stations::getStations($name);
         if (!isset($stationsgraph->{'@graph'}[0])) {
             throw new Exception('Could not match \'' . $name . '\' with a station id in iRail. Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
@@ -139,7 +140,7 @@ class StationsDatasource
     private static function fetchAllStationsFromDB($lang)
     {
         $stations = [];
-        $newstations = \irail\stations\Stations::getStations();
+        $newstations = Stations::getStations();
         foreach ($newstations->{'@graph'} as $station) {
             array_push($stations, self::transformNewToOldStyle($station, $lang));
         }

@@ -8,6 +8,7 @@ use Irail\api\data\NMBS\CompositionDataSource;
 use Irail\api\data\NMBS\ConnectionsDatasource;
 use Irail\api\data\NMBS\DisturbancesDatasource;
 use Irail\api\data\NMBS\LiveboardDatasource;
+use Irail\api\data\NMBS\StationsDatasource;
 use Irail\api\data\NMBS\VehicleDatasource;
 use Irail\api\output\Printer;
 use Irail\api\requests\CompositionRequest;
@@ -15,6 +16,7 @@ use Irail\api\requests\ConnectionsRequest;
 use Irail\api\requests\DisturbancesRequest;
 use Irail\api\requests\LiveboardRequest;
 use Irail\api\requests\Request;
+use Irail\api\requests\StationsRequest;
 use Irail\api\requests\VehicleinformationRequest;
 
 /**
@@ -86,6 +88,8 @@ class DataRoot
                 VehicleDatasource::fillDataRoot($this, $request);
             } elseif ($request instanceof DisturbancesRequest) {
                 DisturbancesDatasource::fillDataRoot($this, $request);
+            } elseif ($request instanceof StationsRequest) {
+                StationsDatasource::fillDataRoot($this, $request);
             }
         } catch (\Exception $e) {
             if ($e->getCode() == '404') {
