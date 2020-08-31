@@ -48,5 +48,4 @@ class StationsIntegrationTest extends IntegrationTestCase
         }
         self::assertTrue($brusselsCentralFound);
     }
-
 }
