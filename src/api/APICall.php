@@ -54,7 +54,7 @@ class APICall
             $this->log = new Logger('irapi');
             //Create a formatter for the logs
             $logFormatter = new LineFormatter("%context%\n", 'Y-m-d\TH:i:s');
-            $streamHandler = new StreamHandler(__DIR__ . '/../storage/irapi.log', Logger::INFO);
+            $streamHandler = new StreamHandler(__DIR__ . '/../../storage/irapi.log', Logger::INFO);
             $streamHandler->setFormatter($logFormatter);
             $this->log->pushHandler($streamHandler);
             switch ($datasourceName) {
