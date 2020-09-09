@@ -442,9 +442,17 @@ class VehicleDatasource
 
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
         $vehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['jnyL'][0]['prodX']];
-        if (preg_replace("/[^A-Z0-9]/", "", $vehicle->name) !=
-            preg_replace("/[^A-Z0-9]/", "", $requestedVehicleId)) {
-            throw new Exception("Vehicle not found", 404);
+        if (preg_match("/[A-Za-z]/", $requestedVehicleId) != false) {
+            // The search string contains letters, so we try to match train type and number (IC xxx)
+            if (preg_replace("/[^A-Za-z0-9]/", "", $vehicle->name) !=
+                preg_replace("/[^A-Za-z0-9]/", "", $requestedVehicleId)) {
+                throw new Exception("Vehicle not found", 404);
+            }
+        } else {
+            // The search string contains no letters, so we try to match the train number (Train 538)
+            if ($requestedVehicleId != $vehicle->num) {
+                throw new Exception("Vehicle number not found", 404);
+            }
         }
 
         return $json['svcResL'][0]['res']['jnyL'][0]['jid'];
