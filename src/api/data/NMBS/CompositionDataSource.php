@@ -230,7 +230,7 @@ class CompositionDataSource
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents(
-                '../storage/debug-composition-' . $vehicleId . '-' . $language . '-' . time() . '.log',
+                '../../storage/debug-composition-' . $vehicleId . '-' . $language . '-' . time() . '.log',
                 $response
             );
         }

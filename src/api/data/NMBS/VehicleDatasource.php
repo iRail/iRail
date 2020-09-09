@@ -26,8 +26,9 @@ class VehicleDatasource
     const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
 
     /**
-     * @param DataRoot $dataroot
+     * @param DataRoot                  $dataroot
      * @param VehicleinformationRequest $request
+     *
      * @throws Exception
      */
     public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request)
@@ -83,27 +84,10 @@ class VehicleDatasource
     }
 
     /**
-     * @param $id
-     * @param $lang
-     * @return mixed
-     * @throws Exception
-     */
-    private static function getServerData($id, $date, $lang)
-    {
-        $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
-
-        $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
-        return self::getVehicleDataForJourneyId($jid, $request_options);
-    }
-
-    /**
      * @param string $serverData
      * @param string $lang
-     * @param $occupancyArr
+     * @param        $occupancyArr
+     *
      * @return Stop[]
      * @throws Exception
      */
@@ -143,13 +127,82 @@ class VehicleDatasource
     }
 
     /**
-     * @param $rawStop
-     * @param DateTime $firstStationDepartureDate date on which the train leaves the first station on its journey.
+     * @param DateTime $dateOfFirstDeparture The date when the train leaves the first station on its journey.
+     * @param array    $occupancyArr         Occuppancy data for this train
+     * @param Stop     $stop                 The stop on which occuppancy data needs to be added.
+     */
+    protected static function addOccuppancyData(DateTime $dateOfFirstDeparture, $occupancyArr, Stop $stop): void
+    {
+        $isOccupancyDate = self::isSpitsgidsDataAvailable($dateOfFirstDeparture);
+        // Check if it is in less than 2 days and MongoDB is available
+        if ($isOccupancyDate && isset($occupancyArr)) {
+            // Add occupancy
+            $occupancyOfStationFound = false;
+            $k = 0;
+
+            while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
+                if ($stop->station->{'@id'} == $occupancyArr[$k]["from"]) {
+                    $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
+                    $stop->occupancy = new \stdClass();
+                    $stop->occupancy->{'@id'} = $occupancyURI;
+                    $stop->occupancy->name = basename($occupancyURI);
+                    $occupancyOfStationFound = true;
+                }
+                $k++;
+            }
+
+            if (!isset($stop->occupancy)) {
+                $unknown = OccupancyOperations::getUnknown();
+                $stop->occupancy = new \stdClass();
+                $stop->occupancy->{'@id'} = $unknown;
+                $stop->occupancy->name = basename($unknown);
+            }
+        }
+    }
+
+    /**
+     * @param array $stops
+     */
+    protected static function ensureTrainHasLeftPreviousStop(array $stops): void
+    {
+        for ($i = count($stops) - 1; $i > 0; $i--) {
+            if ($stops[$i]->arrived == 1) {
+                $stops[$i - 1]->arrived = 1;
+                $stops[$i - 1]->left = 1;
+            }
+        }
+        // The first stop can't have arrived == 1, since there is no arrival.
+        $stops[0]->arrived = 0;
+    }
+
+    /**
+     * @param $id
      * @param $lang
-     * @param $vehiclesInJourney
-     * @param $locationDefinitions
-     * @param bool $isFirstStop
-     * @param bool $isLastStop
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    private static function getServerData($id, $date, $lang)
+    {
+        $request_options = [
+            'referer' => 'http://api.irail.be/',
+            'timeout' => '30',
+            'useragent' => Tools::getUserAgent(),
+        ];
+
+        $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
+        return self::getVehicleDataForJourneyId($jid, $request_options);
+    }
+
+    /**
+     * @param          $rawStop
+     * @param DateTime $firstStationDepartureDate date on which the train leaves the first station on its journey.
+     * @param          $lang
+     * @param          $vehiclesInJourney
+     * @param          $locationDefinitions
+     * @param bool     $isFirstStop
+     * @param bool     $isLastStop
+     *
      * @return Stop
      * @throws Exception
      */
@@ -219,7 +272,7 @@ class VehicleDatasource
         if (key_exists('dPlatfR', $rawStop)) {
             $departurePlatform = $rawStop['dPlatfR'];
             $departurePlatformNormal = false;
-        } elseif (key_exists('dPlatfS', $rawStop)) {
+        } else if (key_exists('dPlatfS', $rawStop)) {
             $departurePlatform = $rawStop['dPlatfS'];
             $departurePlatformNormal = true;
         } else {
@@ -231,7 +284,7 @@ class VehicleDatasource
         if (key_exists('aPlatfR', $rawStop)) {
             $arrivalPlatform = $rawStop['aPlatfR'];
             $arrivalPlatformNormal = false;
-        } elseif (key_exists('aPlatfS', $rawStop)) {
+        } else if (key_exists('aPlatfS', $rawStop)) {
             $arrivalPlatform = $rawStop['aPlatfS'];
             $arrivalPlatformNormal = true;
         } else {
@@ -332,8 +385,9 @@ class VehicleDatasource
     }
 
     /**
-     * @param $jid
+     * @param       $jid
      * @param array $request_options
+     *
      * @return bool|string
      */
     private static function getVehicleDataForJourneyId($jid, array $request_options)
@@ -349,7 +403,7 @@ class VehicleDatasource
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents(
-                '../storage/debug-vehicle-' . $jid . '-' . time() . '.log',
+                '../../storage/debug-vehicle-' . $jid . '-' . time() . '.log',
                 $response
             );
         }
@@ -357,10 +411,11 @@ class VehicleDatasource
     }
 
     /**
-     * @param $requestedVehicleId
-     * @param $date
-     * @param $lang
+     * @param       $requestedVehicleId
+     * @param       $date
+     * @param       $lang
      * @param array $request_options
+     *
      * @return string Journey ID
      * @throws Exception
      */
@@ -429,6 +484,14 @@ class VehicleDatasource
          * },
          */
         $response = self::makeRequestToNmbs($postdata, $request_options);
+
+        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
+            file_put_contents(
+                '../../storage/debug-vehiclelookup-' . $requestedVehicleId . '-' . time() . '.log',
+                $response
+            );
+        }
+
         $json = json_decode($response, true);
 
         // Verify that the vehicle number matches with the query.
@@ -442,17 +505,25 @@ class VehicleDatasource
 
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
         $vehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['jnyL'][0]['prodX']];
-        if (preg_replace("/[^A-Z0-9]/", "", $vehicle->name) !=
-            preg_replace("/[^A-Z0-9]/", "", $requestedVehicleId)) {
-            throw new Exception("Vehicle not found", 404);
+        if (preg_match("/[A-Za-z]/", $requestedVehicleId) != false) {
+            // The search string contains letters, so we try to match train type and number (IC xxx)
+            if (preg_replace("/[^A-Za-z0-9]/", "", $vehicle->name) !=
+                preg_replace("/[^A-Za-z0-9]/", "", $requestedVehicleId)) {
+                throw new Exception("Vehicle not found", 404);
+            }
+        } else {
+            // The search string contains no letters, so we try to match the train number (Train 538)
+            if ($requestedVehicleId != $vehicle->num){
+                throw new Exception("Vehicle number not found", 404);
+            }
         }
-
         return $json['svcResL'][0]['res']['jnyL'][0]['jid'];
     }
 
     /**
      * @param string $postdata
-     * @param array $request_options
+     * @param array  $request_options
+     *
      * @return string|False
      */
     private static function makeRequestToNmbs(string $postdata, array $request_options)
@@ -472,6 +543,7 @@ class VehicleDatasource
 
     /**
      * @param DateTime $requestedDate
+     *
      * @return bool
      */
     private static function isSpitsgidsDataAvailable(DateTime $requestedDate): bool
@@ -488,6 +560,7 @@ class VehicleDatasource
 
     /**
      * @param string $serverData
+     *
      * @return HafasVehicle
      * @throws Exception
      */
@@ -501,6 +574,7 @@ class VehicleDatasource
 
     /**
      * @param string $serverData
+     *
      * @return Alert[]
      */
     private static function getAlerts(string $serverData): array
@@ -508,54 +582,5 @@ class VehicleDatasource
         $json = json_decode($serverData, true);
         // These are formatted already
         return HafasCommon::parseAlertDefinitions($json);
-    }
-
-    /**
-     * @param DateTime $dateOfFirstDeparture  The date when the train leaves the first station on its journey.
-     * @param array $occupancyArr Occuppancy data for this train
-     * @param Stop $stop The stop on which occuppancy data needs to be added.
-     */
-    protected static function addOccuppancyData(DateTime $dateOfFirstDeparture, $occupancyArr, Stop $stop): void
-    {
-        $isOccupancyDate = self::isSpitsgidsDataAvailable($dateOfFirstDeparture);
-        // Check if it is in less than 2 days and MongoDB is available
-        if ($isOccupancyDate && isset($occupancyArr)) {
-            // Add occupancy
-            $occupancyOfStationFound = false;
-            $k = 0;
-
-            while ($k < count($occupancyArr) && !$occupancyOfStationFound) {
-                if ($stop->station->{'@id'} == $occupancyArr[$k]["from"]) {
-                    $occupancyURI = OccupancyOperations::NumberToURI($occupancyArr[$k]["occupancy"]);
-                    $stop->occupancy = new \stdClass();
-                    $stop->occupancy->{'@id'} = $occupancyURI;
-                    $stop->occupancy->name = basename($occupancyURI);
-                    $occupancyOfStationFound = true;
-                }
-                $k++;
-            }
-
-            if (!isset($stop->occupancy)) {
-                $unknown = OccupancyOperations::getUnknown();
-                $stop->occupancy = new \stdClass();
-                $stop->occupancy->{'@id'} = $unknown;
-                $stop->occupancy->name = basename($unknown);
-            }
-        }
-    }
-
-    /**
-     * @param array $stops
-     */
-    protected static function ensureTrainHasLeftPreviousStop(array $stops): void
-    {
-        for ($i = count($stops) - 1; $i > 0; $i--) {
-            if ($stops[$i]->arrived == 1) {
-                $stops[$i - 1]->arrived = 1;
-                $stops[$i - 1]->left = 1;
-            }
-        }
-        // The first stop can't have arrived == 1, since there is no arrival.
-        $stops[0]->arrived = 0;
     }
 }

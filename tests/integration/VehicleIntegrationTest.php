@@ -35,6 +35,13 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
+    public function test_xml_validParametersNoTrainType_shouldReturn200()
+    {
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=538");
+        $this->assertEquals(200, $response->getStatusCode());
+        self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
+    }
+
     public function test_json_missingParameters_shouldReturn400()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json");
@@ -60,6 +67,13 @@ class VehicleIntegrationTest extends IntegrationTestCase
     public function test_json_validParameters_shouldReturn200()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC538");
+        $this->assertEquals(200, $response->getStatusCode());
+        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
+    }
+
+    public function test_json_validParametersNoTrainType_shouldReturn200()
+    {
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=538");
         $this->assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
