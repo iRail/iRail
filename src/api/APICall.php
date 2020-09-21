@@ -68,7 +68,7 @@ class APICall
                     break;
                 case DisturbancesDatasource::class:
                     $this->request = new DisturbancesRequest();
-                    $rootname = "Disturbance";
+                    $rootname = "Disturbances";
                     break;
                 case LiveboardDatasource::class:
                     $this->request = new LiveboardRequest();
