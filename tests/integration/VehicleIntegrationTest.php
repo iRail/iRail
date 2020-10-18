@@ -2,6 +2,8 @@
 
 namespace Tests\integration;
 
+use DateTime;
+use DateTimeZone;
 use GuzzleHttp\Exception\GuzzleException;
 
 class VehicleIntegrationTest extends IntegrationTestCase
@@ -205,8 +207,12 @@ class VehicleIntegrationTest extends IntegrationTestCase
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=IC538");
         $this->assertEquals(200, $response->getStatusCode());
 
-        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=S103890");
-        $this->assertEquals(200, $response->getStatusCode());
+        if (!self::isTodayWeekend()) {
+            // Todo: we should be able to specify the date here
+            // S Trains can only be tested during the week, unfortunately
+            $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?format=json&id=S103890");
+            $this->assertEquals(200, $response->getStatusCode());
+        }
     }
 
     /**
@@ -217,8 +223,14 @@ class VehicleIntegrationTest extends IntegrationTestCase
     {
         $response = self::getClient()->request(
             "GET",
-            self::getBaseUrl() . "vehicle.php?format=json&id=S102063&alerts=true"
+            self::getBaseUrl() . "vehicle.php?format=json&id=IC538&alerts=true"
         );
         $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    private static function isTodayWeekend()
+    {
+        $currentDate = new DateTime("now", new DateTimeZone("Europe/Brussels"));
+        return $currentDate->format('N') >= 6;
     }
 }
