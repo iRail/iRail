@@ -53,7 +53,8 @@ class ConnectionsIntegrationTest extends IntegrationTestCase
         self::assertEquals("BE.NMBS.008814001", $xml->connection[0]->arrival->station->attributes()['id']);
     }
 
-    public function test_xml_validParameters_shouldHaveCorrectRootElement(){
+    public function test_xml_validParameters_shouldHaveCorrectRootElement()
+    {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "connections.php?from=Gent-Dampoort&to=Brussel-zuid");
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);

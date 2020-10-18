@@ -12,7 +12,8 @@ class StationsIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
-    public function test_xml_validParameters_shouldHaveCorrectRootElement(){
+    public function test_xml_validParameters_shouldHaveCorrectRootElement()
+    {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "stations.php");
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
