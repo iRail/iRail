@@ -24,16 +24,25 @@ class LiveboardIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
+    public function test_xml_validParameters_shouldHaveCorrectRootElement()
+    {
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "liveboard.php?station=Welkenraedt");
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
+        self::assertTrue(strpos($response->getBody(), "<liveboard ") === 0, "Root element name should be 'liveboard'");
+    }
+
     public function test_xml_validParameters_shouldReturn200()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "liveboard.php?id=008844503");
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
 
-        $response = self::getClient()->request("GET", self::getBaseUrl() . "liveboard.php?station=Welkenraedt");
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "liveboard.php?station=Welkenraedt&time=1300");
         self::assertEquals(200, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
 
+        self::assertTrue(strpos($response->getBody(), "<liveboard ") === 0, "Root element name should be 'liveboard'");
         $xml = simplexml_load_string($response->getBody());
         self::assertEquals("Welkenraedt", $xml->station);
         self::assertTrue(count($xml->departures->departure) > 0, "Liveboard should at least have one departure");
