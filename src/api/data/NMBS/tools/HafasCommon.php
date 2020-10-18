@@ -28,6 +28,9 @@ class HafasCommon
         if ($json['svcResL'][0]['err'] == "H890") {
             throw new Exception('No results found', 404);
         }
+        if ($json['svcResL'][0]['err'] == 'PROBLEMS') {
+            throw new Exception("Date likely outside of the timetable period. Check your query.", 400);
+        }
         if ($json['svcResL'][0]['err'] != 'OK') {
             throw new Exception("This request failed. Please check your query. Error code " . $json['svcResL'][0]['err'], 500);
         }
