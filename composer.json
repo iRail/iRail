@@ -9,7 +9,7 @@
     }
   ],
   "require": {
-    "irail/stations": "^1.6.4",
+    "irail/stations": "^1.6.6",
     "monolog/monolog": "^1.25",
     "ptachoire/tac": "1.0.*",
     "sebastian/environment": "4.2.*",
@@ -29,7 +29,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^8.5.8",
-    "guzzlehttp/guzzle": "^7.0",
+    "guzzlehttp/guzzle": "^7.2",
     "symfony/process": "^v5.1"
   },
   "scripts": {
