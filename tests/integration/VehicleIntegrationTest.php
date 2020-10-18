@@ -35,6 +35,13 @@ class VehicleIntegrationTest extends IntegrationTestCase
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
+    public function test_xml_validParameters_shouldHaveCorrectRootElement(){
+        $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=IC538");
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
+        self::assertTrue(strpos($response->getBody(), "<vehicleinformation ") === 0, "Root element name should be 'vehicleinformation'");
+    }
+
     public function test_xml_validParametersNoTrainType_shouldReturn200()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "vehicle.php?id=538");
