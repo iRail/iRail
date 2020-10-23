@@ -180,7 +180,10 @@ class DisturbancesDatasource
                 " " . $newlinePlaceHolder,
                 $disturbance->description
             );
-            $disturbance->description = preg_replace('/<.*?>/', '', $disturbance->description);
+
+            // Strip all html tags except anchor tags <a>
+            $disturbance->description = preg_replace('/<(?!a ).*?[^a]>/', '', $disturbance->description);
+
             $disturbance->description = preg_replace(
                 "/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/",
                 "",
