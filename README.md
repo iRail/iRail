@@ -33,10 +33,10 @@ _note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://
  * Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
  * Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
  * Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
- * Once the startscript has ran, the task of pushing strutural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
+ * Once the startscript has ran, the task of pushing structural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
  * Enjoy the occupancy scores in all the GET requests. [Read the docs](https://docs.irail.be/) on how to post occupancy data.
  
-**Imporant**: If you plan on using spitsgids in a production environment, don't forget to add indices. Most queries check either the connection (routes, liveboards endpoints) or vehicle field (vehicle endpoint). Example indices can be found below.
+**Important**: If you plan on using spitsgids in a production environment, don't forget to add indices. Most queries check either the connection (routes, liveboards endpoints) or vehicle field (vehicle endpoint). Example indices can be found below.
 - For queries on vehicles: `db.occupancy.createIndex({vehicle: 1})` or `db.occupancy.createIndex({date: -1, vehicle: 1})`
 - For queries on connections: `db.occupancy.createIndex({connection: 1})`
 
