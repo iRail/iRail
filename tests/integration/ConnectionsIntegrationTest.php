@@ -13,10 +13,6 @@ class ConnectionsIntegrationTest extends IntegrationTestCase
         $response = self::getClient()->request("GET", self::getBaseUrl() . "connections.php?from=008814001");
         self::assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
-
-        $response = self::getClient()->request("GET", self::getBaseUrl() . "connections.php?from=008814001");
-        self::assertEquals(400, $response->getStatusCode());
-        self::assertEquals("application/xml;charset=UTF-8", $response->getHeader("content-type")[0]);
     }
 
     public function test_xml_invalidParameters_shouldReturn404()
@@ -64,13 +60,6 @@ class ConnectionsIntegrationTest extends IntegrationTestCase
     public function test_json_missingParameters_shouldReturn400()
     {
         $response = self::getClient()->request("GET", self::getBaseUrl() . "connections.php?format=json");
-        self::assertEquals(400, $response->getStatusCode());
-        self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
-
-        $response = self::getClient()->request(
-            "GET",
-            self::getBaseUrl() . "connections.php?format=json&from=008814001"
-        );
         self::assertEquals(400, $response->getStatusCode());
         self::assertEquals("application/json;charset=UTF-8", $response->getHeader("content-type")[0]);
 
