@@ -133,7 +133,7 @@ class HafasCommon
      */
     public static function parseAlertDefinitions($json): array
     {
-        if (!key_exists('remL', $json['svcResL'][0]['res']['common'])) {
+        if (!key_exists('himL', $json['svcResL'][0]['res']['common'])) {
             return [];
         }
 
