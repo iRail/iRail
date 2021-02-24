@@ -791,7 +791,10 @@ class ConnectionsDatasource
 
         $parsedTrain->isPartiallyCancelled = false;
         $parsedTrain->stops = [];
-        if (key_exists('jny', $trainRide)) {
+        if (key_exists('jny', $trainRide) && key_exists('stopL',$trainRide['jny'])) {
+            // If the list of stops is not present, the NMBS is outputting faulty data. It means the train is broken
+            // on their website as well.
+
             if (key_exists('isPartCncl', $trainRide['jny'])) {
                 $parsedTrain->isPartiallyCancelled = $trainRide['jny']['isPartCncl'];
             }
