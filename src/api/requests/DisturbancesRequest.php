@@ -12,7 +12,7 @@ class DisturbancesRequest extends Request
     public function __construct()
     {
         parent::__construct();
-        parent::setGetVar('lineBreakCharacter', '');
+        parent::setGetVar('lineBreakCharacter', ' ');
     }
 
     public function getLinebreakCharacter(): string

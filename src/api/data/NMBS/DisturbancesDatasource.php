@@ -135,7 +135,6 @@ class DisturbancesDatasource
 
         $data = new SimpleXMLElement($xml);
         $disturbances = [];
-
         // Loop through all news items.
         foreach ($data->channel->item as $item) {
             $disturbance = new Disturbance();
@@ -143,9 +142,6 @@ class DisturbancesDatasource
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
             $disturbance->title = trim((string)$item->title, "\r\n ");
             $disturbance->description = trim((string)$item->description, "\r\n ");
-
-            // Trim the description from any html
-            $disturbance->description = str_replace('<br/>', "\n", $disturbance->description);
 
             if (strpos(
                 $disturbance->description,
@@ -172,29 +168,41 @@ class DisturbancesDatasource
             $disturbance->description = str_replace(' ', ' ', $disturbance->description);
             $disturbance->description = preg_replace(
                 '/<br ?\/><br ?\/>/',
-                " " . $newlinePlaceHolder,
+                $newlinePlaceHolder,
                 $disturbance->description
             );
             $disturbance->description = preg_replace(
                 '/<br ?\/>/',
-                " " . $newlinePlaceHolder,
+                $newlinePlaceHolder,
                 $disturbance->description
             );
 
             // Strip all html tags except anchor tags <a>
-            $disturbance->description = preg_replace('/<(?!a ).*?[^a]>/', '', $disturbance->description);
-
-            $disturbance->description = preg_replace(
-                "/(Info (NL|FR|DE|EN)( |$newlinePlaceHolder)+)+$/",
-                "",
-                $disturbance->description
-            );
-            $disturbance->description = preg_replace("/\s?$newlinePlaceHolder\s?$/", "", $disturbance->description);
+            $disturbance->description = strip_tags($disturbance->description, '<a>');
             $disturbance->description = preg_replace("/\s+/", " ", $disturbance->description);
+            // remove trailing newlines
+            $disturbance->description = preg_replace("/\s?$newlinePlaceHolder\s?$/", "", $disturbance->description);
             // Replace the placeholder after stripping the HTML tags: the end user might want to use a <br> tag as placeholder
             $disturbance->description = str_replace($newlinePlaceHolder, $newlineChar, $disturbance->description);
-
             $disturbance->description = trim($disturbance->description, "\r\n ");
+
+            // This is the richtext version which can contain links etc
+            $disturbance->richtext = $disturbance->description;
+
+            // clean it further to a plaintext field
+            $disturbance->description = preg_replace("/<a.*?>.*?<\/a>/", "", $disturbance->description);
+            $disturbance->description = strip_tags($disturbance->description);
+            // put the links from the description in an easy to use array for clients, so it can be used with the cleaned text
+            $disturbance->descriptionLink = [];
+            preg_match_all('/<a href="(.*?)">(.*?)<\/a>/', $disturbance->richtext, $descriptionLinkMatches);
+            for ($i = 0; $i < count($descriptionLinkMatches[0]); $i++) {
+                $link = new StdClass();
+                $link->link = $descriptionLinkMatches[1][$i];
+                $link->text = $descriptionLinkMatches[2][$i];
+                $disturbance->descriptionLink[] = $link;
+            }
+
+
             $disturbance->link = trim((string)$item->link, "\r\n ");
 
             $pubdate = $item->pubDate;
@@ -204,7 +212,6 @@ class DisturbancesDatasource
             if (strpos($disturbance->link, 'tplParamHimMsgInfoGroup=works') !== false) {
                 $disturbance->type = self::TYPE_PLANNED;
             }
-
             $disturbances[] = $disturbance;
         }
 

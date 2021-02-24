@@ -134,7 +134,7 @@ class Xml extends Printer
             echo "<$key formatted=\"$form\">$val";
         } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             echo "<$key>";
-            if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'link') {
+            if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link') {
                 echo "<![CDATA[";
             }
             echo $val;
@@ -142,17 +142,17 @@ class Xml extends Printer
     }
 
     /**
-     * @param $name
+     * @param $key
      * @return mixed|void
      */
-    public function endElement($name)
+    public function endElement($key)
     {
-        if ($name == 'header' || $name == 'title' || $name == 'description' || $name == 'link') {
+        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext'  || $key == 'link') {
             echo ']]>';
         }
 
-        if (!in_array($name, $this->ATTRIBUTES) && $name != 'name') {
-            echo "</$name>";
+        if (!in_array($key, $this->ATTRIBUTES) && $key != 'name') {
+            echo "</$key>";
         }
     }
 
