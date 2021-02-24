@@ -145,23 +145,17 @@ abstract class Printer
     private function printElement($key, $val, $root = false)
     {
         if (is_array($val)) {
-            if (count($val) > 0) {
-                $this->startArray($key, count($val), $root);
-                $i = 0;
-                foreach ($val as $elementval) {
-                    $this->printElement($key, $elementval);
-                    // Keep count of where we are, and as long as this isn't the last element, print the array divider
-                    if ($i < (count($val) - 1)) {
-                        $this->nextArrayElement();
-                    }
-                    $i++;
+            $this->startArray($key, count($val), $root);
+            $i = 0;
+            foreach ($val as $elementval) {
+                $this->printElement($key, $elementval);
+                // Keep count of where we are, and as long as this isn't the last element, print the array divider
+                if ($i < (count($val) - 1)) {
+                    $this->nextArrayElement();
                 }
-                $this->endArray($key, $root);
-            } else {
-                //very dirty fix of the komma problem when empty array when this would occur
-                $this->startKeyVal('empty', '');
-                $this->endElement('empty');
+                $i++;
             }
+            $this->endArray($key, $root);
         } elseif (is_object($val)) {
             $this->startObject($key, $val);
             $allObjectVars = get_object_vars($val);
