@@ -44,7 +44,7 @@ class ConnectionsDatasourceTest extends TestCase
     public function test_regression434_connectionMissingStops_shouldBeParsedCorrectly()
     {
         $serverData = file_get_contents(__DIR__ . "/fixtures/connections-issue434.json");
-        $connections = ConnectionsDatasource::parseConnectionsAPI($serverData, "en",  $this->createMock(ConnectionsRequest::class));
+        $connections = ConnectionsDatasource::parseConnectionsAPI($serverData, "en", $this->createMock(ConnectionsRequest::class));
         self::assertNotNull($connections);
         self::assertEquals(10, count($connections));
     }
