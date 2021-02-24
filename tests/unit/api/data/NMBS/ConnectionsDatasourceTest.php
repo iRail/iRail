@@ -48,5 +48,4 @@ class ConnectionsDatasourceTest extends TestCase
         self::assertNotNull($connections);
         self::assertEquals(10, count($connections));
     }
-
 }
