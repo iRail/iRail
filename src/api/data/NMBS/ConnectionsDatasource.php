@@ -546,7 +546,10 @@ class ConnectionsDatasource
         $connection->departure->stop = $trainsInConnection[0]->stops;
         array_shift($connection->departure->stop);
         array_pop($connection->departure->stop);
-
+        if (count($connection->departure->stop) === 0) {
+            // TODO: Always include stops, even when empty, when clients support it
+            unset($connection->departure->stop);
+        }
 
         $connection->departure->departureConnection = 'http://irail.be/connections/' .
             substr(basename($departureStation->{'@id'}), 2) . '/' .
@@ -1060,6 +1063,10 @@ class ConnectionsDatasource
         $constructedVia->departure->stop = $trains[$viaIndex + 1]->stops;
         array_shift($constructedVia->departure->stop); // remove departure stop
         array_pop($constructedVia->departure->stop); // remove arrival stop
+        if (count($constructedVia->departure->stop) === 0) {
+            // TODO: Always include stops, even when empty, when clients support it
+            unset($constructedVia->departure->stop);
+        }
 
         $constructedVia->station = $trains[$viaIndex]->arrival->station;
 
