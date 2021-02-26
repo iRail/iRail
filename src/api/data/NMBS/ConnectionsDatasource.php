@@ -506,10 +506,11 @@ class ConnectionsDatasource
         if ($viaCount != 0) {
             for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
                 // Update the via array
-                $vias = self::constructVia($vias, $viaIndex, $trainsInConnection);
+                // TODO: clean this up
+                $vias = self::addViaToArray($vias, $viaIndex, $trainsInConnection);
             }
+            $connection->via = $vias;
         }
-        $connection->via = $vias;
 
         // All the train alerts should go together in the connection alerts
         $connectionAlerts = [];
@@ -1008,7 +1009,7 @@ class ConnectionsDatasource
      * @param $trains
      * @return Via[]
      */
-    private static function constructVia($vias, $viaIndex, $trains): array
+    private static function addViaToArray($vias, $viaIndex, $trains): array
     {
         // A via lies between two trains. This mean that for n trains, there are n-1 vias, with n >=1
         // The n-th via lies between train n and train n+1
