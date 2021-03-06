@@ -237,6 +237,10 @@ class LiveboardDatasource
      */
     private static function parseNmbsData(string $serverData, string $lang): array
     {
+        if (empty($serverData)){
+            throw new Exception("The server did not return any data.", 500);
+        }
+
         $json = json_decode($serverData, true);
 
         HafasCommon::throwExceptionOnInvalidResponse($json);
