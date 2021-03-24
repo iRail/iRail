@@ -86,6 +86,8 @@ class VehicleIdToolsTest extends TestCase
         self::verify_extract_train_number("S8", "6370");
         self::verify_extract_train_number("S20", "3070");
         self::verify_extract_train_number("S32", "2569");
+        self::verify_extract_train_number("S32", "400");
+        self::verify_extract_train_number("S32", "401");
         self::verify_extract_train_number("S43", "5370");
         self::verify_extract_train_number("S44", "5190");
         self::verify_extract_train_number("S51", "790");
@@ -105,6 +107,8 @@ class VehicleIdToolsTest extends TestCase
         self::verify_extract_train_type("S8", "6370");
         self::verify_extract_train_type("S20", "3070");
         self::verify_extract_train_type("S32", "2569");
+        self::verify_extract_train_type("S32", "400");
+        self::verify_extract_train_type("S32", "402");
         self::verify_extract_train_type("S43", "5370");
         self::verify_extract_train_type("S44", "5190");
         self::verify_extract_train_type("S51", "790");

@@ -14,6 +14,7 @@ class VehicleIdTools
         $vehicleId = strtoupper($vehicleId);
         // Handle S trains. For example, S5 3381 or S53381 should become 3381. Typically a number has 4 digits.
         $vehicleId = preg_replace("/S[12]0 ?(\d{4})/", "$1", $vehicleId); // S10, S20
+        $vehicleId = preg_replace("/S32 ?(4\d{2})/", "$1", $vehicleId); // S32 400
         $vehicleId = preg_replace("/S3[234] ?(\d{4})/", "$1", $vehicleId); // S32, S33, S34
         $vehicleId = preg_replace("/S4[1234] ?(\d{4})/", "$1", $vehicleId); // S41, 42, 43, 44
         $vehicleId = preg_replace("/S51 ?(7\d{2})/", "$1", $vehicleId); // S51 750, 751, ...

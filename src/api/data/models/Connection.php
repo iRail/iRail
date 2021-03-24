@@ -11,4 +11,6 @@ class Connection
     public $via;
     // not compulsory
     public $duration;
+    public $remark = [];
+    public $alert = [];
 }
