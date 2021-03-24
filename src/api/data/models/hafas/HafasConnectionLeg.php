@@ -3,7 +3,6 @@
 
 namespace Irail\api\data\models\hafas;
 
-
 use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\models\ViaDepartureArrival;
 use stdClass;
