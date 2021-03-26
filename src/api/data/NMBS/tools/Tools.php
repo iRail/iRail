@@ -173,7 +173,7 @@ class Tools
             $departureTime
         ) . '/' . substr(
             $vehicleId,
-                strrpos($vehicleId, '.') !== false ? strrpos($vehicleId, '.') + 1 : 0
+            strrpos($vehicleId, '.') !== false ? strrpos($vehicleId, '.') + 1 : 0
         );
     }
 
