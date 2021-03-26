@@ -835,26 +835,28 @@ class ConnectionsDatasource
                 }
             }
         }
-
-        try {
-            if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
-                foreach ($trainRide['jny']['himL'] as $message) {
-                    $parsedTrain->alerts[] = $alertDefinitions[$message['himX']];
-                }
-            }
-            if (key_exists('msgL', $trainRide['jny']) && is_array($trainRide['jny']['msgL'])) {
-                foreach ($trainRide['jny']['msgL'] as $message) {
-                    if ($message['type'] == "HIM") {
-                        if ($message['himX'] > count($alertDefinitions)) {
-                            continue;
-                        }
+        if (key_exists('jny', $trainRide)) {
+            try {
+                if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
+                    foreach ($trainRide['jny']['himL'] as $message) {
                         $parsedTrain->alerts[] = $alertDefinitions[$message['himX']];
                     }
                 }
+                if (key_exists('msgL', $trainRide['jny']) && is_array($trainRide['jny']['msgL'])) {
+                    foreach ($trainRide['jny']['msgL'] as $message) {
+                        if ($message['type'] == "HIM") {
+                            if ($message['himX'] > count($alertDefinitions)) {
+                                continue;
+                            }
+                            $parsedTrain->alerts[] = $alertDefinitions[$message['himX']];
+                        }
+                    }
+                }
+            } catch (Exception $ignored) {
+                // ignored
             }
-        } catch (Exception $ignored) {
-            // ignored
         }
+
 
         if ($trainRide['type'] == 'WALK') {
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.

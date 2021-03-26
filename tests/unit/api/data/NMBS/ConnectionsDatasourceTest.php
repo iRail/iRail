@@ -78,4 +78,32 @@ class ConnectionsDatasourceTest extends TestCase
             $connections[1]->remark[0]->description
         );
     }
+
+    public function test_connectionsWithWalkingLeg_shouldParseAndPrintCorrectly()
+    {
+        $serverData = file_get_contents(__DIR__ . "/fixtures/connections-walking-leg.json");
+        $connections = ConnectionsDatasource::parseConnectionsAPI(
+            $serverData,
+            "en",
+            $this->createMock(ConnectionsRequest::class)
+        );
+        self::assertNotNull($connections);
+        self::assertEquals(6, count($connections));
+
+        self::assertEquals(1, $connections[2]->via[0]->departure->walking);
+        self::assertEquals(0, $connections[2]->via[0]->departure->left);
+        self::assertEquals(0, $connections[2]->via[0]->departure->delay);
+        self::assertEquals(0, $connections[2]->via[0]->departure->canceled);
+        self::assertEquals("WALK", $connections[2]->via[0]->departure->direction->name);
+        self::assertEquals("WALK", $connections[2]->via[0]->departure->vehicle->name);
+        self::assertEquals("http://irail.be/connections/8811130/20210326/WALK", $connections[2]->via[0]->departure->departureConnection);
+        self::assertEquals("http://irail.be/connections/8833001/20210326/S23785", $connections[2]->departure->departureConnection);
+
+        self::assertEquals(1, $connections[2]->via[1]->arrival->walking);
+        self::assertEquals(0, $connections[2]->via[1]->arrival->arrived);
+        self::assertEquals(0, $connections[2]->via[1]->arrival->delay);
+        self::assertEquals(0, $connections[2]->via[1]->arrival->canceled);
+        self::assertEquals("WALK", $connections[2]->via[1]->arrival->direction->name);
+        self::assertEquals("WALK", $connections[2]->via[1]->arrival->vehicle->name);
+    }
 }
