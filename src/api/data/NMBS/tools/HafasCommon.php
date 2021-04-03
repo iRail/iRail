@@ -89,7 +89,7 @@ class HafasCommon
     public static function parseRemarkDefinitions($json): array
     {
         if (!key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            return $remarkDefinitions;
+            return [];
         }
 
         $remarkDefinitions = [];

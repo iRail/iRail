@@ -14,6 +14,8 @@ use Exception;
 use Irail\api\data\DataRoot;
 use Irail\api\data\models\Connection;
 use Irail\api\data\models\DepartureArrival;
+use Irail\api\data\models\hafas\HafasConnectionLeg;
+use Irail\api\data\models\hafas\HafasIntermediateStop;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
@@ -420,24 +422,24 @@ class ConnectionsDatasource
     }
 
     /**
-     * @param $request
-     * @param $hafasConnection
-     * @param $locationDefinitions
-     * @param $vehicleDefinitions
-     * @param $alertDefinitions
-     * @param $remarkDefinitions
-     * @param $lang
+     * @param ConnectionsRequest $request
+     * @param array $hafasConnection
+     * @param array $locationDefinitions
+     * @param array $vehicleDefinitions
+     * @param array $alertDefinitions
+     * @param array $remarkDefinitions
+     * @param string $lang
      * @return Connection
      * @throws Exception
      */
     private static function parseHafasConnection(
         ConnectionsRequest $request,
-        $hafasConnection,
-        $locationDefinitions,
-        $vehicleDefinitions,
-        $alertDefinitions,
-        $remarkDefinitions,
-        $lang
+        array $hafasConnection,
+        array $locationDefinitions,
+        array $vehicleDefinitions,
+        array $alertDefinitions,
+        array $remarkDefinitions,
+        string $lang
     ): Connection {
         $connection = new Connection();
         $connection->duration = Tools::transformDurationHHMMSS($hafasConnection['dur']);
@@ -487,7 +489,7 @@ class ConnectionsDatasource
 
         $connection->arrival->platform = self::parseArrivalPlatform($arrival = $hafasConnection['arr']);
 
-        $trainsInConnection = self::parseHafasTrainsForConnection(
+        $trainsInConnection = self::parseHafasLegsForConnection(
             $hafasConnection,
             $locationDefinitions,
             $vehicleDefinitions,
@@ -506,8 +508,7 @@ class ConnectionsDatasource
         if ($viaCount != 0) {
             for ($viaIndex = 0; $viaIndex < $viaCount; $viaIndex++) {
                 // Update the via array
-                // TODO: clean this up
-                $vias = self::addViaToArray($vias, $viaIndex, $trainsInConnection);
+                $vias[$viaIndex] = self::parseViaFromTrainArray($viaIndex, $trainsInConnection);
             }
             $connection->via = $vias;
         }
@@ -515,11 +516,10 @@ class ConnectionsDatasource
         // All the train alerts should go together in the connection alerts
         $connectionAlerts = [];
         foreach ($trainsInConnection as $train) {
-            if (property_exists($train, 'alerts')) {
-                $connectionAlerts = array_merge($connectionAlerts, $train->alerts);
-            }
+            $connectionAlerts = array_merge($connectionAlerts, $train->alerts);
         }
         $connectionAlerts = array_unique($connectionAlerts, SORT_REGULAR);
+
 
         $connectionRemarks = [];
         if (key_exists('ovwMsgL', $hafasConnection)) {
@@ -530,6 +530,13 @@ class ConnectionsDatasource
         if (key_exists('footerMsgL', $hafasConnection)) {
             foreach ($hafasConnection['footerMsgL'] as $message) {
                 $connectionRemarks[] = $remarkDefinitions[$message['remX']];
+            }
+        }
+        if (key_exists('msgL', $hafasConnection)) {
+            foreach ($hafasConnection['msgL'] as $message) {
+                if ($message['type'] == 'REM') {
+                    $connectionRemarks[] = $remarkDefinitions[$message['remX']];
+                }
             }
         }
 
@@ -560,7 +567,7 @@ class ConnectionsDatasource
         $connection->departure->left = $trainsInConnection[0]->left;
 
         $connection->departure->walking = 0;
-        if (property_exists($trainsInConnection[0], 'alerts') && count($trainsInConnection[0]->alerts) > 0) {
+        if (count($trainsInConnection[0]->alerts) > 0) {
             $connection->departure->alert = $trainsInConnection[0]->alerts;
         }
 
@@ -633,10 +640,10 @@ class ConnectionsDatasource
      * @param array $vehicleDefinitions The vehicle definitions, defined in the API response.
      * @param array $alertDefinitions The alert definitions, defined in the API response.
      * @param string $lang The language for station names etc.
-     * @return array All trains in this connection.
+     * @return HafasConnectionLeg[] All trains in this connection.
      * @throws Exception
      */
-    private static function parseHafasTrainsForConnection(
+    private static function parseHafasLegsForConnection(
         array $hafasConnection,
         array $locationDefinitions,
         array $vehicleDefinitions,
@@ -655,7 +662,7 @@ class ConnectionsDatasource
                 continue;
             }
 
-            $trainsInConnection[] = self::parseHafasTrain(
+            $trainsInConnection[] = self::parseHafasConnectionLeg(
                 $trainRide,
                 $hafasConnection,
                 $locationDefinitions,
@@ -675,17 +682,17 @@ class ConnectionsDatasource
      * @param array $vehicleDefinitions The vehicle definitions, defined in the API response.
      * @param array $alertDefinitions The alert definitions, defined in the API response.
      * @param string $lang The language for station names etc.
-     * @return StdClass The parsed train
+     * @return HafasConnectionLeg The parsed leg
      * @throws Exception
      */
-    private static function parseHafasTrain(
+    private static function parseHafasConnectionLeg(
         array $trainRide,
         array $hafasConnection,
         array $locationDefinitions,
         array $vehicleDefinitions,
         array $alertDefinitions,
         string $lang
-    ): StdClass {
+    ): HafasConnectionLeg {
         $departPlatform = self::parseDeparturePlatform($trainRide['dep']);
 
         if (key_exists('dTimeR', $trainRide['dep'])) {
@@ -747,13 +754,8 @@ class ConnectionsDatasource
             $arrivalcanceled = $trainRide['arr']['aCncl'];
         }
 
-        $parsedTrain = new StdClass();
-        $parsedTrain->arrival = new ViaDepartureArrival();
-        $parsedTrain->arrival->time = Tools::transformTime($trainRide['arr']['aTimeS'], $hafasConnection['date']);
-        $parsedTrain->arrival->delay = $arrivalDelay;
-        $parsedTrain->arrival->platform = $arrivalPlatform;
-        $parsedTrain->arrival->canceled = $arrivalcanceled;
-        $parsedTrain->arrival->isExtraStop = $arrivalIsExtraStop;
+        $parsedTrain = new HafasConnectionLeg();
+
         $parsedTrain->departure = new ViaDepartureArrival();
         $parsedTrain->departure->time = Tools::transformTime($trainRide['dep']['dTimeS'], $hafasConnection['date']);
         $parsedTrain->departure->delay = $departDelay;
@@ -761,6 +763,12 @@ class ConnectionsDatasource
         $parsedTrain->departure->canceled = $departurecanceled;
         $parsedTrain->departure->isExtraStop = $departureIsExtraStop;
 
+        $parsedTrain->arrival = new ViaDepartureArrival();
+        $parsedTrain->arrival->time = Tools::transformTime($trainRide['arr']['aTimeS'], $hafasConnection['date']);
+        $parsedTrain->arrival->delay = $arrivalDelay;
+        $parsedTrain->arrival->platform = $arrivalPlatform;
+        $parsedTrain->arrival->canceled = $arrivalcanceled;
+        $parsedTrain->arrival->isExtraStop = $arrivalIsExtraStop;
         $departTime = Tools::transformTime($trainRide['dep']['dTimeS'], $hafasConnection['date']);
 
         $parsedTrain->duration = Tools::calculateSecondsHHMMSS(
@@ -795,6 +803,7 @@ class ConnectionsDatasource
 
         $parsedTrain->isPartiallyCancelled = false;
         $parsedTrain->stops = [];
+        $parsedTrain->alerts = [];
         if (key_exists('jny', $trainRide) && key_exists('stopL', $trainRide['jny'])) {
             // If the list of stops is not present, the NMBS is outputting faulty data. It means the train is broken
             // on their website as well.
@@ -825,12 +834,22 @@ class ConnectionsDatasource
                     $parsedTrain->stops[$i]->arrived = 1;
                 }
             }
-
-            $parsedTrain->alerts = [];
+        }
+        if (key_exists('jny', $trainRide)) {
             try {
                 if (key_exists('himL', $trainRide['jny']) && is_array($trainRide['jny']['himL'])) {
-                    foreach ($trainRide['jny']['himL'] as $himX) {
-                        $parsedTrain->alerts[] = $alertDefinitions[$himX['himX']];
+                    foreach ($trainRide['jny']['himL'] as $message) {
+                        $parsedTrain->alerts[] = $alertDefinitions[$message['himX']];
+                    }
+                }
+                if (key_exists('msgL', $trainRide['jny']) && is_array($trainRide['jny']['msgL'])) {
+                    foreach ($trainRide['jny']['msgL'] as $message) {
+                        if ($message['type'] == "HIM") {
+                            if ($message['himX'] > count($alertDefinitions)) {
+                                continue;
+                            }
+                            $parsedTrain->alerts[] = $alertDefinitions[$message['himX']];
+                        }
                     }
                 }
             } catch (Exception $ignored) {
@@ -838,8 +857,10 @@ class ConnectionsDatasource
             }
         }
 
+
         if ($trainRide['type'] == 'WALK') {
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
+            // TODO: This is ugly code, clean it up
             $parsedTrain->direction = new StdClass();
             $parsedTrain->direction->name = "WALK";
             $parsedTrain->vehicle = new StdClass();
@@ -872,7 +893,7 @@ class ConnectionsDatasource
      * @param $vehicleDefinitions
      * @param $rawIntermediateStop
      * @param $conn
-     * @return StdClass The parsed intermediate stop.
+     * @return HafasIntermediateStop The parsed intermediate stop.
      * @throws Exception
      */
     private static function parseHafasIntermediateStop($lang, $locationDefinitions, $vehicleDefinitions, $rawIntermediateStop, $conn)
@@ -889,7 +910,7 @@ class ConnectionsDatasource
            "dProgType": "PROGNOSED",
            "isImp": true
         */
-        $intermediateStop = new StdClass();
+        $intermediateStop = new HafasIntermediateStop();
         $intermediateStop->station = StationsDatasource::getStationFromID(
             $locationDefinitions[$rawIntermediateStop['locX']]->id,
             $lang
@@ -1007,12 +1028,11 @@ class ConnectionsDatasource
 
 
     /**
-     * @param $vias
-     * @param $viaIndex
-     * @param $trains
-     * @return Via[]
+     * @param $viaIndex int The index of the via which should be parsed
+     * @param $trains array The trains to parse into vias
+     * @return Via The parsed via
      */
-    private static function addViaToArray($vias, $viaIndex, $trains): array
+    private static function parseViaFromTrainArray(int $viaIndex, array $trains): Via
     {
         // A via lies between two trains. This mean that for n trains, there are n-1 vias, with n >=1
         // The n-th via lies between train n and train n+1
@@ -1081,8 +1101,7 @@ class ConnectionsDatasource
             $constructedVia->arrival->vehicle->name
         );
 
-        $vias[$viaIndex] = $constructedVia;
-        return $vias;
+        return $constructedVia;
     }
 
     /**
