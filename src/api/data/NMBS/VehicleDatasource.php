@@ -97,7 +97,7 @@ class VehicleDatasource
         ];
 
         $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
-        return self::getVehicleDataForJourneyId($jid, $request_options);
+        return self::getVehicleDataForJourneyId($jid, $lang, $request_options);
     }
 
     /**
@@ -333,16 +333,17 @@ class VehicleDatasource
 
     /**
      * @param $jid
-     * @param array $request_options
+     * @param string $lang The preferred language for alerts and messages
+     * @param array $request_options request options such as referer and user agent
      * @return bool|string
      */
-    private static function getVehicleDataForJourneyId($jid, array $request_options)
+    private static function getVehicleDataForJourneyId($jid, string $lang, array $request_options)
     {
         $postdata = '{
         "auth":{"aid":"sncb-mobi","type":"AID"},
         "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND",
             "ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
-        "lang":"nld",
+        "lang":"' . $lang . '",
         "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
         "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
         $response = self::makeRequestToNmbs($postdata, $request_options);
