@@ -334,8 +334,6 @@ class ConnectionsDatasource
                     // Route query
                     'meth' => 'TripSearch',
                     'req' => [
-
-                        // TODO: include as many parameters as possible in locations to prevent future issues
                         // Official Location ID (lid): "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@"
                         // "eteId": "A=1@O=Zaventem@X=4469886@Y=50885723@U=80@L=008811221@B=1@p=1518483428@n=ac.1=GA@Zaventem",
                         // "extId": "8811221",
@@ -343,14 +341,14 @@ class ConnectionsDatasource
                         // Departure station
                         'depLocL' => [
                             [
-                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GA@'
+                                'lid' => 'L=' . $stationFrom->_hafasId . '@A=1@B=1@U=80@'
                             ]
                         ],
 
                         // Arrival station
                         'arrLocL' => [
                             [
-                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@p=1578357403@n=ac.1=GI@'
+                                'lid' => 'L=' . $stationTo->_hafasId . '@A=1@B=1@U=80@@'
                             ]
                         ],
 
