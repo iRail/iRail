@@ -369,7 +369,7 @@ class ConnectionsDatasource
                         // Coordinates of a line visualizing the trip (direct lines between stations, doesn't show the tracks)
                         'getPolyline' => false,
                         // Number of results
-                        'numF' => 8,
+                        'numF' => 6,
                         'liveSearch' => false
                     ]
                 ]
