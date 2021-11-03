@@ -54,8 +54,8 @@ class DisturbancesDatasource
             // This fallback ensures travellers get information if everything goes down.
             $disturbance = new stdClass();
             $disturbance->title = "Website issues";
-            $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available.";
-            $disturbance->link = "https://belgianrail.be/";
+            $disturbance->description = "It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available. You are viewing the last available disturbance data cached by iRail.";
+            $disturbance->link = "https://belgianrail.be/"; // Should this be a link to iRail instead?
             $disturbance->type = self::TYPE_DISTURBANCE;
             $disturbance->timestamp = round(microtime(true));
             array_unshift($data, $disturbance);
