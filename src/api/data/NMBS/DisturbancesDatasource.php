@@ -133,6 +133,7 @@ class DisturbancesDatasource
             $xml = $tidy->value;
         }
 
+        libxml_use_internal_errors(); // Don't print XML errors
         $data = new SimpleXMLElement($xml);
         $disturbances = [];
         // Loop through all news items.
