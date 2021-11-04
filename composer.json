@@ -25,6 +25,7 @@
     "ext-iconv": "*",
     "ext-mbstring": "*",
     "ext-mongodb": "*",
+    "ext-libxml": "*",
     "php": ">=7.4"
   },
   "require-dev": {
