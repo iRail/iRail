@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\unit\log;
+namespace Tests\Unit\Log;
 
 use Irail\log\JsonLog;
 use PHPUnit\Framework\TestCase;

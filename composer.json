@@ -28,10 +28,7 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        },
-        "classmap": [
-            "tests/"
-        ]
+        }
     },
     "config": {
         "preferred-install": "dist",
@@ -43,6 +40,10 @@
     "scripts": {
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ]
+        ],
+        "post-install-cmd": [
+            "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
+        ],
+        "post-update-cmd" : "cd vendor/irail/stations; npm install ; node bin/build.js > stations.jsonld"
     }
 }

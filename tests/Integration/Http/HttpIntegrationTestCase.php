@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
-abstract class IntegrationTestCase extends TestCase
+abstract class HttpIntegrationTestCase extends TestCase
 {
 
     /** @var Process */

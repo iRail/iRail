@@ -2,9 +2,11 @@
 
 namespace Irail\Data\Nmbs\Repositories;
 
+use Irail\Data\Nmbs\Tools\HafasCommon;
 use Irail\Data\Nmbs\Tools\Tools;
-use Irail\Models\Result\DepartureArrivalMode;
-use Irail\Models\Result\Request\LiveboardRequest;
+use Irail\Models\CachedData;
+use Irail\Models\DepartureArrivalMode;
+use Irail\Models\Requests\LiveboardRequest;
 use Irail\Traits\Cache;
 
 class RawDataRepository
@@ -19,9 +21,14 @@ class RawDataRepository
     public function __construct(StationsRepository $stationsRepository)
     {
         $this->stationsRepository = $stationsRepository;
+        $this->setCachePrefix('NMBS');
     }
 
-    public function getLiveboardData(LiveboardRequest $request): string
+    /**
+     * @param LiveboardRequest $request
+     * @return CachedData the data, along with information about its age and validity
+     */
+    public function getLiveboardData(LiveboardRequest $request): CachedData
     {
         return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshLiveboardData($request);
@@ -34,7 +41,7 @@ class RawDataRepository
      */
     protected function getFreshLiveboardData(LiveboardRequest $request): string|bool
     {
-        $iRailStation = $this->stationsRepository->getStationById($request->getStationId());
+        $hafasStationId = HafasCommon::iRailToHafasId($request->getStationId());
 
         $request_options = [
             'referer'   => 'http://api.irail.be/',
@@ -59,7 +66,7 @@ class RawDataRepository
                     'ua'   => 'SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)',
                     'v'    => 302132,
                 ],
-            'lang'      => $request->getIso2Language(),
+            'lang'      => $request->getLanguage(),
             'svcReqL'   =>
                 [
                     0 =>
@@ -68,7 +75,7 @@ class RawDataRepository
                                 [
                                     'polyEnc' => 'GPA',
                                 ],
-                            'meth' => 'StationBoardResult',
+                            'meth' => 'StationBoard',
                             'req'  =>
                                 [
                                     'date'                => $request->getDateTime()->format("Ymd"),
@@ -83,18 +90,15 @@ class RawDataRepository
                                         ],
                                     'stbLoc'              =>
                                         [
-                                            'lid'  => 'A=1@O=' . $iRailStation->getStandardname() . '@U=80@L=00' . $iRailStation->getHafasId() . '@B=1',
-                                            'name' => '' . $iRailStation->getStandardname() . '',
+                                            'lid'  => 'A=1@O=@U=80@L=00' . $hafasStationId . '@B=1',
                                             'type' => 'S',
                                         ],
                                     'time'                => $request->getDateTime()->format("Hms"),
-                                    'getPasslist'         => false,
-                                    'getTrainComposition' => false,
                                     'maxJny'              => 50
                                 ]
                         ]
                 ],
-            'ver'       => '1.11',
+            'ver'       => '1.21',
             'formatted' => false,
         ];
         if ($request->getDepartureArrivalMode() == DepartureArrivalMode::MODE_ARRIVAL) {

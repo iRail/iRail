@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
 use GuzzleHttp\Exception\GuzzleException;
 
-class LiveboardIntegrationTest extends IntegrationTestCase
+class LiveboardHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()
     {

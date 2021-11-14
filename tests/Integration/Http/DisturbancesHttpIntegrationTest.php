@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
-class DisturbancesIntegrationTest extends IntegrationTestCase
+class DisturbancesHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_noParameters_shouldReturn200()
     {

@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\StationsRepository;
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -46,6 +49,18 @@ $app->singleton(
 $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     Irail\Console\Kernel::class
+);
+
+
+$app->singleton(
+    RawDataRepository::class,
+    RawDataRepository::class
+);
+
+
+$app->singleton(
+    StationsRepository::class,
+    StationsRepository::class
 );
 
 /*

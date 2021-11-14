@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Models\Request;
+namespace Irail\Models\Requests;
 
 interface CacheableRequest
 {

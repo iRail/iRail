@@ -276,4 +276,9 @@ class HafasCommon
 
         return $locationDefinitions;
     }
+
+    public static function iRailToHafasId(string $iRailStationId)
+    {
+        return substr($iRailStationId, 2);
+    }
 }

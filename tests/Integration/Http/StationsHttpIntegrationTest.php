@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
-class StationsIntegrationTest extends IntegrationTestCase
+class StationsHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_noParameters_shouldReturn200()
     {

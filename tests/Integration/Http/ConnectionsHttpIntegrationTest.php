@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
-class ConnectionsIntegrationTest extends IntegrationTestCase
+class ConnectionsHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()
     {

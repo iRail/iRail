@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Integration;
+namespace Tests\Integration\Http;
 
 use DateTime;
 use DateTimeZone;
 use GuzzleHttp\Exception\GuzzleException;
 
-class VehicleIntegrationTest extends IntegrationTestCase
+class VehicleHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()
     {

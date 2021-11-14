@@ -6,12 +6,13 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Closure;
+use Irail\Models\CachedData;
 use Psr\Cache\InvalidArgumentException;
 
 trait Cache
 {
-    private AbstractCachePool $cache;
-    private string $prefix;
+    private ?AbstractCachePool $cache = null;
+    private string $prefix = '';
     private int $defaultTtl = 15;
 
     private function initializeCachePool(): void
@@ -44,7 +45,11 @@ trait Cache
     {
         $key = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
-        return $this->cache->hasItem($key);
+        try {
+            return $this->cache->hasItem($key);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
     }
 
     /**
@@ -53,14 +58,14 @@ trait Cache
      * @param string $key The key to search for.
      * @return object|false The cached object if found. If not found, false.
      */
-    public function getCachedObject(string $key): object|false
+    public function getCachedObject(string $key): CachedData|false
     {
         $key = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
 
         try {
             if ($this->cache->hasItem($key)) {
-                return $this->cache->getItem($key)->get();
+                return $this->getCacheEntry($key);
             } else {
                 return false;
             }
@@ -73,12 +78,12 @@ trait Cache
     /**
      * Store an item in the cache
      *
-     * @param string $key The key to store the object under
-     * @param object $value The object to store
-     * @param int    $ttl The number of seconds to keep this in cache. 0 for infinity.
+     * @param string              $key The key to store the object under
+     * @param object|string|array $value The object to store
+     * @param int                 $ttl The number of seconds to keep this in cache. 0 for infinity.
      *                      Negative values will be replaced with the default TTL value.
      */
-    public function setCachedObject(string $key, object $value, int $ttl = -1)
+    public function setCachedObject(string $key, object|string|array $value, int $ttl = -1)
     {
         if ($ttl < 0) {
             $ttl = $this->defaultTtl;
@@ -93,7 +98,8 @@ trait Cache
             return;
         }
 
-        $item->set($value);
+        $cacheEntry = new CachedData($key, $value);
+        $item->set($cacheEntry);
         if ($ttl > 0) {
             $item->expiresAfter($ttl);
         }
@@ -104,18 +110,17 @@ trait Cache
     /**
      * Get data from the cache. If the data is not present in the cache, the value function will be called
      * and the retrieved value will be stored in the cache.
-     * @param string   $cacheKey
+     * @param string  $cacheKey
      * @param Closure $valueProvider
-     * @return false|object|void
+     * @return CachedData
      */
-    private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider)
+    private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider): CachedData
     {
-        if ($this->isCached($cacheKey)) {
-            return $this->getCachedObject($cacheKey);
+        if (!$this->isCached($cacheKey)) {
+            $data = $valueProvider();
+            $this->setCachedObject($cacheKey, $data);
         }
-        $data = $valueProvider();
-        $this->setCachedObject($cacheKey, $data);
-        return $data;
+        return $this->getCachedObject($cacheKey);
     }
 
     /**
@@ -127,4 +132,19 @@ trait Cache
         return $this->prefix . $key;
     }
 
+    /**
+     * @param string $key
+     * @return CachedData|null
+     * @throws InvalidArgumentException
+     */
+    private function getCacheEntry(string $key): ?CachedData
+    {
+        $cacheItem = $this->cache->getItem($key);
+        $cacheEntry = $cacheItem->get();
+        if ($cacheEntry == null) {
+            return null;
+        }
+        $cacheEntry->setExpiresAt($cacheItem->getExpirationTimestamp());
+        return $cacheEntry;
+    }
 }
