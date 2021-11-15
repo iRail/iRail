@@ -14,12 +14,12 @@ class LiveboardRequestImpl implements LiveboardRequest
     private string $stationId;
 
     /**
-     * @param string   $language
-     * @param int      $departureArrivalMode
-     * @param DateTime $dateTime
      * @param string   $stationId
+     * @param int      $departureArrivalMode
+     * @param string   $language
+     * @param DateTime $dateTime
      */
-    public function __construct(string $language, int $departureArrivalMode, DateTime $dateTime, string $stationId)
+    public function __construct(string $stationId, int $departureArrivalMode, string $language, DateTime $dateTime)
     {
         $this->language = $language;
         $this->departureArrivalMode = $departureArrivalMode;

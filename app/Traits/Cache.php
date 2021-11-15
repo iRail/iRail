@@ -112,13 +112,15 @@ trait Cache
      * and the retrieved value will be stored in the cache.
      * @param string  $cacheKey
      * @param Closure $valueProvider
+     * @param int     $ttl The number of seconds to keep this in cache. 0 for infinity.
+     *                      Negative values will be replaced with the default TTL value.
      * @return CachedData
      */
-    private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider): CachedData
+    private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
     {
         if (!$this->isCached($cacheKey)) {
             $data = $valueProvider();
-            $this->setCachedObject($cacheKey, $data);
+            $this->setCachedObject($cacheKey, $data, $ttl);
         }
         return $this->getCachedObject($cacheKey);
     }

@@ -16,88 +16,60 @@ use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
 use Irail\Data\Nmbs\Models\Platform;
 use Irail\Data\Nmbs\Models\Stop;
 use Irail\Data\Nmbs\Models\VehicleInfo;
+use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Data\Nmbs\Tools\HafasCommon;
 use Irail\Data\Nmbs\Tools\Tools;
 use Irail\Http\Requests\VehicleinformationRequest;
 use Irail\Legacy\Occupancy\OccupancyOperations;
+use Irail\Models\CachedData;
+use Irail\Models\DepartureArrival;
+use Irail\Models\Requests\LiveboardRequest;
+use Irail\Models\Requests\VehicleJourneyRequest;
+use Irail\Models\Result\LiveboardResult;
+use Irail\Models\Result\VehicleJourneyResult;
 
 class VehicleDatasource
 {
-    const HAFAS_MOBILE_API_ENDPOINT = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
+    use  HafasDatasource;
 
-    /**
-     * @param DataRoot $dataroot
-     * @param VehicleinformationRequest $request
-     * @throws Exception
-     */
-    public static function fillDataRoot(DataRoot $dataroot, VehicleinformationRequest $request)
+    private StationsRepository $stationsRepository;
+    private RawDataRepository $rawDataRepository;
+
+    public function __construct(StationsRepository $stationsRepository, RawDataRepository $rawDataRepository)
     {
-        $lang = $request->getLang();
-        $date = $request->getDate();
-
-        $nmbsCacheKey = self::getNmbsCacheKey($request->getVehicleId(), $date, $lang);
-        $serverData = Tools::getCachedObject($nmbsCacheKey);
-        if ($serverData === false) {
-            $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
-            Tools::setCachedObject($nmbsCacheKey, $serverData);
-        }
-
-        $vehicleOccupancy = OccupancyOperations::getOccupancy($request->getVehicleId(), $date);
-
-        // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
-        if (!is_null($vehicleOccupancy)) {
-            $vehicleOccupancy = iterator_to_array($vehicleOccupancy);
-        }
-
-        $hafasVehicle = self::getVehicleDetails($serverData);
-        $dataroot->vehicle = new VehicleInfo($hafasVehicle);
-        $dataroot->vehicle->locationX = 0;
-        $dataroot->vehicle->locationY = 0;
-
-        $dataroot->stop = self::getStops($serverData, $lang, $vehicleOccupancy);
-
-        $lastStop = $dataroot->stop[0];
-        foreach ($dataroot->stop as $stop) {
-            if ($stop->arrived) {
-                $lastStop = $stop;
-            }
-        }
-
-        if ($request->getAlerts() && self::getAlerts($serverData)) {
-            $dataroot->alert = self::getAlerts($serverData);
-        }
-
-        if (!is_null($lastStop)) {
-            $dataroot->vehicle->locationX = $lastStop->station->locationX;
-            $dataroot->vehicle->locationY = $lastStop->station->locationY;
-        }
-    }
-
-    public static function getNmbsCacheKey($id, $date, $lang)
-    {
-        return 'NMBSVehicle|' . join('.', [
-                $id,
-                $date,
-                $lang,
-            ]);
+        $this->stationsRepository = $stationsRepository;
+        $this->rawDataRepository = $rawDataRepository;
     }
 
     /**
-     * @param $id
-     * @param $lang
-     * @return mixed
+     * This is the entry point for the data fetching and transformation.
+     *
+     * @param LiveboardRequest $request
+     * @return LiveboardResult
      * @throws Exception
      */
-    private static function getServerData($id, $date, $lang)
+    public function getDatedVehicleJourney(VehicleJourneyRequest $request): VehicleJourneyResult
     {
-        $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
+        $rawData = $this->rawDataRepository->getVehicleJourneyData($request);
+        $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
+        return $this->parseNmbsRawVehicleJourney($rawData);
+    }
 
-        $jid = self::getJourneyIdForVehicleId($id, $date, $lang, $request_options);
-        return self::getVehicleDataForJourneyId($jid, $lang, $request_options);
+    /**
+     * @param CachedData $cachedRawData
+     * @return VehicleJourneyResult
+     * @throws Exception
+     */
+    private function parseNmbsRawVehicleJourney(CachedData $cachedRawData): VehicleJourneyResult
+    {
+        $rawData = $cachedRawData->getValue();
+        $json = $this->decodeAndVerifyResponse($rawData);
+
+        $vehicleInfo = $this->parseVehicleInfo($json);
+        $stops = $this->parseVehicleStops($json);
+        $alerts = []; // TODO: implement
+        return new VehicleJourneyResult($cachedRawData->getCreatedAt(), $vehicleInfo, $stops, $alerts);
     }
 
     /**
@@ -332,154 +304,6 @@ class VehicleDatasource
     }
 
     /**
-     * @param $jid
-     * @param string $lang The preferred language for alerts and messages
-     * @param array $request_options request options such as referer and user agent
-     * @return bool|string
-     */
-    private static function getVehicleDataForJourneyId($jid, string $lang, array $request_options)
-    {
-        $postdata = '{
-        "auth":{"aid":"sncb-mobi","type":"AID"},
-        "client":{"id":"SNCB","name":"NMBS","os":"Android 5.0.2","type":"AND",
-            "ua":"SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)","v":302132},
-        "lang":"' . $lang . '",
-        "svcReqL":[{"cfg":{"polyEnc":"GPA"},"meth":"JourneyDetails",
-        "req":{"jid":"' . $jid . '","getTrainComposition":false}}],"ver":"1.11","formatted":false}';
-        $response = self::makeRequestToNmbs($postdata, $request_options);
-        // Store the raw output to a file on disk, for debug purposes
-        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents(
-                '../storage/debug-vehicle-' . $jid . '-' . time() . '.log',
-                $response
-            );
-        }
-        return $response;
-    }
-
-    /**
-     * @param $requestedVehicleId
-     * @param $date
-     * @param $lang
-     * @param array $request_options
-     * @return string Journey ID
-     * @throws Exception
-     */
-    private static function getJourneyIdForVehicleId(string $requestedVehicleId, string $date, string $lang, array $request_options): string
-    {
-        $postdata = '{
-                      "auth": {
-                        "aid": "sncb-mobi",
-                        "type": "AID"
-                      },
-                      "client": {
-                        "id": "SNCB",
-                        "name": "NMBS",
-                        "os": "Android 5.0.2",
-                        "type": "AND",
-                        "ua": "SNCB\/302132 (Android_5.0.2) Dalvik\/2.1.0 (Linux; U; Android 5.0.2; HTC One Build\/LRX22G)",
-                        "v": 302132
-                      },
-                     "lang":"' . $lang . '",
-                      "svcReqL": [
-                        {
-                          "cfg": {
-                            "polyEnc": "GPA"
-                          },
-                          "meth": "JourneyMatch",
-                          "req": {
-                            "date": "' . $date . '",
-                            "jnyFltrL": [
-                              {
-                                "mode": "BIT",
-                                "type": "PROD",
-                                "value": "11101111000111"
-                              }
-                            ],
-                            "input":"' . $requestedVehicleId . '"
-                          }
-                        }
-                      ],
-                      "ver": "1.11",
-                      "formatted": false
-                    }';
-        // Result contains a list of journeys, with the vehicle short name, origin and destination
-        // including departure and arrival times.
-        /*
-         *           {
-         *   "jid": "1|1|0|80|8082020",
-         *   "date": "20200808",
-         *   "prodX": 0,
-         *   "stopL": [
-         *     {
-         *      "locX": 0,
-         *      "dTimeS": "182900"
-         *    },
-         *    {
-         *      "locX": 1,
-         *      "aTimeS": "213500"
-         *    }
-         *  ],
-         *  "sDaysL": [
-         *    {
-         *      "sDaysR": "not every day",
-         *      "sDaysI": "11. Apr until 12. Dec 2020 Sa, Su; also 13. Apr, 1., 21. May, 1. Jun, 21. Jul, 11. Nov",
-         *      "sDaysB": "000000000000000000000000000003860C383062C1C3060C183060D183060C183060C183060C183060C983060C10"
-         *    }
-         *   ]
-         * },
-         */
-        $response = self::makeRequestToNmbs($postdata, $request_options);
-        $json = json_decode($response, true);
-
-        // Verify that the vehicle number matches with the query.
-        // The best match should be on top, so we don't look further than the first response.
-        try {
-            HafasCommon::throwExceptionOnInvalidResponse($json);
-        } catch (Exception $exception) {
-            // An error in the journey id search should result in a 404, not a 500 error.
-            throw new Exception("Vehicle not found", 404, $exception);
-        }
-
-        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
-        $vehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['jnyL'][0]['prodX']];
-        if (preg_match("/[A-Za-z]/", $requestedVehicleId) != false) {
-            // The search string contains letters, so we try to match train type and number (IC xxx)
-            if (preg_replace("/[^A-Za-z0-9]/", "", $vehicle->name) !=
-                preg_replace("/[^A-Za-z0-9]/", "", $requestedVehicleId)) {
-                throw new Exception("Vehicle not found", 404);
-            }
-        } else {
-            // The search string contains no letters, so we try to match the train number (Train 538)
-            if ($requestedVehicleId != $vehicle->num) {
-                throw new Exception("Vehicle number not found", 404);
-            }
-        }
-
-        return $json['svcResL'][0]['res']['jnyL'][0]['jid'];
-    }
-
-    /**
-     * @param string $postdata
-     * @param array $request_options
-     * @return string|False
-     */
-    private static function makeRequestToNmbs(string $postdata, array $request_options)
-    {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        return $response;
-    }
-
-    /**
      * @param DateTime $requestedDate
      * @return bool
      */
@@ -567,4 +391,19 @@ class VehicleDatasource
         // The first stop can't have arrived == 1, since there is no arrival.
         $stops[0]->arrived = 0;
     }
+
+    private function parseVehicleInfo(array $json): VehicleInfo
+    {
+
+    }
+
+    /**
+     * @param array $json
+     * @return DepartureArrival[]
+     */
+    private function parseVehicleStops(array $json): array
+    {
+
+    }
+
 }

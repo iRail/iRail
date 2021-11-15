@@ -24,7 +24,7 @@ use Irail\Models\Vehicle;
 
 class LiveboardDatasource
 {
-
+use  HafasDatasource;
     private StationsRepository $stationsRepository;
     private RawDataRepository $rawDataRepository;
 
@@ -55,10 +55,10 @@ class LiveboardDatasource
 
         // A Hafas API response contains all locations, trains, ... in separate lists to prevent duplicate data.
         // Get all those lists so we can read the actual data.
-        $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
-        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
-        $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
-        $alertDefinitions = HafasCommon::parseAlertDefinitions($json);
+        $locationDefinitions = $this->parseLocationDefinitions($json);
+        $vehicleDefinitions = $this->parseVehicleDefinitions($json);
+        $remarkDefinitions = $this->parseRemarkDefinitions($json);
+        $alertDefinitions = $this->parseAlertDefinitions($json);
 
         // Now we'll actually read the departures/arrivals information.
         $currentStation = $this->stationsRepository->getStationById($locationDefinitions[0]->id);
@@ -75,20 +75,7 @@ class LiveboardDatasource
         return new LiveboardResult($cachedRawData->getCreatedAt(), $currentStation, $departuresOrArrivals);
     }
 
-    /**
-     * @param string $rawJsonData data to decode.
-     * @return array an associative array representing the JSON response
-     * @throws Exception thrown when the response is invalid or describes an error
-     */
-    private function decodeAndVerifyResponse(string $rawJsonData): array
-    {
-        if (empty($rawJsonData)) {
-            throw new Exception("The server did not return any data.", 500);
-        }
-        $json = json_decode($rawJsonData, true);
-        HafasCommon::throwExceptionOnInvalidResponse($json);
-        return $json;
-    }
+
 
     /**
      * Parse a HAFAS stop, for example

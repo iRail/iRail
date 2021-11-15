@@ -17,15 +17,7 @@ use irail\stations\Stations;
  */
 class StationsDatasource
 {
-    /**
-     * @param $dataroot
-     * @param $request
-     * @throws Exception
-     */
-    public static function fillDataRoot($dataroot, $request)
-    {
-        $dataroot->station = self::fetchAllStationsFromDB($request->getLang());
-    }
+
 
     /**
      * Takes a JSON-LD station element and transforms it into the style of the old API.

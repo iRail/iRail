@@ -22,10 +22,10 @@ class LiveboardDataSourceTest extends TestCase
         $stationsRepo = new StationsRepository();
         $datasource = new LiveboardDatasource($stationsRepo, $rawDataRepo);
         $liveboardData = $datasource->getLiveboard(
-            new LiveboardRequestImpl("nl",
+            new LiveboardRequestImpl('008814001',
                 DepartureArrivalMode::MODE_DEPARTURE,
-                new DateTime(),
-                '008814001'));
+                "nl",
+                new DateTime()));
         self::assertNotEmpty($liveboardData);
         self::assertCount(51, $liveboardData->getStops());
 
