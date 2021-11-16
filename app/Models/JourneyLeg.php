@@ -5,7 +5,7 @@ namespace Irail\Models;
 class JourneyLeg
 {
     /**
-     * @var DepartureArrival[]
+     * @var DepartureAndArrival[]
      */
     private array $stops;
 

@@ -2,22 +2,23 @@
 
 namespace Irail\Models\Result;
 
-use Irail\Models\DepartureArrival;
+use Irail\Models\DepartureAndArrival;
 use Irail\Models\StationInfo;
+use Irail\Models\StationBoardEntry;
 
 class LiveboardResult
 {
     private StationInfo $station;
     private int $timestamp;
     /**
-     * @var $stops DepartureArrival[]
+     * @var $stops StationBoardEntry[]
      */
     private array $stops;
 
     /**
-     * @param StationInfo        $station
-     * @param int                $timestamp
-     * @param DepartureArrival[] $stops
+     * @param StationInfo         $station
+     * @param int                 $timestamp
+     * @param StationBoardEntry[] $stops
      */
     public function __construct(int $timestamp, StationInfo $station, array $stops)
     {
@@ -43,7 +44,7 @@ class LiveboardResult
     }
 
     /**
-     * @return DepartureArrival[]
+     * @return StationBoardEntry[]
      */
     public function getStops(): array
     {

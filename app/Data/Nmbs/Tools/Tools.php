@@ -2,13 +2,10 @@
 
 namespace Irail\Data\Nmbs\Tools;
 
-use Cache\Adapter\Apcu\ApcuCachePool;
-use Cache\Adapter\Common\AbstractCachePool;
-use Cache\Adapter\PHPArray\ArrayCachePool;
-use Cache\Namespaced\NamespacedCachePool;
+use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Irail\Data\Nmbs\Models\Station;
-use Psr\Cache\InvalidArgumentException;
 
 /** Copyright (C) 2011 by iRail vzw/asbl
  * This is a class with static tools for you to use on the NMBS scraper. It contains stuff that is needed by all other classes.
@@ -17,38 +14,32 @@ class Tools
 {
 
     /**
-     * @var $cache Cache\Adapter\Common\AbstractCachePool cache pool which will be used throughout the application.
-     */
-    private static $cache;
-    const cache_TTL = 15;
-    const cache_prefix = "|Irail|Api|";
-
-    /**
-     * @param string $time -> in hhmmss or ddhhmmss format
-     * @param string $date -> in 20100915
-     * @return int seconds since the Unix epoch
+     * Parse a "traffic day time", which can go beyond 24h. Example: 01002000 (24:02:00, 00:02:00 the next day)
+     *
+     * @param DateTime $baseDate The date of the traffic day (the date of the first departure of the vehicle)
+     * @param string   $time The time on the traffic day
+     * @return Carbon A DateTime object representing this time.
      * @throws Exception
      */
-    public static function transformTime($time, $date)
+    public static function parseDDHHMMSS(DateTime $baseDate, string $time): Carbon
     {
         if (strlen($time) < 6) {
-            throw new Exception("Invalid time passed to transformTime, should be 6 or 8 digits!");
+            throw new Exception("Invalid time passed to parseTrafficDayTime, should be 6 or 8 digits!");
         }
         if (strlen($time) == 6) {
             $time = '00' . $time;
         }
-
         date_default_timezone_set('Europe/Brussels');
         $dayoffset = intval(substr($time, 0, 2));
         $hour = intval(substr($time, 2, 2));
+        if ($hour > 23) {
+            // Implement this functionality when needed
+            throw new \InvalidArgumentException("Traffic day times in hhmmss format, with an hour component larger than 23, cannot be parsed at this moment");
+        }
         $minute = intval(substr($time, 4, 2));
         $second = intval(substr($time, 6, 2));
-
-        $year = intval(substr($date, 0, 4));
-        $month = intval(substr($date, 4, 2));
-        $day = intval(substr($date, 6, 2));
-
-        return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
+        $baseDate = new Carbon($baseDate);
+        return $baseDate->addDays($dayoffset)->setTime($hour, $minute, $second);
     }
 
     /**
@@ -64,103 +55,9 @@ class Tools
         return Tools::transformTime($realTimeTime, $realTimeDate) - Tools::transformTime($plannedTime, $plannedDate);
     }
 
-    /**
-     * This function transforms the brail formatted timestring and reformats it to seconds.
-     * @param int $time
-     * @return int Duration in seconds
-     */
-    public static function transformDuration($time)
+    public static function calculateDDHHMMSSTimeDifferenceInSeconds(DateTime $baseDate, string $scheduledTime, string $realtime): int
     {
-        $days = intval(substr($time, 0, 2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6, 2));
-        $second = intval(substr($time, 9, 2));
-
-        return $days * 24 * 3600 + $hour * 3600 + $minute * 60 + $second;
-    }
-
-    /**
-     * This function transforms the brail formatted timestring and reformats it to seconds.
-     * @param int $time
-     * @return int Duration in seconds
-     */
-    public static function transformDurationHHMMSS($time)
-    {
-        $hour = intval(substr($time, 0, 2));
-        $minute = intval(substr($time, 2, 2));
-        $second = intval(substr($time, 4, 2));
-
-        return $hour * 3600 + $minute * 60 + $second;
-    }
-
-    /**
-     * @return AbstractCachePool the cachePool for this application
-     */
-    private static function createCachePool()
-    {
-        if (self::$cache == null) {
-            // Try to use APC when available
-            if (extension_loaded('apcu')) {
-                self::$cache = new ApcuCachePool();
-            } else {
-                // Fall back to array cache
-                self::$cache = new ArrayCachePool();
-            }
-        }
-
-        return self::$cache;
-    }
-
-
-    /**
-     * Get an item from the cache.
-     *
-     * @param String $key The key to search for.
-     * @return bool|object The cached object if found. If not found, false.
-     */
-    public static function getCachedObject($key)
-    {
-        $key = self::cache_prefix . $key;
-
-        self::createCachePool();
-
-        try {
-            if (self::$cache->hasItem($key)) {
-                return self::$cache->getItem($key)->get();
-            } else {
-                return false;
-            }
-        } catch (InvalidArgumentException $e) {
-            // Todo: log something here
-            return false;
-        }
-    }
-
-    /**
-     * Store an item in the cache
-     *
-     * @param String $key The key to store the object under
-     * @param object|array|string $value The object to store
-     * @param int $ttl The number of seconds to keep this in cache
-     */
-    public static function setCachedObject($key, $value, $ttl = self::cache_TTL)
-    {
-        $key = self::cache_prefix . $key;
-
-        self::createCachePool();
-        try {
-            $item = self::$cache->getItem($key);
-        } catch (InvalidArgumentException $e) {
-            // Todo: log something here
-            return;
-        }
-
-        $item->set($value);
-        if ($ttl > 0) {
-            $item->expiresAfter($ttl);
-        }
-
-        self::$cache->save($item);
+        return self::parseDDHHMMSS($baseDate, $scheduledTime)->diffInRealSeconds(self::parseDDHHMMSS($baseDate, $realtime));
     }
 
 
@@ -191,4 +88,6 @@ class Tools
     {
         header("X-iRail-cache-hit: " . $cached);
     }
+
+
 }

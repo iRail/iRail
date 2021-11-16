@@ -8,6 +8,8 @@ use Irail\Data\Nmbs\Models\hafas\HafasInformationManagerMessage;
 use Irail\Data\Nmbs\Models\hafas\HafasLocationDefinition;
 use Irail\Data\Nmbs\Models\hafas\HafasRemark;
 use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
+use Irail\Models\PlatformInfo;
+use Irail\Models\StationInfo;
 
 trait HafasDatasource
 {
@@ -91,106 +93,27 @@ trait HafasDatasource
             return true;
         }
     }
-
     /**
-     * @param $json
-     *
-     * @return HafasRemark[]
+     * @param StationInfo $parentStation
+     * @param array       $rawStop
+     * @param string      $schedPlatformField
+     * @param string      $rtPlatformField
+     * @return PlatformInfo|null
      */
-    protected function parseRemarkDefinitions($json): array
+    protected function parsePlatform(StationInfo $parentStation, array $rawStop, string $schedPlatformField, string $rtPlatformField): ?PlatformInfo
     {
-        if (!key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $remarkDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
-            $remarkType = $rawRemark['type'];
-            $remarkCode = $rawRemark['code'];
-            $remarkText = strip_tags(preg_replace(
-                "/<a href=\".*?\">.*?<\/a>/",
-                '',
-                $rawRemark['txtN']
-            ));
-            $remarkDefinitions[] = new HafasRemark($remarkType, $remarkCode, $remarkText);
-        }
-
-        return $remarkDefinitions;
-    }
-
-    /**
-     * Parse the list which contains information about all the service messages which are used in this API response.
-     * Service messages warn about service interruptions etc.
-     *
-     * @param $json
-     *
-     * @return HafasInformationManagerMessage[]
-     */
-    protected function parseInformationMessageDefinitions($json): array
-    {
-        if (!key_exists('himL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $alertDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
-            $startDate = \DateTime::createFromFormat("Ymd His", $rawAlert['sDate'] . ' ' . $rawAlert['sTime']);
-            $endDate = \DateTime::createFromFormat("Ymd His", $rawAlert['eDate'] . ' ' . $rawAlert['eTime']);
-            $modDate = \DateTime::createFromFormat("Ymd His", $rawAlert['lModDate'] . ' ' . $rawAlert['lModTime']);
-            $header = $rawAlert['head'];
-            $message = $rawAlert['text'];
-            $lead = $rawAlert['lead'];
-            $publisher = strip_tags($rawAlert['comp']);
-            $message = new HafasInformationManagerMessage($startDate, $endDate, $modDate, $header, $lead, $message, $publisher);
-            $alertDefinitions[] = $message;
-        }
-        return $alertDefinitions;
-    }
-
-    /**
-     * @param $json
-     *
-     * @return HafasVehicle[]
-     */
-    protected function parseVehicleDefinitions($json): array
-    {
-        if (!key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $vehicleDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
-            $vehicleDisplayName = str_replace(" ", '', $rawTrain['name']);
-            $vehicleNumber = trim($rawTrain['number']);
-            if (key_exists('prodCtx', $rawTrain)) {
-                $vehicleType = trim($rawTrain['prodCtx']['catOutL']);
+        if (key_exists($rtPlatformField, $rawStop)) {
+            $platformDesignation = $rawStop[$rtPlatformField];
+            $isScheduledPlatform = false;
+        } else {
+            if (key_exists($schedPlatformField, $rawStop)) {
+                $platformDesignation = $rawStop[$schedPlatformField];
+                $isScheduledPlatform = true;
             } else {
-                $vehicleType = trim(str_replace($vehicleNumber, '', $vehicleDisplayName));
+                return null;
             }
-            $vehicleDefinitions[] = new HafasVehicle($vehicleNumber, $vehicleDisplayName, $vehicleType);
         }
-
-        return $vehicleDefinitions;
-    }
-
-    /**
-     * @param $json
-     *
-     * @return HafasLocationDefinition[]
-     */
-    protected function parseLocationDefinitions($json): array
-    {
-        if (!key_exists('locL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $locationDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['locL'] as $index => $rawLocation) {
-            $location = new HafasLocationDefinition($index, $rawLocation['name'], $rawLocation['extId']);
-            $locationDefinitions[] = $location;
-        }
-
-        return $locationDefinitions;
+        return new PlatformInfo($parentStation->getId(), $platformDesignation, $isScheduledPlatform);
     }
 
     protected function iRailToHafasId(string $iRailStationId)
