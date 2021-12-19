@@ -20,7 +20,6 @@ class StationsRepository
         return $this->graphStationToStationInfo($station);
     }
 
-
     public function findStationByName(string $name): ?StationInfo
     {
         // first check if it wasn't by any chance an id

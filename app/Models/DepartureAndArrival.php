@@ -4,8 +4,8 @@ namespace Irail\Models;
 
 class DepartureAndArrival
 {
-    private ?StationBoardEntry $arrival;
-    private ?StationBoardEntry $departure;
+    private ?StationBoardEntry $arrival = null;
+    private ?StationBoardEntry $departure = null;
 
     /**
      * @return string

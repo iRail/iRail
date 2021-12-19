@@ -2,6 +2,8 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\DepartureAndArrival;
+use Irail\Models\StationBoardEntry;
 use Irail\Models\Vehicle;
 
 class VehicleJourneyResult
@@ -12,8 +14,8 @@ class VehicleJourneyResult
     private array $alerts;
 
     /**
-     * @param Vehicle $vehicle
-     * @param array   $stops
+     * @param Vehicle               $vehicle
+     * @param DepartureAndArrival[] $stops
      */
     public function __construct(int $timestamp, Vehicle $vehicle, array $stops, array $alerts)
     {
@@ -40,11 +42,29 @@ class VehicleJourneyResult
     }
 
     /**
-     * @return array
+     * @return DepartureAndArrival[]
      */
     public function getStops(): array
     {
         return $this->stops;
+    }
+
+    /**
+     * @param int $index
+     * @return StationBoardEntry|null
+     */
+    public function getDeparture(int $index):?StationBoardEntry
+    {
+        return $this->getStops()[$index]->getDeparture();
+    }
+
+    /**
+     * @param int $index
+     * @return StationBoardEntry|null
+     */
+    public function getArrival(int $index) :?StationBoardEntry
+    {
+        return $this->getStops()[$index]->getArrival();
     }
 
     public function getAlerts(): array

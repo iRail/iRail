@@ -5,9 +5,11 @@
 
 namespace Irail\Data\Nmbs;
 
+use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Irail\Data\Nmbs\Models\hafas\HafasResponseContext;
+use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
 use Irail\Data\Nmbs\Repositories\RawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Models\CachedData;
@@ -55,7 +57,7 @@ class LiveboardDatasource
         $context = HafasResponseContext::fromJson($json);
 
         // Now we'll actually read the departures/arrivals information.
-        $currentStation = $this->stationsRepository->getStationById($context->getLocations()[0]->getExtId());
+        $currentStation = $this->stationsRepository->getStationById($this->hafasIdToIrailId($context->getLocations()[0]->getExtId()));
         if ($currentStation == null) {
             throw new Exception("Failed to match station id {$context->getLocations()[0]->getExtId()} with a known station",
                 500);
@@ -111,8 +113,8 @@ class LiveboardDatasource
 
         if ($isDeparture) {
             // Departures
-            $scheduledTime = key_exists('dTimeS', $stbStop) ? DateTime::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeS']) : null;
-            $estimatedTime = key_exists('dTimeR', $stbStop) ? DateTime::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeR']) : $scheduledTime;
+            $scheduledTime = key_exists('dTimeS', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeS']) : null;
+            $estimatedTime = key_exists('dTimeR', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeR']) : $scheduledTime;
             $platform = $this->parsePlatform($currentStation, $stop, 'dPlatfS', 'dPlatfR');
             $isReported = (key_exists('dProgType', $stbStop) && $stbStop['dProgType'] == 'REPORTED');
             $isCanceled = (key_exists('dCncl', $stbStop) && $stbStop['dCncl']);
@@ -124,8 +126,8 @@ class LiveboardDatasource
         } else {
 
             // Arrivals
-            $scheduledTime = key_exists('aTimeS', $stbStop) ? DateTime::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeS']) : null;
-            $estimatedTime = key_exists('aTimeR', $stbStop) ? DateTime::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeR']) : $scheduledTime;
+            $scheduledTime = key_exists('aTimeS', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeS']) : null;
+            $estimatedTime = key_exists('aTimeR', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeR']) : $scheduledTime;
             $platform = $this->parsePlatform($currentStation, $stop, 'aPlatfS', 'aPlatfR');
             $isReported = (key_exists('aProgType', $stbStop) && $stbStop['aProgType'] == 'REPORTED');
             $isCanceled = (key_exists('aCncl', $stbStop) && $stbStop['aCncl']);
@@ -134,7 +136,7 @@ class LiveboardDatasource
             $uri = null;
             $occupancy = null;
         }
-        $delay = $estimatedTime - $scheduledTime;
+        $delay = $estimatedTime->diffInRealSeconds($scheduledTime);
 
         // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
         // DepartureCanceled gives information if this stop has been canceled.
@@ -179,11 +181,11 @@ class LiveboardDatasource
      * Add occupancy data (also known as spitsgids data) to the object.
      *
      * @param StationInfo          $currentStation
-     * @param Vehicle              $vehicle
+     * @param HafasVehicle              $vehicle
      * @param                      $date
      * @return Occupancy
      */
-    private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, $date): Occupancy
+    private function getOccupancy(StationInfo $currentStation, HafasVehicle $vehicle, $date): Occupancy
     {
         // TODO: implement
         return new Occupancy();

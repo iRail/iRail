@@ -4,7 +4,9 @@ namespace Irail\Data\Nmbs\Repositories;
 
 use DateTime;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Irail\Data\Nmbs\HafasDatasource;
+use Irail\Data\Nmbs\Models\hafas\HafasResponseContext;
 use Irail\Models\CachedData;
 use Irail\Models\DepartureArrivalMode;
 use Irail\Models\Requests\LiveboardRequest;
@@ -78,7 +80,7 @@ class RawDataRepository
                             'meth' => 'StationBoard',
                             'req'  =>
                                 [
-                                    'date'     => $request->getDateTime()->format("Ymd"),
+                                    'date'     => $request->getDateTime()->format('Ymd'),
                                     'jnyFltrL' =>
                                         [
                                             0 =>
@@ -93,7 +95,7 @@ class RawDataRepository
                                             'lid'  => 'A=1@O=@U=80@L=00' . $hafasStationId . '@B=1',
                                             'type' => 'S',
                                         ],
-                                    'time'     => $request->getDateTime()->format("Hms"),
+                                    'time'     => $request->getDateTime()->format('Hms'),
                                     'maxJny'   => 50
                                 ]
                         ]
@@ -146,7 +148,7 @@ class RawDataRepository
      * @param string $lang The preferred language for alerts and messages
      * @return bool|string
      */
-    private function getVehicleDataForJourneyId($jid, string $lang)
+    public function getVehicleDataForJourneyId($jid, string $lang)
     {
         $postdata = [
             'auth'      => self::HAFAS_MGATE_AUTH,
@@ -286,15 +288,16 @@ class RawDataRepository
             $this->throwExceptionOnInvalidResponse($json);
         } catch (Exception $exception) {
             // An error in the journey id search should result in a 404, not a 500 error.
-            throw new Exception("Vehicle not found", 404, $exception);
+            throw new Exception('Vehicle not found', 404, $exception);
         }
 
-        $vehicleDefinitions = $this->parseVehicleDefinitions($json);
+        $context = HafasResponseContext::fromJson($json);
+        $vehicleDefinitions = $context->getVehicles();
         $vehicle = $vehicleDefinitions[$json['svcResL'][0]['res']['jnyL'][0]['prodX']];
-        if (preg_match("/[A-Za-z]/", $vehicleId) != false) {
+        if (preg_match('/[A-Za-z]/', $vehicleId) != false) {
             // The search string contains letters, so we try to match train type and number (IC xxx)
-            if (preg_replace("/[^A-Za-z0-9]/", "", $vehicle->getDisplayName()) !=
-                preg_replace("/[^A-Za-z0-9]/", "", $vehicleId)) {
+            if (preg_replace('/[^A-Za-z0-9]/', '', $vehicle->getDisplayName()) !=
+                preg_replace('/[^A-Za-z0-9]/', '', $vehicleId)) {
                 throw new Exception("Vehicle $vehicleId not found", 404);
             }
         } else {
@@ -316,6 +319,8 @@ class RawDataRepository
         if (is_array($postdata)) {
             $postdata = json_encode($postdata, JSON_UNESCAPED_SLASHES);
         }
+        Log::debug('Mgate at: ' . self::HAFAS_MOBILE_API_ENDPOINT);
+        Log::debug("Mgate request body: $postdata");
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::HAFAS_MOBILE_API_ENDPOINT);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
@@ -326,6 +331,7 @@ class RawDataRepository
         curl_setopt($ch, CURLOPT_TIMEOUT, self::CURL_TIMEOUT);
         $response = curl_exec($ch);
         curl_close($ch);
+        Log::debug("Mgate response: $response");
         return $response;
     }
 

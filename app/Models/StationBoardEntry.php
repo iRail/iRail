@@ -52,6 +52,11 @@ class StationBoardEntry
         return $this->platform;
     }
 
+    public function isPlatformInfoAvailable(): bool
+    {
+        return $this->platform != null;
+    }
+
     /**
      * @param PlatformInfo|null $platform
      * @return StationBoardEntry
@@ -223,6 +228,11 @@ class StationBoardEntry
     {
         $this->uri = $uri;
         return $this;
+    }
+
+    public function setOccupany(?Occupancy $occupancy)
+    {
+
     }
 
 }

@@ -163,9 +163,6 @@ class VehicleDatasource
             $stops[] = $stop;
             $previousStop = $stop;
         }
-        // Use ArrivalDelay instead of DepartureDelay for the last stop, since DepartureDelay will always be 0 (there is no departure)
-        $stops[count($stops) - 1]->delay = $stops[count($stops) - 1]->arrivalDelay;
-
         $this->ensureHasArrivedHasLeftConsistency($stops);
 
         return $stops;
@@ -199,8 +196,11 @@ class VehicleDatasource
 
         [$left, $arrived] = $this->parseHasLeftHasArrived($rawStop);
 
-        $arrivalHeadSign = $rawStop['aDirTxt'] ?: $previousVehicleStop->getDeparture()->getHeadSign();
-        $departureHeadSign = $rawStop['dDirTxt'] ?: $arrivalHeadSign;
+        $arrivalHeadSign = $rawStop['aDirTxt'] ?? null;
+        if ($arrivalHeadSign == null && $previousVehicleStop != null) {
+            $arrivalHeadSign = $previousVehicleStop->getDeparture()->getHeadSign();
+        }
+        $departureHeadSign = $rawStop['dDirTxt'] ?? $arrivalHeadSign;
 
         // TODO: what does type mean?
         if (key_exists('dCncl', $rawStop)) {

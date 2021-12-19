@@ -4,10 +4,6 @@ namespace Irail\Data\Nmbs;
 
 use Exception;
 use Irail\Data\Nmbs\Models\Alert;
-use Irail\Data\Nmbs\Models\hafas\HafasInformationManagerMessage;
-use Irail\Data\Nmbs\Models\hafas\HafasLocationDefinition;
-use Irail\Data\Nmbs\Models\hafas\HafasRemark;
-use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 
