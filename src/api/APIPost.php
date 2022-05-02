@@ -36,7 +36,7 @@ class APIPost
         $this->postData = json_decode($postData);
         $this->method = $method;
 
-        $dotenv = new Dotenv(dirname(__DIR__ . '/../'));
+        $dotenv = new Dotenv(dirname(__DIR__, 2));
         $dotenv->load();
         $this->mongodb_url = getenv('MONGODB_URL');
         $this->mongodb_db = getenv('MONGODB_DB');
