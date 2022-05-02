@@ -414,16 +414,16 @@
         },
         {
             "name": "irail/stations",
-            "version": "1.6.11",
+            "version": "1.6.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-                "reference": "a0702b60b47a00871d94a65857745e0ceb70ddfc"
+                "reference": "5c443b62c9e61b51ca96569a0b56296bed2f4f83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iRail/stations/zipball/a0702b60b47a00871d94a65857745e0ceb70ddfc",
-                "reference": "a0702b60b47a00871d94a65857745e0ceb70ddfc",
+                "url": "https://api.github.com/repos/iRail/stations/zipball/5c443b62c9e61b51ca96569a0b56296bed2f4f83",
+                "reference": "5c443b62c9e61b51ca96569a0b56296bed2f4f83",
                 "shasum": ""
             },
             "require": {
@@ -455,9 +455,9 @@
             "description": "Use the Belgian railway's station in your PHP project",
             "support": {
                 "issues": "https://github.com/iRail/stations/issues",
-                "source": "https://github.com/iRail/stations/tree/1.6.11"
+                "source": "https://github.com/iRail/stations/tree/1.6.12"
             },
-            "time": "2022-05-02T18:08:51+00:00"
+            "time": "2022-05-02T18:26:48+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
