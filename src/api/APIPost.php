@@ -13,14 +13,11 @@ use Dotenv\Dotenv;
 use Exception;
 use Irail\api\occupancy\OccupancyDao;
 use Irail\api\occupancy\OccupancyOperations;
+use Irail\api\output\Json;
+use Irail\api\output\Xml;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-
-// DO NOT REMOVE, used by dynamic constructor
-use Irail\api\output\Xml;
-// DO NOT REMOVE, used by dynamic constructor
-use Irail\api\output\Json;
 
 
 class APIPost
@@ -202,8 +199,11 @@ class APIPost
         if (!in_array($format, self::SUPPORTED_FILE_FORMATS)) {
             $format = 'Xml';
         }
-        include_once "output/$format.php";
-        $printer = new $format(null);
+        if ($format == 'Json') {
+            $printer = new Json(null);
+        } else {
+            $printer = new Xml(null);
+        }
         $printer->printError($e->getCode(), $e->getMessage());
         exit(0);
     }
