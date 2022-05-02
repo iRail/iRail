@@ -17,6 +17,12 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
+// DO NOT REMOVE, used by dynamic constructor
+use Irail\api\output\Xml;
+// DO NOT REMOVE, used by dynamic constructor
+use Irail\api\output\Json;
+
+
 class APIPost
 {
     const SUPPORTED_FILE_FORMATS = ['Json', 'Jsonp', 'Xml'];
