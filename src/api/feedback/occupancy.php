@@ -25,6 +25,9 @@
 /**
  * This is the API request handler.
  */
+
+use Irail\api\APIPost;
+
 include_once '../../vendor/autoload.php';
 include_once '../APIPost.php';
 date_default_timezone_set('Europe/Brussels');
