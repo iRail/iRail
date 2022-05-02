@@ -9,6 +9,8 @@
 
 namespace Irail\api;
 
+use Dotenv\Dotenv;
+use Exception;
 use Irail\api\occupancy\OccupancyDao;
 use Irail\api\occupancy\OccupancyOperations;
 use Monolog\Formatter\LineFormatter;
@@ -34,7 +36,7 @@ class APIPost
         $this->postData = json_decode($postData);
         $this->method = $method;
 
-        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+        $dotenv = new Dotenv(dirname(__DIR__));
         $dotenv->load();
         $this->mongodb_url = getenv('MONGODB_URL');
         $this->mongodb_db = getenv('MONGODB_DB');
