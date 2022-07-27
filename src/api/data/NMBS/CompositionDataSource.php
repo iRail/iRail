@@ -224,6 +224,10 @@ class CompositionDataSource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $headers = array(
+            "auth-code: 6c088db73a11de02eebfc0e5e4d38c75",
+        );
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $response = curl_exec($ch);
         curl_close($ch);
 
