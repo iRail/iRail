@@ -161,7 +161,7 @@ class OccupancyOperations
 
     private static function initDotEnv(): void
     {
-        $dotenv = new Dotenv(dirname(dirname(dirname(__DIR__))));
+        $dotenv = new Dotenv(dirname(__DIR__, 3));
         $dotenv->load();
     }
 }

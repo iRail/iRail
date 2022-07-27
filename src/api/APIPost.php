@@ -9,11 +9,16 @@
 
 namespace Irail\api;
 
+use Dotenv\Dotenv;
+use Exception;
 use Irail\api\occupancy\OccupancyDao;
 use Irail\api\occupancy\OccupancyOperations;
+use Irail\api\output\Json;
+use Irail\api\output\Xml;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+
 
 class APIPost
 {
@@ -34,7 +39,7 @@ class APIPost
         $this->postData = json_decode($postData);
         $this->method = $method;
 
-        $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+        $dotenv = new Dotenv(dirname(__DIR__, 2));
         $dotenv->load();
         $this->mongodb_url = getenv('MONGODB_URL');
         $this->mongodb_db = getenv('MONGODB_DB');
@@ -194,8 +199,11 @@ class APIPost
         if (!in_array($format, self::SUPPORTED_FILE_FORMATS)) {
             $format = 'Xml';
         }
-        include_once "output/$format.php";
-        $printer = new $format(null);
+        if ($format == 'Json') {
+            $printer = new Json(null);
+        } else {
+            $printer = new Xml(null);
+        }
         $printer->printError($e->getCode(), $e->getMessage());
         exit(0);
     }
