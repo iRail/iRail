@@ -34,7 +34,7 @@ class CompositionDataSource
      * Scrape the composition of a train from the NMBS trainmap web application.
      * @param string $vehicleId The id of the vehicle for which the train composition should be retrieved (Example: IC587, or 587).
      * @param string $language string The request language.
-     * @param bool $returnAllData Whether or not ALL data should be returned, including unstable, unchecked raw source data.
+     * @param bool   $returnAllData Whether or not ALL data should be returned, including unstable, unchecked raw source data.
      * @return TrainCompositionResult The iRail response data.
      * @throws Exception Thrown when a vehicle with the specified ID couldn't be found.
      */
@@ -59,7 +59,7 @@ class CompositionDataSource
                 Tools::setCachedObject($nmbsCacheKey, $data, 5 * 60);
             } else {
                 // Confirmed data doesn't change and contains all details. This data dissapears after the train ride,
-                // so cache it long enough so it doesn't dissapear instantly after the ride.
+                // so cache it long enough so it doesn't disappear instantly after the ride.
                 Tools::setCachedObject($nmbsCacheKey, $data, 60 * 60 * 6);
             }
         } else {
@@ -116,9 +116,9 @@ class CompositionDataSource
 
     /**
      * Parse a train composition unit, typically one carriage or locomotive.
-     * @param $rawCompositionUnit StdClass the raw composition unit data.
+     * @param      $rawCompositionUnit StdClass the raw composition unit data.
      * @param bool $returnAllData True if all source data should be printed, even the unstable fields.
-     * @param int $position The index/position of this vehicle.
+     * @param int  $position The index/position of this vehicle.
      * @return TrainCompositionUnit The parsed and cleaned TrainCompositionUnit.
      */
     private static function parseCompositionUnit($rawCompositionUnit, bool $returnAllData, int $position): TrainCompositionUnit
@@ -137,14 +137,20 @@ class CompositionDataSource
 
         if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR") {
             self::setAmMrMaterialType($materialType, $rawCompositionUnit, $position);
-        } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
-            self::setHleMaterialType($materialType, $rawCompositionUnit);
-        } elseif (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
-            self::setHvMaterialType($materialType, $rawCompositionUnit);
-        } elseif (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
-            // Anything else, defaul fallback
-            $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
-            $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
+        } else {
+            if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
+                self::setHleMaterialType($materialType, $rawCompositionUnit);
+            } else {
+                if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
+                    self::setHvMaterialType($materialType, $rawCompositionUnit);
+                } else {
+                    if (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
+                        // Anything else, defaul fallback
+                        $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
+                        $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
+                    }
+                }
+            }
         }
 
         return $materialType;
@@ -154,29 +160,29 @@ class CompositionDataSource
     {
         $trainCompositionUnit = new TrainCompositionUnit();
         $wellDefinedProperties = [
-            'hasToilets' => false,
-            'hasTables' => false,
-            'hasBikeSection' => false,
-            'hasSecondClassOutlets' => false,
-            'hasFirstClassOutlets' => false,
-            'hasHeating' => false,
-            'hasAirco' => false,
-            'hasPrmSection' => false, // Persons with Reduced Mobility
-            'hasPriorityPlaces' => false,
-            'materialNumber' => 0,
-            'tractionType' => "unknown",
-            'canPassToNextUnit' => false,
-            'standingPlacesSecondClass' => 0,
-            'standingPlacesFirstClass' => 0,
-            'seatsCoupeSecondClass' => 0,
-            'seatsCoupeFirstClass' => 0,
-            'seatsSecondClass' => 0,
-            'seatsFirstClass' => 0,
-            'lengthInMeter' => 0,
-            'tractionPosition' => 0,
+            'hasToilets'                    => false,
+            'hasTables'                     => false,
+            'hasBikeSection'                => false,
+            'hasSecondClassOutlets'         => false,
+            'hasFirstClassOutlets'          => false,
+            'hasHeating'                    => false,
+            'hasAirco'                      => false,
+            'hasPrmSection'                 => false, // Persons with Reduced Mobility
+            'hasPriorityPlaces'             => false,
+            'materialNumber'                => 0,
+            'tractionType'                  => "unknown",
+            'canPassToNextUnit'             => false,
+            'standingPlacesSecondClass'     => 0,
+            'standingPlacesFirstClass'      => 0,
+            'seatsCoupeSecondClass'         => 0,
+            'seatsCoupeFirstClass'          => 0,
+            'seatsSecondClass'              => 0,
+            'seatsFirstClass'               => 0,
+            'lengthInMeter'                 => 0,
+            'tractionPosition'              => 0,
             'hasSemiAutomaticInteriorDoors' => false,
-            'hasLuggageSection' => false,
-            'materialSubTypeName' => "unknown"
+            'hasLuggageSection'             => false,
+            'materialSubTypeName'           => "unknown"
         ];
         foreach ($wellDefinedProperties as $propertyName => $defaultValue) {
             if (property_exists($object, $propertyName)) {
@@ -211,8 +217,8 @@ class CompositionDataSource
     private static function getNmbsData(string $vehicleId, string $language)
     {
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
             'useragent' => Tools::getUserAgent(),
         ];
 
@@ -224,9 +230,10 @@ class CompositionDataSource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $headers = array(
-            "auth-code: 6c088db73a11de02eebfc0e5e4d38c75",
-        );
+        $authKey = self::getAuthKey();
+        $headers = [
+            "auth-code: $authKey",
+        ];
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $response = curl_exec($ch);
         curl_close($ch);
@@ -277,8 +284,8 @@ class CompositionDataSource
     /**
      * Handle the material type for AM/MR vehicles ( trains consisting of a type-specific number of motorized carriages which are always together, opposed to having a locomotive and unmotorized carriages).
      * @param RollingMaterialType $materialType
-     * @param $rawCompositionUnit
-     * @param int $position
+     * @param                     $rawCompositionUnit
+     * @param int                 $position
      */
     private static function setAmMrMaterialType(RollingMaterialType $materialType, $rawCompositionUnit, int $position): void
     {
@@ -290,17 +297,19 @@ class CompositionDataSource
             $materialType->parent_type = $rawCompositionUnit->parentMaterialTypeName;
             // NMBS doesn't know the subtype yet, but we can calculate this based on the position.
             self::calculateAmMrSubType($materialType, $position);
-        } elseif (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
-            $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
-            if (property_exists($rawCompositionUnit, "materialSubTypeName")) {
-                $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+        } else {
+            if (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
+                $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
+                if (property_exists($rawCompositionUnit, "materialSubTypeName")) {
+                    $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+                } else {
+                    // This data isn't available in the planning stage
+                    $materialType->sub_type = "";
+                }
             } else {
-                // This data isn't available in the planning stage
+                $materialType->parent_type = "Unknown AM/MR";
                 $materialType->sub_type = "";
             }
-        } else {
-            $materialType->parent_type = "Unknown AM/MR";
-            $materialType->sub_type = "";
         }
     }
 
@@ -308,7 +317,7 @@ class CompositionDataSource
     /**
      * Handle Electric Locomotives (HLE XX).
      * @param RollingMaterialType $materialType
-     * @param $rawCompositionUnit
+     * @param                     $rawCompositionUnit
      */
     private static function setHleMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
     {
@@ -326,8 +335,7 @@ class CompositionDataSource
     /**
      * Handle HV rolling stock (carriages which can be linked together however you want).
      * @param RollingMaterialType $materialType
-     * @param $rawCompositionUnit
-     * @param $matches
+     * @param                     $rawCompositionUnit
      * @return mixed
      */
     private static function setHvMaterialType(RollingMaterialType $materialType, $rawCompositionUnit)
@@ -350,7 +358,7 @@ class CompositionDataSource
 
     /**
      * @param RollingMaterialType $materialType
-     * @param int $position
+     * @param int                 $position
      */
     private static function calculateAmMrSubType(RollingMaterialType $materialType, int $position): void
     {
@@ -401,5 +409,52 @@ class CompositionDataSource
                     break;
             }
         }
+    }
+
+    /**
+     * Get an authentication key for the composition API from cache if possible, or fresh if no key is cached.
+     *
+     * @return string|null the auth key, or null if it could not be obtained.
+     */
+    private static function getAuthKey(): ?string
+    {
+        $cachedKey = Tools::getCachedObject("NMBSCompositionAuth");
+        if ($cachedKey) {
+            return $cachedKey;
+        }
+        $authenticationKey = self::getNewAuthKey();
+
+        Tools::setCachedObject("NMBSCompositionAuth", $authenticationKey, 60 * 30); // Store for half an hour
+        return $authenticationKey;
+    }
+
+    /**
+     * Get an authentication key for the composition API
+     *
+     * @return string|null the auth key, or null if it could not be obtained.
+     */
+    private static function getNewAuthKey(): ?string
+    {
+        $request_options = [
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
+            'useragent' => Tools::getUserAgent(),
+        ];
+
+        $ch = curl_init();
+        $url = "https://trainmap.belgiantrain.be/";
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $html = curl_exec($ch);
+        curl_close($ch);
+
+        // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
+
+        preg_match("/localStorage\.setItem\('tmAuthCode', \"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
+        return $matches['key'];
     }
 }
