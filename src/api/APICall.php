@@ -11,6 +11,7 @@
 
 namespace Irail\api;
 
+use Dotenv\Dotenv;
 use Irail\api\data\DataRoot;
 use Irail\api\data\NMBS\CompositionDataSource;
 use Irail\api\data\NMBS\ConnectionsDatasource;
@@ -43,6 +44,10 @@ class APICall
      */
     public function __construct(string $datasourceName)
     {
+        // The .env file is located two levels above src/api
+        $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
+        $dotenv->load();
+
         //When the HTTP request didn't set a User Agent, set it to a blank
         if (!isset($_SERVER['HTTP_USER_AGENT'])) {
             $_SERVER['HTTP_USER_AGENT'] = '';

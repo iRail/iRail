@@ -10,6 +10,7 @@
 namespace Irail\api\data\NMBS;
 
 use DateTime;
+use Dotenv\Dotenv;
 use Exception;
 use Irail\api\data\DataRoot;
 use Irail\api\data\models\Connection;
