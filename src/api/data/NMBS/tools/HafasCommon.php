@@ -42,16 +42,21 @@ class HafasCommon
     /**
      * Throw an exception if the JSON API response contains an error instead of a result.
      *
-     * @param array $json The JSON response as an associative array.
+     * @param array|null $json The JSON response as an associative array.
      *
      * @throws Exception An Exception containing an error message in case the JSON response contains an error message.
      */
-    public static function throwExceptionOnInvalidResponse(array $json): void
+    public static function throwExceptionOnInvalidResponse(?array $json): void
     {
+        if ($json == null) {
+            throw new Exception("This request failed due to internal errors.", 500);
+        }
+
         if (!key_exists('errorCode', $json)) {
             // all ok!
             return;
         }
+
         if ($json['errorCode'] == 'INT_ERR'
             || $json['errorCode'] == 'INT_GATEWAY'
             || $json['errorCode'] == 'INT_TIMEOUT') {
