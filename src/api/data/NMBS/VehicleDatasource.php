@@ -435,7 +435,7 @@ class VehicleDatasource
         // Verify that the vehicle number matches with the query.
         // The best match should be on top, so we don't look further than the first response.
         try {
-            HafasCommon::throwExceptionOnInvalidResponse($json);
+            HafasCommon::throwExceptionOnLegacyInvalidResponse($json);
         } catch (Exception $exception) {
             // An error in the journey id search should result in a 404, not a 500 error.
             throw new Exception("Vehicle not found", 404, $exception);
@@ -503,7 +503,7 @@ class VehicleDatasource
     private static function getVehicleDetails(string $serverData): object
     {
         $json = json_decode($serverData, true);
-        HafasCommon::throwExceptionOnInvalidResponse($json);
+        HafasCommon::throwExceptionOnLegacyInvalidResponse($json);
         $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
         return $vehicleDefinitions[$json['svcResL'][0]['res']['journey']['prodX']];
     }

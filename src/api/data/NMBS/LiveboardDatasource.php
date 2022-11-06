@@ -243,7 +243,7 @@ class LiveboardDatasource
 
         $json = json_decode($serverData, true);
 
-        HafasCommon::throwExceptionOnInvalidResponse($json);
+        HafasCommon::throwExceptionOnLegacyInvalidResponse($json);
 
         // A Hafas API response contains all locations, trains, ... in separate lists to prevent duplicate data.
         // Get all those lists so we can read the actual data.

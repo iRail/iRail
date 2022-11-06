@@ -31,7 +31,7 @@ use Monolog\Logger;
 
 class APICall
 {
-    private $VERSION = 1.1;
+    private $VERSION = 1.2;
 
     protected $request;
     protected $dataRoot;

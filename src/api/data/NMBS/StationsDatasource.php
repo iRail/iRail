@@ -77,6 +77,9 @@ class StationsDatasource
      */
     public static function getStationFromID($id, $lang)
     {
+        if (!str_starts_with($id, '00')) {
+            $id = '00' . $id;
+        }
         $stationobject = Stations::getStationFromID($id);
         if ($stationobject) {
             return self::transformNewToOldStyle($stationobject, $lang);
@@ -117,14 +120,14 @@ class StationsDatasource
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
-            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 foreach ($stationitem->alternative as $alt) {
                     if (strlen($alt->{'@value'}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
                 }
-            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
+            } else if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                 $station = $stationitem;
                 break;
             }

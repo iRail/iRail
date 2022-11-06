@@ -20,12 +20,12 @@ class HafasCommon
      *
      * @throws Exception An Exception containing an error message in case the JSON response contains an error message.
      */
-    public static function throwExceptionOnInvalidResponse(array $json): void
+    public static function throwExceptionOnLegacyInvalidResponse(array $json): void
     {
         if ($json['svcResL'][0]['err'] == "H9360") {
             throw new Exception("Date outside of the timetable period.", 404);
         }
-        if ($json['svcResL'][0]['err'] == "H890") {
+        if ($json['errorCode'] == 'SVC_NO_RESULT' || $json['svcResL'][0]['err'] == "H890") {
             throw new Exception('No results found', 404);
         }
         if ($json['svcResL'][0]['err'] == 'PROBLEMS') {
@@ -37,6 +37,34 @@ class HafasCommon
         if ($json['svcResL'][0]['err'] != 'OK') {
             throw new Exception("We're sorry, this data is not available from our sources at this moment. Error code " . $json['svcResL'][0]['err'], 500);
         }
+    }
+
+    /**
+     * Throw an exception if the JSON API response contains an error instead of a result.
+     *
+     * @param array $json The JSON response as an associative array.
+     *
+     * @throws Exception An Exception containing an error message in case the JSON response contains an error message.
+     */
+    public static function throwExceptionOnInvalidResponse(array $json): void
+    {
+        if (!key_exists('errorCode', $json)) {
+            // all ok!
+            return;
+        }
+        if ($json['errorCode'] == 'INT_ERR'
+            || $json['errorCode'] == 'INT_GATEWAY'
+            || $json['errorCode'] == 'INT_TIMEOUT') {
+            throw new Exception("NMBS data is temporarily unavailable.", 504);
+        }
+        if ($json['errorCode'] == 'SVC_NO_RESULT') {
+            throw new Exception('No results found', 404);
+        }
+        if ($json['errorCode'] == 'SVC_DATATIME_PERIOD') {
+            throw new Exception("Date  outside of the timetable period. Check your query.", 400);
+        }
+        throw new Exception("This request failed. Please check your query. Error code " . $json['errorCode'], 500);
+
     }
 
     /**
@@ -185,6 +213,90 @@ class HafasCommon
         }
         return $alertDefinitions;
     }
+
+    /**
+     * Parse the list which contains information about all the alerts which are used in this API response.
+     * Alerts warn about service interruptions etc.
+     *
+     * @param $json
+     *
+     * @return Alert[]
+     */
+    public static function parseAlerts($json): array
+    {
+        if (!key_exists('Messages', $json)) {
+            return [];
+        }
+
+        $alertDefinitions = [];
+        foreach ($json['Messages']['Message'] as $rawAlert) {
+            /*
+                              {
+                  "affectedStops": {
+                    "StopLocation": [
+                      ...
+                    ]
+                  },
+                  "validFromStop": {
+                    "name": "Gent-Sint-Pieters",
+                    "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                    "extId": "8892007",
+                    "lon": 3.710675,
+                    "lat": 51.035897
+                  },
+                  "validToStop": {
+                    "name": "Antwerpen-Centraal",
+                    "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                    "extId": "8821006",
+                    "lon": 4.421102,
+                    "lat": 51.2172
+                  },
+                  "channel": [
+                    ...
+                  ],
+                  "id": "66738",
+                  "act": true,
+                  "head": "Kortrijk - Deinze",
+                  "lead": "We are conducting work for you between Kortrijk and Deinze.",
+                  "text": "We are conducting work for you between Kortrijk and Deinze. Detailed information only available in French (FR) and in Dutch (NL).",
+                  "company": "SNCB",
+                  "category": "1",
+                  "priority": 50,
+                  "products": 57348,
+                  "modTime": "11:45:57",
+                  "modDate": "2022-10-17",
+                  "icon": "HIM1",
+                  "routeIdxFrom": 0,
+                  "routeIdxTo": 14,
+                  "sTime": "03:00:00",
+                  "sDate": "2022-10-29",
+                  "eTime": "23:59:00",
+                  "eDate": "2022-11-06"
+                }
+              }*/
+
+            $alert = new Alert();
+            $alert->header = strip_tags($rawAlert['head']);
+            $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
+            $alert->lead = strip_tags($rawAlert['lead']);
+
+            preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
+            if (count($matches[1]) > 1) {
+                $alert->link = urlencode($matches[1][0]);
+            }
+            $alert->startTime = Tools::transformTime(
+                $rawAlert['sTime'],
+                $rawAlert['sDate']
+            );
+            $alert->endTime = Tools::transformTime(
+                $rawAlert['eTime'],
+                $rawAlert['eDate']
+            );
+            $alertDefinitions[] = $alert;
+        }
+        return $alertDefinitions;
+    }
+
 
     /**
      * @param $json
