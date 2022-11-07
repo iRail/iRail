@@ -5,14 +5,13 @@
 
 namespace Irail\api\data\NMBS;
 
+use DateTime;
 use Exception;
 use Irail\api\data\DataRoot;
 use Irail\api\data\models\DepartureArrival;
-use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
-use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
@@ -40,15 +39,17 @@ class LiveboardDatasource
 
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             self::fillDataRootWithArrivalData($dataroot, $request);
-        } elseif (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
-            self::FillDataRootWithDepartureData($dataroot, $request);
         } else {
-            throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
+            if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
+                self::FillDataRootWithDepartureData($dataroot, $request);
+            } else {
+                throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
+            }
         }
     }
 
     /**
-     * @param DataRoot $dataroot
+     * @param DataRoot         $dataroot
      * @param LiveboardRequest $request
      * @throws Exception
      */
@@ -81,11 +82,11 @@ class LiveboardDatasource
             Tools::sendIrailCacheResponseHeader(true);
         }
 
-        $dataroot->arrival = self::parseNmbsData($xml, $request->getLang());
+        $dataroot->arrival = self::parseNmbsData($xml, $dataroot->station, true, $request->getLang());
     }
 
     /**
-     * @param DataRoot $dataroot
+     * @param DataRoot         $dataroot
      * @param LiveboardRequest $request
      * @throws Exception
      */
@@ -113,16 +114,16 @@ class LiveboardDatasource
             Tools::sendIrailCacheResponseHeader(true);
         }
 
-        $dataroot->departure = self::parseNmbsData($html, $request->getLang());
+        $dataroot->departure = self::parseNmbsData($html, $dataroot->station, false, $request->getLang());
     }
 
     /**
      * Get a unique key to identify data in the in-memory cache which reduces the number of requests to the NMBS.
      * @param Station $station
-     * @param string $time
-     * @param string $date
-     * @param string $lang
-     * @param string $timeSel
+     * @param string  $time
+     * @param string  $date
+     * @param string  $lang
+     * @param string  $timeSel
      * @return string
      */
     public static function getNmbsCacheKey(Station $station, string $time, string $date, string $lang, string $timeSel): string
@@ -140,87 +141,40 @@ class LiveboardDatasource
      * Fetch JSON data from the NMBS.
      *
      * @param Station $station
-     * @param string $time
-     * @param string $date
-     * @param string $lang
-     * @param string $timeSel
+     * @param string  $time Time in hh:mm format
+     * @param string  $date Date in YYYYmmdd format
+     * @param string  $lang
+     * @param string  $timeSel
      * @return string
      */
     private static function fetchDataFromNmbs(Station $station, string $time, string $date, string $lang, string $timeSel): string
     {
         $request_options = [
-            'referer' => 'http://api.irail.be/',
-            'timeout' => '30',
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
             'useragent' => Tools::getUserAgent(),
         ];
 
-        $url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/mgate.exe";
+        $url = "https://mobile-riv.api.belgianrail.be/api/v1.0/dacs";
+        $dateTime = DateTime::createFromFormat('Ymd H:i', $date . ' ' . $time);
+        $formattedDateTimeStr = $dateTime->format('Y-m-d H:i:s');
 
-        $postdata = [
-            'auth' =>
-                [
-                    'aid' => 'sncb-mobi',
-                    'type' => 'AID',
-                ],
-            'client' =>
-                [
-                    'id' => 'SNCB',
-                    'name' => 'NMBS',
-                    'os' => 'Android 5.0.2',
-                    'type' => 'AND',
-                    'ua' => 'SNCB/302132 (Android_5.0.2) Dalvik/2.1.0 (Linux; U; Android 5.0.2; HTC One Build/LRX22G)',
-                    'v' => 302132,
-                ],
-            'lang' => $lang,
-            'svcReqL' =>
-                [
-                    0 =>
-                        [
-                            'cfg' =>
-                                [
-                                    'polyEnc' => 'GPA',
-                                ],
-                            'meth' => 'StationBoard',
-                            'req' =>
-                                [
-                                    'date' => $date,
-                                    'jnyFltrL' =>
-                                        [
-                                            0 =>
-                                                [
-                                                    'mode' => 'BIT',
-                                                    'type' => 'PROD',
-                                                    'value' => '1010111',
-                                                ],
-                                        ],
-                                    'stbLoc' =>
-                                        [
-                                            'lid' => 'A=1@O=' . $station->name . '@U=80@L=00' . $station->_hafasId . '@B=1@p=1429490515@',
-                                            'name' => '' . $station->name . '',
-                                            'type' => 'S',
-                                        ],
-                                    'time' => str_replace(':', '', $time) . '00',
-                                    'getPasslist' => false,
-                                    'getTrainComposition' => false,
-                                    'maxJny' => 50
-                                ]
-                        ]
-                ],
-            'ver' => '1.11',
-            'formatted' => false,
+        $parameters = [
+            'query'   => ($timeSel == 'arr') ? 'ArrivalsApp' : 'DeparturesApp', // include intermediate stops along the way
+            'UicCode' => substr($station->_hafasId, 2),
+            // 'FromDate' => $formattedDateTimeStr, // requires date in 'yyyy-mm-dd hh:mm:ss' format TODO: figure out how this works
+            'Count'   => 100, // include intermediate stops along the way
+            // language is not passed, responses contain both Dutch and French destinations
         ];
-        if ($timeSel == 'arr') {
-            $postdata['svcReqL'][0]['req']['type'] = 'ARR';
-        }
+        $url = $url . '?' . http_build_query($parameters, "", null,);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postdata, JSON_UNESCAPED_SLASHES));
-        curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
         $response = curl_exec($ch);
         curl_close($ch);
 
@@ -235,74 +189,64 @@ class LiveboardDatasource
      * @return array
      * @throws Exception
      */
-    private static function parseNmbsData(string $serverData, string $lang): array
+    private static function parseNmbsData(string $serverData, Station $station, bool $isArrivalBoard, string $lang): array
     {
         if (empty($serverData)) {
             throw new Exception("The server did not return any data.", 500);
         }
 
         $json = json_decode($serverData, true);
-
-        HafasCommon::throwExceptionOnLegacyInvalidResponse($json);
-
-        // A Hafas API response contains all locations, trains, ... in separate lists to prevent duplicate data.
-        // Get all those lists so we can read the actual data.
-        $locationDefinitions = HafasCommon::parseLocationDefinitions($json);
-        $vehicleDefinitions = HafasCommon::parseVehicleDefinitions($json);
-        $remarkDefinitions = HafasCommon::parseRemarkDefinitions($json);
-        $alertDefinitions = HafasCommon::parseAlertDefinitions($json);
-
         // Now we'll actually read the departures/arrivals information.
         $nodes = [];
-        $currentStation = StationsDatasource::getStationFromID($locationDefinitions[0]->id, $lang);
-        foreach ($json['svcResL'][0]['res']['jnyL'] as $stop) {
+        foreach ($json['entries'] as $stop) {
             /*
-             *   "jid": "1|586|1|80|26102017",
-                                    "date": "20171026",
-                                    "prodX": 0,
-                                    "dirTxt": "Eeklo",
-                                    "status": "P",
-                                    "isRchbl": true,
-                                    "stbStop": {
-                                        "locX": 0,
-                                        "idx": 7,
-                                        "dProdX": 0,
-                                        "dPlatfS": "2",
-                                        "dPlatfR": "1",
-                                        "dTimeS": "141200",
-                                        "dTimeR": "141200",
-                                        "dProgType": "PROGNOSED"
-                                    }
+             * {
+             *    "EntryDate": "2022-11-07 19:55:00",
+             *    "UicCode": "8821006",
+             *    "TrainNumber": 9267,
+             *    "CommercialType": "IC",
+             *    "PlannedDeparture": "2022-11-07 20:44:00",
+             *    "DestinationNl": "BREDA (NL) Amsterdam Cs (NL)",
+             *    "DestinationFr": "BREDA (NL) Amsterdam Cs (NL)",
+             *    "Platform": "22",
+             *    "ExpectedDeparture": "2022-11-07 21:26:00",
+             *    "DepartureDelay": "00:42:00",
+             *    "Destination1UicCode": "8400058"
+             *  },
              */
 
             // The date of this departure
-            $date = $stop['date'];
+            $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
+                $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
+            );
+            $unixtime = $plannedDateTime->getTimestamp();
 
-            $delay = self::parseDelayInSeconds($stop, $date);
+            $delay = self::parseDelayInSeconds($isArrivalBoard ? $stop['ArrivalDelay'] : $stop['DepartureDelay']);
 
             // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
-            list($unixtime, $hafasVehicle) = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
+            // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
             // parse information about which platform this train will depart from/arrive to.
-            list($platform, $isPlatformNormal) = self::parsePlatformData($stop);
+            $platform = $stop['Platform'];
+            $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
 
             // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
             // DepartureCanceled gives information if this stop has been canceled.
-            list($stopCanceled, $left) = self::determineCanceledAndLeftStatus($stop);
+            $stopCanceled = 0; // TODO: reverse-engineer and implement
+            $left = 0; // TODO: probably no longer supported
 
-            $isExtraTrain = 0;
+            $isExtraTrain = 0; // TODO: probably no longer supported
             if (key_exists('status', $stop) && $stop['status'] == 'A') {
                 $isExtraTrain = 1;
             }
-
-            $station = StationsDatasource::getStationFromName($stop['dirTxt'], $lang);
+            $direction = StationsDatasource::getStationFromID($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode'], $lang);
+            $vehicleInfo = new VehicleInfo($stop['CommercialType'], $stop['TrainNumber']);
 
             // Now all information has been parsed. Put it in a nice object.
-
             $stopAtStation = new DepartureArrival();
             $stopAtStation->delay = $delay;
-            $stopAtStation->station = $station;
+            $stopAtStation->station = $direction;
             $stopAtStation->time = $unixtime;
-            $stopAtStation->vehicle = new VehicleInfo($hafasVehicle);
+            $stopAtStation->vehicle = $vehicleInfo;
             $stopAtStation->platform = new Platform($platform, $isPlatformNormal);
             $stopAtStation->canceled = $stopCanceled;
             // Include partiallyCanceled, but don't include canceled.
@@ -313,12 +257,12 @@ class LiveboardDatasource
             $stopAtStation->left = $left;
             $stopAtStation->isExtra = $isExtraTrain;
             $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                basename($currentStation->{'@id'}),
-                2
-            ) . '/' . date('Ymd', $unixtime) . '/' . $hafasVehicle->name;
+                    basename($station->{'@id'}),
+                    2
+                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
 
             // Add occuppancy data, if available
-            $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($currentStation, $stopAtStation, $date);
+            $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($station, $stopAtStation, $plannedDateTime->format('Ymd'));
 
             $nodes[] = $stopAtStation;
         }
@@ -326,142 +270,26 @@ class LiveboardDatasource
         return array_merge($nodes); //array merge reindexes the array
     }
 
-
     /**
-     * Parse the platform name, and whether or not there has been a change in platforms.
-     *
-     * @param $stop
-     * @return array
-     */
-    private static function parsePlatformData($stop): array
-    {
-        // Depending on whether we're showing departures or arrivals, we should load different fields
-        if (key_exists('dProdX', $stop['stbStop'])) {
-            // Departures
-            if (key_exists('dPlatfR', $stop['stbStop'])) {
-                $platform = $stop['stbStop']['dPlatfR'];
-                $isPlatformNormal = false;
-            } elseif (key_exists('dPlatfS', $stop['stbStop'])) {
-                $platform = $stop['stbStop']['dPlatfS'];
-                $isPlatformNormal = true;
-            } else {
-                // TODO: is this what we want when we don't know the platform?
-                $platform = "?";
-                $isPlatformNormal = true;
-            }
-        } else {
-            // Arrivals
-            if (key_exists('aPlatfR', $stop['stbStop'])) {
-                $platform = $stop['stbStop']['aPlatfR'];
-                $isPlatformNormal = false;
-            } elseif (key_exists('aPlatfS', $stop['stbStop'])) {
-                $platform = $stop['stbStop']['aPlatfS'];
-                $isPlatformNormal = true;
-            } else {
-                // TODO: is this what we want when we don't know the platform?
-                $platform = "?";
-                $isPlatformNormal = true;
-            }
-        }
-        return array($platform, $isPlatformNormal);
-    }
-
-    /**
-     * Parse both the vehicle used and the scheduled time of departure or arrival.
-     * @param $stop
-     * @param $date
-     * @param HafasVehicle[] $vehicleDefinitions
-     * @return array
-     */
-    private static function parseScheduledTimeAndVehicle($stop, $date, array $vehicleDefinitions): array
-    {
-        // Depending on whether we're showing departures or arrivals, we should load different fields
-        if (key_exists('dProdX', $stop['stbStop'])) {
-            // Departures
-            $unixtime = Tools::transformTime($stop['stbStop']['dTimeS'], $date);
-            $vehicle = $vehicleDefinitions[$stop['stbStop']['dProdX']];
-        } else {
-            // Arrivals
-            $unixtime = Tools::transformTime($stop['stbStop']['aTimeS'], $date);
-            $vehicle = $vehicleDefinitions[$stop['stbStop']['aProdX']];
-        }
-        return array($unixtime, $vehicle);
-    }
-
-    /**
-     * Determine whether or not the train has been canceled, or has left the station.
-     *
-     * @param $stop
-     * @return array
-     */
-    private static function determineCanceledAndLeftStatus($stop): array
-    {
-        $partiallyCanceled = 0;
-        $stopCanceled = 0;
-        if (key_exists('isCncl', $stop)) {
-            $stopCanceled = $stop['isCncl'];
-        }
-        if (key_exists('isPartCncl', $stop)) {
-            $partiallyCanceled = $stop['isPartCncl'];
-        }
-        if ($stopCanceled) {
-            $partiallyCanceled = 1; // Completely canceled is a special case of partially canceled
-        }
-
-        $left = 0;
-        // Again we need to distinguish departures and arrivals
-        if (key_exists('dProgType', $stop['stbStop'])) {
-            if ($stop['stbStop']['dProgType'] == 'REPORTED') {
-                $left = 1;
-            }
-            if (key_exists('dCncl', $stop['stbStop'])) {
-                $stopCanceled = $stop['stbStop']['dCncl'];
-            }
-        } elseif (key_exists('aProgType', $stop['stbStop'])) {
-            if ($stop['stbStop']['aProgType'] == 'REPORTED') {
-                $left = 1;
-            }
-            if (key_exists('aCncl', $stop['stbStop'])) {
-                $stopCanceled = $stop['stbStop']['aCncl'];
-            }
-        }
-        return array($stopCanceled, $left);
-    }
-
-    /**
-     * Parse the delay based on the difference between the scheduled and real departure/arrival times.
-     * @param $stop
-     * @param $date
+     * Parse the delay based on a string in hh:mm:ss format
+     * @param string $delayString The delay string
      * @return int
      */
-    private static function parseDelayInSeconds($stop, $date): int
+    private static function parseDelayInSeconds(?string $delayString): int
     {
-        if (key_exists('dTimeR', $stop['stbStop'])) {
-            $delay = Tools::calculateSecondsHHMMSS(
-                $stop['stbStop']['dTimeR'],
-                $date,
-                $stop['stbStop']['dTimeS'],
-                $date
-            );
-        } elseif (key_exists('aTimeR', $stop['stbStop'])) {
-            $delay = Tools::calculateSecondsHHMMSS(
-                $stop['stbStop']['aTimeR'],
-                $date,
-                $stop['stbStop']['aTimeS'],
-                $date
-            );
-        } else {
-            $delay = 0;
+        if ($delayString == null) {
+            return 0;
         }
-        return $delay;
+        sscanf($delayString, "%d:%d:%d", $hours, $minutes, $seconds);
+        return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
     /**
      * Add occupancy data (also known as spitsgids data) to the object.
      *
-     * @param Station $currentStation
+     * @param Station          $currentStation
      * @param DepartureArrival $stopAtStation
-     * @param $date
+     * @param                  $date
      * @return DepartureArrival
      */
     private static function getDepartureArrivalWithAddedOccuppancyData(Station $currentStation, DepartureArrival $stopAtStation, $date): DepartureArrival

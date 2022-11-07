@@ -249,7 +249,7 @@ class ConnectionsDatasource
         $formattedDateStr = DateTime::createFromFormat('Ymd', $date)->format('Y-m-d');
         $formattedTimeStr = $time . ':00';
 
-        $parameters = [ // TODO: figure out departure/arrival time toggle, probably 'searchForArrival'
+        $parameters = [
                         // 'trainFilter'      => 'S206466',// TODO: figure out valid values and meaning
                         'originExtId'      => substr($stationFrom->_hafasId, 2),
                         'destExtId'        => substr($stationTo->_hafasId, 2),
@@ -259,7 +259,7 @@ class ConnectionsDatasource
                         'passlist'         => true, // include intermediate stops along the way
                         'searchForArrival' => $timeSel, // include intermediate stops along the way
                         'numF'             => 6, // include intermediate stops along the way
-                        'products'         => 116 // TODO: use the bitcode numeric value from $typeOfTransportCode
+                        'products'         => $typeOfTransportCode
         ];
         $url = $url . '?' . http_build_query($parameters, "", null,);
 
@@ -644,7 +644,7 @@ class ConnectionsDatasource
                 $parsedTrain->direction->name = end($parsedTrain->stops)->station->name;
             }
             $hafasVehicle = self::parseProduct($leg['Product']);
-            $parsedTrain->vehicle = new VehicleInfo($hafasVehicle);
+            $parsedTrain->vehicle = VehicleInfo::fromHafasVehicle($hafasVehicle);
         }
         return $parsedTrain;
     }
