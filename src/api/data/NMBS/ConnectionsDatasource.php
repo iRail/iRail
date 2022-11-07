@@ -31,9 +31,29 @@ use stdClass;
 
 class ConnectionsDatasource
 {
-    const TYPE_TRANSPORT_BITCODE_ALL = 1399; // 10101110111 TODO: VERIFY
-    const TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = 87; // 1010111 TODO: VERIFY
-    const TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS = 23; // 0010111 TODO: VERIFY
+    // Category codes:
+    // Eurostar: "catIn": "003", "catCode": "0", "catOutS": "003", bit 2⁰
+    // Thalys: "catIn": "001", "catCode": "0", "catOutS": "001",  bit 2⁰
+    // IC, both national and international: "catIn": "007", "catCode": "2", "catOutS": "007", bit 2²
+    // S: "catIn": "071", "catCode": "4", "catOutS": "071", bit 2⁴
+    // P: "catIn": "044", "catCode": "2", "catOutS": "044",
+    // L:  "catIn": "046", "catCode": "6", "catOutS": "046",
+
+    // bitcodes for product selection:
+    // national_express: bit 0 (Thalys, Eurostar, ...)
+    // national: bit 1 (???)
+    // regional_exp: bit 2 (IC, P)
+    // regional: bit 3
+    // suburban: bit 4 (S)
+    // bus: bit 5
+    // ferry: bit 6 (L ?!)
+    // subway: bit 7
+    // tram: bit 8
+    // taxi: bit 9
+
+    const TYPE_TRANSPORT_BITCODE_ALL = 511; // 0111111111 TODO: VERIFY
+    const TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS = 94; // 0001011110 TODO: VERIFY
+    const TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = 95; // 0001011111 TODO: VERIFY
 
     const TYPE_TRANSPORT_KEY_AUTOMATIC = 'automatic';
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
@@ -249,7 +269,7 @@ class ConnectionsDatasource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . getenv('IRAIL_NMBS_API_KEY')]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
 
         $response = curl_exec($ch);
 
