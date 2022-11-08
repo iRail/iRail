@@ -2,6 +2,10 @@
 
 namespace Irail\Models;
 
+use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
+use Irail\Data\Nmbs\Models\VehicleInfo;
+use Irail\Data\Nmbs\Tools\VehicleIdTools;
+
 class Vehicle
 {
     private string $uri;
@@ -12,17 +16,28 @@ class Vehicle
 
     /**
      * @param string $uri
-     * @param string $journeyNumber
+     * @param string $id
      * @param string $type
      * @param int    $number
      */
-    public function __construct(string $uri, string $journeyNumber, string $name, string $type, int $number)
+    public function __construct(string $uri, string $id, string $type, int $number)
     {
         $this->uri = $uri;
-        $this->id = $journeyNumber;
+        $this->id = $id;
         $this->type = $type;
         $this->number = $number;
     }
+
+    public static function fromTypeAndNumber(string $type, int $number)
+    {
+        return new Vehicle(
+            'http://irail.be/vehicle/' . $type . $number,
+            $number,
+            $type,
+            $number
+        );
+    }
+
 
     /**
      * @return string
@@ -54,6 +69,11 @@ class Vehicle
     public function getNumber(): int
     {
         return $this->number;
+    }
+
+    public function getName()
+    {
+        return $this->type . $this->number;
     }
 
 }

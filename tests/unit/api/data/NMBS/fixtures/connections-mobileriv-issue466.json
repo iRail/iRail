@@ -1,0 +1,3533 @@
+{
+  "Trip": [
+    {
+      "ServiceDays": [
+        {
+          "planningPeriodBegin": "2021-12-12",
+          "planningPeriodEnd": "2022-12-10",
+          "sDaysR": "daily",
+          "sDaysI": "not 9., 19., 20. Nov",
+          "sDaysB": "000000000000007FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FCFFFFF0"
+        }
+      ],
+      "LegList": {
+        "Leg": [
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Anvers-Central / Antwerpen-Centraal",
+              "type": "ST",
+              "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+              "extId": "8821006",
+              "lon": 4.421102,
+              "lat": 51.2172,
+              "routeIdx": 0,
+              "prognosisType": "PROGNOSED",
+              "time": "22:37:00",
+              "date": "2022-11-06",
+              "track": "1",
+              "rtTime": "22:37:00",
+              "rtDate": "2022-11-06",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+              "type": "ST",
+              "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+              "extId": "8892007",
+              "lon": 3.710675,
+              "lat": 51.035897,
+              "routeIdx": 14,
+              "prognosisType": "PROGNOSED",
+              "time": "23:33:00",
+              "date": "2022-11-06",
+              "track": "1",
+              "rtTime": "23:34:00",
+              "rtDate": "2022-11-06"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|633|13|80|6112022"
+            },
+            "Messages": {
+              "Message": [
+                {
+                  "affectedStops": {
+                    "StopLocation": [
+                      {
+                        "LocationNotes": {
+                          "LocationNote": [
+                            {
+                              "value": "full assistance",
+                              "key": "FA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance",
+                              "key": "LA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "full assistance - search",
+                              "key": "FS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance - search",
+                              "key": "LS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "Belgium stations",
+                              "key": "GA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "GH",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "LI",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "CS",
+                              "type": "A"
+                            }
+                          ]
+                        },
+                        "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                        "extId": "8892007",
+                        "name": "Gent-Sint-Pieters",
+                        "lon": 3.710675,
+                        "lat": 51.035897,
+                        "products": 1652
+                      },
+                      {
+                        "LocationNotes": {
+                          "LocationNote": [
+                            {
+                              "value": "full assistance",
+                              "key": "FA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance",
+                              "key": "LA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "full assistance - search",
+                              "key": "FS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance - search",
+                              "key": "LS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "Belgium stations",
+                              "key": "GA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "GH",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "LI",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "CS",
+                              "type": "A"
+                            }
+                          ]
+                        },
+                        "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                        "extId": "8821006",
+                        "name": "Antwerpen-Centraal",
+                        "lon": 4.421102,
+                        "lat": 51.2172,
+                        "products": 1653
+                      }
+                    ]
+                  },
+                  "validFromStop": {
+                    "name": "Gent-Sint-Pieters",
+                    "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                    "extId": "8892007",
+                    "lon": 3.710675,
+                    "lat": 51.035897
+                  },
+                  "validToStop": {
+                    "name": "Antwerpen-Centraal",
+                    "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                    "extId": "8821006",
+                    "lon": 4.421102,
+                    "lat": 51.2172
+                  },
+                  "channel": [
+                    {
+                      "name": "TIMETABLE",
+                      "url": [
+                        {
+                          "name": "Meer info",
+                          "url": "https://www.belgiantrain.be/nl/news/works-deinze-gent"
+                        },
+                        {
+                          "name": "Plus d'infos",
+                          "url": "https://www.belgiantrain.be/fr/news/works-deinze-gent"
+                        }
+                      ],
+                      "validFromTime": "09:34:00",
+                      "validFromDate": "2022-06-08",
+                      "validToTime": "23:59:00",
+                      "validToDate": "2022-11-06"
+                    }
+                  ],
+                  "id": "66738",
+                  "act": true,
+                  "head": "Kortrijk - Deinze",
+                  "lead": "We are conducting work for you between Kortrijk and Deinze.",
+                  "text": "We are conducting work for you between Kortrijk and Deinze. Detailed information only available in French (FR) and in Dutch (NL).",
+                  "company": "SNCB",
+                  "category": "1",
+                  "priority": 50,
+                  "products": 57348,
+                  "modTime": "11:45:57",
+                  "modDate": "2022-10-17",
+                  "icon": "HIM1",
+                  "routeIdxFrom": 0,
+                  "routeIdxTo": 14,
+                  "sTime": "03:00:00",
+                  "sDate": "2022-10-29",
+                  "eTime": "23:59:00",
+                  "eDate": "2022-11-06"
+                }
+              ]
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC   722",
+              "num": "722",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Central / Antwerpen-Centraal",
+                  "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                  "extId": "8821006",
+                  "routeIdx": 0,
+                  "lon": 4.421102,
+                  "lat": 51.2172,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:37:00",
+                  "depDate": "2022-11-06",
+                  "rtDepTime": "22:37:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Berchem / Antwerpen-Berchem",
+                  "id": "A=1@O=Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+                  "extId": "8821121",
+                  "routeIdx": 1,
+                  "lon": 4.432221,
+                  "lat": 51.199231,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:43:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "22:41:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "22:43:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "22:41:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Saint-Nicolas / Sint-Niklaas",
+                  "id": "A=1@O=Sint-Niklaas@X=4142966@Y=51171472@U=80@L=8894508@",
+                  "extId": "8894508",
+                  "routeIdx": 7,
+                  "lon": 4.142966,
+                  "lat": 51.171472,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:02:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:00:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:02:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:00:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Lokeren",
+                  "id": "A=1@O=Lokeren@X=3987795@Y=51108062@U=80@L=8894201@",
+                  "extId": "8894201",
+                  "routeIdx": 10,
+                  "lon": 3.987795,
+                  "lat": 51.108062,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:12:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:11:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:12:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:11:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Dampoort / Gent-Dampoort",
+                  "id": "A=1@O=Gent-Dampoort@X=3740591@Y=51056374@U=80@L=8893120@",
+                  "extId": "8893120",
+                  "routeIdx": 12,
+                  "lon": 3.740591,
+                  "lat": 51.056374,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:25:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:24:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:25:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:24:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+                  "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                  "extId": "8892007",
+                  "routeIdx": 14,
+                  "lon": 3.710675,
+                  "lat": 51.035897,
+                  "arrPrognosisType": "PROGNOSED",
+                  "arrTime": "23:33:00",
+                  "arrDate": "2022-11-06",
+                  "rtArrTime": "23:34:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                }
+              ]
+            },
+            "idx": 0,
+            "name": "IC   722",
+            "number": "722",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+            "duration": "PT56M"
+          }
+        ]
+      },
+      "idx": 0,
+      "tripId": "C-0",
+      "ctxRecon": "¶HKI¶T$A=1@O=Antwerpen-Centraal@L=8821006@a=128@$A=1@O=Gent-Sint-Pieters@L=8892007@a=128@$202211062237$202211062333$IC   722$$1$$$$",
+      "duration": "PT56M",
+      "checksum": "1db43005_3"
+    },
+    {
+      "ServiceDays": [
+        {
+          "planningPeriodBegin": "2021-12-12",
+          "planningPeriodEnd": "2022-12-10",
+          "sDaysR": "not every day",
+          "sDaysI": "6. Nov, 11. until 13. Nov 2022, 10. Dec",
+          "sDaysB": "00000000000000000000000000000000000000000000000000000000000000000000C003060C183068C380000010"
+        }
+      ],
+      "LegList": {
+        "Leg": [
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Anvers-Central / Antwerpen-Centraal",
+              "type": "ST",
+              "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+              "extId": "8821006",
+              "lon": 4.421102,
+              "lat": 51.2172,
+              "routeIdx": 0,
+              "prognosisType": "PROGNOSED",
+              "time": "22:40:00",
+              "date": "2022-11-06",
+              "track": "5",
+              "rtTime": "22:40:00",
+              "rtDate": "2022-11-06",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Brux.-Midi/Brus.-Zuid",
+              "type": "ST",
+              "id": "A=1@O=Brussel-Zuid / Bruxelles-Midi@X=4336531@Y=50835707@U=80@L=8814001@",
+              "extId": "8814001",
+              "lon": 4.336531,
+              "lat": 50.835707,
+              "routeIdx": 19,
+              "prognosisType": "PROGNOSED",
+              "time": "23:31:00",
+              "date": "2022-11-06",
+              "track": "21",
+              "rtTime": "23:31:00",
+              "rtDate": "2022-11-06"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|3690|16|80|6112022"
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC  3343",
+              "num": "3343",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Central / Antwerpen-Centraal",
+                  "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                  "extId": "8821006",
+                  "routeIdx": 0,
+                  "lon": 4.421102,
+                  "lat": 51.2172,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:40:00",
+                  "depDate": "2022-11-06",
+                  "rtDepTime": "22:40:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Berchem / Antwerpen-Berchem",
+                  "id": "A=1@O=Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+                  "extId": "8821121",
+                  "routeIdx": 1,
+                  "lon": 4.432221,
+                  "lat": 51.199231,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:45:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "22:44:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "22:45:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "22:44:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Mortsel-Oude God",
+                  "id": "A=1@O=Mortsel-Oude God@X=4455737@Y=51171248@U=80@L=8821238@",
+                  "extId": "8821238",
+                  "routeIdx": 3,
+                  "lon": 4.455737,
+                  "lat": 51.171248,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:49:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "22:48:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "22:49:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "22:48:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Malines-Nekkerspoel / Mechelen-Nekkerspoel",
+                  "id": "A=1@O=Mechelen-Nekkerspoel@X=4489914@Y=51029883@U=80@L=8822343@",
+                  "extId": "8822343",
+                  "routeIdx": 8,
+                  "lon": 4.489914,
+                  "lat": 51.029883,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "22:58:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "22:57:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "22:58:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "22:57:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Malines / Mechelen",
+                  "id": "A=1@O=Mechelen@X=4482786@Y=51017649@U=80@L=8822004@",
+                  "extId": "8822004",
+                  "routeIdx": 9,
+                  "lon": 4.482786,
+                  "lat": 51.017649,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:03:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:01:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:03:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:01:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Vilvorde / Vilvoorde",
+                  "id": "A=1@O=Vilvoorde@X=4432824@Y=50924583@U=80@L=8811189@",
+                  "extId": "8811189",
+                  "routeIdx": 12,
+                  "lon": 4.432824,
+                  "lat": 50.924583,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:13:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:11:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:13:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:11:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Brux.-Nord/Brus.-Noord",
+                  "id": "A=1@O=Bru.-Noord / Brux.-Nord@X=4360847@Y=50859663@U=80@L=8812005@",
+                  "extId": "8812005",
+                  "routeIdx": 15,
+                  "lon": 4.360847,
+                  "lat": 50.859663,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:23:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:21:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:23:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:21:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Brux.-/ Brus-Centr.",
+                  "id": "A=1@O=Bru.-Centraal / Brux.-Central@X=4356802@Y=50845649@U=80@L=8813003@",
+                  "extId": "8813003",
+                  "routeIdx": 17,
+                  "lon": 4.356802,
+                  "lat": 50.845649,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:27:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:26:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:27:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:26:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Brux.-Midi/Brus.-Zuid",
+                  "id": "A=1@O=Brussel-Zuid / Bruxelles-Midi@X=4336531@Y=50835707@U=80@L=8814001@",
+                  "extId": "8814001",
+                  "routeIdx": 19,
+                  "lon": 4.336531,
+                  "lat": 50.835707,
+                  "arrPrognosisType": "PROGNOSED",
+                  "arrTime": "23:31:00",
+                  "arrDate": "2022-11-06",
+                  "rtArrTime": "23:31:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                }
+              ]
+            },
+            "idx": 0,
+            "name": "IC  3343",
+            "number": "3343",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Malines / Mechelen & Brux.-Midi/Brus.-Zuid",
+            "duration": "PT51M"
+          },
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Brux.-Midi/Brus.-Zuid",
+              "type": "ST",
+              "id": "A=1@O=Brussel-Zuid / Bruxelles-Midi@X=4336531@Y=50835707@U=80@L=8814001@",
+              "extId": "8814001",
+              "lon": 4.336531,
+              "lat": 50.835707,
+              "routeIdx": 25,
+              "prognosisType": "PROGNOSED",
+              "time": "23:52:00",
+              "date": "2022-11-06",
+              "track": "17",
+              "rtTime": "23:52:00",
+              "rtDate": "2022-11-06",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  },
+                  {
+                    "value": "Arrival Monday, 07.11.2022",
+                    "key": "text.connection.section.arrival.date.deviation",
+                    "type": "H"
+                  }
+                ]
+              },
+              "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+              "type": "ST",
+              "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+              "extId": "8892007",
+              "lon": 3.710675,
+              "lat": 51.035897,
+              "routeIdx": 27,
+              "prognosisType": "PROGNOSED",
+              "time": "00:20:00",
+              "date": "2022-11-07",
+              "track": "12",
+              "rtTime": "00:20:00",
+              "rtDate": "2022-11-07"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|1187|0|80|6112022"
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC  1545",
+              "num": "1545",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Brux.-Midi/Brus.-Zuid",
+                  "id": "A=1@O=Brussel-Zuid / Bruxelles-Midi@X=4336531@Y=50835707@U=80@L=8814001@",
+                  "extId": "8814001",
+                  "routeIdx": 25,
+                  "lon": 4.336531,
+                  "lat": 50.835707,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:52:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:49:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:52:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:49:00",
+                  "rtArrDate": "2022-11-06"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+                  "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                  "extId": "8892007",
+                  "routeIdx": 27,
+                  "lon": 3.710675,
+                  "lat": 51.035897,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depTime": "00:23:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "00:20:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "00:23:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "00:20:00",
+                  "rtArrDate": "2022-11-07",
+                  "rtArrTz": 0
+                }
+              ]
+            },
+            "idx": 1,
+            "name": "IC  1545",
+            "number": "1545",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Gand-Saint-Pierre / Gent-Sint-Pieters & Bruges / Brugge",
+            "duration": "PT28M"
+          }
+        ]
+      },
+      "idx": 1,
+      "tripId": "C-1",
+      "ctxRecon": "¶HKI¶T$A=1@O=Antwerpen-Centraal@L=8821006@a=128@$A=1@O=Brussel-Zuid / Bruxelles-Midi@L=8814001@a=128@$202211062240$202211062331$IC  3343$$1$$$$§T$A=1@O=Brussel-Zuid / Bruxelles-Midi@L=8814001@a=128@$A=1@O=Gent-Sint-Pieters@L=8892007@a=128@$202211062352$202211070020$IC  1545$$1$$$$",
+      "duration": "PT1H40M",
+      "checksum": "dde1283e_3",
+      "transferCount": 1
+    },
+    {
+      "ServiceDays": [
+        {
+          "planningPeriodBegin": "2021-12-12",
+          "planningPeriodEnd": "2022-12-10",
+          "sDaysR": "daily",
+          "sDaysI": "not 9., 19., 20. Nov",
+          "sDaysB": "000000000000007FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FCFFFFF0"
+        }
+      ],
+      "LegList": {
+        "Leg": [
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Anvers-Central / Antwerpen-Centraal",
+              "type": "ST",
+              "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+              "extId": "8821006",
+              "lon": 4.421102,
+              "lat": 51.2172,
+              "routeIdx": 0,
+              "prognosisType": "PROGNOSED",
+              "time": "23:37:00",
+              "date": "2022-11-06",
+              "track": "2",
+              "rtTime": "23:37:00",
+              "rtDate": "2022-11-06",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  },
+                  {
+                    "value": "Arrival Monday, 07.11.2022",
+                    "key": "text.connection.section.arrival.date.deviation",
+                    "type": "H"
+                  }
+                ]
+              },
+              "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+              "type": "ST",
+              "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+              "extId": "8892007",
+              "lon": 3.710675,
+              "lat": 51.035897,
+              "routeIdx": 14,
+              "prognosisType": "PROGNOSED",
+              "time": "00:33:00",
+              "date": "2022-11-07",
+              "track": "3",
+              "rtTime": "00:34:00",
+              "rtDate": "2022-11-07",
+              "rtTrackZone": "B"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|665|0|80|6112022"
+            },
+            "Messages": {
+              "Message": [
+                {
+                  "affectedStops": {
+                    "StopLocation": [
+                      {
+                        "LocationNotes": {
+                          "LocationNote": [
+                            {
+                              "value": "full assistance",
+                              "key": "FA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance",
+                              "key": "LA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "full assistance - search",
+                              "key": "FS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance - search",
+                              "key": "LS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "Belgium stations",
+                              "key": "GA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "GH",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "LI",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "CS",
+                              "type": "A"
+                            }
+                          ]
+                        },
+                        "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                        "extId": "8892007",
+                        "name": "Gent-Sint-Pieters",
+                        "lon": 3.710675,
+                        "lat": 51.035897,
+                        "products": 1652
+                      },
+                      {
+                        "LocationNotes": {
+                          "LocationNote": [
+                            {
+                              "value": "full assistance",
+                              "key": "FA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance",
+                              "key": "LA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "full assistance - search",
+                              "key": "FS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "light assistance - search",
+                              "key": "LS",
+                              "type": "A"
+                            },
+                            {
+                              "value": "Belgium stations",
+                              "key": "GA",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "GH",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "LI",
+                              "type": "A"
+                            },
+                            {
+                              "value": "",
+                              "key": "CS",
+                              "type": "A"
+                            }
+                          ]
+                        },
+                        "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                        "extId": "8821006",
+                        "name": "Antwerpen-Centraal",
+                        "lon": 4.421102,
+                        "lat": 51.2172,
+                        "products": 1653
+                      }
+                    ]
+                  },
+                  "validFromStop": {
+                    "name": "Gent-Sint-Pieters",
+                    "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                    "extId": "8892007",
+                    "lon": 3.710675,
+                    "lat": 51.035897
+                  },
+                  "validToStop": {
+                    "name": "Antwerpen-Centraal",
+                    "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                    "extId": "8821006",
+                    "lon": 4.421102,
+                    "lat": 51.2172
+                  },
+                  "channel": [
+                    {
+                      "name": "TIMETABLE",
+                      "url": [
+                        {
+                          "name": "Meer info",
+                          "url": "https://www.belgiantrain.be/nl/news/works-deinze-gent"
+                        },
+                        {
+                          "name": "Plus d'infos",
+                          "url": "https://www.belgiantrain.be/fr/news/works-deinze-gent"
+                        }
+                      ],
+                      "validFromTime": "09:34:00",
+                      "validFromDate": "2022-06-08",
+                      "validToTime": "23:59:00",
+                      "validToDate": "2022-11-06"
+                    }
+                  ],
+                  "id": "66738",
+                  "act": true,
+                  "head": "Kortrijk - Deinze",
+                  "lead": "We are conducting work for you between Kortrijk and Deinze.",
+                  "text": "We are conducting work for you between Kortrijk and Deinze. Detailed information only available in French (FR) and in Dutch (NL).",
+                  "company": "SNCB",
+                  "category": "1",
+                  "priority": 50,
+                  "products": 57348,
+                  "modTime": "11:45:57",
+                  "modDate": "2022-10-17",
+                  "icon": "HIM1",
+                  "routeIdxFrom": 0,
+                  "routeIdxTo": 14,
+                  "sTime": "03:00:00",
+                  "sDate": "2022-10-29",
+                  "eTime": "23:59:00",
+                  "eDate": "2022-11-06"
+                }
+              ]
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC   723",
+              "num": "723",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Central / Antwerpen-Centraal",
+                  "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                  "extId": "8821006",
+                  "routeIdx": 0,
+                  "lon": 4.421102,
+                  "lat": 51.2172,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:37:00",
+                  "depDate": "2022-11-06",
+                  "rtDepTime": "23:37:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Berchem / Antwerpen-Berchem",
+                  "id": "A=1@O=Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+                  "extId": "8821121",
+                  "routeIdx": 1,
+                  "lon": 4.432221,
+                  "lat": 51.199231,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "23:43:00",
+                  "depDate": "2022-11-06",
+                  "arrTime": "23:41:00",
+                  "arrDate": "2022-11-06",
+                  "rtDepTime": "23:43:00",
+                  "rtDepDate": "2022-11-06",
+                  "rtDepTz": 0,
+                  "rtArrTime": "23:41:00",
+                  "rtArrDate": "2022-11-06",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Saint-Nicolas / Sint-Niklaas",
+                  "id": "A=1@O=Sint-Niklaas@X=4142966@Y=51171472@U=80@L=8894508@",
+                  "extId": "8894508",
+                  "routeIdx": 7,
+                  "lon": 4.142966,
+                  "lat": 51.171472,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "00:02:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "00:00:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "00:02:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtDepTz": 0,
+                  "rtArrTime": "00:00:00",
+                  "rtArrDate": "2022-11-07",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Lokeren",
+                  "id": "A=1@O=Lokeren@X=3987795@Y=51108062@U=80@L=8894201@",
+                  "extId": "8894201",
+                  "routeIdx": 10,
+                  "lon": 3.987795,
+                  "lat": 51.108062,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "00:12:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "00:11:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "00:12:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtDepTz": 0,
+                  "rtArrTime": "00:11:00",
+                  "rtArrDate": "2022-11-07",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Dampoort / Gent-Dampoort",
+                  "id": "A=1@O=Gent-Dampoort@X=3740591@Y=51056374@U=80@L=8893120@",
+                  "extId": "8893120",
+                  "routeIdx": 12,
+                  "lon": 3.740591,
+                  "lat": 51.056374,
+                  "arrPrognosisType": "PROGNOSED",
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "00:25:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "00:24:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "00:25:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtDepTz": 0,
+                  "rtArrTime": "00:24:00",
+                  "rtArrDate": "2022-11-07",
+                  "rtArrTz": 0
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+                  "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                  "extId": "8892007",
+                  "routeIdx": 14,
+                  "lon": 3.710675,
+                  "lat": 51.035897,
+                  "arrPrognosisType": "PROGNOSED",
+                  "arrTime": "00:33:00",
+                  "arrDate": "2022-11-07",
+                  "rtArrTime": "00:34:00",
+                  "rtArrDate": "2022-11-07",
+                  "rtArrTz": 0
+                }
+              ]
+            },
+            "idx": 0,
+            "name": "IC   723",
+            "number": "723",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+            "duration": "PT56M"
+          }
+        ]
+      },
+      "idx": 2,
+      "tripId": "C-2",
+      "ctxRecon": "¶HKI¶T$A=1@O=Antwerpen-Centraal@L=8821006@a=128@$A=1@O=Gent-Sint-Pieters@L=8892007@a=128@$202211062337$202211070033$IC   723$$1$$$$",
+      "duration": "PT56M",
+      "checksum": "92f8b1db_3"
+    },
+    {
+      "ServiceDays": [
+        {
+          "planningPeriodBegin": "2021-12-12",
+          "planningPeriodEnd": "2022-12-10",
+          "sDaysR": "Mo - Fr",
+          "sDaysI": "not 9., 11. Nov",
+          "sDaysB": "0000000000000000000000000000000000000000000000000000000000000000001F3E7CF9F3E7CF97347CF9F3E0"
+        }
+      ],
+      "LegList": {
+        "Leg": [
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Anvers-Central / Antwerpen-Centraal",
+              "type": "ST",
+              "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+              "extId": "8821006",
+              "lon": 4.421102,
+              "lat": 51.2172,
+              "routeIdx": 0,
+              "prognosisType": "PROGNOSED",
+              "time": "04:37:00",
+              "date": "2022-11-07",
+              "track": "4",
+              "rtTime": "04:37:00",
+              "rtDate": "2022-11-07",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+              "type": "ST",
+              "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+              "extId": "8892007",
+              "lon": 3.710675,
+              "lat": 51.035897,
+              "routeIdx": 14,
+              "prognosisType": "PROGNOSED",
+              "time": "05:33:00",
+              "date": "2022-11-07",
+              "track": "9",
+              "rtTime": "05:33:00",
+              "rtDate": "2022-11-07"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|611|0|80|7112022"
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC   704",
+              "num": "704",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Central / Antwerpen-Centraal",
+                  "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                  "extId": "8821006",
+                  "routeIdx": 0,
+                  "lon": 4.421102,
+                  "lat": 51.2172,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "04:37:00",
+                  "depDate": "2022-11-07",
+                  "rtDepTime": "04:37:00",
+                  "rtDepDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Berchem / Antwerpen-Berchem",
+                  "id": "A=1@O=Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+                  "extId": "8821121",
+                  "routeIdx": 1,
+                  "lon": 4.432221,
+                  "lat": 51.199231,
+                  "depTime": "04:42:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "04:41:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "04:42:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "04:41:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Saint-Nicolas / Sint-Niklaas",
+                  "id": "A=1@O=Sint-Niklaas@X=4142966@Y=51171472@U=80@L=8894508@",
+                  "extId": "8894508",
+                  "routeIdx": 7,
+                  "lon": 4.142966,
+                  "lat": 51.171472,
+                  "depTime": "05:02:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:00:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:02:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:00:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Lokeren",
+                  "id": "A=1@O=Lokeren@X=3987795@Y=51108062@U=80@L=8894201@",
+                  "extId": "8894201",
+                  "routeIdx": 10,
+                  "lon": 3.987795,
+                  "lat": 51.108062,
+                  "depTime": "05:12:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:11:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:12:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:11:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Dampoort / Gent-Dampoort",
+                  "id": "A=1@O=Gent-Dampoort@X=3740591@Y=51056374@U=80@L=8893120@",
+                  "extId": "8893120",
+                  "routeIdx": 12,
+                  "lon": 3.740591,
+                  "lat": 51.056374,
+                  "depTime": "05:25:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:24:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:25:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:24:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+                  "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                  "extId": "8892007",
+                  "routeIdx": 14,
+                  "lon": 3.710675,
+                  "lat": 51.035897,
+                  "depTime": "05:36:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:33:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:36:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:33:00",
+                  "rtArrDate": "2022-11-07"
+                }
+              ]
+            },
+            "idx": 0,
+            "name": "IC   704",
+            "number": "704",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Gand-Saint-Pierre / Gent-Sint-Pieters & Poperinge",
+            "duration": "PT56M"
+          }
+        ]
+      },
+      "idx": 3,
+      "tripId": "C-3",
+      "ctxRecon": "¶HKI¶T$A=1@O=Antwerpen-Centraal@L=8821006@a=128@$A=1@O=Gent-Sint-Pieters@L=8892007@a=128@$202211070437$202211070533$IC   704$$1$$$$",
+      "duration": "PT56M",
+      "checksum": "1b6afcf3_3"
+    },
+    {
+      "ServiceDays": [
+        {
+          "planningPeriodBegin": "2021-12-12",
+          "planningPeriodEnd": "2022-12-10",
+          "sDaysR": "daily",
+          "sDaysI": "not 9., 19., 20. Nov",
+          "sDaysB": "0000000000000000000000000000000000000000000003FFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFF7FCFFFFF0"
+        }
+      ],
+      "LegList": {
+        "Leg": [
+          {
+            "Origin": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Anvers-Central / Antwerpen-Centraal",
+              "type": "ST",
+              "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+              "extId": "8821006",
+              "lon": 4.421102,
+              "lat": 51.2172,
+              "routeIdx": 0,
+              "prognosisType": "PROGNOSED",
+              "time": "05:06:00",
+              "date": "2022-11-07",
+              "track": "4",
+              "rtTime": "05:06:00",
+              "rtDate": "2022-11-07",
+              "CommercialInfo": {
+                "Occupancy": {
+                  "Level": 1
+                }
+              }
+            },
+            "Destination": {
+              "Notes": {
+                "Note": [
+                  {
+                    "value": "full assistance",
+                    "key": "FA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "light assistance",
+                    "key": "LA",
+                    "type": "A",
+                    "priority": 1
+                  },
+                  {
+                    "value": "full assistance - search",
+                    "key": "FS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "light assistance - search",
+                    "key": "LS",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "Belgium stations",
+                    "key": "GA",
+                    "type": "A",
+                    "priority": 999
+                  },
+                  {
+                    "value": "",
+                    "key": "GH",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "LI",
+                    "type": "A"
+                  },
+                  {
+                    "value": "",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+              "type": "ST",
+              "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+              "extId": "8892007",
+              "lon": 3.710675,
+              "lat": 51.035897,
+              "routeIdx": 14,
+              "prognosisType": "PROGNOSED",
+              "time": "06:06:00",
+              "date": "2022-11-07",
+              "track": "4",
+              "rtTime": "06:06:00",
+              "rtDate": "2022-11-07"
+            },
+            "JourneyDetailRef": {
+              "ref": "1|1520|0|80|7112022"
+            },
+            "JourneyStatus": "P",
+            "Product": {
+              "name": "IC  1826",
+              "num": "1826",
+              "catOut": "IC      ",
+              "catIn": "007",
+              "catCode": "2",
+              "catOutS": "007",
+              "catOutL": "IC ",
+              "admin": "88____"
+            },
+            "Stops": {
+              "Stop": [
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Central / Antwerpen-Centraal",
+                  "id": "A=1@O=Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+                  "extId": "8821006",
+                  "routeIdx": 0,
+                  "lon": 4.421102,
+                  "lat": 51.2172,
+                  "depPrognosisType": "PROGNOSED",
+                  "depTime": "05:06:00",
+                  "depDate": "2022-11-07",
+                  "rtDepTime": "05:06:00",
+                  "rtDepDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Berchem / Antwerpen-Berchem",
+                  "id": "A=1@O=Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+                  "extId": "8821121",
+                  "routeIdx": 1,
+                  "lon": 4.432221,
+                  "lat": 51.199231,
+                  "depTime": "05:12:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:10:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:12:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:10:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Anvers-Sud / Antwerpen-Zuid",
+                  "id": "A=1@O=Antwerpen-Zuid@X=4390260@Y=51197829@U=80@L=8821196@",
+                  "extId": "8821196",
+                  "routeIdx": 2,
+                  "lon": 4.39026,
+                  "lat": 51.197829,
+                  "depTime": "05:17:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:16:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:17:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:16:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Beveren",
+                  "id": "A=1@O=Beveren@X=4259521@Y=51208337@U=80@L=8894748@",
+                  "extId": "8894748",
+                  "routeIdx": 5,
+                  "lon": 4.259521,
+                  "lat": 51.208337,
+                  "depTime": "05:27:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:26:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:27:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:26:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Saint-Nicolas / Sint-Niklaas",
+                  "id": "A=1@O=Sint-Niklaas@X=4142966@Y=51171472@U=80@L=8894508@",
+                  "extId": "8894508",
+                  "routeIdx": 7,
+                  "lon": 4.142966,
+                  "lat": 51.171472,
+                  "depTime": "05:36:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:34:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:36:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:34:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Lokeren",
+                  "id": "A=1@O=Lokeren@X=3987795@Y=51108062@U=80@L=8894201@",
+                  "extId": "8894201",
+                  "routeIdx": 10,
+                  "lon": 3.987795,
+                  "lat": 51.108062,
+                  "depTime": "05:46:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:45:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:46:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:45:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Dampoort / Gent-Dampoort",
+                  "id": "A=1@O=Gent-Dampoort@X=3740591@Y=51056374@U=80@L=8893120@",
+                  "extId": "8893120",
+                  "routeIdx": 12,
+                  "lon": 3.740591,
+                  "lat": 51.056374,
+                  "depTime": "05:59:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "05:58:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "05:59:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "05:58:00",
+                  "rtArrDate": "2022-11-07"
+                },
+                {
+                  "Notes": {
+                    "Note": [
+                      {
+                        "value": "full assistance",
+                        "key": "FA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "light assistance",
+                        "key": "LA",
+                        "type": "A",
+                        "priority": 1
+                      },
+                      {
+                        "value": "full assistance - search",
+                        "key": "FS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "light assistance - search",
+                        "key": "LS",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "Belgium stations",
+                        "key": "GA",
+                        "type": "A",
+                        "priority": 999
+                      },
+                      {
+                        "value": "",
+                        "key": "GH",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "LI",
+                        "type": "A"
+                      },
+                      {
+                        "value": "",
+                        "key": "CS",
+                        "type": "A"
+                      }
+                    ]
+                  },
+                  "name": "Gand-Saint-Pierre / Gent-Sint-Pieters",
+                  "id": "A=1@O=Gent-Sint-Pieters@X=3710675@Y=51035897@U=80@L=8892007@",
+                  "extId": "8892007",
+                  "routeIdx": 14,
+                  "lon": 3.710675,
+                  "lat": 51.035897,
+                  "depTime": "06:09:00",
+                  "depDate": "2022-11-07",
+                  "arrTime": "06:06:00",
+                  "arrDate": "2022-11-07",
+                  "rtDepTime": "06:09:00",
+                  "rtDepDate": "2022-11-07",
+                  "rtArrTime": "06:06:00",
+                  "rtArrDate": "2022-11-07"
+                }
+              ]
+            },
+            "idx": 0,
+            "name": "IC  1826",
+            "number": "1826",
+            "category": "007",
+            "type": "JNY",
+            "reachable": true,
+            "direction": "Gand-Saint-Pierre / Gent-Sint-Pieters & Ostende / Oostende",
+            "duration": "PT1H"
+          }
+        ]
+      },
+      "idx": 4,
+      "tripId": "C-4",
+      "ctxRecon": "¶HKI¶T$A=1@O=Antwerpen-Centraal@L=8821006@a=128@$A=1@O=Gent-Sint-Pieters@L=8892007@a=128@$202211070506$202211070606$IC  1826$$1$$$$",
+      "duration": "PT1H",
+      "checksum": "24f9ed18_3"
+    }
+  ],
+  "scrB": "2|OB|MTµ11µ477997µ477997µ478053µ478053µ0µ0µ5µ477990µ1µ-2147483646µ0µ1µ2|PDHµc334a9aa3315a601b9b80e46ffb4a5b6|RDµ6112022|RTµ223000|USµ0",
+  "scrF": "2|OF|MTµ11µ478386µ478386µ478446µ478446µ0µ0µ5µ478358µ5µ-2147483646µ0µ1µ2|PDHµc334a9aa3315a601b9b80e46ffb4a5b6|RDµ6112022|RTµ223000|USµ0",
+  "serverVersion": "2.19.4",
+  "dialectVersion": "2.19",
+  "planRtTs": "2022-11-06 22:30:33+01:00",
+  "requestId": "kq6wciagkw4kykcs"
+}

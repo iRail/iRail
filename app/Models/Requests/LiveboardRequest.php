@@ -17,9 +17,9 @@ interface LiveboardRequest extends CacheableRequest
     public function getDateTime(): DateTime;
 
     /**
-     * @return int
+     * @return TimeSelection
      */
-    public function getDepartureArrivalMode(): int;
+    public function getDepartureArrivalMode(): TimeSelection;
 
     /**
      * Get the requested response language, as an ISO2 code.

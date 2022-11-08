@@ -9,6 +9,10 @@
 
 namespace Irail\Legacy\Occupancy;
 
+use Dotenv\Dotenv;
+use MongoDB\Collection;
+use MongoDB\Driver\Manager;
+
 /**
  * Class OccupancyDao This class handles interactions with the feedback and occupancy collections in MongoDB
  * The feedback collection contains every feedback entry ever reported.
@@ -94,8 +98,8 @@ class OccupancyDao
         $mongodb_url = getenv('MONGODB_URL');
         $mongodb_db = getenv('MONGODB_DB');
 
-        $m = new MongoDB\Driver\Manager($mongodb_url);
-        $occupancy = new MongoDB\Collection($m, $mongodb_db, 'occupancy');
+        $m = new Manager($mongodb_url);
+        $occupancy = new Collection($m, $mongodb_db, 'occupancy');
 
         $occupancyExists = $occupancy->findOne(array('connection' => $feedback['connection']));
 
@@ -139,8 +143,8 @@ class OccupancyDao
         self::initDotEnv();
         $mongodb_url = getenv('MONGODB_URL');
         $mongodb_db = getenv('MONGODB_DB');
-        $m = new MongoDB\Driver\Manager($mongodb_url);
-        $feedbackTable = new MongoDB\Collection($m, $mongodb_db, 'feedback');
+        $m = new Manager($mongodb_url);
+        $feedbackTable = new Collection($m, $mongodb_db, 'feedback');
 
         $feedbackData = array(
             'connection' => $feedback['connection'],
@@ -155,7 +159,7 @@ class OccupancyDao
 
     private static function initDotEnv(): void
     {
-        $dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
+        $dotenv = new Dotenv(dirname(__DIR__, 3));
         $dotenv->load();
     }
 }

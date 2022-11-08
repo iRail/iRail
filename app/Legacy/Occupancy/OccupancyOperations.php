@@ -8,7 +8,6 @@
  */
 namespace Irail\Legacy\Occupancy;
 
-use Dotenv\Dotenv;
 use Exception;
 
 class OccupancyOperations
@@ -43,9 +42,8 @@ class OccupancyOperations
 
     private static function getOccupancyTrip($vehicle, $from, $date)
     {
-        self::initDotEnv();
-        $mongodb_url = getenv('MONGODB_URL');
-        $mongodb_db = getenv('MONGODB_DB');
+        $mongodb_url = $_ENV['MONGODB_URL'];
+        $mongodb_db = $_ENV['MONGODB_DB'];
 
         $m = new \MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new \MongoDB\Collection($m, $mongodb_db, 'occupancy');
@@ -58,7 +56,6 @@ class OccupancyOperations
     {
         // Check if the MongoDB module is installed, if not just return null
         if (class_exists(self::MONGODBCLASS)) {
-            self::initDotEnv();
             $mongodb_url = getenv('MONGODB_URL');
             $mongodb_db = getenv('MONGODB_DB');
 
@@ -159,9 +156,4 @@ class OccupancyOperations
         return self::CONNECTIONBASEURI . substr(basename($from), 2) . '/' . $date . '/' . basename($vehicle);
     }
 
-    private static function initDotEnv(): void
-    {
-        $dotenv = new Dotenv(dirname(dirname(dirname(__DIR__))));
-        $dotenv->load();
-    }
 }

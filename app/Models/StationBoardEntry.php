@@ -3,6 +3,7 @@
 namespace Irail\Models;
 
 use DateTime;
+use Irail\Data\Nmbs\Models\Station;
 
 /**
  * Base class for a vehicle calling at a stop, could be either a departure or arrival
@@ -18,7 +19,7 @@ class StationBoardEntry
     private bool $isCancelled;
 
     private string $headSign;
-    private array $direction;
+    private Station $direction;
 
     private bool $isReported;
     private bool $isExtra;
@@ -142,7 +143,7 @@ class StationBoardEntry
     /**
      * @return array
      */
-    public function getDirection(): array
+    public function getDirection(): Station
     {
         return $this->direction;
     }
@@ -151,7 +152,7 @@ class StationBoardEntry
      * @param array $direction
      * @return StationBoardEntry
      */
-    public function setDirection(array $direction): StationBoardEntry
+    public function setDirection(Station $direction): StationBoardEntry
     {
         $this->direction = $direction;
         return $this;

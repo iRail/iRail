@@ -315,7 +315,6 @@ class VehicleDatasource
         return new Vehicle(
             $hafasVehicle->getUri(),
             $hafasVehicle->getNumber(),
-            $hafasVehicle->getDisplayName(),
             $hafasVehicle->getType(),
             $hafasVehicle->getNumber());
     }

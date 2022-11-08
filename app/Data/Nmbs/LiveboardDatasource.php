@@ -10,11 +10,14 @@ use DateTime;
 use Exception;
 use Irail\Data\Nmbs\Models\hafas\HafasResponseContext;
 use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
+use Irail\Data\Nmbs\Models\Station;
 use Irail\Data\Nmbs\Repositories\RawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Models\CachedData;
 use Irail\Models\Occupancy;
+use Irail\Models\PlatformInfo;
 use Irail\Models\Requests\LiveboardRequest;
+use Irail\Models\Requests\TimeSelection;
 use Irail\Models\Result\LiveboardResult;
 use Irail\Models\StationBoardEntry;
 use Irail\Models\StationInfo;
@@ -22,8 +25,6 @@ use Irail\Models\Vehicle;
 
 class LiveboardDatasource
 {
-    use  HafasDatasource;
-
     private StationsRepository $stationsRepository;
     private RawDataRepository $rawDataRepository;
 
@@ -44,163 +45,130 @@ class LiveboardDatasource
     {
         $rawData = $this->rawDataRepository->getLiveboardData($request);
         $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
-        return $this->parseNmbsRawData($rawData);
+        return $this->parseNmbsRawData($request, $rawData);
     }
 
-    private function parseNmbsRawData(CachedData $cachedRawData): LiveboardResult
+    private function parseNmbsRawData(LiveboardRequest $request, CachedData $cachedRawData): LiveboardResult
     {
         $rawData = $cachedRawData->getValue();
-        $json = $this->decodeAndVerifyResponse($rawData);
 
-        // A Hafas API response contains all locations, trains, ... in separate lists to prevent duplicate data.
-        // Get a context object containing all those objects
-        $context = HafasResponseContext::fromJson($json);
+        if (empty($serverData)) {
+            throw new Exception("The server did not return any data.", 500);
+        }
 
         // Now we'll actually read the departures/arrivals information.
-        $currentStation = $this->stationsRepository->getStationById($this->hafasIdToIrailId($context->getLocations()[0]->getExtId()));
+        $currentStation = $this->stationsRepository->getStationById($request->getStationId());
         if ($currentStation == null) {
-            throw new Exception("Failed to match station id {$context->getLocations()[0]->getExtId()} with a known station",
+            throw new Exception("Failed to match station id {$request->getStationId()} with a known station",
                 500);
         }
-        $stopsAtStation = $json['svcResL'][0]['res']['jnyL'];
+        $decodedJsonData = json_decode($rawData, associative: true);
+        $stopsAtStation = $decodedJsonData['entries'];
         $departuresOrArrivals = [];
         foreach ($stopsAtStation as $stop) {
-            $departuresOrArrivals[] = $this->parseStopAtStation($currentStation, $stop, $context);
+            $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
         }
 
         return new LiveboardResult($cachedRawData->getCreatedAt(), $currentStation, $departuresOrArrivals);
     }
 
-
-
     /**
-     * Parse a HAFAS stop, for example
-     * {
-     *   "jid": "1|586|1|80|26102017",
-     *   "date": "20171026",
-     *   "prodX": 0,
-     *   "dirTxt": "Eeklo",
-     *   "status": "P",
-     *   "isRchbl": true,
-     *   "stbStop": {
-     *      "locX": 0,
-     *      "idx": 7,
-     *      "dProdX": 0,
-     *      "dPlatfS": "2",
-     *      "dPlatfR": "1",
-     *      "dTimeS": "141200",
-     *      "dTimeR": "141200",
-     *      "dProgType": "PROGNOSED"
-     *   }
-     * }
-     * @param StationInfo          $currentStation
-     * @param mixed                $stop
-     * @param HafasResponseContext $context
+     * Parse the JSON data received from the NMBS.
+     *
+     * @param LiveboardRequest $request
+     * @param StationInfo      $currentStation
+     * @param array            $stop
      * @return StationBoardEntry
      * @throws Exception
      */
-    private function parseStopAtStation(StationInfo $currentStation, array $stop, HafasResponseContext $context): StationBoardEntry
+    private function parseStopAtStation(LiveboardRequest $request, StationInfo $currentStation, array $stop): StationBoardEntry
     {
-        // The date of this departure, in Ymd format
-        $date = $stop['date'];
-        $stbStop = $stop['stbStop'];
-        $isDeparture = key_exists('dProdX', $stbStop);
-        $isArrival = key_exists('dProdX', $stbStop);
 
-        if (!($isDeparture || $isArrival)) {
-            throw new Exception("StationBoard contains an entry without a departure or arrival date");
-        }
+        /*
+         * {
+         *    "EntryDate": "2022-11-07 19:55:00",
+         *    "UicCode": "8821006",
+         *    "TrainNumber": 9267,
+         *    "CommercialType": "IC",
+         *    "PlannedDeparture": "2022-11-07 20:44:00",
+         *    "DestinationNl": "BREDA (NL) Amsterdam Cs (NL)",
+         *    "DestinationFr": "BREDA (NL) Amsterdam Cs (NL)",
+         *    "Platform": "22",
+         *    "ExpectedDeparture": "2022-11-07 21:26:00",
+         *    "DepartureDelay": "00:42:00",
+         *    "Destination1UicCode": "8400058"
+         *  },
+         */
+        $isArrivalBoard = $request->getDepartureArrivalMode() == TimeSelection::ARRIVAL;
 
-        if ($isDeparture) {
-            // Departures
-            $scheduledTime = key_exists('dTimeS', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeS']) : null;
-            $estimatedTime = key_exists('dTimeR', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['dTimeR']) : $scheduledTime;
-            $platform = $this->parsePlatform($currentStation, $stop, 'dPlatfS', 'dPlatfR');
-            $isReported = (key_exists('dProgType', $stbStop) && $stbStop['dProgType'] == 'REPORTED');
-            $isCanceled = (key_exists('dCncl', $stbStop) && $stbStop['dCncl']);
-            $vehicle = $context->getVehicle($stbStop['dProdX']);
+        // The date of this departure
+        $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
+            $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
+        );
+        $unixtime = $plannedDateTime->getTimestamp();
 
-            $uri = $this->buildDepartureUri($currentStation, $scheduledTime, $vehicle->getDisplayName());
-            // Add occupancy data, if available
-            $occupancy = self::getOccupancy($currentStation, $vehicle, $date);
-        } else {
+        $delay = self::parseDelayInSeconds($isArrivalBoard ? $stop['ArrivalDelay'] : $stop['DepartureDelay']);
 
-            // Arrivals
-            $scheduledTime = key_exists('aTimeS', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeS']) : null;
-            $estimatedTime = key_exists('aTimeR', $stbStop) ? Carbon::createFromFormat("Ymd His", $date . ' ' . $stbStop['aTimeR']) : $scheduledTime;
-            $platform = $this->parsePlatform($currentStation, $stop, 'aPlatfS', 'aPlatfR');
-            $isReported = (key_exists('aProgType', $stbStop) && $stbStop['aProgType'] == 'REPORTED');
-            $isCanceled = (key_exists('aCncl', $stbStop) && $stbStop['aCncl']);
-            $vehicle = $context->getVehicle($stbStop['aProdX']);
-
-            $uri = null;
-            $occupancy = null;
-        }
-        $delay = $estimatedTime->diffInRealSeconds($scheduledTime);
+        // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
+        // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
+        // parse information about which platform this train will depart from/arrive to.
+        $platform = $stop['Platform'];
+        $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
 
         // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
         // DepartureCanceled gives information if this stop has been canceled.
+        $stopCanceled = 0; // TODO: reverse-engineer and implement
+        $left = 0; // TODO: probably no longer supported
 
-        $partiallyCanceled = 0;
-        $stopCanceled = 0;
-        if (key_exists('isCncl', $stop)) {
-            $stopCanceled = $stop['isCncl'];
-            $partiallyCanceled = true;
+        $isExtraTrain = 0; // TODO: probably no longer supported
+        if (key_exists('status', $stop) && $stop['status'] == 'A') {
+            $isExtraTrain = 1;
         }
-        if (key_exists('isPartCncl', $stop)) {
-            $partiallyCanceled = $stop['isPartCncl'];
+        $direction = $this->stationsRepository->getStationById($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode']);
+        $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
+
+        // Now all information has been parsed. Put it in a nice object.
+        $stopAtStation = new StationBoardEntry();
+        $stopAtStation->setStation($currentStation);
+        $stopAtStation->setVehicle($vehicle);
+        $stopAtStation->setScheduledDateTime($plannedDateTime);
+        $stopAtStation->setDelay($delay);
+        $stopAtStation->setPlatform(new PlatformInfo(null, $platform, $isPlatformNormal));
+        $stopAtStation->setIsCancelled($stopCanceled);
+        $stopAtStation->setIsExtra($isExtraTrain);
+        $stopAtStation->setIsReported($left);
+        $stopAtStation->setUri('http://irail.be/connections/' . substr($currentStation->getId(), 2)
+            . '/' . date('Ymd', $unixtime) . '/' . $vehicle->getName());
+
+        $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
+        return $stopAtStation;
+    }
+
+    /**
+     * Parse the delay based on a string in hh:mm:ss format
+     * @param string|null $delayString The delay string
+     * @return int
+     */
+    private static function parseDelayInSeconds(?string $delayString): int
+    {
+        if ($delayString == null) {
+            return 0;
         }
-
-        $isExtraTrain = (key_exists('status', $stop) && $stop['status'] == 'A');
-        $directionStation = $this->stationsRepository->findStationByName($stop['dirTxt']);
-
-        $stationBoardEntry = new StationBoardEntry();
-
-        $stationBoardEntry->setStation($currentStation);
-        $stationBoardEntry->setHeadsign($stop['dirTxt']);
-        $stationBoardEntry->setDirection([$directionStation]);
-        $stationBoardEntry->setScheduledDateTime($scheduledTime)->setDelay($delay);
-
-        $stationBoardEntry->setPlatform($platform);
-        $stationBoardEntry->setIsReported($isReported)->setIsExtra($isExtraTrain)->setIsCancelled($stopCanceled);
-        $stationBoardEntry->setVehicle(
-            new Vehicle(
-                $vehicle->getUri(),
-                $vehicle->getNumber(),
-                $vehicle->getDisplayName(),
-                $vehicle->getType(),
-                $vehicle->getNumber())
-        );
-
-        $stationBoardEntry->setUri($uri);
-        $stationBoardEntry->setOccupany($occupancy);
-        return $stationBoardEntry;
+        sscanf($delayString, "%d:%d:%d", $hours, $minutes, $seconds);
+        return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
     /**
      * Add occupancy data (also known as spitsgids data) to the object.
      *
-     * @param StationInfo          $currentStation
-     * @param HafasVehicle              $vehicle
-     * @param                      $date
+     * @param StationInfo  $currentStation
+     * @param Vehicle  $vehicle
+     * @param DateTime $date
      * @return Occupancy
      */
-    private function getOccupancy(StationInfo $currentStation, HafasVehicle $vehicle, $date): Occupancy
+    private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, DateTime $date): Occupancy
     {
         // TODO: implement
         return new Occupancy();
     }
-
-    /**
-     * @param StationInfo $currentStation
-     * @param DateTime    $departureTime
-     * @param string      $vehicleId
-     * @return string
-     */
-    private function buildDepartureUri(StationInfo $currentStation, DateTime $departureTime, string $vehicleId): string
-    {
-        return 'http://irail.be/connections/' . substr($currentStation->getId(), 2)
-            . '/' . $departureTime->format('YMd') . '/' . $vehicleId;
-    }
-
 }

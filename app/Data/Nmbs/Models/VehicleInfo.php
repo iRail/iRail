@@ -7,13 +7,21 @@ use Irail\Data\Nmbs\Tools\VehicleIdTools;
 
 class VehicleInfo
 {
-    public function __construct(HafasVehicle $hafasVehicle)
+    public function __construct(string $type, int $number)
     {
-        $this->{'@id'} = 'http://irail.be/vehicle/' . $hafasVehicle->name;
-        $this->shortname = $hafasVehicle->name;
-        $this->name = 'BE.NMBS.' . $hafasVehicle->name;
-        $this->type = VehicleIdTools::extractTrainType($hafasVehicle->name);
-        $this->number = VehicleIdTools::extractTrainNumber($hafasVehicle->name);
+        $this->{'@id'} = 'http://irail.be/vehicle/' . $type . $number;
+        $this->shortname = $type . $number;
+        $this->name = 'BE.NMBS.' . $type . $number;
+        $this->type = $type;
+        $this->number = $number;
+    }
+
+    public static function fromHafasVehicle(HafasVehicle $hafasVehicle)
+    {
+        return new VehicleInfo(
+            VehicleIdTools::extractTrainType($hafasVehicle->name),
+            VehicleIdTools::extractTrainNumber($hafasVehicle->name)
+        );
     }
 
     public $name;
@@ -24,7 +32,7 @@ class VehicleInfo
 
     public $type;
 
-    public $locationX = null;
+    public $locationX = 0;
 
-    public $locationY = null;
+    public $locationY = 0;
 }
