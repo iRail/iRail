@@ -250,16 +250,16 @@ class ConnectionsDatasource
         $formattedTimeStr = $time . ':00';
 
         $parameters = [
-                        // 'trainFilter'      => 'S206466',// TODO: figure out valid values and meaning
-                        'originExtId'      => substr($stationFrom->_hafasId, 2),
-                        'destExtId'        => substr($stationTo->_hafasId, 2),
-                        'date'             => $formattedDateStr, // requires date in yyyy-mm-dd format
-                        'time'             => $formattedTimeStr, // requires time in hh:mm:ss format
-                        'lang'             => $lang,
-                        'passlist'         => true, // include intermediate stops along the way
-                        'searchForArrival' => $timeSel, // include intermediate stops along the way
-                        'numF'             => 6, // include intermediate stops along the way
-                        'products'         => $typeOfTransportCode
+            // 'trainFilter'      => 'S206466',// TODO: figure out valid values and meaning
+            'originExtId'      => substr($stationFrom->_hafasId, 2),
+            'destExtId'        => substr($stationTo->_hafasId, 2),
+            'date'             => $formattedDateStr, // requires date in yyyy-mm-dd format
+            'time'             => $formattedTimeStr, // requires time in hh:mm:ss format
+            'lang'             => $lang,
+            'passlist'         => true, // include intermediate stops along the way
+            'searchForArrival' => $timeSel, // include intermediate stops along the way
+            'numF'             => 6, // include intermediate stops along the way
+            'products'         => $typeOfTransportCode
         ];
         $url = $url . '?' . http_build_query($parameters, "", null,);
 
@@ -423,7 +423,7 @@ class ConnectionsDatasource
             date('Ymd', $connection->departure->time) . '/' .
             $trainsInConnection[0]->vehicle->shortname;
 
-        $connection->departure->direction = $trainsInConnection[0]->direction;
+        $connection->departure->direction = self::getSingleLocalizedDirection($trainsInConnection[0]->direction, $request);
         $connection->departure->left = $trainsInConnection[0]->left;
 
         $connection->departure->walking = 0;
@@ -432,7 +432,7 @@ class ConnectionsDatasource
         }
 
         $connection->arrival->vehicle = $trainsInConnection[count($trainsInConnection) - 1]->vehicle;
-        $connection->arrival->direction = $trainsInConnection[count($trainsInConnection) - 1]->direction;
+        $connection->arrival->direction = self::getSingleLocalizedDirection($trainsInConnection[count($trainsInConnection) - 1]->direction, $request);
         $connection->arrival->arrived = end($trainsInConnection)->arrived;
         $connection->arrival->walking = 0;
 
@@ -1051,5 +1051,27 @@ class ConnectionsDatasource
         $existing = $request->getJourneyOptions();
         $existing[] = $journeyoptions;
         $request->setJourneyOptions($existing);
+    }
+
+    /**
+     * Replace "Sint-Niklaas & Anvers-Central / Sint-Niklaas & Antwerpen-centraal" with "Antwerpen-centraal" or "Anvers-Central" depending on the requested language.
+     * @param stdClass           $direction
+     * @param ConnectionsRequest $request
+     * @return array
+     */
+    public static function getSingleLocalizedDirection(stdClass $direction, ConnectionsRequest $request): stdClass
+    {
+        $directionStr = $direction->name;
+        if (str_contains($directionStr, '&')) {
+            $allDirectionStrs = explode("&", $directionStr);
+            $directionStr = trim(end($allDirectionStrs)); // TODO: support for multiple directions is possible here
+        }
+        if (str_contains($directionStr, '/')) {
+            // Only use the French name when requested, use the Dutch name by default.
+            $directionStr = $request->getLang() == "FR" ? explode("/", $directionStr)[0] : explode("/", $directionStr)[1];
+        }
+        $direction = new stdClass;
+        $direction->name = trim($directionStr);
+        return $direction;
     }
 }
