@@ -9,7 +9,7 @@ services:
     volumes:
         - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
         - ./docker/nginx/logs:/var/log/nginx
-        - ./:/var/www/html
+        - ./:/var/www/
     expose:
         - "80"
     ports:
@@ -25,7 +25,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./:/var/www/html/
+      - ./:/var/www/
       - ./docker/php/crontab:/etc/cron.d/myCrontab
   mongo:
       image: mongo:4.0.0
