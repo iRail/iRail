@@ -102,7 +102,6 @@ class GtfsTripStartEndExtractor
                 print("Not keeping id " . $serviceId  . "\n");
                 continue;
             }
-            print("Keeping service id " . $serviceId);
 
             if (!key_exists($serviceId, $vehicleDetailsByServiceId)) {
                 $vehicleDetailsByServiceId[$serviceId] = [];
