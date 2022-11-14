@@ -394,7 +394,7 @@ class CompositionDataSource
 
         // Trains with 4 carriages:
         if (in_array($materialType->parent_type, ['AM75'])) {
-            switch ($position % 3) {
+            switch ($position % 4) {
                 case 0:
                     $materialType->sub_type = "a";
                     break;
