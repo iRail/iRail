@@ -99,7 +99,6 @@ class GtfsTripStartEndExtractor
             $tripId = $row[$TRIP_ID_COLUMN];
 
             if (!in_array($serviceId, $serviceIdsToRetain)) {
-                print("Not keeping id " . $serviceId  . "\n");
                 continue;
             }
 
