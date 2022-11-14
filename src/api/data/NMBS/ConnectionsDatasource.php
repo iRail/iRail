@@ -643,133 +643,10 @@ class ConnectionsDatasource
                 // This typically is the stop where the user leaves this train
                 $parsedTrain->direction->name = end($parsedTrain->stops)->station->name;
             }
-            $hafasVehicle = self::parseProduct($leg['Product']);
+            $hafasVehicle = HafasCommon::parseProduct($leg['Product']);
             $parsedTrain->vehicle = VehicleInfo::fromHafasVehicle($hafasVehicle);
         }
         return $parsedTrain;
-    }
-
-    /**
-     * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
-     * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
-     * the traveller stays on)
-     * @param $lang
-     * @param $rawIntermediateStop
-     * @param $leg
-     * @return HafasIntermediateStop The parsed intermediate stop.
-     * @throws Exception
-     */
-    private static function parseHafasIntermediateStop($lang, $rawIntermediateStop, $leg)
-    {
-        $intermediateStop = new HafasIntermediateStop();
-        $intermediateStop->station = StationsDatasource::getStationFromID(
-            $rawIntermediateStop['extId'],
-            $lang
-        );
-
-        if (key_exists('arrTime', $rawIntermediateStop)) {
-            $intermediateStop->scheduledArrivalTime = Tools::transformTime(
-                $rawIntermediateStop['arrTime'],
-                $rawIntermediateStop['arrDate']
-            );
-        } else {
-            $intermediateStop->scheduledArrivalTime = null;
-        }
-
-        if (key_exists('arrPrognosisType', $rawIntermediateStop)) {
-            $intermediateStop->arrivalCanceled = HafasCommon::isArrivalCanceledBasedOnState($rawIntermediateStop['arrPrognosisType']);
-
-            if ($rawIntermediateStop['arrPrognosisType'] == "REPORTED") {
-                $intermediateStop->arrived = 1;
-            } else {
-                $intermediateStop->arrived = 0;
-            }
-        } else {
-            $intermediateStop->arrivalCanceled = false;
-            $intermediateStop->arrived = 0;
-        }
-
-        if (key_exists('rtArrTime', $rawIntermediateStop)) {
-            $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS(
-                $rawIntermediateStop['rtArrTime'],
-                $rawIntermediateStop['rtArrDate'],
-                $rawIntermediateStop['arrTime'],
-                $rawIntermediateStop['arrDate']
-            );
-        } else {
-            $intermediateStop->arrivalDelay = 0;
-        }
-
-
-        if (key_exists('depTime', $rawIntermediateStop)) {
-            $intermediateStop->scheduledDepartureTime = Tools::transformTime(
-                $rawIntermediateStop['depTime'],
-                $rawIntermediateStop['depDate']
-            );
-        } else {
-            $intermediateStop->scheduledDepartureTime = null;
-        }
-
-        if (key_exists('rtDepTime', $rawIntermediateStop)) {
-            $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS(
-                $rawIntermediateStop['rtDepTime'],
-                $rawIntermediateStop['rtDepDate'],
-                $rawIntermediateStop['depTime'],
-                $rawIntermediateStop['depDate']
-            );
-        } else {
-            $intermediateStop->departureDelay = 0;
-        }
-
-        if (key_exists('depPrognosisType', $rawIntermediateStop)) {
-            $intermediateStop->departureCanceled =
-                HafasCommon::isDepartureCanceledBasedOnState($rawIntermediateStop['depPrognosisType']);
-
-            if ($rawIntermediateStop['depPrognosisType'] == "REPORTED") {
-                $intermediateStop->left = 1;
-                // A train can only leave a stop if he arrived first
-                $intermediateStop->arrived = 1;
-            } else {
-                $intermediateStop->left = 0;
-            }
-        } else {
-            $intermediateStop->departureCanceled = false;
-            $intermediateStop->left = 0;
-        }
-
-        // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
-        // are null, hope for the best
-        if ($intermediateStop->scheduledDepartureTime == null) {
-            $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
-        }
-        if ($intermediateStop->scheduledArrivalTime == null) {
-            $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
-        }
-
-        // Some boolean about scheduled departure? First seen on an added stop
-        // dInS, dInR, aOutS, aOutR are not processed at this moment
-        if (key_exists('cancelledDeparture', $rawIntermediateStop)) {
-            $intermediateStop->departureCanceled = 1;
-        }
-
-        if (key_exists('cancelledArrival', $rawIntermediateStop)) {
-            $intermediateStop->arrivalCanceled = 1;
-        }
-
-        if (key_exists('additional', $rawIntermediateStop)) {
-            $intermediateStop->isExtraStop = 1;
-        } else {
-            $intermediateStop->isExtraStop = 0;
-        }
-
-        // The last stop does not have a departure, and therefore we cannot construct a departure URI.
-        if (key_exists('dProdX', $rawIntermediateStop)) {
-            $intermediateStop->departureConnection = 'http://irail.be/connections/' .
-                $rawIntermediateStop['extId'] . '/' .
-                date('Ymd', $intermediateStop->scheduledDepartureTime) . '/' .
-                str_replace(' ', '', $leg['Product']['Name']);
-        }
-        return $intermediateStop;
     }
 
 
@@ -913,7 +790,7 @@ class ConnectionsDatasource
         if (key_exists('Stops', $leg)) {
             $hafasIntermediateStops = $leg['Stops']['Stop']; // Yes this is correct, the arrays are weird in the source data
             foreach ($hafasIntermediateStops as $hafasIntermediateStop) {
-                $intermediateStop = self::parseHafasIntermediateStop(
+                $intermediateStop = HafasCommon::parseHafasIntermediateStop(
                     $lang,
                     $hafasIntermediateStop,
                     $trip
@@ -934,18 +811,6 @@ class ConnectionsDatasource
         return $parsedIntermediateStops;
     }
 
-    /**
-     * @param $product
-     * @return HafasVehicle
-     */
-    public static function parseProduct($product): HafasVehicle
-    {
-        $vehicle = new HafasVehicle();
-        $vehicle->name = str_replace(" ", '', $product['name']);
-        $vehicle->num = trim($product['num']);
-        $vehicle->category = trim($product['catOutL']);
-        return $vehicle;
-    }
 
     /**
      * Add spitsgids occupancy data to the response

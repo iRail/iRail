@@ -4,7 +4,9 @@ namespace Irail\api\data\NMBS\tools;
 
 use Exception;
 use Irail\api\data\models\Alert;
+use Irail\api\data\models\hafas\HafasIntermediateStop;
 use Irail\api\data\models\hafas\HafasVehicle;
+use Irail\api\data\NMBS\StationsDatasource;
 use stdClass;
 
 /**
@@ -304,96 +306,137 @@ class HafasCommon
 
 
     /**
-     * @param $json
-     *
-     * @return HafasVehicle[]
+     * @param $product
+     * @return HafasVehicle
      */
-    public static function parseVehicleDefinitions($json): array
+    public static function parseProduct($product): HafasVehicle
     {
-        if (!key_exists('prodL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $vehicleDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['prodL'] as $rawTrain) {
-            /*
-                 {
-                   "name": "IC 545",
-                   "number": "545",
-                   "icoX": 3,
-                   "cls": 4,
-                   "prodCtx": {
-                     "name": "IC   545",
-                     "num": "545",
-                     "catOut": "IC      ",
-                     "catOutS": "007",
-                     "catOutL": "IC ",
-                     "catIn": "007",
-                     "catCode": "2",
-                     "admin": "88____"
-                   }
-                 },
-
-                OR
-
-                {
-                  "name": "ICE 10",
-                  "number": "10",
-                  "line": "ICE 10",
-                  "icoX": 0,
-                  "cls": 1
-                },
-             */
-
-            $vehicle = new HafasVehicle();
-            $vehicle->name = str_replace(" ", '', $rawTrain['name']);
-            $vehicle->num = trim($rawTrain['number']);
-            $vehicle->category = trim($rawTrain['cls']);
-            $vehicleDefinitions[] = $vehicle;
-        }
-
-        return $vehicleDefinitions;
+        $vehicle = new HafasVehicle();
+        $vehicle->name = str_replace(" ", '', $product['name']);
+        $vehicle->num = trim($product['num']);
+        $vehicle->category = trim($product['catOutL']);
+        return $vehicle;
     }
-
     /**
-     * @param $json
-     *
-     * @return array
+     * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
+     * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
+     * the traveller stays on)
+     * @param $lang
+     * @param $rawIntermediateStop
+     * @param $leg
+     * @return HafasIntermediateStop The parsed intermediate stop.
+     * @throws Exception
      */
-    public static function parseLocationDefinitions($json): array
+    public static function parseHafasIntermediateStop($lang, $rawIntermediateStop, $leg)
     {
-        if (!key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            return [];
+        $intermediateStop = new HafasIntermediateStop();
+        $intermediateStop->station = StationsDatasource::getStationFromID(
+            $rawIntermediateStop['extId'],
+            $lang
+        );
+
+        if (key_exists('arrTime', $rawIntermediateStop)) {
+            $intermediateStop->scheduledArrivalTime = Tools::transformTime(
+                $rawIntermediateStop['arrTime'],
+                $rawIntermediateStop['arrDate']
+            );
+        } else {
+            $intermediateStop->scheduledArrivalTime = null;
         }
 
-        $locationDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['locL'] as $rawLocation) {
-            /*
-              {
-                  "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
-                  "type": "S",
-                  "name": "Namur",
-                  "icoX": 1,
-                  "extId": "8863008",
-                  "crd": {
-                    "x": 4862220,
-                    "y": 50468794
-                  },
-                  "pCls": 100,
-                  "rRefL": [
-                    0
-                  ]
-                }
-             */
+        if (key_exists('arrPrognosisType', $rawIntermediateStop)) {
+            $intermediateStop->arrivalCanceled = HafasCommon::isArrivalCanceledBasedOnState($rawIntermediateStop['arrPrognosisType']);
 
-            // S stand for station, P for Point of Interest, A for address
-
-            $location = new StdClass();
-            $location->name = $rawLocation['name'];
-            $location->id = '00' . $rawLocation['extId'];
-            $locationDefinitions[] = $location;
+            if ($rawIntermediateStop['arrPrognosisType'] == "REPORTED") {
+                $intermediateStop->arrived = 1;
+            } else {
+                $intermediateStop->arrived = 0;
+            }
+        } else {
+            $intermediateStop->arrivalCanceled = false;
+            $intermediateStop->arrived = 0;
         }
 
-        return $locationDefinitions;
+        if (key_exists('rtArrTime', $rawIntermediateStop)) {
+            $intermediateStop->arrivalDelay = Tools::calculateSecondsHHMMSS(
+                $rawIntermediateStop['rtArrTime'],
+                $rawIntermediateStop['rtArrDate'],
+                $rawIntermediateStop['arrTime'],
+                $rawIntermediateStop['arrDate']
+            );
+        } else {
+            $intermediateStop->arrivalDelay = 0;
+        }
+
+
+        if (key_exists('depTime', $rawIntermediateStop)) {
+            $intermediateStop->scheduledDepartureTime = Tools::transformTime(
+                $rawIntermediateStop['depTime'],
+                $rawIntermediateStop['depDate']
+            );
+        } else {
+            $intermediateStop->scheduledDepartureTime = null;
+        }
+
+        if (key_exists('rtDepTime', $rawIntermediateStop)) {
+            $intermediateStop->departureDelay = Tools::calculateSecondsHHMMSS(
+                $rawIntermediateStop['rtDepTime'],
+                $rawIntermediateStop['rtDepDate'],
+                $rawIntermediateStop['depTime'],
+                $rawIntermediateStop['depDate']
+            );
+        } else {
+            $intermediateStop->departureDelay = 0;
+        }
+
+        if (key_exists('depPrognosisType', $rawIntermediateStop)) {
+            $intermediateStop->departureCanceled =
+                HafasCommon::isDepartureCanceledBasedOnState($rawIntermediateStop['depPrognosisType']);
+
+            if ($rawIntermediateStop['depPrognosisType'] == "REPORTED") {
+                $intermediateStop->left = 1;
+                // A train can only leave a stop if he arrived first
+                $intermediateStop->arrived = 1;
+            } else {
+                $intermediateStop->left = 0;
+            }
+        } else {
+            $intermediateStop->departureCanceled = false;
+            $intermediateStop->left = 0;
+        }
+
+        // Prevent null values in edge cases. If one of both values is unknown, copy the non-null value. In case both
+        // are null, hope for the best
+        if ($intermediateStop->scheduledDepartureTime == null) {
+            $intermediateStop->scheduledDepartureTime = $intermediateStop->scheduledArrivalTime;
+        }
+        if ($intermediateStop->scheduledArrivalTime == null) {
+            $intermediateStop->scheduledArrivalTime = $intermediateStop->scheduledDepartureTime;
+        }
+
+        // Some boolean about scheduled departure? First seen on an added stop
+        // dInS, dInR, aOutS, aOutR are not processed at this moment
+        if (key_exists('cancelledDeparture', $rawIntermediateStop)) {
+            $intermediateStop->departureCanceled = 1;
+        }
+
+        if (key_exists('cancelledArrival', $rawIntermediateStop)) {
+            $intermediateStop->arrivalCanceled = 1;
+        }
+
+        if (key_exists('additional', $rawIntermediateStop)) {
+            $intermediateStop->isExtraStop = 1;
+        } else {
+            $intermediateStop->isExtraStop = 0;
+        }
+
+        // The last stop does not have a departure, and therefore we cannot construct a departure URI.
+        if (key_exists('dProdX', $rawIntermediateStop)) {
+            $intermediateStop->departureConnection = 'http://irail.be/connections/' .
+                $rawIntermediateStop['extId'] . '/' .
+                date('Ymd', $intermediateStop->scheduledDepartureTime) . '/' .
+                str_replace(' ', '', $leg['Product']['Name']);
+        }
+        return $intermediateStop;
     }
 }

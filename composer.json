@@ -18,6 +18,7 @@
     "cache/apcu-adapter": "^1.0",
     "cache/array-adapter": "^1.0",
     "cache/apc-adapter": "^1.0@dev",
+    "nesbot/carbon": "^2.63",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-simplexml": "*",
