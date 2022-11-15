@@ -423,7 +423,7 @@ class ConnectionsDatasource
             date('Ymd', $connection->departure->time) . '/' .
             $trainsInConnection[0]->vehicle->shortname;
 
-        $connection->departure->direction = self::getSingleLocalizedDirection($trainsInConnection[0]->direction, $request);
+        $connection->departure->direction = self::getSingleLocalizedDirection($trainsInConnection[0]->direction, $request->getLang());
         $connection->departure->left = $trainsInConnection[0]->left;
 
         $connection->departure->walking = 0;
@@ -432,7 +432,7 @@ class ConnectionsDatasource
         }
 
         $connection->arrival->vehicle = $trainsInConnection[count($trainsInConnection) - 1]->vehicle;
-        $connection->arrival->direction = self::getSingleLocalizedDirection($trainsInConnection[count($trainsInConnection) - 1]->direction, $request);
+        $connection->arrival->direction = self::getSingleLocalizedDirection($trainsInConnection[count($trainsInConnection) - 1]->direction, $request->getLang());
         $connection->arrival->arrived = end($trainsInConnection)->arrived;
         $connection->arrival->walking = 0;
 
@@ -637,6 +637,8 @@ class ConnectionsDatasource
             if (key_exists('direction', $leg)) {
                 // Get the direction from the API
                 $parsedTrain->direction->name = $leg['direction'];
+                // TODO the iRail printer model and internal data model should be split here!
+                $parsedTrain->direction = self::getSingleLocalizedDirection($parsedTrain->direction, $lang);
             } else {
                 // If we can't load the direction from the data (direction is missing),
                 // fill in the gap by using the furthest stop we know on this trains route.
@@ -921,10 +923,10 @@ class ConnectionsDatasource
     /**
      * Replace "Sint-Niklaas & Anvers-Central / Sint-Niklaas & Antwerpen-centraal" with "Antwerpen-centraal" or "Anvers-Central" depending on the requested language.
      * @param stdClass           $direction
-     * @param ConnectionsRequest $request
+     * @param string $lang
      * @return array
      */
-    public static function getSingleLocalizedDirection(stdClass $direction, ConnectionsRequest $request): stdClass
+    public static function getSingleLocalizedDirection(stdClass $direction, string $lang): stdClass
     {
         $directionStr = $direction->name;
         if (str_contains($directionStr, '&')) {
@@ -933,7 +935,7 @@ class ConnectionsDatasource
         }
         if (str_contains($directionStr, '/')) {
             // Only use the French name when requested, use the Dutch name by default.
-            $directionStr = $request->getLang() == "FR" ? explode("/", $directionStr)[0] : explode("/", $directionStr)[1];
+            $directionStr = $lang == "FR" ? explode("/", $directionStr)[0] : explode("/", $directionStr)[1];
         }
         $direction = new stdClass;
         $direction->name = trim($directionStr);

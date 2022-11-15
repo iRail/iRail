@@ -162,7 +162,7 @@ class LiveboardDatasource
         $parameters = [
             'query'   => ($timeSel == 'arr') ? 'ArrivalsApp' : 'DeparturesApp', // include intermediate stops along the way
             'UicCode' => substr($station->_hafasId, 2),
-            // 'FromDate' => $formattedDateTimeStr, // requires date in 'yyyy-mm-dd hh:mm:ss' format TODO: figure out how this works
+            'FromDate' => $formattedDateTimeStr, // requires date in 'yyyy-mm-dd hh:mm:ss' format TODO: figure out how this works
             'Count'   => 100, // include intermediate stops along the way
             // language is not passed, responses contain both Dutch and French destinations
         ];
