@@ -22,8 +22,8 @@ class LiveboardDatasource
     /**
      * This is the entry point for the data fetching and transformation.
      *
-     * @param $dataroot
-     * @param $request
+     * @param DataRoot         $dataroot
+     * @param LiveboardRequest $request
      * @throws Exception
      */
     public static function fillDataRoot(DataRoot $dataroot, LiveboardRequest $request): void
@@ -160,10 +160,10 @@ class LiveboardDatasource
         $formattedDateTimeStr = $dateTime->format('Y-m-d H:i:s');
 
         $parameters = [
-            'query'   => ($timeSel == 'arr') ? 'ArrivalsApp' : 'DeparturesApp', // include intermediate stops along the way
-            'UicCode' => substr($station->_hafasId, 2),
+            'query'    => ($timeSel == 'arr') ? 'ArrivalsApp' : 'DeparturesApp', // include intermediate stops along the way
+            'UicCode'  => substr($station->_hafasId, 2),
             'FromDate' => $formattedDateTimeStr, // requires date in 'yyyy-mm-dd hh:mm:ss' format TODO: figure out how this works
-            'Count'   => 100, // include intermediate stops along the way
+            'Count'    => 100, // include intermediate stops along the way
             // language is not passed, responses contain both Dutch and French destinations
         ];
         $url = $url . '?' . http_build_query($parameters, "", null,);
@@ -177,6 +177,15 @@ class LiveboardDatasource
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
         $response = curl_exec($ch);
         curl_close($ch);
+
+        // Store the raw output to a file on disk, for debug purposes
+        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
+            file_put_contents(
+                '../../storage/debug-liveboard-' . $station->_hafasId . '-' .
+                time() . '.json',
+                $response
+            );
+        }
 
         return $response;
     }
@@ -215,13 +224,26 @@ class LiveboardDatasource
              *  },
              */
 
+            if (self::isServiceTrain($stop)) {
+                // Service trains head to workplaces, such as Vorst-rijtuigen.
+                // Since they probably won't be available any longer as soon as we switch to any other data source,
+                // don't include them in the responses. They also refer to stations closed for passengers such as
+                // 008817327, which are not included in the GTFS data.
+                continue;
+            }
+
             // The date of this departure
             $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
                 $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
             );
             $unixtime = $plannedDateTime->getTimestamp();
 
-            $delay = self::parseDelayInSeconds($isArrivalBoard ? $stop['ArrivalDelay'] : $stop['DepartureDelay']);
+            $delay = 0;
+            if (key_exists('ArrivalDelay', $stop)) {
+                $delay = self::parseDelayInSeconds($stop['ArrivalDelay']);
+            } else if (key_exists('DepartureDelay', $stop)) {
+                $delay = self::parseDelayInSeconds($stop['DepartureDelay']);
+            }
 
             // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
             // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
@@ -272,7 +294,7 @@ class LiveboardDatasource
 
     /**
      * Parse the delay based on a string in hh:mm:ss format
-     * @param string $delayString The delay string
+     * @param string|null $delayString The delay string
      * @return int
      */
     private static function parseDelayInSeconds(?string $delayString): int
@@ -313,5 +335,10 @@ class LiveboardDatasource
             }
         }
         return $stopAtStation;
+    }
+
+    private static function isServiceTrain(mixed $stop)
+    {
+        return $stop['CommercialType'] == 'SERV';
     }
 }
