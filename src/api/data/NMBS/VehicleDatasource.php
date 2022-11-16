@@ -90,6 +90,9 @@ class VehicleDatasource
     private static function getServerData(string $vehicleName, string $date, string $lang): mixed
     {
         $vehicleWithOriginAndDestination = GtfsTripStartEndExtractor::getVehicleWithOriginAndDestination($vehicleName, $date);
+        if ($vehicleWithOriginAndDestination === false) {
+            throw new Exception("Vehicle not found", 404);
+        }
         $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
 
         $request_options = [
