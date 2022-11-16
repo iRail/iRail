@@ -9,7 +9,7 @@
     }
   ],
   "require": {
-    "irail/stations": "^1.6.11",
+    "irail/stations": "^1.6.13",
     "monolog/monolog": "^1.25",
     "ptachoire/tac": "1.0.*",
     "sebastian/environment": "4.2.*",
