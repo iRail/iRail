@@ -126,7 +126,7 @@ class VehicleDatasource
                 '../../storage/debug-vehicle-' . $vehicleName . '-'
                 . $vehicleWithOriginAndDestination->getOriginStopId() . '-'
                 . $vehicleWithOriginAndDestination->getDestinationStopId() . '-' .
-                time() . '.log',
+                time() . '.json',
                 $response
             );
         }
