@@ -124,7 +124,6 @@ class GtfsTripStartEndExtractor
         $startDate = $date->copy()->subDays(abs($daysBack));
         $endDate = $date->copy()->addDays(abs($daysForward));
         for ($dateToKeep = $startDate; $dateToKeep <= $endDate; $dateToKeep->addDay()) {
-            print ("Keep " . $dateToKeep->format('Ymd'));
             $serviceIdsOnDay = $serviceIdsByCalendarDate[$dateToKeep->format('Ymd')];
             foreach ($serviceIdsOnDay as $serviceIdOnDay) {
                 $serviceIdsToKeep[] = $serviceIdOnDay;
