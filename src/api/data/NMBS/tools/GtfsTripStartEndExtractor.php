@@ -73,10 +73,12 @@ class GtfsTripStartEndExtractor
 
         $headers = fgetcsv($fileStream); // ignore the headers
         while ($row = fgetcsv($fileStream)) {
-            if (!key_exists($row[$DATE_COLUMN], $serviceIdsByDate)) {
-                $serviceIdsByDate[$row[$DATE_COLUMN]] = [];
+            $date = $row[$DATE_COLUMN];
+            if (!key_exists($date, $serviceIdsByDate)) {
+                $serviceIdsByDate[$date] = [];
             }
-            $serviceIdsByDate[$row[$DATE_COLUMN]][] = intval($row[$SERVICE_ID_COLUMN]);
+            $serviceId = self::safeIntVal($row[$SERVICE_ID_COLUMN]);
+            $serviceIdsByDate[$date][] = $serviceId;
         }
         return $serviceIdsByDate;
     }
@@ -95,7 +97,7 @@ class GtfsTripStartEndExtractor
 
         $headers = fgetcsv($fileStream); // ignore the headers
         while ($row = fgetcsv($fileStream)) {
-            $serviceId = intval($row[$SERVICE_ID_COLUMN]);
+            $serviceId = self::safeIntVal($row[$SERVICE_ID_COLUMN]);
             $tripId = $row[$TRIP_ID_COLUMN];
 
             if (!in_array($serviceId, $serviceIdsToRetain)) {
@@ -106,7 +108,7 @@ class GtfsTripStartEndExtractor
                 $vehicleDetailsByServiceId[$serviceId] = [];
             }
 
-            $trainNumber = intval($row[$TRIP_SHORT_NAME_COLUMN]);
+            $trainNumber = self::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
             $tripIdParts = explode(':', $tripId);
             $vehicleDetails = new VehicleWithOriginAndDestination($trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
@@ -130,5 +132,14 @@ class GtfsTripStartEndExtractor
             }
         }
         return array_unique($serviceIdsToKeep);
+    }
+
+    /**
+     * @param $row
+     * @return int
+     */
+    public static function safeIntVal($row): int
+    {
+        return intval(ltrim($row)); // ltrim to avoid octal interpretation
     }
 }
