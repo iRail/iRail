@@ -7,6 +7,7 @@ use Irail\api\data\models\Alert;
 use Irail\api\data\models\hafas\HafasIntermediateStop;
 use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\Platform;
+use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\NMBS\StationsDatasource;
 use stdClass;
 
@@ -323,13 +324,13 @@ class HafasCommon
      * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
      * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
      * the traveller stays on)
-     * @param $lang
-     * @param $rawIntermediateStop
-     * @param $leg
+     * @param string      $lang
+     * @param array       $rawIntermediateStop
+     * @param VehicleInfo $vehicleInfo
      * @return HafasIntermediateStop The parsed intermediate stop.
      * @throws Exception
      */
-    public static function parseHafasIntermediateStop($lang, $rawIntermediateStop, $leg)
+    public static function parseHafasIntermediateStop(string $lang, array $rawIntermediateStop, VehicleInfo $vehicleInfo): HafasIntermediateStop
     {
         $intermediateStop = new HafasIntermediateStop();
         $intermediateStop->station = StationsDatasource::getStationFromID(
@@ -439,7 +440,7 @@ class HafasCommon
             $intermediateStop->departureConnection = 'http://irail.be/connections/' .
                 $rawIntermediateStop['extId'] . '/' .
                 date('Ymd', $intermediateStop->scheduledDepartureTime) . '/' .
-                str_replace(' ', '', $leg['Product']['Name']);
+                str_replace(' ', '', $vehicleInfo->name);
         }
         return $intermediateStop;
     }
@@ -451,6 +452,12 @@ class HafasCommon
      */
     public static function parsePlatform(array $departureOrArrival): Platform
     {
+        if (key_exists('depTrack', $departureOrArrival)) {
+            return self::parseTrackData($departureOrArrival, 'depTrack', 'rtDepTrack');
+        }
+        if (key_exists('arrTrack', $departureOrArrival)) {
+            return self::parseTrackData($departureOrArrival, 'arrTrack', 'rtArrTrack');
+        }
         return self::parseTrackData($departureOrArrival, 'track', 'rtTrack');
     }
 

@@ -81,6 +81,11 @@ class VehicleDatasource
     }
 
     /**
+     * Make multiple calls to get the best data.
+     *
+     * Step 1. Obtain the origin and destination station for a train from the GTFS data
+     * Step 2. Use data from step 1 to obtain a journey reference of the form 1|4256|0|80|16112022
+     * Step 3. Use the journey reference to get detailed information including the platforms
      * @param String $vehicleName
      * @param String $date The date, in YYYYmmdd
      * @param String $lang
@@ -93,25 +98,86 @@ class VehicleDatasource
         if ($vehicleWithOriginAndDestination === false) {
             throw new Exception("Vehicle not found", 404);
         }
-        $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
+        $journeyDetailRef = self::getJourneyDetailRef($date, $vehicleName, $vehicleWithOriginAndDestination, $lang);
+        return self::getJourneyDetailResponse($journeyDetailRef, $lang, $vehicleName, $vehicleWithOriginAndDestination);
+    }
 
-        $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
+    /**
+     * @param String                          $date
+     * @param String                          $vehicleName
+     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @param String                          $lang
+     * @return string
+     */
+    private static function getJourneyDetailRef(string $date, string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $lang): string
+    {
+        $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
 
         $formattedDateStr = DateTime::createFromFormat('Ymd', $date)->format('Y-m-d');
 
         $parameters = [
-            // 'trainFilter'      => 'S206466',// TODO: figure out valid values and meaning
-            'trainFilter' => $vehicleName,
+            'trainFilter' => $vehicleName, // type + number, type is required!
             'originExtId' => $vehicleWithOriginAndDestination->getOriginStopId(),
             'destExtId'   => $vehicleWithOriginAndDestination->getDestinationStopId(),
             'date'        => $formattedDateStr,
             'lang'        => $lang
         ];
         $url = $url . '?' . http_build_query($parameters, "", null,);
+
+        $journeyResponse = self::makeNmbsRequest($url);
+        // Store the raw output to a file on disk, for debug purposes
+        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
+            file_put_contents(
+                '../../storage/debug-vehicle-' . time() . '-' . $vehicleName . '-'
+                . $vehicleWithOriginAndDestination->getOriginStopId() . '-'
+                . $vehicleWithOriginAndDestination->getDestinationStopId() . '-journey.json',
+                $journeyResponse
+            );
+        }
+        $journeyDetailRef = json_decode($journeyResponse, true)['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];
+        return $journeyDetailRef;
+    }
+
+    /**
+     * @param string                          $journeyDetailRef
+     * @param String                          $lang
+     * @param String                          $vehicleName
+     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @return bool|string
+     */
+    private static function getJourneyDetailResponse(string $journeyDetailRef, string $lang, string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination): string|bool
+    {
+        $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey/detail";
+        $parameters = [
+            'id'   => $journeyDetailRef,
+            'lang' => $lang
+        ];
+        $url = $url . '?' . http_build_query($parameters, "", null,);
+
+        $journeyResponse = self::makeNmbsRequest($url);
+        // Store the raw output to a file on disk, for debug purposes
+        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
+            file_put_contents(
+                '../../storage/debug-vehicle-' . time() . '-' . $vehicleName . '-'
+                . $vehicleWithOriginAndDestination->getOriginStopId() . '-'
+                . $vehicleWithOriginAndDestination->getDestinationStopId() . '-journeyDetail.json',
+                $journeyResponse
+            );
+        }
+        return $journeyResponse;
+    }
+
+    /**
+     * @param string $url
+     * @return bool|string
+     */
+    private static function makeNmbsRequest(string $url): string|bool
+    {
+        $request_options = [
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
+            'useragent' => Tools::getUserAgent(),
+        ];
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -122,17 +188,6 @@ class VehicleDatasource
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
 
         $response = curl_exec($ch);
-
-        // Store the raw output to a file on disk, for debug purposes
-        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents(
-                '../../storage/debug-vehicle-' . $vehicleName . '-'
-                . $vehicleWithOriginAndDestination->getOriginStopId() . '-'
-                . $vehicleWithOriginAndDestination->getDestinationStopId() . '-' .
-                time() . '.json',
-                $response
-            );
-        }
 
         curl_close($ch);
         return $response;
@@ -152,15 +207,13 @@ class VehicleDatasource
         $stops = [];
         $stopIndex = 0;
         // TODO: pick the right train here, a train which splits has multiple parts here.
-        $stopsList = $json['Trip'][0]['LegList']['Leg'][0]['Stops']['Stop'];
+        $stopsList = $json['Stops']['Stop'];
         foreach ($stopsList as $rawStop) {
             $stop = self::parseVehicleStop(
                 $rawStop,
                 $lang,
-                $json['Trip'][0],
-                $stopIndex == 0,
-                $stopIndex == count($stopsList) - 1,
-                $vehicle
+                $vehicle,
+                $stopsList[0]['depDate']
             );
 
             $stops[] = $stop;
@@ -175,22 +228,22 @@ class VehicleDatasource
         return $stops;
     }
 
+
     /**
-     * @param          $rawStop
-     * @param string   $lang
-     * @param bool     $isFirstStop
-     * @param bool     $isLastStop
+     * @param array       $rawStop
+     * @param string      $lang
+     * @param VehicleInfo $vehicle
+     * @param string      $departureDate departure date from first stop in yyyy-mm-dd format
      * @return Stop
      * @throws Exception
      */
-    private static function parseVehicleStop(array $rawStop, string $lang, array $trip,
-        bool $isFirstStop, bool $isLastStop, VehicleInfo $vehicle): Stop
+    private static function parseVehicleStop(array $rawStop, string $lang, VehicleInfo $vehicle, string $departureDate): Stop
     {
         // TODO: export remarks as they contain information about changes in the train designation.
         $hafasIntermediateStop = HafasCommon::parseHafasIntermediateStop(
             $lang,
             $rawStop,
-            $trip
+            $vehicle,
         );
 
         $stop = new Stop();
@@ -211,11 +264,11 @@ class VehicleDatasource
 
 
         // The final doesn't have a departure product
-        if ($isLastStop) {
+        if (!key_exists('depTime', $rawStop)) {
             // Still include the field, just leave it empty.
             $stop->departureConnection = "";
         } else {
-            $firstDepartureDate = str_replace('-', '', $trip['LegList']['Leg'][0]['Origin']['date']);
+            $firstDepartureDate = str_replace('-', '', $departureDate);
             $stop->departureConnection = 'http://irail.be/connections/' .
                 substr(basename($stop->station->{'@id'}), 2) . '/' .
                 $firstDepartureDate . '/' . $vehicle->name;
@@ -230,7 +283,6 @@ class VehicleDatasource
         $stop->isExtraStop = $hafasIntermediateStop->isExtraStop;
         return $stop;
     }
-
 
     /**
      * @param DateTime $requestedDate
@@ -257,7 +309,8 @@ class VehicleDatasource
     {
         $json = json_decode($serverData, true);
         HafasCommon::throwExceptionOnInvalidResponse($json);
-        return HafasCommon::parseProduct($json['Trip'][0]['LegList']['Leg'][0]['Product']);
+        $vehicle = HafasCommon::parseProduct($json['Names']['Name'][0]['Product']);
+        return $vehicle;
     }
 
     /**
@@ -272,9 +325,9 @@ class VehicleDatasource
     }
 
     /**
-     * @param DateTime $dateOfFirstDeparture The date when the train leaves the first station on its journey.
-     * @param array    $occupancyArr Occuppancy data for this train
-     * @param Stop     $stop The stop on which occuppancy data needs to be added.
+     * @param array $occupancyArr Occuppancy data for this train
+     * @param Stop  $stop The stop on which occuppancy data needs to be added.
+     * @throws Exception
      */
     protected static function addOccuppancyData($occupancyArr, Stop $stop): void
     {
@@ -319,5 +372,6 @@ class VehicleDatasource
         // The first stop can't have arrived == 1, since there is no arrival.
         $stops[0]->arrived = 0;
     }
+
 
 }

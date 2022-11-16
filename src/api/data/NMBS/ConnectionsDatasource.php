@@ -445,7 +445,6 @@ class ConnectionsDatasource
 
         return $connection;
     }
-    
 
 
     /**
@@ -576,16 +575,8 @@ class ConnectionsDatasource
             $lang
         );
 
-        $parsedTrain->isPartiallyCancelled = false;
         $parsedTrain->stops = [];
         $parsedTrain->alerts = [];
-        $parsedTrain->stops = self::parseIntermediateStops($leg, $lang, $trip);
-        if (count($parsedTrain->stops) > 0) {
-            $parsedTrain->left = $parsedTrain->stops [0]->left;
-        }
-
-        $parsedTrain->alerts = HafasCommon::parseAlerts($leg);
-
         if ($leg['type'] == 'WALK') {
             // If the type is walking, there is no direction. Resolve this by hardcoding this variable.
             // TODO: This is ugly code, clean it up
@@ -610,7 +601,14 @@ class ConnectionsDatasource
             }
             $hafasVehicle = HafasCommon::parseProduct($leg['Product']);
             $parsedTrain->vehicle = VehicleInfo::fromHafasVehicle($hafasVehicle);
+            $parsedTrain->stops = self::parseIntermediateStops($leg, $lang, $parsedTrain->vehicle);
         }
+
+        $parsedTrain->isPartiallyCancelled = false;
+        if (count($parsedTrain->stops) > 0) {
+            $parsedTrain->left = $parsedTrain->stops[0]->left;
+        }
+        $parsedTrain->alerts = HafasCommon::parseAlerts($leg);
         return $parsedTrain;
     }
 
@@ -743,13 +741,13 @@ class ConnectionsDatasource
 
 
     /**
-     * @param array  $leg
-     * @param string $lang
-     * @param array  $trip
+     * @param array       $leg
+     * @param string      $lang
+     * @param VehicleInfo $vehicle
      * @return array
      * @throws Exception
      */
-    public static function parseIntermediateStops(array $leg, string $lang, array $trip): array
+    public static function parseIntermediateStops(array $leg, string $lang, VehicleInfo $vehicle): array
     {
         $parsedIntermediateStops = [];
         if (key_exists('Stops', $leg)) {
@@ -758,7 +756,7 @@ class ConnectionsDatasource
                 $intermediateStop = HafasCommon::parseHafasIntermediateStop(
                     $lang,
                     $hafasIntermediateStop,
-                    $trip
+                    $vehicle
                 );
                 $parsedIntermediateStops[] = $intermediateStop;
             }
@@ -885,9 +883,9 @@ class ConnectionsDatasource
 
     /**
      * Replace "Sint-Niklaas & Anvers-Central / Sint-Niklaas & Antwerpen-centraal" with "Antwerpen-centraal" or "Anvers-Central" depending on the requested language.
-     * @param stdClass           $direction
-     * @param string $lang
-     * @return array
+     * @param stdClass $direction
+     * @param string   $lang
+     * @return stdClass
      */
     public static function getSingleLocalizedDirection(stdClass $direction, string $lang): stdClass
     {
