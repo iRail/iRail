@@ -381,11 +381,11 @@ class ConnectionsDatasource
 
         $connection->departure->delay = self::calculateDelay($firstDeparture);
         $connection->departure->time = Tools::transformTime($firstDeparture['time'], $firstDeparture['date']);
-        $connection->departure->platform = self::parseTrack($firstDeparture);
+        $connection->departure->platform = HafasCommon::parsePlatform($firstDeparture);
 
         $connection->arrival->delay = self::calculateDelay($lastArrival);
         $connection->arrival->time = Tools::transformTime($lastArrival['time'], $lastArrival['date']);
-        $connection->arrival->platform = self::parseTrack($lastArrival);
+        $connection->arrival->platform = HafasCommon::parsePlatform($lastArrival);
 
         $trainsInConnection = self::parseTripLegs(
             $trip,
@@ -445,44 +445,7 @@ class ConnectionsDatasource
 
         return $connection;
     }
-
-    /**
-     * Parse the arrival platform, and whether this is a normal platform or a changed one
-     * @param array $departureOrArrival
-     * @return Platform The platform for this departure.
-     */
-    private static function parseTrack(array $departureOrArrival): Platform
-    {
-        return self::parsePlatform($departureOrArrival, 'track', 'rtTrack');
-    }
-
-    /**
-     * @param array  $data The data object containing the platform information, for example a departure or arrival.
-     * @param string $scheduledFieldName The name of the field containing information about the scheduled platform.
-     * @param string $realTimeFieldName The name of the field containing information about the realtime platform.
-     * @return Platform The platform for this departure/arrival.
-     */
-    private static function parsePlatform(array $data, string $scheduledFieldName, string $realTimeFieldName): Platform
-    {
-        $result = new Platform();
-
-        if (key_exists($realTimeFieldName, $data)) {
-            // Realtime correction exists
-            $result->name = $data[$realTimeFieldName];
-            $result->normal = false;
-        } else {
-            if (key_exists($scheduledFieldName, $data)) {
-                // Only scheduled data exists
-                $result->name = $data[$scheduledFieldName];
-                $result->normal = true;
-            } else {
-                // No data
-                $result->name = "?";
-                $result->normal = true;
-            }
-        }
-        return $result;
-    }
+    
 
 
     /**
@@ -529,7 +492,7 @@ class ConnectionsDatasource
         $legStart = $leg['Origin'];
         $legEnd = $leg['Destination'];
 
-        $departurePlatform = self::parseTrack($legStart);
+        $departurePlatform = HafasCommon::parsePlatform($legStart);
         $departureDelay = self::calculateDelay($legStart);
         $departureTime = Tools::transformTime(
             $legStart['time'],
@@ -540,7 +503,7 @@ class ConnectionsDatasource
             $legEnd['time'],
             $legEnd['date']
         );
-        $arrivalPlatform = self::parseTrack($legEnd);
+        $arrivalPlatform = HafasCommon::parsePlatform($legEnd);
         $arrivalDelay = self::calculateDelay($legEnd);
 
         $departureIsExtraStop = 0;

@@ -6,6 +6,7 @@ use Exception;
 use Irail\api\data\models\Alert;
 use Irail\api\data\models\hafas\HafasIntermediateStop;
 use Irail\api\data\models\hafas\HafasVehicle;
+use Irail\api\data\models\Platform;
 use Irail\api\data\NMBS\StationsDatasource;
 use stdClass;
 
@@ -317,6 +318,7 @@ class HafasCommon
         $vehicle->category = trim($product['catOutL']);
         return $vehicle;
     }
+
     /**
      * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
      * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
@@ -334,6 +336,8 @@ class HafasCommon
             $rawIntermediateStop['extId'],
             $lang
         );
+
+        $intermediateStop->platform = self::parsePlatform($rawIntermediateStop);
 
         if (key_exists('arrTime', $rawIntermediateStop)) {
             $intermediateStop->scheduledArrivalTime = Tools::transformTime(
@@ -438,5 +442,43 @@ class HafasCommon
                 str_replace(' ', '', $leg['Product']['Name']);
         }
         return $intermediateStop;
+    }
+
+    /**
+     * Parse the arrival platform, and whether this is a normal platform or a changed one
+     * @param array $departureOrArrival
+     * @return Platform The platform for this departure.
+     */
+    public static function parsePlatform(array $departureOrArrival): Platform
+    {
+        return self::parseTrackData($departureOrArrival, 'track', 'rtTrack');
+    }
+
+    /**
+     * @param array  $data The data object containing the platform information, for example a departure or arrival.
+     * @param string $scheduledFieldName The name of the field containing information about the scheduled platform.
+     * @param string $realTimeFieldName The name of the field containing information about the realtime platform.
+     * @return Platform The platform for this departure/arrival.
+     */
+    private static function parseTrackData(array $data, string $scheduledFieldName, string $realTimeFieldName): Platform
+    {
+        $result = new Platform();
+
+        if (key_exists($realTimeFieldName, $data)) {
+            // Realtime correction exists
+            $result->name = $data[$realTimeFieldName];
+            $result->normal = false;
+        } else {
+            if (key_exists($scheduledFieldName, $data)) {
+                // Only scheduled data exists
+                $result->name = $data[$scheduledFieldName];
+                $result->normal = true;
+            } else {
+                // No data
+                $result->name = "?";
+                $result->normal = true;
+            }
+        }
+        return $result;
     }
 }

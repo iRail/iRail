@@ -204,9 +204,7 @@ class VehicleDatasource
         $stop->arrivalDelay = $hafasIntermediateStop->arrivalDelay;
         $stop->arrivalCanceled = $hafasIntermediateStop->arrivalCanceled;
 
-        $stop->platform = new Platform();
-        $stop->platform->name = '-'; // missing data at source
-        $stop->platform->normal = true; // missing data at source
+        $stop->platform = $hafasIntermediateStop->platform;
 
         $stop->time = $hafasIntermediateStop->scheduledDepartureTime;
         $stop->canceled = $hafasIntermediateStop->arrivalCanceled && $hafasIntermediateStop->departureCanceled;
