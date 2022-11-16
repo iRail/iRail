@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0fc54d06247874361b7d2d624f0c3104",
+    "content-hash": "bc0a763e5c14848eb6ef23e42c1d4705",
     "packages": [
         {
             "name": "cache/adapter-common",
@@ -476,16 +476,16 @@
         },
         {
             "name": "irail/stations",
-            "version": "1.6.12",
+            "version": "1.6.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-                "reference": "5c443b62c9e61b51ca96569a0b56296bed2f4f83"
+                "reference": "8d0e8d10d658cc1334fcf92251541d3f1dfaf9a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iRail/stations/zipball/5c443b62c9e61b51ca96569a0b56296bed2f4f83",
-                "reference": "5c443b62c9e61b51ca96569a0b56296bed2f4f83",
+                "url": "https://api.github.com/repos/iRail/stations/zipball/8d0e8d10d658cc1334fcf92251541d3f1dfaf9a8",
+                "reference": "8d0e8d10d658cc1334fcf92251541d3f1dfaf9a8",
                 "shasum": ""
             },
             "require": {
@@ -517,9 +517,9 @@
             "description": "Use the Belgian railway's station in your PHP project",
             "support": {
                 "issues": "https://github.com/iRail/stations/issues",
-                "source": "https://github.com/iRail/stations/tree/1.6.12"
+                "source": "https://github.com/iRail/stations/tree/1.6.13"
             },
-            "time": "2022-05-02T18:26:48+00:00"
+            "time": "2022-11-16T20:40:03+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
