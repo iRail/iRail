@@ -44,5 +44,9 @@ class VehicleWithOriginAndDestination
         return $this->destinationStopId;
     }
 
+    public function __debugInfo(): ?array
+    {
+        return ["Train {$this->vehicleNumber} from {$this->originStopId} to {$this->destinationStopId}"];
+    }
 
 }
