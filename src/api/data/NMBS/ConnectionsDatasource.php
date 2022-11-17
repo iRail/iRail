@@ -215,7 +215,7 @@ class ConnectionsDatasource
      * @param Station $stationTo
      * @param string  $lang
      * @param string  $time Time in hh:mm format
-     * @param string  $date Date in YYYY-mm-dd format
+     * @param string  $date Date in YYYYmmdd format
      * @param string  $timeSel
      * @param string  $typeOfTransport
      * @return string The JSON data returned by the HAFAS system

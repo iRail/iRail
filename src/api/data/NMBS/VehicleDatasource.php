@@ -14,7 +14,6 @@ use Irail\api\data\DataRoot;
 use Irail\api\data\models\Alert;
 use Irail\api\data\models\hafas\HafasVehicle;
 use Irail\api\data\models\hafas\VehicleWithOriginAndDestination;
-use Irail\api\data\models\Platform;
 use Irail\api\data\models\Stop;
 use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\NMBS\tools\GtfsTripStartEndExtractor;
@@ -36,14 +35,16 @@ class VehicleDatasource
         $lang = $request->getLang();
         $date = $request->getDate();
 
-        $nmbsCacheKey = self::getNmbsCacheKey($request->getVehicleId(), $date, $lang);
+        $vehicleName = $request->getVehicleId();
+        $vehicleName = str_replace('BE.NMBS.', '', $vehicleName);
+        $nmbsCacheKey = self::getNmbsCacheKey($vehicleName, $date, $lang);
         $serverData = Tools::getCachedObject($nmbsCacheKey);
         if ($serverData === false) {
-            $serverData = self::getServerData($request->getVehicleId(), $date, $lang);
+            $serverData = self::getServerData($vehicleName, $date, $lang);
             Tools::setCachedObject($nmbsCacheKey, $serverData);
         }
 
-        $vehicleOccupancy = OccupancyOperations::getOccupancy($request->getVehicleId(), $date);
+        $vehicleOccupancy = OccupancyOperations::getOccupancy($vehicleName, $date);
 
         // Use this to check if the MongoDB module is set up. If not, the occupancy score will not be returned
         if (!is_null($vehicleOccupancy)) {
@@ -96,9 +97,12 @@ class VehicleDatasource
     {
         $vehicleWithOriginAndDestination = GtfsTripStartEndExtractor::getVehicleWithOriginAndDestination($vehicleName, $date);
         if ($vehicleWithOriginAndDestination === false) {
-            throw new Exception("Vehicle not found", 404);
+            throw new Exception("Vehicle not found in GTFS data", 404);
         }
         $journeyDetailRef = self::getJourneyDetailRef($date, $vehicleName, $vehicleWithOriginAndDestination, $lang);
+        if ($journeyDetailRef === null) {
+            throw new Exception("Vehicle not found", 404);
+        }
         return self::getJourneyDetailResponse($journeyDetailRef, $lang, $vehicleName, $vehicleWithOriginAndDestination);
     }
 
@@ -107,9 +111,9 @@ class VehicleDatasource
      * @param String                          $vehicleName
      * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
      * @param String                          $lang
-     * @return string
+     * @return string|null
      */
-    private static function getJourneyDetailRef(string $date, string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $lang): string
+    private static function getJourneyDetailRef(string $date, string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $lang): ?string
     {
         $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
 
