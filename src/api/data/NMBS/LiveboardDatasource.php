@@ -29,7 +29,7 @@ class LiveboardDatasource
     public static function fillDataRoot(DataRoot $dataroot, LiveboardRequest $request): void
     {
         $stationr = $request->getStation();
-
+        $stationr = str_replace('BE.NMBS.', '', $stationr);
         try {
             $dataroot->station = StationsDatasource::getStationFromName($stationr, strtolower($request->getLang()));
         } catch (Exception $e) {
@@ -207,86 +207,90 @@ class LiveboardDatasource
         $json = json_decode($serverData, true);
         // Now we'll actually read the departures/arrivals information.
         $nodes = [];
-        foreach ($json['entries'] as $stop) {
-            /*
-             * {
-             *    "EntryDate": "2022-11-07 19:55:00",
-             *    "UicCode": "8821006",
-             *    "TrainNumber": 9267,
-             *    "CommercialType": "IC",
-             *    "PlannedDeparture": "2022-11-07 20:44:00",
-             *    "DestinationNl": "BREDA (NL) Amsterdam Cs (NL)",
-             *    "DestinationFr": "BREDA (NL) Amsterdam Cs (NL)",
-             *    "Platform": "22",
-             *    "ExpectedDeparture": "2022-11-07 21:26:00",
-             *    "DepartureDelay": "00:42:00",
-             *    "Destination1UicCode": "8400058"
-             *  },
-             */
+        if (key_exists('entries', $json)) {
+            foreach ($json['entries'] as $stop) {
+                /*
+                 * {
+                 *    "EntryDate": "2022-11-07 19:55:00",
+                 *    "UicCode": "8821006",
+                 *    "TrainNumber": 9267,
+                 *    "CommercialType": "IC",
+                 *    "PlannedDeparture": "2022-11-07 20:44:00",
+                 *    "DestinationNl": "BREDA (NL) Amsterdam Cs (NL)",
+                 *    "DestinationFr": "BREDA (NL) Amsterdam Cs (NL)",
+                 *    "Platform": "22",
+                 *    "ExpectedDeparture": "2022-11-07 21:26:00",
+                 *    "DepartureDelay": "00:42:00",
+                 *    "Destination1UicCode": "8400058"
+                 *  },
+                 */
 
-            if (self::isServiceTrain($stop)) {
-                // Service trains head to workplaces, such as Vorst-rijtuigen.
-                // Since they probably won't be available any longer as soon as we switch to any other data source,
-                // don't include them in the responses. They also refer to stations closed for passengers such as
-                // 008817327, which are not included in the GTFS data.
-                continue;
+                if (self::isServiceTrain($stop)) {
+                    // Service trains head to workplaces, such as Vorst-rijtuigen.
+                    // Since they probably won't be available any longer as soon as we switch to any other data source,
+                    // don't include them in the responses. They also refer to stations closed for passengers such as
+                    // 008817327, which are not included in the GTFS data.
+                    continue;
+                }
+
+                // The date of this departure
+                $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
+                    $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
+                );
+                $unixtime = $plannedDateTime->getTimestamp();
+
+                $delay = 0;
+                if (key_exists('ArrivalDelay', $stop)) {
+                    $delay = self::parseDelayInSeconds($stop['ArrivalDelay']);
+                } else {
+                    if (key_exists('DepartureDelay', $stop)) {
+                        $delay = self::parseDelayInSeconds($stop['DepartureDelay']);
+                    }
+                }
+
+                // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
+                // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
+                // parse information about which platform this train will depart from/arrive to.
+                $platform = $stop['Platform'];
+                $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
+
+                // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
+                // DepartureCanceled gives information if this stop has been canceled.
+                $stopCanceled = 0; // TODO: reverse-engineer and implement
+                $left = 0; // TODO: probably no longer supported
+
+                $isExtraTrain = 0; // TODO: probably no longer supported
+                if (key_exists('status', $stop) && $stop['status'] == 'A') {
+                    $isExtraTrain = 1;
+                }
+                $direction = StationsDatasource::getStationFromID($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode'], $lang);
+                $vehicleInfo = new VehicleInfo($stop['CommercialType'], $stop['TrainNumber']);
+
+                // Now all information has been parsed. Put it in a nice object.
+                $stopAtStation = new DepartureArrival();
+                $stopAtStation->delay = $delay;
+                $stopAtStation->station = $direction;
+                $stopAtStation->time = $unixtime;
+                $stopAtStation->vehicle = $vehicleInfo;
+                $stopAtStation->platform = new Platform($platform, $isPlatformNormal);
+                $stopAtStation->canceled = $stopCanceled;
+                // Include partiallyCanceled, but don't include canceled.
+                // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
+                // Canceled means all stations are canceled, including this one
+                // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
+                // $stopAtStation->partiallyCanceled = $partiallyCanceled;
+                $stopAtStation->left = $left;
+                $stopAtStation->isExtra = $isExtraTrain;
+                $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
+                        basename($station->{'@id'}),
+                        2
+                    ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
+
+                // Add occuppancy data, if available
+                $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($station, $stopAtStation, $plannedDateTime->format('Ymd'));
+
+                $nodes[] = $stopAtStation;
             }
-
-            // The date of this departure
-            $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
-                $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
-            );
-            $unixtime = $plannedDateTime->getTimestamp();
-
-            $delay = 0;
-            if (key_exists('ArrivalDelay', $stop)) {
-                $delay = self::parseDelayInSeconds($stop['ArrivalDelay']);
-            } else if (key_exists('DepartureDelay', $stop)) {
-                $delay = self::parseDelayInSeconds($stop['DepartureDelay']);
-            }
-
-            // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
-            // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
-            // parse information about which platform this train will depart from/arrive to.
-            $platform = $stop['Platform'];
-            $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
-
-            // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
-            // DepartureCanceled gives information if this stop has been canceled.
-            $stopCanceled = 0; // TODO: reverse-engineer and implement
-            $left = 0; // TODO: probably no longer supported
-
-            $isExtraTrain = 0; // TODO: probably no longer supported
-            if (key_exists('status', $stop) && $stop['status'] == 'A') {
-                $isExtraTrain = 1;
-            }
-            $direction = StationsDatasource::getStationFromID($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode'], $lang);
-            $vehicleInfo = new VehicleInfo($stop['CommercialType'], $stop['TrainNumber']);
-
-            // Now all information has been parsed. Put it in a nice object.
-            $stopAtStation = new DepartureArrival();
-            $stopAtStation->delay = $delay;
-            $stopAtStation->station = $direction;
-            $stopAtStation->time = $unixtime;
-            $stopAtStation->vehicle = $vehicleInfo;
-            $stopAtStation->platform = new Platform($platform, $isPlatformNormal);
-            $stopAtStation->canceled = $stopCanceled;
-            // Include partiallyCanceled, but don't include canceled.
-            // PartiallyCanceled might mean the next 3 stations are canceled while this station isn't.
-            // Canceled means all stations are canceled, including this one
-            // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
-            // $stopAtStation->partiallyCanceled = $partiallyCanceled;
-            $stopAtStation->left = $left;
-            $stopAtStation->isExtra = $isExtraTrain;
-            $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                    basename($station->{'@id'}),
-                    2
-                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
-
-            // Add occuppancy data, if available
-            $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($station, $stopAtStation, $plannedDateTime->format('Ymd'));
-
-            $nodes[] = $stopAtStation;
         }
 
         return array_merge($nodes); //array merge reindexes the array
