@@ -328,8 +328,11 @@ class VehicleDatasource
     private static function getAlerts(string $serverData): array
     {
         $json = json_decode($serverData, true);
-        // These are formatted already
-        return HafasCommon::parseAlertDefinitions($json['Messages']['Message']);
+        if (key_exists('Messages', $json)) {
+            return HafasCommon::parseAlertDefinitions($json['Messages']['Message']);
+        } else {
+            return [];
+        }
     }
 
     /**
