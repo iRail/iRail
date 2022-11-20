@@ -329,7 +329,7 @@ class VehicleDatasource
     {
         $json = json_decode($serverData, true);
         // These are formatted already
-        return HafasCommon::parseAlertDefinitions($json);
+        return HafasCommon::parseAlertDefinitions($json['Messages']['Message']);
     }
 
     /**

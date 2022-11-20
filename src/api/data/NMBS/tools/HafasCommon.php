@@ -163,37 +163,37 @@ class HafasCommon
      * Parse the list which contains information about all the alerts which are used in this API response.
      * Alerts warn about service interruptions etc.
      *
-     * @param $json
-     *
-     * @return Alert[]
+     * @param array|null $jsonAlertList
+     * @return array
+     * @throws Exception
      */
-    public static function parseAlertDefinitions($json): array
+    public static function parseAlertDefinitions(?array $jsonAlertList): array
     {
-        if (!key_exists('himL', $json['svcResL'][0]['res']['common'])) {
+        if ($jsonAlertList == null || count($jsonAlertList) < 1) {
             return [];
         }
 
         $alertDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['himL'] as $rawAlert) {
+        foreach ($jsonAlertList as $rawAlert) {
             /*
-                "hid": "23499",
-                "type": "LOC",
+                "id": "67305",
                 "act": true,
-                "head": "S Gravenbrakel: Wisselstoring.",
-                "lead": "Wisselstoring.",
-                "text": "Vertraagd verkeer.<br \/><br \/> Vertragingen tussen 5 en 10 minuten zijn mogelijk.<br \/><br \/> Dienst op enkel spoor tussen Tubeke en S Gravenbrakel.",
-                "icoX": 3,
-                "prio": 25,
-                "prod": 1893,
-                "pubChL": [
-                  {
-                      "name": "timetable",
-                    "fDate": "20171016",
-                    "fTime": "082000",
-                    "tDate": "20171018",
-                    "tTime": "235900"
-                  }
-                ]
+                "head": "Gent-Sint-Pieters - Brugge",
+                "lead": "We are conducting work for you between Gent-Sint-Pieters and Brugge.",
+                "text": "We are conducting work for you between Gent-Sint-Pieters and Brugge. Detailed information only available in French (FR) and in Dutch (NL). (Brussel-Zuid / Bruxelles-Midi - Brugge)",
+                "company": "SNCB",
+                "category": "1",
+                "priority": 50,
+                "products": 57348,
+                "modTime": "10:06:23",
+                "modDate": "2022-11-09",
+                "icon": "HIM1",
+                "routeIdxFrom": 6,
+                "routeIdxTo": 15,
+                "sTime": "03:00:00",
+                "sDate": "2022-11-14",
+                "eTime": "23:59:00",
+                "eDate": "2022-11-18"
               }*/
 
             $alert = new Alert();
@@ -206,16 +206,14 @@ class HafasCommon
                 $alert->link = urlencode($matches[1][0]);
             }
 
-            if (key_exists('pubChL', $rawAlert)) {
-                $alert->startTime = Tools::transformTime(
-                    $rawAlert['pubChL'][0]['fTime'],
-                    $rawAlert['pubChL'][0]['fDate']
-                );
-                $alert->endTime = Tools::transformTime(
-                    $rawAlert['pubChL'][0]['tTime'],
-                    $rawAlert['pubChL'][0]['tDate']
-                );
-            }
+            $alert->startTime = Tools::transformTime(
+                $rawAlert['sTime'],
+                $rawAlert['sDate']
+            );
+            $alert->endTime = Tools::transformTime(
+                $rawAlert['eTime'],
+                $rawAlert['eDate']
+            );
 
             $alertDefinitions[] = $alert;
         }
@@ -228,7 +226,8 @@ class HafasCommon
      *
      * @param $json
      *
-     * @return Alert[]
+     * @return array
+     * @throws Exception
      */
     public static function parseAlerts($json): array
     {
