@@ -17,7 +17,7 @@ class GtfsTripStartEndExtractor
      */
     public static function getVehicleWithOriginAndDestination(string $vehicleId, string $date): VehicleWithOriginAndDestination|false
     {
-        $vehicleNumber = (int)filter_var($vehicleId, FILTER_SANITIZE_NUMBER_INT);
+        $vehicleNumber = self::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
         foreach ($vehicleDetailsForDate as $vehicleWithOriginAndDestination) {
             if ($vehicleWithOriginAndDestination->getVehicleNumber() == $vehicleNumber) {
