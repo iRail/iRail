@@ -9,15 +9,16 @@
     }
   ],
   "require": {
-    "irail/stations": "^1.6.11",
+    "irail/stations": "^1.6.13",
     "monolog/monolog": "^1.25",
     "ptachoire/tac": "1.0.*",
     "sebastian/environment": "4.2.*",
-    "vlucas/phpdotenv": "^2.3",
+    "vlucas/phpdotenv": "^5.5",
     "mongodb/mongodb": "^1.6",
     "cache/apcu-adapter": "^1.0",
     "cache/array-adapter": "^1.0",
     "cache/apc-adapter": "^1.0@dev",
+    "nesbot/carbon": "^2.63",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-simplexml": "*",

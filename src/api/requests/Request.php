@@ -54,7 +54,6 @@ abstract class Request
         $this->setGetVar('format', 'xml');
         $this->setGetVar('lang', 'EN');
         $this->setGetVar('debug', false);
-        $this->setGetVar('version', 10);
     }
 
     /**
