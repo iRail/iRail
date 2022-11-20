@@ -126,7 +126,7 @@ class VehicleDatasource
             'date'        => $formattedDateStr,
             'lang'        => $lang
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null, );
+        $url = $url . '?' . http_build_query($parameters, "", null,);
 
         $journeyResponse = self::makeNmbsRequest($url);
         // Store the raw output to a file on disk, for debug purposes
@@ -138,7 +138,11 @@ class VehicleDatasource
                 $journeyResponse
             );
         }
-        $journeyDetailRef = json_decode($journeyResponse, true)['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];
+        $journeyResponse = json_decode($journeyResponse, true);
+        if (!key_exists('Trip', $journeyResponse)) {
+            throw new Exception("Vehicle not found", 404);
+        }
+        $journeyDetailRef = $journeyResponse['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];
         return $journeyDetailRef;
     }
 
@@ -156,7 +160,7 @@ class VehicleDatasource
             'id'   => $journeyDetailRef,
             'lang' => $lang
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null, );
+        $url = $url . '?' . http_build_query($parameters, "", null,);
 
         $journeyResponse = self::makeNmbsRequest($url);
         // Store the raw output to a file on disk, for debug purposes
