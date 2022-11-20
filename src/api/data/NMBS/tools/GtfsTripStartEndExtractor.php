@@ -17,7 +17,7 @@ class GtfsTripStartEndExtractor
      */
     public static function getVehicleWithOriginAndDestination(string $vehicleId, string $date): VehicleWithOriginAndDestination|false
     {
-        $vehicleNumber = self::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
+        $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
         foreach ($vehicleDetailsForDate as $vehicleWithOriginAndDestination) {
             if ($vehicleWithOriginAndDestination->getVehicleNumber() == $vehicleNumber) {
@@ -90,7 +90,7 @@ class GtfsTripStartEndExtractor
             if (!key_exists($date, $serviceIdsByDate)) {
                 $serviceIdsByDate[$date] = [];
             }
-            $serviceId = self::safeIntVal($row[$SERVICE_ID_COLUMN]);
+            $serviceId = Tools::safeIntVal($row[$SERVICE_ID_COLUMN]);
             $serviceIdsByDate[$date][] = $serviceId;
         }
         return $serviceIdsByDate;
@@ -110,7 +110,7 @@ class GtfsTripStartEndExtractor
 
         $headers = fgetcsv($fileStream); // ignore the headers
         while ($row = fgetcsv($fileStream)) {
-            $serviceId = self::safeIntVal($row[$SERVICE_ID_COLUMN]);
+            $serviceId = Tools::safeIntVal($row[$SERVICE_ID_COLUMN]);
             $tripId = $row[$TRIP_ID_COLUMN];
 
             if (!in_array($serviceId, $serviceIdsToRetain)) {
@@ -121,7 +121,7 @@ class GtfsTripStartEndExtractor
                 $vehicleDetailsByServiceId[$serviceId] = [];
             }
 
-            $trainNumber = self::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
+            $trainNumber = Tools::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
             $tripIdParts = explode(':', $tripId);
             $vehicleDetails = new VehicleWithOriginAndDestination($trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
@@ -147,14 +147,5 @@ class GtfsTripStartEndExtractor
             }
         }
         return array_unique($serviceIdsToKeep);
-    }
-
-    /**
-     * @param $row
-     * @return int
-     */
-    private static function safeIntVal($row): int
-    {
-        return intval(ltrim($row)); // ltrim to avoid octal interpretation
     }
 }

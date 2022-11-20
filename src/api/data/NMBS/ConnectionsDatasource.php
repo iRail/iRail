@@ -359,7 +359,7 @@ class ConnectionsDatasource
         string $lang
     ): Connection {
         $connection = new Connection();
-        $connection->duration = Tools::transformDurationHHMMSS($trip['duration']);
+        $connection->duration = Tools::transformDuration($trip['duration']);
 
         $legs = $trip['LegList']['Leg'];
 
@@ -538,9 +538,9 @@ class ConnectionsDatasource
         $parsedTrain->arrival->isExtraStop = $arrivalIsExtraStop;
 
         $parsedTrain->duration = Tools::calculateSecondsHHMMSS(
-            $arrivalTime,
+            $legEnd['time'],
             $legEnd['date'],
-            $departureTime,
+            $legStart['time'],
             $legStart['date']
         );
 

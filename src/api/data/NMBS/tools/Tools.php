@@ -6,6 +6,8 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Adapter\Common\AbstractCachePool;
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Cache\Namespaced\NamespacedCachePool;
+use Carbon\Carbon;
+use DateInterval;
 use Exception;
 use Irail\api\data\models\Station;
 
@@ -28,35 +30,36 @@ class Tools
      * @return int seconds since the Unix epoch
      * @throws Exception
      */
-    public static function transformTime($time, $date)
+    public static function transformTime(string $time, string $date): int
     {
-        if (strlen($time) < 8) {
-            throw new Exception("Invalid time passed to transformTime, should be 6 or 8 digits!");
+        if (strlen($time) != 8 && strlen($time) != 11) {
+            throw new Exception("Invalid time passed to transformTime, should be 8 or 11 digits! $time");
         }
         if (strlen($time) == 8) {
             $time = '00:' . $time;
         }
 
         date_default_timezone_set('Europe/Brussels');
-        $dayoffset = intval(substr($time, 0, 2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6, 2));
-        $second = intval(substr($time, 8, 2));
+        $dayoffset = Tools::safeIntVal(substr($time, 0, 2));
+        $hour = Tools::safeIntVal(substr($time, 3, 2));
+        $minute = Tools::safeIntVal(substr($time, 6, 2));
+        $second = Tools::safeIntVal(substr($time, 9, 2));
 
-        $year = intval(substr($date, 0, 4));
-        $month = intval(substr($date, 5, 2));
-        $day = intval(substr($date, 8, 2));
+        $year = Tools::safeIntVal(substr($date, 0, 4));
+        $month = Tools::safeIntVal(substr($date, 5, 2));
+        $day = Tools::safeIntVal(substr($date, 8, 2));
 
         return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
     }
 
     /**
      * Calculate the difference between two moments, in seconds.
-     * @param string $realTimeTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
-     * @param string $realTimeDate Date as a Ymd string.
-     * @param string $plannedTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
-     * @param string $plannedDate Date as a Ymd string.
+     * @param string $realTimeTime in hh:mm:ss or dd:hh:mm:ss format
+     * @param string $realTimeDate Date as a Y-m-d string.
+     * @param string $plannedTime in hh:mm:ss or dd:hh:mm:ss format
+     * @param string $plannedDate Date as a Y-m-d string.
      * @return int The difference between the two datetimes, in seconds.
+     * @throws Exception
      */
     public static function calculateSecondsHHMMSS($realTimeTime, $realTimeDate, $plannedTime, $plannedDate)
     {
@@ -64,32 +67,33 @@ class Tools
     }
 
     /**
-     * This function transforms the brail formatted timestring and reformats it to seconds.
-     * @param int $time
+     * This function transforms a duration in PT..H..M format into seconds.
+     * @param string $duration
      * @return int Duration in seconds
+     * @throws Exception
      */
-    public static function transformDuration($time)
+    public static function transformDuration(string $duration)
     {
-        $days = intval(substr($time, 0, 2));
-        $hour = intval(substr($time, 3, 2));
-        $minute = intval(substr($time, 6, 2));
-        $second = intval(substr($time, 9, 2));
-
-        return $days * 24 * 3600 + $hour * 3600 + $minute * 60 + $second;
+        $interval = new DateInterval($duration);
+        return $interval->d * 24 * 3600 + $interval->h * 3600 + $interval->i * 60 + $interval->s;
     }
 
     /**
-     * This function transforms the brail formatted timestring and reformats it to seconds.
-     * @param int $time
+     * This function transforms the b-rail formatted timestring and reformats it to seconds.
+     * @param string $time in HHMMSS or DDHHMMSS format
      * @return int Duration in seconds
      */
     public static function transformDurationHHMMSS($time)
     {
-        $hour = intval(substr($time, 0, 2));
-        $minute = intval(substr($time, 2, 2));
-        $second = intval(substr($time, 4, 2));
+        if (strlen($time) == 6) {
+            $time = '00' . $time;
+        }
+        $days = intval(substr($time, 0, 2));
+        $hour = intval(substr($time, 2, 2));
+        $minute = intval(substr($time, 4, 2));
+        $second = intval(substr($time, 6, 2));
 
-        return $hour * 3600 + $minute * 60 + $second;
+        return $days * 86400 + $hour * 3600 + $minute * 60 + $second;
     }
 
     /**
@@ -138,9 +142,9 @@ class Tools
     /**
      * Store an item in the cache
      *
-     * @param String $key The key to store the object under
+     * @param String              $key The key to store the object under
      * @param object|array|string $value The object to store
-     * @param int $ttl The number of seconds to keep this in cache
+     * @param int                 $ttl The number of seconds to keep this in cache
      */
     public static function setCachedObject($key, $value, $ttl = self::cache_TTL)
     {
@@ -166,15 +170,15 @@ class Tools
     public static function createDepartureUri(Station $station, $departureTime, string $vehicleId): string
     {
         return 'http://irail.be/connections/' . substr(
-            basename($station->{'@id'}),
-            2
-        ) . '/' . date(
-            'Ymd',
-            $departureTime
-        ) . '/' . substr(
-            $vehicleId,
-            strrpos($vehicleId, '.') !== false ? strrpos($vehicleId, '.') + 1 : 0
-        );
+                basename($station->{'@id'}),
+                2
+            ) . '/' . date(
+                'Ymd',
+                $departureTime
+            ) . '/' . substr(
+                $vehicleId,
+                strrpos($vehicleId, '.') !== false ? strrpos($vehicleId, '.') + 1 : 0
+            );
     }
 
     public static function getUserAgent(): string
@@ -186,8 +190,18 @@ class Tools
      * Send a HTTP response header to the requester, idicating that this response was served from an internal cache.
      * @param bool $cached
      */
-    public static function sendIrailCacheResponseHeader(bool $cached) : void
+    public static function sendIrailCacheResponseHeader(bool $cached): void
     {
         header("X-iRail-cache-hit: " . $cached);
+    }
+
+    /**
+     * Get the int value of a string by interpreting it as a decimal number. This prevents octal interpretation of numbers starting with a leading 0.
+     * @param string $value
+     * @return int
+     */
+    public static function safeIntVal(string $value): int
+    {
+        return intval(ltrim($value, '0')); // ltrim to avoid octal interpretation
     }
 }
