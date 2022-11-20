@@ -252,7 +252,7 @@ class LiveboardDatasource
                 // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
                 // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
                 // parse information about which platform this train will depart from/arrive to.
-                $platform = $stop['Platform'];
+                $platform = key_exists('Platform', $stop) ? $stop['Platform'] : '?';
                 $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
 
                 // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
