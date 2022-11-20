@@ -37,6 +37,9 @@ class GtfsTripStartEndExtractor
         if ($vehicleDetailsByDate === false) {
             $vehicleDetailsByDate = self::loadTripsWithStartAndEndDateInCache();
         }
+        if (!key_exists($tripStartDate, $vehicleDetailsByDate)) {
+            throw new Exception("Request outside of allowed date period (3 days back, 14 days forward)", 404);
+        }
         return $vehicleDetailsByDate[$tripStartDate];
     }
 
