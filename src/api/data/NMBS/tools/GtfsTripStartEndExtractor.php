@@ -131,8 +131,7 @@ class GtfsTripStartEndExtractor
         array $serviceIdsByCalendarDate,
         int $daysBack,
         int $daysForward
-    )
-    {
+    ) {
         $date = Carbon::now();
         $serviceIdsToKeep = [];
 
