@@ -126,7 +126,7 @@ class VehicleDatasource
             'date'        => $formattedDateStr,
             'lang'        => $lang
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null,);
+        $url = $url . '?' . http_build_query($parameters, "", null, );
 
         $journeyResponse = self::makeNmbsRequest($url);
         // Store the raw output to a file on disk, for debug purposes
@@ -156,7 +156,7 @@ class VehicleDatasource
             'id'   => $journeyDetailRef,
             'lang' => $lang
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null,);
+        $url = $url . '?' . http_build_query($parameters, "", null, );
 
         $journeyResponse = self::makeNmbsRequest($url);
         // Store the raw output to a file on disk, for debug purposes
@@ -376,6 +376,4 @@ class VehicleDatasource
         // The first stop can't have arrived == 1, since there is no arrival.
         $stops[0]->arrived = 0;
     }
-
-
 }

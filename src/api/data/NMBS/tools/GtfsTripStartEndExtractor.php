@@ -117,8 +117,12 @@ class GtfsTripStartEndExtractor
         return $vehicleDetailsByServiceId;
     }
 
-    private static function getServiceIdsInDateRange(array $serviceIdsByCalendarDate, string $date,
-        int $daysBack, int $daysForward)
+    private static function getServiceIdsInDateRange(
+        array $serviceIdsByCalendarDate,
+        string $date,
+        int $daysBack,
+        int $daysForward
+    )
     {
         $date = Carbon::createFromFormat('Ymd', $date);
         $serviceIdsToKeep = [];

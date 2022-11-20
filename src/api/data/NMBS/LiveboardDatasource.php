@@ -166,7 +166,7 @@ class LiveboardDatasource
             'Count'    => 100, // 100 results
             // language is not passed, responses contain both Dutch and French destinations
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null,);
+        $url = $url . '?' . http_build_query($parameters, "", null, );
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -234,7 +234,8 @@ class LiveboardDatasource
                 }
 
                 // The date of this departure
-                $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
+                $plannedDateTime = DateTime::createFromFormat(
+                    'Y-m-d H:i:s',
                     $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
                 );
                 $unixtime = $plannedDateTime->getTimestamp();
@@ -282,9 +283,9 @@ class LiveboardDatasource
                 $stopAtStation->left = $left;
                 $stopAtStation->isExtra = $isExtraTrain;
                 $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                        basename($station->{'@id'}),
-                        2
-                    ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
+                    basename($station->{'@id'}),
+                    2
+                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
 
                 // Add occuppancy data, if available
                 $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($station, $stopAtStation, $plannedDateTime->format('Ymd'));

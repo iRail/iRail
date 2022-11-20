@@ -163,5 +163,4 @@ class OccupancyOperations
     {
         return class_exists(self::MONGODBCLASS) && getenv('MONGODB_URL') && getenv('MONGODB_DB');
     }
-
 }

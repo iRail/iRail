@@ -73,7 +73,6 @@ class HafasCommon
             throw new Exception("Date  outside of the timetable period. Check your query.", 400);
         }
         throw new Exception("This request failed. Please check your query. Error code " . $json['errorCode'], 500);
-
     }
 
     /**

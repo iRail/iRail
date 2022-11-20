@@ -111,8 +111,7 @@ class ConnectionsDatasource
         string $timeSel,
         string $typeOfTransport,
         ConnectionsRequest $request
-    ): array
-    {
+    ): array {
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
@@ -197,8 +196,7 @@ class ConnectionsDatasource
         string $date,
         string $timeSel,
         string $typeOfTransport
-    ): string
-    {
+    ): string {
         return 'NMBSConnections|' . join('.', [
                 $idfrom,
                 $idto,
@@ -228,8 +226,7 @@ class ConnectionsDatasource
         string $date,
         string $timeSel,
         string $typeOfTransport
-    ): string
-    {
+    ): string {
         $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
 
         $request_options = [
@@ -261,7 +258,7 @@ class ConnectionsDatasource
             'numF'             => 6, // include intermediate stops along the way
             'products'         => $typeOfTransportCode
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null,);
+        $url = $url . '?' . http_build_query($parameters, "", null, );
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -360,8 +357,7 @@ class ConnectionsDatasource
         ConnectionsRequest $request,
         array $trip,
         string $lang
-    ): Connection
-    {
+    ): Connection {
         $connection = new Connection();
         $connection->duration = Tools::transformDurationHHMMSS($trip['duration']);
 
@@ -457,8 +453,7 @@ class ConnectionsDatasource
     private static function parseTripLegs(
         array $trip,
         string $lang
-    ): array
-    {
+    ): array {
         $legs = [];
         // For the sake of code readability and maintainability: the response contains trains, not vias.
         // Therefore, just parse the trains and walks first, and create iRail via's based on the trains later.
@@ -486,8 +481,7 @@ class ConnectionsDatasource
         array $leg,
         array $trip,
         string $lang
-    ): HafasConnectionLeg
-    {
+    ): HafasConnectionLeg {
         $legStart = $leg['Origin'];
         $legEnd = $leg['Destination'];
 
@@ -645,9 +639,9 @@ class ConnectionsDatasource
         $constructedVia->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
         $constructedVia->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
         if (property_exists(
-                $trains[$viaIndex + 1],
-                'alerts'
-            ) && count($trains[$viaIndex + 1]->alerts) > 0) {
+            $trains[$viaIndex + 1],
+            'alerts'
+        ) && count($trains[$viaIndex + 1]->alerts) > 0) {
             $constructedVia->departure->alert = $trains[$viaIndex + 1]->alerts;
         }
 

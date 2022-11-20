@@ -48,5 +48,4 @@ class VehicleWithOriginAndDestination
     {
         return ["Train {$this->vehicleNumber} from {$this->originStopId} to {$this->destinationStopId}"];
     }
-
 }

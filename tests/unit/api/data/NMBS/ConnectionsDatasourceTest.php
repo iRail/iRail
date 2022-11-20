@@ -10,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class ConnectionsDatasourceTest extends TestCase
 {
-
     public function test_regression466_connectionsNewEndpoint_shouldBeParsedCorrectly()
     {
         $serverData = file_get_contents(__DIR__ . "/fixtures/connections-mobileriv-issue466.json");
