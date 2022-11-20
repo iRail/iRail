@@ -31,36 +31,46 @@ class GtfsTripStartEndExtractor
      * @return VehicleWithOriginAndDestination[]
      * @throws Exception
      */
-    public static function getTripsWithStartAndEndByDate(string $date): array
+    public static function getTripsWithStartAndEndByDate(string $tripStartDate): array
     {
         $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
         if ($vehicleDetailsByDate === false) {
-            $serviceIdsByCalendarDate = self::readCalendarDates();
-            // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
-            $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, $date, -3, +14);
-            $vehicleDetailsByServiceId = self::readTrips($serviceIdsToRetain);
+            $vehicleDetailsByDate = self::loadTripsWithStartAndEndDateInCache();
+        }
+        return $vehicleDetailsByDate[$tripStartDate];
+    }
 
-            if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
-                throw new Exception("No response from iRail GTFS", 504);
-            }
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public static function loadTripsWithStartAndEndDateInCache(): array
+    {
+        $serviceIdsByCalendarDate = self::readCalendarDates();
+        // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
+        $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 14);
+        $vehicleDetailsByServiceId = self::readTrips($serviceIdsToRetain);
 
-            // Create a multi-dimensional array:
-            // date (yyyymmdd) => VehicleWithRoute[]
-            $vehicleDetailsByDate = [];
-            foreach ($serviceIdsByCalendarDate as $date => $serviceIds) {
-                $vehicleDetailsByDate[$date] = [];
-                foreach ($serviceIds as $serviceId) {
-                    if (key_exists($serviceId, $vehicleDetailsByServiceId)) {
-                        foreach ($vehicleDetailsByServiceId[$serviceId] as $vehicleDetails) {
-                            $vehicleDetailsByDate[$date][] = $vehicleDetails;
-                        }
+        if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
+            throw new Exception("No response from iRail GTFS", 504);
+        }
+
+        // Create a multidimensional array:
+        // date (yyyymmdd) => VehicleWithRoute[]
+        $vehicleDetailsByDate = [];
+        foreach ($serviceIdsByCalendarDate as $date => $serviceIds) {
+            $vehicleDetailsByDate[$date] = [];
+            foreach ($serviceIds as $serviceId) {
+                if (key_exists($serviceId, $vehicleDetailsByServiceId)) {
+                    foreach ($vehicleDetailsByServiceId[$serviceId] as $vehicleDetails) {
+                        $vehicleDetailsByDate[$date][] = $vehicleDetails;
                     }
                 }
             }
-
-            Tools::setCachedObject("gtfs|vehicleDetailsByDate", $vehicleDetailsByDate, 7200);
         }
-        return $vehicleDetailsByDate[$date];
+
+        Tools::setCachedObject("gtfs|vehicleDetailsByDate", $vehicleDetailsByDate, 7200);
+        return $vehicleDetailsByDate;
     }
 
     private static function readCalendarDates()
@@ -119,12 +129,11 @@ class GtfsTripStartEndExtractor
 
     private static function getServiceIdsInDateRange(
         array $serviceIdsByCalendarDate,
-        string $date,
         int $daysBack,
         int $daysForward
     )
     {
-        $date = Carbon::createFromFormat('Ymd', $date);
+        $date = Carbon::now();
         $serviceIdsToKeep = [];
 
         $startDate = $date->copy()->subDays(abs($daysBack));
@@ -142,7 +151,7 @@ class GtfsTripStartEndExtractor
      * @param $row
      * @return int
      */
-    public static function safeIntVal($row): int
+    private static function safeIntVal($row): int
     {
         return intval(ltrim($row)); // ltrim to avoid octal interpretation
     }
