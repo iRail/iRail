@@ -8,7 +8,6 @@
  */
 namespace Irail\api\occupancy;
 
-use Dotenv\Dotenv;
 use Exception;
 
 class OccupancyOperations
@@ -24,7 +23,7 @@ class OccupancyOperations
     {
         try {
             // Check if the MongoDB module is installed, if not just return null
-            if (class_exists(self::MONGODBCLASS)) {
+            if (self::isMongoAvailable()) {
                 $occupancyDeparture = self::getOccupancyTrip($vehicle, $from, $date);
 
                 // If there is no occupancy for that connection, return unknown
@@ -43,9 +42,8 @@ class OccupancyOperations
 
     private static function getOccupancyTrip($vehicle, $from, $date)
     {
-        self::initDotEnv();
-        $mongodb_url = getenv('MONGODB_URL');
-        $mongodb_db = getenv('MONGODB_DB');
+        $mongodb_url = $_ENV['MONGODB_URL'];
+        $mongodb_db = $_ENV['MONGODB_DB'];
 
         $m = new \MongoDB\Driver\Manager($mongodb_url);
         $occupancy = new \MongoDB\Collection($m, $mongodb_db, 'occupancy');
@@ -56,12 +54,11 @@ class OccupancyOperations
 
     public static function getOccupancy($vehicle, $date)
     {
-        // Check if the MongoDB module is installed, if not just return null
-        if (class_exists(self::MONGODBCLASS)) {
-            self::initDotEnv();
+        // Check if the MongoDB module is installed and configured, if not just return null
+
+        if (self::isMongoAvailable()) {
             $mongodb_url = getenv('MONGODB_URL');
             $mongodb_db = getenv('MONGODB_DB');
-
             $manager = new \MongoDB\Driver\Manager($mongodb_url);
             $occupancy = new \MongoDB\Collection($manager, $mongodb_db, 'occupancy');
             try {
@@ -159,9 +156,11 @@ class OccupancyOperations
         return self::CONNECTIONBASEURI . substr(basename($from), 2) . '/' . $date . '/' . basename($vehicle);
     }
 
-    private static function initDotEnv(): void
+    /**
+     * @return bool
+     */
+    public static function isMongoAvailable(): bool
     {
-        $dotenv = new Dotenv(dirname(__DIR__, 3));
-        $dotenv->load();
+        return class_exists(self::MONGODBCLASS) && getenv('MONGODB_URL') && getenv('MONGODB_DB');
     }
 }
