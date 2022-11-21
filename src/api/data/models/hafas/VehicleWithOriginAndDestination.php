@@ -7,14 +7,16 @@ class VehicleWithOriginAndDestination
     private int $vehicleNumber;
     private string $originStopId;
     private string $destinationStopId;
+    private string $tripId;
 
     /**
      * @param int    $vehicleNumber
      * @param string $originStopId
      * @param string $destinationStopId
      */
-    public function __construct(int $vehicleNumber, string $originStopId, string $destinationStopId)
+    public function __construct(string $tripId, int $vehicleNumber, string $originStopId, string $destinationStopId)
     {
+        $this->tripId = $tripId;
         $this->vehicleNumber = $vehicleNumber;
         $this->originStopId = $originStopId;
         $this->destinationStopId = $destinationStopId;
@@ -42,6 +44,14 @@ class VehicleWithOriginAndDestination
     public function getDestinationStopId(): string
     {
         return $this->destinationStopId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTripId(): string
+    {
+        return $this->tripId;
     }
 
     public function __debugInfo(): ?array

@@ -27,11 +27,31 @@ class GtfsTripStartEndExtractor
         return false;
     }
 
+
+    /**
+     * Get alternative origins and destinations for a vehicle, in case one of the first/last stops is cancelled.
+     *
+     * @param string $tripId The trip id. This should be obtained from the getVehicleWithOriginAndDestination method.
+     * @return VehicleWithOriginAndDestination[]
+     * @throws Exception
+     */
+    public static function getAlternativeVehicleWithOriginAndDestination(string $tripId): array
+    {
+        # error_log("getAlternativeVehicleWithOriginAndDestination called for trip $tripId");
+        $stops = self::getStopsForTrip($tripId);
+        $results = [];
+        for ($i = 1; $i < count($stops); $i++) {
+            $results[] = new VehicleWithOriginAndDestination($tripId, 0, $stops[$i - 1], $stops[$i]);
+        }
+        # error_log("getAlternativeVehicleWithOriginAndDestination returned " . count($results) . " results for trip $tripId");
+        return $results;
+    }
+
     /**
      * @return VehicleWithOriginAndDestination[]
      * @throws Exception
      */
-    public static function getTripsWithStartAndEndByDate(string $tripStartDate): array
+    private static function getTripsWithStartAndEndByDate(string $tripStartDate): array
     {
         $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
         if ($vehicleDetailsByDate === false) {
@@ -41,6 +61,19 @@ class GtfsTripStartEndExtractor
             throw new Exception("Request outside of allowed date period (3 days back, 14 days forward)", 404);
         }
         return $vehicleDetailsByDate[$tripStartDate];
+    }
+
+    /**
+     * @return string[]
+     * @throws Exception
+     */
+    private static function getStopsForTrip(string $tripId): array
+    {
+        $tripStops = self::readTripStops();
+        if (!key_exists($tripId, $tripStops)) {
+            throw new Exception("Trip not found", 404);
+        }
+        return $tripStops[$tripId];
     }
 
     /**
@@ -123,7 +156,7 @@ class GtfsTripStartEndExtractor
 
             $trainNumber = Tools::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
             $tripIdParts = explode(':', $tripId);
-            $vehicleDetails = new VehicleWithOriginAndDestination($trainNumber, $tripIdParts[3], $tripIdParts[4]);
+            $vehicleDetails = new VehicleWithOriginAndDestination($tripId, $trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
         }
 
@@ -147,5 +180,34 @@ class GtfsTripStartEndExtractor
             }
         }
         return array_unique($serviceIdsToKeep);
+    }
+
+    private static function readTripStops(): array
+    {
+        $stopsByTripId = Tools::getCachedObject("gtfs|stopsByTrip");
+        if ($stopsByTripId !== false) {
+            return $stopsByTripId;
+        }
+        error_log("reading stop_times");
+        $fileStream = fopen("https://gtfs.irail.be/nmbs/gtfs/latest/stop_times.txt", "r");
+        $stopsByTripId = [];
+
+        $TRIP_ID_COLUMN = 0;
+        $STOP_ID_COLUMN = 3;
+
+        $headers = fgetcsv($fileStream); // ignore the headers
+        while ($row = fgetcsv($fileStream)) {
+            $trip_id = $row[$TRIP_ID_COLUMN];
+            if (!key_exists($trip_id, $stopsByTripId)) {
+                $stopsByTripId[$trip_id] = [];
+            }
+            $stopId = $row[$STOP_ID_COLUMN];
+            # Assume all stop_times are in chronological order, we don't have time to sort this.
+            $stopsByTripId[$trip_id][] = $stopId;
+        }
+        error_log("read stop_times");
+        # This takes a long time to generate, and should be cached quite long
+        Tools::setCachedObject("gtfs|stopsByTrip", $stopsByTripId, 14400);
+        return $stopsByTripId;
     }
 }
