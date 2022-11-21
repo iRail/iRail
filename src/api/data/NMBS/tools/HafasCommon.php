@@ -428,13 +428,18 @@ class HafasCommon
         }
 
         if (key_exists('cancelled', $rawIntermediateStop)) {
+            # Default case
             $intermediateStop->departureCanceled = 1;
             $intermediateStop->arrivalCanceled = 1;
-            if (key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] == false) {
+
+            # Try and get more specific
+            $noAlighting = key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] === false;
+            $noBoarding = key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] === false;
+            if ($noAlighting && !$noBoarding){
                 # If alighting is cancelled more specifically, then boarding is still possible
                 $intermediateStop->departureCanceled = 0;
             }
-            if (key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] == false) {
+            if ($noBoarding && !$noAlighting) {
                 # If boarding is cancelled more specifically, then arrival is still possible
                 $intermediateStop->arrivalCanceled = 0;
             }
