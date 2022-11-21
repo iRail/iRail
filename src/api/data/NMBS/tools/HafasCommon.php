@@ -427,6 +427,11 @@ class HafasCommon
             $intermediateStop->arrivalCanceled = 1;
         }
 
+        if (key_exists('cancelled', $rawIntermediateStop)) {
+            $intermediateStop->departureCanceled = 1;
+            $intermediateStop->arrivalCanceled = 1;
+        }
+
         if (key_exists('additional', $rawIntermediateStop)) {
             $intermediateStop->isExtraStop = 1;
         } else {
