@@ -31,17 +31,23 @@ class GtfsTripStartEndExtractor
     /**
      * Get alternative origins and destinations for a vehicle, in case one of the first/last stops is cancelled.
      *
-     * @param string $tripId The trip id. This should be obtained from the getVehicleWithOriginAndDestination method.
+     * @param VehicleWithOriginAndDestination $originalVehicle
      * @return VehicleWithOriginAndDestination[]
      * @throws Exception
      */
-    public static function getAlternativeVehicleWithOriginAndDestination(string $tripId): array
+    public static function getAlternativeVehicleWithOriginAndDestination(VehicleWithOriginAndDestination $originalVehicle): array
     {
         # error_log("getAlternativeVehicleWithOriginAndDestination called for trip $tripId");
-        $stops = self::getStopsForTrip($tripId);
+        $stops = self::getStopsForTrip($originalVehicle->getTripId());
         $results = [];
         for ($i = 1; $i < count($stops); $i++) {
-            $results[] = new VehicleWithOriginAndDestination($tripId, 0, $stops[$i - 1], $stops[$i]);
+            $results[] = new VehicleWithOriginAndDestination(
+                $originalVehicle->getTripId(),
+                $originalVehicle->getVehicleType(),
+                $originalVehicle->getVehicleNumber(),
+                $stops[$i - 1],
+                $stops[$i]
+            );
         }
         # error_log("getAlternativeVehicleWithOriginAndDestination returned " . count($results) . " results for trip $tripId");
         return $results;
@@ -138,13 +144,17 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsByServiceId = [];
 
         $SERVICE_ID_COLUMN = 1;
+        $ROUTE_ID_COLUMN = 0;
         $TRIP_ID_COLUMN = 2;
         $TRIP_SHORT_NAME_COLUMN = 4;
+
+        $vehicleTypeByTripId = self::readVehicleTypes();
 
         $headers = fgetcsv($fileStream); // ignore the headers
         while ($row = fgetcsv($fileStream)) {
             $serviceId = Tools::safeIntVal($row[$SERVICE_ID_COLUMN]);
             $tripId = $row[$TRIP_ID_COLUMN];
+            $routeId = $row[$ROUTE_ID_COLUMN];
 
             if (!in_array($serviceId, $serviceIdsToRetain)) {
                 continue;
@@ -156,7 +166,9 @@ class GtfsTripStartEndExtractor
 
             $trainNumber = Tools::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
             $tripIdParts = explode(':', $tripId);
-            $vehicleDetails = new VehicleWithOriginAndDestination($tripId, $trainNumber, $tripIdParts[3], $tripIdParts[4]);
+            $vehicleType = $vehicleTypeByTripId[$routeId];
+            error_log("$vehicleType $trainNumber");
+            $vehicleDetails = new VehicleWithOriginAndDestination($tripId, $vehicleType, $trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
         }
 
@@ -209,5 +221,26 @@ class GtfsTripStartEndExtractor
         # This takes a long time to generate, and should be cached quite long
         Tools::setCachedObject("gtfs|stopsByTrip", $stopsByTripId, 14400);
         return $stopsByTripId;
+    }
+
+    /**
+     * @return array An associative array mapping route ids to vehicle types.
+     */
+    private static function readVehicleTypes(): array
+    {
+        $fileStream = fopen("https://gtfs.irail.be/nmbs/gtfs/latest/routes.txt", "r");
+        $vehicleTypesByRouteId = [];
+
+        $ROUTE_ID_COLUMN = 0;
+        $VEHICLE_TYPE_COLUMN = 2; // Vehicle type is stored as route short name
+
+        $headers = fgetcsv($fileStream); // ignore the headers
+        while ($row = fgetcsv($fileStream)) {
+            $routeId = $row[$ROUTE_ID_COLUMN];
+            $vehicleType = $row[$VEHICLE_TYPE_COLUMN];
+            $vehicleTypesByRouteId[$routeId] = $vehicleType;
+        }
+
+        return $vehicleTypesByRouteId;
     }
 }

@@ -8,18 +8,31 @@ class VehicleWithOriginAndDestination
     private string $originStopId;
     private string $destinationStopId;
     private string $tripId;
+    private string $vehicleType;
 
     /**
+     * @param string $tripId
+     * @param string $vehicleType
      * @param int    $vehicleNumber
      * @param string $originStopId
      * @param string $destinationStopId
      */
-    public function __construct(string $tripId, int $vehicleNumber, string $originStopId, string $destinationStopId)
+    public function __construct(string $tripId, string $vehicleType, int $vehicleNumber, string $originStopId, string $destinationStopId)
     {
         $this->tripId = $tripId;
         $this->vehicleNumber = $vehicleNumber;
         $this->originStopId = $originStopId;
         $this->destinationStopId = $destinationStopId;
+        $this->vehicleType = $vehicleType;
+    }
+
+    /**
+     * The vehicle type, such as "IC" or "S32"
+     * @return string
+     */
+    public function getVehicleType(): string
+    {
+        return $this->vehicleType;
     }
 
     /**

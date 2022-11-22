@@ -115,7 +115,7 @@ class VehicleDatasource
      */
     private static function getJourneyDetailRef(string $date, string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $lang): ?string
     {
-        $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($vehicleName, $vehicleWithOriginAndDestination, $date, $lang);
+        $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($vehicleWithOriginAndDestination, $date, $lang);
         # If false, check if it has been partially cancelled.
         if ($journeyDetailRef === false) {
             $journeyDetailRef = self::getJourneyDetailRefAlt($vehicleWithOriginAndDestination, $vehicleName, $date, $lang);
@@ -143,7 +143,7 @@ class VehicleDatasource
             return $journeyRef;
         }
         $alternativeOriginDestinations = GtfsTripStartEndExtractor::getAlternativeVehicleWithOriginAndDestination(
-            $vehicleWithOriginAndDestination->getTripId()
+            $vehicleWithOriginAndDestination
         );
         // Assume the first and last stop are cancelled, since the normal origin-destination search did not return results
         // This saves 2 requests and should not make a difference.
@@ -151,7 +151,7 @@ class VehicleDatasource
         while ($journeyRef === false && $i < count($alternativeOriginDestinations) - 1) {
             # error_log("Searching for vehicle $vehicleName using alternative segments, $i");
             $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i++];
-            $journeyRef = self::findVehicleJourneyRefBetweenStops($vehicleName, $altVehicleWithOriginAndDestination, $date, $lang);
+            $journeyRef = self::findVehicleJourneyRefBetweenStops($altVehicleWithOriginAndDestination, $date, $lang);
         }
         # Cache for 4 hours
         Tools::setCachedObject("gtfs|getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getVehicleNumber()}",$journeyRef,14400);
@@ -159,18 +159,18 @@ class VehicleDatasource
     }
 
     /**
-     * @param String                          $vehicleName
      * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
      * @param string                          $date
      * @param String                          $lang
      * @return string|false
      */
-    public static function findVehicleJourneyRefBetweenStops(string $vehicleName, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $date, string $lang): string|false
+    public static function findVehicleJourneyRefBetweenStops( VehicleWithOriginAndDestination $vehicleWithOriginAndDestination, string $date, string $lang): string|false
     {
         $url = "https://mobile-riv.api.belgianrail.be/riv/v1.0/journey";
 
         $formattedDateStr = DateTime::createFromFormat('Ymd', $date)->format('Y-m-d');
 
+        $vehicleName = $vehicleWithOriginAndDestination->getVehicleType() . $vehicleWithOriginAndDestination->getVehicleNumber();
         $parameters = [
             'trainFilter' => $vehicleName, // type + number, type is required!
             'originExtId' => $vehicleWithOriginAndDestination->getOriginStopId(),
