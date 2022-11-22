@@ -167,7 +167,7 @@ class GtfsTripStartEndExtractor
             $trainNumber = Tools::safeIntVal($row[$TRIP_SHORT_NAME_COLUMN]);
             $tripIdParts = explode(':', $tripId);
             $vehicleType = $vehicleTypeByTripId[$routeId];
-            error_log("$vehicleType $trainNumber");
+
             $vehicleDetails = new VehicleWithOriginAndDestination($tripId, $vehicleType, $trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
         }
