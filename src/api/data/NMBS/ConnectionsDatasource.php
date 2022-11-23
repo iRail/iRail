@@ -301,21 +301,15 @@ class ConnectionsDatasource
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
             }
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_TRAINS) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
         } else {
-            if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
-            } else {
-                if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_TRAINS) {
-                    $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
-                } else {
-                    if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
-                        $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
-                    } else {
-                        // All trains is the default
-                        $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
-                    }
-                }
-            }
+            // All trains is the default
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
         }
         return $typeOfTransportCode;
     }
