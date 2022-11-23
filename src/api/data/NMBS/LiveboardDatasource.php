@@ -12,6 +12,7 @@ use Irail\api\data\models\DepartureArrival;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
+use Irail\api\data\NMBS\tools\GtfsTripStartEndExtractor;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
@@ -166,7 +167,7 @@ class LiveboardDatasource
             'Count'    => 100, // 100 results
             // language is not passed, responses contain both Dutch and French destinations
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null, );
+        $url = $url . '?' . http_build_query($parameters, "", null,);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -265,7 +266,8 @@ class LiveboardDatasource
                     $isExtraTrain = 1;
                 }
 
-                $direction = StationsDatasource::getStationFromID($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode'], $lang);
+
+                $direction = StationsDatasource::getStationFromID(self::getDirectionUicCode($stop, $isArrivalBoard), $lang);
                 $vehicleInfo = new VehicleInfo($stop['CommercialType'], $stop['TrainNumber']);
 
                 // Now all information has been parsed. Put it in a nice object.
@@ -282,11 +284,12 @@ class LiveboardDatasource
                 // TODO: enable partially canceled as soon as it's reliable, ATM it still marks trains which aren't partially canceled at all
                 // $stopAtStation->partiallyCanceled = $partiallyCanceled;
                 $stopAtStation->left = $left;
+                // TODO: handle '"DepartureStatusNl": "aan perron",' as "halting"
                 $stopAtStation->isExtra = $isExtraTrain;
                 $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                    basename($station->{'@id'}),
-                    2
-                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
+                        basename($station->{'@id'}),
+                        2
+                    ) . '/' . date('Ymd', $unixtime) . '/' . $vehicleInfo->shortname;
 
                 // Add occuppancy data, if available
                 $stopAtStation = self::getDepartureArrivalWithAddedOccuppancyData($station, $stopAtStation, $plannedDateTime->format('Ymd'));
@@ -346,5 +349,27 @@ class LiveboardDatasource
     private static function isServiceTrain(mixed $stop)
     {
         return $stop['CommercialType'] == 'SERV';
+    }
+
+    private static function getDirectionUicCode(array $stop, bool $isArrivalBoard)
+    {
+        if ($isArrivalBoard) {
+            if (key_exists('Origin1UicCode', $stop)) {
+                return $stop['Origin1UicCode'];
+            }
+            // GTFS to the rescue in the case of a missing origin!
+            return GtfsTripStartEndExtractor::getVehicleWithOriginAndDestination(
+                $stop['TrainNumber'],
+                substr($stop['PlannedArrival'], 0, 10)
+            )->getOriginStopId();
+        }
+        if (key_exists('Destination1UicCode', $stop)) {
+            return $stop['Destination1UicCode'];
+        }
+        // GTFS to the rescue in the case of a missing destination!
+        return GtfsTripStartEndExtractor::getVehicleWithOriginAndDestination(
+            $stop['TrainNumber'],
+            substr($stop['PlannedDeparture'], 0, 10)
+        )->getDestinationStopId();
     }
 }
