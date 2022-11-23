@@ -335,11 +335,7 @@ class ConnectionsDatasource
         HafasCommon::throwExceptionOnInvalidResponse($json);
 
         if (!key_exists('Trip', $json)) {
-            file_put_contents(
-                '../../storage/error-connections-' . $request->getFrom()->_hafasId . '-' . $request->getTo()->_hafasId . '-' . time() . '.json',
-                $serverData
-            );
-            throw new Exception("Unexpected error in the response data - please try again.", 500);
+            throw new Exception("An upstream server experienced a timeout while obtaining this data", 504);
         }
 
         $connections = [];
