@@ -119,7 +119,7 @@ class Tools
      * Get an item from the cache.
      *
      * @param String $key The key to search for.
-     * @return bool|object The cached object if found. If not found, false.
+     * @return bool|object|array|string The cached object if found. If not found, false.
      */
     public static function getCachedObject($key)
     {

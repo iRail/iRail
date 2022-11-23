@@ -3,6 +3,7 @@
 namespace Irail\api\data\NMBS\tools;
 
 use Carbon\Carbon;
+use Closure;
 use Exception;
 use Irail\api\data\models\hafas\VehicleWithOriginAndDestination;
 
@@ -61,7 +62,10 @@ class GtfsTripStartEndExtractor
     {
         $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
         if ($vehicleDetailsByDate === false) {
-            $vehicleDetailsByDate = self::loadTripsWithStartAndEndDateInCache();
+            self::synchronized(function () {
+                self::loadTripsWithStartAndEndDateInCache();
+            });
+            $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
         }
         if (!key_exists($tripStartDate, $vehicleDetailsByDate)) {
             throw new Exception("Request outside of allowed date period (3 days back, 14 days forward)", 404);
@@ -88,6 +92,11 @@ class GtfsTripStartEndExtractor
      */
     public static function loadTripsWithStartAndEndDateInCache(): array
     {
+        $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
+        if ($vehicleDetailsByDate !== false) {
+            return $vehicleDetailsByDate;
+        }
+
         $serviceIdsByCalendarDate = self::readCalendarDates();
         // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
         $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 14);
@@ -242,5 +251,27 @@ class GtfsTripStartEndExtractor
         }
 
         return $vehicleTypesByRouteId;
+    }
+
+    /**
+     * Execute a callback method, while ensuring this method is only being executed by one thread at a time.
+     * This prevents multiple requests racing to fill a cache, which would put an unnecessary strain on the server.
+     * @param $callback Closure The function to execute
+     * @return mixed The function return value
+     */
+    static function synchronized(Closure $callback)
+    {
+        $requestId = sprintf("%08x", abs(crc32($_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT'])));
+        $lockName = "lock|" . md5(json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]));
+        while (Tools::getCachedObject($lockName) === true) {
+            error_log("[$requestId] Waiting for lock $lockName to become free");
+            sleep(1);
+        }
+        error_log("[$requestId] Locking $lockName");
+        Tools::setCachedObject($lockName, true);
+        $result = $callback();
+        error_log("[$requestId] Freeing $lockName");
+        Tools::setCachedObject($lockName, false);
+        return $result;
     }
 }
