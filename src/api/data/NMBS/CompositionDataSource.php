@@ -321,7 +321,7 @@ class CompositionDataSource
             $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
         } else if (property_exists($rawCompositionUnit, "materialSubTypeName")
-            && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')){
+            && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')) { // HV mislabeled as HLE :(
             $materialType->parent_type = "M7";
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName,2);
         } else {
