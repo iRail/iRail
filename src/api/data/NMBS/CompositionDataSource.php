@@ -137,20 +137,14 @@ class CompositionDataSource
 
         if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR") {
             self::setAmMrMaterialType($materialType, $rawCompositionUnit, $position);
-        } else {
-            if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
-                self::setHleMaterialType($materialType, $rawCompositionUnit);
-            } else {
-                if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
-                    self::setHvMaterialType($materialType, $rawCompositionUnit);
-                } else {
-                    if (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
-                        // Anything else, defaul fallback
-                        $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
-                        $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
-                    }
-                }
-            }
+        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
+            self::setHleMaterialType($materialType, $rawCompositionUnit);
+        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
+            self::setHvMaterialType($materialType, $rawCompositionUnit);
+        } else if (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
+            // Anything else, defaul fallback
+            $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
+            $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
         }
 
         return $materialType;
@@ -323,9 +317,12 @@ class CompositionDataSource
     {
         // Electric locomotives
         if (property_exists($rawCompositionUnit, "materialSubTypeName")
-            && strpos($rawCompositionUnit->materialSubTypeName, 'HLE') === 0) {
+            && str_starts_with($rawCompositionUnit->materialSubTypeName, 'HLE')) {
             $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
+        } else if (str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')){
+            $materialType->parent_type = "M7";
+            $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName,2);
         } else {
             $materialType->parent_type = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
             $materialType->sub_type = substr($rawCompositionUnit->materialTypeName, 5);
