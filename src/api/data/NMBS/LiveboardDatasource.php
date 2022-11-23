@@ -265,12 +265,6 @@ class LiveboardDatasource
                     $isExtraTrain = 1;
                 }
 
-                if (!key_exists('Origin1UicCode', $stop) && !key_exists('Destination1UicCode', $stop)) {
-                    file_put_contents(
-                        '../../storage/error-liveboard-missingDestination-' . $station->_hafasId . '-' . time() . '.json',
-                        $serverData
-                    );
-                }
                 $direction = StationsDatasource::getStationFromID($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode'], $lang);
                 $vehicleInfo = new VehicleInfo($stop['CommercialType'], $stop['TrainNumber']);
 
