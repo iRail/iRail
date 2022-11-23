@@ -458,11 +458,19 @@ class ConnectionsDatasource
         // This is way more readable compared to instantly creating the vias
         // Loop over all train rides in the list. This will also include the first train ride.
         foreach ($trip['LegList']['Leg'] as $leg) {
-            $legs[] = self::parseHafasConnectionLeg(
-                $leg,
-                $trip,
-                $lang
-            );
+
+            if ($leg['type'] == "JNY" || $leg['type'] == "WALK") {
+                $legs[] = self::parseHafasConnectionLeg(
+                    $leg,
+                    $trip,
+                    $lang
+                );
+            } else {
+                $ignoredTypes = ['CHKI']; // CHKI = check in for international trains, in-station transfer 15 minutes
+                if (!in_array($leg['type'], $ignoredTypes)) {
+                    error_log("Unknown leg type " . $leg['type']);
+                }
+            }
         }
         return $legs;
     }
