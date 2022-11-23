@@ -20,32 +20,6 @@ class HafasCommon
     /**
      * Throw an exception if the JSON API response contains an error instead of a result.
      *
-     * @param array $json The JSON response as an associative array.
-     *
-     * @throws Exception An Exception containing an error message in case the JSON response contains an error message.
-     */
-    public static function throwExceptionOnLegacyInvalidResponse(array $json): void
-    {
-        if ($json['svcResL'][0]['err'] == "H9360") {
-            throw new Exception("Date outside of the timetable period.", 404);
-        }
-        if ($json['errorCode'] == 'SVC_NO_RESULT' || $json['svcResL'][0]['err'] == "H890") {
-            throw new Exception('No results found', 404);
-        }
-        if ($json['svcResL'][0]['err'] == 'PROBLEMS') {
-            throw new Exception("Date likely outside of the timetable period. Check your query.", 400);
-        }
-        if ($json['svcResL'][0]['err'] != 'OK') {
-            throw new Exception("This request failed. Please check your query. Error code " . $json['svcResL'][0]['err'], 500);
-        }
-        if ($json['svcResL'][0]['err'] != 'OK') {
-            throw new Exception("We're sorry, this data is not available from our sources at this moment. Error code " . $json['svcResL'][0]['err'], 500);
-        }
-    }
-
-    /**
-     * Throw an exception if the JSON API response contains an error instead of a result.
-     *
      * @param array|null $json The JSON response as an associative array.
      *
      * @throws Exception An Exception containing an error message in case the JSON response contains an error message.

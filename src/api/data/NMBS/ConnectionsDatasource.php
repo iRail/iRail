@@ -258,7 +258,7 @@ class ConnectionsDatasource
             'numF'             => 6, // include intermediate stops along the way
             'products'         => $typeOfTransportCode
         ];
-        $url = $url . '?' . http_build_query($parameters, "", null, );
+        $url = $url . '?' . http_build_query($parameters, "", null,);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -333,6 +333,14 @@ class ConnectionsDatasource
         $json = json_decode($serverData, true);
 
         HafasCommon::throwExceptionOnInvalidResponse($json);
+
+        if (!key_exists('Trip', $json)) {
+            file_put_contents(
+                '../../storage/error-connections-' . $request->getFrom()->_hafasId . '-' . $request->getTo()->_hafasId . '-' . time() . '.json',
+                $serverData
+            );
+            throw new Exception("Unexpected error in the response data - please try again.", 500);
+        }
 
         $connections = [];
         foreach ($json['Trip'] as $conn) {
@@ -639,9 +647,9 @@ class ConnectionsDatasource
         $constructedVia->departure->canceled = $trains[$viaIndex + 1]->departure->canceled;
         $constructedVia->departure->isExtraStop = $trains[$viaIndex + 1]->departure->isExtraStop;
         if (property_exists(
-            $trains[$viaIndex + 1],
-            'alerts'
-        ) && count($trains[$viaIndex + 1]->alerts) > 0) {
+                $trains[$viaIndex + 1],
+                'alerts'
+            ) && count($trains[$viaIndex + 1]->alerts) > 0) {
             $constructedVia->departure->alert = $trains[$viaIndex + 1]->alerts;
         }
 
