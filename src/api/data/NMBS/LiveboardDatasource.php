@@ -110,7 +110,7 @@ class LiveboardDatasource
                 $request->getLang(),
                 'dep'
             );
-            Tools::setCachedObject($nmbsCacheKey, $html);
+            Tools::setCachedObject($nmbsCacheKey, $html, 20);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
         }
