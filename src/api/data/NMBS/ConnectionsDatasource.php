@@ -133,7 +133,7 @@ class ConnectionsDatasource
                 throw new Exception("No response from NMBS/SNCB", 504);
             }
 
-            Tools::setCachedObject($nmbsCacheKey, $xml);
+            Tools::setCachedObject($nmbsCacheKey, $xml, 30);
         } else {
             Tools::sendIrailCacheResponseHeader(true);
         }
