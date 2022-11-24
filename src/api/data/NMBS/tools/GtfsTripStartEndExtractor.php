@@ -268,7 +268,7 @@ class GtfsTripStartEndExtractor
             sleep(1);
         }
         error_log("[$requestId] Locking $lockName");
-        Tools::setCachedObject($lockName, true);
+        Tools::setCachedObject($lockName, true, 300);
         $result = $callback();
         error_log("[$requestId] Freeing $lockName");
         Tools::setCachedObject($lockName, false);
