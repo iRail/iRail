@@ -20,10 +20,23 @@ class GtfsTripStartEndExtractor
     {
         $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
+        $foundVehicleWithInternationalOriginAndDestination = false;
+
         foreach ($vehicleDetailsForDate as $vehicleWithOriginAndDestination) {
             if ($vehicleWithOriginAndDestination->getVehicleNumber() == $vehicleNumber) {
-                return $vehicleWithOriginAndDestination;
+                // International journeys are split into two parts at tha Belgian side of the border, where the
+                // border is represented by a "station" with a belgian ID.
+                // If the journey is between belgian stops, return immediatly
+                if (str_starts_with($vehicleWithOriginAndDestination->getOriginStopId(), '88')
+                    && str_starts_with($vehicleWithOriginAndDestination->getDestinationStopId(), '88')) {
+                    return $vehicleWithOriginAndDestination;
+                }
+                // Otherwise, keep the "international" stretch as a last-change backup should we not find a belgian part.
+                $foundVehicleWithInternationalOriginAndDestination = $vehicleWithOriginAndDestination;
             }
+        }
+        if ($foundVehicleWithInternationalOriginAndDestination) {
+            return $foundVehicleWithInternationalOriginAndDestination;
         }
         return false;
     }
