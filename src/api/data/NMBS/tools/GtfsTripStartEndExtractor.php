@@ -228,6 +228,8 @@ class GtfsTripStartEndExtractor
 
         $TRIP_ID_COLUMN = 0;
         $STOP_ID_COLUMN = 3;
+        $STOP_PICKUP_TYPE = 6;
+        $STOP_DROPOFF_TYPE = 7;
 
         $headers = fgetcsv($fileStream); // ignore the headers
         while ($row = fgetcsv($fileStream)) {
@@ -236,6 +238,12 @@ class GtfsTripStartEndExtractor
                 $stopsByTripId[$trip_id] = [];
             }
             $stopId = $row[$STOP_ID_COLUMN];
+
+            if ($row[$STOP_PICKUP_TYPE] == 1 && $row[$STOP_DROPOFF_TYPE] == 1) {
+                // Ignore "stops" where the train only passes, without possibility to embark or disembark.
+                continue;
+            }
+
             # Assume all stop_times are in chronological order, we don't have time to sort this.
             $stopsByTripId[$trip_id][] = $stopId;
         }
