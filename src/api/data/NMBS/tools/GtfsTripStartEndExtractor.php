@@ -9,6 +9,8 @@ use Irail\api\data\models\hafas\VehicleWithOriginAndDestination;
 
 class GtfsTripStartEndExtractor
 {
+    const TRIP_STOPS_CACHE_KEY = "gtfs|stopsByTrip";
+    const GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY = "gtfs|vehicleDetailsByDate";
 
     /**
      * @param string $vehicleId The vehicle name/id, such as IC538
@@ -73,12 +75,12 @@ class GtfsTripStartEndExtractor
      */
     private static function getTripsWithStartAndEndByDate(string $tripStartDate): array
     {
-        $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
+        // Check the cache here to prevent going in the synchronized method
+        $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         if ($vehicleDetailsByDate === false) {
-            self::synchronized(function () {
-                self::loadTripsWithStartAndEndDateInCache();
-            });
-            $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
+            // Synchronized method to prevent multiple requests from filling the cache with compute-intensive data
+            self::synchronized(fn() => self::loadTripsWithStartAndEndDateInCache());
+            $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         }
         if (!key_exists($tripStartDate, $vehicleDetailsByDate)) {
             throw new Exception("Request outside of allowed date period (3 days back, 14 days forward)", 404);
@@ -92,7 +94,13 @@ class GtfsTripStartEndExtractor
      */
     private static function getStopsForTrip(string $tripId): array
     {
-        $tripStops = self::readTripStops();
+        // Check the cache here to prevent going in the synchronized method
+        $tripStops = Tools::getCachedObject(self::TRIP_STOPS_CACHE_KEY);
+        if ($tripStops === false) {
+            // Synchronized method to prevent multiple requests from filling the cache with compute-intensive data
+            self::synchronized(fn() => self::readTripStops());
+            $tripStops = self::readTripStops();
+        }
         if (!key_exists($tripId, $tripStops)) {
             throw new Exception("Trip not found", 404);
         }
@@ -105,7 +113,7 @@ class GtfsTripStartEndExtractor
      */
     public static function loadTripsWithStartAndEndDateInCache(): array
     {
-        $vehicleDetailsByDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate");
+        $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         if ($vehicleDetailsByDate !== false) {
             return $vehicleDetailsByDate;
         }
@@ -133,7 +141,7 @@ class GtfsTripStartEndExtractor
             }
         }
 
-        Tools::setCachedObject("gtfs|vehicleDetailsByDate", $vehicleDetailsByDate, 7200);
+        Tools::setCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, $vehicleDetailsByDate, 7200);
         return $vehicleDetailsByDate;
     }
 
@@ -218,7 +226,7 @@ class GtfsTripStartEndExtractor
 
     private static function readTripStops(): array
     {
-        $stopsByTripId = Tools::getCachedObject("gtfs|stopsByTrip");
+        $stopsByTripId = Tools::getCachedObject(self::TRIP_STOPS_CACHE_KEY);
         if ($stopsByTripId !== false) {
             return $stopsByTripId;
         }
@@ -249,7 +257,7 @@ class GtfsTripStartEndExtractor
         }
         error_log("read stop_times");
         # This takes a long time to generate, and should be cached quite long
-        Tools::setCachedObject("gtfs|stopsByTrip", $stopsByTripId, 14400);
+        Tools::setCachedObject(self::TRIP_STOPS_CACHE_KEY, $stopsByTripId, 14400);
         return $stopsByTripId;
     }
 
