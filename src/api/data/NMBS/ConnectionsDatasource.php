@@ -301,21 +301,15 @@ class ConnectionsDatasource
             } else {
                 $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
             }
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_TRAINS) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
+        } else if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
         } else {
-            if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS) {
-                $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
-            } else {
-                if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_TRAINS) {
-                    $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
-                } else {
-                    if ($typeOfTransportKey == self::TYPE_TRANSPORT_KEY_ALL) {
-                        $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ALL;
-                    } else {
-                        // All trains is the default
-                        $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
-                    }
-                }
-            }
+            // All trains is the default
+            $typeOfTransportCode = self::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
         }
         return $typeOfTransportCode;
     }
@@ -464,11 +458,19 @@ class ConnectionsDatasource
         // This is way more readable compared to instantly creating the vias
         // Loop over all train rides in the list. This will also include the first train ride.
         foreach ($trip['LegList']['Leg'] as $leg) {
-            $legs[] = self::parseHafasConnectionLeg(
-                $leg,
-                $trip,
-                $lang
-            );
+
+            if ($leg['type'] == "JNY" || $leg['type'] == "WALK") {
+                $legs[] = self::parseHafasConnectionLeg(
+                    $leg,
+                    $trip,
+                    $lang
+                );
+            } else {
+                $ignoredTypes = ['CHKI']; // CHKI = check in for international trains, in-station transfer 15 minutes
+                if (!in_array($leg['type'], $ignoredTypes)) {
+                    error_log("Unknown leg type " . $leg['type']);
+                }
+            }
         }
         return $legs;
     }
