@@ -29,14 +29,20 @@ class LiveboardDatasource
      */
     public static function fillDataRoot(DataRoot $dataroot, LiveboardRequest $request): void
     {
-        $stationr = $request->getStation();
-        $stationr = str_replace('BE.NMBS.', '', $stationr);
+        $stationNameOrNumber = $request->getStation();
+        $stationNameOrNumber = str_replace('BE.NMBS.', '', $stationNameOrNumber);
         try {
-            $dataroot->station = StationsDatasource::getStationFromName($stationr, strtolower($request->getLang()));
+            $dataroot->station = StationsDatasource::getStationFromName($stationNameOrNumber, strtolower($request->getLang()));
         } catch (Exception $e) {
-            throw new Exception('Could not find station ' . $stationr, 404);
+            throw new Exception('Could not find station ' . $stationNameOrNumber, 404);
         }
         $request->setStation($dataroot->station);
+
+        if (self::isOutsideRivTimetablePeriod($request)){
+            $fallback = new LiveboardFallbackDatasource();
+            $fallback->fillDataRoot($dataroot, $request);
+            return;
+        }
 
         if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
             self::fillDataRootWithArrivalData($dataroot, $request);
@@ -60,7 +66,6 @@ class LiveboardDatasource
             $dataroot->station,
             $request->getTime(),
             $request->getDate(),
-            $request->getLang(),
             'arr'
         );
         $xml = Tools::getCachedObject($nmbsCacheKey);
@@ -70,7 +75,6 @@ class LiveboardDatasource
                 $dataroot->station,
                 $request->getTime(),
                 $request->getDate(),
-                $request->getLang(),
                 'arr'
             );
 
@@ -97,7 +101,6 @@ class LiveboardDatasource
             $dataroot->station,
             $request->getTime(),
             $request->getDate(),
-            $request->getLang(),
             'dep'
         );
         $html = Tools::getCachedObject($nmbsCacheKey);
@@ -107,7 +110,6 @@ class LiveboardDatasource
                 $dataroot->station,
                 $request->getTime(),
                 $request->getDate(),
-                $request->getLang(),
                 'dep'
             );
             Tools::setCachedObject($nmbsCacheKey, $html, 20);
@@ -127,14 +129,13 @@ class LiveboardDatasource
      * @param string  $timeSel
      * @return string
      */
-    public static function getNmbsCacheKey(Station $station, string $time, string $date, string $lang, string $timeSel): string
+    public static function getNmbsCacheKey(Station $station, string $time, string $date,  string $timeSel): string
     {
         return 'NMBSLiveboard|' . join('.', [
                 $station->id,
                 str_replace(':', '.', $time),
                 $date,
                 $timeSel,
-                $lang,
             ]);
     }
 
@@ -144,11 +145,10 @@ class LiveboardDatasource
      * @param Station $station
      * @param string  $time Time in hh:mm format
      * @param string  $date Date in YYYYmmdd format
-     * @param string  $lang
      * @param string  $timeSel
      * @return string
      */
-    private static function fetchDataFromNmbs(Station $station, string $time, string $date, string $lang, string $timeSel): string
+    private static function fetchDataFromNmbs(Station $station, string $time, string $date, string $timeSel): string
     {
         $request_options = [
             'referer'   => 'http://api.irail.be/',
@@ -371,5 +371,19 @@ class LiveboardDatasource
             $stop['TrainNumber'],
             substr($stop['PlannedDeparture'], 0, 10)
         )->getDestinationStopId();
+    }
+
+    /**
+     * @param LiveboardRequest $request
+     * @return bool
+     */
+    public static function isOutsideRivTimetablePeriod(LiveboardRequest $request): bool
+    {
+        // Date before today
+        return $request->getDate() < (new DateTime())->format('Ymd')
+                // Earlier today
+            || $request->getTime() < (new DateTime())->format('Hi')
+                // More than 7 days into the future
+            || $request->getDate() > (new DateTime())->modify("+7 day")->format('Ymd');
     }
 }
