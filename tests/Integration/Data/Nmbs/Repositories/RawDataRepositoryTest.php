@@ -3,7 +3,7 @@
 namespace Tests\Integration\Data\Nmbs\Repositories;
 
 use DateTime;
-use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Models\DepartureArrivalMode;
 use Irail\Models\Requests\LiveboardRequestImpl;
@@ -14,7 +14,7 @@ class RawDataRepositoryTest extends TestCase
 {
     public function testGetFreshLiveboardData_brusselsSouth_shouldReturnValidJson()
     {
-        $repo = new RawDataRepository(new StationsRepository());
+        $repo = new NmbsRivRawDataRepository(new StationsRepository());
         $liveboardData = (string)$repo->getLiveboardData(
             new LiveboardRequestImpl('008814001',
                 DepartureArrivalMode::MODE_DEPARTURE,
@@ -27,7 +27,7 @@ class RawDataRepositoryTest extends TestCase
 
     public function testGetFreshVehicleJourneyData_IC1545_shouldReturnValidJson()
     {
-        $repo = new RawDataRepository(new StationsRepository());
+        $repo = new NmbsRivRawDataRepository(new StationsRepository());
         $vehicleJourneyData = (string)$repo->getVehicleJourneyData(
             new VehicleJourneyRequestImpl("IC1545",
                 null,

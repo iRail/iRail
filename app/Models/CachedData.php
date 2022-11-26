@@ -1,7 +1,12 @@
 <?php
 
 namespace Irail\Models;
-
+/**
+ * Data which has been cached.
+ *
+ * @template T, the cached data type
+ * @template-implements CachedData<T>
+ */
 class CachedData
 {
     private string $key;
@@ -10,8 +15,8 @@ class CachedData
     private int $expiresAt;
 
     /**
-     * @param string              $key
-     * @param array|object|string $value
+     * @param string $key
+     * @param T      $value
      */
     public function __construct(string $key, object|array|string $value)
     {
@@ -33,9 +38,9 @@ class CachedData
     /**
      * The value of this cache entry.
      *
-     * @return array|object|string
+     * @return T
      */
-    public function getValue(): object|array|string
+    public function getValue(): mixed
     {
         return $this->value;
     }

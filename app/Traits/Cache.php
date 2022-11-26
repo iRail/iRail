@@ -78,12 +78,15 @@ trait Cache
     /**
      * Store an item in the cache
      *
-     * @param string              $key The key to store the object under
-     * @param object|string|array $value The object to store
-     * @param int                 $ttl The number of seconds to keep this in cache. 0 for infinity.
+     * @template T, the cached data type
+     *
+     * @param string $key The key to store the object under
+     * @param T      $value The object to store
+     * @param int    $ttl The number of seconds to keep this in cache. 0 for infinity.
      *                      Negative values will be replaced with the default TTL value.
+     *
      */
-    public function setCachedObject(string $key, object|string|array $value, int $ttl = -1)
+    public function setCachedObject(string $key, object|string|array $value, int $ttl = -1) : void
     {
         if ($ttl < 0) {
             $ttl = $this->defaultTtl;
@@ -110,11 +113,14 @@ trait Cache
     /**
      * Get data from the cache. If the data is not present in the cache, the value function will be called
      * and the retrieved value will be stored in the cache.
+     *
+     * @template T, the cached data type
+     *
      * @param string  $cacheKey
      * @param Closure $valueProvider
      * @param int     $ttl The number of seconds to keep this in cache. 0 for infinity.
      *                      Negative values will be replaced with the default TTL value.
-     * @return CachedData
+     * @return CachedData<T>
      */
     private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
     {
@@ -135,8 +141,9 @@ trait Cache
     }
 
     /**
+     * @template T, the cached data type
      * @param string $key
-     * @return CachedData|null
+     * @return CachedData<T>|null
      * @throws InvalidArgumentException
      */
     private function getCacheEntry(string $key): ?CachedData

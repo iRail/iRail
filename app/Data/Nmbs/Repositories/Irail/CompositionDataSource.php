@@ -6,7 +6,7 @@
  * fillDataRoot will fill the entire dataroot with data.
  */
 
-namespace Irail\Data\Nmbs;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
 use Exception;
 use Irail\Data\Nmbs\Models\RollingMaterialType;
@@ -18,6 +18,8 @@ use Irail\Data\Nmbs\Tools\Tools;
 use Irail\Data\Nmbs\Tools\VehicleIdTools;
 use Irail\Http\Requests\CompositionRequest;
 use stdClass;
+use function Irail\Data\Nmbs\str_contains;
+use function Irail\Data\Nmbs\str_starts_with;
 
 class CompositionDataSource
 {

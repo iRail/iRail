@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Data\Nmbs;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
 use Exception;
 use Irail\api\data\DataRoot;
@@ -10,10 +10,11 @@ use Irail\Http\Requests\DisturbancesRequest;
 use SimpleXMLElement;
 use stdClass;
 use tidy;
+use function Irail\Data\Nmbs\str_contains;
 
 require_once __DIR__ . '/tools/Tools.php';
 
-class DisturbancesDatasource
+class NmbsRssDisturbancesDatasource
 {
     const TYPE_DISTURBANCE = 'disturbance';
     const TYPE_PLANNED = 'planned';

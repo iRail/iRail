@@ -3,15 +3,11 @@
  * Copyright (C) 2011 by iRail vzw/asbl
  */
 
-namespace Irail\Data\Nmbs;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
-use Carbon\Carbon;
 use DateTime;
 use Exception;
-use Irail\Data\Nmbs\Models\hafas\HafasResponseContext;
-use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
-use Irail\Data\Nmbs\Models\Station;
-use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Models\CachedData;
 use Irail\Models\Occupancy;
@@ -23,15 +19,19 @@ use Irail\Models\StationBoardEntry;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 
-class LiveboardDatasource
+class NmbsRivLiveboardRepository implements LiveboardRepository
 {
     private StationsRepository $stationsRepository;
-    private RawDataRepository $rawDataRepository;
+    private NmbsRivRawDataRepository $rivDataRepository;
 
-    public function __construct(StationsRepository $stationsRepository, RawDataRepository $rawDataRepository)
+    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
     {
         $this->stationsRepository = $stationsRepository;
-        $this->rawDataRepository = $rawDataRepository;
+        if ($rivDataRepository != null) {
+            $this->rivDataRepository = $rivDataRepository;
+        } else {
+            $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
+        }
     }
 
     /**
@@ -43,7 +43,7 @@ class LiveboardDatasource
      */
     public function getLiveboard(LiveboardRequest $request): LiveboardResult
     {
-        $rawData = $this->rawDataRepository->getLiveboardData($request);
+        $rawData = $this->rivDataRepository->getLiveboardData($request);
         $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
         return $this->parseNmbsRawData($request, $rawData);
     }

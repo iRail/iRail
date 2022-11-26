@@ -5,9 +5,9 @@ namespace Tests\Unit\Api\Data\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
-use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\Irail\NmbsRivVehicleRepository;
+use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
-use Irail\Data\Nmbs\VehicleDatasource;
 use Irail\Models\CachedData;
 use Irail\Models\Requests\VehicleJourneyRequestImpl;
 use PHPUnit\Framework\TestCase;
@@ -20,12 +20,12 @@ class VehicleDatasourceTest extends TestCase
     public function testIc2137_canceledFromFifthStop_shouldHavePlatformDataForFifthStop()
     {
         $request = new VehicleJourneyRequestImpl('IC2137', null, Carbon::createFromDate(2021, 11, 14), 'en');
-        $rawDataRepo = \Mockery::mock(RawDataRepository::class);
+        $rawDataRepo = \Mockery::mock(NmbsRivRawDataRepository::class);
         $rawDataRepo->shouldReceive('getVehicleJourneyData')->withArgs([$request])->andReturn(
             new CachedData('dummy-cache-key', file_get_contents(__DIR__ . '/../../../../Fixtures/datedVehicleJourney-ic2137-partiallyCancelled.json'))
         );
         $stationsRepo = new StationsRepository();
-        $vehicleRepo = new VehicleDatasource($stationsRepo, $rawDataRepo);
+        $vehicleRepo = new NmbsRivVehicleRepository($stationsRepo, $rawDataRepo);
         $datedVehicleJourney = $vehicleRepo->getDatedVehicleJourney($request);
         self::assertNotNull($datedVehicleJourney);
         self::assertCount(14, $datedVehicleJourney->getStops());
@@ -57,13 +57,13 @@ class VehicleDatasourceTest extends TestCase
     public function testIc1545_journeyMatchAndJourneyFetch_shouldReturnCorrectPlatformResult()
     {
         $request = new VehicleJourneyRequestImpl('IC1545', null, Carbon::createFromDate(2021, 11, 14), 'en');
-        $rawDataRepo = \Mockery::mock(RawDataRepository::class);
+        $rawDataRepo = \Mockery::mock(NmbsRivRawDataRepository::class);
         $rawDataRepo->shouldReceive('getVehicleJourneyData')->withArgs([$request])->andReturn(
             new CachedData('dummy-cache-key', file_get_contents(__DIR__ . '/../../../../Fixtures/datedVehicleJourney-ic1545.json'))
         );
 
         $stationsRepo = new StationsRepository();
-        $vehicleRepo = new VehicleDatasource($stationsRepo, $rawDataRepo);
+        $vehicleRepo = new NmbsRivVehicleRepository($stationsRepo, $rawDataRepo);
         $datedVehicleJourney = $vehicleRepo->getDatedVehicleJourney($request);
         self::assertCount(11, $datedVehicleJourney->getStops());
         $platforms = [4, 1, 1, 8, 5, 6, 2, 12];

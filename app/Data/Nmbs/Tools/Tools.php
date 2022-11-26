@@ -3,6 +3,7 @@
 namespace Irail\Data\Nmbs\Tools;
 
 use Carbon\Carbon;
+use DateInterval;
 use DateTime;
 use Exception;
 use Irail\Data\Nmbs\Models\Station;
@@ -14,50 +15,75 @@ class Tools
 {
 
     /**
-     * Parse a "traffic day time", which can go beyond 24h. Example: 01002000 (24:02:00, 00:02:00 the next day)
-     *
-     * @param DateTime $baseDate The date of the traffic day (the date of the first departure of the vehicle)
-     * @param string   $time The time on the traffic day
-     * @return Carbon A DateTime object representing this time.
+     * @param string $time -> in hh:mm:ss or dd:hh:mm:ss format
+     * @param string $date -> in Y-m-d
+     * @return int seconds since the Unix epoch
      * @throws Exception
      */
-    public static function parseDDHHMMSS(DateTime $baseDate, string $time): Carbon
+    public static function transformTime(string $time, string $date): int
     {
-        if (strlen($time) < 6) {
-            throw new Exception("Invalid time passed to parseTrafficDayTime, should be 6 or 8 digits!");
+        if (strlen($time) != 8 && strlen($time) != 11) {
+            throw new Exception("Invalid time passed to transformTime, should be 8 or 11 digits! $time");
         }
-        if (strlen($time) == 6) {
-            $time = '00' . $time;
+        if (strlen($time) == 8) {
+            $time = '00:' . $time;
         }
+
         date_default_timezone_set('Europe/Brussels');
-        $dayoffset = intval(substr($time, 0, 2));
-        $hour = intval(substr($time, 2, 2));
-        if ($hour > 23) {
-            // Implement this functionality when needed
-            throw new \InvalidArgumentException("Traffic day times in hhmmss format, with an hour component larger than 23, cannot be parsed at this moment");
-        }
-        $minute = intval(substr($time, 4, 2));
-        $second = intval(substr($time, 6, 2));
-        $baseDate = new Carbon($baseDate);
-        return $baseDate->addDays($dayoffset)->setTime($hour, $minute, $second);
+        $dayoffset = Tools::safeIntVal(substr($time, 0, 2));
+        $hour = Tools::safeIntVal(substr($time, 3, 2));
+        $minute = Tools::safeIntVal(substr($time, 6, 2));
+        $second = Tools::safeIntVal(substr($time, 9, 2));
+
+        $year = Tools::safeIntVal(substr($date, 0, 4));
+        $month = Tools::safeIntVal(substr($date, 5, 2));
+        $day = Tools::safeIntVal(substr($date, 8, 2));
+
+        return mktime($hour, $minute, $second, $month, $day + $dayoffset, $year);
     }
 
     /**
      * Calculate the difference between two moments, in seconds.
-     * @param string $realTimeTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
-     * @param string $realTimeDate Date as a Ymd string.
-     * @param string $plannedTime -> in 00d15:24:00 or hhmmss or ddhhmmss format
-     * @param string $plannedDate Date as a Ymd string.
+     * @param string $realTimeTime in hh:mm:ss or dd:hh:mm:ss format
+     * @param string $realTimeDate Date as a Y-m-d string.
+     * @param string $plannedTime in hh:mm:ss or dd:hh:mm:ss format
+     * @param string $plannedDate Date as a Y-m-d string.
      * @return int The difference between the two datetimes, in seconds.
+     * @throws Exception
      */
     public static function calculateSecondsHHMMSS($realTimeTime, $realTimeDate, $plannedTime, $plannedDate)
     {
         return Tools::transformTime($realTimeTime, $realTimeDate) - Tools::transformTime($plannedTime, $plannedDate);
     }
 
-    public static function calculateDDHHMMSSTimeDifferenceInSeconds(DateTime $baseDate, string $scheduledTime, string $realtime): int
+    /**
+     * This function transforms a duration in PT..H..M format into seconds.
+     * @param string $duration
+     * @return int Duration in seconds
+     * @throws Exception
+     */
+    public static function transformDuration(string $duration)
     {
-        return self::parseDDHHMMSS($baseDate, $scheduledTime)->diffInRealSeconds(self::parseDDHHMMSS($baseDate, $realtime));
+        $interval = new DateInterval($duration);
+        return $interval->d * 24 * 3600 + $interval->h * 3600 + $interval->i * 60 + $interval->s;
+    }
+
+    /**
+     * This function transforms the b-rail formatted timestring and reformats it to seconds.
+     * @param string $time in HHMMSS or DDHHMMSS format
+     * @return int Duration in seconds
+     */
+    public static function transformDurationHHMMSS($time)
+    {
+        if (strlen($time) == 6) {
+            $time = '00' . $time;
+        }
+        $days = intval(substr($time, 0, 2));
+        $hour = intval(substr($time, 2, 2));
+        $minute = intval(substr($time, 4, 2));
+        $second = intval(substr($time, 6, 2));
+
+        return $days * 86400 + $hour * 3600 + $minute * 60 + $second;
     }
 
 
@@ -89,5 +115,14 @@ class Tools
         header("X-iRail-cache-hit: " . $cached);
     }
 
+    /**
+     * Get the int value of a string by interpreting it as a decimal number. This prevents octal interpretation of numbers starting with a leading 0.
+     * @param string $value
+     * @return int
+     */
+    public static function safeIntVal(string $value): int
+    {
+        return intval(ltrim($value, '0')); // ltrim to avoid octal interpretation
+    }
 
 }

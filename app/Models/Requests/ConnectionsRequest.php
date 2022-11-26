@@ -9,10 +9,6 @@
 namespace Irail\Models\Requests;
 
 use DateTime;
-use Irail\Data\Nmbs\Models\Station;
-use Irail\Data\Nmbs\StationsDatasource;
-use Irail\Models\Requests\CacheableRequest;
-use Irail\Models\Requests\TimeSelection;
 
 interface ConnectionsRequest extends CacheableRequest
 {

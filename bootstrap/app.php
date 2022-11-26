@@ -1,6 +1,6 @@
 <?php
 
-use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -53,8 +53,8 @@ $app->singleton(
 
 
 $app->singleton(
-    RawDataRepository::class,
-    RawDataRepository::class
+    NmbsRivRawDataRepository::class,
+    NmbsRivRawDataRepository::class
 );
 
 

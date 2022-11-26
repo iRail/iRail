@@ -6,13 +6,14 @@
  * This will fetch all vehicledata for the NMBS.
  */
 
-namespace Irail\Data\Nmbs;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
 use DateTime;
 use Exception;
 use Irail\Data\Nmbs\Models\hafas\HafasResponseContext;
 use Irail\Data\Nmbs\Models\Stop;
-use Irail\Data\Nmbs\Repositories\RawDataRepository;
+use Irail\Data\Nmbs\Repositories\Riv\HafasDatasource;
+use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Data\Nmbs\Repositories\StationsRepository;
 use Irail\Data\Nmbs\Tools\Tools;
 use Irail\Legacy\Occupancy\OccupancyOperations;
@@ -23,17 +24,21 @@ use Irail\Models\Result\VehicleJourneyResult;
 use Irail\Models\StationBoardEntry;
 use Irail\Models\Vehicle;
 
-class VehicleDatasource
+class NmbsRivVehicleRepository implements VehicleJourneyRepository
 {
     use  HafasDatasource;
 
     private StationsRepository $stationsRepository;
-    private RawDataRepository $rawDataRepository;
+    private NmbsRivRawDataRepository $rivDataRepository;
 
-    public function __construct(StationsRepository $stationsRepository, RawDataRepository $rawDataRepository)
+    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
     {
         $this->stationsRepository = $stationsRepository;
-        $this->rawDataRepository = $rawDataRepository;
+        if ($rivDataRepository != null) {
+            $this->rivDataRepository = $rivDataRepository;
+        } else {
+            $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
+        }
     }
 
     /**
@@ -45,7 +50,7 @@ class VehicleDatasource
      */
     public function getDatedVehicleJourney(VehicleJourneyRequest $request): VehicleJourneyResult
     {
-        $rawData = $this->rawDataRepository->getVehicleJourneyData($request);
+        $rawData = $this->rivDataRepository->getVehicleJourneyData($request);
         $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
         return $this->parseNmbsRawVehicleJourney($rawData);
     }

@@ -1,10 +1,11 @@
 <?php
 
-namespace Irail\Data\Nmbs;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
 use Exception;
 use Irail\Data\Nmbs\Models\Station;
 use irail\stations\Stations;
+use function Irail\Data\Nmbs\str_starts_with;
 
 /**
  * Copyright (C) 2011 by iRail vzw/asbl

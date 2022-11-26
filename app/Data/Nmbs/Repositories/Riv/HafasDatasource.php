@@ -1,21 +1,31 @@
 <?php
 
-namespace Irail\api\data\NMBS\tools;
+namespace Irail\Data\Nmbs\Repositories\Riv;
 
 use Exception;
-use Irail\api\data\models\Alert;
-use Irail\api\data\models\hafas\HafasIntermediateStop;
-use Irail\api\data\models\hafas\HafasVehicle;
-use Irail\api\data\models\Platform;
-use Irail\api\data\models\VehicleInfo;
-use Irail\api\data\NMBS\StationsDatasource;
-use stdClass;
+use Irail\api\data\NMBS\tools\HafasCommon;
+use Irail\api\data\NMBS\tools\Tools;
+use Irail\Data\Nmbs\Models\Alert;
+use Irail\Models\PlatformInfo;
+use Irail\Models\StationInfo;
 
-/**
- * This class offers utility methods to work with HaCon/HAFAS data, which is used by the NMBS/SNCB.
- */
-class HafasCommon
+trait HafasDatasource
 {
+
+    /**
+     * @param string $rawJsonData data to decode.
+     * @return array an associative array representing the JSON response
+     * @throws Exception thrown when the response is invalid or describes an error
+     */
+    protected function decodeAndVerifyResponse(string $rawJsonData): array
+    {
+        if (empty($rawJsonData)) {
+            throw new Exception("The server did not return any data.", 500);
+        }
+        $json = json_decode($rawJsonData, true);
+        $this->throwExceptionOnInvalidResponse($json);
+        return $json;
+    }
 
     /**
      * Throw an exception if the JSON API response contains an error instead of a result.
@@ -48,6 +58,7 @@ class HafasCommon
         }
         throw new Exception("This request failed. Please check your query. Error code " . $json['errorCode'], 500);
     }
+
 
     /**
      * Check whether or not the status of the arrival equals cancelled.
@@ -477,5 +488,16 @@ class HafasCommon
             }
         }
         return $result;
+    }
+
+    protected function iRailToHafasId(string $iRailStationId)
+    {
+        return substr($iRailStationId, 2);
+    }
+
+
+    protected function hafasIdToIrailId(string $hafasStationId)
+    {
+        return '00' . $hafasStationId;
     }
 }

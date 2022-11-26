@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\api\data\models\hafas;
+namespace Irail\Data\NMBS\Repositories\Gtfs\Models;
 
 class VehicleWithOriginAndDestination
 {

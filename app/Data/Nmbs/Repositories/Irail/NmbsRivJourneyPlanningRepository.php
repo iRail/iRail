@@ -7,7 +7,7 @@
  * fillDataRoot will fill the entire dataroot with connections
  */
 
-namespace Irail\api\data\NMBS;
+namespace Irail\Data\Nmbs\Repositories\Irail;
 
 use DateTime;
 use Dotenv\Dotenv;
@@ -27,14 +27,22 @@ use Irail\api\data\NMBS\tools\HafasCommon;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\ConnectionsRequest;
+use Irail\Data\Nmbs\Repositories\Irail\JourneyPlanningRepository;
+use Irail\Models\Requests\ConnectionsRequest;
+use Irail\Models\Result\TripResult;
 use stdClass;
 
-class ConnectionsDatasource
+class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 {
     const TYPE_TRANSPORT_KEY_AUTOMATIC = 'automatic';
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
     const TYPE_TRANSPORT_KEY_TRAINS = 'trains';
     const TYPE_TRANSPORT_KEY_ALL = 'all';
+
+    public function getJourneyPlanning(ConnectionsRequest $connectionsRequest): TripResult
+    {
+        // TODO: implement
+    }
 
     /**
      * This is the entry point for the data fetching and transformation.
@@ -87,8 +95,7 @@ class ConnectionsDatasource
         string $timeSel,
         string $typeOfTransport,
         ConnectionsRequest $request
-    ): array
-    {
+    ): array {
         // TODO: clean the whole station name/id to object flow
         $stations = self::getStationsFromName($from, $to, $lang, $request);
 
@@ -154,40 +161,6 @@ class ConnectionsDatasource
         }
     }
 
-    /**
-     * Get a key to identify this request. Requests which will result in a different response will receive a different key
-     * @param string $idfrom
-     * @param string $idto
-     * @param string $lang
-     * @param string $time
-     * @param string $date
-     * @param string $timeSel
-     * @param string $typeOfTransport
-     * @return string
-     */
-    public static function getNmbsCacheKey(
-        string $idfrom,
-        string $idto,
-        string $lang,
-        string $time,
-        string $date,
-        string $timeSel,
-        string $typeOfTransport
-    ): string
-    {
-        return 'NMBSConnections|' . join('.', [
-                $idfrom,
-                $idto,
-                $lang,
-                str_replace(':', '.', $time),
-                $date,
-                $timeSel,
-                $typeOfTransport,
-            ]);
-    }
-
-
-
 
     /**
      * @param string             $serverData
@@ -225,8 +198,7 @@ class ConnectionsDatasource
         ConnectionsRequest $request,
         array $trip,
         string $lang
-    ): Connection
-    {
+    ): Connection {
         $connection = new Connection();
         $connection->duration = Tools::transformDurationHHMMSS($trip['duration']);
 
@@ -360,8 +332,7 @@ class ConnectionsDatasource
     private static function parseTripLegs(
         array $trip,
         string $lang
-    ): array
-    {
+    ): array {
         $legs = [];
         // For the sake of code readability and maintainability: the response contains trains, not vias.
         // Therefore, just parse the trains and walks first, and create iRail via's based on the trains later.
@@ -389,8 +360,7 @@ class ConnectionsDatasource
         array $leg,
         array $trip,
         string $lang
-    ): HafasConnectionLeg
-    {
+    ): HafasConnectionLeg {
         $legStart = $leg['Origin'];
         $legEnd = $leg['Destination'];
 
