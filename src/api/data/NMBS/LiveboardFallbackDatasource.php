@@ -185,6 +185,14 @@ class LiveboardFallbackDatasource
 
         $matches = [];
 
+        if (str_contains($response, 'vallen niet binnen de dienstregelingsperiode')) {
+            throw new Exception('The data for which you requested data is too far in the past or future.', 404);
+        }
+
+        // Only keep the actual data, php tidy can't handle the entire document
+        $response = preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
+        $response = $matches[0];
+
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents(
@@ -193,15 +201,6 @@ class LiveboardFallbackDatasource
                 $response
             );
         }
-
-
-        if (str_contains($response, 'vallen niet binnen de dienstregelingsperiode')) {
-            throw new Exception('The data for which you requested data is too far in the past or future.', 404);
-        }
-
-        // Only keep the actual data, php tidy can't handle the entire document
-        $response = preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
-        $response = $matches[0];
 
         return $response;
     }
@@ -298,8 +297,13 @@ class LiveboardFallbackDatasource
             $unixtime = Tools::transformtime($time . ':00', $date->format('Y-m-d'));
 
             // http://www.belgianrail.be/Station.ashx?lang=en&stationId=8885001
-            $direction = Stations::getStationFromID(substr($stBoardEntry->xpath('td')[1]->a['href'], 57));
-
+            if (isset($stBoardEntry->xpath('td')[1]->a['href'])){
+            $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
+            $direction = StationsDatasource::getStationFromID($directionHafasId, $request->getLang());
+            } else {
+                $directionName = $stBoardEntry->xpath('td')[1];
+                $direction = StationsDatasource::getStationFromName($directionName, $request->getLang());
+            }
             $vehicleTypeAndNumber = trim((string)$stBoardEntry->xpath("td[@class='product']/a")[0]);
             // Some trains are split by a newline, some by a space
             $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
