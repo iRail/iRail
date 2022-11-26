@@ -3,6 +3,8 @@
 
 namespace Irail\Data\Nmbs\Models\hafas;
 
+use Irail\api\data\models\Platform;
+
 class HafasIntermediateStop
 {
 
@@ -50,4 +52,6 @@ class HafasIntermediateStop
      * @var string
      */
     public $departureConnection;
+
+    public Platform $platform;
 }

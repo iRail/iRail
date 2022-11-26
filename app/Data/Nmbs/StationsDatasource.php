@@ -69,6 +69,7 @@ class StationsDatasource
      */
     public static function getStationFromID($id, $lang)
     {
+        $id = str_replace('BE.NMBS.', '', $id);
         if (!str_starts_with($id, '00')) {
             $id = '00' . $id;
         }
@@ -112,16 +113,20 @@ class StationsDatasource
             if (strlen($stationitem->name) === strlen($name)) {
                 $station = $stationitem;
                 break;
-            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
-                foreach ($stationitem->alternative as $alt) {
-                    if (strlen($alt->{'@value'}) === strlen($name)) {
+            } else {
+                if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+                    foreach ($stationitem->alternative as $alt) {
+                        if (strlen($alt->{'@value'}) === strlen($name)) {
+                            $station = $stationitem;
+                            break;
+                        }
+                    }
+                } else {
+                    if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                         $station = $stationitem;
                         break;
                     }
                 }
-            } else if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
-                $station = $stationitem;
-                break;
             }
         }
         return self::transformNewToOldStyle($station, $lang);
