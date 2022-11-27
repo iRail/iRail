@@ -257,6 +257,7 @@ class LiveboardFallbackDatasource
 
         $departureArrivals = [];
         $previousTimeWasDualDigit = false;
+        $daysForward = 0;
         foreach ($stBoardEntries as $stBoardEntry) {
             $canceled = false;
 
@@ -285,21 +286,23 @@ class LiveboardFallbackDatasource
                 $platform = '?';
             }
 
-            $date = Carbon::createFromFormat('Ymd', $request->getDate());
-            if ($previousTimeWasDualDigit) {
-                $date->addDay();
-            }
-
             $time = trim((string)$stBoardEntry->xpath("td[@class='time']")[0]);
             $time = explode(' ', $time)[0];
-            $previousTimeWasDualDigit = str_starts_with($time, '1'); // After 10 in the morning, if we find midnight now we crossed a date line!
+            $thisTimeIsDualDigit = !str_starts_with($time, '0');
+
+            $date = Carbon::createFromFormat('Ymd', $request->getDate());
+            if (!$thisTimeIsDualDigit && $previousTimeWasDualDigit) {
+                $daysForward++;
+            }
+            $date->addDays($daysForward);
+            $previousTimeWasDualDigit = $thisTimeIsDualDigit; // After 10 in the morning, if we find time after midnight before 10 now we crossed a date line!
 
             $unixtime = Tools::transformtime($time . ':00', $date->format('Y-m-d'));
 
             // http://www.belgianrail.be/Station.ashx?lang=en&stationId=8885001
-            if (isset($stBoardEntry->xpath('td')[1]->a['href'])){
-            $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
-            $direction = StationsDatasource::getStationFromID($directionHafasId, $request->getLang());
+            if (isset($stBoardEntry->xpath('td')[1]->a['href'])) {
+                $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
+                $direction = StationsDatasource::getStationFromID($directionHafasId, $request->getLang());
             } else {
                 $directionName = $stBoardEntry->xpath('td')[1];
                 $direction = StationsDatasource::getStationFromName($directionName, $request->getLang());
