@@ -83,7 +83,7 @@ class GtfsTripStartEndExtractor
             $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         }
         if (!key_exists($tripStartDate, $vehicleDetailsByDate)) {
-            throw new Exception("Request outside of allowed date period (3 days back, 14 days forward)", 404);
+            throw new Exception("Request outside of allowed date period (3 days back, 10 days forward)", 404);
         }
         return $vehicleDetailsByDate[$tripStartDate];
     }
@@ -120,7 +120,7 @@ class GtfsTripStartEndExtractor
 
         $serviceIdsByCalendarDate = self::readCalendarDates();
         // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
-        $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 14);
+        $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 10);
         $vehicleDetailsByServiceId = self::readTrips($serviceIdsToRetain);
 
         if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
@@ -162,6 +162,7 @@ class GtfsTripStartEndExtractor
             $serviceId = Tools::safeIntVal($row[$SERVICE_ID_COLUMN]);
             $serviceIdsByDate[$date][] = $serviceId;
         }
+        fclose($fileStream);
         return $serviceIdsByDate;
     }
 
@@ -201,7 +202,7 @@ class GtfsTripStartEndExtractor
             $vehicleDetails = new VehicleWithOriginAndDestination($tripId, $vehicleType, $trainNumber, $tripIdParts[3], $tripIdParts[4]);
             $vehicleDetailsByServiceId[$serviceId][] = $vehicleDetails;
         }
-
+        fclose($fileStream);
         return $vehicleDetailsByServiceId;
     }
 
@@ -230,7 +231,7 @@ class GtfsTripStartEndExtractor
         if ($stopsByTripId !== false) {
             return $stopsByTripId;
         }
-        error_log("reading stop_times");
+        error_log("Reading stop_times... ");
         $fileStream = fopen("https://gtfs.irail.be/nmbs/gtfs/latest/stop_times.txt", "r");
         $stopsByTripId = [];
 
@@ -255,6 +256,7 @@ class GtfsTripStartEndExtractor
             # Assume all stop_times are in chronological order, we don't have time to sort this.
             $stopsByTripId[$trip_id][] = $stopId;
         }
+        fclose($fileStream);
         error_log("read stop_times");
         # This takes a long time to generate, and should be cached quite long
         Tools::setCachedObject(self::TRIP_STOPS_CACHE_KEY, $stopsByTripId, 14400);
@@ -278,7 +280,7 @@ class GtfsTripStartEndExtractor
             $vehicleType = $row[$VEHICLE_TYPE_COLUMN];
             $vehicleTypesByRouteId[$routeId] = $vehicleType;
         }
-
+        fclose($fileStream);
         return $vehicleTypesByRouteId;
     }
 
@@ -291,22 +293,15 @@ class GtfsTripStartEndExtractor
      */
     static function synchronized(Closure $callback)
     {
-        $requestId = sprintf('%08x', abs(crc32($_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT'])));
         $lockName = 'lock|' . md5(json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]));
-        $secondsWaitedForLock = 0;
-        while (Tools::getCachedObject($lockName) === true) {
-            error_log(" [$requestId] Waiting for lock $lockName to become free... ");
-            sleep(1);
-            $secondsWaitedForLock++;
-            if ($secondsWaitedForLock > 10) {
-                // Even while loading the data can take up to 60s, requests should not be locked forever.
-                throw new Exception('GTFS data is being processed. Please try again later.', 500);
-            }
+        if (Tools::getCachedObject($lockName) === true) {
+            // Since loading the data can take up to 60s, other requests should not be blocking server resources
+            throw new Exception('GTFS data is being processed. Please try again later.', 503);
         }
-        error_log("[$requestId] Locking $lockName");
+        error_log("Locking $lockName");
         Tools::setCachedObject($lockName, true, 60); // In case the callback method does not complete, the lock will still release after 60s
         $result = $callback();
-        error_log("[$requestId] Freeing $lockName");
+        error_log("Freeing $lockName");
         Tools::setCachedObject($lockName, false);
         return $result;
     }
