@@ -273,9 +273,14 @@ class LiveboardFallbackDatasource
             }
 
             $platformChangeInformation = $stBoardEntry->xpath("td[@class='platform']/div[@class='relative']/td[@class='prognosis']");
-            $platform = trim((string)$stBoardEntry->xpath("td[@class='platform']/text()")[0]);
-            $platform = trim(explode("\n", $platform)[0]); // remove a newline and some garbage characters
-            $platform = str_replace("\xc2\xa0", '', $platform);// Remove non-breaking spaces
+            $platformInformation = $stBoardEntry->xpath("td[@class='platform']/text()");
+            if (isEmpty($platformInformation)) {
+                $platform = trim((string)$platformInformation[0]);
+                $platform = trim(explode("\n", $platform)[0]); // remove a newline and some garbage characters
+                $platform = str_replace("\xc2\xa0", '', $platform);// Remove non-breaking spaces
+            } else {
+                $platform = '?';
+            }
 
             $platformNormal = true;
             if (!empty($platformChangeInformation)) {
