@@ -75,6 +75,12 @@ class GtfsTripStartEndExtractor
      */
     private static function getTripsWithStartAndEndByDate(string $tripStartDate): array
     {
+        // Cache the data on a by-date basis. This prevents the needless deserializing of all data for 14 days'
+        if ($cachedDataForDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate|$tripStartDate")) {
+            return $cachedDataForDate;
+        }
+
+        // Second level bigger, slower cache with all dates.
         // Check the cache here to prevent going in the synchronized method
         $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         if ($vehicleDetailsByDate === false) {
@@ -82,9 +88,12 @@ class GtfsTripStartEndExtractor
             self::synchronized(fn() => self::loadTripsWithStartAndEndDateInCache());
             $vehicleDetailsByDate = Tools::getCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY);
         }
+
         if (!key_exists($tripStartDate, $vehicleDetailsByDate)) {
-            throw new Exception("Request outside of allowed date period (3 days back, 10 days forward)", 404);
+            throw new Exception('Request outside of allowed date period (3 days back, 14 days forward)', 404);
         }
+        // Cache the data on a by-date basis. This prevents the needless deserializing of all data for 14 days
+        Tools::setCachedObject("gtfs|vehicleDetailsByDate|$tripStartDate", $vehicleDetailsByDate[$tripStartDate], 1800);
         return $vehicleDetailsByDate[$tripStartDate];
     }
 
@@ -120,7 +129,7 @@ class GtfsTripStartEndExtractor
 
         $serviceIdsByCalendarDate = self::readCalendarDates();
         // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
-        $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 10);
+        $serviceIdsToRetain = self::getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 14);
         $vehicleDetailsByServiceId = self::readTrips($serviceIdsToRetain);
 
         if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
