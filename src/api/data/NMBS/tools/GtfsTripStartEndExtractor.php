@@ -75,7 +75,7 @@ class GtfsTripStartEndExtractor
      */
     private static function getTripsWithStartAndEndByDate(string $tripStartDate): array
     {
-        // Cache the data on a by-date basis. This prevents the needless deserializing of all data for 14 days'
+        // Cache the data on a by-date basis. This prevents the needless deserializing of all data for 14 days
         if ($cachedDataForDate = Tools::getCachedObject("gtfs|vehicleDetailsByDate|$tripStartDate")) {
             return $cachedDataForDate;
         }
@@ -103,6 +103,10 @@ class GtfsTripStartEndExtractor
      */
     private static function getStopsForTrip(string $tripId): array
     {
+        // Cache the data on a by-trip basis. This prevents the needless deserializing of all data for all trips days
+        if ($cachedDataForDate = Tools::getCachedObject("gtfs|stopsByTrip|$tripId")) {
+            return $cachedDataForDate;
+        }
         // Check the cache here to prevent going in the synchronized method
         $tripStops = Tools::getCachedObject(self::TRIP_STOPS_CACHE_KEY);
         if ($tripStops === false) {
@@ -111,8 +115,10 @@ class GtfsTripStartEndExtractor
             $tripStops = self::readTripStops();
         }
         if (!key_exists($tripId, $tripStops)) {
-            throw new Exception("Trip not found", 404);
+            throw new Exception('Trip not found', 404);
         }
+        // Cache the data on a by-date basis. This prevents the needless deserializing of all data for all trips
+        Tools::setCachedObject("gtfs|stopsByTrip|$tripId", $tripStops[$tripId], 3600);
         return $tripStops[$tripId];
     }
 
