@@ -287,17 +287,24 @@ class GtfsTripStartEndExtractor
      * This prevents multiple requests racing to fill a cache, which would put an unnecessary strain on the server.
      * @param $callback Closure The function to execute
      * @return mixed The function return value
+     * @throws Exception
      */
     static function synchronized(Closure $callback)
     {
-        $requestId = sprintf("%08x", abs(crc32($_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT'])));
-        $lockName = "lock|" . md5(json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]));
+        $requestId = sprintf('%08x', abs(crc32($_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT'])));
+        $lockName = 'lock|' . md5(json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]));
+        $secondsWaitedForLock = 0;
         while (Tools::getCachedObject($lockName) === true) {
-            error_log("[$requestId] Waiting for lock $lockName to become free");
+            error_log(" [$requestId] Waiting for lock $lockName to become free... ");
             sleep(1);
+            $secondsWaitedForLock++;
+            if ($secondsWaitedForLock > 10) {
+                // Even while loading the data can take up to 60s, requests should not be locked forever.
+                throw new Exception('GTFS data is being processed. Please try again later.', 500);
+            }
         }
         error_log("[$requestId] Locking $lockName");
-        Tools::setCachedObject($lockName, true, 300);
+        Tools::setCachedObject($lockName, true, 60); // In case the callback method does not complete, the lock will still release after 60s
         $result = $callback();
         error_log("[$requestId] Freeing $lockName");
         Tools::setCachedObject($lockName, false);
