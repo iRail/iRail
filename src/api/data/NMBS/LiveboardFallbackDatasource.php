@@ -13,13 +13,9 @@ use Irail\api\data\models\DepartureArrival;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
-use Irail\api\data\NMBS\tools\GtfsTripStartEndExtractor;
 use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\occupancy\OccupancyOperations;
 use Irail\api\requests\LiveboardRequest;
-use irail\stations\Stations;
 use SimpleXMLElement;
-use stdClass;
 use tidy;
 
 class LiveboardFallbackDatasource
@@ -274,7 +270,7 @@ class LiveboardFallbackDatasource
 
             $platformChangeInformation = $stBoardEntry->xpath("td[@class='platform']/div[@class='relative']/td[@class='prognosis']");
             $platformInformation = $stBoardEntry->xpath("td[@class='platform']/text()");
-            if (isEmpty($platformInformation)) {
+            if (!empty($platformInformation)) {
                 $platform = trim((string)$platformInformation[0]);
                 $platform = trim(explode("\n", $platform)[0]); // remove a newline and some garbage characters
                 $platform = str_replace("\xc2\xa0", '', $platform);// Remove non-breaking spaces
