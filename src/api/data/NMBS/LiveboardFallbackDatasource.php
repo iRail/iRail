@@ -313,6 +313,7 @@ class LiveboardFallbackDatasource
             $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
             // Busses are completely missing a space
             $vehicleTypeAndNumber = str_replace("BUS", 'BUS ', $vehicleTypeAndNumber);
+            $vehicleTypeAndNumber = str_replace("TRN", 'TRN ', $vehicleTypeAndNumber);
             $vehicleTypeAndNumber = explode(' ', $vehicleTypeAndNumber);
             $vehicle = new VehicleInfo($vehicleTypeAndNumber[0], $vehicleTypeAndNumber[1]);
 
