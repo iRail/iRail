@@ -3,7 +3,7 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Irail\Models\Requests\LiveboardRequest;
+use Irail\Http\Requests\LiveboardRequest;
 
 class LiveboardController extends Controller
 {

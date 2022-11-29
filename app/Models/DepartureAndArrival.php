@@ -4,8 +4,8 @@ namespace Irail\Models;
 
 class DepartureAndArrival
 {
-    private ?StationBoardEntry $arrival = null;
-    private ?StationBoardEntry $departure = null;
+    private ?DepartureOrArrival $arrival = null;
+    private ?DepartureOrArrival $departure = null;
 
     /**
      * @return string
@@ -16,36 +16,36 @@ class DepartureAndArrival
     }
 
     /**
-     * @return StationBoardEntry|null
+     * @return DepartureOrArrival|null
      */
-    public function getArrival(): ?StationBoardEntry
+    public function getArrival(): ?DepartureOrArrival
     {
         return $this->arrival;
     }
 
     /**
-     * @param StationBoardEntry|null $arrival
+     * @param DepartureOrArrival|null $arrival
      * @return DepartureAndArrival
      */
-    public function setArrival(?StationBoardEntry $arrival): DepartureAndArrival
+    public function setArrival(?DepartureOrArrival $arrival): DepartureAndArrival
     {
         $this->arrival = $arrival;
         return $this;
     }
 
     /**
-     * @return StationBoardEntry|null
+     * @return DepartureOrArrival|null
      */
-    public function getDeparture(): ?StationBoardEntry
+    public function getDeparture(): ?DepartureOrArrival
     {
         return $this->departure;
     }
 
     /**
-     * @param StationBoardEntry|null $departure
+     * @param DepartureOrArrival|null $departure
      * @return DepartureAndArrival
      */
-    public function setDeparture(?StationBoardEntry $departure): DepartureAndArrival
+    public function setDeparture(?DepartureOrArrival $departure): DepartureAndArrival
     {
         $this->departure = $departure;
         return $this;

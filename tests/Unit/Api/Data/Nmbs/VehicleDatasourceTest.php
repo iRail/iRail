@@ -5,11 +5,12 @@ namespace Tests\Unit\Api\Data\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
-use Irail\Data\Nmbs\Repositories\Irail\NmbsRivVehicleRepository;
-use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
-use Irail\Data\Nmbs\Repositories\StationsRepository;
+use Irail\Http\Requests\VehicleJourneyRequestImpl;
 use Irail\Models\CachedData;
-use Irail\Models\Requests\VehicleJourneyRequestImpl;
+use Irail\Repositories\Irail\NmbsRivVehicleRepository;
+use Irail\Repositories\Nmbs\StationsRepository;
+use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 
 class VehicleDatasourceTest extends TestCase
@@ -20,7 +21,7 @@ class VehicleDatasourceTest extends TestCase
     public function testIc2137_canceledFromFifthStop_shouldHavePlatformDataForFifthStop()
     {
         $request = new VehicleJourneyRequestImpl('IC2137', null, Carbon::createFromDate(2021, 11, 14), 'en');
-        $rawDataRepo = \Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawDataRepo->shouldReceive('getVehicleJourneyData')->withArgs([$request])->andReturn(
             new CachedData('dummy-cache-key', file_get_contents(__DIR__ . '/../../../../Fixtures/datedVehicleJourney-ic2137-partiallyCancelled.json'))
         );
@@ -57,7 +58,7 @@ class VehicleDatasourceTest extends TestCase
     public function testIc1545_journeyMatchAndJourneyFetch_shouldReturnCorrectPlatformResult()
     {
         $request = new VehicleJourneyRequestImpl('IC1545', null, Carbon::createFromDate(2021, 11, 14), 'en');
-        $rawDataRepo = \Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawDataRepo->shouldReceive('getVehicleJourneyData')->withArgs([$request])->andReturn(
             new CachedData('dummy-cache-key', file_get_contents(__DIR__ . '/../../../../Fixtures/datedVehicleJourney-ic1545.json'))
         );

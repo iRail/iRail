@@ -18,4 +18,9 @@ class Journey
      * @var array ServiceAlertNote[]
      */
     private array $serviceAlerts;
+
+    public function setDurationSeconds(float|int $transformIso8601Duration)
+    {
+
+    }
 }

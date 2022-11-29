@@ -3,19 +3,20 @@
 namespace Tests\Unit\Api\Data\Nmbs;
 
 use DateTime;
-use Irail\Data\Nmbs\Repositories\Irail\NmbsRivLiveboardRepository;
-use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
-use Irail\Data\Nmbs\Repositories\StationsRepository;
+use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Models\CachedData;
 use Irail\Models\DepartureArrivalMode;
-use Irail\Models\Requests\LiveboardRequestImpl;
+use Irail\Repositories\Irail\NmbsRivLiveboardRepository;
+use Irail\Repositories\Nmbs\StationsRepository;
+use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Mockery;
 use Tests\TestCase;
 
 class LiveboardDataSourceTest extends TestCase
 {
     public function testGetLiveboard_departuresBrusselsSouth_shouldParseAndReturnData()
     {
-        $rawDataRepo = \Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawDataRepo->shouldReceive('getLiveboardData')->andReturn(
             new CachedData('dummy-cache-key', file_get_contents(__DIR__ . '/../../../../Fixtures/departures-brussels-2021114.json'))
         );

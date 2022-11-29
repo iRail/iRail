@@ -1,7 +1,7 @@
 <?php
 
-use Irail\Data\Nmbs\Repositories\Riv\NmbsRivRawDataRepository;
-use Irail\Data\Nmbs\Repositories\StationsRepository;
+use Irail\Repositories\Nmbs\StationsRepository;
+use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

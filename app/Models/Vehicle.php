@@ -2,10 +2,6 @@
 
 namespace Irail\Models;
 
-use Irail\Data\Nmbs\Models\hafas\HafasVehicle;
-use Irail\Data\Nmbs\Models\VehicleInfo;
-use Irail\Data\Nmbs\Tools\VehicleIdTools;
-
 class Vehicle
 {
     private string $uri;
