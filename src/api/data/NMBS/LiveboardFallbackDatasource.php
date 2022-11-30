@@ -311,9 +311,12 @@ class LiveboardFallbackDatasource
             $vehicleTypeAndNumber = trim((string)$stBoardEntry->xpath("td[@class='product']/a")[0]);
             // Some trains are split by a newline, some by a space
             $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
-            // Busses are completely missing a space
-            $vehicleTypeAndNumber = str_replace("BUS", 'BUS ', $vehicleTypeAndNumber);
-            $vehicleTypeAndNumber = str_replace("TRN", 'TRN ', $vehicleTypeAndNumber);
+            // Busses are completely missing a space, TRN trains are missing this sometimes
+            $vehicleTypeAndNumber = str_replace('BUS', 'BUS ', $vehicleTypeAndNumber);
+            $vehicleTypeAndNumber = str_replace('TRN', 'TRN ', $vehicleTypeAndNumber);
+            // Replace possible double spaces after the space-introducing fixes
+            $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
+
             $vehicleTypeAndNumber = explode(' ', $vehicleTypeAndNumber);
             $vehicle = new VehicleInfo($vehicleTypeAndNumber[0], $vehicleTypeAndNumber[1]);
 
