@@ -72,7 +72,10 @@ class NmbsRivVehicleRepository implements VehicleJourneyRepository
         $vehicle = $this->parseVehicle($json, $context);
         $stops = $this->parseVehicleStops($json, $vehicle, $context);
         $alerts = []; // TODO: implement
-        return new VehicleJourneySearchResult($cachedRawData->getCreatedAt(), $vehicle, $stops, $alerts);
+
+        $vehicleJourneySearchResult = new VehicleJourneySearchResult($vehicle, $stops, $alerts);
+        $vehicleJourneySearchResult->mergeCacheValidity($cachedRawData->getCreatedAt(), $cachedRawData->getExpiresAt());
+        return $vehicleJourneySearchResult;
     }
 
 

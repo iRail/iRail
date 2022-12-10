@@ -1,6 +1,8 @@
 <?php
 
 namespace Irail\Models;
+use Carbon\Carbon;
+
 /**
  * Data which has been cached.
  *
@@ -46,19 +48,19 @@ class CachedData
     }
 
     /**
-     * @return int the timestamp at which this entry was created
+     * @return Carbon the timestamp at which this entry was created
      */
-    public function getCreatedAt(): int
+    public function getCreatedAt(): Carbon
     {
-        return $this->createdAt;
+        return Carbon::createFromTimestamp($this->createdAt);
     }
 
     /**
-     * @return int
+     * @return Carbon
      */
-    public function getExpiresAt(): int
+    public function getExpiresAt(): Carbon
     {
-        return $this->expiresAt;
+        return Carbon::createFromTimestamp($this->expiresAt);
     }
 
     /**

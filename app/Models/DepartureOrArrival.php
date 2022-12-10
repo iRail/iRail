@@ -3,7 +3,7 @@
 namespace Irail\Models;
 
 use Carbon\Carbon;
-use Irail\Repositories\Nmbs\Models\Station;
+use DateTime;
 
 /**
  * Base class for a vehicle calling at a stop, could be either a departure or arrival
@@ -19,7 +19,7 @@ class DepartureOrArrival
     private bool $isCancelled;
 
     private string $headSign;
-    private Station $direction;
+    private StationInfo $direction;
 
     private bool $isReported;
     private bool $isExtra;
@@ -108,6 +108,7 @@ class DepartureOrArrival
      */
     public function setDelay(int $delay): DepartureOrArrival
     {
+
         $this->delay = $delay;
         return $this;
     }
@@ -149,18 +150,18 @@ class DepartureOrArrival
     }
 
     /**
-     * @return array
+     * @return StationInfo
      */
-    public function getDirection(): Station
+    public function getDirection(): StationInfo
     {
         return $this->direction;
     }
 
     /**
-     * @param array $direction
+     * @param StationInfo $direction
      * @return DepartureOrArrival
      */
-    public function setDirection(Station $direction): DepartureOrArrival
+    public function setDirection(StationInfo $direction): DepartureOrArrival
     {
         $this->direction = $direction;
         return $this;
@@ -224,19 +225,11 @@ class DepartureOrArrival
     /**
      * @return string|null
      */
-    public function getUri(): ?string
+    public function getDepartureUri(): ?string
     {
-        return $this->uri;
-    }
-
-    /**
-     * @param string|null $uri
-     * @return DepartureOrArrival
-     */
-    public function setUri(?string $uri): DepartureOrArrival
-    {
-        $this->uri = $uri;
-        return $this;
+        return 'http://irail.be/connections/' . substr($this->station->getId(), 2) . '/' .
+            date('Ymd', $this->scheduledDateTime) . '/' .
+            str_replace(' ', '', $this->vehicle->getName());
     }
 
     public function setOccupany(?Occupancy $occupancy)

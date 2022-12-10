@@ -70,7 +70,9 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
             $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
         }
 
-        return new LiveboardSearchResult($cachedRawData->getCreatedAt(), $currentStation, $departuresOrArrivals);
+        $liveboardSearchResult = new LiveboardSearchResult($currentStation, $departuresOrArrivals);
+        $liveboardSearchResult->mergeCacheValidity($cachedRawData->getCreatedAt(), $cachedRawData->getExpiresAt());
+        return $liveboardSearchResult;
     }
 
     /**
@@ -138,8 +140,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setIsExtra($isExtraTrain);
         $stopAtStation->setIsReported($left);
-        $stopAtStation->setUri('http://irail.be/connections/' . substr($currentStation->getId(), 2)
-            . '/' . date('Ymd', $unixtime) . '/' . $vehicle->getName());
+        $stopAtStation->setDirection($direction);
 
         $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
         return $stopAtStation;

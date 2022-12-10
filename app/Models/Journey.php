@@ -19,8 +19,19 @@ class Journey
      */
     private array $serviceAlerts;
 
-    public function setDurationSeconds(float|int $transformIso8601Duration)
+    public function setLegs(array $trainsInConnection)
     {
+        $this->legs = $trainsInConnection;
+    }
 
+    public function getDurationSeconds(): int
+    {
+        return $this->legs[0]->getDeparture()->getRealtimeDateTime()
+            ->diffInSeconds(end($this->legs)->getArrival()->getRealtimeDateTime());
+    }
+
+    public function setNotes(array $notes)
+    {
+        $this->notes = $notes;
     }
 }

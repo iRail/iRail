@@ -2,6 +2,8 @@
 
 namespace Irail\Models;
 
+use Irail\Exceptions\Internal\InternalProcessingException;
+
 class DepartureAndArrival
 {
     private ?DepartureOrArrival $arrival = null;
@@ -12,7 +14,7 @@ class DepartureAndArrival
      */
     public function getUri(): ?string
     {
-        return $this->getDeparture()?->getUri();
+        return $this->getDeparture()?->getDepartureUri();
     }
 
     /**
@@ -49,6 +51,21 @@ class DepartureAndArrival
     {
         $this->departure = $departure;
         return $this;
+    }
+
+    /**
+     * @return StationInfo
+     * @throws InternalProcessingException
+     */
+    public function getStation(): StationInfo
+    {
+        if ($this->departure) {
+            return $this->departure->getStation();
+        }
+        if ($this->arrival) {
+            return $this->arrival->getStation();
+        }
+        throw new InternalProcessingException('Trying to read the station from a DepartureAndArrival which neither has a departure nor arrival');
     }
 
 }

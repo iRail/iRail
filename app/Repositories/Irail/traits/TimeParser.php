@@ -86,10 +86,11 @@ trait TimeParser
     /**
      * @throws InternalProcessingException
      */
-    private function parseDurationFromTwoDatesAndTimes(string $date, string $time, string $rtDate, string $rtTime): CarbonPeriod
+    private function getSecondsBetweenTwoDatesAndTimes(string $date, string $time, string $rtDate, string $rtTime): int
     {
         try {
-            return $this->parseDateAndTime($date, $time)->secondsUntil($this->parseDateAndTime($rtDate, $rtTime));
+            return $this->parseDateAndTime($date, $time)
+                ->diffInSeconds($this->parseDateAndTime($rtDate, $rtTime), absolute: false);
         } catch (InternalProcessingException $e) {
             Log::error("Failed to parse duration '$date' '$time' '$rtDate' $rtTime': " . $e->getMessage());
             throw new InternalProcessingException($e);

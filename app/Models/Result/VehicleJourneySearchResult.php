@@ -8,29 +8,22 @@ use Irail\Models\Vehicle;
 
 class VehicleJourneySearchResult
 {
+    use Cachable;
+
     private Vehicle $vehicle;
     private array $stops;
-    private int $timestamp;
     private array $alerts;
 
     /**
-     * @param Vehicle               $vehicle
-     * @param DepartureAndArrival[] $stops
+     * @param Vehicle $vehicle
+     * @param array   $stops
+     * @param array   $alerts
      */
-    public function __construct(int $timestamp, Vehicle $vehicle, array $stops, array $alerts)
+    public function __construct(Vehicle $vehicle, array $stops, array $alerts)
     {
-        $this->timestamp = $timestamp;
         $this->vehicle = $vehicle;
         $this->stops = $stops;
         $this->alerts = $alerts;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTimestamp(): int
-    {
-        return $this->timestamp;
     }
 
     /**
