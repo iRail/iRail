@@ -16,6 +16,7 @@ use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\StationsRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -24,10 +25,15 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
 {
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
+    private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
 
-    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
-    {
+    public function __construct(
+        StationsRepository $stationsRepository,
+        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor,
+        NmbsRivRawDataRepository $rivDataRepository = null
+    ) {
         $this->stationsRepository = $stationsRepository;
+        $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
         if ($rivDataRepository != null) {
             $this->rivDataRepository = $rivDataRepository;
         } else {
@@ -49,6 +55,9 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         return $this->parseNmbsRawData($request, $rawData);
     }
 
+    /**
+     * @throws Exception
+     */
     private function parseNmbsRawData(LiveboardRequest $request, CachedData $cachedRawData): LiveboardSearchResult
     {
         $rawData = $cachedRawData->getValue();
@@ -67,6 +76,14 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopsAtStation = $decodedJsonData['entries'];
         $departuresOrArrivals = [];
         foreach ($stopsAtStation as $stop) {
+            if ($this->isServiceTrain($stop)) {
+                // Service trains head to workplaces, such as Vorst-rijtuigen.
+                // Since they probably won't be available any longer as soon as we switch to any other data source,
+                // don't include them in the responses. They also refer to stations closed for passengers such as
+                // 008817327, which are not included in the GTFS data.
+                continue;
+            }
+
             $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
         }
 
@@ -123,11 +140,8 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopCanceled = 0; // TODO: reverse-engineer and implement
         $left = 0; // TODO: probably no longer supported
 
-        $isExtraTrain = 0; // TODO: probably no longer supported
-        if (key_exists('status', $stop) && $stop['status'] == 'A') {
-            $isExtraTrain = 1;
-        }
-        $direction = $this->stationsRepository->getStationById($isArrivalBoard ? $stop['Origin1UicCode'] : $stop['Destination1UicCode']);
+        // using plannedDateTime as trip start date is not 100% correct here, but we don't have anything better. Might cause issues on trains crossing midnight.
+        $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $plannedDateTime);
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
 
         // Now all information has been parsed. Put it in a nice object.
@@ -138,8 +152,8 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setDelay($delay);
         $stopAtStation->setPlatform(new PlatformInfo(null, $platform, $isPlatformNormal));
         $stopAtStation->setIsCancelled($stopCanceled);
-        $stopAtStation->setIsExtra($isExtraTrain);
-        $stopAtStation->setIsReported($left);
+        $stopAtStation->setIsReported($left); // TODO: handle '"DepartureStatusNl": "aan perron",' as "halting"
+        $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
         $stopAtStation->setDirection($direction);
 
         $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
@@ -163,14 +177,46 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     /**
      * Add occupancy data (also known as spitsgids data) to the object.
      *
-     * @param StationInfo  $currentStation
-     * @param Vehicle  $vehicle
-     * @param DateTime $date
+     * @param StationInfo $currentStation
+     * @param Vehicle     $vehicle
+     * @param DateTime    $date
      * @return Occupancy
      */
     private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, DateTime $date): Occupancy
     {
         // TODO: implement
         return new Occupancy();
+    }
+
+
+    private function isServiceTrain(array $stop)
+    {
+        return $stop['CommercialType'] == 'SERV';
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getDirectionUicCode(array $stop, bool $isArrivalBoard, DateTime $scheduledTripDepartureDate)
+    {
+        if ($isArrivalBoard) {
+            if (key_exists('Origin1UicCode', $stop)) {
+                return $stop['Origin1UicCode'];
+            }
+
+            // GTFS to the rescue in the case of a missing origin!
+            return $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination(
+                $stop['TrainNumber'],
+                $scheduledTripDepartureDate
+            )->getOriginStopId();
+        }
+        if (key_exists('Destination1UicCode', $stop)) {
+            return $stop['Destination1UicCode'];
+        }
+        // GTFS to the rescue in the case of a missing destination!
+        return $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination(
+            $stop['TrainNumber'],
+            $scheduledTripDepartureDate
+        )->getDestinationStopId();
     }
 }
