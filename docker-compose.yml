@@ -1,0 +1,58 @@
+version: '3.9'
+
+# For development purposes only, as easy passwords are hardcoded
+
+services:
+  #PHP Service
+  app:
+    image: irail-v2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      APP_NAME: irail-api
+      APP_ENV: local
+      APP_KEY:
+      APP_DEBUG: 'true'
+      APP_URL: 'http://localhost'
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: 'irail-api'
+      DB_USERNAME: 'irail-api'
+      DB_PASSWORD: 'irail-api'
+    working_dir: /var/www
+    networks:
+      - app
+    volumes:
+      - ./:/var/www
+  #MySQL Service
+  db:
+    image: mariadb:10.4.12
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "33060:3306"
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: irail-api
+      MYSQL_PASSWORD: irail-api
+      MYSQL_ROOT_PASSWORD: irail-api
+    networks:
+      - app
+    volumes:
+      - irailv2_sqldata:/var/lib/mysql:delegated
+
+#Docker Networks
+networks:
+  app:
+    driver: bridge
+
+#Docker internal volumes
+volumes:
+  irailv2_sqldata:
+    name: "irailv2_sqldata"

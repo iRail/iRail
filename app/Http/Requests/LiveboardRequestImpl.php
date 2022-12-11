@@ -9,17 +9,17 @@ class LiveboardRequestImpl implements LiveboardRequest
     use LiveboardCacheId;
 
     private string $language;
-    private int $departureArrivalMode;
+    private TimeSelection $departureArrivalMode;
     private DateTime $dateTime;
     private string $stationId;
 
     /**
-     * @param string   $stationId
-     * @param int      $departureArrivalMode
-     * @param string   $language
-     * @param DateTime $dateTime
+     * @param string        $stationId
+     * @param TimeSelection $departureArrivalMode
+     * @param string        $language
+     * @param DateTime      $dateTime
      */
-    public function __construct(string $stationId, int $departureArrivalMode, string $language, DateTime $dateTime)
+    public function __construct(string $stationId, TimeSelection $departureArrivalMode, string $language, DateTime $dateTime)
     {
         $this->language = $language;
         $this->departureArrivalMode = $departureArrivalMode;
@@ -44,9 +44,9 @@ class LiveboardRequestImpl implements LiveboardRequest
     }
 
     /**
-     * @return int
+     * @return TimeSelection
      */
-    public function getDepartureArrivalMode(): int
+    public function getDepartureArrivalMode(): TimeSelection
     {
         return $this->departureArrivalMode;
     }

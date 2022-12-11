@@ -20,7 +20,7 @@ trait LiveboardCacheId
 
     abstract function getDateTime(): DateTime;
 
-    abstract function getDepartureArrivalMode(): int;
+    abstract function getDepartureArrivalMode(): TimeSelection;
 
     abstract function getLanguage(): string;
 

@@ -1,6 +1,6 @@
 <?php
 
-use Irail\Repositories\Nmbs\StationsRepository;
+use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';

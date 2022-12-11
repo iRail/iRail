@@ -105,11 +105,11 @@ class Message
         return $this->publisher;
     }
 
-    public function getLink(): ?HafasInformationManagerMessageLink
+    public function getLink(): ?MessageLink
     {
         preg_match_all("/<a href=\"(.*?)\">(.*?)<\/a>/", urldecode($this->message), $matches);
         if (count($matches[1]) > 1) {
-            return new HafasInformationManagerMessageLink(urlencode($matches[2][0]), urlencode($matches[1][0]));
+            return new MessageLink(urlencode($matches[1][0]), urlencode($matches[2][0]));
         }
         return null;
     }

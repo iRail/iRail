@@ -2,7 +2,6 @@
 
 namespace Irail\Repositories\Nmbs\Models;
 
-use Irail\Repositories\Nmbs\Models\hafas\HafasVehicle;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 
 class VehicleInfo

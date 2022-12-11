@@ -9,11 +9,10 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
-use Irail\Models\DepartureArrivalMode;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
-use Irail\Repositories\Irail\traits\BasedOnHafas;
-use Irail\Repositories\Nmbs\StationsRepository;
+use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
 
 class NmbsRivRawDataRepository
@@ -60,7 +59,7 @@ class NmbsRivRawDataRepository
         $url = 'https://mobile-riv.api.belgianrail.be/api/v1.0/dacs';
         $formattedDateTimeStr = $request->getDateTime()->format('Y-m-d H:i:s');
 
-        $queryType = ($request->getDepartureArrivalMode() == DepartureArrivalMode::MODE_ARRIVAL)
+        $queryType = ($request->getDepartureArrivalMode() == TimeSelection::ARRIVAL)
             ? 'ArrivalsApp'
             : 'DeparturesApp';
 
