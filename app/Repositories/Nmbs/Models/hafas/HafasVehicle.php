@@ -45,14 +45,18 @@ class HafasVehicle
      */
     private $type;
 
+    private string $name;
+
     /**
      * @param string $number
      * @param string $type
+     * @param string $name
      */
-    public function __construct(string $number, string $type)
+    public function __construct(string $number, string $type, string $name)
     {
         $this->number = $number;
         $this->type = $type;
+        $this->name = $name;
     }
 
     /**

@@ -26,7 +26,6 @@ use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\traits\BasedOnHafas;
 use Irail\Repositories\Irail\traits\TimeParser;
 use Irail\Repositories\JourneyPlanningRepository;
-use Irail\Repositories\Nmbs\Models\hafas\HafasVehicle;
 use Irail\Repositories\Nmbs\StationsRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
@@ -63,8 +62,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
      */
     private function parseJourneyPlanning(JourneyPlanningRequest $request, CachedData $data): JourneyPlanningSearchResult
     {
-        $json = json_decode($data->getValue(), true);
-        $this->throwExceptionOnInvalidResponse($json);
+        $json = $this->deserializeAndVerifyResponse($data->getValue());
 
         $result = new JourneyPlanningSearchResult();
         $result->mergeCacheValidity($data->getCreatedAt(), $data->getExpiresAt());
@@ -242,92 +240,11 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             );
             $parsedIntermediateStops[] = $intermediateStop;
         }
+        $this->fixInconsistentReportedStates($parsedIntermediateStops);
 
-        // Sanity check: ensure that the arrived/left status for intermediate stops is correct.
-        // If a train has reached the next intermediate stop, it must have passed the previous one.
-        // Start at end position minus 2 because we "look forward" in the loop
-        for ($i = count($parsedIntermediateStops) - 2; $i >= 0; $i--) {
-            if ($parsedIntermediateStops[$i + 1]->arrived) {
-                $parsedIntermediateStops[$i]->left = 1;
-                $parsedIntermediateStops[$i]->arrived = 1;
-            }
-        }
         return $parsedIntermediateStops;
     }
 
-    /**
-     * Parse an intermediate stop for a train on a connection. For example, if a traveller travels from
-     * Brussels South to Brussels north, Brussels central would be an intermediate stop (the train stops but
-     * the traveller stays on)
-     * @param $lang
-     * @param $rawIntermediateStop
-     * @param Vehicle $vehicle
-     * @return DepartureAndArrival The parsed intermediate stop.
-     * @throws InternalProcessingException
-     * @throws UnknownStopException
-     */
-    private function parseHafasIntermediateStop($lang, $rawIntermediateStop, Vehicle $vehicle): DepartureAndArrival
-    {
-        $intermediateStop = new DepartureAndArrival();
-        $station = StationsDatasource::getStationFromID(
-            $rawIntermediateStop['extId'],
-            $lang
-        );
-
-        if (key_exists('arrTime', $rawIntermediateStop)) {
-            $arrival = new DepartureOrArrival();
-            $arrival->setStation($station);
-            $arrival->setVehicle($vehicle);
-            $arrival->setScheduledDateTime($this->parseDateAndTime(
-                $rawIntermediateStop['arrTime'],
-                $rawIntermediateStop['arrDate']
-            ));
-            if (key_exists('arrPrognosisType', $rawIntermediateStop)) {
-                $arrival->setIsCancelled($this->isArrivalCanceledBasedOnState($rawIntermediateStop['arrPrognosisType']));
-                $arrival->setIsReported($rawIntermediateStop['arrPrognosisType'] == 'REPORTED');
-            }
-            if (key_exists('rtArrTime', $rawIntermediateStop)) {
-                $arrival->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
-                    $rawIntermediateStop['rtArrTime'],
-                    $rawIntermediateStop['rtArrDate'],
-                    $rawIntermediateStop['arrTime'],
-                    $rawIntermediateStop['arrDate']
-                ));
-            }
-            $arrival->setIsCancelled(key_exists('cancelledArrival', $rawIntermediateStop));
-            $arrival->setIsExtra(key_exists('additional', $rawIntermediateStop));
-            $intermediateStop->setArrival($arrival);
-        }
-
-        if (key_exists('depTime', $rawIntermediateStop)) {
-            $departure = new DepartureOrArrival();
-            $departure->setStation($station);
-            $departure->setVehicle($vehicle);
-            $departure->setScheduledDateTime($this->parseDateAndTime(
-                $rawIntermediateStop['depTime'],
-                $rawIntermediateStop['depDate']
-            ));
-            if (key_exists('depPrognosisType', $rawIntermediateStop)) {
-                $departure->setIsCancelled($this->isDepartureCanceledBasedOnState($rawIntermediateStop['depPrognosisType']));
-                $departure->setIsReported($rawIntermediateStop['depPrognosisType'] == 'REPORTED');
-            }
-            if (key_exists('rtArrTime', $rawIntermediateStop)) {
-                $departure->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
-                    $rawIntermediateStop['rtArrTime'],
-                    $rawIntermediateStop['rtArrDate'],
-                    $rawIntermediateStop['depTime'],
-                    $rawIntermediateStop['depDate']
-                ));
-            }
-            $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));
-            $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
-            $intermediateStop->setDeparture($departure);
-        }
-
-        // Some boolean about scheduled departure? First seen on an added stop
-        // dInS, dInR, aOutS, aOutR are not processed at this moment
-        return $intermediateStop;
-    }
 
     /**
      * @param array $departureOrArrival
@@ -361,14 +278,6 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         );
     }
 
-    /**
-     * @param $product
-     * @return HafasVehicle
-     */
-    public function parseProduct($product): HafasVehicle
-    {
-        return new HafasVehicle(trim($product['num']), trim($product['catOutL']));
-    }
 
     /**
      * @param mixed  $legStartOrEnd

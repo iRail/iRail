@@ -4,6 +4,7 @@ namespace Irail\Models\Result;
 
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
+use Irail\Models\Message;
 use Irail\Models\Vehicle;
 
 class VehicleJourneySearchResult
@@ -15,9 +16,9 @@ class VehicleJourneySearchResult
     private array $alerts;
 
     /**
-     * @param Vehicle $vehicle
-     * @param array   $stops
-     * @param array   $alerts
+     * @param Vehicle               $vehicle
+     * @param DepartureAndArrival[] $stops
+     * @param Message[]             $alerts
      */
     public function __construct(Vehicle $vehicle, array $stops, array $alerts)
     {
@@ -60,6 +61,9 @@ class VehicleJourneySearchResult
         return $this->getStops()[$index]->getArrival();
     }
 
+    /**
+     * @return Message[]
+     */
     public function getAlerts(): array
     {
         return $this->alerts;

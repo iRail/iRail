@@ -1,0 +1,116 @@
+<?php
+
+namespace Irail\Models;
+
+use Carbon\Carbon;
+use Irail\Repositories\Nmbs\Models\hafas\HafasInformationManagerMessageLink;
+
+class Message
+{
+    private Carbon $validFrom, $validUpTo;
+    private Carbon $lastModified;
+    private string $header;
+    private string $leadText;
+    private string $message;
+    private string $publisher;
+
+    /**
+     * @param Carbon $validFrom The datetime when this message becomes visible/active
+     * @param Carbon $validUpTo The datetime until when this message is visible/active
+     * @param Carbon $lastModified The datetime when this message was last updated
+     * @param string $header The header text
+     * @param string $leadText The lead text
+     * @param string $message The complete message text
+     * @param string $publisher The name of the organisation who published this message
+     */
+    public function __construct(
+        Carbon $validFrom,
+        Carbon $validUpTo,
+        Carbon $lastModified,
+        string $header,
+        string $leadText,
+        string $message,
+        string $publisher
+    ) {
+        $this->validFrom = $validFrom;
+        $this->validUpTo = $validUpTo;
+        $this->lastModified = $lastModified;
+        $this->header = $header;
+        $this->leadText = $leadText;
+        $this->message = $message;
+        $this->publisher = $publisher;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getValidFrom(): Carbon
+    {
+        return $this->validFrom;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getValidUpTo(): Carbon
+    {
+        return $this->validUpTo;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getLastModified(): Carbon
+    {
+        return $this->lastModified;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeader(): string
+    {
+        return strip_tags($this->header);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLeadText(): string
+    {
+        return strip_tags($this->leadText);
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStrippedMessage(): string
+    {
+        return strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $this->message));
+    }
+
+    /**
+     * @return string
+     */
+    public function getPublisher(): string
+    {
+        return $this->publisher;
+    }
+
+    public function getLink(): ?HafasInformationManagerMessageLink
+    {
+        preg_match_all("/<a href=\"(.*?)\">(.*?)<\/a>/", urldecode($this->message), $matches);
+        if (count($matches[1]) > 1) {
+            return new HafasInformationManagerMessageLink(urlencode($matches[2][0]), urlencode($matches[1][0]));
+        }
+        return null;
+    }
+}

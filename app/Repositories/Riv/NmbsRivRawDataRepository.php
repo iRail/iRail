@@ -161,7 +161,8 @@ class NmbsRivRawDataRepository
         $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $vehicleWithOriginAndDestination);
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
-            $journeyDetailRef = $this->getCacheWithDefaultCacheUpdate("getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getVehicleNumber()}",
+            $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getVehicleNumber()}|{$request->getDateTime()->format('Ymd')}";
+            $journeyDetailRef = $this->getCacheWithDefaultCacheUpdate($cacheKey,
                 function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination) {
                     return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
                 },
@@ -223,8 +224,9 @@ class NmbsRivRawDataRepository
         // Assume the first and last stop are cancelled, since the normal origin-destination search did not return results
         // This saves 2 requests and should not make a difference.
         $i = 1;
+        $journeyRef = false;
         while ($journeyRef === false && $i < count($alternativeOriginDestinations) - 1) {
-            # error_log("Searching for vehicle $vehicleName using alternative segments, $i");
+            Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $i");
             $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i++];
             $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
         }
@@ -271,13 +273,11 @@ class NmbsRivRawDataRepository
 
         Log::debug("Received response with HTTP code $httpcode for URL $url");
         Log::debug($response);
-
         if ($httpcode >= 500){
             Log::warning("Request $url received response code $httpcode");
         }
 
         return $response;
     }
-
 
 }

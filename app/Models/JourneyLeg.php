@@ -16,7 +16,7 @@ class JourneyLeg
     private VehicleDirection $direction;
     private JourneyLegType $legType;
     /**
-     * @var AlertMessage[]
+     * @var Message[]
      */
     private array $alerts = [];
 
@@ -107,7 +107,7 @@ class JourneyLeg
     }
 
     /**
-     * @return AlertMessage[]
+     * @return Message[]
      */
     public function getAlerts(): array
     {
