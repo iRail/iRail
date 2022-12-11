@@ -25,6 +25,7 @@ class CachedData
         $this->key = $key;
         $this->value = $value;
         $this->createdAt = time();
+        $this->expiresAt = time();
     }
 
     /**

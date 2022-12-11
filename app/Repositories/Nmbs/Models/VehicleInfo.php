@@ -2,8 +2,6 @@
 
 namespace Irail\Repositories\Nmbs\Models;
 
-use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
-
 class VehicleInfo
 {
     public function __construct(string $type, int $number)
@@ -15,16 +13,7 @@ class VehicleInfo
         $this->number = $number;
     }
 
-    public static function fromHafasVehicle(HafasVehicle $hafasVehicle)
-    {
-        return new VehicleInfo(
-            VehicleIdTools::extractTrainType($hafasVehicle->name),
-            VehicleIdTools::extractTrainNumber($hafasVehicle->name)
-        );
-    }
-
     public $name;
-
     public $shortname;
 
     public $number;

@@ -3,7 +3,6 @@
 namespace Irail\Models;
 
 use Carbon\Carbon;
-use DateTime;
 
 /**
  * Base class for a vehicle calling at a stop, could be either a departure or arrival
@@ -88,7 +87,7 @@ class DepartureOrArrival
      * @param Carbon $scheduledDateTime
      * @return DepartureOrArrival
      */
-    public function setScheduledDateTime(DateTime $scheduledDateTime): DepartureOrArrival
+    public function setScheduledDateTime(Carbon $scheduledDateTime): DepartureOrArrival
     {
         $this->scheduledDateTime = $scheduledDateTime;
         return $this;

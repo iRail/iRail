@@ -5,6 +5,7 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Irail\Http\Requests\LiveboardRequest;
@@ -122,12 +123,12 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $isArrivalBoard = $request->getDepartureArrivalMode() == TimeSelection::ARRIVAL;
 
         // The date of this departure
-        $plannedDateTime = DateTime::createFromFormat('Y-m-d H:i:s',
+        $plannedDateTime = Carbon::createFromFormat('Y-m-d H:i:s',
             $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
         );
         $unixtime = $plannedDateTime->getTimestamp();
 
-        $delay = self::parseDelayInSeconds($isArrivalBoard ? $stop['ArrivalDelay'] : $stop['DepartureDelay']);
+        $delay = self::parseDelayInSeconds($stop, $isArrivalBoard ? 'ArrivalDelay' : 'DepartureDelay');
 
         // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
         // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
@@ -142,6 +143,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
 
         // using plannedDateTime as trip start date is not 100% correct here, but we don't have anything better. Might cause issues on trains crossing midnight.
         $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $plannedDateTime);
+        $direction = $this->stationsRepository->getStationById('00' . $direction);
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
 
         // Now all information has been parsed. Put it in a nice object.
@@ -162,15 +164,16 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
 
     /**
      * Parse the delay based on a string in hh:mm:ss format
-     * @param string|null $delayString The delay string
+     * @param array  $stop The raw stop data array
+     * @param string $arrayKey The key pointing to the delay value
      * @return int
      */
-    private static function parseDelayInSeconds(?string $delayString): int
+    private static function parseDelayInSeconds(array $stop, string $arrayKey): int
     {
-        if ($delayString == null) {
+        if (!key_exists($arrayKey, $stop)) {
             return 0;
         }
-        sscanf($delayString, '%d:%d:%d', $hours, $minutes, $seconds);
+        sscanf($arrayKey, '%d:%d:%d', $hours, $minutes, $seconds);
         return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
