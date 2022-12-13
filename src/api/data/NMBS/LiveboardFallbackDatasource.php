@@ -35,7 +35,7 @@ class LiveboardFallbackDatasource
             if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
                 self::FillDataRootWithDepartureData($dataroot, $request);
             } else {
-                throw new Exception('Not a good timeSel value: try ARR or DEP', 400);
+                throw new Exception('Not a good timeSel value: try \'arrival\' or \'departure\'', 400);
             }
         }
     }
@@ -147,12 +147,13 @@ class LiveboardFallbackDatasource
             'useragent' => Tools::getUserAgent(),
         ];
 
-        $url = 'http://www.belgianrail.be/jp/nmbs-realtime/stboard.exe/nn?ld=std&AjaxMap=CPTVMap&=';
+        $url = 'http://www.belgianrail.be/jp/nmbs-realtime/stboard.exe/nn';
         $dateTime = DateTime::createFromFormat('Ymd H:i', $date . ' ' . $time);
         $formattedDateStr = $dateTime->format('d/m/Y');
         $formattedTimeStr = $dateTime->format('H:i:s');
 
         $parameters = [
+            'ld'                      => 'std',
             'boardType'               => $timeSel,
             'time'                    => $formattedTimeStr,
             'date'                    => $formattedDateStr,
@@ -186,7 +187,7 @@ class LiveboardFallbackDatasource
         }
 
         // Only keep the actual data, php tidy can't handle the entire document
-        $response = preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
+        preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
         $response = $matches[0];
 
         // Store the raw output to a file on disk, for debug purposes
