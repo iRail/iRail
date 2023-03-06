@@ -340,9 +340,9 @@ class CompositionDataSource
     {
         // Separate carriages
         if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-            preg_match('/([A-Z]\d+)\s?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+            preg_match('/([A-Z]+\d+[A-Z]?)(\s|_)?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
             $materialType->parent_type = $matches[1]; // M6, I11
-            $materialType->sub_type = $matches[2]; // A, B, BDX, BUH, ...
+            $materialType->sub_type = $matches[3]; // A, B, BDX, BUH, ...
         } else {
             // Some special cases, typically when data is missing
             if (property_exists($rawCompositionUnit, 'materialTypeName')) {
