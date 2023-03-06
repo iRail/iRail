@@ -288,12 +288,12 @@ class CompositionDataSource
         // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailled data.
         if (property_exists($rawCompositionUnit, "parentMaterialTypeName")) {
             // Sub type might not be set yet when in planning.
-            $materialType->parent_type = $rawCompositionUnit->parentMaterialTypeName;
+            $materialType->parent_type = strtoupper($rawCompositionUnit->parentMaterialSubTypeName);
             // NMBS doesn't know the subtype yet, but we can calculate this based on the position.
             self::calculateAmMrSubType($materialType, $position);
         } else {
             if (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
-                $materialType->parent_type = $rawCompositionUnit->parentMaterialSubTypeName;
+                $materialType->parent_type = strtoupper($rawCompositionUnit->parentMaterialSubTypeName);
                 if (property_exists($rawCompositionUnit, "materialSubTypeName")) {
                     $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
                 } else {
@@ -376,7 +376,7 @@ class CompositionDataSource
         }
 
         // Trains with 3 carriages:
-        if (in_array($materialType->parent_type, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM80', 'AM80m'])) {
+        if (in_array($materialType->parent_type, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM80', 'AM80M'])) {
             switch ($position % 3) {
                 case 0:
                     $materialType->sub_type = "a";
