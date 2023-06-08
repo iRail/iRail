@@ -453,7 +453,7 @@ class CompositionDataSource
 
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
 
-        preg_match("/localStorage\.setItem\('tmAuthCode', \"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
+        preg_match("/localStorage\.setItem\(\"tmAuthCode\", \"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
         return $matches['key'];
     }
 }
