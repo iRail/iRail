@@ -128,21 +128,22 @@ class CompositionDataSource
         return $compositionUnit;
     }
 
-    private static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
+    static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
         $materialType = new RollingMaterialType();
         $materialType->parent_type = "unknown";
         $materialType->sub_type = "unknown";
         $materialType->orientation = "LEFT";
 
-        if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR") {
+        if ((property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
+            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))) {
             self::setAmMrMaterialType($materialType, $rawCompositionUnit, $position);
         } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             self::setHleMaterialType($materialType, $rawCompositionUnit);
         } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
             self::setHvMaterialType($materialType, $rawCompositionUnit);
         } else if (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
-            // Anything else, defaul fallback
+            // Anything else, default fallback
             $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
         }
@@ -150,7 +151,7 @@ class CompositionDataSource
         return $materialType;
     }
 
-    private static function transformRawCompositionUnitToTrainCompositionUnit($object, $returnAllData): TrainCompositionUnit
+    static function transformRawCompositionUnitToTrainCompositionUnit($object, $returnAllData): TrainCompositionUnit
     {
         $trainCompositionUnit = new TrainCompositionUnit();
         $wellDefinedProperties = [
@@ -176,7 +177,7 @@ class CompositionDataSource
             'tractionPosition'              => 0,
             'hasSemiAutomaticInteriorDoors' => false,
             'hasLuggageSection'             => false,
-            'materialSubTypeName'           => "unknown"
+            'materialSubTypeName'           => "unknown",
         ];
         foreach ($wellDefinedProperties as $propertyName => $defaultValue) {
             if (property_exists($object, $propertyName)) {
@@ -323,7 +324,7 @@ class CompositionDataSource
         } else if (property_exists($rawCompositionUnit, "materialSubTypeName")
             && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')) { // HV mislabeled as HLE :(
             $materialType->parent_type = "M7";
-            $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName,2);
+            $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 2);
         } else {
             $materialType->parent_type = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
             $materialType->sub_type = substr($rawCompositionUnit->materialTypeName, 5);
@@ -340,7 +341,7 @@ class CompositionDataSource
     {
         // Separate carriages
         if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-            preg_match('/([A-Z]+\d+[A-Z]?)(\s|_)?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+            preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
             $materialType->parent_type = $matches[1]; // M6, I11
             $materialType->sub_type = $matches[3]; // A, B, BDX, BUH, ...
         } else {
@@ -452,7 +453,7 @@ class CompositionDataSource
 
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
 
-        preg_match("/localStorage\.setItem\('tmAuthCode', \"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
+        preg_match("/localStorage\.setItem\(\"tmAuthCode\",\"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
         return $matches['key'];
     }
 }
