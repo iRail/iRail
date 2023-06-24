@@ -40,6 +40,8 @@ class Xml extends Printer
     public function printHeader()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers: *');
+        header('Access-Control-Expose-Headers: *');
         header('Content-Type: application/xml;charset=UTF-8');
     }
 
