@@ -96,6 +96,11 @@ class DataRoot
                 throw new \Exception($e->getMessage(), 404);
             } elseif ($e->getCode() == '300') {
                 throw new \Exception($e->getMessage(), 300);
+            } elseif ($e->getCode() == '504') {
+                throw new \Exception(
+                    'Could not get data: the upstream datasource is unavailable. Please try again later. ' . $e->getMessage(),
+                    $e->getCode()
+                );
             } else {
                 throw new \Exception(
                     'Could not get data: ' . $e->getMessage() . '. Please report this issue at https://github.com/irail/irail/issues/new',
