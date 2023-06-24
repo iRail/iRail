@@ -476,16 +476,16 @@
         },
         {
             "name": "irail/stations",
-            "version": "1.6.18",
+            "version": "1.6.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-                "reference": "47c2da00e1922c5fd4dfaa6962a10218f8a8db15"
+                "reference": "41b738c8afb12ac3604b01da88dbf8e12c3daaba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iRail/stations/zipball/47c2da00e1922c5fd4dfaa6962a10218f8a8db15",
-                "reference": "47c2da00e1922c5fd4dfaa6962a10218f8a8db15",
+                "url": "https://api.github.com/repos/iRail/stations/zipball/41b738c8afb12ac3604b01da88dbf8e12c3daaba",
+                "reference": "41b738c8afb12ac3604b01da88dbf8e12c3daaba",
                 "shasum": ""
             },
             "require": {
@@ -496,6 +496,7 @@
                 "ml/json-ld": "^1.0"
             },
             "require-dev": {
+                "ext-zip": "*",
                 "phpunit/phpunit": "^5.5"
             },
             "type": "library",
@@ -517,9 +518,9 @@
             "description": "Use the Belgian railway's station in your PHP project",
             "support": {
                 "issues": "https://github.com/iRail/stations/issues",
-                "source": "https://github.com/iRail/stations/tree/1.6.18"
+                "source": "https://github.com/iRail/stations/tree/1.6.19"
             },
-            "time": "2023-06-23T20:51:29+00:00"
+            "time": "2023-06-24T18:50:03+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
