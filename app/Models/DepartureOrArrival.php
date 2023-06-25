@@ -228,7 +228,7 @@ class DepartureOrArrival
     public function getDepartureUri(): ?string
     {
         return 'http://irail.be/connections/' . substr($this->station->getId(), 2) . '/' .
-            date('Ymd', $this->scheduledDateTime) . '/' .
+            date('Ymd', $this->scheduledDateTime->getTimestamp()) . '/' .
             str_replace(' ', '', $this->vehicle->getName());
     }
 
@@ -240,6 +240,11 @@ class DepartureOrArrival
     public function setStatus(?DepartureArrivalState $status)
     {
         $this->status = $status;
+    }
+
+    public function getStatus(): ?DepartureArrivalState
+    {
+        return $this->status;
     }
 
     public function toResponseArray()

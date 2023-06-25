@@ -137,7 +137,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
         // parse information about which platform this train will depart from/arrive to.
         $platform = key_exists('Platform', $stop) ? $stop['Platform'] : '?';
-        $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
+        $hasPlatformChanged = 0; // TODO:  reverse-engineer and implement
 
         // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
         // DepartureCanceled gives information if this stop has been canceled.
@@ -164,7 +164,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setVehicle($vehicle);
         $stopAtStation->setScheduledDateTime($plannedDateTime);
         $stopAtStation->setDelay($delay);
-        $stopAtStation->setPlatform(new PlatformInfo($currentStation->getId(), $platform, $isPlatformNormal));
+        $stopAtStation->setPlatform(new PlatformInfo($currentStation->getId(), $platform, $hasPlatformChanged));
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
@@ -185,7 +185,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         if (!key_exists($arrayKey, $stop)) {
             return 0;
         }
-        sscanf($arrayKey, '%d:%d:%d', $hours, $minutes, $seconds);
+        sscanf($stop[$arrayKey], '%d:%d:%d', $hours, $minutes, $seconds);
         return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
