@@ -1,6 +1,10 @@
 <?php
 
+use Irail\Http\Requests\LiveboardRequest;
+use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\LiveboardRepository;
+use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -61,6 +65,16 @@ $app->singleton(
 $app->singleton(
     StationsRepository::class,
     StationsRepository::class
+);
+
+$app->singleton(
+    LiveboardRequest::class,
+    LiveboardRequestImpl::class
+);
+
+$app->singleton(
+    LiveboardRepository::class,
+    NmbsRivLiveboardRepository::class
 );
 
 /*
@@ -125,6 +139,7 @@ $app->router->group([
     'namespace' => 'Irail\Http\Controllers',
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
+    require __DIR__.'/../routes/api.php';
 });
 
 return $app;

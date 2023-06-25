@@ -3,7 +3,7 @@
 namespace Irail\Legacy\Output;
 
 use Exception;
-use Irail\api\data\DataRoot;
+use Irail\Models\Dto\v1\DataRoot;
 
 /**
  * An abstract class for a printer. It prints a document.
@@ -17,7 +17,7 @@ abstract class Printer
 
     /**
      * Get a new Printer instance for a give format string.
-     * @param string $format The format string.
+     * @param string        $format The format string.
      * @param DataRoot|null $dataroot The data to pass to the printer.
      * @return Printer The new printer instance.
      * @throws Exception Thrown when the format is invalid.
@@ -53,64 +53,17 @@ abstract class Printer
         $this->documentRoot = $documentRoot;
     }
 
-    public function printAll()
-    {
-        // Only create this hash once
-        $this->hash = get_object_vars($this->documentRoot);
-
-        unset($this->hash['timestamp']);
-        $etag = md5(json_encode($this->hash));
-
-        // Print caching and etag headers
-        $this->printCacheHeaders($etag);
-
-        $headers = $this->getallheaders();
-        if (key_exists(
-            'If-None-Match',
-            $headers
-        ) && ($headers['If-None-Match'] == '"' . $etag . '"' || $headers['If-None-Match'] == 'W/"' . $etag . '"')) {
-            // Print the unchanged response code. Don't transmit a body
-            http_response_code("304");
-            return;
-        }
-
-        $this->printHeader();
-        $this->printBody();
-    }
-
-    /**
-     * Use our own function to be compatible with nginx.
-     * Source: http://php.net/manual/en/function.getallheaders.php
-     *
-     * @return array
-     */
-    private function getallheaders()
-    {
-        $headers = [];
-        foreach ($_SERVER as $name => $value) {
-            if (str_starts_with($name, 'HTTP_')) {
-                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
-            }
-        }
-
-        return $headers;
-    }
-
-    /**
-     * prints http header: what kind of output, etc.
-     *
-     * @param string format a mime type
-     */
-    abstract public function printHeader();
 
     /**
      * prints the body: The idea begind this is a reversed sax-parser. It will create events which you will have to implement in your implementation of an output.
+     * @throws Exception
      */
-    public function printBody()
+    public function getBody(): string
     {
+        $result = "";
         //so that people would know that we have a child of the rootelement
         $this->root = true;
-        $this->startRootElement(
+        $result .= $this->startRootElement(
             strtolower($this->documentRoot->getRootname()),
             $this->documentRoot->version,
             $this->documentRoot->timestamp
@@ -123,14 +76,15 @@ abstract class Printer
                 continue;
             }
 
-            $this->printElement($key, $val, true);
+            $result .= $this->printElement($key, $val, true);
             if ($counter < count($this->hash) - 1) {
-                $this->nextObjectElement();
+                $result .= $this->nextObjectElement();
             }
 
             $counter++;
         }
-        $this->endRootElement(strtolower($this->documentRoot->getRootname()));
+        $result .= $this->endRootElement(strtolower($this->documentRoot->getRootname()));
+        return $result;
     }
 
     /**
@@ -142,22 +96,23 @@ abstract class Printer
      * @param bool $root
      * @throws Exception
      */
-    private function printElement($key, $val, $root = false)
+    private function printElement($key, $val, $root = false): string
     {
+        $result = "";
         if (is_array($val)) {
-            $this->startArray($key, count($val), $root);
+            $result .= $this->startArray($key, count($val), $root);
             $i = 0;
             foreach ($val as $elementval) {
-                $this->printElement($key, $elementval);
+                $result .= $this->printElement($key, $elementval);
                 // Keep count of where we are, and as long as this isn't the last element, print the array divider
                 if ($i < (count($val) - 1)) {
-                    $this->nextArrayElement();
+                    $result .= $this->nextArrayElement();
                 }
                 $i++;
             }
-            $this->endArray($key, $root);
-        } elseif (is_object($val)) {
-            $this->startObject($key, $val);
+            $result .= $this->endArray($key, $root);
+        } else if (is_object($val)) {
+            $result .= $this->startObject($key, $val);
             $allObjectVars = get_object_vars($val);
 
             // Remove all keys that won't be printed. If we don't do this before starting the loop, the nextObjectElement
@@ -174,34 +129,37 @@ abstract class Printer
 
             $counter = 0;
             foreach ($allObjectVars as $elementkey => $elementval) {
-                $this->printElement($elementkey, $elementval);
+                $result .= $this->printElement($elementkey, $elementval);
                 if ($counter < count($allObjectVars) - 1) {
-                    $this->nextObjectElement();
+                    $result .= $this->nextObjectElement();
                 }
                 $counter++;
             }
-            $this->endObject($key);
-        } elseif (is_bool($val)) {
+            $result .= $this->endObject($key);
+        } else if (is_bool($val)) {
             $val = $val ? 1 : 0; //turn boolean into an int
-            $this->startKeyVal($key, $val);
-            $this->endElement($key);
-        } elseif (!is_null($val)) {
-            $this->startKeyVal($key, $val);
-            $this->endElement($key);
+            $result .= $this->startKeyVal($key, $val);
+            $result .= $this->endElement($key);
+        } else if (!is_null($val)) {
+            $result .= $this->startKeyVal($key, $val);
+            $result .= $this->endElement($key);
         } else {
             throw new Exception(
                 'Could not retrieve the right information - please report this problem to iRail@list.iRail.be or try again with other arguments.',
                 500
             );
         }
+        return $result;
     }
 
-    public function nextArrayElement()
+    public function nextArrayElement(): string
     {
+        return "";
     }
 
-    public function nextObjectElement()
+    public function nextObjectElement(): string
     {
+        return "";
     }
 
     /**
@@ -210,7 +168,7 @@ abstract class Printer
      * @param $timestamp
      * @return mixed
      */
-    abstract public function startRootElement($name, $version, $timestamp);
+    abstract public function startRootElement($name, $version, $timestamp): string;
 
     /**
      * @param      $name
@@ -218,60 +176,59 @@ abstract class Printer
      * @param bool $root
      * @return mixed
      */
-    abstract public function startArray($name, $number, $root = false);
+    abstract public function startArray($name, $number, $root = false): string;
 
     /**
      * @param $name
      * @param $object
      * @return mixed
      */
-    abstract public function startObject($name, $object);
+    abstract public function startObject($name, $object): string;
 
     /**
      * @param $key
      * @param $val
      * @return mixed
      */
-    abstract public function startKeyVal($key, $val);
+    abstract public function startKeyVal($key, $val): string;
 
     /**
      * @param      $name
      * @param bool $root
      * @return mixed
      */
-    abstract public function endArray($name, $root = false);
+    abstract public function endArray($name, $root = false): string;
 
     /**
      * @param $name
      */
-    public function endObject($name)
+    public function endObject($name): string
     {
-        $this->endElement($name);
+        return $this->endElement($name);
     }
 
     /**
      * @param $name
      * @return mixed
      */
-    abstract public function endElement($name);
+    abstract public function endElement($name): string;
 
     /**
      * @param $name
      * @return mixed
      */
-    abstract public function endRootElement($name);
+    abstract public function endRootElement($name): string;
 
     /**
      * @param $ec
      * @param $msg
      * @return mixed
      */
-    abstract public function printError($ec, $msg);
+    abstract public function getError($ec, $msg): string;
 
-    private function printCacheHeaders($etag)
+    private function getCacheHeaders($etag): array
     {
-        header('ETag: "' . $etag . '"');
-        header('Cache-Control: max-age=15');
+        return ['ETag: "' . $etag . '"', 'Cache-Control: max-age=15'];
     }
 
     /**
@@ -282,4 +239,7 @@ abstract class Printer
     {
         return str_starts_with($elementkey, self::PRIVATE_VAR_PREFIX);
     }
+
+
+    public abstract function getHeaders(): array;
 }

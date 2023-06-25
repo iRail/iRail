@@ -18,10 +18,9 @@ class Json extends Printer
     private $arrayindices = [];
     private $currentarrayindex = -1;
 
-    public function printHeader()
+    public function getHeaders(): array
     {
-        header('Access-Control-Allow-Origin: *');
-        header('Content-Type: application/json;charset=UTF-8');
+        return ['Access-Control-Allow-Origin: *', 'Content-Type: application/json;charset=UTF-8'];
     }
 
     /**
@@ -29,11 +28,9 @@ class Json extends Printer
      * @param $msg
      * @return mixed|void
      */
-    public function printError($ec, $msg)
+    public function getError($ec, $msg): string
     {
-        $this->printHeader();
-        header("HTTP/1.1 $ec $msg");
-        echo "{\"error\":$ec,\"message\":\"$msg\"}";
+        return "{\"error\":$ec,\"message\":\"$msg\"}";
     }
 
     /**
@@ -42,40 +39,41 @@ class Json extends Printer
      * @param $timestamp
      * @return mixed|void
      */
-    public function startRootElement($name, $version, $timestamp)
+    public function startRootElement($name, $version, $timestamp): string
     {
         $this->rootname = $name;
-        echo "{\"version\":\"$version\",\"timestamp\":\"$timestamp\",";
+        return "{\"version\":\"$version\",\"timestamp\":\"$timestamp\",";
     }
 
     /**
-     * @param $name
-     * @param $number
+     * @param      $name
+     * @param      $number
      * @param bool $root
      * @return mixed|void
      */
-    public function startArray($name, $number, $root = false)
+    public function startArray($name, $number, $root = false): string
     {
+        $result = "";
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '"' . $name . "s\":{\"number\":\"$number\",";
+            $result .= '"' . $name . "s\":{\"number\":\"$number\",";
         }
 
-        echo "\"$name\":[";
+        $result .= "\"$name\":[";
 
         $this->currentarrayindex++;
         $this->stack[$this->currentarrayindex] = $name;
         $this->arrayindices[$this->currentarrayindex] = 0;
     }
 
-    public function nextArrayElement()
+    public function nextArrayElement(): string
     {
-        echo ',';
+        return ',';
         $this->arrayindices[$this->currentarrayindex]++;
     }
 
-    public function nextObjectElement()
+    public function nextObjectElement(): string
     {
-        echo ',';
+        return ',';
     }
 
     /**
@@ -83,28 +81,30 @@ class Json extends Printer
      * @param $object
      * @return mixed|void
      */
-    public function startObject($name, $object)
+    public function startObject($name, $object): string
     {
+        $result = "";
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name) {
-            echo '{';
+            $result .= '{';
             // Show id (in array) except if array of stations (compatibility issues)
             if ($name != 'station') {
-                echo '"id":"' . $this->arrayindices[$this->currentarrayindex] . '",';
+                $result .= '"id":"' . $this->arrayindices[$this->currentarrayindex] . '",';
             }
         } else {
             if ($this->rootname != 'StationsDatasource' && $name == 'station' || $name == 'platform') {
                 // split station and platform into station/platform and stationinfo/platforminfox,
                 // to be compatible with 1.0
-                echo "\"$name\":\"$object->name\",";
-                echo '"' . $name . 'info":{';
-            } elseif ($this->rootname != 'vehicle' && $name == 'vehicle') {
+                $result .= "\"$name\":\"$object->name\",";
+                $result .= '"' . $name . 'info":{';
+            } else if ($this->rootname != 'vehicle' && $name == 'vehicle') {
                 // split vehicle into vehicle and vehicleinfo to be compatible with 1.0
-                echo "\"$name\":\"$object->name\",";
-                echo '"' . $name . 'info":{';
+                $result .= "\"$name\":\"$object->name\",";
+                $result .= '"' . $name . 'info":{';
             } else {
-                echo "\"$name\":{";
+                $result .= "\"$name\":{";
             }
         }
+        return $result;
     }
 
     /**
@@ -112,54 +112,53 @@ class Json extends Printer
      * @param $val
      * @return mixed|void
      */
-    public function startKeyVal($key, $val)
+    public function startKeyVal($key, $val): string
     {
         $val = trim(json_encode($val), '"');
-        echo "\"$key\":\"$val\"";
+        return "\"$key\":\"$val\"";
     }
 
     /**
-     * @param $name
+     * @param      $name
      * @param bool $root
      * @return mixed|void
      */
-    public function endArray($name, $root = false)
+    public function endArray($name, $root = false): string
     {
         $this->stack[$this->currentarrayindex] = '';
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->currentarrayindex--;
 
         if ($root && $this->rootname != 'liveboard' && $this->rootname != 'vehicleinformation') {
-            echo ']';
+            return ']';
         } else {
-            echo ']}';
+            return ']}';
         }
     }
 
     /**
      * @param $name
      */
-    public function endObject($name)
+    public function endObject($name): string
     {
-        echo '}';
+        return '}';
     }
 
     /**
      * @param $name
      * @return mixed|void
      */
-    public function endElement($name)
+    public function endElement($name): string
     {
+        return "";
     }
 
     /**
      * @param $name
      * @return mixed|void
      */
-    public function endRootElement($name)
+    public function endRootElement($name) : string
     {
-        echo '}';
+        return '}';
     }
 }
-
-;

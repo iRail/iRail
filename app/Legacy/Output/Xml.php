@@ -37,10 +37,9 @@ class Xml extends Printer
     private $arrayindices = [];
     private $currentarrayindex = -1;
 
-    public function printHeader()
+    public function getHeaders(): array
     {
-        header('Access-Control-Allow-Origin: *');
-        header('Content-Type: application/xml;charset=UTF-8');
+        return ['Access-Control-Allow-Origin: *', 'Content-Type: application/xml;charset=UTF-8'];
     }
 
     /**
@@ -48,11 +47,9 @@ class Xml extends Printer
      * @param $msg
      * @return mixed|void
      */
-    public function printError($ec, $msg)
+    public function getError($ec, $msg): string
     {
-        $this->printHeader();
-        header("HTTP/1.1 $ec $msg");
-        echo "<error code=\"$ec\">$msg</error>";
+        return "<error code=\"$ec\">$msg</error>";
     }
 
     /**
@@ -61,26 +58,28 @@ class Xml extends Printer
      * @param $timestamp
      * @return mixed|void
      */
-    public function startRootElement($name, $version, $timestamp)
+    public function startRootElement($name, $version, $timestamp): string
     {
         $this->rootname = $name;
         echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
     }
 
-    public function startArray($name, $number, $root = false)
+    public function startArray($name, $number, $root = false): string
     {
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '<' . $name . "s number=\"$number\">";
+            $result = '<' . $name . "s number=\"$number\">";
         }
 
         $this->currentarrayindex++;
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->stack[$this->currentarrayindex] = $name;
+        return $result;
     }
 
-    public function nextArrayElement()
+    public function nextArrayElement(): string
     {
         $this->arrayindices[$this->currentarrayindex]++;
+        return "";
     }
 
     /**
@@ -88,13 +87,13 @@ class Xml extends Printer
      * @param $object
      * @return mixed|void
      */
-    public function startObject($name, $object)
+    public function startObject($name, $object): string
     {
-        // Test wether this object is a first-level array object
-        echo "<$name";
+        $result = "<$name";
 
+        // Test whether this object is a first-level array object
         if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name && $name != 'station') {
-            echo ' id="' . $this->arrayindices[$this->currentarrayindex] . '"';
+            $result .= ' id="' . $this->arrayindices[$this->currentarrayindex] . '"';
         }
 
         // fallback for attributes and name tag
@@ -109,17 +108,18 @@ class Xml extends Printer
                 if ($elementkey == 'normal' || $elementkey == 'canceled') {
                     $elementval = intval($elementval);
                 }
-                echo " $elementkey=\"$elementval\"";
-            } elseif ($elementkey == 'name') {
+                $result .= " $elementkey=\"$elementval\"";
+            } else if ($elementkey == 'name') {
                 $named = $elementval;
             }
         }
 
-        echo '>';
+        $result .= '>';
 
         if ($named != '') {
-            echo $named;
+            $result .= $named;
         }
+        return $result;
     }
 
     /**
@@ -127,57 +127,62 @@ class Xml extends Printer
      * @param $val
      * @return mixed|void
      */
-    public function startKeyVal($key, $val)
+    public function startKeyVal($key, $val): string
     {
+        $result = "";
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
-            echo "<$key formatted=\"$form\">$val";
-        } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
-            echo "<$key>";
+            $result .= "<$key formatted=\"$form\">$val";
+        } else if ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
+            $result .= "<$key>";
             if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link') {
                 echo "<![CDATA[";
             }
-            echo $val;
+            $result .= $val;
         }
+        return $result;
     }
 
     /**
      * @param $key
      * @return mixed|void
      */
-    public function endElement($key)
+    public function endElement($key): string
     {
-        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext'  || $key == 'link') {
-            echo ']]>';
+        $result = "";
+        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link') {
+            $result .= ']]>';
         }
 
         if (!in_array($key, $this->ATTRIBUTES) && $key != 'name') {
-            echo "</$key>";
+            $result .= "</$key>";
         }
+        return $result;
     }
 
     /**
-     * @param $name
+     * @param      $name
      * @param bool $root
      * @return mixed|void
      */
-    public function endArray($name, $root = false)
+    public function endArray($name, $root = false): string
     {
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
-            echo '</' . $name . 's>';
+            $result = '</' . $name . 's>';
         }
         $this->stack[$this->currentarrayindex] = '';
         $this->arrayindices[$this->currentarrayindex] = 0;
         $this->currentarrayindex--;
+        return $result;
     }
 
     /**
      * @param $name
      * @return mixed|void
      */
-    public function endRootElement($name)
+    public function endRootElement($name): string
     {
-        echo "</$name>";
+        return "</$name>";
     }
 
     /**
