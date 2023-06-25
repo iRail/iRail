@@ -24,6 +24,7 @@ class DepartureOrArrival
     private bool $isExtra;
 
     private ?string $uri;
+    private ?DepartureArrivalState $status;
 
     /**
      * @return StationInfo
@@ -235,5 +236,27 @@ class DepartureOrArrival
     {
 
     }
+
+    public function setStatus(?DepartureArrivalState $status)
+    {
+        $this->status = $status;
+    }
+
+    public function toResponseArray()
+    {
+        return [
+            'station'           => $this->station->toResponseArray(),
+            'platform'          => $this->platform->toResponseArray(),
+            'vehicle'           => $this->vehicle->toResponseArray(),
+            'scheduledDateTime' => $this->scheduledDateTime,
+            'realtimeDateTime'  => $this->scheduledDateTime->copy()->addSeconds($this->delay),
+            'canceled'          => $this->isCancelled,
+            'direction'         => $this->getDirection()?->toResponseArray(),
+            'headsign'          => $this->getHeadSign(),
+            'status'            => $this->status?->value,
+            'isExtraTrain'      => $this->isExtra
+        ];
+    }
+
 
 }

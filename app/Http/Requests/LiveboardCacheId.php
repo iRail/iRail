@@ -11,7 +11,7 @@ trait LiveboardCacheId
         return '|Liveboard|' . join('|', [
                 $this->getStationId(),
                 $this->getDateTime()->getTimestamp(),
-                $this->getDepartureArrivalMode(),
+                $this->getDepartureArrivalMode()->name,
                 $this->getLanguage()
             ]);
     }

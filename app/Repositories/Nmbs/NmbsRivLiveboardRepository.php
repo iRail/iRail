@@ -8,9 +8,11 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
+use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Occupancy;
 use Irail\Models\PlatformInfo;
@@ -32,7 +34,8 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         StationsRepository $stationsRepository,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor,
         NmbsRivRawDataRepository $rivDataRepository = null
-    ) {
+    )
+    {
         $this->stationsRepository = $stationsRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
         if ($rivDataRepository != null) {
@@ -70,7 +73,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         // Now we'll actually read the departures/arrivals information.
         $currentStation = $this->stationsRepository->getStationById($request->getStationId());
         if ($currentStation == null) {
-            throw new Exception("Failed to match station id {$request->getStationId()} with a known station",
+            throw new UnknownStopException("Failed to match station id {$request->getStationId()} with a known station",
                 500);
         }
         $decodedJsonData = json_decode($rawData, associative: true);
@@ -124,26 +127,35 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
 
         // The date of this departure
         $plannedDateTime = Carbon::createFromFormat('Y-m-d H:i:s',
-            $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture']
+            $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture'],
+            'Europe/Brussels'
         );
-        $unixtime = $plannedDateTime->getTimestamp();
 
         $delay = self::parseDelayInSeconds($stop, $isArrivalBoard ? 'ArrivalDelay' : 'DepartureDelay');
 
         // parse the scheduled time of arrival/departure and the vehicle (which is returned as a number to look up in the vehicle definitions list)
         // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
         // parse information about which platform this train will depart from/arrive to.
-        $platform = $stop['Platform'];
+        $platform = key_exists('Platform', $stop) ? $stop['Platform'] : '?';
         $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
 
         // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
         // DepartureCanceled gives information if this stop has been canceled.
         $stopCanceled = 0; // TODO: reverse-engineer and implement
-        $left = 0; // TODO: probably no longer supported
+
+        $status = null;
+        $statusmap = [
+            'aan perron' => DepartureArrivalState::HALTING,
+        ];
+        if (key_exists('DepartureStatusNl', $stop) && key_exists($stop['DepartureStatusNl'], $statusmap)) {
+            $status = $statusmap[$stop['DepartureStatusNl']];
+        }
 
         // using plannedDateTime as trip start date is not 100% correct here, but we don't have anything better. Might cause issues on trains crossing midnight.
         $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $plannedDateTime);
         $direction = $this->stationsRepository->getStationById('00' . $direction);
+        $headsign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
+            $stop['DestinationNl'] : $stop['OriginNl'];
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
 
         // Now all information has been parsed. Put it in a nice object.
@@ -152,12 +164,12 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setVehicle($vehicle);
         $stopAtStation->setScheduledDateTime($plannedDateTime);
         $stopAtStation->setDelay($delay);
-        $stopAtStation->setPlatform(new PlatformInfo(null, $platform, $isPlatformNormal));
+        $stopAtStation->setPlatform(new PlatformInfo($currentStation->getId(), $platform, $isPlatformNormal));
         $stopAtStation->setIsCancelled($stopCanceled);
-        $stopAtStation->setIsReported($left); // TODO: handle '"DepartureStatusNl": "aan perron",' as "halting"
+        $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
         $stopAtStation->setDirection($direction);
-
+        $stopAtStation->setHeadSign($headsign);
         $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
         return $stopAtStation;
     }

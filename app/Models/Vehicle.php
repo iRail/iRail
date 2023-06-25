@@ -72,4 +72,14 @@ class Vehicle
         return $this->type . $this->number;
     }
 
+    public function toResponseArray()
+    {
+        return [
+            'uri'    => $this->uri,
+            'id'     => $this->id,
+            'type'   => $this->type,
+            'number' => $this->number,
+        ];
+    }
+
 }

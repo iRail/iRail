@@ -4,24 +4,28 @@ namespace Irail\Repositories\Irail;
 
 use Exception;
 use InvalidArgumentException;
+use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Models\StationInfo;
 use irail\stations\Stations;
-use function Irail\Data\Nmbs\Repositories\str_starts_with;
 
 class StationsRepository
 {
     private string $lang = 'en';
 
+    /**
+     * @throws UnknownStopException
+     */
     public function getStationById(string $id): ?StationInfo
     {
         $station = Stations::getStationFromID($id);
         if ($station == null) {
-            throw new Exception("Could not match id '{$id}' with a station in iRail."
+            throw new UnknownStopException("Could not match id '{$id}' with a station in iRail."
                 . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
         return $this->graphStationToStationInfo($station);
     }
 
+    /** @noinspection PhpUnused Used through dependency injection*/
     public function findStationByName(string $name): ?StationInfo
     {
         // first check if it wasn't by any chance an id
@@ -88,8 +92,8 @@ class StationsRepository
     {
         $localName = $iRailGraphStation->{'name'};
         $translatedName = $localName;
-        if (isset($newstation->{'alternative'})) {
-            foreach ($newstation->{'alternative'} as $alternatives) {
+        if (isset($iRailGraphStation->{'alternative'})) {
+            foreach ($iRailGraphStation->{'alternative'} as $alternatives) {
                 if ($alternatives->{'@language'} == $this->lang) {
                     $translatedName = $alternatives->{'@value'};
                 }

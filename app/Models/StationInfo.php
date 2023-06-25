@@ -22,8 +22,8 @@ class StationInfo
      * @param float|null $longitude
      */
     public function __construct(string $id, string $uri,
-                                string $stationName, string $localizedStationName,
-                                ?float $longitude = null, ?float $latitude = null)
+        string $stationName, string $localizedStationName,
+        ?float $longitude = null, ?float $latitude = null)
     {
         $this->id = $id;
         $this->uri = $uri;
@@ -79,6 +79,18 @@ class StationInfo
     public function getLongitude(): ?float
     {
         return $this->longitude;
+    }
+
+    public function toResponseArray()
+    {
+        return [
+            'id'            => $this->id,
+            'uri'           => $this->uri,
+            'name'          => $this->stationName,
+            'localizedName' => $this->localizedStationName,
+            'latitude'      => $this->latitude,
+            'longitude'     => $this->longitude
+        ];
     }
 
 

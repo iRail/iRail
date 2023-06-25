@@ -3,7 +3,7 @@
 namespace Tests\Repositories\Nmbs;
 
 use DateTime;
-use Irail\Http\Requests\LiveboardRequestImpl;
+use Irail\Http\Requests\LiveboardRequestImplIrail;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Http\Requests\VehicleJourneyRequestImpl;
 use Irail\Repositories\Irail\StationsRepository;
@@ -17,7 +17,7 @@ class RawDataRepositoryIntegrationTest extends TestCase
     {
         $repo = new NmbsRivRawDataRepository(new StationsRepository());
         $liveboardData = (string)$repo->getLiveboardData(
-            new LiveboardRequestImpl('008814001',
+            new LiveboardRequestImplIrail('008814001',
                 TimeSelection::DEPARTURE,
                 'nl',
                 new DateTime()))->getValue();

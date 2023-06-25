@@ -3,32 +3,27 @@
 namespace Irail\Http\Requests;
 
 use DateTime;
+use Irail\Exceptions\Request\InvalidRequestException;
 
-class LiveboardRequestImpl implements LiveboardRequest
+class LiveboardRequestImpl extends IrailHttpRequest implements LiveboardRequest
 {
     use LiveboardCacheId;
 
-    private string $language;
     private TimeSelection $departureArrivalMode;
     private DateTime $dateTime;
     private string $stationId;
 
-    /**
-     * @param string        $stationId
-     * @param TimeSelection $departureArrivalMode
-     * @param string        $language
-     * @param DateTime      $dateTime
-     */
-    public function __construct(string $stationId, TimeSelection $departureArrivalMode, string $language, DateTime $dateTime)
+    public function __construct()
     {
-        $this->language = $language;
-        $this->departureArrivalMode = $departureArrivalMode;
-        $this->dateTime = $dateTime;
-        $this->stationId = $stationId;
+        parent::__construct();
+        $this->stationId = $this->parseStationId('id', $this->routeOrGet('id'));
+        $this->dateTime = $this->parseDateTime($this->get('datetime'));
+        $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep'));
     }
 
     /**
      * @return string
+     * @throws InvalidRequestException
      */
     public function getStationId(): string
     {
@@ -51,8 +46,5 @@ class LiveboardRequestImpl implements LiveboardRequest
         return $this->departureArrivalMode;
     }
 
-    public function getLanguage(): string
-    {
-        return $this->language;
-    }
+
 }

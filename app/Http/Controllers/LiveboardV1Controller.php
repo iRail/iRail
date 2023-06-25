@@ -4,8 +4,9 @@ namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Irail\Http\Requests\LiveboardRequest;
+use Irail\Repositories\LiveboardRepository;
 
-class LiveboardController extends Controller
+class LiveboardV1Controller extends IrailController
 {
     /**
      * Create a new controller instance.
@@ -19,6 +20,9 @@ class LiveboardController extends Controller
 
     public function getLiveboardById(LiveboardRequest $request): Response
     {
-
+        $repo = app(LiveboardRepository::class);
+        $liveboardSearchResult = $repo->getLiveboard($request);
+        return $this->outputV1($request, $liveboardSearchResult);
     }
+
 }

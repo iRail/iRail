@@ -41,5 +41,12 @@ class LiveboardSearchResult
         return $this->stops;
     }
 
+    public function toResponseArray(): array
+    {
+        return [
+            'station' => $this->getStation()->toResponseArray(),
+            'stops'   => array_map(fn($obj) => $obj->toResponseArray(), $this->getStops())
+        ];
+    }
 
 }

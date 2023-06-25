@@ -44,4 +44,12 @@ class PlatformInfo
         return $this->hasChanged;
     }
 
+    public function toResponseArray()
+    {
+        return [
+            'designation' => $this->getDesignation(),
+            'hasChanged'  => $this->hasChanged(),
+        ];
+    }
+
 }

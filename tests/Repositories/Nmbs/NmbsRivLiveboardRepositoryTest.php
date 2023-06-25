@@ -3,7 +3,7 @@
 namespace Tests\Repositories\Nmbs;
 
 use Carbon\Carbon;
-use Irail\Http\Requests\LiveboardRequestImpl;
+use Irail\Http\Requests\LiveboardRequestImplIrail;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
@@ -22,7 +22,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
         $liveboardRepo = new NmbsRivLiveboardRepository($stationsRepo, $gtfsStartEndExtractor, $rivRepo);
 
-        $request = new LiveboardRequestImpl('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::createMidnightDate(2022, 12, 11));
+        $request = new LiveboardRequestImplIrail('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::createMidnightDate(2022, 12, 11));
         $rivRepo->shouldReceive('getLiveboardData')
             ->with($request)
             ->atLeast()
