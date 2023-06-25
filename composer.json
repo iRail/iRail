@@ -6,12 +6,13 @@
     "type": "project",
     "require": {
         "php": "^8.2",
-        "laravel/lumen-framework": "^9.0",
+        "laravel/lumen-framework": "^10.0",
         "irail/stations": "^1.6.10",
         "ext-curl": "*",
         "ext-tidy": "*",
         "ext-simplexml": "*",
-        "ext-libxml": "*"
+        "ext-libxml": "*",
+        "ext-http": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.20",
