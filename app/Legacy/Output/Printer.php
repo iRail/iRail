@@ -37,10 +37,6 @@ abstract class Printer
                 return new Xml($dataroot);
             case "Json":
                 return new Json($dataroot);
-            case "Kml":
-                return new Kml($dataroot);
-            case "Jsonp":
-                return new Jsonp($dataroot);
         }
         throw new Exception('Incorrect format specified. Please correct this and try again', 402);
     }
@@ -61,6 +57,8 @@ abstract class Printer
     public function getBody(): string
     {
         $result = "";
+        // Only create this hash once
+        $this->hash = get_object_vars($this->documentRoot);
         //so that people would know that we have a child of the rootelement
         $this->root = true;
         $result .= $this->startRootElement(

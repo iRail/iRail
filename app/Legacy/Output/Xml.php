@@ -4,6 +4,8 @@
 
 namespace Irail\Legacy\Output;
 
+use Illuminate\Support\Carbon;
+
 /**
  * Prints the Xml style output.
  */
@@ -39,7 +41,7 @@ class Xml extends Printer
 
     public function getHeaders(): array
     {
-        return ['Access-Control-Allow-Origin: *', 'Content-Type: application/xml;charset=UTF-8'];
+        return ['Access-Control-Allow-Origin' => '*', 'Content-Type' => 'application/xml;charset=UTF-8'];
     }
 
     /**
@@ -61,7 +63,7 @@ class Xml extends Printer
     public function startRootElement($name, $version, $timestamp): string
     {
         $this->rootname = $name;
-        echo "<$name version=\"$version\" timestamp=\"$timestamp\">";
+        return "<$name version=\"$version\" timestamp=\"$timestamp\">";
     }
 
     public function startArray($name, $number, $root = false): string
@@ -191,7 +193,7 @@ class Xml extends Printer
      */
     public function iso8601($unixtime)
     {
-        return date("Y-m-d\TH:i:s", $unixtime);
+        return Carbon::createFromTimestamp($unixtime)->timezone('Europe/Brussels')->format("Y-m-d\TH:i:s");
     }
 }
 

@@ -20,7 +20,7 @@ class Json extends Printer
 
     public function getHeaders(): array
     {
-        return ['Access-Control-Allow-Origin: *', 'Content-Type: application/json;charset=UTF-8'];
+        return ['Access-Control-Allow-Origin' => '*', 'Content-Type' => 'application/json;charset=UTF-8'];
     }
 
     /**
@@ -157,7 +157,7 @@ class Json extends Printer
      * @param $name
      * @return mixed|void
      */
-    public function endRootElement($name) : string
+    public function endRootElement($name): string
     {
         return '}';
     }
