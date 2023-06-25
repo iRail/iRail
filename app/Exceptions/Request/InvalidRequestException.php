@@ -2,7 +2,9 @@
 
 namespace Irail\Exceptions\Request;
 
-class InvalidRequestException
+use Exception;
+
+class InvalidRequestException extends Exception
 {
 
 }
