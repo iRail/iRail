@@ -19,6 +19,7 @@ use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
+use Irail\Models\VehicleDirection;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
@@ -168,8 +169,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setDirection($direction);
-        $stopAtStation->setHeadSign($headsign);
+        $stopAtStation->setDirection(new VehicleDirection($headsign, $direction));
         $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
         return $stopAtStation;
     }

@@ -17,8 +17,7 @@ class DepartureOrArrival
     private int $delay;
     private bool $isCancelled;
 
-    private string $headSign;
-    private StationInfo $direction;
+    private VehicleDirection $direction;
 
     private bool $isReported;
     private bool $isExtra;
@@ -131,28 +130,11 @@ class DepartureOrArrival
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getHeadSign(): string
-    {
-        return $this->headSign;
-    }
-
-    /**
-     * @param string $headSign
-     * @return DepartureOrArrival
-     */
-    public function setHeadSign(string $headSign): DepartureOrArrival
-    {
-        $this->headSign = $headSign;
-        return $this;
-    }
 
     /**
      * @return StationInfo
      */
-    public function getDirection(): StationInfo
+    public function getDirection(): VehicleDirection
     {
         return $this->direction;
     }
@@ -161,7 +143,7 @@ class DepartureOrArrival
      * @param StationInfo $direction
      * @return DepartureOrArrival
      */
-    public function setDirection(StationInfo $direction): DepartureOrArrival
+    public function setDirection(VehicleDirection $direction): DepartureOrArrival
     {
         $this->direction = $direction;
         return $this;
@@ -246,22 +228,5 @@ class DepartureOrArrival
     {
         return $this->status;
     }
-
-    public function toResponseArray()
-    {
-        return [
-            'station'           => $this->station->toResponseArray(),
-            'platform'          => $this->platform->toResponseArray(),
-            'vehicle'           => $this->vehicle->toResponseArray(),
-            'scheduledDateTime' => $this->scheduledDateTime,
-            'realtimeDateTime'  => $this->scheduledDateTime->copy()->addSeconds($this->delay),
-            'canceled'          => $this->isCancelled,
-            'direction'         => $this->getDirection()?->toResponseArray(),
-            'headsign'          => $this->getHeadSign(),
-            'status'            => $this->status?->value,
-            'isExtraTrain'      => $this->isExtra
-        ];
-    }
-
 
 }

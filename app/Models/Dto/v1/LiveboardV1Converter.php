@@ -11,7 +11,7 @@ use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
 use stdClass;
 
-class LiveboardV1Converter
+class LiveboardV1Converter extends V1Converter
 {
 
     /**
@@ -31,18 +31,6 @@ class LiveboardV1Converter
         return $result;
     }
 
-    private static function convertStation(StationInfo $station): StdClass
-    {
-        $obj = new StdClass();
-        $obj->locationX = $station->getLongitude();
-        $obj->locationY = $station->getLatitude();
-        $obj->id = 'BE.NMBS.' . $station->getId();
-        $obj->{'@id'} = $station->getUri();
-        $obj->standardname = $station->getStationName();
-        $obj->name = $station->getLocalizedStationName();
-        return $obj;
-    }
-
     private static function convertDeparture(DepartureOrArrival $departure)
     {
         $result = new StdClass();
@@ -60,27 +48,17 @@ class LiveboardV1Converter
 
     private static function convertArrival(DepartureOrArrival $arrival)
     {
-
-    }
-
-    private static function convertPlatform(?\Irail\Models\PlatformInfo $platform)
-    {
         $result = new StdClass();
-        $result->name = $platform->getDesignation();
-        $result->normal = $platform->hasChanged() ? '0' : '1';
+        $result->station = self::convertStation($arrival->getDirection());
+        $result->time = $arrival->getScheduledDateTime()->getTimestamp();
+        $result->delay = $arrival->getDelay();
+        $result->canceled = $arrival->isCancelled() ? '1' : '0';
+        $result->arrived = $arrival->getStatus() == DepartureArrivalState::LEFT  ?'1' : '0';;
+        $result->isExtra = $arrival->isExtra() ? '1' : '0';;
+        $result->vehicle = self::convertVehicle($arrival->getVehicle());
+        $result->platform = self::convertPlatform($arrival->getPlatform());
+        $result->departureConnection = $arrival->getDepartureUri();
         return $result;
     }
 
-    private static function convertVehicle(\Irail\Models\Vehicle $vehicle)
-    {
-        $result = new StdClass();
-        $result->name = 'BE.NMBS.' . $vehicle->getName();
-        $result->shortname = $vehicle->getName();
-        $result->number = $vehicle->getNumber();
-        $result->type = $vehicle->getType();
-        $result->locationX = '0';
-        $result->locationY = '0';
-        $result->{'@id'} = $vehicle->getUri();
-        return $result;
-    }
 }

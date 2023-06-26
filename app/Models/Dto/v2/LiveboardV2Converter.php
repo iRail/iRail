@@ -5,7 +5,7 @@ namespace Irail\Models\Dto\v2;
 use Irail\Http\Requests\IrailHttpRequest;
 use Irail\Models\Result\LiveboardSearchResult;
 
-class LiveboardV2Converter
+class LiveboardV2Converter extends V2Converter
 {
 
     /**
@@ -13,8 +13,11 @@ class LiveboardV2Converter
      * @param LiveboardSearchResult $result
      */
     public static function convert(IrailHttpRequest $request,
-        LiveboardSearchResult $result) : array
+        LiveboardSearchResult $result): array
     {
-        return (array) $result;
+        return [
+            'station' => self::convertStation($result->getStation()),
+            'stops'   => array_map(fn($obj) => self::convertDepartureOrArrival($obj), $result->getStops())
+        ];
     }
 }

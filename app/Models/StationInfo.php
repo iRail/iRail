@@ -81,17 +81,4 @@ class StationInfo
         return $this->longitude;
     }
 
-    public function toResponseArray()
-    {
-        return [
-            'id'            => $this->id,
-            'uri'           => $this->uri,
-            'name'          => $this->stationName,
-            'localizedName' => $this->localizedStationName,
-            'latitude'      => $this->latitude,
-            'longitude'     => $this->longitude
-        ];
-    }
-
-
 }

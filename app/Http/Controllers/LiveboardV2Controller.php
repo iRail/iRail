@@ -23,7 +23,7 @@ class LiveboardV2Controller extends IrailController
     {
         $repo = app(LiveboardRepository::class);
         $liveboardSearchResult = $repo->getLiveboard($request);
-        $dto = $liveboardSearchResult->toResponseArray();
+        $dto = LiveboardV2Converter::convert($request, $liveboardSearchResult);
         return $this->outputJson($request, $dto);
     }
 

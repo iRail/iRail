@@ -7,6 +7,12 @@ class VehicleDirection
     private ?StationInfo $station;
     private string $name;
 
+    public function __construct(string $name, ?StationInfo $station)
+    {
+        $this->name = $name;
+        $this->station = $station;
+    }
+
     /**
      * @return StationInfo|null
      */
