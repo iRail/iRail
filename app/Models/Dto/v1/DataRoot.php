@@ -27,7 +27,7 @@ class DataRoot
     public function __construct($rootName)
     {
         $this->rootName = $rootName;
-        $this->version = '1.0';
+        $this->version = '1.3';
         $this->timestamp = date('U');
     }
 

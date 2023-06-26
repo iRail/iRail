@@ -15,9 +15,33 @@ class Journey
     private array $notes;
 
     /**
-     * @var array ServiceAlertNote[]
+     * @var ServiceAlertNote[]
      */
     private array $serviceAlerts;
+
+    /**
+     * @return JourneyLeg[]
+     */
+    public function getLegs(): array
+    {
+        return $this->legs;
+    }
+
+    /**
+     * @return DepartureOrArrival
+     */
+    public function getDeparture()
+    {
+        return $this->legs[0]->getDeparture();
+    }
+
+    /**
+     * @return DepartureOrArrival
+     */
+    public function getArrival()
+    {
+        return end($this->legs)->getArrival();
+    }
 
     public function setLegs(array $trainsInConnection)
     {
@@ -28,6 +52,13 @@ class Journey
     {
         return $this->legs[0]->getDeparture()->getRealtimeDateTime()
             ->diffInSeconds(end($this->legs)->getArrival()->getRealtimeDateTime());
+    }
+
+    /**
+     * @return Note[]
+     */
+    public function getNotes():array{
+        return $this->notes;
     }
 
     public function setNotes(array $notes)

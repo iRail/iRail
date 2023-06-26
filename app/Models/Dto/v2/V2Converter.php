@@ -17,7 +17,7 @@ class V2Converter
             'platform'          => self::convertPlatform($obj->getPlatform()),
             'vehicle'           => self::convertVehicle($obj->getVehicle()),
             'scheduledDateTime' => $obj->getScheduledDateTime(),
-            'realtimeDateTime'  => $obj->getScheduledDateTime()->copy()->addSeconds($obj->getDelay()),
+            'realtimeDateTime'  => $obj->getRealtimeDateTime(),
             'canceled'          => $obj->isCancelled(),
             'direction'         => self::convertVehicleDirection($obj->getDirection()),
             'status'            => $obj->getStatus()?->value,

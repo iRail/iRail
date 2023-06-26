@@ -4,7 +4,7 @@ namespace Irail\Http\Requests;
 
 use DateTime;
 
-class JourneyPlanningRequestImpl implements JourneyPlanningRequest
+class JourneyPlanningV2RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest
 {
     use ConnectionsCacheId;
 
@@ -13,7 +13,6 @@ class JourneyPlanningRequestImpl implements JourneyPlanningRequest
     private DateTime $dateTime;
     private TimeSelection $timeSelection;
     private TypeOfTransportFilter $typesOfTransport;
-    private string $language;
 
     /**
      * @param string                $originStationId
@@ -23,18 +22,14 @@ class JourneyPlanningRequestImpl implements JourneyPlanningRequest
      * @param TypeOfTransportFilter $typesOfTransport
      * @param string                $language
      */
-    public function __construct(string $originStationId, string $destinationStationId,
-        DateTime $dateTime = new DateTime(),
-        TimeSelection $timeSelection = TimeSelection::DEPARTURE,
-        TypeOfTransportFilter $typesOfTransport = TypeOfTransportFilter::AUTOMATIC,
-        string $language = 'en')
+    public function __construct()
     {
-        $this->originStationId = $originStationId;
-        $this->destinationStationId = $destinationStationId;
-        $this->dateTime = $dateTime;
-        $this->timeSelection = $timeSelection;
-        $this->typesOfTransport = $typesOfTransport;
-        $this->language = $language;
+        parent::__construct();
+        $this->originStationId = $this->parseStationId('from', $this->routeOrGet('from'));
+        $this->destinationStationId = $this->parseStationId('to', $this->routeOrGet('to'));;
+        $this->dateTime = $this->parseDateTime($this->get('datetime'));
+        $this->timeSelection = $this->routeOrGet('arrdep') ? $this->parseDepartureArrival($this->routeOrGet('arrdep')) : TimeSelection::DEPARTURE;
+        $this->typesOfTransport = TypeOfTransportFilter::AUTOMATIC; // $this->routeOrGet('typeOfTransport'); // TODO: implement
     }
 
 
@@ -61,10 +56,5 @@ class JourneyPlanningRequestImpl implements JourneyPlanningRequest
     function getTypesOfTransport(): TypeOfTransportFilter
     {
         return $this->typesOfTransport;
-    }
-
-    function getLanguage(): string
-    {
-        return $this->language;
     }
 }

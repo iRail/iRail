@@ -12,8 +12,8 @@ trait ConnectionsCacheId
                 $this->getOriginStationId(),
                 $this->getDestinationStationId(),
                 $this->getDateTime()->getTimestamp(),
-                $this->getTimeSelection(),
-                $this->getTypesOfTransport(),
+                $this->getTimeSelection()->name,
+                $this->getTypesOfTransport()->name,
                 $this->getLanguage()
             ]);
     }

@@ -10,7 +10,7 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
-use Irail\Repositories\Irail\StationsDatasource;
+use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Irail\Traits\StdClass;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
 
@@ -262,14 +262,14 @@ trait BasedOnHafas
     {
         if (key_exists($realTimeFieldName, $data)) {
             // Realtime correction exists
-            return new PlatformInfo(null, $data[$realTimeFieldName], false);
+            return new PlatformInfo(null, $data[$realTimeFieldName], true);
         } else {
             if (key_exists($scheduledFieldName, $data)) {
                 // Only scheduled data exists
-                return new PlatformInfo(null, $data[$scheduledFieldName], true);
+                return new PlatformInfo(null, $data[$scheduledFieldName], false);
             } else {
                 // No data
-                return new PlatformInfo(null, '?', true);
+                return new PlatformInfo(null, '?', false);
             }
         }
     }
@@ -294,13 +294,14 @@ trait BasedOnHafas
      * @throws InternalProcessingException
      * @throws UnknownStopException
      */
-    private function parseHafasIntermediateStop($lang, $rawIntermediateStop, Vehicle $vehicle): DepartureAndArrival
+    private function parseHafasIntermediateStop(
+        StationsRepository $stationsRepository,
+        array $rawIntermediateStop,
+        Vehicle $vehicle
+    ): DepartureAndArrival
     {
         $intermediateStop = new DepartureAndArrival();
-        $station = StationsDatasource::getStationFromID(
-            $rawIntermediateStop['extId'],
-            $lang
-        );
+        $station = $stationsRepository->getStationByHafasId($rawIntermediateStop['extId']);
 
         if (key_exists('arrTime', $rawIntermediateStop)) {
             $arrival = new DepartureOrArrival();
@@ -316,10 +317,10 @@ trait BasedOnHafas
             }
             if (key_exists('rtArrTime', $rawIntermediateStop)) {
                 $arrival->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
-                    $rawIntermediateStop['rtArrTime'],
-                    $rawIntermediateStop['rtArrDate'],
+                    $rawIntermediateStop['arrDate'],
                     $rawIntermediateStop['arrTime'],
-                    $rawIntermediateStop['arrDate']
+                    $rawIntermediateStop['rtArrDate'],
+                    $rawIntermediateStop['rtArrTime']
                 ));
             }
             $arrival->setIsCancelled(key_exists('cancelledArrival', $rawIntermediateStop));
@@ -341,10 +342,10 @@ trait BasedOnHafas
             }
             if (key_exists('rtArrTime', $rawIntermediateStop)) {
                 $departure->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
-                    $rawIntermediateStop['rtArrTime'],
-                    $rawIntermediateStop['rtArrDate'],
+                    $rawIntermediateStop['depDate'],
                     $rawIntermediateStop['depTime'],
-                    $rawIntermediateStop['depDate']
+                    $rawIntermediateStop['rtDepDate'],
+                    $rawIntermediateStop['rtDepTime']
                 ));
             }
             $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));

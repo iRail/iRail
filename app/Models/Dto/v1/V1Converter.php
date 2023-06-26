@@ -14,9 +14,9 @@ abstract class V1Converter
         $obj->locationX = $station->getLongitude();
         $obj->locationY = $station->getLatitude();
         $obj->id = 'BE.NMBS.' . $station->getId();
+        $obj->name = $station->getLocalizedStationName();
         $obj->{'@id'} = $station->getUri();
         $obj->standardname = $station->getStationName();
-        $obj->name = $station->getLocalizedStationName();
         return $obj;
     }
 

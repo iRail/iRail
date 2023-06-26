@@ -12,7 +12,6 @@ namespace Irail\Http\Requests;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
-use http\Env\Request;
 use Illuminate\Http\Request as LumenRequest;
 use Irail\Exceptions\Request\InvalidRequestException;
 use Irail\Repositories\Irail\StationsRepository;
@@ -24,7 +23,7 @@ abstract class IrailHttpRequest extends LumenRequest
 
     private string $responseFormat = 'xml';
     private string $language = 'nl';
-    private $_request;
+    protected $_request;
 
     /**
      * @throws InvalidRequestException

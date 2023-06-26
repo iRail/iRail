@@ -14,16 +14,16 @@ class DepartureOrArrival
 
     private ?PlatformInfo $platform;
     private Carbon $scheduledDateTime;
-    private int $delay;
-    private bool $isCancelled;
+    private int $delay = 0;
+    private bool $isCancelled = false;
 
     private VehicleDirection $direction;
 
-    private bool $isReported;
-    private bool $isExtra;
+    private bool $isReported = false;
+    private bool $isExtra = false;
 
-    private ?string $uri;
-    private ?DepartureArrivalState $status;
+    private ?string $uri = null;
+    private ?DepartureArrivalState $status = null;
 
     /**
      * @return StationInfo
@@ -132,7 +132,7 @@ class DepartureOrArrival
 
 
     /**
-     * @return StationInfo
+     * @return VehicleDirection
      */
     public function getDirection(): VehicleDirection
     {

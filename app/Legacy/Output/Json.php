@@ -63,6 +63,7 @@ class Json extends Printer
         $this->currentarrayindex++;
         $this->stack[$this->currentarrayindex] = $name;
         $this->arrayindices[$this->currentarrayindex] = 0;
+        return $result;
     }
 
     public function nextArrayElement(): string

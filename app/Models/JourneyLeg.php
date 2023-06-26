@@ -20,6 +20,12 @@ class JourneyLeg
      */
     private array $alerts = [];
 
+    public function __construct(DepartureOrArrival $departure, DepartureOrArrival $arrival)
+    {
+        $this->departure = $departure;
+        $this->arrival = $arrival;
+    }
+
     /**
      * @return DepartureOrArrival
      */
@@ -91,6 +97,8 @@ class JourneyLeg
     public function setVehicle(?Vehicle $vehicle): void
     {
         $this->vehicle = $vehicle;
+        $this->departure->setVehicle($vehicle);
+        $this->arrival->setVehicle($vehicle);
     }
 
     /**

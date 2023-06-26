@@ -24,9 +24,6 @@ class IrailController extends BaseController
 
     protected function outputV1(IrailHttpRequest $request, $result)
     {
-        if ($result instanceof LiveboardSearchResult) {
-            $result = LiveboardV1Converter::convert($request, $result);
-        }
         $printer = Printer::getPrinterInstance($request->getResponseFormat(), $result);
         try {
             return response($printer->getBody(), 200, $printer->getHeaders());

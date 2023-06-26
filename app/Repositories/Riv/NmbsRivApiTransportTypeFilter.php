@@ -3,7 +3,6 @@
 namespace Irail\Repositories\Riv;
 
 use Irail\Http\Requests\TypeOfTransportFilter;
-use function Irail\Data\Nmbs\Repositories\Riv\str_starts_with;
 
 enum NmbsRivApiTransportTypeFilter: int
 {

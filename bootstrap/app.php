@@ -1,9 +1,13 @@
 <?php
 
+use Irail\Http\Requests\JourneyPlanningRequest;
+use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
+use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
 use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
@@ -77,6 +81,10 @@ $app->singleton(
     NmbsRivLiveboardRepository::class
 );
 
+$app->singleton(
+    JourneyPlanningRepository::class,
+    NmbsRivJourneyPlanningRepository::class
+);
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

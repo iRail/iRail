@@ -23,7 +23,6 @@ use Irail\Models\JourneyLegType;
 use Irail\Models\Result\JourneyPlanningSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
-use Irail\Repositories\Irail\StationsDatasource;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
@@ -88,7 +87,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
      */
     private function parseHafasTrip(
         JourneyPlanningRequest $request,
-        array                  $trip
+        array $trip
     ): Journey
     {
         $connection = new Journey();
@@ -111,13 +110,13 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
     /**
      * Parse all train objects in a connection (route/trip).
-     * @param array $trip The connection object for which trains should be parsed.
+     * @param array  $trip The connection object for which trains should be parsed.
      * @param string $lang The language for station names etc.
      * @return JourneyLeg[] All trains in this connection.
      * @throws Exception
      */
     private function parseTripLegs(
-        array  $trip,
+        array $trip,
         string $lang
     ): array
     {
@@ -148,14 +147,13 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         array $leg,
         array $trip,
         string $lang
-    ): JourneyLeg {
-        $parsedLeg = new JourneyLeg();
-
+    ): JourneyLeg
+    {
         $legStart = $leg['Origin'];
         $legEnd = $leg['Destination'];
 
-        $departure = $this->parseConnectionLegEnd($legStart, $lang);
-        $arrival = $this->parseConnectionLegEnd($legEnd, $lang);
+        $departure = $this->parseConnectionLegEnd($legStart);
+        $arrival = $this->parseConnectionLegEnd($legEnd);
 
         if (key_exists('journeyStatus', $leg)) {
             // JourneyStatus:
@@ -167,15 +165,15 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $arrival->setIsExtra($departure->isExtra());
         }
         // check if the departure has been reported
-        if (self::hasDepartureOrArrivalBeenReported($legStart)) {
-            $departure->setIsReported(true);
-        }
+        $departure->setIsReported(self::hasDepartureOrArrivalBeenReported($legStart));
 
         // check if the arrival has been reported
         if (self::hasDepartureOrArrivalBeenReported($legEnd)) {
             $arrival->setIsReported(true);
             // A train can only arrive if it left first in the previous station
             $departure->setIsReported(true);
+        } else {
+            $arrival->setIsReported(false);
         }
 
         if (key_exists('cancelled', $legStart)) {
@@ -186,14 +184,18 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $arrival->setIsCancelled($legEnd['cancelled'] == true); // TODO: verify this
         }
 
-        $parsedLeg->setDeparture($departure);
-        $parsedLeg->setArrival($arrival);
-
+        // Handle directions such as "Gand-Saint-Pierre / Gent-Sint-Pieters & Poperinge" correctly by taking the last station
+        $directionStationNames = explode('&',$leg['direction']);
+        $direction = new VehicleDirection($leg['direction'], $this->stationsRepository->findStationByName(end($directionStationNames)));
+        $departure->setDirection($direction);
+        $arrival->setDirection($direction);
+        $parsedLeg = new JourneyLeg($departure, $arrival);
         $parsedLeg->setAlerts($this->parseAlerts($leg));
 
         if ($leg['type'] == 'WALK') {
             // If the type is walking, there is no direction.
             $parsedLeg->setLegType(JourneyLegType::WALKING);
+            $parsedLeg->setVehicle(null);
         } else {
             $parsedLeg->setLegType(JourneyLegType::JOURNEY);
 
@@ -202,17 +204,16 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $intermediateStops = $this->parseIntermediateStops($trip, $leg, $lang, $vehicle);
             $parsedLeg->setIntermediateStops($intermediateStops);
 
-            $direction = new VehicleDirection();
             if (key_exists('direction', $leg)) {
                 // Get the direction from the API
-                $direction->setName($leg['direction']);
+                $directionName = $leg['direction'];
             } else {
                 // If we can't load the direction from the data (direction is missing),
                 // fill in the gap by using the furthest stop we know on this trains route.
                 // This typically is the stop where the user leaves this train
-                $direction->setName(end($intermediateStops)->getStation()->getStationName());
+                $directionName = end($intermediateStops)->getStation()->getStationName();
             }
-            $parsedLeg->setDirection($direction);
+            $parsedLeg->setDirection(new VehicleDirection($directionName, $this->stationsRepository->findStationByName($directionName)));
         }
         return $parsedLeg;
     }
@@ -233,9 +234,11 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
         $parsedIntermediateStops = [];
         $hafasIntermediateStops = $leg['Stops']['Stop']; // Yes this is correct, the arrays are weird in the source data
-        foreach ($hafasIntermediateStops as $hafasIntermediateStop) {
+        // The first and last stop are not intermediate stops, skip them
+        for ($i = 1; $i < count($hafasIntermediateStops) - 1; $i++) {
+            $hafasIntermediateStop = $hafasIntermediateStops[$i];
             $intermediateStop = $this->parseHafasIntermediateStop(
-                $lang,
+                $this->stationsRepository,
                 $hafasIntermediateStop,
                 $vehicle
             );
@@ -281,17 +284,15 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
 
     /**
-     * @param mixed  $legStartOrEnd
-     * @param string $lang
+     * @param mixed $legStartOrEnd
      * @return DepartureOrArrival
      * @throws InternalProcessingException|UnknownStopException
      */
-    public function parseConnectionLegEnd(array $legStartOrEnd, string $lang): DepartureOrArrival
+    public function parseConnectionLegEnd(array $legStartOrEnd): DepartureOrArrival
     {
         $departureOrArrival = new DepartureOrArrival();
-        $departureOrArrival->setStation(StationsDatasource::getStationFromID(
-            $legStartOrEnd['extId'],
-            $lang
+        $departureOrArrival->setStation($this->stationsRepository->getStationByHafasId(
+            $legStartOrEnd['extId']
         ));
         $departureOrArrival->setScheduledDateTime($this->parseDateAndTime(
             $legStartOrEnd['date'],

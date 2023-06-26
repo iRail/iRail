@@ -2,7 +2,6 @@
 
 namespace Irail\Repositories\Irail;
 
-use Exception;
 use InvalidArgumentException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Models\StationInfo;
@@ -25,7 +24,12 @@ class StationsRepository
         return $this->graphStationToStationInfo($station);
     }
 
-    /** @noinspection PhpUnused Used through dependency injection*/
+    public function getStationByHafasId(string $id): ?StationInfo
+    {
+        return $this->getStationById('00' . $id);
+    }
+
+    /** @noinspection PhpUnused Used through dependency injection */
     public function findStationByName(string $name): ?StationInfo
     {
         // first check if it wasn't by any chance an id
@@ -42,8 +46,7 @@ class StationsRepository
 
         $stationsgraph = Stations::getStations($name);
         if (!isset($stationsgraph->{'@graph'}[0])) {
-            throw new Exception("Could not match '{$name}' with a station id in iRail."
-                . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
+            return null;
         }
         $bestMatch = $stationsgraph->{'@graph'}[0];
 

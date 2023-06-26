@@ -34,7 +34,7 @@ class LiveboardV1Converter extends V1Converter
     private static function convertDeparture(DepartureOrArrival $departure)
     {
         $result = new StdClass();
-        $result->station = self::convertStation($departure->getDirection());
+        $result->station = self::convertStation($departure->getStation());
         $result->time = $departure->getScheduledDateTime()->getTimestamp();
         $result->delay = $departure->getDelay();
         $result->canceled = $departure->isCancelled() ? '1' : '0';
@@ -49,7 +49,7 @@ class LiveboardV1Converter extends V1Converter
     private static function convertArrival(DepartureOrArrival $arrival)
     {
         $result = new StdClass();
-        $result->station = self::convertStation($arrival->getDirection());
+        $result->station = self::convertStation($arrival->getStation());
         $result->time = $arrival->getScheduledDateTime()->getTimestamp();
         $result->delay = $arrival->getDelay();
         $result->canceled = $arrival->isCancelled() ? '1' : '0';

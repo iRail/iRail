@@ -7,7 +7,6 @@ use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Models\StationInfo;
 use Irail\Repositories\Nmbs\Models\Station;
 use irail\stations\Stations;
-use function Irail\Data\Nmbs\str_starts_with;
 
 /**
  * Copyright (C) 2011 by iRail vzw/asbl

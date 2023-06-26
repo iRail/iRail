@@ -14,14 +14,13 @@
 */
 
 use Illuminate\Http\Request;
-use Irail\Http\Controllers\LiveboardV1Controller;
 
-$router->get('/liveboard', function (Request $request)  use ($router) {
-    return redirect(route('v1.liveboard' , $_GET));
+$router->get('/liveboard', function (Request $request) use ($router) {
+    return redirect(route('v1.liveboard', $_GET));
 });
 
-$router->get('/connections', function (Request $request)  use ($router) {
-    return http_redirect('/v1/connections', $_GET);
+$router->get('/connections', function (Request $request) use ($router) {
+    return redirect(route('v1.journeyplanning', $_GET));
 });
 
 $router->get('/vehicle', function (Request $request) use ($router) {
@@ -38,9 +37,12 @@ $router->get('/logs', function (Request $request) use ($router) {
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/liveboard', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
+    $router->get('/connections', ['as' => 'v1.journeyplanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
 });
 
 $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/liveboard/{arrdep}/{id}', ['as' => 'v2.liveboard', 'uses' => 'LiveboardV2Controller@getLiveboardById']);
+    $router->get('/journeyplanning/{from}/{to}', ['as' => 'v2.journeyplanning', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
+    $router->get('/journeyplanning/{from}/{to}/{arrdep}/{datetime}', ['as' => 'v2.journeyplanning.withTime', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
 });
 

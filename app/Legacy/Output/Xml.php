@@ -68,6 +68,7 @@ class Xml extends Printer
 
     public function startArray($name, $number, $root = false): string
     {
+        $result = "";
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             $result = '<' . $name . "s number=\"$number\">";
         }
@@ -137,8 +138,8 @@ class Xml extends Printer
             $result .= "<$key formatted=\"$form\">$val";
         } else if ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             $result .= "<$key>";
-            if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link') {
-                echo "<![CDATA[";
+            if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
+                $result .= "<![CDATA[";
             }
             $result .= $val;
         }
@@ -152,7 +153,7 @@ class Xml extends Printer
     public function endElement($key): string
     {
         $result = "";
-        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link') {
+        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
             $result .= ']]>';
         }
 
@@ -169,6 +170,7 @@ class Xml extends Printer
      */
     public function endArray($name, $root = false): string
     {
+        $result = "";
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             $result = '</' . $name . 's>';
         }
