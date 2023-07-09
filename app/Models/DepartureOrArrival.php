@@ -132,24 +132,6 @@ class DepartureOrArrival
 
 
     /**
-     * @return VehicleDirection
-     */
-    public function getDirection(): VehicleDirection
-    {
-        return $this->direction;
-    }
-
-    /**
-     * @param StationInfo $direction
-     * @return DepartureOrArrival
-     */
-    public function setDirection(VehicleDirection $direction): DepartureOrArrival
-    {
-        $this->direction = $direction;
-        return $this;
-    }
-
-    /**
      * Whether this call has been reported as "passed" in realtime.
      * @return bool
      */

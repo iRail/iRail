@@ -18,6 +18,7 @@ use Irail\Models\DepartureAndArrival;
 use Irail\Models\Message;
 use Irail\Models\Result\VehicleJourneySearchResult;
 use Irail\Models\Vehicle;
+use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Repositories\Nmbs\Traits\TimeParser;
@@ -109,8 +110,15 @@ class NmbsRivVehicleRepository implements VehicleJourneyRepository
      */
     private function getVehicleDetails(array $json): Vehicle
     {
-        $vehicle = $this->parseProduct($json['Names']['Name'][0]['Product']);
-        return $vehicle->toVehicle();
+        $hafasVehicle = $this->parseProduct($json['Names']['Name'][0]['Product']);
+        $vehicle = $hafasVehicle->toVehicle();
+        $vehicle->setDirection(
+            new VehicleDirection(
+                $json['Directions']['Direction'][0]['value'],
+                $this->stationsRepository->getStationByHafasId(end($json['Stops']['Stop'])['extId'])
+            )
+        );
+        return $vehicle;
     }
 
     /**

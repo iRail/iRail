@@ -45,5 +45,7 @@ $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/liveboard/{arrdep}/{id}', ['as' => 'v2.liveboard', 'uses' => 'LiveboardV2Controller@getLiveboardById']);
     $router->get('/journeyplanning/{from}/{to}', ['as' => 'v2.journeyplanning', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
     $router->get('/journeyplanning/{from}/{to}/{arrdep}/{datetime}', ['as' => 'v2.journeyplanning.withTime', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
+    $router->get('/vehicle/{id}', ['as' => 'v2.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV2Controller@getDatedVehicleJourney']);
+    $router->get('/vehicle/{id}/{datetime}', ['as' => 'v2.datedVehicleJourney.withTime', 'uses' => 'DatedVehicleJourneyV2Controller@getDatedVehicleJourney']);
 });
 

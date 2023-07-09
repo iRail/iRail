@@ -158,6 +158,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $headsign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
             $stop['DestinationNl'] : $stop['OriginNl'];
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
+        $vehicle->setDirection(new VehicleDirection($headsign, $direction));
 
         // Now all information has been parsed. Put it in a nice object.
         $stopAtStation = new DepartureOrArrival();
@@ -169,7 +170,6 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setDirection(new VehicleDirection($headsign, $direction));
         $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
         return $stopAtStation;
     }

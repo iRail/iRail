@@ -273,7 +273,7 @@ class NmbsRivRawDataRepository
 
         Log::debug("Received response with HTTP code $httpcode for URL $url");
         Log::debug($response);
-        if ($httpcode >= 500){
+        if ($httpcode >= 500) {
             Log::warning("Request $url received response code $httpcode");
         }
 

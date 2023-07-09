@@ -6,12 +6,16 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
+use Irail\Models\VehicleDirection;
 
 class V2Converter
 {
 
-    public static function convertDepartureOrArrival(DepartureOrArrival $obj): array
+    public static function convertDepartureOrArrival(?DepartureOrArrival $obj): ?array
     {
+        if ($obj == null) {
+            return null;
+        }
         return [
             'station'           => self::convertStation($obj->getStation()),
             'platform'          => self::convertPlatform($obj->getPlatform()),
@@ -19,7 +23,6 @@ class V2Converter
             'scheduledDateTime' => $obj->getScheduledDateTime(),
             'realtimeDateTime'  => $obj->getRealtimeDateTime(),
             'canceled'          => $obj->isCancelled(),
-            'direction'         => self::convertVehicleDirection($obj->getDirection()),
             'status'            => $obj->getStatus()?->value,
             'isExtraTrain'      => $obj->isExtra()
         ];
@@ -48,17 +51,18 @@ class V2Converter
     public static function convertVehicle(Vehicle $obj)
     {
         return [
-            'uri'    => $obj->getUri(),
-            'id'     => $obj->getId(),
-            'type'   => $obj->getType(),
-            'number' => $obj->getNumber(),
+            'uri'       => $obj->getUri(),
+            'id'        => $obj->getId(),
+            'type'      => $obj->getType(),
+            'number'    => $obj->getNumber(),
+            'direction' => self::convertVehicleDirection($obj->getDirection())
         ];
     }
 
-    private static function convertVehicleDirection(\Irail\Models\VehicleDirection $obj)
+    private static function convertVehicleDirection(VehicleDirection $obj)
     {
         return [
-            'name' => $obj->getName(),
+            'name'    => $obj->getName(),
             'station' => $obj->getStation() ? self::convertStation($obj->getStation()) : null
         ];
     }

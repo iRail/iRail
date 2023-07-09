@@ -3,7 +3,7 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Irail\Http\Requests\LiveboardRequest;
+use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Models\Dto\v1\LiveboardV1Converter;
 use Irail\Repositories\LiveboardRepository;
 
@@ -19,7 +19,7 @@ class LiveboardV1Controller extends IrailController
         //
     }
 
-    public function getLiveboardById(LiveboardRequest $request): Response
+    public function getLiveboardById(LiveboardRequestImpl $request): Response
     {
         $repo = app(LiveboardRepository::class);
         $liveboardSearchResult = $repo->getLiveboard($request);

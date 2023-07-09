@@ -33,7 +33,7 @@ class DatedVehicleJourneyV1Converter extends V1Converter
         $result = new StdClass();
         $result->station = self::convertStation($stop->getStation());
         $result->time = $departure->getScheduledDateTime()->getTimestamp();
-        $result->platform = self::convertPlatform($departure ? $departure->getPlatform() : $arrival->getPlatform());
+        $result->platform = self::convertPlatform($departure->getPlatform());
         $result->scheduledDepartureTime = $departure->getScheduledDateTime()->getTimestamp();
         $result->scheduledArrivalTime = $arrival->getScheduledDateTime()->getTimestamp();
         $result->delay = $departure->getDelay();

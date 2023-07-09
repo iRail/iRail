@@ -144,13 +144,13 @@ abstract class IrailHttpRequest extends LumenRequest
     /**
      * @throws InvalidRequestException when the provided datetime is not in a valid format
      */
-    protected function parseDateTime(?string $datetime): DateTime
+    protected function parseDateTime(?string $datetime): Carbon
     {
         if (!$datetime) {
             return Carbon::now('Europe/Brussels');
         }
         try {
-            return new DateTime($datetime);
+            return new Carbon($datetime, 'Europe/Brussels');
         } catch (Exception $e) {
             throw new InvalidRequestException("The provided date/time {$datetime} is invalid.", 400, $e);
         }

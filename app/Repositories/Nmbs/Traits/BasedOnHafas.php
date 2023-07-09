@@ -12,6 +12,7 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
+use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Irail\Traits\StdClass;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
@@ -304,7 +305,7 @@ trait BasedOnHafas
     private function parseHafasIntermediateStop(
         StationsRepository $stationsRepository,
         array $rawIntermediateStop,
-        Vehicle $vehicle
+        Vehicle $vehicle,
     ): DepartureAndArrival
     {
         $intermediateStop = new DepartureAndArrival();

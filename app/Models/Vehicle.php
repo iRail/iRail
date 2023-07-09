@@ -6,9 +6,10 @@ class Vehicle
 {
     private string $uri;
     private string $id;
-
     private string $type;
     private int $number;
+
+    private VehicleDirection $direction;
 
     /**
      * @param string $uri
@@ -70,6 +71,22 @@ class Vehicle
     public function getName()
     {
         return $this->type . $this->number;
+    }
+
+    /**
+     * @return VehicleDirection
+     */
+    public function getDirection(): VehicleDirection
+    {
+        return $this->direction;
+    }
+
+    /**
+     * @param VehicleDirection $direction
+     */
+    public function setDirection(VehicleDirection $direction): void
+    {
+        $this->direction = $direction;
     }
 
 }
