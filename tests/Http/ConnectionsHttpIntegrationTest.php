@@ -2,8 +2,6 @@
 
 namespace Tests\Http;
 
-use function Tests\Integration\Http\str_starts_with;
-
 class ConnectionsHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_missingParameters_shouldReturn400()

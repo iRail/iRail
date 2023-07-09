@@ -5,7 +5,6 @@ namespace Tests\Http;
 use DateTime;
 use DateTimeZone;
 use GuzzleHttp\Exception\GuzzleException;
-use function Tests\Integration\Http\str_starts_with;
 
 class VehicleHttpIntegrationTest extends HttpIntegrationTestCase
 {

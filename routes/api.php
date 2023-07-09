@@ -24,7 +24,7 @@ $router->get('/connections', function (Request $request) use ($router) {
 });
 
 $router->get('/vehicle', function (Request $request) use ($router) {
-    return http_redirect('/v1/vehicle', $_GET);
+    return redirect(route('v1.datedvehiclejourney', $_GET));
 });
 
 $router->get('/composition', function (Request $request) use ($router) {
@@ -38,6 +38,7 @@ $router->get('/logs', function (Request $request) use ($router) {
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/liveboard', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
     $router->get('/connections', ['as' => 'v1.journeyplanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
+    $router->get('/vehicle', ['as' => 'v1.datedvehiclejourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
 });
 
 $router->group(['prefix' => 'v2'], function () use ($router) {

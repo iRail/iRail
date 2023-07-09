@@ -18,8 +18,6 @@ use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\requests\LiveboardRequest;
 use SimpleXMLElement;
 use tidy;
-use function Irail\api\data\NMBS\str_contains;
-use function Irail\api\data\NMBS\str_starts_with;
 
 class NmbsHtmlLiveboardRepository
 {

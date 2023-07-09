@@ -12,7 +12,7 @@ class DepartureOrArrival
     private Vehicle $vehicle;
     private StationInfo $station;
 
-    private ?PlatformInfo $platform;
+    private ?PlatformInfo $platform = null;
     private Carbon $scheduledDateTime;
     private int $delay = 0;
     private bool $isCancelled = false;

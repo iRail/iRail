@@ -92,7 +92,7 @@ class NmbsRivVehicleRepository implements VehicleJourneyRepository
         $stopsList = $json['Stops']['Stop'];
         foreach ($stopsList as $rawStop) {
             $stop = $this->parseHafasIntermediateStop(
-                $lang,
+                $this->stationsRepository,
                 $rawStop,
                 $vehicle,
             );

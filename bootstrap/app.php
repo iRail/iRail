@@ -1,15 +1,13 @@
 <?php
 
-use Irail\Http\Requests\JourneyPlanningRequest;
-use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
-use Irail\Http\Requests\LiveboardRequest;
-use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
 use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
+use Irail\Repositories\Nmbs\NmbsRivVehicleRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Irail\Repositories\VehicleJourneyRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -72,11 +70,6 @@ $app->singleton(
 );
 
 $app->singleton(
-    LiveboardRequest::class,
-    LiveboardRequestImpl::class
-);
-
-$app->singleton(
     LiveboardRepository::class,
     NmbsRivLiveboardRepository::class
 );
@@ -84,6 +77,11 @@ $app->singleton(
 $app->singleton(
     JourneyPlanningRepository::class,
     NmbsRivJourneyPlanningRepository::class
+);
+
+$app->singleton(
+    VehicleJourneyRepository::class,
+    NmbsRivVehicleRepository::class
 );
 /*
 |--------------------------------------------------------------------------
@@ -146,8 +144,8 @@ $app->configure('app');
 $app->router->group([
     'namespace' => 'Irail\Http\Controllers',
 ], function ($router) {
-    require __DIR__.'/../routes/web.php';
-    require __DIR__.'/../routes/api.php';
+    require __DIR__ . '/../routes/web.php';
+    require __DIR__ . '/../routes/api.php';
 });
 
 return $app;

@@ -3,7 +3,6 @@
 namespace Tests\Http;
 
 use GuzzleHttp\Exception\GuzzleException;
-use function Tests\Integration\Http\str_starts_with;
 
 class LiveboardHttpIntegrationTest extends HttpIntegrationTestCase
 {

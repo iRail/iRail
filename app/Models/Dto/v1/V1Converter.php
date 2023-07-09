@@ -23,8 +23,8 @@ abstract class V1Converter
     protected static function convertPlatform(?\Irail\Models\PlatformInfo $platform): StdClass
     {
         $result = new StdClass();
-        $result->name = $platform->getDesignation();
-        $result->normal = $platform->hasChanged() ? '0' : '1';
+        $result->name = $platform ? $platform->getDesignation() : '?';
+        $result->normal = !$platform || $platform->hasChanged() ? '0' : '1';
         return $result;
     }
 

@@ -5,7 +5,7 @@ namespace Tests\Repositories\Nmbs;
 use DateTime;
 use Irail\Http\Requests\LiveboardRequestImplIrail;
 use Irail\Http\Requests\TimeSelection;
-use Irail\Http\Requests\VehicleJourneyRequestImpl;
+use Irail\Http\Requests\DatedVehicleJourneyV1Request;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 use Tests\TestCase;
@@ -30,7 +30,7 @@ class RawDataRepositoryIntegrationTest extends TestCase
     {
         $repo = new NmbsRivRawDataRepository(new StationsRepository());
         $vehicleJourneyData = (string)$repo->getVehicleJourneyData(
-            new VehicleJourneyRequestImpl('IC1545',
+            new DatedVehicleJourneyV1Request('IC1545',
                 null,
                 new DateTime(),
                 'en'))->getValue();

@@ -2,8 +2,10 @@
 
 namespace Irail\Repositories\Nmbs\Traits;
 
+use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
@@ -21,13 +23,21 @@ trait BasedOnHafas
      * @param string $rawJsonData data to decode.
      * @return array an associative array representing the JSON response
      * @throws UpstreamServerException thrown when the response is invalid or describes an error
+     * @throws NoResultsException
      */
     protected function deserializeAndVerifyResponse(string $rawJsonData): array
     {
         if (empty($rawJsonData)) {
-            throw new UpstreamServerException('The server did not return any data.', 500);
+            throw new UpstreamServerException('The server did not return any data.');
         }
         $json = json_decode($rawJsonData, true);
+        if ($json == null) {
+            Log::error("Failed to read raw json data:");
+            Log::error($rawJsonData);
+            // Example invalid data:
+            // "ERROR reason : error : 9000 : _Service_Handler_Policies : Service Handler - Connection To Backend failed. Please verify backend server status."
+            throw new UpstreamServerException('iRail could not read the data received from the remote server.');
+        }
         $this->throwExceptionOnInvalidResponse($json);
         return $json;
     }
@@ -38,13 +48,10 @@ trait BasedOnHafas
      * @param array|null $json The JSON response as an associative array.
      *
      * @throws UpstreamServerException An Exception containing an error message in case the JSON response contains an error message.
+     * @throws NoResultsException
      */
     public static function throwExceptionOnInvalidResponse(?array $json): void
     {
-        if ($json == null) {
-            throw new UpstreamServerException('This request failed due to internal errors.', 500);
-        }
-
         if (!key_exists('errorCode', $json)) {
             // all ok!
             return;
@@ -53,10 +60,10 @@ trait BasedOnHafas
         if ($json['errorCode'] == 'INT_ERR'
             || $json['errorCode'] == 'INT_GATEWAY'
             || $json['errorCode'] == 'INT_TIMEOUT') {
-            throw new UpstreamServerException('NMBS data is temporarily unavailable.', 504);
+            throw new UpstreamServerException('NMBS data is temporarily unavailable.');
         }
         if ($json['errorCode'] == 'SVC_NO_RESULT') {
-            throw new UpstreamServerException('No results found', 404);
+            throw new NoResultsException('No results found');
         }
         if ($json['errorCode'] == 'SVC_DATETIME_PERIOD') {
             throw new UpstreamServerException('Date  outside of the timetable period. Check your query.', 400);
@@ -325,6 +332,7 @@ trait BasedOnHafas
             }
             $arrival->setIsCancelled(key_exists('cancelledArrival', $rawIntermediateStop));
             $arrival->setIsExtra(key_exists('additional', $rawIntermediateStop));
+            $arrival->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setArrival($arrival);
         }
 
@@ -340,7 +348,7 @@ trait BasedOnHafas
                 $departure->setIsCancelled($this->isDepartureCanceledBasedOnState($rawIntermediateStop['depPrognosisType']));
                 $departure->setIsReported($rawIntermediateStop['depPrognosisType'] == 'REPORTED');
             }
-            if (key_exists('rtArrTime', $rawIntermediateStop)) {
+            if (key_exists('rtDepTime', $rawIntermediateStop)) {
                 $departure->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
                     $rawIntermediateStop['depDate'],
                     $rawIntermediateStop['depTime'],
@@ -350,6 +358,7 @@ trait BasedOnHafas
             }
             $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
+            $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setDeparture($departure);
         }
 

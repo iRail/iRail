@@ -33,7 +33,7 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
         $this->destinationStationId = $this->parseStationId('to', $this->_request->get('to'));;
 
         try {
-            $date = $this->request->get('date') ?: date('Ymd');
+            $date = $this->_request->get('date') ?: date('Ymd');
             $time = $this->_request->get('time') ?: date('Hi');
             if (strlen($date) == 6) {
                 $date = '20' . $date;

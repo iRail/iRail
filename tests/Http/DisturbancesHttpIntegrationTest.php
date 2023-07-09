@@ -3,8 +3,6 @@
 
 namespace Tests\Http;
 
-use function Tests\Integration\Http\str_starts_with;
-
 class DisturbancesHttpIntegrationTest extends HttpIntegrationTestCase
 {
     public function test_xml_noParameters_shouldReturn200()

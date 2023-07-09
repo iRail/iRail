@@ -19,8 +19,6 @@ use Irail\Repositories\Nmbs\Models\TrainCompositionUnit;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use stdClass;
-use function Irail\Data\Nmbs\str_contains;
-use function Irail\Data\Nmbs\str_starts_with;
 
 class CompositionDataSource
 {

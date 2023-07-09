@@ -200,7 +200,8 @@ class NmbsRivRawDataRepository
         $journeyResponse = $this->makeApiCallToMobileRivApi($url, $parameters);
 
         $journeyResponse = json_decode($journeyResponse, true);
-        if (!key_exists('Trip', $journeyResponse)) {
+
+        if ($journeyResponse === null || !key_exists('Trip', $journeyResponse)) {
             return false;
         }
         return $journeyResponse['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];

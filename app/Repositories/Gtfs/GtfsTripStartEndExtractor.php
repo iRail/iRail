@@ -9,7 +9,6 @@ use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Traits\Cache;
-use function Irail\Data\NMBS\Repositories\Gtfs\str_starts_with;
 
 class GtfsTripStartEndExtractor
 {
@@ -19,11 +18,12 @@ class GtfsTripStartEndExtractor
     const GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY = 'vehicleDetailsByDate';
     private GtfsRepository $gtfsRepository;
 
-    public function __construct(GtfsRepository $gtfsRepository = null)
+    public function __construct(?GtfsRepository $gtfsRepository = null)
     {
-        $this->gtfsRepository = $gtfsRepository;
         if ($gtfsRepository == null) {
             $this->gtfsRepository = new GtfsRepository();
+        } else {
+            $this->gtfsRepository = $gtfsRepository;
         }
         $this->setCachePrefix('gtfsTrips');
     }
@@ -106,9 +106,9 @@ class GtfsTripStartEndExtractor
             return $this->loadTripsWithStartAndEndDate();
         }, ttl: 2 * 3600); // Cache for 2 hours
 
-        $vehicleDetailByDate = $vehicleDetailsByDate->getValue();
+        $vehicleDetailsByDate = $vehicleDetailsByDate->getValue();
         $dateYmd = $date->format('Ymd');
-        if (!key_exists($dateYmd, $vehicleDetailByDate)) {
+        if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
             throw new Exception('Request outside of allowed date period (3 days back, 14 days forward)', 404);
         }
         return $vehicleDetailsByDate[$dateYmd];
