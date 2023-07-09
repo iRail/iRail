@@ -7,6 +7,8 @@ use Irail\Repositories\Nmbs\Models\hafas\HafasInformationManagerMessageLink;
 
 class Message
 {
+    private string $id;
+
     private Carbon $validFrom, $validUpTo;
     private Carbon $lastModified;
     private string $header;
@@ -24,6 +26,7 @@ class Message
      * @param string $publisher The name of the organisation who published this message
      */
     public function __construct(
+        string $id,
         Carbon $validFrom,
         Carbon $validUpTo,
         Carbon $lastModified,
@@ -32,6 +35,7 @@ class Message
         string $message,
         string $publisher
     ) {
+        $this->id = $id;
         $this->validFrom = $validFrom;
         $this->validUpTo = $validUpTo;
         $this->lastModified = $lastModified;
@@ -39,6 +43,11 @@ class Message
         $this->leadText = $leadText;
         $this->message = $message;
         $this->publisher = $publisher;
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
