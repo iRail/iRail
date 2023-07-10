@@ -15,6 +15,7 @@ class Message
     private string $leadText;
     private string $message;
     private string $publisher;
+    private $links;
 
     /**
      * @param Carbon $validFrom The datetime when this message becomes visible/active
@@ -33,8 +34,10 @@ class Message
         string $header,
         string $leadText,
         string $message,
-        string $publisher
-    ) {
+        string $publisher,
+        array $links
+    )
+    {
         $this->id = $id;
         $this->validFrom = $validFrom;
         $this->validUpTo = $validUpTo;
@@ -43,6 +46,7 @@ class Message
         $this->leadText = $leadText;
         $this->message = $message;
         $this->publisher = $publisher;
+        $this->links = $links;
     }
 
     public function getId()
@@ -114,12 +118,20 @@ class Message
         return $this->publisher;
     }
 
-    public function getLink(): ?MessageLink
+    public function extractHtmlLink(): ?MessageLink
     {
         preg_match_all("/<a href=\"(.*?)\">(.*?)<\/a>/", urldecode($this->message), $matches);
         if (count($matches[1]) > 1) {
             return new MessageLink(urlencode($matches[1][0]), urlencode($matches[2][0]));
         }
         return null;
+    }
+
+    /**
+     * @return MessageLink[]
+     */
+    public function getLinks(): array
+    {
+        return $this->links;
     }
 }

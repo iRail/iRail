@@ -11,6 +11,14 @@ use Irail\Models\VehicleDirection;
 class V2Converter
 {
 
+    public static function convertDepartureAndArrival(\Irail\Models\DepartureAndArrival $departureAndArrival): array
+    {
+        return [
+            'arrival'   => self::convertDepartureOrArrival($departureAndArrival->getArrival()),
+            'departure' => self::convertDepartureOrArrival($departureAndArrival->getDeparture()),
+        ];
+    }
+
     public static function convertDepartureOrArrival(?DepartureOrArrival $obj): ?array
     {
         if ($obj == null) {

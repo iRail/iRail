@@ -10,7 +10,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
 use Exception;
 use Illuminate\Http\Request as LumenRequest;
 use Irail\Exceptions\Request\InvalidRequestException;
@@ -119,11 +118,11 @@ abstract class IrailHttpRequest extends LumenRequest
         if (!$id) {
             throw new InvalidRequestException("Could not find station, missing query parameter $fieldName.", 400);
         }
-        if (strlen($id) == 9) {
+        if (strlen($id) == 9 && is_numeric($id)) {
             // iRail style
             return $id;
         }
-        if (strlen($id) == 7) {
+        if (strlen($id) == 7 && is_numeric($id)) {
             // GTFS and HAFAS style
             return '00' . $id;
         }

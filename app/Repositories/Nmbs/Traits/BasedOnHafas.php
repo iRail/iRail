@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
+use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
+use Irail\Models\MessageLink;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
-use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Irail\Traits\StdClass;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
@@ -61,13 +62,16 @@ trait BasedOnHafas
         if ($json['errorCode'] == 'INT_ERR'
             || $json['errorCode'] == 'INT_GATEWAY'
             || $json['errorCode'] == 'INT_TIMEOUT') {
-            throw new UpstreamServerException('NMBS data is temporarily unavailable.');
+            throw new UpstreamServerConnectionException('NMBS data is temporarily unavailable.');
         }
         if ($json['errorCode'] == 'SVC_NO_RESULT') {
             throw new NoResultsException('No results found');
         }
+        if ($json['errorCode'] == 'SVC_LOC') {
+            throw new NoResultsException('Location not found');
+        }
         if ($json['errorCode'] == 'SVC_DATETIME_PERIOD') {
-            throw new UpstreamServerException('Date  outside of the timetable period. Check your query.', 400);
+            throw new NoResultsException('Date  outside of the timetable period. Check your query.', 400);
         }
         throw new UpstreamServerException('This request failed. Please check your query. Error code ' . $json['errorCode'], 500);
     }
@@ -238,7 +242,14 @@ trait BasedOnHafas
             );
             $organisation = $rawAlert['company'];
 
-            $messages[] = new Message($id, $startTime, $endTime, $modifiedTime, $header, $lead, $description, $organisation);
+            $links = [];
+            foreach ($rawAlert['channel'] as $channel) {
+                foreach ($channel['url'] as $url) {
+                    $links[] = new MessageLink($url['name'], $url['url']);
+                }
+            }
+
+            $messages[] = new Message($id, $startTime, $endTime, $modifiedTime, $header, $lead, $description, $organisation, $links);
         }
         return $messages;
     }

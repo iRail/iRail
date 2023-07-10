@@ -48,6 +48,27 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         }
     }
 
+    private static function parseNotes(array $trip): array
+    {
+        /*
+        "Notes": {
+         "Note": [
+           {
+               "value": "Due to delays a connecting service may not be reachable.",
+             "key": "text.realtime.connection.brokentrip",
+             "type": "R"
+           }
+         ]
+        }*/
+        $notes = [];
+        if (key_exists('Notes', $trip)) {
+            foreach ($trip['Notes']['Note'] as $note) {
+                $notes[] = $note['value'];
+            }
+        }
+        return $notes;
+    }
+
     /**
      * @throws Exception
      */
@@ -99,7 +120,8 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         );
 
         $connection->setLegs($trainsInConnection);
-        $connection->setNotes([]); // TODO: parse alerts
+        $connection->setNotes(self::parseNotes($trip));
+        $connection->setServiceAlerts($this->parseAlerts($trip));
 
         if ($connection->getDurationSeconds() != $this->transformIso8601Duration($trip['duration'])) {
             Log::warning('Duration does not match for connection. A possible parsing error has occured!');
@@ -184,11 +206,6 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $arrival->setIsCancelled($legEnd['cancelled'] == true); // TODO: verify this
         }
 
-        // Handle directions such as "Gand-Saint-Pierre / Gent-Sint-Pieters & Poperinge" correctly by taking the last station
-        $directionStationNames = explode('&',$leg['direction']);
-        $direction = new VehicleDirection($leg['direction'], $this->stationsRepository->findStationByName(end($directionStationNames)));
-        $departure->setDirection($direction);
-        $arrival->setDirection($direction);
         $parsedLeg = new JourneyLeg($departure, $arrival);
         $parsedLeg->setAlerts($this->parseAlerts($leg));
 
@@ -200,7 +217,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $parsedLeg->setLegType(JourneyLegType::JOURNEY);
 
             $vehicle = $this->parseProduct($leg['Product'])->toVehicle();
-            $parsedLeg->setVehicle($vehicle);
+
             $intermediateStops = $this->parseIntermediateStops($trip, $leg, $lang, $vehicle);
             $parsedLeg->setIntermediateStops($intermediateStops);
 
@@ -213,7 +230,8 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
                 // This typically is the stop where the user leaves this train
                 $directionName = end($intermediateStops)->getStation()->getStationName();
             }
-            $parsedLeg->setDirection(new VehicleDirection($directionName, $this->stationsRepository->findStationByName($directionName)));
+            $vehicle->setDirection(new VehicleDirection($directionName, $this->stationsRepository->findStationByName($directionName)));
+            $parsedLeg->setVehicle($vehicle);
         }
         return $parsedLeg;
     }

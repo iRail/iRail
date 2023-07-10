@@ -57,6 +57,12 @@ class JourneyLeg
         return $this->departure->getRealtimeDateTime()->secondsUntil($this->arrival->getRealtimeDateTime());
     }
 
+    public function getDurationSeconds(): int
+    {
+        return $this->getDeparture()->getRealtimeDateTime()
+            ->diffInSeconds($this->getArrival()->getRealtimeDateTime());
+    }
+
     public function setIntermediateStops(array $intermediateStops): void
     {
         $this->intermediateStops = $intermediateStops;
@@ -68,19 +74,6 @@ class JourneyLeg
     public function getIntermediateStops(): array
     {
         return $this->intermediateStops;
-    }
-
-    public function setDirection(VehicleDirection $direction): void
-    {
-        $this->direction = $direction;
-    }
-
-    /**
-     * @return VehicleDirection
-     */
-    public function getDirection(): VehicleDirection
-    {
-        return $this->direction;
     }
 
     /**

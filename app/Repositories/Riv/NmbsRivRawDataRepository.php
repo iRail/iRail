@@ -109,7 +109,7 @@ class NmbsRivRawDataRepository
             'passlist'         => true, // include intermediate stops along the way
             'searchForArrival' => ($request->getTimeSelection() == TimeSelection::ARRIVAL), // include intermediate stops along the way
             'numF'             => 6, // request 6 (the max) results forward in time
-            'products'         => $typeOfTransportCode
+            'products'         => $typeOfTransportCode->value
         ];
         return $this->makeApiCallToMobileRivApi($url, $parameters);
     }

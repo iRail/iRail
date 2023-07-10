@@ -12,7 +12,8 @@ class LiveboardV2Converter extends V2Converter
      * @param IrailHttpRequest      $request
      * @param LiveboardSearchResult $result
      */
-    public static function convert(IrailHttpRequest $request,
+    public static function convert(
+        IrailHttpRequest $request,
         LiveboardSearchResult $result): array
     {
         return [

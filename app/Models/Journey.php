@@ -10,12 +10,12 @@ class Journey
     private array $legs;
 
     /**
-     * @var Note[]
+     * @var String[]
      */
     private array $notes;
 
     /**
-     * @var ServiceAlertNote[]
+     * @var Message[]
      */
     private array $serviceAlerts;
 
@@ -30,7 +30,7 @@ class Journey
     /**
      * @return DepartureOrArrival
      */
-    public function getDeparture()
+    public function getDeparture(): DepartureOrArrival
     {
         return $this->legs[0]->getDeparture();
     }
@@ -38,12 +38,12 @@ class Journey
     /**
      * @return DepartureOrArrival
      */
-    public function getArrival()
+    public function getArrival(): DepartureOrArrival
     {
         return end($this->legs)->getArrival();
     }
 
-    public function setLegs(array $trainsInConnection)
+    public function setLegs(array $trainsInConnection): void
     {
         $this->legs = $trainsInConnection;
     }
@@ -55,14 +55,28 @@ class Journey
     }
 
     /**
-     * @return Note[]
+     * @return String[]
      */
-    public function getNotes():array{
+    public function getNotes(): array
+    {
         return $this->notes;
     }
 
-    public function setNotes(array $notes)
+    public function setNotes(array $notes): void
     {
         $this->notes = $notes;
+    }
+
+    /**
+     * @return Message[]
+     */
+    public function getServiceAlerts(): array
+    {
+        return $this->serviceAlerts;
+    }
+
+    public function setServiceAlerts(array $serviceAlerts): void
+    {
+        $this->serviceAlerts = $serviceAlerts;
     }
 }

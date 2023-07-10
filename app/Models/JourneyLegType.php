@@ -5,6 +5,6 @@ namespace Irail\Models;
 enum JourneyLegType: string
 {
     case WALKING = 'WALK';
-    case JOURNEY = 'TRANSPORT';
+    case JOURNEY = 'JNY';
     case CHECK_IN = "CHKI";
 }

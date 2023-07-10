@@ -7,8 +7,8 @@ use Throwable;
 
 class UpstreamServerException extends Exception
 {
-    function __construct(string $message = "", ?Throwable $previous = null)
+    function __construct(string $message = "", $code = 504, ?Throwable $previous = null)
     {
-        parent::__construct($message, 504, $previous);
+        parent::__construct($message, $code, $previous);
     }
 }

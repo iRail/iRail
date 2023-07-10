@@ -13,7 +13,8 @@ class DatedVehicleJourneyV2Converter extends V2Converter
      * @param VehicleJourneySearchResult $result
      * @return array
      */
-    public static function convert(IrailHttpRequest $request,
+    public static function convert(
+        IrailHttpRequest $request,
         VehicleJourneySearchResult $result): array
     {
         return [
@@ -22,11 +23,4 @@ class DatedVehicleJourneyV2Converter extends V2Converter
         ];
     }
 
-    private static function convertDepartureAndArrival(\Irail\Models\DepartureAndArrival $departureAndArrival)
-    {
-        return [
-            'arrival'   => self::convertDepartureOrArrival($departureAndArrival->getArrival()),
-            'departure' => self::convertDepartureOrArrival($departureAndArrival->getDeparture()),
-        ];
-    }
 }
