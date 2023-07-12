@@ -3,19 +3,19 @@
 namespace Irail\Models;
 
 use Carbon\Carbon;
-use Irail\Repositories\Nmbs\Models\hafas\HafasInformationManagerMessageLink;
 
 class Message
 {
     private string $id;
 
-    private Carbon $validFrom, $validUpTo;
-    private Carbon $lastModified;
+    private ?Carbon $validFrom, $validUpTo;
+    private ?Carbon $lastModified;
     private string $header;
     private string $leadText;
     private string $message;
     private string $publisher;
-    private $links;
+    private array $links;
+    private MessageType $type;
 
     /**
      * @param Carbon $validFrom The datetime when this message becomes visible/active
@@ -28,9 +28,10 @@ class Message
      */
     public function __construct(
         string $id,
-        Carbon $validFrom,
-        Carbon $validUpTo,
-        Carbon $lastModified,
+        ?Carbon $validFrom,
+        ?Carbon $validUpTo,
+        ?Carbon $lastModified,
+        MessageType $type,
         string $header,
         string $leadText,
         string $message,
@@ -47,6 +48,7 @@ class Message
         $this->message = $message;
         $this->publisher = $publisher;
         $this->links = $links;
+        $this->type = $type;
     }
 
     public function getId()
@@ -57,7 +59,7 @@ class Message
     /**
      * @return Carbon
      */
-    public function getValidFrom(): Carbon
+    public function getValidFrom(): ?Carbon
     {
         return $this->validFrom;
     }
@@ -65,7 +67,7 @@ class Message
     /**
      * @return Carbon
      */
-    public function getValidUpTo(): Carbon
+    public function getValidUpTo(): ?Carbon
     {
         return $this->validUpTo;
     }
@@ -73,7 +75,7 @@ class Message
     /**
      * @return Carbon
      */
-    public function getLastModified(): Carbon
+    public function getLastModified(): ?Carbon
     {
         return $this->lastModified;
     }
@@ -133,5 +135,13 @@ class Message
     public function getLinks(): array
     {
         return $this->links;
+    }
+
+    /**
+     * @return MessageType
+     */
+    public function getType(): MessageType
+    {
+        return $this->type;
     }
 }

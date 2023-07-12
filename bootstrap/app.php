@@ -6,7 +6,9 @@ use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
 use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivVehicleRepository;
+use Irail\Repositories\Nmbs\NmbsRssDisturbancesRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Irail\Repositories\ServiceAlertsRepository;
 use Irail\Repositories\VehicleJourneyRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -83,6 +85,12 @@ $app->singleton(
     VehicleJourneyRepository::class,
     NmbsRivVehicleRepository::class
 );
+
+$app->singleton(
+    ServiceAlertsRepository::class,
+    NmbsRssDisturbancesRepository::class
+);
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

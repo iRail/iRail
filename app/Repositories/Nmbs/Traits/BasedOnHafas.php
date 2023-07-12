@@ -12,6 +12,7 @@ use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
+use Irail\Models\MessageType;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
 use Irail\Repositories\Irail\StationsRepository;
@@ -249,7 +250,17 @@ trait BasedOnHafas
                 }
             }
 
-            $messages[] = new Message($id, $startTime, $endTime, $modifiedTime, $header, $lead, $description, $organisation, $links);
+            $type = MessageType::TROUBLE;
+            switch ($rawAlert['category']) {
+                case '1':
+                    $type = MessageType::WORKS;
+                    break;
+                case '2':
+                    $type = MessageType::INFO;
+                    break;
+            }
+
+            $messages[] = new Message($id, $startTime, $endTime, $modifiedTime, $type, $header, $lead, $description, $organisation, $links);
         }
         return $messages;
     }

@@ -51,27 +51,4 @@ class JourneyPlanningV2Converter extends V2Converter
         ];
     }
 
-    private static function convertMessage(Message $note): array
-    {
-        return [
-            'id'           => $note->getId(),
-            'header'       => $note->getHeader(),
-            'lead'         => $note->getLeadText(),
-            'link'         => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
-            'validFrom'    => $note->getValidFrom(),
-            'validUpTo'    => $note->getValidUpTo(),
-            'lastModified' => $note->getLastModified()
-        ];
-    }
-
-    private static function convertMessageLink(?MessageLink $link): ?array
-    {
-        if (!$link) {
-            return null;
-        }
-        return [
-            'action' => $link->getText(),
-            'link'   => $link->getLink()
-        ];
-    }
 }

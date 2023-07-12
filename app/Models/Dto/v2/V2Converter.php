@@ -3,6 +3,8 @@
 namespace Irail\Models\Dto\v2;
 
 use Irail\Models\DepartureOrArrival;
+use Irail\Models\Message;
+use Irail\Models\MessageLink;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
@@ -72,6 +74,34 @@ class V2Converter
         return [
             'name'    => $obj->getName(),
             'station' => $obj->getStation() ? self::convertStation($obj->getStation()) : null
+        ];
+    }
+
+
+    protected static function convertMessage(Message $note): array
+    {
+        return [
+            'id'           => $note->getId(),
+            'header'       => $note->getHeader(),
+            'lead'         => $note->getLeadText(),
+            'message'      => $note->getMessage(),
+            'plainText'    => $note->getStrippedMessage(),
+            'link'         => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
+            'validFrom'    => $note->getValidFrom(),
+            'validUpTo'    => $note->getValidUpTo(),
+            'lastModified' => $note->getLastModified()
+        ];
+    }
+
+    protected static function convertMessageLink(?MessageLink $link): ?array
+    {
+        if (!$link) {
+            return null;
+        }
+        return [
+            'text' => $link->getText(),
+            'link' => $link->getLink(),
+            'language' => $link->getLanguage()
         ];
     }
 }
