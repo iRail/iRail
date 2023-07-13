@@ -1,8 +1,8 @@
 <?php
 
-namespace Irail\Repositories\Nmbs\Models;
+namespace Irail\Models\VehicleComposition;
 
-class TrainCompositionInSegment
+class TrainCompositionOnSegment
 {
     public $origin;
 
