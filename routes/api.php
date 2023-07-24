@@ -48,10 +48,10 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
 
 $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/liveboard/{arrdep}/{id}', ['as' => 'v2.liveboard', 'uses' => 'LiveboardV2Controller@getLiveboardById']);
-    $router->get('/journeyPlanning/{from}/{to}', ['as' => 'v2.journeyPlanning', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
-    $router->get('/journeyPlanning/{from}/{to}/{arrdep}/{datetime}', ['as' => 'v2.journeyPlanning.withTime', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
+    $router->get('/journeyplanning/{from}/{to}', ['as' => 'v2.journeyPlanning', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
+    $router->get('/journeyplanning/{from}/{to}/{arrdep}/{datetime}', ['as' => 'v2.journeyPlanning.withTime', 'uses' => 'JourneyPlanningV2Controller@getJourneyPlanning']);
     $router->get('/vehicle/{id}', ['as' => 'v2.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV2Controller@getDatedVehicleJourney']);
     $router->get('/vehicle/{id}/{datetime}', ['as' => 'v2.datedVehicleJourney.withTime', 'uses' => 'DatedVehicleJourneyV2Controller@getDatedVehicleJourney']);
-    $router->get('/serviceAlerts', ['as' => 'v2.serviceAlerts', 'uses' => 'ServiceAlertsV2Controller@getServiceAlerts']);
+    $router->get('/servicealerts', ['as' => 'v2.serviceAlerts', 'uses' => 'ServiceAlertsV2Controller@getServiceAlerts']);
 });
 
