@@ -131,7 +131,8 @@ abstract class IrailHttpRequest extends LumenRequest
             return substr($id, 30);
         }
         if (!is_numeric($id)) {
-            $station = app(StationsRepository::class)->findStationByName($id);
+            $name = urldecode($id); // ensure spaces etc are decoded
+            $station = app(StationsRepository::class)->findStationByName($name);
             if ($station != null) {
                 return $station->getId();
             }
