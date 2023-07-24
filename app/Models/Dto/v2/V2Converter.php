@@ -34,7 +34,7 @@ class V2Converter
             'realtimeDateTime'  => $obj->getRealtimeDateTime(),
             'canceled'          => $obj->isCancelled(),
             'status'            => $obj->getStatus()?->value,
-            'isExtraTrain'      => $obj->isExtra()
+            /*'isExtraTrain'      => $obj->isExtra()*/
         ];
     }
 

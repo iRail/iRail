@@ -5,8 +5,6 @@ namespace Irail\Models\Dto\v2;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
-use Irail\Models\Message;
-use Irail\Models\MessageLink;
 use Irail\Models\Result\JourneyPlanningSearchResult;
 
 class JourneyPlanningV2Converter extends V2Converter
@@ -47,7 +45,7 @@ class JourneyPlanningV2Converter extends V2Converter
             'duration'  => $leg->getDurationSeconds(),
             'vehicle'   => self::convertVehicle($leg->getVehicle()),
             'alerts'    => array_map(fn($note) => self::convertMessage($note), $leg->getAlerts()),
-            'stops'     => $leg->getIntermediateStops(),
+            'stops'     => array_map(fn($departureAndArrival) => self::convertDepartureAndArrival($departureAndArrival), $leg->getIntermediateStops()),
         ];
     }
 
