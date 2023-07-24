@@ -230,7 +230,9 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
                 // This typically is the stop where the user leaves this train
                 $directionName = end($intermediateStops)->getStation()->getStationName();
             }
-            $vehicle->setDirection(new VehicleDirection($directionName, $this->stationsRepository->findStationByName($directionName)));
+            $directionLastStationNames = explode('&', $directionName);
+            $directionStation = $this->stationsRepository->findStationByName(end($directionLastStationNames));
+            $vehicle->setDirection(new VehicleDirection($directionName, $directionStation));
             $parsedLeg->setVehicle($vehicle);
         }
         return $parsedLeg;
