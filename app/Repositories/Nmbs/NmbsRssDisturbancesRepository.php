@@ -115,6 +115,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For some reason CURL can't verify the RSS SSL certificate
         $response = curl_exec($ch);
         curl_close($ch);
 

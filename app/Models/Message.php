@@ -109,7 +109,9 @@ class Message
      */
     public function getStrippedMessage(): string
     {
-        return strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $this->message));
+        $messageWithoutLinks = preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $this->message);
+        // Replace newline characters with a space to ensure no whitespace is removed.
+        return trim(strip_tags(str_replace('<br>', ' ', $messageWithoutLinks)));
     }
 
     /**
