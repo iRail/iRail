@@ -110,16 +110,17 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         return $compositionUnit;
     }
 
-    private static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
+    public static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
-        if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'AM/MR') {
+        if ((property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
+            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))) {
             return self::getAmMrMaterialType($rawCompositionUnit, $position);
-        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
+        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             return self::getHleMaterialType($rawCompositionUnit);
-        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
+        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
             return self::getHvMaterialType($rawCompositionUnit);
         } else if (str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
-            // Anything else, defaul fallback
+            // Anything else, default fallback
             $parentType = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
             return new RollingMaterialType($parentType, $subType);
@@ -161,7 +162,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
      * @return array The response data, or null when no data was found.
      */
-    private static function getFreshCompositionData(string $vehicleId): array
+    private function getFreshCompositionData(string $vehicleId): array
     {
         $request_options = [
             'referer'   => 'http://api.irail.be/',
@@ -177,6 +178,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+
+        $authKey = $this->getAuthKey();
+        $headers = [
+            "auth-code: $authKey",
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $response = curl_exec($ch);
         curl_close($ch);
 
@@ -336,5 +343,48 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             }
         }
         return 'unknown';
+    }
+
+    /**
+     * Get an authentication key for the composition API from cache if possible, or fresh if no key is cached.
+     *
+     * @return string|null the auth key, or null if it could not be obtained.
+     */
+    private function getAuthKey(): ?string
+    {
+        return $this->getCacheWithDefaultCacheUpdate(
+            'NMBSCompositionAuth',
+            fn() => self::getNewAuthKey(),
+            60 * 30
+        )->getValue();
+    }
+
+    /**
+     * Get an authentication key for the composition API
+     *
+     * @return string|null the auth key, or null if it could not be obtained.
+     */
+    private static function getNewAuthKey(): ?string
+    {
+        $request_options = [
+            'referer'   => 'http://api.irail.be/',
+            'timeout'   => '30',
+            'useragent' => Tools::getUserAgent(),
+        ];
+
+        $ch = curl_init();
+        $url = "https://trainmap.belgiantrain.be/";
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
+        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
+        $html = curl_exec($ch);
+        curl_close($ch);
+
+        // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
+        preg_match("/localStorage\.setItem\(\"tmAuthCode\",\"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
+        return $matches['key'];
     }
 }

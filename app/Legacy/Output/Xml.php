@@ -41,7 +41,12 @@ class Xml extends Printer
 
     public function getHeaders(): array
     {
-        return ['Access-Control-Allow-Origin' => '*', 'Content-Type' => 'application/xml;charset=UTF-8'];
+        return [
+            'Access-Control-Allow-Origin'   => '*',
+            'Access-Control-Allow-Headers'  => '*',
+            'Access-Control-Expose-Headers' => '*',
+            'Content-Type'                  => 'application/xml;charset=UTF-8'
+        ];
     }
 
     /**

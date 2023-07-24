@@ -20,7 +20,12 @@ class Json extends Printer
 
     public function getHeaders(): array
     {
-        return ['Access-Control-Allow-Origin' => '*', 'Content-Type' => 'application/json;charset=UTF-8'];
+        return [
+            'Access-Control-Allow-Origin'   => '*',
+            'Access-Control-Allow-Headers'  => '*',
+            'Access-Control-Expose-Headers' => '*',
+            'Content-Type'                  => 'application/json;charset=UTF-8'
+        ];
     }
 
     /**
