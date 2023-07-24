@@ -9,122 +9,122 @@ class TrainCompositionUnit
     /**
      * @var RollingMaterialType
      */
-    public RollingMaterialType $materialType;
+    private RollingMaterialType $materialType;
 
     //--- Data fields
 
     /**
      * @var boolean Indicates if this unit has toilets.
      */
-    public bool $hasToilets;
+    private bool $hasToilets;
 
     /**
      * @var boolean Indicates if this unit has tables.
      */
-    public bool $hasTables;
+    private bool $hasTables;
 
     /**
      * @var boolean Indicates if this unit has 230v power outlets in 1st class.
      */
-    public bool $hasFirstClassOutlets;
+    private bool $hasFirstClassOutlets;
 
     /**
      * @var boolean Indicates if this unit has 230v power outlets in 2nd class.
      */
-    public bool $hasSecondClassOutlets;
+    private bool $hasSecondClassOutlets;
 
     /**
      * @var boolean Indicates if this unit has heating.
      */
-    public bool $hasHeating;
+    private bool $hasHeating;
 
     /**
      * @var boolean Indicates if this unit has air-conditioning.
      */
-    public bool $hasAirco;
+    private bool $hasAirco;
 
     /**
      * @var integer The number for this car or motor-unit, visible to the traveler.
      */
-    public int $materialNumber;
+    private int $materialNumber;
 
     private bool $hasBikeSection;
 
     /**
      * @var string
      */
-    public string $tractionType;
+    private string $tractionType;
 
     /**
-     * @var boolean Whether or not people can pass to the next unit, backwards in the driving direction.
+     * @var boolean Whether people can pass to the next unit, backwards in the driving direction.
      */
-    public bool $canPassToNextUnit;
+    private bool $canPassToNextUnit;
 
     /**
      * @var integer The number of standing positions in second class.
      */
-    public int $standingPlacesSecondClass;
+    private int $standingPlacesSecondClass;
 
 
     /**
      * @var integer The number of standing positions in first class.
      */
-    public int $standingPlacesFirstClass;
+    private int $standingPlacesFirstClass;
 
 
     /**
      * @var integer The number of seats in second class coupes.
      */
-    public int $seatsCoupeSecondClass;
+    private int $seatsCoupeSecondClass;
 
     /**
      * @var integer The number of seats in first class coupes.
      */
-    public int $seatsCoupeFirstClass;
+    private int $seatsCoupeFirstClass;
 
     /**
      * @var integer The number of seats in second class.
      */
-    public int $seatsSecondClass;
+    private int $seatsSecondClass;
 
     /**
      * @var integer The number of seats in first class.
      */
-    public int $seatsFirstClass;
+    private int $seatsFirstClass;
 
     /**
      * @var integer The length of this unit in metric meters.
      */
-    public int $lengthInMeter;
+    private int $lengthInMeter;
 
     /**
      * @var boolean Indicates if this unit has semi-automatic or manual interior doors
      */
-    public bool $hasSemiAutomaticInteriorDoors;
+    private bool $hasSemiAutomaticInteriorDoors;
 
     /**
      * @var boolean Indicates if this unit has a luggage section.
      */
-    public bool $hasLuggageSection;
+    private bool $hasLuggageSection;
 
     /**
      * @var string The material subtype name, as specified by the railway company. Examples are AM80_c or M6BUH.
      */
-    public string $materialSubTypeName;
+    private string $materialSubTypeName;
 
     /**
      * @var int The traction group in which this carriage belongs. For example, two trains coupled together have 2 traction positions.
      */
-    public int $tractionPosition;
+    private int $tractionPosition;
 
     /**
      * @var boolean Whether this carriage has a section for persons with a reduced mobility.
      */
-    public bool $hasPrmSection;
+    private bool $hasPrmSection;
     /**
      * @var boolean Whether this carriage has priority places (places with priority for those who are old, pregnant, ...)
      */
-    public bool $hasPriorityPlaces;
+    private bool $hasPriorityPlaces;
 
     /**
      * @param RollingMaterialType $materialType

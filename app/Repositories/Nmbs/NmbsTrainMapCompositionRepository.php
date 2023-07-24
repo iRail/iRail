@@ -1,26 +1,22 @@
 <?php
-/**
- * © 2019 by Open Knowledge Belgium vzw/asbl
- * This will return information about the composition of an NMBS/SNCB train.
- *
- * fillDataRoot will fill the entire dataroot with data.
- */
 
 namespace Irail\Repositories\Nmbs;
 
 use Irail\Exceptions\CompositionUnavailableException;
+use Irail\Http\Requests\VehicleCompositionRequest;
+use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\VehicleComposition\RollingMaterialOrientation;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
-use Irail\Models\VehicleComposition\TrainCompositionResult;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Tools\Tools;
+use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
 use stdClass;
 
-class NmbsTrainmapCompositionRepository
+class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 {
 
     use Cache;
@@ -35,11 +31,13 @@ class NmbsTrainmapCompositionRepository
     /**
      * Scrape the composition of a train from the NMBS trainmap web application.
      * @param string $trainId
-     * @return TrainCompositionResult|null The response data. Null if no composition is available.
+     * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
+     * @throws CompositionUnavailableException
      */
 
-    public function getComposition(string $trainId): ?TrainCompositionResult
+    function getComposition(VehicleCompositionRequest $request): VehicleCompositionSearchResult
     {
+        $trainId = $request->getVehicleId();
         try {
             $cacheKey = self::getCacheKey($trainId);
             $cacheAge = 0;
@@ -62,11 +60,7 @@ class NmbsTrainmapCompositionRepository
         } catch (CompositionUnavailableException $e) {
             // Cache "data unavailable" for 5 minutes to limit outgoing requests
             $this->setCachedObject($cacheKey, null, 300);
-            $compositionData = null;
-        }
-
-        if ($compositionData == null) {
-            return null;
+            throw $e;
         }
 
         // Build a result
@@ -77,20 +71,19 @@ class NmbsTrainmapCompositionRepository
             );
         }
 
-        return new TrainCompositionResult($segments);
+        return new VehicleCompositionSearchResult($segments);
     }
 
     private function parseOneSegmentWithCompositionData($travelSegmentWithCompositionData): TrainCompositionOnSegment
     {
-        $result = new TrainCompositionOnSegment;
-        $result->origin = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarFrom->uicCode);
-        $result->destination = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarTo->uicCode);
-        $result->composition = self::parseCompositionData($travelSegmentWithCompositionData);
+        $origin = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarFrom->uicCode);
+        $destination = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarTo->uicCode);
+        $composition = self::parseCompositionData($travelSegmentWithCompositionData);
 
         // Set the left/right orientation on carriages. This can only be done by evaluating all carriages at the same time
-        $result->composition = self::setCorrectDirectionForCarriages($result->composition);
+        $composition = self::setCorrectDirectionForCarriages($composition);
 
-        return $result;
+        return new TrainCompositionOnSegment($origin, $destination, $composition);
     }
 
     private static function parseCompositionData($travelsegmentWithCompositionData): TrainComposition
@@ -211,12 +204,12 @@ class NmbsTrainmapCompositionRepository
      */
     private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
     {
-        $lastTractionGroup = $composition->getUnits()[0]->tractionPosition;
+        $lastTractionGroup = $composition->getUnits()[0]->getTractionPosition();
         for ($i = 0; $i < count($composition->getUnits()); $i++) {
             if ($composition->getUnit($i)->getTractionPosition() > $lastTractionGroup) {
                 $composition->getUnit($i - 1)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
             }
-            $lastTractionGroup = $composition->getUnits()[$i]->tractionPosition;
+            $lastTractionGroup = $composition->getUnits()[$i]->getTractionPosition();
         }
         $composition->getUnit($composition->getLength() - 1)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle of the train
         return $composition;
