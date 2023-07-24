@@ -37,7 +37,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     function getComposition(VehicleCompositionRequest $request): VehicleCompositionSearchResult
     {
-        $trainId = $request->getVehicleId();
+        $trainId = preg_replace('/[^0-9]/', '', $request->getVehicleId());
         try {
             $cacheKey = self::getCacheKey($trainId);
             $cacheAge = 0;
@@ -112,8 +112,10 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     public static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
-        if ((property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
-            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))) {
+        if (
+            (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
+            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))
+        ) {
             return self::getAmMrMaterialType($rawCompositionUnit, $position);
         } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
             return self::getHleMaterialType($rawCompositionUnit);
@@ -133,12 +135,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         $trainCompositionUnit->setHasToilets($object->hasToilets ?: false);
         $trainCompositionUnit->setHasTables($object->hasTables ?: false);
-        $trainCompositionUnit->setHasBikeSection($object->hasBikeSection ?: false);
+        $trainCompositionUnit->setHasBikeSection(property_exists($object, 'hasBikeSection') && $object->hasBikeSection);
         $trainCompositionUnit->setHasSecondClassOutlets($object->hasSecondClassOutlets ?: false);
         $trainCompositionUnit->setHasFirstClassOutlets($object->hasFirstClassOutlets ?: false);
         $trainCompositionUnit->setHasHeating($object->hasHeating ?: false);
         $trainCompositionUnit->setHasAirco($object->hasAirco ?: false);
-        $trainCompositionUnit->setHasPrmSection($object->hasPrmSection ?: false); // Persons with Reduced Mobility
+        $trainCompositionUnit->setHasPrmSection(property_exists($object, 'hasPrmSection') && $object->hasPrmSection); // Persons with Reduced Mobility
         $trainCompositionUnit->setHasPriorityPlaces($object->hasPriorityPlaces ?: false);
         $trainCompositionUnit->setMaterialNumber($object->materialNumber ?: 0);
         $trainCompositionUnit->setTractionType($object->tractionType ?: 'unknown');
@@ -152,7 +154,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $trainCompositionUnit->setLengthInMeter($object->lengthInMeter ?: 0);
         $trainCompositionUnit->setTractionPosition($object->tractionPosition ?: 0);
         $trainCompositionUnit->setHasSemiAutomaticInteriorDoors($object->hasSemiAutomaticInteriorDoors ?: false);
-        $trainCompositionUnit->setHasLuggageSection($object->hasLuggageSection ?: false);
+        $trainCompositionUnit->setHasLuggageSection(property_exists($object, 'hasLuggageSection') && $object->hasLuggageSection);
         $trainCompositionUnit->setMaterialSubTypeName($object->materialSubTypeName ?: 'unknown');
 
         return $trainCompositionUnit;
@@ -162,7 +164,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
      * @return array The response data, or null when no data was found.
      */
-    private function getFreshCompositionData(string $vehicleId): array
+    private function getFreshCompositionData(int $vehicleNumber): array
     {
         $request_options = [
             'referer'   => 'http://api.irail.be/',
@@ -171,7 +173,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         ];
 
         $ch = curl_init();
-        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleId;
+        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
 
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -232,19 +234,15 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
-        // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailled data.
-        if (property_exists($rawCompositionUnit, 'parentMaterialTypeName')) {
-            // Sub type might not be set yet when in planning.
-            $parentType = $rawCompositionUnit->parentMaterialTypeName;
-            // NMBS doesn't know the subtype yet, but we can calculate this based on the position.
-            $subType = self::calculateAmMrSubType($parentType, $position);
-        } else if (property_exists($rawCompositionUnit, 'parentMaterialSubTypeName')) {
+        // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailed data.
+        if (property_exists($rawCompositionUnit, 'parentMaterialTypeName')
+            || property_exists($rawCompositionUnit, 'parentMaterialSubTypeName')) {
             $parentType = $rawCompositionUnit->parentMaterialSubTypeName;
             if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
                 $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
             } else {
                 // This data isn't available in the planning stage
-                $subType = '';
+                $subType = self::calculateAmMrSubType($parentType, $position);
             }
         } else {
             $parentType = 'Unknown AM/MR';

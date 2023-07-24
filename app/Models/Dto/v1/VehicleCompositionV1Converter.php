@@ -31,8 +31,8 @@ class VehicleCompositionV1Converter extends V1Converter
     private static function convertSegment(TrainCompositionOnSegment $segment): StdClass
     {
         $result = new StdClass();
-        $result->origin = $segment->getOrigin();
-        $result->destination = $segment->getDestination();
+        $result->origin = self::convertStation($segment->getOrigin());
+        $result->destination = self::convertStation($segment->getDestination());
         $result->composition = self::convertComposition($segment->getComposition());
         return $result;
     }
@@ -60,12 +60,12 @@ class VehicleCompositionV1Converter extends V1Converter
         $result->seatsFirstClass = $unit->getSeatsFirstClass();
         $result->seatsCoupeFirstClass = $unit->getSeatsCoupeFirstClass();
         $result->standingPlacesFirstClass = $unit->getStandingPlacesFirstClass();
-        $result->seatsSecondClass = $unit->getSeatsCoupeSecondClass();
+        $result->seatsSecondClass = $unit->getSeatsSecondClass();
         $result->seatsCoupeSecondClass = $unit->getSeatsCoupeSecondClass();
         $result->standingPlacesSecondClass = $unit->getStandingPlacesSecondClass();
         $result->lengthInMeter = $unit->getLengthInMeter();
-        $result->hasSemiAutomaticInteriorDoors = $unit->getLengthInMeter();
-        $result->materialSubTypeName = $unit->getLengthInMeter();
+        $result->hasSemiAutomaticInteriorDoors = $unit->hasSemiAutomaticInteriorDoors();
+        $result->materialSubTypeName = $unit->getMaterialSubTypeName();
         $result->tractionPosition = $unit->getTractionPosition();
         $result->hasPrmSection = $unit->hasPrmSection();
         $result->hasPriorityPlaces = $unit->hasPriorityPlaces();
@@ -78,7 +78,7 @@ class VehicleCompositionV1Converter extends V1Converter
         $result = new StdClass;
         $result->parent_type = $materialType->getParentType();
         $result->sub_type = $materialType->getSubType();
-        $result->orientation = $materialType->getOrientation();
+        $result->orientation = $materialType->getOrientation()->name;
         return $result;
     }
 
