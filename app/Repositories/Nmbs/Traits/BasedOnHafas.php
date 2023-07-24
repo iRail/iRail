@@ -226,7 +226,7 @@ trait BasedOnHafas
 
             $id = $rawAlert['id'];
             $header = strip_tags($rawAlert['head']);
-            $description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
+            $description = $rawAlert['text'];
             $lead = strip_tags($rawAlert['lead']);
 
             $startTime = $this->parseDateAndTime(
