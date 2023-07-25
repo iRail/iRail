@@ -48,6 +48,11 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         }
     }
 
+    /**
+     * Parse notes for a deserialized raw trip.
+     * @param array $trip
+     * @return String[] the notes for this trip
+     */
     private static function parseNotes(array $trip): array
     {
         /*
@@ -59,7 +64,15 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
              "type": "R"
            }
          ]
-        }*/
+        }
+   "value": "Deze aansluiting kan waarschijnlijk niet gehaald worden.",
+                  "key": "text.realtime.journey.missed.connection",
+                  "type": "R"
+
+            "value": "De aansluiting van S44 5159 zal worden gegarandeerd zolang de vertraging minder is dan 4 minuten.",
+            "key": "WAITING",
+            "type": "I"
+        */
         $notes = [];
         if (key_exists('Notes', $trip)) {
             foreach ($trip['Notes']['Note'] as $note) {
@@ -177,6 +190,9 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         $departure = $this->parseConnectionLegEnd($legStart);
         $arrival = $this->parseConnectionLegEnd($legEnd);
 
+        // When a previous leg gets delayed, a following leg may become unreachable if there is insufficient time to transfer in the station
+        $reachable = $leg['Reachable'];
+
         if (key_exists('journeyStatus', $leg)) {
             // JourneyStatus:
             // - Planned (P)
@@ -207,6 +223,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         }
 
         $parsedLeg = new JourneyLeg($departure, $arrival);
+        $parsedLeg->setReachable($reachable);
         $parsedLeg->setAlerts($this->parseAlerts($leg));
 
         if ($leg['type'] == 'WALK') {

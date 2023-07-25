@@ -82,11 +82,12 @@ class V2Converter
     {
         return [
             'id'           => $note->getId(),
+            'type'         => $note->getType()->name,
             'header'       => $note->getHeader(),
             'lead'         => $note->getLeadText(),
             'message'      => $note->getMessage(),
             'plainText'    => $note->getStrippedMessage(),
-            'link'         => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
+            'links'        => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
             'validFrom'    => $note->getValidFrom(),
             'validUpTo'    => $note->getValidUpTo(),
             'lastModified' => $note->getLastModified()
@@ -99,8 +100,8 @@ class V2Converter
             return null;
         }
         return [
-            'text' => $link->getText(),
-            'link' => $link->getLink(),
+            'text'     => $link->getText(),
+            'link'     => $link->getLink(),
             'language' => $link->getLanguage()
         ];
     }

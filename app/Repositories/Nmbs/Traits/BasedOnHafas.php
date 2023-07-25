@@ -16,7 +16,6 @@ use Irail\Models\MessageType;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
 use Irail\Repositories\Irail\StationsRepository;
-use Irail\Repositories\Irail\Traits\StdClass;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
 
 trait BasedOnHafas
@@ -121,48 +120,6 @@ trait BasedOnHafas
     }
 
     /**
-     * @param $json
-     *
-     * @return array
-     */
-    public static function parseRemarkDefinitions($json): array
-    {
-        if (!key_exists('remL', $json['svcResL'][0]['res']['common'])) {
-            return [];
-        }
-
-        $remarkDefinitions = [];
-        foreach ($json['svcResL'][0]['res']['common']['remL'] as $rawRemark) {
-            /**
-             *  "type": "I",
-             * "code": "VIA",
-             * "icoX": 5,
-             * "txtN": "Opgelet: voor deze reis heb je 2 biljetten nodig.
-             *          <a href=\"http:\/\/www.belgianrail.be\/nl\/klantendienst\/faq\/biljetten.aspx?cat=reisweg\">Meer info.<\/a>"
-             */
-
-            $remark = new StdClass();
-            $remark->code = $rawRemark['code'];
-            $remark->description = strip_tags(preg_replace(
-                "/<a href=\".*?\">.*?<\/a>/",
-                '',
-                $rawRemark['txtN']
-            ));
-
-            $matches = [];
-            preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawRemark['txtN']), $matches);
-
-            if (count($matches[1]) > 0) {
-                $remark->link = urlencode($matches[1][0]);
-            }
-
-            $remarkDefinitions[] = $remark;
-        }
-
-        return $remarkDefinitions;
-    }
-
-    /**
      * Parse the list which contains information about all the alerts which are used in this API response.
      * Alerts warn about service interruptions etc.
      *
@@ -245,8 +202,10 @@ trait BasedOnHafas
 
             $links = [];
             foreach ($rawAlert['channel'] as $channel) {
-                foreach ($channel['url'] as $url) {
-                    $links[] = new MessageLink($url['name'], $url['url']);
+                if (key_exists('url', $channel)) {
+                    foreach ($channel['url'] as $url) {
+                        $links[] = new MessageLink($url['name'], $url['url']);
+                    }
                 }
             }
 
@@ -255,7 +214,8 @@ trait BasedOnHafas
                 case '1':
                     $type = MessageType::WORKS;
                     break;
-                case '2':
+                case '2': // Seen for example on 'Stiltezones'
+                case '11': // Seen for example on 'Kust-expres
                     $type = MessageType::INFO;
                     break;
             }
@@ -413,8 +373,4 @@ trait BasedOnHafas
         return substr($iRailStationId, 2);
     }
 
-    protected function hafasIdToIrailId(string $hafasStationId)
-    {
-        return '00' . $hafasStationId;
-    }
 }

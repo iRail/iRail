@@ -19,6 +19,7 @@ class JourneyLeg
      * @var Message[]
      */
     private array $alerts = [];
+    private bool $reachable;
 
     public function __construct(DepartureOrArrival $departure, DepartureOrArrival $arrival)
     {
@@ -118,6 +119,22 @@ class JourneyLeg
     public function setAlerts(array $alerts): void
     {
         $this->alerts = $alerts;
+    }
+
+    /**
+     * When a previous leg gets delayed, a following leg may become unreachable if there is insufficient time to
+     * transfer in the station, or if the previous leg arrives after the departure of the vehicle in this leg.
+     *
+     * @return bool False if this leg cannot be reached before departure.
+     */
+    public function isReachable(): bool
+    {
+        return $this->reachable;
+    }
+
+    public function setReachable(bool $reachable)
+    {
+        $this->reachable = $reachable;
     }
 
 }
