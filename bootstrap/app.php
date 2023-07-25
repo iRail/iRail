@@ -5,7 +5,7 @@ use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
 use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
-use Irail\Repositories\Nmbs\NmbsRivVehicleRepository;
+use Irail\Repositories\Nmbs\NmbsRivVehicleJourneyRepository;
 use Irail\Repositories\Nmbs\NmbsRssDisturbancesRepository;
 use Irail\Repositories\Nmbs\NmbsTrainMapCompositionRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -85,7 +85,7 @@ $app->singleton(
 
 $app->singleton(
     VehicleJourneyRepository::class,
-    NmbsRivVehicleRepository::class
+    NmbsRivVehicleJourneyRepository::class
 );
 
 $app->singleton(

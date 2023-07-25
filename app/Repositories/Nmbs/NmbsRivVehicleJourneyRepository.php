@@ -25,7 +25,7 @@ use Irail\Repositories\Nmbs\Traits\TimeParser;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Repositories\VehicleJourneyRepository;
 
-class NmbsRivVehicleRepository implements VehicleJourneyRepository
+class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
 {
     use BasedOnHafas;
     use TimeParser;
