@@ -25,6 +25,8 @@ class DepartureOrArrival
     private ?string $uri = null;
     private ?DepartureArrivalState $status = null;
 
+    private ?OccupancyInfo $occupancy = null;
+
     /**
      * @return StationInfo
      */
@@ -196,9 +198,14 @@ class DepartureOrArrival
             str_replace(' ', '', $this->vehicle->getName());
     }
 
-    public function setOccupany(?Occupancy $occupancy)
+    public function getOccupancy(): OccupancyInfo
     {
+        return $this->occupancy ?: new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN);
+    }
 
+    public function setOccupancy(OccupancyInfo $occupancy): void
+    {
+        $this->occupancy = $occupancy;
     }
 
     public function setStatus(?DepartureArrivalState $status)

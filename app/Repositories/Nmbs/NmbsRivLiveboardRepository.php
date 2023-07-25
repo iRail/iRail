@@ -15,6 +15,8 @@ use Irail\Models\CachedData;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Occupancy;
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
@@ -170,7 +172,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setOccupany($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
+        $stopAtStation->setOccupancy($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
         return $stopAtStation;
     }
 
@@ -195,12 +197,12 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      * @param StationInfo $currentStation
      * @param Vehicle     $vehicle
      * @param DateTime    $date
-     * @return Occupancy
+     * @return OccupancyInfo
      */
-    private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, DateTime $date): Occupancy
+    private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, DateTime $date): OccupancyInfo
     {
         // TODO: implement
-        return new Occupancy();
+        return new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN);
     }
 
 

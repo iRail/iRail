@@ -9,6 +9,7 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
@@ -20,7 +21,10 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\JourneyLegType;
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Models\Result\JourneyPlanningSearchResult;
+use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\StationsRepository;
@@ -252,16 +256,29 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $vehicle->setDirection(new VehicleDirection($directionName, $directionStation));
             $parsedLeg->setVehicle($vehicle);
         }
+
+        // TODO: set occupancy data for intermediate stops
+        $parsedLeg->getDeparture()->setOccupancy(
+            $this->getOccupancy(
+                $legStart,
+                $parsedLeg->getDeparture()->getStation(),
+                $parsedLeg->getDeparture()->getVehicle(),
+                $parsedLeg->getDeparture()->getScheduledDateTime()
+            )
+        );
+
         return $parsedLeg;
     }
 
 
     /**
-     * @param array  $leg
-     * @param string $lang
-     * @param array  $trip
+     * @param array   $trip
+     * @param array   $leg
+     * @param string  $lang
+     * @param Vehicle $vehicle
      * @return DepartureAndArrival[];
-     * @throws Exception
+     * @throws InternalProcessingException
+     * @throws UnknownStopException
      */
     public function parseIntermediateStops(array $trip, array $leg, string $lang, Vehicle $vehicle): array
     {
@@ -338,5 +355,25 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         $departureOrArrival->setDelay($this->calculateDelay($legStartOrEnd));
         $departureOrArrival->setPlatform($this->parsePlatform($legStartOrEnd));
         return $departureOrArrival;
+    }
+
+    /**
+     * Add occupancy data (also known as spitsgids data) to the object.
+     *
+     * @param array       $rawDepartureOrArrival The raw NMBS data from which to extract official data
+     * @param StationInfo $station
+     * @param Vehicle     $vehicle
+     * @param DateTime    $date
+     * @return OccupancyInfo
+     */
+    private function getOccupancy(array $rawDepartureOrArrival, StationInfo $station, Vehicle $vehicle, DateTime $date): OccupancyInfo
+    {
+        // TODO: implement spitsgids
+        $officialLevel = OccupancyLevel::UNKNOWN;
+        if (array_key_exists('CommercialInfo', $rawDepartureOrArrival)
+            && array_key_exists('Occupancy', $rawDepartureOrArrival['CommercialInfo'])) {
+            $officialLevel = OccupancyLevel::fromNmbsLevel($rawDepartureOrArrival['CommercialInfo']['Occupancy']['Level']);
+        }
+        return new OccupancyInfo($officialLevel, OccupancyLevel::UNKNOWN);
     }
 }
