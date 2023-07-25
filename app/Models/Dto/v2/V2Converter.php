@@ -5,6 +5,8 @@ namespace Irail\Models\Dto\v2;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
@@ -34,6 +36,7 @@ class V2Converter
             'realtimeDateTime'  => $obj->getRealtimeDateTime(),
             'canceled'          => $obj->isCancelled(),
             'status'            => $obj->getStatus()?->value,
+            'occupancy'         => self::convertOccupancy($obj->getOccupancy()),
             /*'isExtraTrain'      => $obj->isExtra()*/
         ];
     }
@@ -77,7 +80,6 @@ class V2Converter
         ];
     }
 
-
     protected static function convertMessage(Message $note): array
     {
         return [
@@ -94,6 +96,7 @@ class V2Converter
         ];
     }
 
+
     protected static function convertMessageLink(?MessageLink $link): ?array
     {
         if (!$link) {
@@ -103,6 +106,26 @@ class V2Converter
             'text'     => $link->getText(),
             'link'     => $link->getLink(),
             'language' => $link->getLanguage()
+        ];
+    }
+
+    private static function convertOccupancy(OccupancyInfo $occupancy): array
+    {
+        return [
+            'official'  => self::convertOccupancyLevel($occupancy->getOfficialLevel()),
+            'spitsgids' => self::convertOccupancyLevel($occupancy->getSpitsgidsLevel()),
+        ];
+    }
+
+    /**
+     * @param OccupancyLevel $occupancy
+     * @return array
+     */
+    public static function convertOccupancyLevel(OccupancyLevel $occupancy): array
+    {
+        return [
+            'value' => $occupancy->name,
+            'uri'   => $occupancy->value
         ];
     }
 }
