@@ -48,8 +48,10 @@ class DatedVehicleJourneyV1Converter extends V1Converter
 
         $result->isExtraStop = ($departure->isExtra()) || ($arrival->isExtra()) ? '1' : '0';
         if ($stop->getDeparture()) {
+            $result->occupancy = self::convertOccupancy($stop->getDeparture()->getOccupancy());
             $result->departureConnection = $departure->getDepartureUri();
         }
+
         return $result;
     }
 

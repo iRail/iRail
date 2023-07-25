@@ -2,6 +2,8 @@
 
 namespace Irail\Models\Dto\v1;
 
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Models\StationInfo;
 use stdClass;
 
@@ -38,6 +40,17 @@ abstract class V1Converter
         $result->locationX = '0';
         $result->locationY = '0';
         $result->{'@id'} = $vehicle->getUri();
+        return $result;
+    }
+
+    protected static function convertOccupancy(OccupancyInfo $occupancy)
+    {
+        $level = $occupancy->getSpitsgidsLevel() != OccupancyLevel::UNKNOWN
+            ? $occupancy->getSpitsgidsLevel()
+            : $occupancy->getOfficialLevel();
+        $result = new \stdClass();
+        $result->{'@id'} = $level->value;
+        $result->name = basename($level->value);
         return $result;
     }
 }

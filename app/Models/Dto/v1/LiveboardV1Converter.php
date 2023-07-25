@@ -42,6 +42,7 @@ class LiveboardV1Converter extends V1Converter
         $result->isExtra = $departure->isExtra() ? '1' : '0';;
         $result->vehicle = self::convertVehicle($departure->getVehicle());
         $result->platform = self::convertPlatform($departure->getPlatform());
+        $result->occupancy = self::convertOccupancy($departure->getOccupancy());
         $result->departureConnection = $departure->getDepartureUri();
         return $result;
     }

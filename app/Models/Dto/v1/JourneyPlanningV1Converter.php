@@ -65,10 +65,11 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->canceled = $departure->isCancelled() ? '1' : '0';
         $result->stop = array_map(fn($stop) => self::convertIntermediateStop($stop), $departureLeg->getIntermediateStops());
         $result->departureConnection = $departure->getDepartureUri();
-        $result->direction = $departure->getDirection()->getName();
+        $result->direction = $departure->getVehicle()->getDirection()->getName();
         $result->left = $departure->getStatus()?->hasLeft() ? '1' : '0';
         $result->walking = $departureLeg->getLegType() == JourneyLegType::WALKING ? '1' : '0';
         $result->alert = self::convertAlerts($departureLeg->getAlerts());
+        $result->occupancy = self::convertOccupancy($departure->getOccupancy());
         return $result;
     }
 
@@ -83,7 +84,7 @@ class JourneyPlanningV1Converter extends V1Converter
             : self::convertVehicle(new Vehicle("", "WALK", "", ""));
         $result->platform = self::convertPlatform($arrival->getPlatform());
         $result->canceled = $arrival->isCancelled() ? '1' : '0';
-        $result->direction = $arrival->getDirection()->getName();
+        $result->direction = $arrival->getVehicle()->getDirection()->getName();
         $result->arrived = $arrival->getStatus()?->hasArrived() ? '1' : '0';
         $result->walking = $arrivalLeg->getLegType() == JourneyLegType::WALKING ? '1' : '0';
         return $result;
