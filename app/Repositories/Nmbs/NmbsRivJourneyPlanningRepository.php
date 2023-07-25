@@ -195,7 +195,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         $arrival = $this->parseConnectionLegEnd($legEnd);
 
         // When a previous leg gets delayed, a following leg may become unreachable if there is insufficient time to transfer in the station
-        $reachable = $leg['Reachable'];
+        $reachable = $leg['reachable'];
 
         if (key_exists('journeyStatus', $leg)) {
             // JourneyStatus:
