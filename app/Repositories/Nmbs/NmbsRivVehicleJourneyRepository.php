@@ -11,6 +11,7 @@ namespace Irail\Repositories\Nmbs;
 use Exception;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
@@ -64,6 +65,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
      * @throws InternalProcessingException
      * @throws UnknownStopException
      * @throws UpstreamServerException
+     * @throws NoResultsException
      */
     private function parseNmbsRawVehicleJourney(VehicleJourneyRequest $request, CachedData $cachedRawData): VehicleJourneySearchResult
     {

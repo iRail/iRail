@@ -15,14 +15,13 @@ use Irail\Models\CachedData;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Occupancy;
-use Irail\Models\OccupancyInfo;
-use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
+use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -172,7 +171,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setOccupancy($this->getOccupancy($currentStation, $vehicle, $plannedDateTime));
+        $stopAtStation->setOccupancy(OccupancyRepository::getOccupancy($stopAtStation));
         return $stopAtStation;
     }
 
@@ -190,21 +189,6 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         sscanf($stop[$arrayKey], '%d:%d:%d', $hours, $minutes, $seconds);
         return $hours * 3600 + $minutes * 60 + $seconds;
     }
-
-    /**
-     * Add occupancy data (also known as spitsgids data) to the object.
-     *
-     * @param StationInfo $currentStation
-     * @param Vehicle     $vehicle
-     * @param DateTime    $date
-     * @return OccupancyInfo
-     */
-    private function getOccupancy(StationInfo $currentStation, Vehicle $vehicle, DateTime $date): OccupancyInfo
-    {
-        // TODO: implement
-        return new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN);
-    }
-
 
     private function isServiceTrain(array $stop)
     {

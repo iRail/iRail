@@ -27,6 +27,7 @@ use Irail\Models\Result\JourneyPlanningSearchResult;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
+use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
@@ -259,11 +260,9 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
         // TODO: set occupancy data for intermediate stops
         $parsedLeg->getDeparture()->setOccupancy(
-            $this->getOccupancy(
-                $legStart,
-                $parsedLeg->getDeparture()->getStation(),
-                $parsedLeg->getDeparture()->getVehicle(),
-                $parsedLeg->getDeparture()->getScheduledDateTime()
+            OccupancyRepository::getOccupancy(
+                $parsedLeg->getDeparture(),
+                $this->getNmbsOccupancyFromHafas($legStart)
             )
         );
 
@@ -357,23 +356,4 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         return $departureOrArrival;
     }
 
-    /**
-     * Add occupancy data (also known as spitsgids data) to the object.
-     *
-     * @param array       $rawDepartureOrArrival The raw NMBS data from which to extract official data
-     * @param StationInfo $station
-     * @param Vehicle     $vehicle
-     * @param DateTime    $date
-     * @return OccupancyInfo
-     */
-    private function getOccupancy(array $rawDepartureOrArrival, StationInfo $station, Vehicle $vehicle, DateTime $date): OccupancyInfo
-    {
-        // TODO: implement spitsgids
-        $officialLevel = OccupancyLevel::UNKNOWN;
-        if (array_key_exists('CommercialInfo', $rawDepartureOrArrival)
-            && array_key_exists('Occupancy', $rawDepartureOrArrival['CommercialInfo'])) {
-            $officialLevel = OccupancyLevel::fromNmbsLevel($rawDepartureOrArrival['CommercialInfo']['Occupancy']['Level']);
-        }
-        return new OccupancyInfo($officialLevel, OccupancyLevel::UNKNOWN);
-    }
 }

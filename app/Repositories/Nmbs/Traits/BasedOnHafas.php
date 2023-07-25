@@ -15,6 +15,7 @@ use Irail\Models\MessageLink;
 use Irail\Models\MessageType;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
+use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
 
@@ -342,6 +343,7 @@ trait BasedOnHafas
             $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
+            $departure->setOccupancy(OccupancyRepository::getOccupancy($departure));
             $intermediateStop->setDeparture($departure);
         }
 
