@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Repositories\VehicleCompositionRepository;
 
-class CompositionV2Controller extends IrailController
+class CompositionV2Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

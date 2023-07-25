@@ -7,7 +7,7 @@ use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
 use Irail\Models\Dto\v2\JourneyPlanningV2Converter;
 use Irail\Repositories\JourneyPlanningRepository;
 
-class JourneyPlanningV2Controller extends IrailController
+class JourneyPlanningV2Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

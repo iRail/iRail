@@ -7,7 +7,7 @@ use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Models\Dto\v2\DatedVehicleJourneyV2Converter;
 use Irail\Repositories\VehicleJourneyRepository;
 
-class DatedVehicleJourneyV2Controller extends IrailController
+class DatedVehicleJourneyV2Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

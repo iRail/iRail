@@ -10,7 +10,7 @@ use Irail\Models\Dto\v1\LiveboardV1Converter;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\VehicleJourneyRepository;
 
-class DatedVehicleJourneyV1Controller extends IrailController
+class DatedVehicleJourneyV1Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

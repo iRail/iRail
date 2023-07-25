@@ -7,7 +7,7 @@ use Irail\Http\Requests\LiveboardRequestImpl;
 use Irail\Models\Dto\v1\LiveboardV1Converter;
 use Irail\Repositories\LiveboardRepository;
 
-class LiveboardV1Controller extends IrailController
+class LiveboardV1Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

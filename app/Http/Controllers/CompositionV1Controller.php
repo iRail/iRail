@@ -7,7 +7,7 @@ use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Models\Dto\v1\VehicleCompositionV1Converter;
 use Irail\Repositories\VehicleCompositionRepository;
 
-class CompositionV1Controller extends IrailController
+class CompositionV1Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

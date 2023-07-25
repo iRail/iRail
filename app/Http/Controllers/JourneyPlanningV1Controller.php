@@ -12,7 +12,7 @@ use Irail\Models\Dto\v2\LiveboardV2Converter;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
 
-class JourneyPlanningV1Controller extends IrailController
+class JourneyPlanningV1Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.

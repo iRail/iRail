@@ -9,7 +9,7 @@ use Irail\Models\Dto\v1\LiveboardV1Converter;
 use Irail\Models\Result\LiveboardSearchResult;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
-class IrailController extends BaseController
+abstract class BaseIrailController extends BaseController
 {
 
     protected function outputJson(Request $request, $result)

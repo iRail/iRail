@@ -7,7 +7,7 @@ use Irail\Http\Requests\ServiceAlertsV2Request;
 use Irail\Models\Dto\v2\ServiceAlertsV2Converter;
 use Irail\Repositories\ServiceAlertsRepository;
 
-class ServiceAlertsV2Controller extends IrailController
+class ServiceAlertsV2Controller extends BaseIrailController
 {
     /**
      * Create a new controller instance.
