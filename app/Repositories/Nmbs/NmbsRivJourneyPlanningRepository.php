@@ -9,8 +9,8 @@
 
 namespace Irail\Repositories\Nmbs;
 
-use DateTime;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
@@ -21,10 +21,8 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\JourneyLegType;
-use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
 use Irail\Models\Result\JourneyPlanningSearchResult;
-use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Repositories\Irail\OccupancyRepository;
@@ -41,6 +39,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
+    private OccupancyRepository $occupancyRepository;
 
 
     public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
@@ -51,6 +50,8 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         } else {
             $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
         }
+
+        $this->occupancyRepository = App::make(OccupancyRepository::class);
     }
 
     /**
@@ -260,7 +261,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
         // TODO: set occupancy data for intermediate stops
         $parsedLeg->getDeparture()->setOccupancy(
-            OccupancyRepository::getOccupancy(
+            $this->occupancyRepository->getOccupancy(
                 $parsedLeg->getDeparture(),
                 $this->getNmbsOccupancyFromHafas($legStart)
             )
@@ -354,6 +355,14 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         $departureOrArrival->setDelay($this->calculateDelay($legStartOrEnd));
         $departureOrArrival->setPlatform($this->parsePlatform($legStartOrEnd));
         return $departureOrArrival;
+    }
+
+    private function getNmbsOccupancyFromHafas(array $legStart): OccupancyLevel
+    {
+        if (key_exists('CommercialInfo', $legStart)) {
+            return OccupancyLevel::fromNmbsLevel($legStart['CommercialInfo']['Occupancy']['Level']);
+        }
+        return OccupancyLevel::UNKNOWN;
     }
 
 }

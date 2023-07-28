@@ -29,7 +29,7 @@ class Vehicle
     {
         return new Vehicle(
             'http://irail.be/vehicle/' . $type . $number,
-            $number,
+            $type . $number,
             $type,
             $number
         );

@@ -1,5 +1,6 @@
 <?php
 
+use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
@@ -96,6 +97,11 @@ $app->singleton(
 $app->singleton(
     VehicleCompositionRepository::class,
     NmbsTrainMapCompositionRepository::class
+);
+
+$app->singleton(
+    OccupancyRepository::class,
+    OccupancyRepository::class
 );
 
 /*

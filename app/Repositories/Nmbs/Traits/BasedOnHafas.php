@@ -343,7 +343,6 @@ trait BasedOnHafas
             $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
-            $departure->setOccupancy(OccupancyRepository::getOccupancy($departure));
             $intermediateStop->setDeparture($departure);
         }
 

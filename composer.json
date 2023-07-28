@@ -6,13 +6,14 @@
     "type": "project",
     "require": {
         "php": "^8.2",
-        "laravel/lumen-framework": "^10.0",
-        "irail/stations": "1.6.20",
         "ext-curl": "*",
-        "ext-tidy": "*",
-        "ext-simplexml": "*",
+        "ext-http": "*",
         "ext-libxml": "*",
-        "ext-http": "*"
+        "ext-simplexml": "*",
+        "ext-tidy": "*",
+        "irail/stations": "1.6.20",
+        "laravel/lumen-framework": "^10.0",
+        "spatie/async": "^1.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.20",

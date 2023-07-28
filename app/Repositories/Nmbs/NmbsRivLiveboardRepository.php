@@ -8,13 +8,13 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
-use Irail\Models\Occupancy;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Models\StationInfo;
@@ -31,6 +31,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
+    private OccupancyRepository $occupancyRepository;
 
     public function __construct(
         StationsRepository $stationsRepository,
@@ -45,6 +46,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         } else {
             $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
         }
+        $this->occupancyRepository = App::make(OccupancyRepository::class);
     }
 
     /**
@@ -171,7 +173,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setOccupancy(OccupancyRepository::getOccupancy($stopAtStation));
+        $stopAtStation->setOccupancy($this->occupancyRepository->getOccupancy($stopAtStation));
         return $stopAtStation;
     }
 

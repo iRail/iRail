@@ -51,4 +51,33 @@ enum OccupancyLevel: string
                 return OccupancyLevel::UNKNOWN;
         }
     }
+
+    public function getIntValue(): int
+    {
+        switch ($this) {
+            default:
+            case OccupancyLevel::UNKNOWN:
+                throw new \InvalidArgumentException();
+            case OccupancyLevel::LOW:
+                return 1;
+            case OccupancyLevel::MEDIUM:
+                return 2;
+            case OccupancyLevel::HIGH:
+                return 3;
+        }
+    }
+
+    public static function fromIntValue(int $value): OccupancyLevel
+    {
+        switch ($value) {
+            default:
+                throw new \InvalidArgumentException();
+            case 1;
+                return OccupancyLevel::LOW;
+            case 2:
+                return OccupancyLevel::MEDIUM;
+            case 3:
+                return OccupancyLevel::HIGH;
+        }
+    }
 }

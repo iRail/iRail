@@ -9,6 +9,7 @@
 namespace Irail\Repositories\Nmbs;
 
 use Exception;
+use Illuminate\Support\Facades\App;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
@@ -20,6 +21,7 @@ use Irail\Models\Message;
 use Irail\Models\Result\VehicleJourneySearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
+use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Repositories\Nmbs\Traits\TimeParser;
@@ -33,6 +35,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
 
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
+    private OccupancyRepository $occupancyRepository;
 
     public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
     {
@@ -42,6 +45,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
         } else {
             $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
         }
+        $this->occupancyRepository = App::make(OccupancyRepository::class);
     }
 
     /**
@@ -99,6 +103,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
                 $rawStop,
                 $vehicle,
             );
+            $stop->getDeparture()->setOccupancy($this->occupancyRepository->getOccupancy($stop->getDeparture()));
             $stops[] = $stop;
         }
         $this->fixInconsistentReportedStates($stops);
