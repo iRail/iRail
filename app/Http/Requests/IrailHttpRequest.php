@@ -174,8 +174,8 @@ abstract class IrailHttpRequest extends LumenRequest
      * @param string $param
      * @return string|null
      */
-    protected function routeOrGet(string $param): ?string
+    protected function routeOrGet(string $param, string $defaultValue = null): ?string
     {
-        return $this->_request->route($param, $this->_request->get($param));
+        return $this->_request->route($param, $this->_request->get($param)) ?: $defaultValue;
     }
 }
