@@ -103,7 +103,10 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
                 $rawStop,
                 $vehicle,
             );
-            $stop->getDeparture()->setOccupancy($this->occupancyRepository->getOccupancy($stop->getDeparture()));
+            if ($stop->getDeparture()) {
+                // The last stop does not have a departure
+                $stop->getDeparture()->setOccupancy($this->occupancyRepository->getOccupancy($stop->getDeparture()));
+            }
             $stops[] = $stop;
         }
         $this->fixInconsistentReportedStates($stops);
