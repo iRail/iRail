@@ -36,7 +36,7 @@ $router->get('/composition', function (Request $request) use ($router) {
 });
 
 $router->get('/logs', function (Request $request) use ($router) {
-    return http_redirect('/v1/logs', $_GET);
+    return redirect(route('v1.logs', $_GET));
 });
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
@@ -45,6 +45,7 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/vehicle', ['as' => 'v1.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
     $router->get('/disturbances', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
+    $router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
 });
 
 $router->group(['prefix' => 'v2'], function () use ($router) {
@@ -55,5 +56,6 @@ $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/vehicle/{id}/{datetime}', ['as' => 'v2.datedVehicleJourney.withTime', 'uses' => 'DatedVehicleJourneyV2Controller@getDatedVehicleJourney']);
     $router->get('/servicealerts', ['as' => 'v2.serviceAlerts', 'uses' => 'ServiceAlertsV2Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v2.composition', 'uses' => 'CompositionV2Controller@getVehiclecomposition']);
+    $router->get('/logs', ['as' => 'v2.logs', 'uses' => 'LogController@getLogs']);
 });
 
