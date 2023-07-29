@@ -22,7 +22,7 @@ abstract class IrailHttpRequest extends LumenRequest
 
     private string $responseFormat = 'xml';
     private string $language = 'nl';
-    protected $_request;
+    protected LumenRequest $_request;
 
     /**
      * @throws InvalidRequestException
@@ -43,7 +43,7 @@ abstract class IrailHttpRequest extends LumenRequest
     protected function verifyRequiredVariablesPresent(array $array)
     {
         foreach ($array as $var) {
-            if (!$this->has($var)) {
+            if (!$this->_request->has($var)) {
                 throw new InvalidRequestException("$var not set. Please review your request and add the right parameters", 400);
             }
         }
@@ -67,14 +67,14 @@ abstract class IrailHttpRequest extends LumenRequest
         return $this->language;
     }
 
-    public function getApiVersion(): int
+    public function getUserAgent(): string
     {
-        return $this->apiVersion;
+        return $this->_request->header('User-Agent') ?: $this->_request->header('user-agent');
     }
 
     public function isDebugModeEnabled(): bool
     {
-        return $this->get('debug', false) == true;
+        return $this->_request->get('debug') == true;
     }
 
     /**
@@ -84,7 +84,7 @@ abstract class IrailHttpRequest extends LumenRequest
      */
     private function determineResponseFormat(): void
     {
-        $this->responseFormat = $this->_request->get('format', 'xml');
+        $this->responseFormat = $this->_request->get('format') ?: 'xml';
         $this->responseFormat = strtolower($this->responseFormat);
         if (!in_array($this->responseFormat, self::SUPPORTED_FORMATS)) {
             throw new InvalidRequestException("Format {$this->responseFormat} is not supported. Allowed values are: "
@@ -174,7 +174,7 @@ abstract class IrailHttpRequest extends LumenRequest
      * @param string $param
      * @return string|null
      */
-    protected function routeOrGet(string $param, string $defaultValue = null): ?string
+    public function routeOrGet(string $param, string $defaultValue = null): ?string
     {
         return $this->_request->route($param, $this->_request->get($param)) ?: $defaultValue;
     }

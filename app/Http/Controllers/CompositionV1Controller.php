@@ -5,6 +5,7 @@ namespace Irail\Http\Controllers;
 use Illuminate\Http\Response;
 use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Models\Dto\v1\VehicleCompositionV1Converter;
+use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV1Controller extends BaseIrailController
@@ -24,7 +25,25 @@ class CompositionV1Controller extends BaseIrailController
         $repo = app(VehicleCompositionRepository::class);
         $vehicleCompositionSearchResult = $repo->getComposition($request);
         $dataRoot = VehicleCompositionV1Converter::convert($request, $vehicleCompositionSearchResult);
+
+        $this->logRequest($request);
+
         return $this->outputV1($request, $dataRoot);
+    }
+
+    /**
+     * @param VehicleCompositionV1Request $request
+     * @return void
+     */
+    public function logRequest(VehicleCompositionV1Request $request): void
+    {
+        $query = [
+            'id'            => $request->getVehicleId(),
+            'language'      => $request->getLanguage(),
+            'serialization' => $request->getResponseFormat(),
+            'version'       => 1
+        ];
+        app(LogRepository::class)->log('composition', $query, $request->getUserAgent());
     }
 
 }

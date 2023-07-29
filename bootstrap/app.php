@@ -1,5 +1,6 @@
 <?php
 
+use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
@@ -104,6 +105,10 @@ $app->singleton(
     OccupancyRepository::class
 );
 
+$app->singleton(
+    LogRepository::class,
+    LogRepository::class
+);
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('journeyStartDate')->nullable(false)->comment('The date on which the vehicle started its journey');;
             $table->string('source')->nullable(false)->comment('The source, such as Spitsgids or NMBS');
             $table->integer('occupancy')->nullable(false)->comment('The reported occupancy level');
-            $table->timestamp('created_at');
+            $table->timestamp('createdAt');
         });
     }
 

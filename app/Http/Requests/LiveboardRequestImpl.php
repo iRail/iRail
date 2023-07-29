@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use DateTime;
-use Irail\Exceptions\Request\InvalidRequestException;
 
 class LiveboardRequestImpl extends IrailHttpRequest implements LiveboardRequest
 {
@@ -18,12 +17,11 @@ class LiveboardRequestImpl extends IrailHttpRequest implements LiveboardRequest
         parent::__construct();
         $this->stationId = $this->parseStationId('id', $this->routeOrGet('id'));
         $this->dateTime = $this->parseDateTime($this->get('datetime'));
-        $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep','departure'));
+        $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep', 'departure'));
     }
 
     /**
      * @return string
-     * @throws InvalidRequestException
      */
     public function getStationId(): string
     {
