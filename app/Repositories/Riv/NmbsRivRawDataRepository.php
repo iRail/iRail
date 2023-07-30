@@ -9,6 +9,7 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
+use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
@@ -20,21 +21,19 @@ class NmbsRivRawDataRepository
     use Cache;
     use BasedOnHafas;
 
-    const CURL_HEADER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36';
-    const CURL_HEADER_REFERRER = 'http://api.irail.be/';
-    const CURL_TIMEOUT = 30;
-
     const RIV_API_KEY = 'IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl';
 
     private StationsRepository $stationsRepository;
+    private CurlProxy $curlProxy;
 
     /**
      * @param StationsRepository $stationsRepository
      */
-    public function __construct(StationsRepository $stationsRepository)
+    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
     {
         $this->stationsRepository = $stationsRepository;
         $this->setCachePrefix('NMBS');
+        $this->curlProxy = $curlProxy;
     }
 
     /**
@@ -252,32 +251,12 @@ class NmbsRivRawDataRepository
     /**
      * @param string $url
      * @param array  $parameters
-     * @return bool|string
+     * @return string
      */
-    private function makeApiCallToMobileRivApi(string $url, array $parameters): string|bool
+    private function makeApiCallToMobileRivApi(string $url, array $parameters): string
     {
-        $url = $url . '?' . http_build_query($parameters, '', null,);
-
-        Log::debug("Calling NMBS at $url");
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, self::CURL_HEADER_USER_AGENT);
-        curl_setopt($ch, CURLOPT_REFERER, self::CURL_HEADER_REFERRER);
-        curl_setopt($ch, CURLOPT_TIMEOUT, self::CURL_TIMEOUT);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . self::RIV_API_KEY]);
-        $response = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        Log::debug("Received response with HTTP code $httpcode for URL $url");
-        Log::debug($response);
-        if ($httpcode >= 500) {
-            Log::warning("Request $url received response code $httpcode");
-        }
-
-        return $response;
+        $response = $this->curlProxy->get($url, $parameters, ['x-api-key: ' . self::RIV_API_KEY]);
+        return $response->getResponseBody();
     }
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
@@ -109,6 +110,12 @@ $app->singleton(
     LogRepository::class,
     LogRepository::class
 );
+
+$app->singleton(
+    CurlProxy::class,
+    CurlProxy::class
+);
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

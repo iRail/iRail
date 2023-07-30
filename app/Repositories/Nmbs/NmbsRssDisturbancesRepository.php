@@ -9,6 +9,7 @@ use Irail\Models\Message;
 use Irail\Models\MessageLink;
 use Irail\Models\MessageType;
 use Irail\Models\Result\ServiceAlertsResult;
+use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\ServiceAlertsRepository;
 use Irail\Traits\Cache;
@@ -26,6 +27,11 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
         'en' => 'Read more',
         'de' => 'Weiterlesen',
     ];
+    private CurlProxy $curlProxy;
+
+    public function __construct(CurlProxy $curlProxy){
+        $this->curlProxy = $curlProxy;
+    }
 
     /**
      * @param ServiceAlertsRequest $request
@@ -99,27 +105,11 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
      * @param ServiceAlertsRequest $request
      * @return string Broken XML
      */
-    private static function fetchData(ServiceAlertsRequest $request): string
+    private function fetchData(ServiceAlertsRequest $request): string
     {
-        $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
-
         $scrapeUrl = 'https://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/' . strtolower($request->getLanguage()) . '?tpl=rss_feed';
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $scrapeUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For some reason CURL can't verify the RSS SSL certificate
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        return $response;
+        $curlHttpResponse = $this->curlProxy->get($scrapeUrl);
+        return $curlHttpResponse->getResponseBody();
     }
 
     /**

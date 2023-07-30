@@ -10,6 +10,7 @@ use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\VehicleCompositionRepository;
@@ -22,10 +23,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     use Cache;
 
     private StationsRepository $stationsRepository;
+    private CurlProxy $curlProxy;
 
-    public function __construct(StationsRepository $stationsRepository)
+    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
     {
         $this->stationsRepository = $stationsRepository;
+        $this->curlProxy = $curlProxy;
     }
 
     /**
@@ -166,30 +169,13 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     private function getFreshCompositionData(int $vehicleNumber): array
     {
-        $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => 30,
-            'useragent' => Tools::getUserAgent()
-        ];
-
-        $ch = curl_init();
         $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
 
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-
         $authKey = $this->getAuthKey();
-        $headers = [
-            "auth-code: $authKey",
-        ];
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $response = curl_exec($ch);
-        curl_close($ch);
+        $headers = ["auth-code: $authKey"];
 
-        return json_decode($response);
+        $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
+        return json_decode($curlHttpResponse->getResponseBody());
     }
 
     /**
@@ -362,26 +348,13 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      *
      * @return string|null the auth key, or null if it could not be obtained.
      */
-    private static function getNewAuthKey(): ?string
+    private function getNewAuthKey(): ?string
     {
-        $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
-
-        $ch = curl_init();
         $url = "https://trainmap.belgiantrain.be/";
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        $html = curl_exec($ch);
-        curl_close($ch);
+        $curlHttpResponse = $this->curlProxy->get($url);
 
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
+        $html = $curlHttpResponse->getResponseBody();
         preg_match("/localStorage\.setItem\(\"tmAuthCode\",\"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
         return $matches['key'];
     }
