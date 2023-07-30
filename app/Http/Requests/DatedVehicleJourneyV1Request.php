@@ -20,6 +20,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
      * @param string|null $datedJourneyId
      * @param DateTime    $requestDateTime
      * @param string      $language
+     * @throws InvalidRequestException
      */
     public function __construct()
     {

@@ -2,9 +2,12 @@
 
 namespace Irail\Exceptions\Request;
 
-use Exception;
+use Irail\Exceptions\IrailHttpException;
 
-class InvalidRequestException extends Exception
+class InvalidRequestException extends IrailHttpException
 {
-
+    public function __construct($message, $code = 400)
+    {
+        parent::__construct($code, $message);
+    }
 }

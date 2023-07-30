@@ -4,7 +4,7 @@ namespace Irail\Http\Requests;
 
 use DateTime;
 
-class LiveboardRequestImpl extends IrailHttpRequest implements LiveboardRequest
+class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, IrailV1Request
 {
     use LiveboardCacheId;
 
@@ -15,7 +15,11 @@ class LiveboardRequestImpl extends IrailHttpRequest implements LiveboardRequest
     public function __construct()
     {
         parent::__construct();
-        $this->stationId = $this->parseStationId('id', $this->routeOrGet('id'));
+        if ($this->_request->has('id')) {
+            $this->stationId = $this->parseStationId('id', $this->routeOrGet('id'));
+        } else {
+            $this->stationId = $this->parseStationId('station', $this->routeOrGet('station'));
+        }
         $this->dateTime = $this->parseDateTime($this->get('datetime'));
         $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep', 'departure'));
     }

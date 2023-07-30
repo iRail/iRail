@@ -2,13 +2,13 @@
 
 namespace Irail\Exceptions\Upstream;
 
-use Exception;
+use Irail\Exceptions\IrailHttpException;
 use Throwable;
 
-class UpstreamServerException extends Exception
+class UpstreamServerException extends IrailHttpException
 {
-    function __construct(string $message = "", $code = 504, ?Throwable $previous = null)
+    function __construct(string $message = '', int $code = 504, ?Throwable $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($code, $message, $previous);
     }
 }

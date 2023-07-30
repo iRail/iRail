@@ -11,7 +11,7 @@ use Irail\Exceptions\Request\InvalidRequestException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCompositionRequest
+class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCompositionRequest, IrailV1Request
 {
     private string $vehicleId;
     private bool $returnRawData;

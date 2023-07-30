@@ -10,6 +10,7 @@ use DateTime;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
@@ -71,7 +72,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $rawData = $cachedRawData->getValue();
 
         if (empty($rawData)) {
-            throw new Exception('The server did not return any data.', 500);
+            throw new UpstreamServerException('The server did not return any data.', 500);
         }
 
         // Now we'll actually read the departures/arrivals information.

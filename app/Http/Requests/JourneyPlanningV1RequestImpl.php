@@ -7,7 +7,7 @@ use DateTime;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\InvalidRequestException;
 
-class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest
+class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest, IrailV1Request
 {
     use ConnectionsCacheId;
 

@@ -2,9 +2,9 @@
 
 namespace Irail\Exceptions\Internal;
 
-use Exception;
+use Irail\Exceptions\IrailHttpException;
 
-class InternalProcessingException extends Exception
+class InternalProcessingException extends IrailHttpException
 {
 
 }

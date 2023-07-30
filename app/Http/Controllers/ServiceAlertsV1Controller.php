@@ -3,7 +3,7 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Irail\Http\Requests\LiveboardRequestImpl;
+use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Requests\ServiceAlertsV1Request;
 use Irail\Models\Dto\v1\ServiceAlertsV1Converter;
 use Irail\Repositories\Irail\LogRepository;

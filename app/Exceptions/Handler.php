@@ -4,6 +4,9 @@ namespace Irail\Exceptions;
 
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -41,14 +44,39 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param Throwable                 $exception
-     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     * @param \Illuminate\Http\Request $request
+     * @param Throwable                $exception
+     * @return Response|JsonResponse
      *
      * @throws Throwable
      */
-    public function render($request, Throwable $exception)
+    public function render($request, Throwable $exception): Response|JsonResponse
     {
-        return parent::render($request, $exception);
+
+        if (str_contains($request->getUri(), '/v1/') && $request->get('format', 'xml') == 'xml') {
+            Log::debug('Returning XML error');
+            return response(
+                "<error code=\"{$exception->getCode()}\">{$exception->getMessage()}</error>",
+                $exception->getStatusCode(),
+                [
+                    'Access-Control-Allow-Origin'   => '*',
+                    'Access-Control-Allow-Headers'  => '*',
+                    'Access-Control-Expose-Headers' => '*',
+                    'Content-Type'                  => 'application/xml;charset=UTF-8'
+                ]
+            );
+        }
+        return response()->json(
+            [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage()
+            ],
+            $exception->getCode(),
+            [
+                'Access-Control-Allow-Origin'   => '*',
+                'Access-Control-Allow-Headers'  => '*',
+                'Access-Control-Expose-Headers' => '*',
+                'Content-Type'                  => 'application/json;charset=UTF-8'
+            ]);
     }
 }

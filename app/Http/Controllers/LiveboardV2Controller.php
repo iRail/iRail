@@ -3,7 +3,9 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Irail\Http\Requests\LiveboardRequestImpl;
+use Irail\Http\Requests\LiveboardRequest;
+use Irail\Http\Requests\LiveboardV1Request;
+use Irail\Http\Requests\LiveboardV2Request;
 use Irail\Models\Dto\v2\LiveboardV2Converter;
 use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\LiveboardRepository;
@@ -20,7 +22,7 @@ class LiveboardV2Controller extends BaseIrailController
         //
     }
 
-    public function getLiveboardById(LiveboardRequestImpl $request): JsonResponse
+    public function getLiveboardById(LiveboardV2Request $request): JsonResponse
     {
         $repo = app(LiveboardRepository::class);
         $liveboardSearchResult = $repo->getLiveboard($request);
@@ -30,10 +32,10 @@ class LiveboardV2Controller extends BaseIrailController
     }
 
     /**
-     * @param LiveboardRequestImpl $request
+     * @param LiveboardV1Request $request
      * @return void
      */
-    public function logRequest(LiveboardRequestImpl $request): void
+    public function logRequest(LiveboardRequest $request): void
     {
         $query = [
             'station'  => $request->getStationId(),

@@ -2,8 +2,7 @@
 
 namespace Tests\Http;
 
-use GuzzleHttp\Client;
-use PHPUnit\Framework\TestCase;
+use Laravel\Lumen\Testing\TestCase;
 use Symfony\Component\Process\Process;
 
 abstract class HttpIntegrationTestCase extends TestCase

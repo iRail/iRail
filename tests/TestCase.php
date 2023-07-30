@@ -12,8 +12,10 @@ abstract class TestCase extends BaseTestCase
      *
      * @return Application
      */
-    public function createApplication()
+    public function createApplication(): Application
     {
-        return require __DIR__.'/../bootstrap/app.php';
+        $app = require __DIR__.'/../bootstrap/app.php';
+        config(['app.env' => 'testing', 'app.debug' => false]);
+        return $app;
     }
 }

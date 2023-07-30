@@ -3,6 +3,7 @@
 namespace Irail\Legacy\Output;
 
 use Exception;
+use InvalidArgumentException;
 use Irail\Models\Dto\v1\DataRoot;
 
 /**
@@ -25,20 +26,20 @@ abstract class Printer
     public static function getPrinterInstance(string $format, ?DataRoot $dataroot): Printer
     {
         //We're making this in the class form: Json or Xml or Jsonp
-        $format = ucfirst(strtolower($format));
+        $format = strtolower($format);
         //fallback for when callback is set but not the format= Jsonp
         if (isset($_GET['callback']) && $format == 'Json') {
-            $format = 'Jsonp';
+            $format = 'jsonp';
         }
 
         switch ($format) {
             case "":
-            case "Xml":
+            case "xml":
                 return new Xml($dataroot);
-            case "Json":
+            case "json":
                 return new Json($dataroot);
         }
-        throw new Exception('Incorrect format specified. Please correct this and try again', 402);
+        throw new InvalidArgumentException('Incorrect format specified. Please correct this and try again', 402);
     }
 
     /**
