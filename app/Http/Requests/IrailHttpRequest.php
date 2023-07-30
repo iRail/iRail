@@ -182,7 +182,7 @@ abstract class IrailHttpRequest extends LumenRequest
         if (strtolower($value) === 'arrival') {
             return TimeSelection::ARRIVAL;
         }
-        throw new InvalidRequestException("The provided time mode selection {$value} is invalid.");
+        throw new InvalidRequestException("The provided time mode selection '{$value}' is invalid. Should be one of 'departure', 'arrival'.");
     }
 
     /**

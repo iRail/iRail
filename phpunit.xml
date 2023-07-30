@@ -14,4 +14,9 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
     </php>
+    <source>
+        <include>
+            <directory>app/</directory>
+        </include>
+    </source>
 </phpunit>

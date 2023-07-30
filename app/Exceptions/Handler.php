@@ -52,6 +52,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
+        if (!method_exists($exception, 'getStatusCode')) {
+            return parent::render($request, $exception);
+        }
 
         if (str_contains($request->getUri(), '/v1/') && $request->get('format', 'xml') == 'xml') {
             Log::debug('Returning XML error');
@@ -68,10 +71,10 @@ class Handler extends ExceptionHandler
         }
         return response()->json(
             [
-                'code'    => $exception->getCode(),
+                'code'    => $exception->getStatusCode(),
                 'message' => $exception->getMessage()
             ],
-            $exception->getCode(),
+            $exception->getStatusCode(),
             [
                 'Access-Control-Allow-Origin'   => '*',
                 'Access-Control-Allow-Headers'  => '*',

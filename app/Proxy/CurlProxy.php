@@ -75,7 +75,7 @@ class CurlProxy
      * @param array  $parameters
      * @return string
      */
-    private function buildUrl(string $url, array $parameters): string
+    protected function buildUrl(string $url, array $parameters): string
     {
         return $url . '?' . http_build_query($parameters, '', null,);
     }
