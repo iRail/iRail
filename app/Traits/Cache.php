@@ -11,19 +11,19 @@ use Psr\Cache\InvalidArgumentException;
 
 trait Cache
 {
-    private ?AbstractCachePool $cache = null;
+    private static ?AbstractCachePool $cache = null;
     private string $prefix = '';
     private int $defaultTtl = 15;
 
     private function initializeCachePool(): void
     {
-        if ($this->cache == null) {
+        if (self::$cache == null) {
             // Try to use APC when available
             if (extension_loaded('apcu')) {
-                $this->cache = new ApcuCachePool();
+                self::$cache = new ApcuCachePool();
             } else {
                 // Fall back to array cache
-                $this->cache = new ArrayCachePool();
+                self::$cache = new ArrayCachePool();
             }
         }
     }
@@ -46,7 +46,7 @@ trait Cache
         $key = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
         try {
-            return $this->cache->hasItem($key);
+            return self::$cache->hasItem($key);
         } catch (InvalidArgumentException) {
             return false;
         }
@@ -64,7 +64,7 @@ trait Cache
         $this->initializeCachePool();
 
         try {
-            if ($this->cache->hasItem($key)) {
+            if (self::$cache->hasItem($key)) {
                 return $this->getCacheEntry($key);
             } else {
                 return false;
@@ -95,7 +95,7 @@ trait Cache
         $key = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
         try {
-            $item = $this->cache->getItem($key);
+            $item = self::$cache->getItem($key);
         } catch (InvalidArgumentException $e) {
             // Todo: log something here
             return;
@@ -107,7 +107,7 @@ trait Cache
             $item->expiresAfter($ttl);
         }
 
-        $this->cache->save($item);
+        self::$cache->save($item);
     }
 
     /**
@@ -148,7 +148,7 @@ trait Cache
      */
     private function getCacheEntry(string $key): ?CachedData
     {
-        $cacheItem = $this->cache->getItem($key);
+        $cacheItem = self::$cache->getItem($key);
         $cacheEntry = $cacheItem->get();
         if ($cacheEntry == null) {
             return null;

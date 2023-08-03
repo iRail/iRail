@@ -8,7 +8,7 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
+use Carbon\Carbon;
 
 interface JourneyPlanningRequest extends CacheableRequest
 {
@@ -16,7 +16,7 @@ interface JourneyPlanningRequest extends CacheableRequest
 
     public function getDestinationStationId(): string;
 
-    public function getDateTime(): DateTime;
+    public function getDateTime(): Carbon;
 
     public function getTimeSelection(): TimeSelection;
 

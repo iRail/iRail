@@ -2,6 +2,7 @@
 
 namespace Irail\Http\Requests;
 
+use Carbon\Carbon;
 use DateTime;
 
 interface LiveboardRequest extends CacheableRequest
@@ -12,9 +13,9 @@ interface LiveboardRequest extends CacheableRequest
     public function getStationId(): string;
 
     /**
-     * @return DateTime
+     * @return Carbon
      */
-    public function getDateTime(): DateTime;
+    public function getDateTime(): Carbon;
 
     /**
      * @return TimeSelection

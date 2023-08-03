@@ -6,25 +6,22 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\InvalidRequestException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest, IrailV1Request
 {
-    use ConnectionsCacheId;
+    use JourneyPlanningCacheId;
 
     private string $originStationId;
     private string $destinationStationId;
-    private DateTime $dateTime;
+    private Carbon $dateTime;
     private TimeSelection $timeSelection;
     private TypeOfTransportFilter $typesOfTransport;
 
     /**
-     * @param string                $originStationId
-     * @param string                $destinationStationId
-     * @param DateTime              $dateTime
-     * @param TimeSelection         $timeSelection
-     * @param TypeOfTransportFilter $typesOfTransport
-     * @param string                $language
-     * @throws InvalidRequestException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function __construct()
     {
@@ -62,7 +59,7 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
         return $this->destinationStationId;
     }
 
-    function getDateTime(): DateTime
+    function getDateTime(): Carbon
     {
         return $this->dateTime;
     }

@@ -2,22 +2,23 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
+
+use Carbon\Carbon;
 
 class JourneyPlanningV2RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest
 {
-    use ConnectionsCacheId;
+    use JourneyPlanningCacheId;
 
     private string $originStationId;
     private string $destinationStationId;
-    private DateTime $dateTime;
+    private Carbon $dateTime;
     private TimeSelection $timeSelection;
     private TypeOfTransportFilter $typesOfTransport;
 
     /**
      * @param string                $originStationId
      * @param string                $destinationStationId
-     * @param DateTime              $dateTime
+     * @param Carbon              $dateTime
      * @param TimeSelection         $timeSelection
      * @param TypeOfTransportFilter $typesOfTransport
      * @param string                $language
@@ -43,7 +44,7 @@ class JourneyPlanningV2RequestImpl extends IrailHttpRequest implements JourneyPl
         return $this->destinationStationId;
     }
 
-    function getDateTime(): DateTime
+    function getDateTime(): Carbon
     {
         return $this->dateTime;
     }

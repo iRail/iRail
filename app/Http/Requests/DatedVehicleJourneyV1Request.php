@@ -3,7 +3,7 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
+
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\InvalidRequestException;
 
@@ -18,7 +18,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     /**
      * @param string|null $vehicleId
      * @param string|null $datedJourneyId
-     * @param DateTime    $requestDateTime
+     * @param Carbon    $requestDateTime
      * @param string      $language
      * @throws InvalidRequestException
      */
@@ -63,7 +63,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     /**
      * @inheritDoc
      */
-    public function getDateTime(): DateTime
+    public function getDateTime(): Carbon
     {
         return $this->dateTime;
     }

@@ -2,7 +2,7 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
+use Carbon\Carbon;
 
 trait VehicleJourneyCacheId
 {
@@ -11,7 +11,7 @@ trait VehicleJourneyCacheId
         return '|VehicleJourney|' . join('|', [
                 $this->getDatedJourneyId() ?: 'null',
                 $this->getVehicleId() ?: 'null',
-                $this->getDateTime()->getTimestamp(),
+                $this->getDateTime()->seconds(0)->getTimestamp(),
                 $this->getLanguage()
             ]);
     }
@@ -20,7 +20,7 @@ trait VehicleJourneyCacheId
 
     abstract function getDatedJourneyId(): ?string;
 
-    abstract function getDateTime(): DateTime;
+    abstract function getDateTime(): Carbon;
 
     abstract function getLanguage(): string;
 

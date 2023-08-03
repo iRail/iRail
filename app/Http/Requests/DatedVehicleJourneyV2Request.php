@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
 
 class DatedVehicleJourneyV2Request extends IrailHttpRequest implements VehicleJourneyRequest
 {
@@ -16,7 +15,7 @@ class DatedVehicleJourneyV2Request extends IrailHttpRequest implements VehicleJo
     /**
      * @param string|null $vehicleId
      * @param string|null $datedJourneyId
-     * @param DateTime    $requestDateTime
+     * @param Carbon    $requestDateTime
      * @param string      $language
      */
     public function __construct()
@@ -45,7 +44,7 @@ class DatedVehicleJourneyV2Request extends IrailHttpRequest implements VehicleJo
     /**
      * @inheritDoc
      */
-    public function getDateTime(): DateTime
+    public function getDateTime(): Carbon
     {
         return $this->dateTime;
     }

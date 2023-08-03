@@ -2,16 +2,17 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
 
-trait ConnectionsCacheId
+use Carbon\Carbon;
+
+trait JourneyPlanningCacheId
 {
     public function getCacheId(): string
     {
         return '|Connections|' . join('|', [
                 $this->getOriginStationId(),
                 $this->getDestinationStationId(),
-                $this->getDateTime()->getTimestamp(),
+                $this->getDateTime()->seconds(0)->getTimestamp(),
                 $this->getTimeSelection()->name,
                 $this->getTypesOfTransport()->name,
                 $this->getLanguage()
@@ -22,7 +23,7 @@ trait ConnectionsCacheId
 
     abstract function getDestinationStationId(): string;
 
-    abstract function getDateTime(): DateTime;
+    abstract function getDateTime(): Carbon;
 
     abstract function getTimeSelection(): TimeSelection;
 

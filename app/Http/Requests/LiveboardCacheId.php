@@ -2,6 +2,7 @@
 
 namespace Irail\Http\Requests;
 
+use Carbon\Carbon;
 use DateTime;
 
 trait LiveboardCacheId
@@ -10,7 +11,7 @@ trait LiveboardCacheId
     {
         return '|Liveboard|' . join('|', [
                 $this->getStationId(),
-                $this->getDateTime()->getTimestamp(),
+                $this->getDateTime()->seconds(0)->getTimestamp(),
                 $this->getDepartureArrivalMode()->name,
                 $this->getLanguage()
             ]);
@@ -18,7 +19,7 @@ trait LiveboardCacheId
 
     abstract function getStationId(): string;
 
-    abstract function getDateTime(): DateTime;
+    abstract function getDateTime(): Carbon;
 
     abstract function getDepartureArrivalMode(): TimeSelection;
 

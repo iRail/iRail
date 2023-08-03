@@ -2,6 +2,7 @@
 
 namespace Irail\Http\Requests;
 
+use Carbon\Carbon;
 use DateTime;
 
 class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, IrailV1Request
@@ -9,7 +10,7 @@ class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, I
     use LiveboardCacheId;
 
     private TimeSelection $departureArrivalMode;
-    private DateTime $dateTime;
+    private Carbon $dateTime;
     private string $stationId;
 
     public function __construct()
@@ -33,9 +34,9 @@ class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, I
     }
 
     /**
-     * @return DateTime
+     * @return Carbon
      */
-    public function getDateTime(): DateTime
+    public function getDateTime(): Carbon
     {
         return $this->dateTime;
     }

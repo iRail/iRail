@@ -2,7 +2,7 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
+use Carbon\Carbon;
 
 interface VehicleJourneyRequest extends CacheableRequest
 {
@@ -17,9 +17,9 @@ interface VehicleJourneyRequest extends CacheableRequest
     public function getDatedJourneyId(): ?string;
 
     /**
-     * @return DateTime
+     * @return Carbon
      */
-    public function getDateTime(): DateTime;
+    public function getDateTime(): Carbon;
 
     /**
      * Get the requested response language, as an ISO2 code.
