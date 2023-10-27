@@ -38,7 +38,7 @@ class LiveboardDatasource
         }
         $request->setStation($dataroot->station);
 
-        if (self::isOutsideRivTimetablePeriod($request)){
+        if (self::isOutsideRivTimetablePeriod($request)) {
             $fallback = new LiveboardFallbackDatasource();
             $fallback->fillDataRoot($dataroot, $request);
             return;
@@ -129,7 +129,7 @@ class LiveboardDatasource
      * @param string  $timeSel
      * @return string
      */
-    public static function getNmbsCacheKey(Station $station, string $time, string $date,  string $timeSel): string
+    public static function getNmbsCacheKey(Station $station, string $time, string $date, string $timeSel): string
     {
         return 'NMBSLiveboard|' . join('.', [
                 $station->id,
@@ -202,7 +202,7 @@ class LiveboardDatasource
     private static function parseNmbsData(string $serverData, Station $station, bool $isArrivalBoard, string $lang): array
     {
         if (empty($serverData)) {
-            throw new Exception("The server did not return any data.", 500);
+            throw new Exception("The remote server did not return any data.", 504);
         }
 
         $json = json_decode($serverData, true);
@@ -254,11 +254,11 @@ class LiveboardDatasource
                 // $hafasVehicle] = self::parseScheduledTimeAndVehicle($stop, $date, $vehicleDefinitions);
                 // parse information about which platform this train will depart from/arrive to.
                 $platform = key_exists('Platform', $stop) ? $stop['Platform'] : '?';
-                $isPlatformNormal = 1; // TODO:  reverse-engineer and implement
+                $isPlatformNormal = key_exists('PlatformChanged', $stop) && $stop['PlatformChanged'] == 1 ? 0 : 1;
 
                 // Canceled means the entire train is canceled, partiallyCanceled means only a few stops are canceled.
                 // DepartureCanceled gives information if this stop has been canceled.
-                $stopCanceled = 0; // TODO: reverse-engineer and implement
+                $stopCanceled = key_exists('Status', $stop) && $stop['Status'] == 'Canceled';
                 $left = 0; // TODO: probably no longer supported
 
                 $isExtraTrain = 0; // TODO: probably no longer supported
@@ -381,9 +381,9 @@ class LiveboardDatasource
     {
         // Date before today
         return $request->getDate() < (new DateTime())->format('Ymd')
-                // Earlier today
+            // Earlier today
             || $request->getTime() < (new DateTime())->format('Hi')
-                // More than 7 days into the future
+            // More than 7 days into the future
             || $request->getDate() > (new DateTime())->modify("+7 day")->format('Ymd');
     }
 }
