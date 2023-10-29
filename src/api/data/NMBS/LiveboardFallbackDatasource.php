@@ -190,6 +190,10 @@ class LiveboardFallbackDatasource
         preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
         $response = $matches[0];
 
+        $response = preg_replace('/<tr class="sqLinkRow.*?<\/tr>/s','',$response);
+        $response = preg_replace('/onclick="loadDetails(.*?)"/s','',$response);
+        $response = preg_replace('/<div.*?<\/div>/s','',$response);
+
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents(
