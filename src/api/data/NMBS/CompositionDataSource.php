@@ -54,7 +54,7 @@ class CompositionDataSource
 
             // This data is static. Cache depending on the "state" of the data.
             // We don't cache suport short trains. If it's only a locomotive, it's incorrect data, and we don't want to cache incorrect data too long.
-            if ($data[0]->confirmedBy == "Planning" || count($data[0]->materialUnits) < 2) {
+            if ($data[0]->confirmedBy == 'Planning' || count($data[0]->materialUnits) < 2) {
                 // Planning data often lacks detail. Store it for 5 minutes
                 Tools::setCachedObject($nmbsCacheKey, $data, 5 * 60);
             } else {
@@ -87,12 +87,21 @@ class CompositionDataSource
     private static function parseOneSegmentWithCompositionData($travelsegmentWithCompositionData, string $language, bool $returnAllData): TrainCompositionInSegment
     {
         $result = new TrainCompositionInSegment;
+        $fromUicCode = $travelsegmentWithCompositionData->ptCarFrom->uicCode;
+        //     "ptCarFrom": {
+        //      "id": 139,
+        //      "uicCode": "8829025",
+        //      "fromName": "Anv-Berchem - Antw-Berchem"
+        //    },
+        $fromUicCode = ($fromUicCode == '8829025') ? '8821121' : $fromUicCode; // replace unknown uic code with antwerpen-berchem
         $result->origin = StationsDatasource::getStationFromID(
-            '00' . $travelsegmentWithCompositionData->ptCarFrom->uicCode,
+            '00' . $fromUicCode,
             $language
         );
+        $toUicCode = $travelsegmentWithCompositionData->ptCarTo->uicCode;
+        $toUicCode = ($toUicCode == '8829025') ? '8821121' : $toUicCode;
         $result->destination = StationsDatasource::getStationFromID(
-            '00' . $travelsegmentWithCompositionData->ptCarTo->uicCode,
+            '00' . $toUicCode,
             $language
         );
         $result->composition = self::parseCompositionData($travelsegmentWithCompositionData, $returnAllData);
@@ -131,18 +140,18 @@ class CompositionDataSource
     static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
         $materialType = new RollingMaterialType();
-        $materialType->parent_type = "unknown";
-        $materialType->sub_type = "unknown";
-        $materialType->orientation = "LEFT";
+        $materialType->parent_type = 'unknown';
+        $materialType->sub_type = 'unknown';
+        $materialType->orientation = 'LEFT';
 
-        if ((property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
-            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))) {
+        if ((property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'AM/MR')
+            || (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName, 'AM'))) {
             self::setAmMrMaterialType($materialType, $rawCompositionUnit, $position);
-        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
+        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
             self::setHleMaterialType($materialType, $rawCompositionUnit);
-        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
+        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
             self::setHvMaterialType($materialType, $rawCompositionUnit);
-        } else if (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
+        } elseif (strpos($rawCompositionUnit->materialSubTypeName, '_') !== false) {
             // Anything else, default fallback
             $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
@@ -165,7 +174,7 @@ class CompositionDataSource
             'hasPrmSection'                 => false, // Persons with Reduced Mobility
             'hasPriorityPlaces'             => false,
             'materialNumber'                => 0,
-            'tractionType'                  => "unknown",
+            'tractionType'                  => 'unknown',
             'canPassToNextUnit'             => false,
             'standingPlacesSecondClass'     => 0,
             'standingPlacesFirstClass'      => 0,
@@ -177,7 +186,7 @@ class CompositionDataSource
             'tractionPosition'              => 0,
             'hasSemiAutomaticInteriorDoors' => false,
             'hasLuggageSection'             => false,
-            'materialSubTypeName'           => "unknown",
+            'materialSubTypeName'           => 'unknown',
         ];
         foreach ($wellDefinedProperties as $propertyName => $defaultValue) {
             if (property_exists($object, $propertyName)) {
@@ -218,7 +227,7 @@ class CompositionDataSource
         ];
 
         $ch = curl_init();
-        $url = "https://trainmapjs.azureedge.net/data/composition/" . $vehicleId;
+        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleId;
 
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -268,11 +277,11 @@ class CompositionDataSource
         $lastTractionGroup = $composition->unit[0]->tractionPosition;
         for ($i = 0; $i < count($composition->unit); $i++) {
             if ($composition->unit[$i]->tractionPosition > $lastTractionGroup) {
-                $composition->unit[$i - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle in each traction group
+                $composition->unit[$i - 1]->materialType->orientation = 'RIGHT'; // Switch orientation on the last vehicle in each traction group
             }
             $lastTractionGroup = $composition->unit[$i]->tractionPosition;
         }
-        $composition->unit[count($composition->unit) - 1]->materialType->orientation = "RIGHT"; // Switch orientation on the last vehicle of the train
+        $composition->unit[count($composition->unit) - 1]->materialType->orientation = 'RIGHT'; // Switch orientation on the last vehicle of the train
         return $composition;
     }
 
@@ -287,23 +296,23 @@ class CompositionDataSource
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
         // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailled data.
-        if (property_exists($rawCompositionUnit, "parentMaterialTypeName")) {
+        if (property_exists($rawCompositionUnit, 'parentMaterialTypeName')) {
             // Sub type might not be set yet when in planning.
             $materialType->parent_type = strtoupper($rawCompositionUnit->parentMaterialSubTypeName);
             // NMBS doesn't know the subtype yet, but we can calculate this based on the position.
             self::calculateAmMrSubType($materialType, $position);
         } else {
-            if (property_exists($rawCompositionUnit, "parentMaterialSubTypeName")) {
+            if (property_exists($rawCompositionUnit, 'parentMaterialSubTypeName')) {
                 $materialType->parent_type = strtoupper($rawCompositionUnit->parentMaterialSubTypeName);
-                if (property_exists($rawCompositionUnit, "materialSubTypeName")) {
+                if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
                     $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
                 } else {
                     // This data isn't available in the planning stage
-                    $materialType->sub_type = "";
+                    $materialType->sub_type = '';
                 }
             } else {
-                $materialType->parent_type = "Unknown AM/MR";
-                $materialType->sub_type = "";
+                $materialType->parent_type = 'Unknown AM/MR';
+                $materialType->sub_type = '';
             }
         }
     }
@@ -317,13 +326,13 @@ class CompositionDataSource
     private static function setHleMaterialType(RollingMaterialType $materialType, $rawCompositionUnit): void
     {
         // Electric locomotives
-        if (property_exists($rawCompositionUnit, "materialSubTypeName")
+        if (property_exists($rawCompositionUnit, 'materialSubTypeName')
             && str_starts_with($rawCompositionUnit->materialSubTypeName, 'HLE')) {
             $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
-        } else if (property_exists($rawCompositionUnit, "materialSubTypeName")
+        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName')
             && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')) { // HV mislabeled as HLE :(
-            $materialType->parent_type = "M7";
+            $materialType->parent_type = 'M7';
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 2);
         } else {
             $materialType->parent_type = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
@@ -341,17 +350,23 @@ class CompositionDataSource
     {
         // Separate carriages
         if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-            preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
-            $materialType->parent_type = $matches[1]; // M6, I11
-            $materialType->sub_type = $matches[3]; // A, B, BDX, BUH, ...
+            if (preg_match('/NS(\w+)$/', $rawCompositionUnit->materialSubTypeName, $matches) == 1) {
+                // International NS train handling
+                $materialType->parent_type = 'NS';
+                $materialType->sub_type = $matches[1];
+            } else {
+                preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+                $materialType->parent_type = $matches[1]; // M6, I11
+                $materialType->sub_type = $matches[3]; // A, B, BDX, BUH, ...
+            }
         } else {
             // Some special cases, typically when data is missing
             if (property_exists($rawCompositionUnit, 'materialTypeName')) {
                 $materialType->parent_type = $rawCompositionUnit->materialTypeName;
             } else {
-                $materialType->parent_type = "unknown";
+                $materialType->parent_type = 'unknown';
             }
-            $materialType->sub_type = "unknown";
+            $materialType->sub_type = 'unknown';
         }
     }
 
@@ -368,10 +383,10 @@ class CompositionDataSource
         if (in_array($materialType->parent_type, ['AM62-66', 'AM62', 'AM66', 'AM86'])) {
             switch ($position % 2) {
                 case 0:
-                    $materialType->sub_type = "a";
+                    $materialType->sub_type = 'a';
                     break;
                 case 1:
-                    $materialType->sub_type = "b";
+                    $materialType->sub_type = 'b';
                     break;
             }
         }
@@ -380,13 +395,13 @@ class CompositionDataSource
         if (in_array($materialType->parent_type, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM80', 'AM80M'])) {
             switch ($position % 3) {
                 case 0:
-                    $materialType->sub_type = "a";
+                    $materialType->sub_type = 'a';
                     break;
                 case 1:
-                    $materialType->sub_type = "b";
+                    $materialType->sub_type = 'b';
                     break;
                 case 2:
-                    $materialType->sub_type = "c";
+                    $materialType->sub_type = 'c';
                     break;
             }
         }
@@ -395,16 +410,16 @@ class CompositionDataSource
         if (in_array($materialType->parent_type, ['AM75'])) {
             switch ($position % 4) {
                 case 0:
-                    $materialType->sub_type = "a";
+                    $materialType->sub_type = 'a';
                     break;
                 case 1:
-                    $materialType->sub_type = "b";
+                    $materialType->sub_type = 'b';
                     break;
                 case 2:
-                    $materialType->sub_type = "c";
+                    $materialType->sub_type = 'c';
                     break;
                 case 3:
-                    $materialType->sub_type = "d";
+                    $materialType->sub_type = 'd';
                     break;
             }
         }
@@ -417,13 +432,13 @@ class CompositionDataSource
      */
     private static function getAuthKey(): ?string
     {
-        $cachedKey = Tools::getCachedObject("NMBSCompositionAuth");
+        $cachedKey = Tools::getCachedObject('NMBSCompositionAuth');
         if ($cachedKey) {
             return $cachedKey;
         }
         $authenticationKey = self::getNewAuthKey();
 
-        Tools::setCachedObject("NMBSCompositionAuth", $authenticationKey, 60 * 30); // Store for half an hour
+        Tools::setCachedObject('NMBSCompositionAuth', $authenticationKey, 60 * 30); // Store for half an hour
         return $authenticationKey;
     }
 
@@ -441,7 +456,7 @@ class CompositionDataSource
         ];
 
         $ch = curl_init();
-        $url = "https://trainmap.belgiantrain.be/";
+        $url = 'https://trainmap.belgiantrain.be/';
 
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
