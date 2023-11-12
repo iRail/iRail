@@ -259,7 +259,8 @@ class HafasCommon
             $alert = new Alert();
             $alert->header = strip_tags($rawAlert['head']);
             $alert->description = strip_tags(preg_replace("/<a href=\".*?\">.*?<\/a>/", '', $rawAlert['text']));
-            $alert->lead = strip_tags($rawAlert['lead']);
+            // read Lead if present, fall back to the first sentence if unavailable
+            $alert->lead = key_exists('lead', $rawAlert) ? strip_tags($rawAlert['lead']) : substr($alert->description, 0, strpos($alert->description, '.'));
 
             preg_match_all("/<a href=\"(.*?)\">.*?<\/a>/", urldecode($rawAlert['text']), $matches);
             if (count($matches[1]) > 1) {
