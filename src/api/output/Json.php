@@ -33,8 +33,14 @@ class Json extends Printer
      */
     public function printError($ec, $msg)
     {
+        if (str_contains($msg, PHP_EOL)) {
+            // message should never span two lines when printed in a header
+            $msgSingleLine = str_replace(PHP_EOL, ' ', $msg);
+        } else {
+            $msgSingleLine = $msg;
+        }
+        header("HTTP/1.1 $ec $msgSingleLine");
         $this->printHeader();
-        header("HTTP/1.1 $ec $msg");
         echo "{\"error\":$ec,\"message\":\"$msg\"}";
     }
 
