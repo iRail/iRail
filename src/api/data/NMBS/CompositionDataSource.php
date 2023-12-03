@@ -392,7 +392,7 @@ class CompositionDataSource
         }
 
         // Trains with 3 carriages:
-        if (in_array($materialType->parent_type, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM80', 'AM80M'])) {
+        if (in_array($materialType->parent_type, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM96P', 'AM80', 'AM80M'])) {
             switch ($position % 3) {
                 case 0:
                     $materialType->sub_type = 'a';
