@@ -274,15 +274,21 @@ class CompositionDataSource
      */
     private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
     {
-        $lastTractionGroup = $composition->unit[0]->tractionPosition;
-        for ($i = 0; $i < count($composition->unit); $i++) {
-            if ($composition->unit[$i]->tractionPosition > $lastTractionGroup) {
-                $composition->unit[$i - 1]->materialType->orientation = 'RIGHT'; // Switch orientation on the last vehicle in each traction group
+        for ($i = 1; $i < count($composition->unit) - 1; $i++) {
+            // When discovering a carriage in another traction position,
+            if ($composition->unit[$i]->tractionPosition < $composition->unit[$i + 1]->tractionPosition
+                && (!str_starts_with( $composition->unit[$i]->materialSubTypeName, 'M7') || (self::isM7SteeringCabin($composition->unit[$i]) && self::isM7SteeringCabin($composition->unit[$i + 1])))
+            ) {
+                $composition->unit[$i]->materialType->orientation = 'RIGHT'; // Switch orientation on the last vehicle in each traction group
             }
-            $lastTractionGroup = $composition->unit[$i]->tractionPosition;
         }
         $composition->unit[count($composition->unit) - 1]->materialType->orientation = 'RIGHT'; // Switch orientation on the last vehicle of the train
         return $composition;
+    }
+
+    private static function isM7SteeringCabin($unit): bool
+    {
+        return $unit->materialSubTypeName == 'M7BMX' || $unit->materialSubTypeName == 'M7BDXH';
     }
 
     /**
