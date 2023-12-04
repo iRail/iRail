@@ -336,8 +336,9 @@ class CompositionDataSource
             && str_starts_with($rawCompositionUnit->materialSubTypeName, 'HLE')) {
             $materialType->parent_type = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 5);
-        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName')
-            && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7')) { // HV mislabeled as HLE :(
+        } elseif (
+            (property_exists($rawCompositionUnit, 'materialTypeName') && $rawCompositionUnit->materialTypeName == 'M7BMX')
+        || (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName, 'M7'))) { // HV mislabeled as HLE :(
             $materialType->parent_type = 'M7';
             $materialType->sub_type = substr($rawCompositionUnit->materialSubTypeName, 2);
         } else {
