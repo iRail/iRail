@@ -263,7 +263,7 @@ class ConnectionsDatasource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . (getenv('NMBS_API_KEY') ?? self::API_KEY)]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . (getenv('NMBS_API_KEY') ?: self::API_KEY)]);
 
         $response = curl_exec($ch);
 
