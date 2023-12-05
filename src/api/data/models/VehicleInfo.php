@@ -10,7 +10,7 @@ class VehicleInfo
     public function __construct(string $type, int $number)
     {
         $this->{'@id'} = 'http://irail.be/vehicle/' . $type . $number;
-        $this->shortname = $type . $number;
+        $this->shortname = $type . ' ' . $number;
         $this->name = 'BE.NMBS.' . $type . $number;
         $this->type = $type;
         $this->number = $number;

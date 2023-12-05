@@ -322,8 +322,8 @@ class LiveboardFallbackDatasource
             // Replace possible double spaces after the space-introducing fixes
             $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
 
-            $vehicleTypeAndNumber = explode(' ', $vehicleTypeAndNumber);
-            $vehicle = new VehicleInfo($vehicleTypeAndNumber[0], $vehicleTypeAndNumber[1]);
+            preg_match('/^(\w+?)\s?(\d+)$/',$vehicleTypeAndNumber, $vehicleTypeAndNumber);
+            $vehicle = new VehicleInfo($vehicleTypeAndNumber[1], $vehicleTypeAndNumber[2]);
 
             $stopAtStation = new DepartureArrival();
             $stopAtStation->delay = $delay;
