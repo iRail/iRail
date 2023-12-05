@@ -10,15 +10,11 @@
 namespace Irail\api\data\NMBS;
 
 use DateTime;
-use Dotenv\Dotenv;
 use Exception;
 use Irail\api\data\DataRoot;
 use Irail\api\data\models\Connection;
 use Irail\api\data\models\DepartureArrival;
 use Irail\api\data\models\hafas\HafasConnectionLeg;
-use Irail\api\data\models\hafas\HafasIntermediateStop;
-use Irail\api\data\models\hafas\HafasVehicle;
-use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
 use Irail\api\data\models\Via;
@@ -59,6 +55,7 @@ class ConnectionsDatasource
     const TYPE_TRANSPORT_KEY_NO_INTERNATIONAL_TRAINS = 'nointernationaltrains';
     const TYPE_TRANSPORT_KEY_TRAINS = 'trains';
     const TYPE_TRANSPORT_KEY_ALL = 'all';
+    const API_KEY = 'IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl';
 
     /**
      * This is the entry point for the data fetching and transformation.
@@ -266,7 +263,7 @@ class ConnectionsDatasource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . getenv('NMBS_API_KEY') ?? self::API_KEY]);
 
         $response = curl_exec($ch);
 

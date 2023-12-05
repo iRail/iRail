@@ -24,6 +24,7 @@ use Irail\api\requests\VehicleinformationRequest;
 
 class VehicleDatasource
 {
+    const API_KEY = 'IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl';
 
     /**
      * @param DataRoot                  $dataroot
@@ -245,7 +246,7 @@ class VehicleDatasource
         curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
         curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['x-api-key: ' . getenv('NMBS_API_KEY') ?? self::API_KEY]);
 
         $response = curl_exec($ch);
 
