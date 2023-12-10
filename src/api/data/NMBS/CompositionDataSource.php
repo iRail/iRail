@@ -155,6 +155,10 @@ class CompositionDataSource
             // Anything else, default fallback
             $materialType->parent_type = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $materialType->sub_type = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
+        } elseif (preg_match("/(\w+\d+)(\w+)/", $rawCompositionUnit->materialSubTypeName, $regexGroups)) {
+            // In case something changes in the backend, fall back to parsing for example "M6BDX" into "M6" and "BDX"
+            $materialType->parent_type = $regexGroups[1];
+            $materialType->sub_type = $regexGroups[2];
         }
 
         return $materialType;
