@@ -1,6 +1,6 @@
 <?php
 
-/** @var \Laravel\Lumen\Routing\Router $router */
+/** @var Router $router */
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,7 @@
 */
 
 use Illuminate\Http\Request;
+use Laravel\Lumen\Routing\Router;
 
 $router->get('/liveboard', function (Request $request) use ($router) {
     return redirect(route('v1.liveboard', $_GET));
@@ -46,6 +47,7 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/disturbances', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
     $router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
+    $router->post('/feedback/occupancy', ['as' => 'v1.occupancy', 'uses' => 'LogController@store']);
 });
 
 $router->group(['prefix' => 'v2'], function () use ($router) {
@@ -57,5 +59,8 @@ $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/servicealerts', ['as' => 'v2.serviceAlerts', 'uses' => 'ServiceAlertsV2Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v2.composition', 'uses' => 'CompositionV2Controller@getVehiclecomposition']);
     $router->get('/logs', ['as' => 'v2.logs', 'uses' => 'LogController@getLogs']);
+    $router->post('/feedback/occupancy', ['as' => 'v2.occupancy', 'uses' => 'OccupancyController@store']);
+    // A raw dump endpoint, so these logs can still be published even if they are stored in a database
+    $router->get('/feedback/reports', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@dump']);
 });
 

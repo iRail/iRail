@@ -3,6 +3,7 @@
 namespace Irail\Models;
 
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 enum OccupancyLevel: string
 {
@@ -37,6 +38,21 @@ enum OccupancyLevel: string
      */
     case HIGH = 'http://api.irail.be/terms/high';
 
+    public static function fromUri(string $uri): OccupancyLevel
+    {
+        switch ($uri) {
+            case OccupancyLevel::LOW:
+                return OccupancyLevel::LOW;
+            case  OccupancyLevel::MEDIUM:
+                return OccupancyLevel::MEDIUM;
+            case  OccupancyLevel::HIGH:
+                return OccupancyLevel::HIGH;
+            default:
+                Log::error("Unknown occupancy level uri $uri");
+                return OccupancyLevel::UNKNOWN;
+        }
+    }
+
     public static function fromNmbsLevel(int $level): OccupancyLevel
     {
         switch ($level) {
@@ -57,7 +73,7 @@ enum OccupancyLevel: string
         switch ($this) {
             default:
             case OccupancyLevel::UNKNOWN:
-                throw new \InvalidArgumentException();
+                throw new InvalidArgumentException();
             case OccupancyLevel::LOW:
                 return 1;
             case OccupancyLevel::MEDIUM:
@@ -71,7 +87,7 @@ enum OccupancyLevel: string
     {
         switch ($value) {
             default:
-                throw new \InvalidArgumentException();
+                throw new InvalidArgumentException();
             case 1;
                 return OccupancyLevel::LOW;
             case 2:

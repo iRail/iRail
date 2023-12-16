@@ -5,7 +5,6 @@ namespace Irail\Repositories\Irail;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
-use Irail\Models\Dao\OccupancyReport;
 use Irail\Models\Dao\OccupancyReportSource;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\OccupancyInfo;
@@ -57,13 +56,24 @@ class OccupancyRepository
      * Record a spitsgids occupancy record
      * @param string         $vehicleId
      * @param int            $stationId
-     * @param DateTime       $vehicleJourneyStartDate
+     * @param Carbon         $vehicleJourneyStartDate
      * @param OccupancyLevel $occupancyLevel
-     * @return bool
+     * @return OccupancyInfo The updated occupancy.
      */
-    public function recordSpitsgidsOccupancy(string $vehicleId, int $stationId, DateTime $vehicleJourneyStartDate, OccupancyLevel $occupancyLevel): bool
+    public function recordSpitsgidsOccupancy(string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate, OccupancyLevel $occupancyLevel): OccupancyInfo
     {
-        return true;
+        $this->store(OccupancyReportSource::SPITSGIDS, $vehicleId, $stationId, $vehicleJourneyStartDate, $occupancyLevel);
+        $officialNmbsLevel = $this->getOfficialLevel(
+            $vehicleId,
+            $stationId,
+            $vehicleJourneyStartDate
+        );
+        $spitsgidsLevel = $this->getSpitsgidsLevel(
+            $vehicleId,
+            $stationId,
+            $vehicleJourneyStartDate
+        );
+        return new OccupancyInfo($officialNmbsLevel, $spitsgidsLevel);
     }
 
 
@@ -114,22 +124,9 @@ class OccupancyRepository
         return $reports[0];
     }
 
-    /**
-     * Read all stored reports from the database.
-     *
-     * @param OccupancyReportSource $source The source for which to read reports
-     * @param string|null           $vehicleId The vehicle for which to read reports. Null in order not to filter on vehicle.
-     * @param int|null              $stationId The station for which to read reports. Null in order not to filter on station.
-     * @param DateTime              $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
-     * @return OccupancyReport[] The reports which have been found.
-     */
-    private function read(OccupancyReportSource $source,
-        DateTime $vehicleJourneyStartDate,
-        ?string $vehicleId = null,
-        ?int $stationId = null): array
+    public function getReports(Carbon $date): array
     {
-        // TODO: implement
-        return [];
+        return $this->exportSpitsgidsReport($date);
     }
 
     /**
@@ -151,5 +148,22 @@ class OccupancyRepository
                 $vehicleJourneyStartDate->startOfDay()
             ]);
         return array_map(fn($row) => OccupancyLevel::fromIntValue($row->occupancy), $rows);
+    }
+
+    private function exportSpitsgidsReport(Carbon $reportDate): array
+    {
+        $rows = DB::select('SELECT occupancy FROM OccupancyReports WHERE source=? AND DATE(createdAt)=? ',
+            [
+                OccupancyReportSource::SPITSGIDS,
+                $reportDate
+            ]);
+
+        return array_map(fn($row) => [
+            'connection' => "http=>//irail.be/connections/{$row->stationId}/{$row->date}/{$row->vehicleId}",
+            'from'       => 'http=>//irail.be/stations/NMBS/00' . $row->stationId,
+            'date'       => $row->date,
+            'vehicle'    => 'http=>//irail.be/vehicle/' . $row->vehicleId,
+            'occupancy'  => OccupancyLevel::fromIntValue($row->occupancy)
+        ], $rows);
     }
 }
