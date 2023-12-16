@@ -10,18 +10,29 @@ RUN apt-get update && apt-get install -y libssl-dev \
     curl \
     libonig-dev \
     libxml2-dev \
-    libtidy-dev
+    libtidy-dev \
+    libcurl4-gnutls-dev \
+    libgnutls28-dev \
+    zlib1g \
+    zlib1g-dev \
+    ca-certificates \
+    gnupg
 
 # Irail/stations depends on NodeJS
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update && apt-get install -y nodejs
-
 
 RUN docker-php-ext-install pdo_mysql mbstring tidy && docker-php-ext-enable pdo_mysql mbstring tidy
 
+# Install ext-http
+RUN pecl install raphf && docker-php-ext-enable raphf
+RUN pecl install pecl_http
+
 # Install apcu
-RUN pecl install apcu && docker-php-ext-enable apcu
-RUN echo "extension=apcu.so\napc.enable=1" > /usr/local/etc/php/php.ini
+RUN pecl install apcu
+RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1" > /usr/local/etc/php/php.ini
+RUN docker-php-ext-enable apcu http
 
 # Install xdebug
 RUN yes | pecl install xdebug \

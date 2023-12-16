@@ -21,7 +21,7 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: 'irail-api'
+      DB_DATABASE: 'irail'
       DB_USERNAME: 'irail-api'
       DB_PASSWORD: 'irail-api'
     working_dir: /var/www
@@ -29,7 +29,9 @@ services:
       - app
     volumes:
       - ./:/var/www
-  #MySQL Service
+    ports:
+      - "8080:8080"
+      #MySQL Service
   db:
     image: mariadb:10.4.12
     container_name: db
@@ -38,7 +40,7 @@ services:
     ports:
       - "33060:3306"
     environment:
-      MYSQL_DATABASE: laravel
+      MYSQL_DATABASE: irail
       MYSQL_USER: irail-api
       MYSQL_PASSWORD: irail-api
       MYSQL_ROOT_PASSWORD: irail-api
