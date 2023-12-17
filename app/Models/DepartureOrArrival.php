@@ -20,7 +20,6 @@ class DepartureOrArrival
     private bool $isReported = false;
     private bool $isExtra = false;
 
-    private ?string $uri = null;
     private ?DepartureArrivalState $status = null;
 
     private ?OccupancyInfo $occupancy = null;

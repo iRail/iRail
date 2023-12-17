@@ -40,13 +40,13 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
         self::assertEquals(50, count($response->getStops()));
         self::assertEquals('008821006', $response->getStops()[0]->getStation()->getId());
         self::assertEquals('Antwerpen-Centraal', $response->getStops()[0]->getStation()->getStationName());
-        self::assertEquals('008833001', $response->getStops()[0]->getDirection()->getStation()->getId());
-        self::assertEquals('Leuven', $response->getStops()[0]->getDirection()->getName());
+        self::assertEquals('008833001', $response->getStops()[0]->getVehicle()->getDirection()->getStation()->getId());
+        self::assertEquals('Leuven', $response->getStops()[0]->getVehicle()->getDirection()->getName());
         self::assertEquals(Carbon::create(2023, 12, 15, 12, 58), $response->getStops()[0]->getScheduledDateTime());
         self::assertEquals('http://irail.be/connections/8821006/20231215/L2862', $response->getStops()[0]->getDepartureUri());
 
-        self::assertEquals('008400058', $response->getStops()[12]->getDirection()->getStation()->getId());
-        self::assertEquals('Amsterdam Cs (NL)', $response->getStops()[12]->getDirection()->getName());
+        self::assertEquals('008400058', $response->getStops()[12]->getVehicle()->getDirection()->getStation()->getId());
+        self::assertEquals('Amsterdam Cs (NL)', $response->getStops()[12]->getVehicle()->getDirection()->getName());
     }
 
     private function createRequest(string $station, TimeSelection $timeSelection, string $language, Carbon $dateTime): LiveboardRequest

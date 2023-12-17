@@ -12,6 +12,7 @@ namespace Irail\Http\Requests;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request as LumenRequest;
+use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\InvalidRequestException;
 use Irail\Exceptions\Request\RequestedStopNotFoundException;
 use Irail\Repositories\Irail\StationsRepository;
@@ -40,19 +41,6 @@ abstract class IrailHttpRequest extends LumenRequest
         $this->determineResponseFormat();
         $this->determineLanguage();
         app(StationsRepository::class)->setLocalizedLanguage($this->language);
-    }
-
-    /**
-     * @param String[] $array names of required parameters
-     * @throws InvalidRequestException
-     */
-    protected function verifyRequiredVariablesPresent(array $array)
-    {
-        foreach ($array as $var) {
-            if (!$this->_request->has($var)) {
-                throw new InvalidRequestException("$var not set. Please review your request and add the right parameters", 400);
-            }
-        }
     }
 
     /**
@@ -115,7 +103,6 @@ abstract class IrailHttpRequest extends LumenRequest
         }
     }
 
-
     /**
      * Get a 9-digit numeric station id.
      *
@@ -153,6 +140,31 @@ abstract class IrailHttpRequest extends LumenRequest
             }
         }
         throw new RequestedStopNotFoundException($id);
+    }
+
+
+    /**
+     * @return Carbon
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function parseIrailV1DateTime(): Carbon
+    {
+        try {
+            $defaultDateTime = Carbon::now('Europe/Brussels');
+            $date = $this->_request->get('date') ?: $defaultDateTime->format('dmY');
+            $time = $this->_request->get('time') ?: $defaultDateTime->format('Hi');
+            if (strlen($date) == 6) {
+                $date = substr($date, 0, 4) . '20' . substr($date, 4);
+            }
+            if (strlen($time) == 3) {
+                $time = '0' . $time;
+            }
+            return Carbon::createFromFormat('dmY Hi', $date . ' ' . $time);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            throw new InvalidRequestException('Invalid date/time provided');
+        }
     }
 
 

@@ -38,7 +38,7 @@ trait TimeParser
         $month = Tools::safeIntVal(substr($date, 5, 2));
         $day = Tools::safeIntVal(substr($date, 8, 2));
 
-        return new Carbon(mktime($hour, $minute, $second, $month, $day + $dayoffset, $year));
+        return new Carbon(mktime($hour, $minute, $second, $month, $day + $dayoffset, $year), 'Europe/Brussels');
     }
 
     /**

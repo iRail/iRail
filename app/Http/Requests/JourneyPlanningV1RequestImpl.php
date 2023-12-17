@@ -3,9 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
-use Illuminate\Support\Facades\Log;
-use Irail\Exceptions\Request\InvalidRequestException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -27,23 +24,8 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
     {
         parent::__construct();
         $this->originStationId = $this->parseStationId('from', $this->_request->get('from'));
-        $this->destinationStationId = $this->parseStationId('to', $this->_request->get('to'));;
-
-        try {
-            $date = $this->_request->get('date') ?: date('Ymd');
-            $time = $this->_request->get('time') ?: date('Hi');
-            if (strlen($date) == 6) {
-                $date = '20' . $date;
-            }
-            if (strlen($time) == 3) {
-                $time = '0' . $time;
-            }
-            $this->dateTime = Carbon::createFromFormat('Ymd Hi', $date . ' ' . $time);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            throw new InvalidRequestException('Invalid date/time provided');
-        }
-
+        $this->destinationStationId = $this->parseStationId('to', $this->_request->get('to'));
+        $this->dateTime = $this->parseIrailV1DateTime();
         $this->timeSelection = $this->_request->has('arrdep') ? $this->parseDepartureArrival($this->_request->get('arrdep')) : TimeSelection::DEPARTURE;
         $this->typesOfTransport = TypeOfTransportFilter::AUTOMATIC; // $this->routeOrGet('typeOfTransport'); // TODO: implement
     }

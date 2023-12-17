@@ -30,7 +30,7 @@ class JourneyPlanningV1Controller extends BaseIrailController
         $repo = app(JourneyPlanningRepository::class);
         $journeyPlanningResult = $repo->getJourneyPlanning($request);
         $dataRoot = JourneyPlanningV1Converter::convert($request, $journeyPlanningResult);
-        $this->logRequest($request);
+        $this->logRequest($request, $journeyPlanningResult);
         return $this->outputV1($request, $dataRoot);
     }
 
@@ -39,7 +39,7 @@ class JourneyPlanningV1Controller extends BaseIrailController
      * @param JourneyPlanningSearchResult  $result
      * @return void
      */
-    public function logRequest(JourneyPlanningV2RequestImpl $request, JourneyPlanningSearchResult $result): void
+    public function logRequest(JourneyPlanningV1RequestImpl $request, JourneyPlanningSearchResult $result): void
     {
         $query = [
             'language'      => $request->getLanguage(),

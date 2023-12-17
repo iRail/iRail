@@ -87,7 +87,7 @@ class OccupancyRepository
             $source->value,
             $vehicleId,
             $stationId,
-            $vehicleJourneyStartDate->startOfDay(),
+            $vehicleJourneyStartDate->copy()->startOfDay(),
             $occupancyLevel->getIntValue()
         ]);
     }
@@ -145,7 +145,7 @@ class OccupancyRepository
                 $source->value,
                 $vehicleId,
                 $stationId,
-                $vehicleJourneyStartDate->startOfDay()
+                $vehicleJourneyStartDate->copy()->startOfDay()
             ]);
         return array_map(fn($row) => OccupancyLevel::fromIntValue($row->occupancy), $rows);
     }
