@@ -4,7 +4,7 @@
 
 namespace Irail\Legacy\Output;
 
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 /**
  * Prints the Xml style output.
@@ -73,7 +73,7 @@ class Xml extends Printer
 
     public function startArray($name, $number, $root = false): string
     {
-        $result = "";
+        $result = '';
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             $result = '<' . $name . "s number=\"$number\">";
         }
@@ -87,7 +87,7 @@ class Xml extends Printer
     public function nextArrayElement(): string
     {
         $this->arrayindices[$this->currentarrayindex]++;
-        return "";
+        return '';
     }
 
     /**
@@ -137,14 +137,14 @@ class Xml extends Printer
      */
     public function startKeyVal($key, $val): string
     {
-        $result = "";
+        $result = '';
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             $result .= "<$key formatted=\"$form\">$val";
         } else if ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             $result .= "<$key>";
             if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
-                $result .= "<![CDATA[";
+                $result .= '<![CDATA[';
             }
             $result .= $val;
         }
@@ -157,7 +157,7 @@ class Xml extends Printer
      */
     public function endElement($key): string
     {
-        $result = "";
+        $result = '';
         if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
             $result .= ']]>';
         }
@@ -175,7 +175,7 @@ class Xml extends Printer
      */
     public function endArray($name, $root = false): string
     {
-        $result = "";
+        $result = '';
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             $result = '</' . $name . 's>';
         }
@@ -200,8 +200,6 @@ class Xml extends Printer
      */
     public function iso8601($unixtime)
     {
-        return Carbon::createFromTimestamp($unixtime)->timezone('Europe/Brussels')->format("Y-m-d\TH:i:s");
+        return Carbon::createFromTimestamp($unixtime)->timezone('Europe/Brussels')->format('Y-m-d\TH:i:s');
     }
 }
-
-;
