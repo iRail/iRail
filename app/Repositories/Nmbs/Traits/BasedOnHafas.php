@@ -15,7 +15,6 @@ use Irail\Models\MessageLink;
 use Irail\Models\MessageType;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Vehicle;
-use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Models\HafasVehicle;
 
@@ -35,7 +34,7 @@ trait BasedOnHafas
         }
         $json = json_decode($rawJsonData, true);
         if ($json == null) {
-            Log::error("Failed to read raw json data:");
+            Log::error('Failed to read raw json data:');
             Log::error($rawJsonData);
             // Example invalid data:
             // "ERROR reason : error : 9000 : _Service_Handler_Policies : Service Handler - Connection To Backend failed. Please verify backend server status."
@@ -185,7 +184,8 @@ trait BasedOnHafas
             $id = $rawAlert['id'];
             $header = strip_tags($rawAlert['head']);
             $description = $rawAlert['text'];
-            $lead = strip_tags($rawAlert['lead']);
+            // read Lead if present, fall back to the first sentence if unavailable
+            $lead = key_exists('lead', $rawAlert) ? strip_tags($rawAlert['lead']) : substr($description, 0, strpos($description, '.'));
 
             $startTime = $this->parseDateAndTime(
                 $rawAlert['sDate'],

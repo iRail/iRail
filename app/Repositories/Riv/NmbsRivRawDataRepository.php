@@ -21,8 +21,6 @@ class NmbsRivRawDataRepository
     use Cache;
     use BasedOnHafas;
 
-    const RIV_API_KEY = 'IOS-v0001-20190214-YKNDlEPxDqynCovC2ciUOYl8L6aMwU4WuhKaNtxl';
-
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
 
@@ -255,7 +253,7 @@ class NmbsRivRawDataRepository
      */
     private function makeApiCallToMobileRivApi(string $url, array $parameters): string
     {
-        $response = $this->curlProxy->get($url, $parameters, ['x-api-key: ' . self::RIV_API_KEY]);
+        $response = $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
         return $response->getResponseBody();
     }
 

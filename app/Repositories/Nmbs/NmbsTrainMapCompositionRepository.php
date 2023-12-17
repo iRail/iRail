@@ -12,7 +12,6 @@ use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
-use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
 use stdClass;
@@ -116,13 +115,13 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     public static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
     {
         if (
-            (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "AM/MR")
-            || (property_exists($rawCompositionUnit, "materialSubTypeName") && str_starts_with($rawCompositionUnit->materialSubTypeName, "AM"))
+            (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'AM/MR')
+            || (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName, 'AM'))
         ) {
             return self::getAmMrMaterialType($rawCompositionUnit, $position);
-        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HLE") {
+        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
             return self::getHleMaterialType($rawCompositionUnit);
-        } else if (property_exists($rawCompositionUnit, "tractionType") && $rawCompositionUnit->tractionType == "HV") {
+        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
             return self::getHvMaterialType($rawCompositionUnit);
         } else if (str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
             // Anything else, default fallback
@@ -199,17 +198,25 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
     {
-        $lastTractionGroup = $composition->getUnits()[0]->getTractionPosition();
-        for ($i = 0; $i < count($composition->getUnits()); $i++) {
-            if ($composition->getUnit($i)->getTractionPosition() > $lastTractionGroup) {
-                $composition->getUnit($i - 1)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
+        for ($i = 1; $i < $composition->getLength() - 1; $i++) {
+            // When discovering a carriage in another traction position,
+            if ($composition->getUnit($i)->getTractionPosition() < $composition->getUnit($i + 1)->getTractionPosition()
+                && (
+                    !str_starts_with($composition->getUnit($i)->getMaterialSubTypeName(), 'M7')
+                    || (self::isM7SteeringCabin($composition->getUnit($i)) && self::isM7SteeringCabin($composition->getUnit($i + 1)))
+                )
+            ) {
+                $composition->getUnit($i)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
             }
-            $lastTractionGroup = $composition->getUnits()[$i]->getTractionPosition();
         }
         $composition->getUnit($composition->getLength() - 1)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle of the train
         return $composition;
     }
 
+    private static function isM7SteeringCabin($unit): bool
+    {
+        return $unit->materialSubTypeName == 'M7BMX' || $unit->materialSubTypeName == 'M7BDXH';
+    }
 
     /**
      * Handle the material type for AM/MR vehicles ( trains consisting of a type-specific number of motorized carriages which are always together, opposed to having a locomotive and unmotorized carriages).
@@ -250,11 +257,17 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             && str_starts_with($rawCompositionUnit->materialSubTypeName, 'HLE')) {
             $parentType = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
             $subType = substr($rawCompositionUnit->materialSubTypeName, 5);
+        } elseif (property_exists($rawCompositionUnit, 'materialTypeName') && $rawCompositionUnit->materialTypeName == 'M7BMX') {
+            $parentType = 'M7';
+            $subType = 'BMX';
+        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName,
+                'M7')) { // HV mislabeled as HLE :(
+            $parentType = 'M7';
+            $subType = substr($rawCompositionUnit->materialSubTypeName, 2);
         } else {
             $parentType = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
             $subType = substr($rawCompositionUnit->materialTypeName, 5);
         }
-
         return new RollingMaterialType($parentType, $subType);
     }
 
@@ -267,9 +280,15 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         // Separate carriages
         if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-            preg_match('/([A-Z]\d+)\s?(.*?)$/', $rawCompositionUnit->materialSubTypeName, $matches);
-            $parentType = $matches[1]; // M6, I11
-            $subType = $matches[2]; // A, B, BDX, BUH, ...
+            if (preg_match('/NS(\w+)$/', $rawCompositionUnit->materialSubTypeName, $matches) == 1) {
+                // International NS train handling
+                $parentType = 'NS';
+                $subType = $matches[1];
+            } else {
+                preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+                $parentType = $matches[1]; // M6, I11
+                $subType = $matches[2]; // A, B, BDX, BUH, ...
+            }
         } else {
             // Some special cases, typically when data is missing
             if (property_exists($rawCompositionUnit, 'materialTypeName')) {
@@ -283,8 +302,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     }
 
     /**
-     * @param string $parentType
-     * @param int    $position
+     * @param RollingMaterialType $materialType
+     * @param int                 $position
      */
     private static function calculateAmMrSubType(string $parentType, int $position): string
     {
@@ -302,7 +321,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         }
 
         // Trains with 3 carriages:
-        if (in_array($parentType, ['AM08', 'AM96', 'AM80', 'AM80m'])) {
+        if (in_array($parentType, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM96M', 'AM96P', 'AM80', 'AM80M', 'AM80P'])) {
             switch ($position % 3) {
                 case 0:
                     return 'a';
@@ -350,7 +369,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     private function getNewAuthKey(): ?string
     {
-        $url = "https://trainmap.belgiantrain.be/";
+        $url = 'https://trainmap.belgiantrain.be/';
         $curlHttpResponse = $this->curlProxy->get($url);
 
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");

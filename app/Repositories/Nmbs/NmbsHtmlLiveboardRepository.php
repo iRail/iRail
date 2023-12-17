@@ -13,7 +13,6 @@ use Irail\api\data\models\DepartureArrival;
 use Irail\api\data\models\Platform;
 use Irail\api\data\models\Station;
 use Irail\api\data\models\VehicleInfo;
-use Irail\api\data\NMBS\StationsDatasource;
 use Irail\api\data\NMBS\tools\Tools;
 use Irail\api\requests\LiveboardRequest;
 use SimpleXMLElement;
@@ -191,6 +190,10 @@ class NmbsHtmlLiveboardRepository
         preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
         $response = $matches[0];
 
+        $response = preg_replace('/<tr class="sqLinkRow.*?<\/tr>/s','',$response);
+        $response = preg_replace('/onclick="loadDetails(.*?)"/s','',$response);
+        $response = preg_replace('/<div.*?<\/div>/s','',$response);
+
         // Store the raw output to a file on disk, for debug purposes
         if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
             file_put_contents(
@@ -319,8 +322,8 @@ class NmbsHtmlLiveboardRepository
             // Replace possible double spaces after the space-introducing fixes
             $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
 
-            $vehicleTypeAndNumber = explode(' ', $vehicleTypeAndNumber);
-            $vehicle = new VehicleInfo($vehicleTypeAndNumber[0], $vehicleTypeAndNumber[1]);
+            preg_match('/^(\w+?)\s?(\d+)$/',$vehicleTypeAndNumber, $vehicleTypeAndNumber);
+            $vehicle = new VehicleInfo($vehicleTypeAndNumber[1], $vehicleTypeAndNumber[2]);
 
             $stopAtStation = new DepartureArrival();
             $stopAtStation->delay = $delay;

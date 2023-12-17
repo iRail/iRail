@@ -14,9 +14,9 @@ class Json extends Printer
 
     // Make a stack of array information, always work on the last one
     // for nested array support
-    private $stack = [];
-    private $arrayindices = [];
-    private $currentarrayindex = -1;
+    private array $stack = [];
+    private array $arrayIndices = [];
+    private int $currentArrayIndex = -1;
 
     public function getHeaders(): array
     {
@@ -58,23 +58,23 @@ class Json extends Printer
      */
     public function startArray($name, $number, $root = false): string
     {
-        $result = "";
+        $result = '';
         if (!$root || $this->rootname == 'liveboard' || $this->rootname == 'vehicleinformation') {
             $result .= '"' . $name . "s\":{\"number\":\"$number\",";
         }
 
         $result .= "\"$name\":[";
 
-        $this->currentarrayindex++;
-        $this->stack[$this->currentarrayindex] = $name;
-        $this->arrayindices[$this->currentarrayindex] = 0;
+        $this->currentArrayIndex++;
+        $this->stack[$this->currentArrayIndex] = $name;
+        $this->arrayIndices[$this->currentArrayIndex] = 0;
         return $result;
     }
 
     public function nextArrayElement(): string
     {
+        $this->arrayIndices[$this->currentArrayIndex]++;
         return ',';
-        $this->arrayindices[$this->currentarrayindex]++;
     }
 
     public function nextObjectElement(): string
@@ -89,12 +89,12 @@ class Json extends Printer
      */
     public function startObject($name, $object): string
     {
-        $result = "";
-        if ($this->currentarrayindex > -1 && $this->stack[$this->currentarrayindex] == $name) {
+        $result = '';
+        if ($this->currentArrayIndex > -1 && $this->stack[$this->currentArrayIndex] == $name) {
             $result .= '{';
             // Show id (in array) except if array of stations (compatibility issues)
             if ($name != 'station') {
-                $result .= '"id":"' . $this->arrayindices[$this->currentarrayindex] . '",';
+                $result .= '"id":"' . $this->arrayIndices[$this->currentArrayIndex] . '",';
             }
         } else {
             if ($this->rootname != 'StationsDatasource' && $name == 'station' || $name == 'platform') {
@@ -131,9 +131,9 @@ class Json extends Printer
      */
     public function endArray($name, $root = false): string
     {
-        $this->stack[$this->currentarrayindex] = '';
-        $this->arrayindices[$this->currentarrayindex] = 0;
-        $this->currentarrayindex--;
+        $this->stack[$this->currentArrayIndex] = '';
+        $this->arrayIndices[$this->currentArrayIndex] = 0;
+        $this->currentArrayIndex--;
 
         if ($root && $this->rootname != 'liveboard' && $this->rootname != 'vehicleinformation') {
             return ']';
@@ -156,7 +156,7 @@ class Json extends Printer
      */
     public function endElement($name): string
     {
-        return "";
+        return '';
     }
 
     /**
