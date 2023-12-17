@@ -70,9 +70,12 @@ trait BasedOnHafas
         if ($json['errorCode'] == 'SVC_LOC') {
             throw new NoResultsException('Location not found');
         }
+        if ($json['errorCode'] == 'SVC_LOC_EQUAL') {
+            throw new NoResultsException('Origin and destination location are the same', 400);
+        }
         if ($json['errorCode'] == 'SVC_DATETIME_PERIOD' || $json['errorCode'] == 'SVC_DATATIME_PERIOD') {
             // Some versions of Hafas contain a typo in this error code
-            throw new NoResultsException('Date outside of the timetable period. Check your query.', 400);
+            throw new NoResultsException('Date outside of the timetable period. Check your query.');
         }
         throw new UpstreamServerException('This request failed. Please check your query. Error code ' . $json['errorCode'], 500);
     }
