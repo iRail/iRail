@@ -3,7 +3,7 @@
 namespace Tests\Repositories\Nmbs;
 
 use Carbon\Carbon;
-use Irail\Http\Requests\LiveboardRequestImplIrail;
+use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
@@ -22,7 +22,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
         $liveboardRepo = new NmbsRivLiveboardRepository($stationsRepo, $gtfsStartEndExtractor, $rivRepo);
 
-        $request = new LiveboardRequestImplIrail('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::createMidnightDate(2022, 12, 11));
+        $request = $this->createRequest('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::create(2022, 12, 11, 20, 20));
         $rivRepo->shouldReceive('getLiveboardData')
             ->with($request)
             ->atLeast()
@@ -52,5 +52,15 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
     function testGetLiveboard_departureBoardAndGtfsMissingDestination_shouldNotIncludeRowInResult(): void
     {
 
+    }
+
+    private function createRequest(string $station, TimeSelection $timeSelection, string $language, Carbon $dateTime): LiveboardRequest
+    {
+        $mock = Mockery::mock(LiveboardRequest::class);
+        $mock->shouldReceive('getStationId')->andReturn($station);
+        $mock->shouldReceive('getDateTime')->andReturn($dateTime);
+        $mock->shouldReceive('getDepartureArrivalMode')->andReturn($timeSelection);
+        $mock->shouldReceive('getLanguage')->andReturn($language);
+        return $mock;
     }
 }

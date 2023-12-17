@@ -30,8 +30,8 @@ class NmbsRivRawDataRepository
     public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
     {
         $this->stationsRepository = $stationsRepository;
-        $this->setCachePrefix('NMBS');
         $this->curlProxy = $curlProxy;
+        $this->setCachePrefix('NMBS');
     }
 
     /**

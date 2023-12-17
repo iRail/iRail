@@ -4,8 +4,9 @@ namespace Irail\Traits;
 
 use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Adapter\Common\AbstractCachePool;
-use Cache\Adapter\PHPArray\ArrayCachePool;
 use Closure;
+use Illuminate\Support\Facades\Log;
+use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Models\CachedData;
 use Psr\Cache\InvalidArgumentException;
 
@@ -22,8 +23,7 @@ trait Cache
             if (extension_loaded('apcu')) {
                 self::$cache = new ApcuCachePool();
             } else {
-                // Fall back to array cache
-                self::$cache = new ArrayCachePool();
+                throw new InternalProcessingException(500, 'APCU Cache is not enabled, but required to run iRail');
             }
         }
     }
@@ -43,11 +43,11 @@ trait Cache
 
     public function isCached(string $key): bool
     {
-        $key = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
         try {
-            return self::$cache->hasItem($key);
-        } catch (InvalidArgumentException) {
+            return self::$cache->hasItem($prefixedKey);
+        } catch (InvalidArgumentException $e) {
             return false;
         }
     }
@@ -60,17 +60,17 @@ trait Cache
      */
     public function getCachedObject(string $key): CachedData|false
     {
-        $key = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
 
         try {
-            if (self::$cache->hasItem($key)) {
-                return $this->getCacheEntry($key);
+            if (self::$cache->hasItem($prefixedKey)) {
+                return $this->getCacheEntry($prefixedKey);
             } else {
                 return false;
             }
         } catch (InvalidArgumentException $e) {
-            // Todo: log something here
+            Log::error('Failed to read from cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -92,16 +92,16 @@ trait Cache
             $ttl = $this->defaultTtl;
         }
 
-        $key = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->getKeyWithPrefix($key);
         $this->initializeCachePool();
         try {
-            $item = self::$cache->getItem($key);
+            $item = self::$cache->getItem($prefixedKey);
         } catch (InvalidArgumentException $e) {
-            // Todo: log something here
+            Log::error('Failed to read from cache: ' . $e->getMessage());
             return;
         }
 
-        $cacheEntry = new CachedData($key, $value);
+        $cacheEntry = new CachedData($key, $value, $ttl);
         $item->set($cacheEntry);
         if ($ttl > 0) {
             $item->expiresAfter($ttl);
@@ -128,6 +128,10 @@ trait Cache
             $data = $valueProvider();
             $this->setCachedObject($cacheKey, $data, $ttl);
         }
+        if (!$this->isCached($cacheKey)) {
+            throw new InternalProcessingException(500,
+                'Cache is not configured correctly! Items are not being cached, but caching is required for iRail to work correctly.');
+        }
         return $this->getCachedObject($cacheKey);
     }
 
@@ -137,7 +141,7 @@ trait Cache
      */
     private function getKeyWithPrefix(string $key): string
     {
-        return $this->prefix . $key;
+        return $this->cleanCacheKey($this->prefix . '|' . $key);
     }
 
     /**
@@ -155,5 +159,10 @@ trait Cache
         }
         $cacheEntry->setExpiresAt($cacheItem->getExpirationTimestamp());
         return $cacheEntry;
+    }
+
+    private function cleanCacheKey(string $key): string
+    {
+        return str_replace(['{', '}', '(', ')', '/', '\\', '@', ':', ' ', '-'], '_', $key);
     }
 }

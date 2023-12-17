@@ -20,12 +20,12 @@ class CachedData
      * @param string $key
      * @param T      $value
      */
-    public function __construct(string $key, object|array|string $value)
+    public function __construct(string $key, object|array|string $value, int $ttl = 0)
     {
         $this->key = $key;
         $this->value = $value;
         $this->createdAt = time();
-        $this->expiresAt = time();
+        $this->expiresAt = time() + $ttl;
     }
 
     /**

@@ -31,7 +31,7 @@ RUN pecl install pecl_http
 
 # Install apcu
 RUN pecl install apcu
-RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1" > /usr/local/etc/php/php.ini
+RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1" > /usr/local/etc/php/php.ini
 RUN docker-php-ext-enable apcu http
 
 # Install xdebug

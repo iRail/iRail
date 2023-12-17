@@ -17,8 +17,6 @@ class DepartureOrArrival
     private int $delay = 0;
     private bool $isCancelled = false;
 
-    private VehicleDirection $direction;
-
     private bool $isReported = false;
     private bool $isExtra = false;
 

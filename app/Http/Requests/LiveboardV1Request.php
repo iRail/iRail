@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
 
 class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, IrailV1Request
 {
@@ -21,7 +20,8 @@ class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, I
         } else {
             $this->stationId = $this->parseStationId('station', $this->routeOrGet('station'));
         }
-        $this->dateTime = $this->parseDateTime($this->get('datetime'));
+        $dateTime = $this->_request->get('date', Carbon::now()->format('dmy')) . ' ' . $this->_request->get('time', Carbon::now()->format('Hi'));
+        $this->dateTime = $this->parseDateTime($dateTime, 'dmy Hi');
         $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep', 'departure'));
     }
 

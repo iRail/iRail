@@ -6,127 +6,69 @@
 namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
-use DateTime;
 use Exception;
-use Irail\api\data\DataRoot;
-use Irail\api\data\models\DepartureArrival;
-use Irail\api\data\models\Platform;
-use Irail\api\data\models\Station;
-use Irail\api\data\models\VehicleInfo;
-use Irail\api\data\NMBS\tools\Tools;
-use Irail\api\requests\LiveboardRequest;
+use Irail\Exceptions\Internal\InternalProcessingException;
+use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
+use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
+use Irail\Http\Requests\LiveboardRequest;
+use Irail\Http\Requests\TimeSelection;
+use Irail\Models\CachedData;
+use Irail\Models\DepartureOrArrival;
+use Irail\Models\PlatformInfo;
+use Irail\Models\Result\LiveboardSearchResult;
+use Irail\Models\StationInfo;
+use Irail\Models\Vehicle;
+use Irail\Models\VehicleDirection;
+use Irail\Proxy\CurlHttpResponse;
+use Irail\Proxy\CurlProxy;
+use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\LiveboardRepository;
+use Irail\Repositories\Nmbs\Models\Station;
+use Irail\Traits\Cache;
 use SimpleXMLElement;
 use tidy;
 
-class NmbsHtmlLiveboardRepository
+class NmbsHtmlLiveboardRepository implements LiveboardRepository
 {
+    use Cache;
+
+    private StationsRepository $stationsRepository;
+    private CurlProxy $curlProxy;
+
+    /**
+     * @param StationsRepository $stationsRepository
+     * @param CurlProxy          $curlProxy
+     */
+    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
+    {
+        $this->stationsRepository = $stationsRepository;
+        $this->curlProxy = $curlProxy;
+        $this->setCachePrefix('NMBS');
+    }
+
+
     /**
      * This is the entry point for the data fetching and transformation.
      *
-     * @param DataRoot         $dataroot
      * @param LiveboardRequest $request
+     * @return LiveboardSearchResult
      * @throws Exception
      */
-    public static function fillDataRoot(DataRoot $dataroot, LiveboardRequest $request): void
+    public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
-        if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'A') {
-            self::fillDataRootWithArrivalData($dataroot, $request);
-        } else {
-            if (strtoupper(substr($request->getArrdep(), 0, 1)) == 'D') {
-                self::FillDataRootWithDepartureData($dataroot, $request);
-            } else {
-                throw new Exception('Not a good timeSel value: try \'arrival\' or \'departure\'', 400);
-            }
-        }
+        $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
+        $station = $this->stationsRepository->getStationById($request->getStationId());
+
+        $rawData = $this->getLiveboardHtml($request, $station);
+        $entries = $this->parseNmbsData($request, $station, $rawData->getValue());
+        return new LiveboardSearchResult($station, $entries);
     }
 
-    /**
-     * @param DataRoot         $dataroot
-     * @param LiveboardRequest $request
-     * @throws Exception
-     */
-    private static function fillDataRootWithArrivalData(DataRoot $dataroot, LiveboardRequest $request): void
+    private function getLiveboardHtml(LiveboardRequest $request, StationInfo $station): CachedData
     {
-        $nmbsCacheKey = self::getNmbsCacheKey(
-            $dataroot->station,
-            $request->getTime(),
-            $request->getDate(),
-            $request->getLang(),
-            'arr'
-        );
-        $html = Tools::getCachedObject($nmbsCacheKey);
-
-        if ($html === false) {
-            $html = self::fetchDataFromNmbs(
-                $dataroot->station,
-                $request->getTime(),
-                $request->getDate(),
-                $request->getLang(),
-                'arr'
-            );
-
-            if (empty($html)) {
-                throw new Exception('No response from NMBS/SNCB', 504);
-            }
-
-            Tools::setCachedObject($nmbsCacheKey, $html);
-        } else {
-            Tools::sendIrailCacheResponseHeader(true);
-        }
-
-        $dataroot->arrival = self::parseNmbsData($html, $dataroot->station, $request);
-    }
-
-    /**
-     * @param DataRoot         $dataroot
-     * @param LiveboardRequest $request
-     * @throws Exception
-     */
-    private static function FillDataRootWithDepartureData(DataRoot $dataroot, LiveboardRequest $request): void
-    {
-        $nmbsCacheKey = self::getNmbsCacheKey(
-            $dataroot->station,
-            $request->getTime(),
-            $request->getDate(),
-            $request->getLang(),
-            'dep'
-        );
-        $html = Tools::getCachedObject($nmbsCacheKey);
-
-        if ($html === false) {
-            $html = self::fetchDataFromNmbs(
-                $dataroot->station,
-                $request->getTime(),
-                $request->getDate(),
-                $request->getLang(),
-                'dep'
-            );
-            Tools::setCachedObject($nmbsCacheKey, $html, 20);
-        } else {
-            Tools::sendIrailCacheResponseHeader(true);
-        }
-
-        $dataroot->departure = self::parseNmbsData($html, $dataroot->station, $request);
-    }
-
-    /**
-     * Get a unique key to identify data in the in-memory cache which reduces the number of requests to the NMBS.
-     * @param Station $station
-     * @param string  $time
-     * @param string  $date
-     * @param string  $lang
-     * @param string  $timeSel
-     * @return string
-     */
-    public static function getNmbsCacheKey(Station $station, string $time, string $date, string $lang, string $timeSel): string
-    {
-        return 'NMBSLiveboard|fallback|' . join('.', [
-                $station->id,
-                str_replace(':', '.', $time),
-                $date,
-                $timeSel,
-                $lang,
-            ]);
+        return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request, $station) {
+            return $this->fetchLiveboardHtml($request, $station);
+        }, 60);
     }
 
     /**
@@ -139,77 +81,61 @@ class NmbsHtmlLiveboardRepository
      * @param string  $timeSel
      * @return string
      */
-    private static function fetchDataFromNmbs(Station $station, string $time, string $date, string $lang, string $timeSel): string
+    private function fetchLiveboardHtml(LiveboardRequest $request, StationInfo $station): string
     {
-        $request_options = [
-            'referer'   => 'http://api.irail.be/',
-            'timeout'   => '30',
-            'useragent' => Tools::getUserAgent(),
-        ];
-
         $url = 'http://www.belgianrail.be/jp/nmbs-realtime/stboard.exe/nn';
-        $dateTime = DateTime::createFromFormat('Ymd H:i', $date . ' ' . $time);
-        $formattedDateStr = $dateTime->format('d/m/Y');
-        $formattedTimeStr = $dateTime->format('H:i:s');
+        $formattedDateStr = $request->getDateTime()->format('d/m/Y');
+        $formattedTimeStr = $request->getDateTime()->format('H:i:s');
 
         $parameters = [
             'ld'                      => 'std',
-            'boardType'               => $timeSel,
+            'boardType'               => $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ? 'dep' : 'arr',
             'time'                    => $formattedTimeStr,
             'date'                    => $formattedDateStr,
             'maxJourneys'             => 50,
             'wDayExtsq'               => 'Ma|Di|Wo|Do|Vr|Za|Zo',
-            'input'                   => $station->name,
-            'inputRef'                => $station->name . '#' . substr($station->_hafasId, 2),
-            'REQ0JourneyStopsinputID' => "A=1@O={$station->name}@X=4356802@Y=50845649@U=80@L={$station->_hafasId}@B=1@p=1669420371@n=ac.1=FA@n=ac.2=LA@n=ac.3=FS@n=ac.4=LS@n=ac.5=GA@",
+            'input'                   => $station->getStationName(),
+            'inputRef'                => $station->getStationName() . '#' . substr($station->getId(), 2),
+            'REQ0JourneyStopsinputID' => "A=1@O={$station->getStationName()}@X=4356802@Y=50845649@U=80@L={$station->getId()}@B=1@p=1669420371@n=ac.1=FA@n=ac.2=LA@n=ac.3=FS@n=ac.4=LS@n=ac.5=GA@",
             'REQProduct_list'         => '5:1111111000000000',
             'realtimeMode'            => 'show',
             'start'                   => 'yes'
             // language is not passed, since we need to parse the resulting webpage
         ];
+        $response = $this->curlProxy->get($url, $parameters);
 
-        $url = $url . '?' . http_build_query($parameters, '', null,);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $request_options['useragent']);
-        curl_setopt($ch, CURLOPT_REFERER, $request_options['referer']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $request_options['timeout']);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $matches = [];
-
-        if (str_contains($response, 'vallen niet binnen de dienstregelingsperiode')) {
-            throw new Exception('The data for which you requested data is too far in the past or future.', 404);
+        if ($response->getResponseCode() != 200) {
+            throw new UpstreamServerConnectionException('Failed to fetch data from the NMBS website: ' . $response->getResponseCode());
         }
 
+        if (str_contains($response->getResponseBody(), 'vallen niet binnen de dienstregelingsperiode')) {
+            throw new RequestOutsideTimetableRangeException('The data for which you requested data is too far in the past or future.', 404);
+        }
+        return $this->cleanResponse($response);
+    }
+
+    /**
+     * @param CurlHttpResponse $response
+     * @return string The cleaned, simplified response data
+     */
+    public function cleanResponse(CurlHttpResponse $response): string
+    {
         // Only keep the actual data, php tidy can't handle the entire document
-        preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response, $matches);
+        $matches = [];
+        preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response->getResponseBody(), $matches);
         $response = $matches[0];
 
-        $response = preg_replace('/<tr class="sqLinkRow.*?<\/tr>/s','',$response);
-        $response = preg_replace('/onclick="loadDetails(.*?)"/s','',$response);
-        $response = preg_replace('/<div.*?<\/div>/s','',$response);
-
-        // Store the raw output to a file on disk, for debug purposes
-        if (key_exists('debug', $_GET) && isset($_GET['debug'])) {
-            file_put_contents(
-                '../../storage/debug-liveboard-fallback-' . $station->_hafasId . '-' .
-                time() . '.html',
-                $response
-            );
-        }
-
+        $response = preg_replace('/<tr class="sqLinkRow.*?<\/tr>/s', '', $response);
+        $response = preg_replace('/onclick="loadDetails(.*?)"/s', '', $response);
+        $response = preg_replace('/<div.*?<\/div>/s', '', $response);
         return $response;
     }
 
     /**
+     * @return DepartureOrArrival[]
      * @throws Exception
      */
-    private static function parseNmbsData($xml, Station $station, LiveboardRequest $request)
+    private function parseNmbsData(LiveboardRequest $request, StationInfo $station, string $xml): array
     {
         //clean XML
         if (class_exists('tidy', false)) {
@@ -217,7 +143,7 @@ class NmbsHtmlLiveboardRepository
             $tidy->parseString($xml, ['input-xml' => true, 'output-xml' => true], 'utf8');
             $tidy->cleanRepair();
         } else {
-            throw new Exception('PHP Tidy is required to clean the data sources.', 500);
+            throw new InternalProcessingException('PHP Tidy is required to clean the data sources.', 500);
         }
 
         $data = new SimpleXMLElement($tidy);
@@ -257,7 +183,7 @@ class NmbsHtmlLiveboardRepository
         //</tr>
 
         $departureArrivals = [];
-        $previousTimeWasDualDigit = false;
+        $previousTimeWasDualDigit = $request->getDateTime()->hour > 9;
         $daysForward = 0;
         foreach ($stBoardEntries as $stBoardEntry) {
             $canceled = false;
@@ -295,54 +221,71 @@ class NmbsHtmlLiveboardRepository
             $time = trim((string)$stBoardEntry->xpath("td[@class='time']")[0]);
             $time = explode(' ', $time)[0];
             $thisTimeIsDualDigit = !str_starts_with($time, '0');
-
-            $date = Carbon::createFromFormat('Ymd', $request->getDate());
             if (!$thisTimeIsDualDigit && $previousTimeWasDualDigit) {
                 $daysForward++;
             }
-            $date->addDays($daysForward);
             $previousTimeWasDualDigit = $thisTimeIsDualDigit; // After 10 in the morning, if we find time after midnight before 10 now we crossed a date line!
 
-            $unixtime = Tools::transformtime($time . ':00', $date->format('Y-m-d'));
+            $dateTime = Carbon::createFromFormat('Ymd H:i', $request->getDateTime()->format('Ymd') . ' ' . $time);
+            $dateTime->addDays($daysForward);
 
-            // http://www.belgianrail.be/Station.ashx?lang=en&stationId=8885001
-            if (isset($stBoardEntry->xpath('td')[1]->a['href'])) {
-                $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
-                $direction = StationsDatasource::getStationFromID($directionHafasId, $request->getLang());
-            } else {
-                $directionName = $stBoardEntry->xpath('td')[1];
-                $direction = StationsDatasource::getStationFromName($directionName, $request->getLang());
-            }
-            $vehicleTypeAndNumber = trim((string)$stBoardEntry->xpath("td[@class='product']/a")[0]);
-            // Some trains are split by a newline, some by a space
-            $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
-            // Busses are completely missing a space, TRN trains are missing this sometimes
-            $vehicleTypeAndNumber = str_replace('BUS', 'BUS ', $vehicleTypeAndNumber);
-            $vehicleTypeAndNumber = str_replace('TRN', 'TRN ', $vehicleTypeAndNumber);
-            // Replace possible double spaces after the space-introducing fixes
-            $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
+            $vehicleDirection = $this->parseDirection($stBoardEntry);
+            $vehicle = $this->parseVehicle($stBoardEntry);
+            $vehicle->setDirection($vehicleDirection);
 
-            preg_match('/^(\w+?)\s?(\d+)$/',$vehicleTypeAndNumber, $vehicleTypeAndNumber);
-            $vehicle = new VehicleInfo($vehicleTypeAndNumber[1], $vehicleTypeAndNumber[2]);
+            $stopAtStation = new DepartureOrArrival();
+            $stopAtStation->setDelay($delay);
+            $stopAtStation->setStation($station);
+            $stopAtStation->setScheduledDateTime($dateTime);
+            $stopAtStation->setVehicle($vehicle);
+            $stopAtStation->setPlatform(new PlatformInfo($station->getId(), $platform, !$platformNormal));
+            $stopAtStation->setIsCancelled($canceled);
 
-            $stopAtStation = new DepartureArrival();
-            $stopAtStation->delay = $delay;
-            $stopAtStation->station = $direction;
-            $stopAtStation->time = $unixtime;
-            $stopAtStation->vehicle = $vehicle;
-            $stopAtStation->platform = new Platform($platform, $platformNormal);
-            $stopAtStation->canceled = $canceled;
-
-            $stopAtStation->left = 0; // Not available from this data source
-            $stopAtStation->isExtra = 0; // Not available from this data source
-            $stopAtStation->departureConnection = 'http://irail.be/connections/' . substr(
-                    basename($station->{'@id'}),
-                    2
-                ) . '/' . date('Ymd', $unixtime) . '/' . $vehicle->shortname;
+            $stopAtStation->setIsExtra(false); // Not available from this data source
+            $stopAtStation->setIsReported(false); // Not available from this data source
 
             $departureArrivals[] = $stopAtStation;
         }
 
         return array_merge($departureArrivals); //array merge reindexes the array
+    }
+
+    /**
+     * @param mixed $stBoardEntry
+     * @return Vehicle
+     */
+    public function parseVehicle(mixed $stBoardEntry): Vehicle
+    {
+        $vehicleTypeAndNumber = trim((string)$stBoardEntry->xpath("td[@class='product']/a")[0]);
+        // Some trains are split by a newline, some by a space
+        $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
+        // Busses are completely missing a space, TRN trains are missing this sometimes
+        $vehicleTypeAndNumber = str_replace('BUS', 'BUS ', $vehicleTypeAndNumber);
+        $vehicleTypeAndNumber = str_replace('TRN', 'TRN ', $vehicleTypeAndNumber);
+        // Replace possible double spaces after the space-introducing fixes
+        $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
+
+        preg_match('/^(\w+?)\s?(\d+)$/', $vehicleTypeAndNumber, $vehicleTypeAndNumber);
+        return Vehicle::fromTypeAndNumber($vehicleTypeAndNumber[1], $vehicleTypeAndNumber[2]);
+    }
+
+    /**
+     * @param mixed $stBoardEntry
+     * @return VehicleDirection
+     */
+    public function parseDirection(mixed $stBoardEntry): VehicleDirection
+    {
+        // http://www.belgianrail.be/Station.ashx?lang=en&stationId=8885001
+        if (isset($stBoardEntry->xpath('td')[1]->a['href'])) {
+            $directionName = trim($stBoardEntry->xpath('td')[1]->a, "\n");
+            $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
+            $directionStation = $this->stationsRepository->getStationById($directionHafasId);
+            return new VehicleDirection($directionName, $directionStation);
+        } else {
+            $directionName = trim($stBoardEntry->xpath('td')[1], "\n");
+            $directionStation = $this->stationsRepository->findStationByName($directionName);
+            return new VehicleDirection($directionName, $directionStation);
+        }
+
     }
 }
