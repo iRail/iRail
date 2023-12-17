@@ -59,8 +59,10 @@ $router->group(['prefix' => 'v2'], function () use ($router) {
     $router->get('/servicealerts', ['as' => 'v2.serviceAlerts', 'uses' => 'ServiceAlertsV2Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v2.composition', 'uses' => 'CompositionV2Controller@getVehiclecomposition']);
     $router->get('/logs', ['as' => 'v2.logs', 'uses' => 'LogController@getLogs']);
+    // An export endpoint, to allow publishing of logs to gtfs.irail.be
+    $router->get('/logs/{date}', ['as' => 'v2.logs.export', 'uses' => 'LogController@getLogsForDate']);
     $router->post('/feedback/occupancy', ['as' => 'v2.occupancy', 'uses' => 'OccupancyController@store']);
-    // A raw dump endpoint, so these logs can still be published even if they are stored in a database
-    $router->get('/feedback/reports', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@dump']);
+    // A raw dump endpoint, so these logs can still be published to gtfs.irail.be even if they are stored in a database
+    $router->get('/feedback/reports', ['as' => 'v2.occupancy.export', 'uses' => 'OccupancyController@dump']);
 });
 

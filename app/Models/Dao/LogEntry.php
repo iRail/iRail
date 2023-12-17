@@ -2,7 +2,7 @@
 
 namespace Irail\Models\Dao;
 
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class LogEntry
 {
