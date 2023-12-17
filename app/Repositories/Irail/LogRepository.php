@@ -13,7 +13,7 @@ class LogRepository
         DB::update('INSERT INTO RequestLog (queryType, query, userAgent, result) VALUES (?, ?, ?, ?)', [
             $queryType,
             json_encode($query, JSON_UNESCAPED_SLASHES),
-            $userAgent,
+            $this->maskEmailAddress($userAgent),
             $result ? json_encode($result, JSON_UNESCAPED_SLASHES) : null
         ]);
     }
@@ -34,5 +34,27 @@ class LogRepository
                 new Carbon($row->createdAt));
         }, $rows);
         return $entries;
+    }
+
+    /**
+     * Obfuscate an email address in a user agent. abcd@defg.be becomes a***@d***.be.
+     *
+     * @param $userAgent
+     * @return string
+     */
+    private function maskEmailAddress($userAgent): string
+    {
+        // Extract information
+        $hasMatch = preg_match('/([^() @]+)@([^() @]+)\.(\w{2,})/', $userAgent, $matches);
+        if (!$hasMatch) {
+            // No mail address in this user agent.
+            return $userAgent;
+        }
+        $mailReceiver = substr($matches[1], 0, 1) . str_repeat('*', strlen($matches[1]) - 1);
+        $mailDomain = substr($matches[2], 0, 1) . str_repeat('*', strlen($matches[2]) - 1);
+
+        $obfuscatedAddress = $mailReceiver . '@' . $mailDomain . '.' . $matches[3];
+
+        return preg_replace('/([^() ]+)@([^() ]+)\.(\w{2,})/', $obfuscatedAddress, $userAgent);
     }
 }
