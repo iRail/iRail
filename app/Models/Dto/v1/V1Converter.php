@@ -4,7 +4,9 @@ namespace Irail\Models\Dto\v1;
 
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
+use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
+use Irail\Models\Vehicle;
 use stdClass;
 
 abstract class V1Converter
@@ -22,7 +24,7 @@ abstract class V1Converter
         return $obj;
     }
 
-    protected static function convertPlatform(?\Irail\Models\PlatformInfo $platform): StdClass
+    protected static function convertPlatform(?PlatformInfo $platform): StdClass
     {
         $result = new StdClass();
         $result->name = $platform ? $platform->getDesignation() : '?';
@@ -30,11 +32,11 @@ abstract class V1Converter
         return $result;
     }
 
-    protected static function convertVehicle(\Irail\Models\Vehicle $vehicle): StdClass
+    protected static function convertVehicle(Vehicle $vehicle): StdClass
     {
         $result = new StdClass();
-        $result->name = 'BE.NMBS.' . $vehicle->getName();
-        $result->shortname = $vehicle->getName();
+        $result->name = 'BE.NMBS.' . $vehicle->getType() . $vehicle->getNumber();
+        $result->shortname = $vehicle->getType() . ' ' . $vehicle->getNumber();
         $result->number = $vehicle->getNumber();
         $result->type = $vehicle->getType();
         $result->locationX = '0';
@@ -48,7 +50,7 @@ abstract class V1Converter
         $level = $occupancy->getSpitsgidsLevel() != OccupancyLevel::UNKNOWN
             ? $occupancy->getSpitsgidsLevel()
             : $occupancy->getOfficialLevel();
-        $result = new \stdClass();
+        $result = new stdClass();
         $result->{'@id'} = $level->value;
         $result->name = basename($level->value);
         return $result;

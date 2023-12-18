@@ -70,7 +70,7 @@ class Vehicle
 
     public function getName()
     {
-        return $this->type . $this->number;
+        return $this->type . ' ' . $this->number;
     }
 
     /**
