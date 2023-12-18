@@ -140,9 +140,9 @@ $app->configure('app');
 |
 */
 
-// $app->middleware([
-//     Irail\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->middleware([
+    Irail\Http\Middleware\RequestDumpingMiddleware::class
+]);
 
 // $app->routeMiddleware([
 //     'auth' => Irail\Http\Middleware\Authenticate::class,

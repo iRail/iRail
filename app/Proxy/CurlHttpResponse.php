@@ -75,4 +75,14 @@ class CurlHttpResponse
         return $this->duration;
     }
 
+    public function toString()
+    {
+        return "{$this->responseCode} {$this->method} {$this->url} {$this->duration}ms {$this->requestBody} {$this->getResponseBody()}";
+    }
+
+    public function toFormattedString()
+    {
+        return "{$this->responseCode} [{$this->method}] {$this->url} ({$this->duration} ms)\n\n" . ($this->requestBody ?: 'no request body') . "\n\n" . $this->getResponseBody() ?: 'no response body';
+    }
+
 }
