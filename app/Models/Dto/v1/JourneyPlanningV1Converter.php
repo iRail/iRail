@@ -60,15 +60,14 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->time = $departure->getScheduledDateTime()->getTimestamp();
         $result->vehicle = $departureLeg->getLegType() == JourneyLegType::JOURNEY
             ? self::convertVehicle($departure->getVehicle())
-            : self::convertVehicle(new Vehicle("", "WALK", "", ""));
+            : self::convertVehicle(new Vehicle('', 'WALK', '', ''));
         $result->platform = self::convertPlatform($departure->getPlatform());
         $result->canceled = $departure->isCancelled() ? '1' : '0';
         $result->stop = array_map(fn($stop) => self::convertIntermediateStop($stop), $departureLeg->getIntermediateStops());
         $result->departureConnection = $departure->getDepartureUri();
-        $result->direction = $departure->getVehicle()->getDirection()->getName();
+        $result->direction = self::convertDirection($departure);
         $result->left = $departure->getStatus()?->hasLeft() ? '1' : '0';
         $result->walking = $departureLeg->getLegType() == JourneyLegType::WALKING ? '1' : '0';
-        $result->alert = self::convertAlerts($departureLeg->getAlerts());
         $result->occupancy = self::convertOccupancy($departure->getOccupancy());
         return $result;
     }
@@ -81,10 +80,10 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->time = $arrival->getScheduledDateTime()->getTimestamp();
         $result->vehicle = $arrivalLeg->getLegType() == JourneyLegType::JOURNEY
             ? self::convertVehicle($arrival->getVehicle())
-            : self::convertVehicle(new Vehicle("", "WALK", "", ""));
+            : self::convertVehicle(new Vehicle('', 'WALK', '', ''));
         $result->platform = self::convertPlatform($arrival->getPlatform());
         $result->canceled = $arrival->isCancelled() ? '1' : '0';
-        $result->direction = $arrival->getVehicle()->getDirection()->getName();
+        $result->direction = self::convertDirection($arrival);
         $result->arrived = $arrival->getStatus()?->hasArrived() ? '1' : '0';
         $result->walking = $arrivalLeg->getLegType() == JourneyLegType::WALKING ? '1' : '0';
         return $result;
@@ -148,6 +147,17 @@ class JourneyPlanningV1Converter extends V1Converter
             $alert->endTime = $message->getValidUpTo()->getTimestamp();
             $result[] = $alert;
         }
+        return $result;
+    }
+
+    /**
+     * @param DepartureOrArrival $departureOrArrival
+     * @return StdClass
+     */
+    public static function convertDirection(DepartureOrArrival $departureOrArrival): StdClass
+    {
+        $result = new StdClass();
+        $result->name = $departureOrArrival->getVehicle()->getDirection()->getName();
         return $result;
     }
 
