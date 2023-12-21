@@ -15,7 +15,7 @@ class CurlProxy
     /**
      * @var CurlHttpResponse[]
      */
-    private array $requests;
+    private array $requests = [];
 
     public function get(string $url, array $parameters = [], array $headers = []): CurlHttpResponse
     {
