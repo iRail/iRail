@@ -16,12 +16,12 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         for ($i = 0; $i < count($materialUnits); $i++) {
             $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[$i], $i);
 
-            $this->assertEquals("AM86", $rollingMaterialType->getParentType());
+            $this->assertEquals('AM86', $rollingMaterialType->getParentType());
             if ($i == 0) {
-                $this->assertEquals("a", $rollingMaterialType->getSubType());
+                $this->assertEquals('a', $rollingMaterialType->getSubType());
             }
             if ($i == 1) {
-                $this->assertEquals("b", $rollingMaterialType->getSubType());
+                $this->assertEquals('b', $rollingMaterialType->getSubType());
             }
         }
     }
@@ -34,15 +34,15 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         for ($i = 0; $i < count($materialUnits); $i++) {
             $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[$i], $i);
 
-            $this->assertEquals("AM08M", $rollingMaterialType->getParentType());
+            $this->assertEquals('AM08M', $rollingMaterialType->getParentType());
             if ($i % 3 == 0) {
-                $this->assertEquals("a", $rollingMaterialType->getSubType());
+                $this->assertEquals('a', $rollingMaterialType->getSubType());
             }
             if ($i % 3 == 1) {
-                $this->assertEquals("b", $rollingMaterialType->getSubType());
+                $this->assertEquals('b', $rollingMaterialType->getSubType());
             }
             if ($i % 3 == 2) {
-                $this->assertEquals("c", $rollingMaterialType->getSubType());
+                $this->assertEquals('c', $rollingMaterialType->getSubType());
             }
         }
     }
@@ -55,15 +55,15 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         for ($i = 0; $i < count($materialUnits); $i++) {
             $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[$i], $i);
 
-            $this->assertEquals("AM80M", $rollingMaterialType->getParentType());
+            $this->assertEquals('AM80M', $rollingMaterialType->getParentType());
             if ($i % 3 == 0) {
-                $this->assertEquals("a", $rollingMaterialType->getSubType());
+                $this->assertEquals('a', $rollingMaterialType->getSubType());
             }
             if ($i % 3 == 1) {
-                $this->assertEquals("b", $rollingMaterialType->getSubType());
+                $this->assertEquals('b', $rollingMaterialType->getSubType());
             }
             if ($i % 3 == 2) {
-                $this->assertEquals("c", $rollingMaterialType->getSubType());
+                $this->assertEquals('c', $rollingMaterialType->getSubType());
             }
         }
     }
@@ -75,8 +75,8 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
 
         $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[1], 1);
 
-        $this->assertEquals("M6", $rollingMaterialType->getParentType());
-        $this->assertEquals("BDUH", $rollingMaterialType->getSubType());
+        $this->assertEquals('M6', $rollingMaterialType->getParentType());
+        $this->assertEquals('BDUH', $rollingMaterialType->getSubType());
     }
 
     public function testGetMaterialType_M7()
@@ -87,11 +87,11 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         for ($i = 5; $i < 11; $i++) {
             $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[$i], $i);
 
-            $this->assertEquals("M7", $rollingMaterialType->getParentType());
+            $this->assertEquals('M7', $rollingMaterialType->getParentType());
             if ($i <= 7) {
-                $this->assertEquals("ABUH", $rollingMaterialType->getSubType());
+                $this->assertEquals('ABUH', $rollingMaterialType->getSubType());
             } else {
-                $this->assertEquals("BUH", $rollingMaterialType->getSubType());
+                $this->assertEquals('BUH', $rollingMaterialType->getSubType());
             }
         }
     }
@@ -104,8 +104,8 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         for ($i = 2; $i < 4; $i++) {
             $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[$i], $i);
 
-            $this->assertEquals("I11", $rollingMaterialType->getParentType());
-            $this->assertEquals("BUH", $rollingMaterialType->getSubType());
+            $this->assertEquals('I11', $rollingMaterialType->getParentType());
+            $this->assertEquals('BUH', $rollingMaterialType->getSubType());
         }
     }
 
@@ -114,7 +114,7 @@ class NmbsTrainMapCompositionRepositoryTest extends TestCase
         $jsonData = json_decode(file_get_contents(__DIR__ . '/../../Fixtures/composition_m6_i11_i10_m7_ic508.json'));
         $materialUnits = $jsonData[0]->materialUnits;
         $rollingMaterialType = NmbsTrainMapCompositionRepository::getMaterialType($materialUnits[4], 4);
-        $this->assertEquals("I10", $rollingMaterialType->getParentType());
-        $this->assertEquals("BUH", $rollingMaterialType->getSubType());
+        $this->assertEquals('I10', $rollingMaterialType->getParentType());
+        $this->assertEquals('BUH', $rollingMaterialType->getSubType());
     }
 }

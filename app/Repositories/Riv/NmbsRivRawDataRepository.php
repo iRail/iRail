@@ -141,7 +141,7 @@ class NmbsRivRawDataRepository
         if ($journeyDetailRef === null) {
             throw new Exception('Vehicle not found', 404);
         }
-        return $this->getJourneyDetailResponse($request, $journeyDetailRef, $vehicleWithOriginAndDestination);
+        return $this->getJourneyDetailResponse($request, $journeyDetailRef);
     }
 
     /**
