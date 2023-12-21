@@ -287,7 +287,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             } else {
                 preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
                 $parentType = $matches[1]; // M6, I11
-                $subType = $matches[2]; // A, B, BDX, BUH, ...
+                $subType = $matches[3]; // A, B, BDX, BUH, ...
             }
         } else {
             // Some special cases, typically when data is missing
