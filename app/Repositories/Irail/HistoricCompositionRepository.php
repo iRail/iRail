@@ -40,7 +40,7 @@ class HistoricCompositionRepository
      */
     public function getHistoricCompositions(string $vehicleType, int $journeyNumber, int $daysBack = 21): array
     {
-        $rows = DB::select('SELECT * FROM CompositionHistory WHERE journeyType = ? AND journeyNumber = ? AND date = ?');
+        $rows = DB::select('SELECT * FROM CompositionHistory WHERE journeyType = ? AND journeyNumber = ? AND journeyStartDate = ?');
         if (count($rows) == 0) {
             return [];
         }
@@ -56,7 +56,7 @@ class HistoricCompositionRepository
     public function getHistoricComposition(string $journeyType, int $journeyNumber, Carbon $date): array
     {
         $rows = DB::select('SELECT CU.*, CUU.fromStationId, CUU.toStationId, CUU.position FROM CompositionUnitUsage CUU JOIN CompositionUnit CU on CU.uicCode = cuu.uicCode
-         WHERE CUU.journeyType = ? AND CUU.journeyNumber = ? AND CUU.date = ? ORDER BY CUU.fromStationId, CUU.position', [$journeyType, $journeyNumber, $date]);
+         WHERE CUU.journeyType = ? AND CUU.journeyNumber = ? AND CUU.journeyStartDate = ? ORDER BY CUU.fromStationId, CUU.position', [$journeyType, $journeyNumber, $date]);
         if (count($rows) == 0) {
             return [];
         }
@@ -103,7 +103,7 @@ class HistoricCompositionRepository
             }
             $types[$parentType]++;
         }
-        $primaryMaterialType = array_keys($types, max($types))
+        $primaryMaterialType = array_keys($types, max($types));
         DB::update('INSERT INTO CompositionHistory(
                                journeyType, journeyNumber, journeyStartDate, 
                                fromStationId, toStationId,
