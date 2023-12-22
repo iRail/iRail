@@ -29,4 +29,72 @@ class StoredComposition
      * @var StoredCompositionUnit[] $units
      */
     private array $units;
+
+    public function getFromStationId(): string
+    {
+        return $this->fromStationId;
+    }
+
+    public function setFromStationId(string $fromStationId): StoredComposition
+    {
+        $this->fromStationId = $fromStationId;
+        return $this;
+    }
+
+    public function getToStationId(): string
+    {
+        return $this->toStationId;
+    }
+
+    public function setToStationId(string $toStationId): StoredComposition
+    {
+        $this->toStationId = $toStationId;
+        return $this;
+    }
+
+    public function getJourneyType(): string
+    {
+        return $this->journeyType;
+    }
+
+    public function setJourneyType(string $journeyType): StoredComposition
+    {
+        $this->journeyType = $journeyType;
+        return $this;
+    }
+
+    public function getJourneyNumber(): int
+    {
+        return $this->journeyNumber;
+    }
+
+    public function setJourneyNumber(int $journeyNumber): StoredComposition
+    {
+        $this->journeyNumber = $journeyNumber;
+        return $this;
+    }
+
+    public function getDate(): Carbon
+    {
+        return $this->date;
+    }
+
+    public function setDate(Carbon $date): StoredComposition
+    {
+        $this->date = $date;
+        return $this;
+    }
+
+    public function &getUnits(): array
+    {
+        return $this->units;
+    }
+
+    public function setUnits(array $units): StoredComposition
+    {
+        $this->units = $units;
+        return $this;
+    }
+
+
 }
