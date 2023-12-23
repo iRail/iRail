@@ -56,7 +56,7 @@ class VehicleCompositionV1Converter extends V1Converter
         $result->hasAirco = $unit->hasAirco();
         $result->materialNumber = $unit->getMaterialNumber();
         $result->tractionType = $unit->getTractionType();
-        $result->canPassToNextUnit = $unit->isCanPassToNextUnit();
+        $result->canPassToNextUnit = $unit->canPassToNextUnit();
         $result->seatsFirstClass = $unit->getSeatsFirstClass();
         $result->seatsCoupeFirstClass = $unit->getSeatsCoupeFirstClass();
         $result->standingPlacesFirstClass = $unit->getStandingPlacesFirstClass();

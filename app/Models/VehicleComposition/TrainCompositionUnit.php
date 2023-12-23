@@ -270,7 +270,7 @@ class TrainCompositionUnit
         return $this;
     }
 
-    public function isCanPassToNextUnit(): bool
+    public function canPassToNextUnit(): bool
     {
         return $this->canPassToNextUnit;
     }

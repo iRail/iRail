@@ -2,6 +2,7 @@
 
 namespace Irail\Models\Dto\v2;
 
+use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
@@ -10,6 +11,8 @@ use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
+use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
+use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Models\VehicleDirection;
 
 class V2Converter
@@ -126,6 +129,68 @@ class V2Converter
         return [
             'value' => $occupancy->name,
             'uri'   => $occupancy->value
+        ];
+    }
+
+    protected static function convertComposition(TrainCompositionOnSegment $composition): array
+    {
+        return [
+            'fromStationId' => $composition->getOrigin()->getId(),
+            'toStationId'   => $composition->getDestination()->getId(),
+            'units'         => array_map(
+                fn($unit, $index) => self::convertCompositionUnit($index, $unit),
+                $composition->getComposition()->getUnits(),
+                array_keys($composition->getComposition()->getUnits())
+            )
+        ];
+    }
+
+    private static function convertCompositionUnit(int $index, TrainCompositionUnit $unit): array
+    {
+        return [
+            'id'                            => $index,
+            'materialType'                  => [
+                'parent_type' => $unit->getMaterialType()->getParentType(),
+                'sub_type'    => $unit->getMaterialType()->getSubType(),
+                'orientation' => $unit->getMaterialType()->getOrientation()->name
+            ],
+            'uicCode'                       => $unit->getUicCode(),
+            'materialSubTypeName'           => $unit->getMaterialSubTypeName(),
+            'materialNumber'                => $unit->getMaterialNumber(),
+            'tractionType'                  => $unit->getTractionType(),
+            'hasToilets'                    => $unit->hasToilet(),
+            'hasPrmToilets'                 => $unit->hasToilet(),
+            'hasTables'                     => $unit->hasTables(),
+            'hasSecondClassOutlets'         => $unit->hasSecondClassOutlets(),
+            'hasFirstClassOutlets'          => $unit->hasFirstClassOutlets(),
+            'hasHeating'                    => $unit->hasHeating(),
+            'hasAirco'                      => $unit->hasAirco(),
+            'canPassToNextUnit'             => $unit->canPassToNextUnit(),
+            'standingPlacesSecondClass'     => $unit->getStandingPlacesSecondClass(),
+            'standingPlacesFirstClass'      => $unit->getStandingPlacesFirstClass(),
+            'seatsCoupeSecondClass'         => $unit->getSeatsCoupeSecondClass(),
+            'seatsCoupeFirstClass'          => $unit->getSeatsCoupeFirstClass(),
+            'seatsSecondClass'              => $unit->getSeatsSecondClass(),
+            'seatsFirstClass'               => $unit->getSeatsFirstClass(),
+            'lengthInMeter'                 => $unit->getLengthInMeter(),
+            'hasSemiAutomaticInteriorDoors' => $unit->hasSemiAutomaticInteriorDoors(),
+            'hasLuggageSection'             => $unit->hasLuggageSection(),
+            'tractionPosition'              => $unit->getTractionPosition(),
+            'hasPrmSection'                 => $unit->hasPrmSection(),
+            'hasPriorityPlaces'             => $unit->hasPriorityPlaces(),
+            'hasBikeSection'                => $unit->hasBikeSection()
+        ];
+    }
+
+    protected static function convertCompositionStats(CompositionStatistics $compositionStatistics): array
+    {
+        return [
+            'historicalRecords'                      => $compositionStatistics->getNumberOfRecords(),
+            'medianLength'                           => $compositionStatistics->getMedianProbableLength(),
+            'mostFrequentLength'                     => $compositionStatistics->getMostProbableLength(),
+            'mostFrequentLengthOccurrencePercentage' => $compositionStatistics->getMostProbableLengthOccurrence(),
+            'mostFrequentType'                       => $compositionStatistics->getMostProbableType(),
+            'mostFrequentTypeOccurencePercentage'    => $compositionStatistics->getMostProbableTypeOccurrence(),
         ];
     }
 }

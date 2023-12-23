@@ -5,6 +5,7 @@ namespace Irail\Repositories\Irail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Irail\Models\Dao\CompositionHistoryEntry;
+use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Dao\StoredComposition;
 use Irail\Models\Dao\StoredCompositionUnit;
 use Irail\Models\Vehicle;
@@ -47,6 +48,24 @@ class HistoricCompositionRepository
             return [];
         }
         return array_map(fn($row) => $this->transformCompositionHistory($row), $rows);
+    }
+
+    public function getHistoricCompositionStatistics(string $vehicleType, int $journeyNumber, int $daysBack = 21): CompositionStatistics
+    {
+        $compositions = $this->getHistoricCompositions(
+            $vehicleType,
+            $journeyNumber,
+            $daysBack);
+        $lengths = array_map(fn($comp) => $comp->getPassengerUnitCount(), $compositions);
+        sort($lengths);
+        $lengthFrequency = array_count_values($lengths);
+        $typesFrequency = array_count_values(array_map(fn($comp) => $comp->getPrimaryMaterialType(), $compositions));
+        $medianLength = $this->median($lengths);
+        $mostProbableLength = array_keys($lengthFrequency, max($lengthFrequency))[0];
+        $lengthPercentage = 100 * max($lengthFrequency) / count($compositions);
+        $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
+        $typePercentage = 100 * max($lengthFrequency) / count($compositions);
+        return new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage, $primaryMaterialType, $typePercentage)
     }
 
 
@@ -115,13 +134,9 @@ class HistoricCompositionRepository
             if ($unit->getSeatsFirstClass() + $unit->getSeatsSecondClass() > 0) {
                 $passengerCarriageCount++;
             }
-            $parentType = $unit->getMaterialType()->getParentType();
-            if (!key_exists($parentType, $types)) {
-                $types[$parentType] = 0;
-            }
-            $types[$parentType]++;
         }
-        $primaryMaterialType = array_keys($types, max($types))[0];
+        $typesFrequency = array_count_values(array_map(fn($unit) => $unit->getMaterialType()->getParentType(), $units));
+        $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($vehicle, $journeyStartDate, $composition, $primaryMaterialType, $passengerCarriageCount);
         foreach ($units as $position => $unit) {
             $this->insertIfNotExists($unit);
@@ -167,11 +182,11 @@ class HistoricCompositionRepository
     }
 
     /**
-     * @param Vehicle $vehicle
-     * @param Carbon $journeyStartDate
+     * @param Vehicle                   $vehicle
+     * @param Carbon                    $journeyStartDate
      * @param TrainCompositionOnSegment $composition
-     * @param int|string $primaryMaterialType
-     * @param int $passengerCarriageCount
+     * @param int|string                $primaryMaterialType
+     * @param int                       $passengerCarriageCount
      * @return int|mixed|null
      */
     public function insertComposition(
@@ -273,5 +288,15 @@ class HistoricCompositionRepository
             return null;
         }
         return $rows[0]->id;
+    }
+
+    /**
+     * @param $lengths
+     * @return mixed
+     */
+    public function median($lengths): mixed
+    {
+        $count = count($lengths);
+        return $count % 2 == 1 ? $lengths[$count / 2] : ($lengths[$count / 2] + $lengths[($count / 2) + 1] / 2);
     }
 }

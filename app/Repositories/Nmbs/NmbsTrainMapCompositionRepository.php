@@ -4,6 +4,7 @@ namespace Irail\Repositories\Nmbs;
 
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\VehicleCompositionRequest;
+use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\VehicleComposition\RollingMaterialOrientation;
 use Irail\Models\VehicleComposition\RollingMaterialType;
@@ -32,12 +33,11 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     /**
      * Scrape the composition of a train from the NMBS trainmap web application.
-     * @param string $trainId
+     * @param VehicleCompositionRequest|VehicleJourneyRequest $request
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      * @throws CompositionUnavailableException
      */
-
-    function getComposition(VehicleCompositionRequest $request): VehicleCompositionSearchResult
+    function getComposition(VehicleCompositionRequest|VehicleJourneyRequest $request): VehicleCompositionSearchResult
     {
         $trainId = preg_replace('/[^0-9]/', '', $request->getVehicleId());
         try {
