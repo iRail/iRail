@@ -14,9 +14,19 @@ class TrainCompositionUnit
     //--- Data fields
 
     /**
-     * @var boolean Indicates if this unit has toilets.
+     * @var int The UIC code of this vehicle
      */
-    private bool $hasToilets;
+    private int $uicCode;
+
+    /**
+     * @var boolean Indicates if this unit has toilet.
+     */
+    private bool $hasToilet;
+
+    /**
+     * @var boolean Indicates if this unit has a toilet for passengers with reduced mobility.
+     */
+    private bool $hasPrmToilet;
 
     /**
      * @var boolean Indicates if this unit has tables.
@@ -134,378 +144,283 @@ class TrainCompositionUnit
         $this->materialType = $materialType;
     }
 
-    /**
-     * @return RollingMaterialType
-     */
     public function getMaterialType(): RollingMaterialType
     {
         return $this->materialType;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasToilets(): bool
+    public function getUicCode(): int
     {
-        return $this->hasToilets;
+        return $this->uicCode;
     }
 
-    /**
-     * @param bool $hasToilets
-     */
-    public function setHasToilets(bool $hasToilets): void
+    public function setUicCode(int $uicCode): TrainCompositionUnit
     {
-        $this->hasToilets = $hasToilets;
+        $this->uicCode = $uicCode;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
+    public function hasToilet(): bool
+    {
+        return $this->hasToilet;
+    }
+
+    public function setHasToilet(bool $hasToilet): TrainCompositionUnit
+    {
+        $this->hasToilet = $hasToilet;
+        return $this;
+    }
+
+    public function hasPrmToilet(): bool
+    {
+        return $this->hasPrmToilet;
+    }
+
+    public function setHasPrmToilet(bool $hasPrmToilet): TrainCompositionUnit
+    {
+        $this->hasPrmToilet = $hasPrmToilet;
+        return $this;
+    }
+
     public function hasTables(): bool
     {
         return $this->hasTables;
     }
 
-    /**
-     * @param bool $hasTables
-     */
-    public function setHasTables(bool $hasTables): void
+    public function setHasTables(bool $hasTables): TrainCompositionUnit
     {
         $this->hasTables = $hasTables;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasFirstClassOutlets(): bool
     {
         return $this->hasFirstClassOutlets;
     }
 
-    /**
-     * @param bool $hasFirstClassOutlets
-     */
-    public function setHasFirstClassOutlets(bool $hasFirstClassOutlets): void
+    public function setHasFirstClassOutlets(bool $hasFirstClassOutlets): TrainCompositionUnit
     {
         $this->hasFirstClassOutlets = $hasFirstClassOutlets;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasSecondClassOutlets(): bool
     {
         return $this->hasSecondClassOutlets;
     }
 
-    /**
-     * @param bool $hasSecondClassOutlets
-     */
-    public function setHasSecondClassOutlets(bool $hasSecondClassOutlets): void
+    public function setHasSecondClassOutlets(bool $hasSecondClassOutlets): TrainCompositionUnit
     {
         $this->hasSecondClassOutlets = $hasSecondClassOutlets;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasHeating(): bool
     {
         return $this->hasHeating;
     }
 
-    /**
-     * @param bool $hasHeating
-     */
-    public function setHasHeating(bool $hasHeating): void
+    public function setHasHeating(bool $hasHeating): TrainCompositionUnit
     {
         $this->hasHeating = $hasHeating;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasAirco(): bool
     {
         return $this->hasAirco;
     }
 
-    /**
-     * @param bool $hasAirco
-     */
-    public function setHasAirco(bool $hasAirco): void
+    public function setHasAirco(bool $hasAirco): TrainCompositionUnit
     {
         $this->hasAirco = $hasAirco;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasBikeSection(): bool
-    {
-        return $this->hasBikeSection;
-    }
-
-    public function setHasBikeSection(bool $hasBikeSection)
-    {
-        $this->hasBikeSection = $hasBikeSection;
-    }
-
-    /**
-     * @return int
-     */
     public function getMaterialNumber(): int
     {
         return $this->materialNumber;
     }
 
-    /**
-     * @param int $materialNumber
-     */
-    public function setMaterialNumber(int $materialNumber): void
+    public function setMaterialNumber(int $materialNumber): TrainCompositionUnit
     {
         $this->materialNumber = $materialNumber;
+        return $this;
     }
 
-    /**
-     * @return string
-     */
+    public function hasBikeSection(): bool
+    {
+        return $this->hasBikeSection;
+    }
+
+    public function setHasBikeSection(bool $hasBikeSection): TrainCompositionUnit
+    {
+        $this->hasBikeSection = $hasBikeSection;
+        return $this;
+    }
+
     public function getTractionType(): string
     {
         return $this->tractionType;
     }
 
-    /**
-     * @param string $tractionType
-     */
-    public function setTractionType(string $tractionType): void
+    public function setTractionType(string $tractionType): TrainCompositionUnit
     {
         $this->tractionType = $tractionType;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isCanPassToNextUnit(): bool
     {
         return $this->canPassToNextUnit;
     }
 
-    /**
-     * @param bool $canPassToNextUnit
-     */
-    public function setCanPassToNextUnit(bool $canPassToNextUnit): void
+    public function setCanPassToNextUnit(bool $canPassToNextUnit): TrainCompositionUnit
     {
         $this->canPassToNextUnit = $canPassToNextUnit;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getStandingPlacesSecondClass(): int
     {
         return $this->standingPlacesSecondClass;
     }
 
-    /**
-     * @param int $standingPlacesSecondClass
-     */
-    public function setStandingPlacesSecondClass(int $standingPlacesSecondClass): void
+    public function setStandingPlacesSecondClass(int $standingPlacesSecondClass): TrainCompositionUnit
     {
         $this->standingPlacesSecondClass = $standingPlacesSecondClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getStandingPlacesFirstClass(): int
     {
         return $this->standingPlacesFirstClass;
     }
 
-    /**
-     * @param int $standingPlacesFirstClass
-     */
-    public function setStandingPlacesFirstClass(int $standingPlacesFirstClass): void
+    public function setStandingPlacesFirstClass(int $standingPlacesFirstClass): TrainCompositionUnit
     {
         $this->standingPlacesFirstClass = $standingPlacesFirstClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getSeatsCoupeSecondClass(): int
     {
         return $this->seatsCoupeSecondClass;
     }
 
-    /**
-     * @param int $seatsCoupeSecondClass
-     */
-    public function setSeatsCoupeSecondClass(int $seatsCoupeSecondClass): void
+    public function setSeatsCoupeSecondClass(int $seatsCoupeSecondClass): TrainCompositionUnit
     {
         $this->seatsCoupeSecondClass = $seatsCoupeSecondClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getSeatsCoupeFirstClass(): int
     {
         return $this->seatsCoupeFirstClass;
     }
 
-    /**
-     * @param int $seatsCoupeFirstClass
-     */
-    public function setSeatsCoupeFirstClass(int $seatsCoupeFirstClass): void
+    public function setSeatsCoupeFirstClass(int $seatsCoupeFirstClass): TrainCompositionUnit
     {
         $this->seatsCoupeFirstClass = $seatsCoupeFirstClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getSeatsSecondClass(): int
     {
         return $this->seatsSecondClass;
     }
 
-    /**
-     * @param int $seatsSecondClass
-     */
-    public function setSeatsSecondClass(int $seatsSecondClass): void
+    public function setSeatsSecondClass(int $seatsSecondClass): TrainCompositionUnit
     {
         $this->seatsSecondClass = $seatsSecondClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getSeatsFirstClass(): int
     {
         return $this->seatsFirstClass;
     }
 
-    /**
-     * @param int $seatsFirstClass
-     */
-    public function setSeatsFirstClass(int $seatsFirstClass): void
+    public function setSeatsFirstClass(int $seatsFirstClass): TrainCompositionUnit
     {
         $this->seatsFirstClass = $seatsFirstClass;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getLengthInMeter(): int
     {
         return $this->lengthInMeter;
     }
 
-    /**
-     * @param int $lengthInMeter
-     */
-    public function setLengthInMeter(int $lengthInMeter): void
+    public function setLengthInMeter(int $lengthInMeter): TrainCompositionUnit
     {
         $this->lengthInMeter = $lengthInMeter;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasSemiAutomaticInteriorDoors(): bool
     {
         return $this->hasSemiAutomaticInteriorDoors;
     }
 
-    /**
-     * @param bool $hasSemiAutomaticInteriorDoors
-     */
-    public function setHasSemiAutomaticInteriorDoors(bool $hasSemiAutomaticInteriorDoors): void
+    public function setHasSemiAutomaticInteriorDoors(bool $hasSemiAutomaticInteriorDoors): TrainCompositionUnit
     {
         $this->hasSemiAutomaticInteriorDoors = $hasSemiAutomaticInteriorDoors;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasLuggageSection(): bool
     {
         return $this->hasLuggageSection;
     }
 
-    /**
-     * @param bool $hasLuggageSection
-     */
-    public function setHasLuggageSection(bool $hasLuggageSection): void
+    public function setHasLuggageSection(bool $hasLuggageSection): TrainCompositionUnit
     {
         $this->hasLuggageSection = $hasLuggageSection;
+        return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getMaterialSubTypeName(): string
     {
         return $this->materialSubTypeName;
     }
 
-    /**
-     * @param string $materialSubTypeName
-     */
-    public function setMaterialSubTypeName(string $materialSubTypeName): void
+    public function setMaterialSubTypeName(string $materialSubTypeName): TrainCompositionUnit
     {
         $this->materialSubTypeName = $materialSubTypeName;
+        return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getTractionPosition(): int
     {
         return $this->tractionPosition;
     }
 
-    /**
-     * @param int $tractionPosition
-     */
-    public function setTractionPosition(int $tractionPosition): void
+    public function setTractionPosition(int $tractionPosition): TrainCompositionUnit
     {
         $this->tractionPosition = $tractionPosition;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasPrmSection(): bool
     {
         return $this->hasPrmSection;
     }
 
-    /**
-     * @param bool $hasPrmSection
-     */
-    public function setHasPrmSection(bool $hasPrmSection): void
+    public function setHasPrmSection(bool $hasPrmSection): TrainCompositionUnit
     {
         $this->hasPrmSection = $hasPrmSection;
+        return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasPriorityPlaces(): bool
     {
         return $this->hasPriorityPlaces;
     }
 
-    /**
-     * @param bool $hasPriorityPlaces
-     */
-    public function setHasPriorityPlaces(bool $hasPriorityPlaces): void
+    public function setHasPriorityPlaces(bool $hasPriorityPlaces): TrainCompositionUnit
     {
         $this->hasPriorityPlaces = $hasPriorityPlaces;
+        return $this;
     }
-
-
 }

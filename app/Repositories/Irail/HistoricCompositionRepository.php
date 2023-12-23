@@ -9,6 +9,7 @@ use Irail\Models\Dao\StoredComposition;
 use Irail\Models\Dao\StoredCompositionUnit;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
+use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Spatie\Async\Pool;
 use stdClass;
 
@@ -40,7 +41,8 @@ class HistoricCompositionRepository
      */
     public function getHistoricCompositions(string $vehicleType, int $journeyNumber, int $daysBack = 21): array
     {
-        $rows = DB::select('SELECT * FROM CompositionHistory WHERE journeyType = ? AND journeyNumber = ? AND journeyStartDate = ?');
+        $rows = DB::select('SELECT * FROM CompositionHistory WHERE journeyType = ? AND journeyNumber = ? AND journeyStartDate >= ?',
+            [$vehicleType, $journeyNumber, Carbon::now()->startOfDay()->subDays($daysBack)]);
         if (count($rows) == 0) {
             return [];
         }
@@ -55,8 +57,13 @@ class HistoricCompositionRepository
      */
     public function getHistoricComposition(string $journeyType, int $journeyNumber, Carbon $date): array
     {
-        $rows = DB::select('SELECT CU.*, CUU.fromStationId, CUU.toStationId, CUU.position FROM CompositionUnitUsage CUU JOIN CompositionUnit CU on CU.uicCode = cuu.uicCode
-         WHERE CUU.journeyType = ? AND CUU.journeyNumber = ? AND CUU.journeyStartDate = ? ORDER BY CUU.fromStationId, CUU.position', [$journeyType, $journeyNumber, $date]);
+        $rows = DB::select('SELECT CU.*, CH.fromStationId, CH.toStationId, CUU.position 
+            FROM CompositionHistory CH  
+            JOIN CompositionUnitUsage CUU on CH.id = CUU.historicCompositionId
+            JOIN CompositionUnit CU on CU.uicCode = cuu.uicCode
+            WHERE CH.journeyType = ? AND CH.journeyNumber = ? AND CH.journeyStartDate = ? 
+            ORDER BY CH.fromStationId, CUU.position',
+            [$journeyType, $journeyNumber, $date]);
         if (count($rows) == 0) {
             return [];
         }
@@ -65,7 +72,7 @@ class HistoricCompositionRepository
         foreach ($rows as $row) {
             $unit = $this->transformCompositionUnit($row);
             $fromStationId = $row->fromStationId;
-            $toStationId = $row->fromStationId;
+            $toStationId = $row->toStationId;
             $segmentKey = "$fromStationId-$toStationId";
 
             if (!key_exists($segmentKey, $compositionsBySegment)) {
@@ -83,13 +90,24 @@ class HistoricCompositionRepository
         return array_values($compositionsBySegment);
     }
 
-    public function recordComposition(Vehicle $vehicle, TrainCompositionOnSegment $composition, Carbon $journeyStartDate)
+    public function recordCompositionAsync(Vehicle $vehicle, TrainCompositionOnSegment $composition, Carbon $journeyStartDate): void
+    {
+        $this->threadPool->add(function () use ($vehicle, $composition, $journeyStartDate) {
+            $this->recordComposition($vehicle, $composition, $journeyStartDate);
+        });
+    }
+
+    public function recordComposition(Vehicle $vehicle, TrainCompositionOnSegment $composition, Carbon $journeyStartDate): void
     {
         if ($composition->getComposition()->getLength() < 2
             || $journeyStartDate->copy()->startOfDay()->isAfter(Carbon::now()->startOfDay())) {
             // Only record valid compositions for vehicles running today
             return;
         }
+        if ($this->getCompositionId($vehicle, $journeyStartDate, $composition->getOrigin()->getId(), $composition->getDestination()->getId()) != null) {
+            return; // Don't overwrite existing compositions
+        }
+
         $units = $composition->getComposition()->getUnits();
         $passengerCarriageCount = 0;
         $types = [];
@@ -103,20 +121,16 @@ class HistoricCompositionRepository
             }
             $types[$parentType]++;
         }
-        $primaryMaterialType = array_keys($types, max($types));
-        DB::update('INSERT INTO CompositionHistory(
-                               journeyType, journeyNumber, journeyStartDate, 
-                               fromStationId, toStationId,
-                               primaryMaterialType, passengerUnitCount
-                               ) VALUES (?,?,?,?,?,?,?)', [
-            $vehicle->getType(),
-            $vehicle->getNumber(),
-            $journeyStartDate,
-            $composition->getOrigin()->getId(),
-            $composition->getDestination()->getId(),
-            $primaryMaterialType,
-            $passengerCarriageCount
-        ]);
+        $primaryMaterialType = array_keys($types, max($types))[0];
+        $compositionId = $this->insertComposition($vehicle, $journeyStartDate, $composition, $primaryMaterialType, $passengerCarriageCount);
+        foreach ($units as $position => $unit) {
+            $this->insertIfNotExists($unit);
+            DB::update('INSERT INTO CompositionUnitUsage(uicCode, historicCompositionId, position) VALUES (?,?,?)', [
+                $unit->getUicCode(),
+                $compositionId,
+                $position + 1
+            ]);
+        }
     }
 
 
@@ -125,10 +139,12 @@ class HistoricCompositionRepository
         return (new CompositionHistoryEntry())
             ->setJourneyType($row->journeyType)
             ->setJourneyNumber($row->journeyNumber)
-            ->setDate($row->journeyStartDate)
+            ->setDate(Carbon::createFromTimeString($row->journeyStartDate))
+            ->setFromStationId($row->fromStationId)
+            ->setToStationId($row->toStationId)
             ->setPrimaryMaterialType($row->primaryMaterialType)
             ->setPassengerUnitCount($row->passengerUnitCount)
-            ->setCreatedAt($row->createdAt);
+            ->setCreatedAt(Carbon::createFromTimeString($row->createdAt));
 
     }
 
@@ -146,7 +162,116 @@ class HistoricCompositionRepository
             ->setHasPrmSection($row->hasPrmSection)
             ->setSeatsFirstClass($row->seatsFirstClass)
             ->setSeatsSecondClass($row->seatsSecondClass)
-            ->setCreatedAt($row->createdAt)
-            ->setUpdatedAt($row->updatedAt);
+            ->setCreatedAt(Carbon::createFromTimeString($row->createdAt))
+            ->setUpdatedAt(Carbon::createFromTimeString($row->updatedAt));
+    }
+
+    /**
+     * @param Vehicle $vehicle
+     * @param Carbon $journeyStartDate
+     * @param TrainCompositionOnSegment $composition
+     * @param int|string $primaryMaterialType
+     * @param int $passengerCarriageCount
+     * @return int|mixed|null
+     */
+    public function insertComposition(
+        Vehicle $vehicle,
+        Carbon $journeyStartDate,
+        TrainCompositionOnSegment $composition,
+        int|string $primaryMaterialType,
+        int $passengerCarriageCount
+    ): mixed {
+        DB::insert('INSERT INTO CompositionHistory(
+                               journeyType, journeyNumber, journeyStartDate, 
+                               fromStationId, toStationId,
+                               primaryMaterialType, passengerUnitCount, createdAt
+                               ) VALUES (?,?,?,?,?,?,?,?)', [
+            $vehicle->getType(),
+            $vehicle->getNumber(),
+            $journeyStartDate,
+            $composition->getOrigin()->getId(),
+            $composition->getDestination()->getId(),
+            $primaryMaterialType,
+            $passengerCarriageCount,
+            Carbon::now()
+        ]);
+        return $this->getCompositionId($vehicle, $journeyStartDate,
+            $composition->getOrigin()->getId(),
+            $composition->getDestination()->getId());
+    }
+
+    /**
+     * @param TrainCompositionUnit $unit
+     * @return void
+     */
+    private function insertIfNotExists(TrainCompositionUnit $unit): void
+    {
+        if (getenv('DB_CONNECTION') == 'sqlite') {
+            DB::update('INSERT OR IGNORE INTO CompositionUnit(
+                            uicCode, materialTypeName, materialSubTypeName, materialNumber, 
+                            hasToilet, hasPrmToilet, hasAirco, hasBikeSection, hasPrmSection,
+                            seatsFirstClass, seatsSecondClass, createdAt, updatedAt) 
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?); ', [
+                $unit->getUicCode(),
+                $unit->getMaterialType()->getParentType(),
+                $unit->getMaterialType()->getSubType(),
+                $unit->getMaterialNumber(),
+                $unit->hasToilet(),
+                $unit->hasPrmToilet(),
+                $unit->hasAirco(),
+                $unit->hasBikeSection(),
+                $unit->hasPrmSection(),
+                $unit->getSeatsFirstClass(),
+                $unit->getSeatsSecondClass(),
+                Carbon::now(),
+                Carbon::now()
+            ]);
+        } else {
+            DB::update('IF NOT EXISTS(SELECT 1 FROM CompositionUnit WHERE uicCode=?) BEGIN
+                            INSERT INTO CompositionUnit(
+                            uicCode, materialTypeName, materialSubTypeName, materialNumber, 
+                            hasToilet, hasPrmToilet, hasAirco, hasBikeSection, hasPrmSection,
+                            seatsFirstClass, seatsSecondClass, createdAt, updatedAt) 
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+                            END; ', [
+                $unit->getUicCode(),
+                $unit->getUicCode(),
+                $unit->getMaterialType()->getParentType(),
+                $unit->getMaterialType()->getSubType(),
+                $unit->getMaterialNumber(),
+                $unit->hasToilet(),
+                $unit->hasPrmToilet(),
+                $unit->hasAirco(),
+                $unit->hasBikeSection(),
+                $unit->hasPrmSection(),
+                $unit->getSeatsFirstClass(),
+                $unit->getSeatsSecondClass(),
+                Carbon::now(),
+                Carbon::now()
+            ]);
+        }
+    }
+
+    /**
+     * @param Vehicle $vehicle
+     * @param Carbon  $journeyStartDate
+     * @param string  $fromId
+     * @param string  $toId
+     * @return int|null
+     */
+    public function getCompositionId(Vehicle $vehicle, Carbon $journeyStartDate, string $fromId, string $toId): ?int
+    {
+        $rows = DB::select('SELECT id FROM CompositionHistory WHERE journeyType=? AND journeyNumber=? AND journeyStartDate=? AND fromStationId=? AND toStationId=?',
+            [
+                $vehicle->getType(),
+                $vehicle->getNumber(),
+                $journeyStartDate,
+                $fromId,
+                $toId
+            ]);
+        if (empty($rows)) {
+            return null;
+        }
+        return $rows[0]->id;
     }
 }

@@ -135,7 +135,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     private static function readDetailsIntoUnit($object, TrainCompositionUnit $trainCompositionUnit): TrainCompositionUnit
     {
-        $trainCompositionUnit->setHasToilets($object->hasToilets ?: false);
+        $trainCompositionUnit->setHasToilet($object->hasToilets ?: false);
+        $trainCompositionUnit->setHasPrmToilet($object->hasPrmToilets ?: false);
         $trainCompositionUnit->setHasTables($object->hasTables ?: false);
         $trainCompositionUnit->setHasBikeSection(property_exists($object, 'hasBikeSection') && $object->hasBikeSection);
         $trainCompositionUnit->setHasSecondClassOutlets($object->hasSecondClassOutlets ?: false);

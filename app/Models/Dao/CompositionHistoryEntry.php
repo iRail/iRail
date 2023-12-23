@@ -25,6 +25,16 @@ class CompositionHistoryEntry
     private Carbon $date;
 
     /**
+     * @var string The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.
+     */
+    private string $fromStationId;
+
+    /**
+     * @var string The id of the station up to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.
+     */
+    private string $toStationId;
+
+    /**
      * @var string $primaryMaterialType The type of the majority of the used journeys, such as I10, M6 or AM96
      */
     private string $primaryMaterialType;
@@ -69,6 +79,28 @@ class CompositionHistoryEntry
     public function setDate(Carbon $date): CompositionHistoryEntry
     {
         $this->date = $date;
+        return $this;
+    }
+
+    public function getFromStationId(): string
+    {
+        return $this->fromStationId;
+    }
+
+    public function setFromStationId(string $fromStationId): CompositionHistoryEntry
+    {
+        $this->fromStationId = $fromStationId;
+        return $this;
+    }
+
+    public function getToStationId(): string
+    {
+        return $this->toStationId;
+    }
+
+    public function setToStationId(string $toStationId): CompositionHistoryEntry
+    {
+        $this->toStationId = $toStationId;
         return $this;
     }
 

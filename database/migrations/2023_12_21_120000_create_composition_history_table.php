@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('CompositionHistory', function (Blueprint $table) {
+            $table->id();
             $table->string('journeyType', 16)->nullable(false)->comment('The journey type, for example "IC" in IC 513');
             $table->integer('journeyNumber')->comment('The journey number, for example "513" in IC 513');
             $table->date('journeyStartDate')->nullable()->comment('The date on which this journey ran');
@@ -23,7 +24,7 @@ return new class extends Migration {
             $table->string('primaryMaterialType', 16)->comment('The type of the majority of the used vehicles, such as I10, M6 or AM96');
             $table->tinyInteger('passengerUnitCount')->comment('The number of units in which passengers can be seated'); // 0 - 255
             $table->timestamp('createdAt')->comment('The time when this composition was recorded');
-            $table->primary(['journeyType', 'journeyNumber', 'journeyStartDate', 'fromStationId', 'toStationId']);
+            $table->unique(['journeyType', 'journeyNumber', 'journeyStartDate', 'fromStationId', 'toStationId'],'UniqueJourneyIdentifier');
             $table->index(['journeyType', 'journeyNumber', 'journeyStartDate'], 'DatedVehicleJourney');
         });
     }

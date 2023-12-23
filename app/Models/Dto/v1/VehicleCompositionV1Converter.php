@@ -49,7 +49,7 @@ class VehicleCompositionV1Converter extends V1Converter
     {
         $result = new StdClass;
         $result->materialType = self::convertMaterialUnit($unit->getMaterialType());
-        $result->hasToilets = $unit->hasToilets();
+        $result->hasToilets = $unit->hasToilet();
         $result->hasSecondClassOutlets = $unit->hasSecondClassOutlets();
         $result->hasFirstClassOutlets = $unit->hasFirstClassOutlets();
         $result->hasHeating = $unit->hasHeating();

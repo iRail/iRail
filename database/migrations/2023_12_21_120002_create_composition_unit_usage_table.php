@@ -12,26 +12,16 @@ return new class extends Migration {
     {
         Schema::create('CompositionUnitUsage', function (Blueprint $table) {
             $table->integer('uicCode')->nullable(false)->comment('The uic code of the unit');
-            $table->date('journeyStartDate')->nullable(false)->nullable()->comment('The date on which the unit was used in the specified journey');
-            $table->string('journeyType', 16)->nullable(false)->comment('The journey type, for example "IC" in IC 513');
-            $table->integer('journeyNumber')->comment('The journey number, for example "513" in IC 513');
-
-            $table->string('fromStationId',
-                9)->nullable(false)->comment('The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.');
-            $table->string('toStationId',
-                9)->nullable(false)->comment('The id of the station to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.');
+            $table->bigInteger('historicCompositionId')->unsigned()->nullable(false)->comment('Reference to an entry in the CompositionHistory table, where the journey is described.');
             $table->tinyInteger('position')->nullable(false)->comment('The position of this unit in the composition on the specified segment of the specified journey');
 
-            $table->primary(['uicCode', 'journeyStartDate']);
-            $table->unique(['journeyType', 'journeyNumber', 'journeyStartDate', 'position', 'fromStationId'], 'uniquePositionInTrainOnDayAndSegment1');
-            $table->unique(['journeyType', 'journeyNumber', 'journeyStartDate', 'position', 'toStationId'], 'uniquePositionInTrainOnDayAndSegment2');
+            $table->primary(['uicCode', 'historicCompositionId']);
             $table->foreign('uicCode','rolling_stock_reference')
                 ->references('uicCode')
                 ->on('CompositionUnit')
                 ->onDelete('cascade');
-            $table->index(['journeyType', 'journeyNumber', 'journeyStartDate'], 'DatedVehicleJourney');
-            $table->foreign(['journeyType', 'journeyNumber', 'journeyStartDate', 'fromStationId', 'toStationId'],'history_reference')
-                ->references(['journeyType', 'journeyNumber', 'journeyStartDate', 'fromStationId', 'toStationId'])
+            $table->foreign('historicCompositionId','history_reference')
+                ->references('id')
                 ->on('CompositionHistory')
                 ->onDelete('cascade');
         });
