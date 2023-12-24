@@ -8,6 +8,7 @@ use Irail\Models\Dao\CompositionHistoryEntry;
 use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Dao\StoredComposition;
 use Irail\Models\Dao\StoredCompositionUnit;
+use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
@@ -107,10 +108,16 @@ class HistoricCompositionRepository
         return array_values($compositionsBySegment);
     }
 
-    public function recordCompositionAsync(TrainComposition $composition): void
+    public function recordCompositionAsync(VehicleCompositionSearchResult|TrainComposition $composition): void
     {
         $this->threadPool->add(function () use ($composition) {
-            $this->recordComposition($composition);
+            if ($composition instanceof TrainComposition) {
+                $this->recordComposition($composition);
+            } elseif ($composition instanceof VehicleCompositionSearchResult) {
+                foreach ($composition->getSegments() as $segment) {
+                    $this->recordComposition($segment);
+                }
+            }
         });
     }
 

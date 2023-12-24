@@ -13,19 +13,20 @@ class DatedVehicleJourneyV2Converter extends V2Converter
     /**
      * @param IrailHttpRequest           $request
      * @param VehicleJourneySearchResult $result
+     * @param TrainComposition[]         $composition
      * @param CompositionStatistics      $compositionStatistics
      * @return array
      */
     public static function convert(
         IrailHttpRequest $request,
         VehicleJourneySearchResult $result,
-        TrainComposition $composition,
+        array $composition,
         CompositionStatistics $compositionStatistics
     ): array {
         return [
             'vehicle'               => self::convertVehicle($result->getVehicle()),
             'stops'                 => array_map(fn($obj) => self::convertDepartureAndArrival($obj), $result->getStops()),
-            'composition'           => self::convertComposition($composition),
+            'composition'           => array_map(fn($segment) => self::convertComposition($segment), $composition),
             'compositionStatistics' => self::convertCompositionStats($compositionStatistics)
         ];
     }

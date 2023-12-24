@@ -36,13 +36,16 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
     {
         $vehicleJourneySearchResult = $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
 
-        $composition = $this->vehicleCompositionRepository->getComposition($vehicleJourneySearchResult->getVehicle(), $request->getDateTime());
+        $composition = $this->vehicleCompositionRepository->getComposition($vehicleJourneySearchResult->getVehicle());
+        // Store this in the database, in case it's new.
+        $this->historicCompositionRepository->recordCompositionAsync($composition);
+
         $compositionStatistics = $this->historicCompositionRepository->getHistoricCompositionStatistics(
             $vehicleJourneySearchResult->getVehicle()->getType(),
             $vehicleJourneySearchResult->getVehicle()->getNumber()
         );
 
-        $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult,$composition, $compositionStatistics);
+        $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult, $composition->getSegments(), $compositionStatistics);
         $this->logRequest($request);
         return $this->outputJson($request, $dto);
     }

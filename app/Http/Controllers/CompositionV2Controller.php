@@ -6,19 +6,22 @@ use Illuminate\Http\JsonResponse;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Http\Requests\VehicleCompositionV2Request;
 use Irail\Models\Dto\v2\VehicleCompositionV2Converter;
+use Irail\Repositories\Irail\HistoricCompositionRepository;
 use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV2Controller extends BaseIrailController
 {
+    private HistoricCompositionRepository $historicCompositionRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(HistoricCompositionRepository $historicCompositionRepository)
     {
-        //
+        $this->historicCompositionRepository = $historicCompositionRepository;
     }
 
     public function getVehicleComposition(VehicleCompositionV2Request $request): JsonResponse
@@ -26,6 +29,7 @@ class CompositionV2Controller extends BaseIrailController
         $repo = app(VehicleCompositionRepository::class);
         $vehicleCompositionSearchResult = $repo->getComposition($request);
         $dto = VehiclecompositionV2Converter::convert($request, $vehicleCompositionSearchResult);
+        $this->historicCompositionRepository->recordCompositionAsync($vehicleCompositionSearchResult);
         $this->logRequest($request);
         return $this->outputJson($request, $dto);
     }
