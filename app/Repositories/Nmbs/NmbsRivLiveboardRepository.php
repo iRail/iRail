@@ -37,16 +37,12 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     public function __construct(
         StationsRepository $stationsRepository,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor,
-        NmbsRivRawDataRepository $rivDataRepository = null
-    )
-    {
+        NmbsRivRawDataRepository $rivDataRepository
+    ) {
         $this->stationsRepository = $stationsRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
-        if ($rivDataRepository != null) {
-            $this->rivDataRepository = $rivDataRepository;
-        } else {
-            $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
-        }
+
+        $this->rivDataRepository = $rivDataRepository;
         $this->occupancyRepository = App::make(OccupancyRepository::class);
     }
 
@@ -74,7 +70,9 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         if (empty($rawData)) {
             throw new UpstreamServerException('The server did not return any data.', 500);
         }
-
+        if (str_contains($rawData, ': error :')) {
+            throw new UpstreamServerException('The remote server returned an error: ' . $rawData, 504);
+        }
         // Now we'll actually read the departures/arrivals information.
         $currentStation = $this->stationsRepository->getStationById($request->getStationId());
         if ($currentStation == null) {

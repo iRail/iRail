@@ -3,6 +3,7 @@
 namespace Irail\Models\Dto\v2;
 
 use Irail\Models\Dao\CompositionStatistics;
+use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
@@ -11,14 +12,14 @@ use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
-use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
+use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Models\VehicleDirection;
 
 class V2Converter
 {
 
-    public static function convertDepartureAndArrival(\Irail\Models\DepartureAndArrival $departureAndArrival): array
+    public static function convertDepartureAndArrival(DepartureAndArrival $departureAndArrival): array
     {
         return [
             'arrival'   => self::convertDepartureOrArrival($departureAndArrival->getArrival()),
@@ -64,18 +65,24 @@ class V2Converter
         ];
     }
 
-    public static function convertVehicle(Vehicle $obj)
+    public static function convertVehicle(Vehicle $obj) : array
+    {
+        $result = self::convertVehicleWithoutDirection($obj);
+        $result['direction'] = self::convertVehicleDirection($obj->getDirection());
+        return $result;
+    }
+
+    public static function convertVehicleWithoutDirection(Vehicle $obj) :array
     {
         return [
             'uri'       => $obj->getUri(),
             'id'        => $obj->getId(),
             'type'      => $obj->getType(),
-            'number'    => $obj->getNumber(),
-            'direction' => self::convertVehicleDirection($obj->getDirection())
+            'number'    => $obj->getNumber()
         ];
     }
 
-    private static function convertVehicleDirection(VehicleDirection $obj)
+    private static function convertVehicleDirection(VehicleDirection $obj): array
     {
         return [
             'name'    => $obj->getName(),
@@ -132,7 +139,7 @@ class V2Converter
         ];
     }
 
-    protected static function convertComposition(TrainCompositionOnSegment $composition): array
+    protected static function convertComposition(TrainComposition $composition): array
     {
         return [
             'fromStationId' => $composition->getOrigin()->getId(),

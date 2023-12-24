@@ -6,10 +6,10 @@ use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\VehicleCompositionRequest;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\Result\VehicleCompositionSearchResult;
+use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\RollingMaterialOrientation;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
-use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
@@ -39,7 +39,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     function getComposition(VehicleCompositionRequest|VehicleJourneyRequest $request): VehicleCompositionSearchResult
     {
-        $trainId = preg_replace('/[^0-9]/', '', $request->getVehicleId());
+        $vehicle = Vehicle::fromName($request->getVehicleId());
+        $trainId = preg_replace('/[^0-9]/', '', $vehicle->getNumber());
         try {
             $cacheKey = self::getCacheKey($trainId);
             $cacheAge = 0;
@@ -69,33 +70,38 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $segments = [];
         foreach ($compositionData as $compositionDataForSingleSegment) {
             $segments[] = $this->parseOneSegmentWithCompositionData(
+                $vehicle,
                 $compositionDataForSingleSegment
             );
         }
 
-        return new VehicleCompositionSearchResult($segments);
+        return new VehicleCompositionSearchResult($vehicle, $segments);
     }
 
-    private function parseOneSegmentWithCompositionData($travelSegmentWithCompositionData): TrainCompositionOnSegment
+    private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
     {
         $origin = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarFrom->uicCode);
         $destination = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarTo->uicCode);
-        $composition = self::parseCompositionData($travelSegmentWithCompositionData);
+        $source = $travelSegmentWithCompositionData->confirmedBy;
+        $units = self::parseCompositionData($travelSegmentWithCompositionData->materialUnits);
 
         // Set the left/right orientation on carriages. This can only be done by evaluating all carriages at the same time
-        $composition = self::setCorrectDirectionForCarriages($composition);
+        $units = self::setCorrectDirectionForCarriages($units);
 
-        return new TrainCompositionOnSegment($origin, $destination, $composition);
+        return new TrainComposition($vehicle, $origin, $destination, $source, $units);
     }
 
-    private static function parseCompositionData($travelsegmentWithCompositionData): TrainComposition
+    /**
+     * @param $rawUnits
+     * @return TrainCompositionUnit[]
+     */
+    private static function parseCompositionData($rawUnits): array
     {
-        $source = $travelsegmentWithCompositionData->confirmedBy;
         $units = [];
-        foreach ($travelsegmentWithCompositionData->materialUnits as $i => $compositionUnit) {
+        foreach ($rawUnits as $i => $compositionUnit) {
             $units[] = self::parseCompositionUnit($compositionUnit, $i);
         }
-        return new TrainComposition($source, $units);
+        return $units;
     }
 
     /**
@@ -119,11 +125,11 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             || (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName, 'AM'))
         ) {
             return self::getAmMrMaterialType($rawCompositionUnit, $position);
-        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
+        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
             return self::getHleMaterialType($rawCompositionUnit);
-        } else if (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
+        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
             return self::getHvMaterialType($rawCompositionUnit);
-        } else if (str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
+        } elseif (str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
             // Anything else, default fallback
             $parentType = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
@@ -194,24 +200,24 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      * - The default orientation is LEFT. This means a potential drivers cab is to the LEFT.
      * - The last carriage in a traction group has a RIGHT orientation. This means a potential drivers cab is to the RIGHT.
      *
-     * @param TrainComposition $composition
-     * @return TrainComposition
+     * @param TrainCompositionUnit[] $units
+     * @return TrainCompositionUnit[]
      */
-    private static function setCorrectDirectionForCarriages(TrainComposition $composition): TrainComposition
+    private static function setCorrectDirectionForCarriages(array $units): array
     {
-        for ($i = 1; $i < $composition->getLength() - 1; $i++) {
+        for ($i = 1; $i < count($units) - 1; $i++) {
             // When discovering a carriage in another traction position,
-            if ($composition->getUnit($i)->getTractionPosition() < $composition->getUnit($i + 1)->getTractionPosition()
+            if ($units[$i]->getTractionPosition() < $units[$i + 1]->getTractionPosition()
                 && (
-                    !str_starts_with($composition->getUnit($i)->getMaterialSubTypeName(), 'M7')
-                    || (self::isM7SteeringCabin($composition->getUnit($i)) && self::isM7SteeringCabin($composition->getUnit($i + 1)))
+                    !str_starts_with($units[$i]->getMaterialSubTypeName(), 'M7')
+                    || (self::isM7SteeringCabin($units[$i]) && self::isM7SteeringCabin($units[$i + 1]))
                 )
             ) {
-                $composition->getUnit($i)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
+                $units[$i]->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
             }
         }
-        $composition->getUnit($composition->getLength() - 1)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle of the train
-        return $composition;
+        last($units)->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle of the train
+        return $units;
     }
 
     private static function isM7SteeringCabin($unit): bool

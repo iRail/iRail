@@ -8,7 +8,6 @@ use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Result\VehicleJourneySearchResult;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
-use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use stdClass;
 
@@ -28,7 +27,7 @@ class VehicleCompositionV1Converter extends V1Converter
         return $result;
     }
 
-    private static function convertSegment(TrainCompositionOnSegment $segment): StdClass
+    private static function convertSegment(TrainComposition $segment): StdClass
     {
         $result = new StdClass();
         $result->origin = self::convertStation($segment->getOrigin());

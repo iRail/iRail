@@ -5,7 +5,7 @@ namespace Irail\Models\Dto\v2;
 use Irail\Http\Requests\IrailHttpRequest;
 use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Result\VehicleJourneySearchResult;
-use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
+use Irail\Models\VehicleComposition\TrainComposition;
 
 class DatedVehicleJourneyV2Converter extends V2Converter
 {
@@ -19,7 +19,7 @@ class DatedVehicleJourneyV2Converter extends V2Converter
     public static function convert(
         IrailHttpRequest $request,
         VehicleJourneySearchResult $result,
-        TrainCompositionOnSegment $composition,
+        TrainComposition $composition,
         CompositionStatistics $compositionStatistics
     ): array {
         return [

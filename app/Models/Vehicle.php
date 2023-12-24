@@ -2,12 +2,16 @@
 
 namespace Irail\Models;
 
+use Carbon\Carbon;
+use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
+
 class Vehicle
 {
     private string $uri;
     private string $id;
     private string $type;
     private int $number;
+    private Carbon $journeyStartDate;
 
     private VehicleDirection $direction;
 
@@ -17,21 +21,32 @@ class Vehicle
      * @param string $type
      * @param int    $number
      */
-    public function __construct(string $uri, string $id, string $type, int $number)
+    public function __construct(string $uri, string $id, string $type, int $number, Carbon $journeyStartDate = null)
     {
         $this->uri = $uri;
         $this->id = $id;
         $this->type = $type;
         $this->number = $number;
+        $this->journeyStartDate = $journeyStartDate ? $journeyStartDate->copy()->startOfDay() : Carbon::now()->startOfDay();
     }
 
-    public static function fromTypeAndNumber(string $type, int $number)
+    public static function fromTypeAndNumber(string $type, int $number, Carbon $journeyStartDate = null): Vehicle
     {
         return new Vehicle(
             'http://irail.be/vehicle/' . $type . $number,
             $type . $number,
             $type,
-            $number
+            $number,
+            $journeyStartDate
+        );
+    }
+
+    public static function fromName(string $name, Carbon $journeyStartDate = null): Vehicle
+    {
+        return Vehicle::fromTypeAndNumber(
+            VehicleIdTools::extractTrainType($name),
+            VehicleIdTools::extractTrainNumber($name),
+            $journeyStartDate
         );
     }
 
@@ -87,6 +102,11 @@ class Vehicle
     public function setDirection(VehicleDirection $direction): void
     {
         $this->direction = $direction;
+    }
+
+    public function getJourneyStartDate(): Carbon
+    {
+        return $this->journeyStartDate;
     }
 
 }

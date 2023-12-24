@@ -5,6 +5,7 @@ namespace Irail\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Http\Requests\VehicleCompositionV2Request;
+use Irail\Models\Dto\v2\VehicleCompositionV2Converter;
 use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 
@@ -20,7 +21,7 @@ class CompositionV2Controller extends BaseIrailController
         //
     }
 
-    public function getVehicleComposition(DatedVehicleJourneyV2Request $request): JsonResponse
+    public function getVehicleComposition(VehicleCompositionV2Request $request): JsonResponse
     {
         $repo = app(VehicleCompositionRepository::class);
         $vehicleCompositionSearchResult = $repo->getComposition($request);

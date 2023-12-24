@@ -9,7 +9,7 @@ use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Dao\StoredComposition;
 use Irail\Models\Dao\StoredCompositionUnit;
 use Irail\Models\Vehicle;
-use Irail\Models\VehicleComposition\TrainCompositionOnSegment;
+use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Spatie\Async\Pool;
 use stdClass;
@@ -65,16 +65,15 @@ class HistoricCompositionRepository
         $lengthPercentage = 100 * max($lengthFrequency) / count($compositions);
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $typePercentage = 100 * max($lengthFrequency) / count($compositions);
-        return new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage, $primaryMaterialType, $typePercentage)
+        return new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage, $primaryMaterialType, $typePercentage);
     }
-
 
     /**
      * Get the complete historic composition for a journey on a given day.
      *
      * @return StoredComposition[]
      */
-    public function getHistoricComposition(string $journeyType, int $journeyNumber, Carbon $date): array
+    public function getHistoricComposition(Vehicle $vehicle): array
     {
         $rows = DB::select('SELECT CU.*, CH.fromStationId, CH.toStationId, CUU.position 
             FROM CompositionHistory CH  
@@ -82,7 +81,7 @@ class HistoricCompositionRepository
             JOIN CompositionUnit CU on CU.uicCode = cuu.uicCode
             WHERE CH.journeyType = ? AND CH.journeyNumber = ? AND CH.journeyStartDate = ? 
             ORDER BY CH.fromStationId, CUU.position',
-            [$journeyType, $journeyNumber, $date]);
+            [$vehicle->getType(), $vehicle->getNumber(), $vehicle->getJourneyStartDate()]);
         if (count($rows) == 0) {
             return [];
         }
@@ -99,37 +98,36 @@ class HistoricCompositionRepository
                     ->setFromStationId($fromStationId)
                     ->setToStationId($toStationId)
                     ->setUnits([])
-                    ->setJourneyType($journeyType)
-                    ->setJourneyNumber($journeyNumber)
-                    ->setDate($date);
-
+                    ->setJourneyType($vehicle->getType())
+                    ->setJourneyNumber($vehicle->getNumber())
+                    ->setDate($vehicle->getJourneyStartDate());
             }
             $compositionsBySegment[$segmentKey]->getUnits()[$row->position] = $unit;
         }
         return array_values($compositionsBySegment);
     }
 
-    public function recordCompositionAsync(Vehicle $vehicle, TrainCompositionOnSegment $composition, Carbon $journeyStartDate): void
+    public function recordCompositionAsync(TrainComposition $composition): void
     {
-        $this->threadPool->add(function () use ($vehicle, $composition, $journeyStartDate) {
-            $this->recordComposition($vehicle, $composition, $journeyStartDate);
+        $this->threadPool->add(function () use ($composition) {
+            $this->recordComposition($composition);
         });
     }
 
-    public function recordComposition(Vehicle $vehicle, TrainCompositionOnSegment $composition, Carbon $journeyStartDate): void
+    public function recordComposition(TrainComposition $composition): void
     {
-        if ($composition->getComposition()->getLength() < 2
-            || $journeyStartDate->copy()->startOfDay()->isAfter(Carbon::now()->startOfDay())) {
+        if ($composition->getLength() < 2
+            || $composition->getVehicle()->getJourneyStartDate()->isAfter(Carbon::now()->startOfDay())) {
             // Only record valid compositions for vehicles running today
             return;
         }
-        if ($this->getCompositionId($vehicle, $journeyStartDate, $composition->getOrigin()->getId(), $composition->getDestination()->getId()) != null) {
+        if ($this->getCompositionId($composition) != null) {
             return; // Don't overwrite existing compositions
         }
 
-        $units = $composition->getComposition()->getUnits();
+        $units = $composition->getUnits();
         $passengerCarriageCount = 0;
-        $types = [];
+
         foreach ($units as $unit) {
             if ($unit->getSeatsFirstClass() + $unit->getSeatsSecondClass() > 0) {
                 $passengerCarriageCount++;
@@ -137,7 +135,7 @@ class HistoricCompositionRepository
         }
         $typesFrequency = array_count_values(array_map(fn($unit) => $unit->getMaterialType()->getParentType(), $units));
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
-        $compositionId = $this->insertComposition($vehicle, $journeyStartDate, $composition, $primaryMaterialType, $passengerCarriageCount);
+        $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
         foreach ($units as $position => $unit) {
             $this->insertIfNotExists($unit);
             DB::update('INSERT INTO CompositionUnitUsage(uicCode, historicCompositionId, position) VALUES (?,?,?)', [
@@ -182,37 +180,33 @@ class HistoricCompositionRepository
     }
 
     /**
-     * @param Vehicle                   $vehicle
-     * @param Carbon                    $journeyStartDate
-     * @param TrainCompositionOnSegment $composition
-     * @param int|string                $primaryMaterialType
-     * @param int                       $passengerCarriageCount
-     * @return int|mixed|null
+     * @param Vehicle          $vehicle
+     * @param Carbon           $journeyStartDate
+     * @param TrainComposition $composition
+     * @param int|string       $primaryMaterialType
+     * @param int              $passengerCarriageCount
+     * @return int|null
      */
     public function insertComposition(
-        Vehicle $vehicle,
-        Carbon $journeyStartDate,
-        TrainCompositionOnSegment $composition,
+        TrainComposition $composition,
         int|string $primaryMaterialType,
         int $passengerCarriageCount
-    ): mixed {
+    ): ?int {
         DB::insert('INSERT INTO CompositionHistory(
                                journeyType, journeyNumber, journeyStartDate, 
                                fromStationId, toStationId,
                                primaryMaterialType, passengerUnitCount, createdAt
                                ) VALUES (?,?,?,?,?,?,?,?)', [
-            $vehicle->getType(),
-            $vehicle->getNumber(),
-            $journeyStartDate,
+            $composition->getVehicle()->getType(),
+            $composition->getVehicle()->getNumber(),
+            $composition->getVehicle()->getJourneyStartDate(),
             $composition->getOrigin()->getId(),
             $composition->getDestination()->getId(),
             $primaryMaterialType,
             $passengerCarriageCount,
             Carbon::now()
         ]);
-        return $this->getCompositionId($vehicle, $journeyStartDate,
-            $composition->getOrigin()->getId(),
-            $composition->getDestination()->getId());
+        return $this->getCompositionId($composition);
     }
 
     /**
@@ -274,15 +268,15 @@ class HistoricCompositionRepository
      * @param string  $toId
      * @return int|null
      */
-    public function getCompositionId(Vehicle $vehicle, Carbon $journeyStartDate, string $fromId, string $toId): ?int
+    public function getCompositionId(TrainComposition $composition): ?int
     {
         $rows = DB::select('SELECT id FROM CompositionHistory WHERE journeyType=? AND journeyNumber=? AND journeyStartDate=? AND fromStationId=? AND toStationId=?',
             [
-                $vehicle->getType(),
-                $vehicle->getNumber(),
-                $journeyStartDate,
-                $fromId,
-                $toId
+                $composition->getVehicle()->getType(),
+                $composition->getVehicle()->getNumber(),
+                $composition->getVehicle()->getJourneyStartDate(),
+                $composition->getOrigin()->getId(),
+                $composition->getDestination()->getId()
             ]);
         if (empty($rows)) {
             return null;

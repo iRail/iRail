@@ -2,9 +2,8 @@
 
 namespace Irail\Models\VehicleComposition;
 
-enum RollingMaterialOrientation
+enum RollingMaterialOrientation: string
 {
-
-    case LEFT;
-    case RIGHT;
+    case LEFT = 'LEFT';
+    case RIGHT = 'RIGHT';
 }
