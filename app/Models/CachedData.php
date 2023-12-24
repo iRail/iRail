@@ -12,7 +12,7 @@ use Carbon\Carbon;
 class CachedData
 {
     private string $key;
-    private object|string|array $value;
+    private null|object|string|array $value;
     private int $createdAt;
     private int $expiresAt;
 
@@ -20,7 +20,7 @@ class CachedData
      * @param string $key
      * @param T      $value
      */
-    public function __construct(string $key, object|array|string $value, int $ttl = 0)
+    public function __construct(string $key, null|object|array|string $value, int $ttl = 0)
     {
         $this->key = $key;
         $this->value = $value;

@@ -43,14 +43,19 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         $vehicle = Vehicle::fromName($request->getVehicleId());
         $trainId = preg_replace('/[^0-9]/', '', $vehicle->getNumber());
-        try {
-            $cacheKey = self::getCacheKey($trainId);
-            $cacheAge = 0;
-            if ($this->isCached($cacheKey)) {
-                $compositionData = $this->getCachedObject($cacheKey);
-                $cacheAge = $compositionData->getAge();
-                $compositionData = $compositionData->getValue();
-            } else {
+
+        $cacheKey = self::getCacheKey($trainId);
+        $cacheAge = 0;
+        if ($this->isCached($cacheKey)) {
+            $compositionData = $this->getCachedObject($cacheKey);
+            $cacheAge = $compositionData->getAge();
+            $compositionData = $compositionData->getValue();
+
+            if ($compositionData == null) {
+                throw new CompositionUnavailableException($trainId);
+            }
+        } else {
+            try {
                 $compositionData = $this->getFreshCompositionData($trainId);
                 if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
                     // Planning data often lacks detail. Store it for 5 minutes
@@ -61,12 +66,14 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
                     // TODO: data should not be cached for too long into the next day, or a departure date should be added to the query
                     $this->setCachedObject($cacheKey, $compositionData, 60 * 60 * 6);
                 }
+            } catch (CompositionUnavailableException $e) {
+                // Cache "data unavailable" for 5 minutes to limit outgoing requests. Only do this after a fresh attempts,
+                // so we don't keep increasing the TTL on every cache hit which returns null
+                $this->setCachedObject($cacheKey, null, 300);
+                throw $e;
             }
-        } catch (CompositionUnavailableException $e) {
-            // Cache "data unavailable" for 5 minutes to limit outgoing requests
-            $this->setCachedObject($cacheKey, null, 300);
-            throw $e;
         }
+
 
         // Build a result
         $segments = [];
@@ -186,12 +193,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
         $responseBody = $curlHttpResponse->getResponseBody();
         if ($responseBody == "null") {
-            throw new CompositionUnavailableException("Composition for $vehicleNumber is not available");
+            throw new CompositionUnavailableException($vehicleNumber);
         }
         if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
             return $this->getFreshCompositionData($vehicleNumber, true);
         } elseif ($responseBody == null && $forceFreshKey) {
-            throw new CompositionUnavailableException("Failed to fetch composition data for vehicle $vehicleNumber");
+            throw new CompositionUnavailableException($vehicleNumber, 'Invalid response from server');
         }
         return json_decode($responseBody);
     }
