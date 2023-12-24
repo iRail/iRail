@@ -22,6 +22,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     use Cache;
 
+    const NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
+    const AUTH_KEY_CACHE_TTL = 60 * 30;
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
 
@@ -172,16 +174,26 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     /**
      * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
      * @return array The response data, or null when no data was found.
+     * @throws CompositionUnavailableException
      */
-    private function getFreshCompositionData(int $vehicleNumber): array
+    private function getFreshCompositionData(int $vehicleNumber, bool $forceFreshKey = false): array
     {
         $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
 
-        $authKey = $this->getAuthKey();
+        $authKey = $forceFreshKey ? $this->getNewAuthKey() : $this->getAuthKey();
         $headers = ["auth-code: $authKey"];
 
         $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
-        return json_decode($curlHttpResponse->getResponseBody());
+        $responseBody = $curlHttpResponse->getResponseBody();
+        if ($responseBody == "null") {
+            throw new CompositionUnavailableException("Composition for $vehicleNumber is not available");
+        }
+        if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
+            return $this->getFreshCompositionData($vehicleNumber, true);
+        } elseif ($responseBody == null && $forceFreshKey) {
+            throw new CompositionUnavailableException("Failed to fetch composition data for vehicle $vehicleNumber");
+        }
+        return json_decode($responseBody);
     }
 
     /**
@@ -363,9 +375,9 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     private function getAuthKey(): ?string
     {
         return $this->getCacheWithDefaultCacheUpdate(
-            'NMBSCompositionAuth',
+            self::NMBS_COMPOSITION_AUTH_CACHE_KEY,
             fn() => self::getNewAuthKey(),
-            60 * 30
+            self::AUTH_KEY_CACHE_TTL
         )->getValue();
     }
 
@@ -382,6 +394,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
         $html = $curlHttpResponse->getResponseBody();
         preg_match("/localStorage\.setItem\(\"tmAuthCode\",\"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
-        return $matches['key'];
+        $key = $matches['key'];
+        $this->setCachedObject(self::NMBS_COMPOSITION_AUTH_CACHE_KEY, $key, self::AUTH_KEY_CACHE_TTL);
+        return $key;
     }
 }
