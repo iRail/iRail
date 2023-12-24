@@ -246,10 +246,13 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
-        // parentMaterialTypeName seems to be only present in case the sub type is not known. Therefore, it's presence indicates the lack of detailed data.
+        // parentMaterialTypeName seems to be only present in case the subtype is not known. Therefore, it's presence indicates the lack of detailed data.
         if (property_exists($rawCompositionUnit, 'parentMaterialTypeName')
             || property_exists($rawCompositionUnit, 'parentMaterialSubTypeName')) {
             $parentType = $rawCompositionUnit->parentMaterialSubTypeName;
+            if (str_contains($parentType, '-')) {
+                $parentType = explode('-', $parentType)[0]; // AM62-66 should become AM62
+            }
             if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
                 $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
             } else {
@@ -262,6 +265,53 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         }
 
         return new RollingMaterialType($parentType, $subType);
+    }
+
+    /**
+     * @param RollingMaterialType $materialType
+     * @param int                 $position
+     */
+    private static function calculateAmMrSubType(string $parentType, int $position): string
+    {
+        // The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
+        // We can "fix" their planning data for these types by setting A, B, C, ourselves.
+        // We still communicate that this is unconfirmed data, so there isn't a problem if one of the trains has a wrong orientation.
+        // Trains with 2 carriages:
+        if (in_array($parentType, ['AM62-66', 'AM62', 'AM66', 'AM86'])) {
+            switch ($position % 2) {
+                case 0:
+                    return 'A';
+                case 1:
+                    return 'B';
+            }
+        }
+
+        // Trains with 3 carriages:
+        if (in_array($parentType, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM96M', 'AM96P', 'AM80', 'AM80M', 'AM80P'])) {
+            switch ($position % 3) {
+                case 0:
+                    return 'A';
+                case 1:
+                    return 'B';
+                case 2:
+                    return 'C';
+            }
+        }
+
+        // Trains with 4 carriages:
+        if ($parentType == 'AM75') {
+            switch ($position % 3) {
+                case 0:
+                    return 'A';
+                case 1:
+                    return 'B';
+                case 2:
+                    return 'C';
+                case 3:
+                    return 'D';
+            }
+        }
+        return 'unknown';
     }
 
     /**
@@ -318,53 +368,6 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             $subType = 'unknown';
         }
         return new RollingMaterialType($parentType, $subType);
-    }
-
-    /**
-     * @param RollingMaterialType $materialType
-     * @param int                 $position
-     */
-    private static function calculateAmMrSubType(string $parentType, int $position): string
-    {
-        // The NMBS data contains A for the first, B for the second, C for the third, ... carriage in an AM/MR/AR train.
-        // We can "fix" their planning data for these types by setting A, B, C, ourselves.
-        // We still communicate that this is unconfirmed data, so there isn't a problem if one of the trains has a wrong orientation.
-        // Trains with 2 carriages:
-        if (in_array($parentType, ['AM62-66', 'AM62', 'AM66', 'AM86'])) {
-            switch ($position % 2) {
-                case 0:
-                    return 'a';
-                case 1:
-                    return 'b';
-            }
-        }
-
-        // Trains with 3 carriages:
-        if (in_array($parentType, ['AM08', 'AM08M', 'AM08P', 'AM96', 'AM96M', 'AM96P', 'AM80', 'AM80M', 'AM80P'])) {
-            switch ($position % 3) {
-                case 0:
-                    return 'a';
-                case 1:
-                    return 'b';
-                case 2:
-                    return 'c';
-            }
-        }
-
-        // Trains with 4 carriages:
-        if (in_array($parentType, ['AM75'])) {
-            switch ($position % 3) {
-                case 0:
-                    return 'a';
-                case 1:
-                    return 'b';
-                case 2:
-                    return 'c';
-                case 3:
-                    return 'd';
-            }
-        }
-        return 'unknown';
     }
 
     /**
