@@ -108,21 +108,17 @@ class HistoricCompositionRepository
         return array_values($compositionsBySegment);
     }
 
-    public function recordCompositionAsync(VehicleCompositionSearchResult|TrainComposition $composition): void
-    {
-        $this->threadPool->add(function () use ($composition) {
-            if ($composition instanceof TrainComposition) {
-                $this->recordComposition($composition);
-            } elseif ($composition instanceof VehicleCompositionSearchResult) {
-                foreach ($composition->getSegments() as $segment) {
-                    $this->recordComposition($segment);
-                }
-            }
-        });
-    }
 
-    public function recordComposition(TrainComposition $composition): void
+    public function recordComposition(VehicleCompositionSearchResult|TrainComposition $composition): void
     {
+        // Allow recording entire responses by recursively recording every composition in the result
+        if ($composition instanceof VehicleCompositionSearchResult) {
+            foreach ($composition->getSegments() as $segment) {
+                $this->recordComposition($segment);
+            }
+            return;
+        }
+
         if ($composition->getLength() < 2
             || $composition->getVehicle()->getJourneyStartDate()->isAfter(Carbon::now()->startOfDay())) {
             // Only record valid compositions for vehicles running today
@@ -248,7 +244,7 @@ class HistoricCompositionRepository
                             uicCode, materialTypeName, materialSubTypeName, materialNumber, 
                             hasToilet, hasPrmToilet, hasAirco, hasBikeSection, hasPrmSection,
                             seatsFirstClass, seatsSecondClass, createdAt, updatedAt) 
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) 
                             END; ', [
                 $unit->getUicCode(),
                 $unit->getUicCode(),

@@ -5,6 +5,7 @@ namespace Irail\Repositories\Nmbs;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\VehicleCompositionRequest;
 use Irail\Http\Requests\VehicleJourneyRequest;
+use Irail\Models\CachedData;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\RollingMaterialOrientation;
@@ -19,7 +20,6 @@ use stdClass;
 
 class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 {
-
     use Cache;
 
     const NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
@@ -35,45 +35,16 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     /**
      * Scrape the composition of a train from the NMBS trainmap web application.
-     * @param VehicleCompositionRequest|VehicleJourneyRequest $request
+     * @param VehicleCompositionRequest|Vehicle $request
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      * @throws CompositionUnavailableException
      */
-    function getComposition(VehicleCompositionRequest|VehicleJourneyRequest $request): VehicleCompositionSearchResult
+    function getComposition(VehicleCompositionRequest|Vehicle $request): VehicleCompositionSearchResult
     {
-        $vehicle = Vehicle::fromName($request->getVehicleId());
-        $trainId = preg_replace('/[^0-9]/', '', $vehicle->getNumber());
-
-        $cacheKey = self::getCacheKey($trainId);
-        $cacheAge = 0;
-        if ($this->isCached($cacheKey)) {
-            $compositionData = $this->getCachedObject($cacheKey);
-            $cacheAge = $compositionData->getAge();
-            $compositionData = $compositionData->getValue();
-
-            if ($compositionData == null) {
-                throw new CompositionUnavailableException($trainId);
-            }
-        } else {
-            try {
-                $compositionData = $this->getFreshCompositionData($trainId);
-                if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
-                    // Planning data often lacks detail. Store it for 5 minutes
-                    $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
-                } else {
-                    // Confirmed data doesn't change and contains all details. This data dispersal after the train ride,
-                    // so cache it long enough so it doesn't disappear instantly after the ride.
-                    // TODO: data should not be cached for too long into the next day, or a departure date should be added to the query
-                    $this->setCachedObject($cacheKey, $compositionData, 60 * 60 * 6);
-                }
-            } catch (CompositionUnavailableException $e) {
-                // Cache "data unavailable" for 5 minutes to limit outgoing requests. Only do this after a fresh attempts,
-                // so we don't keep increasing the TTL on every cache hit which returns null
-                $this->setCachedObject($cacheKey, null, 300);
-                throw $e;
-            }
-        }
-
+        $vehicle = $request instanceof Vehicle ? $request : Vehicle::fromName($request->getVehicleId());
+        $cachedData = $this->fetchCompositionData($vehicle);
+        $compositionData = $cachedData->getValue();
+        $cacheAge = $cachedData->getAge();
 
         // Build a result
         $segments = [];
@@ -150,6 +121,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     private static function readDetailsIntoUnit($object, TrainCompositionUnit $trainCompositionUnit): TrainCompositionUnit
     {
+        $trainCompositionUnit->setUicCode($object->uicCode ?: 0);
         $trainCompositionUnit->setHasToilet($object->hasToilets ?: false);
         $trainCompositionUnit->setHasPrmToilet($object->hasPrmToilets ?: false);
         $trainCompositionUnit->setHasTables($object->hasTables ?: false);
@@ -176,31 +148,6 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $trainCompositionUnit->setMaterialSubTypeName($object->materialSubTypeName ?: 'unknown');
 
         return $trainCompositionUnit;
-    }
-
-    /**
-     * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
-     * @return array The response data, or null when no data was found.
-     * @throws CompositionUnavailableException
-     */
-    private function getFreshCompositionData(int $vehicleNumber, bool $forceFreshKey = false): array
-    {
-        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
-
-        $authKey = $forceFreshKey ? $this->getNewAuthKey() : $this->getAuthKey();
-        $headers = ["auth-code: $authKey"];
-
-        $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
-        $responseBody = $curlHttpResponse->getResponseBody();
-        if ($responseBody == "null") {
-            throw new CompositionUnavailableException($vehicleNumber);
-        }
-        if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
-            return $this->getFreshCompositionData($vehicleNumber, true);
-        } elseif ($responseBody == null && $forceFreshKey) {
-            throw new CompositionUnavailableException($vehicleNumber, 'Invalid response from server');
-        }
-        return json_decode($responseBody);
     }
 
     /**
@@ -375,6 +322,67 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             $subType = 'unknown';
         }
         return new RollingMaterialType($parentType, $subType);
+    }
+
+    /**
+     * @param Vehicle $vehicle
+     * @return CachedData
+     * @throws CompositionUnavailableException
+     */
+    public function fetchCompositionData(Vehicle $vehicle): CachedData
+    {
+        $cacheKey = self::getCacheKey($vehicle->getNumber());
+        if (!$this->isCached($cacheKey)) {
+            try {
+                $compositionData = $this->getFreshCompositionData($vehicle->getNumber());
+                if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
+                    // Planning data often lacks detail. Store it for 5 minutes
+                    $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
+                } else {
+                    // Confirmed data doesn't change and contains all details. This data dispersal after the train ride,
+                    // so cache it long enough so it doesn't disappear instantly after the ride.
+                    // TODO: data should not be cached for too long into the next day, or a departure date should be added to the query
+                    $this->setCachedObject($cacheKey, $compositionData, 60 * 60 * 6);
+                }
+            } catch (CompositionUnavailableException $e) {
+                // Cache "data unavailable" for 5 minutes to limit outgoing requests. Only do this after a fresh attempts,
+                // so we don't keep increasing the TTL on every cache hit which returns null
+                $this->setCachedObject($cacheKey, null, 300);
+                throw $e;
+            }
+        }
+        $compositionData = $this->getCachedObject($cacheKey);
+
+        if ($compositionData == null) {
+            throw new CompositionUnavailableException($vehicle->getNumber());
+        }
+
+        return $compositionData;
+    }
+
+    /**
+     * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
+     * @return array The response data, or null when no data was found.
+     * @throws CompositionUnavailableException
+     */
+    private function getFreshCompositionData(int $vehicleNumber, bool $forceFreshKey = false): array
+    {
+        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
+
+        $authKey = $forceFreshKey ? $this->getNewAuthKey() : $this->getAuthKey();
+        $headers = ["auth-code: $authKey"];
+
+        $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
+        $responseBody = $curlHttpResponse->getResponseBody();
+        if ($responseBody == "null") {
+            throw new CompositionUnavailableException($vehicleNumber);
+        }
+        if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
+            return $this->getFreshCompositionData($vehicleNumber, true);
+        } elseif ($responseBody == null && $forceFreshKey) {
+            throw new CompositionUnavailableException($vehicleNumber, 'Invalid response from server');
+        }
+        return json_decode($responseBody);
     }
 
     /**

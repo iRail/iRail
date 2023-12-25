@@ -40,6 +40,7 @@ class VehicleCompositionV2Converter extends V2Converter
     {
         return [
             'materialType '                  => self::convertMaterialUnit($unit->getMaterialType()),
+            'uicCode '                       => $unit->getUicCode(),
             'hasToilets '                    => $unit->hasToilet(),
             'hasSecondClassOutlets '         => $unit->hasSecondClassOutlets(),
             'hasFirstClassOutlets '          => $unit->hasFirstClassOutlets(),

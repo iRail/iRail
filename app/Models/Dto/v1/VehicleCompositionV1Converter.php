@@ -32,7 +32,7 @@ class VehicleCompositionV1Converter extends V1Converter
         $result = new StdClass();
         $result->origin = self::convertStation($segment->getOrigin());
         $result->destination = self::convertStation($segment->getDestination());
-        $result->composition = self::convertComposition($segment->getComposition());
+        $result->composition = self::convertComposition($segment); // This is the old structure, don't break it
         return $result;
     }
 

@@ -65,20 +65,20 @@ class V2Converter
         ];
     }
 
-    public static function convertVehicle(Vehicle $obj) : array
+    public static function convertVehicle(Vehicle $obj): array
     {
         $result = self::convertVehicleWithoutDirection($obj);
         $result['direction'] = self::convertVehicleDirection($obj->getDirection());
         return $result;
     }
 
-    public static function convertVehicleWithoutDirection(Vehicle $obj) :array
+    public static function convertVehicleWithoutDirection(Vehicle $obj): array
     {
         return [
-            'uri'       => $obj->getUri(),
-            'id'        => $obj->getId(),
-            'type'      => $obj->getType(),
-            'number'    => $obj->getNumber()
+            'uri'    => $obj->getUri(),
+            'id'     => $obj->getId(),
+            'type'   => $obj->getType(),
+            'number' => $obj->getNumber()
         ];
     }
 
@@ -146,8 +146,8 @@ class V2Converter
             'toStationId'   => $composition->getDestination()->getId(),
             'units'         => array_map(
                 fn($unit, $index) => self::convertCompositionUnit($index, $unit),
-                $composition->getComposition()->getUnits(),
-                array_keys($composition->getComposition()->getUnits())
+                $composition->getUnits(),
+                array_keys($composition->getUnits())
             )
         ];
     }

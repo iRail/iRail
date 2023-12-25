@@ -29,7 +29,7 @@ class CompositionV2Controller extends BaseIrailController
         $repo = app(VehicleCompositionRepository::class);
         $vehicleCompositionSearchResult = $repo->getComposition($request);
         $dto = VehiclecompositionV2Converter::convert($request, $vehicleCompositionSearchResult);
-        $this->historicCompositionRepository->recordCompositionAsync($vehicleCompositionSearchResult);
+        $this->historicCompositionRepository->recordComposition($vehicleCompositionSearchResult);
         $this->logRequest($request);
         return $this->outputJson($request, $dto);
     }
