@@ -3,34 +3,27 @@
 namespace Irail\Models\Dao;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
-class StoredCompositionUnit
+class StoredCompositionUnit extends Model
 {
-    private int $uicCode;
-    private string $materialTypeName;
-    private string $materialSubTypeName;
-    private int $materialNumber;
-    private bool $hasToilet;
-    private bool $hasPrmToilet;
-    private bool $hasAirco;
-    private bool $hasBikeSection;
-    private bool $hasPrmSection;
-    private int $seatsFirstClass;
-    private int $seatsSecondClass;
-    private Carbon $createdAt;
-    private Carbon $updatedAt;
+
+    protected $table = 'CompositionUnit';
+    protected $primaryKey = 'uicCode';
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
 
     /**
      * @return int The UIC code, for example 508826960330
      */
     public function getUicCode(): int
     {
-        return $this->uicCode;
+        return $this->getAttribute('uicCode');
     }
 
     public function setUicCode(int $uicCode): StoredCompositionUnit
     {
-        $this->uicCode = $uicCode;
+        $this->setAttribute('uicCode', $uicCode);
         return $this;
     }
 
@@ -39,12 +32,12 @@ class StoredCompositionUnit
      */
     public function getMaterialTypeName(): string
     {
-        return $this->materialTypeName;
+        return $this->getAttribute('materialTypeName');
     }
 
     public function setMaterialTypeName(string $materialTypeName): StoredCompositionUnit
     {
-        $this->materialTypeName = $materialTypeName;
+        $this->setAttribute('materialTypeName', $materialTypeName);
         return $this;
     }
 
@@ -53,12 +46,12 @@ class StoredCompositionUnit
      */
     public function getMaterialSubTypeName(): string
     {
-        return $this->materialSubTypeName;
+        return $this->getAttribute('materialSubTypeName');
     }
 
     public function setMaterialSubTypeName(string $materialSubTypeName): StoredCompositionUnit
     {
-        $this->materialSubTypeName = $materialSubTypeName;
+        $this->setAttribute('materialSubTypeName', $materialSubTypeName);
         return $this;
     }
 
@@ -67,12 +60,12 @@ class StoredCompositionUnit
      */
     public function getMaterialNumber(): int
     {
-        return $this->materialNumber;
+        return $this->getAttribute('materialNumber');
     }
 
     public function setMaterialNumber(int $materialNumber): StoredCompositionUnit
     {
-        $this->materialNumber = $materialNumber;
+        $this->setAttribute('materialNumber', $materialNumber);
         return $this;
     }
 
@@ -81,12 +74,12 @@ class StoredCompositionUnit
      */
     public function hasToilet(): bool
     {
-        return $this->hasToilet;
+        return $this->getAttribute('hasToilet');
     }
 
     public function setHasToilet(bool $hasToilet): StoredCompositionUnit
     {
-        $this->hasToilet = $hasToilet;
+        $this->setAttribute('hasToilet', $hasToilet);
         return $this;
     }
 
@@ -95,12 +88,12 @@ class StoredCompositionUnit
      */
     public function hasPrmToilet(): bool
     {
-        return $this->hasPrmToilet;
+        return $this->getAttribute('hasPrmToilet');
     }
 
     public function setHasPrmToilet(bool $hasPrmToilet): StoredCompositionUnit
     {
-        $this->hasPrmToilet = $hasPrmToilet;
+        $this->setAttribute('hasPrmToilet', $hasPrmToilet);
         return $this;
     }
 
@@ -109,12 +102,12 @@ class StoredCompositionUnit
      */
     public function hasAirco(): bool
     {
-        return $this->hasAirco;
+        return $this->getAttribute('hasAirco');
     }
 
     public function setHasAirco(bool $hasAirco): StoredCompositionUnit
     {
-        $this->hasAirco = $hasAirco;
+        $this->setAttribute('hasAirco', $hasAirco);
         return $this;
     }
 
@@ -123,12 +116,12 @@ class StoredCompositionUnit
      */
     public function hasBikeSection(): bool
     {
-        return $this->hasBikeSection;
+        return $this->getAttribute('hasBikeSection');
     }
 
     public function setHasBikeSection(bool $hasBikeSection): StoredCompositionUnit
     {
-        $this->hasBikeSection = $hasBikeSection;
+        $this->setAttribute('hasBikeSection', $hasBikeSection);
         return $this;
     }
 
@@ -137,12 +130,12 @@ class StoredCompositionUnit
      */
     public function hasPrmSection(): bool
     {
-        return $this->hasPrmSection;
+        return $this->getAttribute('hasPrmSection');
     }
 
     public function setHasPrmSection(bool $hasPrmSection): StoredCompositionUnit
     {
-        $this->hasPrmSection = $hasPrmSection;
+        $this->setAttribute('hasPrmSection', $hasPrmSection);
         return $this;
     }
 
@@ -151,12 +144,12 @@ class StoredCompositionUnit
      */
     public function getSeatsFirstClass(): int
     {
-        return $this->seatsFirstClass;
+        return $this->getAttribute('seatsFirstClass');
     }
 
     public function setSeatsFirstClass(int $seatsFirstClass): StoredCompositionUnit
     {
-        $this->seatsFirstClass = $seatsFirstClass;
+        $this->setAttribute('seatsFirstClass', $seatsFirstClass);
         return $this;
     }
 
@@ -165,12 +158,12 @@ class StoredCompositionUnit
      */
     public function getSeatsSecondClass(): int
     {
-        return $this->seatsSecondClass;
+        return $this->getAttribute('seatsSecondClass');
     }
 
     public function setSeatsSecondClass(int $seatsSecondClass): StoredCompositionUnit
     {
-        $this->seatsSecondClass = $seatsSecondClass;
+        $this->setAttribute('seatsSecondClass', $seatsSecondClass);
         return $this;
     }
 
@@ -179,27 +172,19 @@ class StoredCompositionUnit
      */
     public function getCreatedAt(): Carbon
     {
-        return $this->createdAt;
+        return $this->getAttribute('createdAt');
     }
 
-    public function setCreatedAt(Carbon $createdAt): StoredCompositionUnit
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
+    // setCreatedAt is provided by the parent class
 
     /**
      * @return Carbon The time when this unit was last updated
      */
     public function getUpdatedAt(): Carbon
     {
-        return $this->updatedAt;
+        return $this->getAttribute('updatedAt');
     }
 
-    public function setUpdatedAt(Carbon $updatedAt): StoredCompositionUnit
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
+    // setUpdatedAt is provided by the parent class
 
 }

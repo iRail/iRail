@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('CompositionUnitUsage', function (Blueprint $table) {
-            $table->integer('uicCode')->nullable(false)->comment('The uic code of the unit');
+            $table->bigInteger('uicCode')->nullable(false)->comment('The uic code of the unit');
             $table->bigInteger('historicCompositionId')->unsigned()->nullable(false)->comment('Reference to an entry in the CompositionHistory table, where the journey is described.');
             $table->tinyInteger('position')->nullable(false)->comment('The position of this unit in the composition on the specified segment of the specified journey');
 

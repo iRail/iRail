@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('CompositionUnit', function (Blueprint $table) {
-            $table->integer('uicCode')->primary()->comment('For example "508826960330"');
+            $table->bigInteger('uicCode')->primary()->comment('For example "508826960330"');
             $table->string('materialTypeName', 16)->nullable(false)->comment('The vehicle type, for example "M7"');
             $table->string('materialSubTypeName', 16)->nullable(false)->comment('The vehicle subtype, for example "M7BUH"');
             $table->integer('materialNumber')->nullable(false)->comment('The vehicle number, for example "72033"');

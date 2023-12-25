@@ -155,7 +155,7 @@ class HistoricCompositionRepository
         return (new CompositionHistoryEntry())
             ->setJourneyType($row->journeyType)
             ->setJourneyNumber($row->journeyNumber)
-            ->setDate(Carbon::createFromTimeString($row->journeyStartDate))
+            ->setJourneyStartDate(Carbon::createFromTimeString($row->journeyStartDate))
             ->setFromStationId($row->fromStationId)
             ->setToStationId($row->toStationId)
             ->setPrimaryMaterialType($row->primaryMaterialType)
@@ -183,8 +183,6 @@ class HistoricCompositionRepository
     }
 
     /**
-     * @param Vehicle          $vehicle
-     * @param Carbon           $journeyStartDate
      * @param TrainComposition $composition
      * @param int|string       $primaryMaterialType
      * @param int              $passengerCarriageCount
@@ -195,21 +193,16 @@ class HistoricCompositionRepository
         int|string $primaryMaterialType,
         int $passengerCarriageCount
     ): ?int {
-        DB::insert('INSERT INTO CompositionHistory(
-                               journeyType, journeyNumber, journeyStartDate, 
-                               fromStationId, toStationId,
-                               primaryMaterialType, passengerUnitCount, createdAt
-                               ) VALUES (?,?,?,?,?,?,?,?)', [
-            $composition->getVehicle()->getType(),
-            $composition->getVehicle()->getNumber(),
-            $composition->getVehicle()->getJourneyStartDate(),
-            $composition->getOrigin()->getId(),
-            $composition->getDestination()->getId(),
-            $primaryMaterialType,
-            $passengerCarriageCount,
-            Carbon::now()
-        ]);
-        return $this->getCompositionId($composition);
+        $history = new CompositionHistoryEntry();
+        $history->setJourneyType($composition->getVehicle()->getType());
+        $history->setJourneyNumber($composition->getVehicle()->getNumber());
+        $history->setJourneyStartDate($composition->getVehicle()->getJourneyStartDate());
+        $history->setFromStationId($composition->getOrigin()->getId());
+        $history->setToStationId($composition->getDestination()->getId());
+        $history->setPrimaryMaterialType($primaryMaterialType);
+        $history->setPassengerUnitCount($passengerCarriageCount);
+        $history->save();
+        return $history->getId();
     }
 
     /**
@@ -218,50 +211,22 @@ class HistoricCompositionRepository
      */
     private function insertIfNotExists(TrainCompositionUnit $unit): void
     {
-        if (getenv('DB_CONNECTION') == 'sqlite') {
-            DB::update('INSERT OR IGNORE INTO CompositionUnit(
-                            uicCode, materialTypeName, materialSubTypeName, materialNumber, 
-                            hasToilet, hasPrmToilet, hasAirco, hasBikeSection, hasPrmSection,
-                            seatsFirstClass, seatsSecondClass, createdAt, updatedAt) 
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?); ', [
-                $unit->getUicCode(),
-                $unit->getMaterialType()->getParentType(),
-                $unit->getMaterialType()->getSubType(),
-                $unit->getMaterialNumber(),
-                $unit->hasToilet(),
-                $unit->hasPrmToilet(),
-                $unit->hasAirco(),
-                $unit->hasBikeSection(),
-                $unit->hasPrmSection(),
-                $unit->getSeatsFirstClass(),
-                $unit->getSeatsSecondClass(),
-                Carbon::now(),
-                Carbon::now()
-            ]);
-        } else {
-            DB::update('IF NOT EXISTS(SELECT 1 FROM CompositionUnit WHERE uicCode=?) BEGIN
-                            INSERT INTO CompositionUnit(
-                            uicCode, materialTypeName, materialSubTypeName, materialNumber, 
-                            hasToilet, hasPrmToilet, hasAirco, hasBikeSection, hasPrmSection,
-                            seatsFirstClass, seatsSecondClass, createdAt, updatedAt) 
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) 
-                            END; ', [
-                $unit->getUicCode(),
-                $unit->getUicCode(),
-                $unit->getMaterialType()->getParentType(),
-                $unit->getMaterialType()->getSubType(),
-                $unit->getMaterialNumber(),
-                $unit->hasToilet(),
-                $unit->hasPrmToilet(),
-                $unit->hasAirco(),
-                $unit->hasBikeSection(),
-                $unit->hasPrmSection(),
-                $unit->getSeatsFirstClass(),
-                $unit->getSeatsSecondClass(),
-                Carbon::now(),
-                Carbon::now()
-            ]);
+        if (StoredCompositionUnit::find($unit->getUicCode())) {
+            return;
         }
+        $storedUnit = new StoredCompositionUnit();
+        $storedUnit->setUicCode($unit->getUicCode());
+        $storedUnit->setMaterialTypeName($unit->getMaterialType()->getParentType());
+        $storedUnit->setMaterialSubTypeName($unit->getMaterialType()->getSubType());
+        $storedUnit->setMaterialNumber($unit->getMaterialNumber());
+        $storedUnit->setHasToilet($unit->hasToilet());
+        $storedUnit->setHasPrmToilet($unit->hasPrmToilet());
+        $storedUnit->setHasAirco($unit->hasAirco());
+        $storedUnit->setHasBikeSection($unit->hasBikeSection());
+        $storedUnit->setHasPrmSection($unit->hasPrmSection());
+        $storedUnit->setSeatsFirstClass($unit->getSeatsFirstClass());
+        $storedUnit->setSeatsSecondClass($unit->getSeatsSecondClass());
+        $storedUnit->save();
     }
 
     /**
@@ -273,18 +238,14 @@ class HistoricCompositionRepository
      */
     public function getCompositionId(TrainComposition $composition): ?int
     {
-        $rows = DB::select('SELECT id FROM CompositionHistory WHERE journeyType=? AND journeyNumber=? AND journeyStartDate=? AND fromStationId=? AND toStationId=?',
-            [
-                $composition->getVehicle()->getType(),
-                $composition->getVehicle()->getNumber(),
-                $composition->getVehicle()->getJourneyStartDate(),
-                $composition->getOrigin()->getId(),
-                $composition->getDestination()->getId()
-            ]);
-        if (empty($rows)) {
-            return null;
-        }
-        return $rows[0]->id;
+        $first = CompositionHistoryEntry::where([
+            'journeyType'      => $composition->getVehicle()->getType(),
+            'journeyNumber'    => $composition->getVehicle()->getNumber(),
+            'journeyStartDate' => $composition->getVehicle()->getJourneyStartDate(),
+            'fromStationId'    => $composition->getOrigin()->getId(),
+            'toStationId'      => $composition->getDestination()->getId()
+        ])->first();
+        return $first ? $first->getId() : null;
     }
 
     /**

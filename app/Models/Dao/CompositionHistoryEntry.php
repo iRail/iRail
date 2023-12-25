@@ -3,138 +3,128 @@
 namespace Irail\Models\Dao;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Brief information about the composition of a train for a given day, recorded in the database.
  */
-class CompositionHistoryEntry
+class CompositionHistoryEntry extends Model
 {
-    /**
-     * @var string $journeyType The journey type, for example "IC" in IC 513
-     */
-    private string $journeyType;
+    protected $table = 'CompositionHistory';
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = null;
 
     /**
-     * @var int $journeyNumber The journey number, for example "513" in IC 513
+     * @return string $journeyType The journey type, for example "IC" in IC 513
      */
-    private int $journeyNumber;
-
-    /**
-     * @var Carbon $date The date on which this journey ran
-     */
-    private Carbon $date;
-
-    /**
-     * @var string The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.
-     */
-    private string $fromStationId;
-
-    /**
-     * @var string The id of the station up to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.
-     */
-    private string $toStationId;
-
-    /**
-     * @var string $primaryMaterialType The type of the majority of the used journeys, such as I10, M6 or AM96
-     */
-    private string $primaryMaterialType;
-
-    /**
-     * @var int $passengerUnitCount The number of units in which *passengers* can be seated
-     */
-    private int $passengerUnitCount;
-
-    /**
-     * @var Carbon $createdAt The time when this composition was recorded
-     */
-    private Carbon $createdAt;
-
     public function getJourneyType(): string
     {
-        return $this->journeyType;
+        return $this->getAttribute('journeyType');
     }
 
     public function setJourneyType(string $journeyType): CompositionHistoryEntry
     {
-        $this->journeyType = $journeyType;
+        $this->setAttribute('journeyType', $journeyType);
         return $this;
     }
 
+    /**
+     * @return int $journeyNumber The journey number, for example "513" in IC 513
+     */
     public function getJourneyNumber(): int
     {
-        return $this->journeyNumber;
+        return $this->getAttribute('journeyNumber');
     }
 
     public function setJourneyNumber(int $journeyNumber): CompositionHistoryEntry
     {
-        $this->journeyNumber = $journeyNumber;
+        $this->setAttribute('journeyNumber', $journeyNumber);
         return $this;
     }
 
+    /**
+     * @return Carbon $date The date on which this journey ran
+     */
     public function getDate(): Carbon
     {
-        return $this->date;
+        return $this->getAttribute('journeyStartDate');
     }
 
-    public function setDate(Carbon $date): CompositionHistoryEntry
+    public function setJourneyStartDate(Carbon $date): CompositionHistoryEntry
     {
-        $this->date = $date;
+        $this->setAttribute('journeyStartDate', $date);
         return $this;
     }
 
+    /**
+     * @return string The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.
+     */
     public function getFromStationId(): string
     {
-        return $this->fromStationId;
+        return $this->getAttribute('fromStationId');
     }
 
     public function setFromStationId(string $fromStationId): CompositionHistoryEntry
     {
-        $this->fromStationId = $fromStationId;
+        $this->setAttribute('fromStationId', $fromStationId);
         return $this;
     }
 
+    /**
+     * @return string The id of the station up to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.
+     */
     public function getToStationId(): string
     {
-        return $this->toStationId;
+        return $this->getAttribute('toStationId');
     }
 
     public function setToStationId(string $toStationId): CompositionHistoryEntry
     {
-        $this->toStationId = $toStationId;
+        $this->setAttribute('toStationId', $toStationId);
         return $this;
     }
 
+    /**
+     * @return string $primaryMaterialType The type of the majority of the used journeys, such as I10, M6 or AM96
+     */
     public function getPrimaryMaterialType(): string
     {
-        return $this->primaryMaterialType;
+        return $this->getAttribute('primaryMaterialType');
     }
 
     public function setPrimaryMaterialType(string $primaryMaterialType): CompositionHistoryEntry
     {
-        $this->primaryMaterialType = $primaryMaterialType;
+        $this->setAttribute('primaryMaterialType', $primaryMaterialType);
         return $this;
     }
 
+    /**
+     * @return int $passengerUnitCount The number of units in which *passengers* can be seated
+     */
     public function getPassengerUnitCount(): int
     {
-        return $this->passengerUnitCount;
+        return $this->getAttribute('passengerUnitCount');
     }
 
     public function setPassengerUnitCount(int $passengerUnitCount): CompositionHistoryEntry
     {
-        $this->passengerUnitCount = $passengerUnitCount;
+        $this->setAttribute('passengerUnitCount', $passengerUnitCount);
         return $this;
     }
 
+    /**
+     * @return Carbon $createdAt The time when this composition was recorded
+     */
     public function getCreatedAt(): Carbon
     {
-        return $this->createdAt;
+        return $this->getAttribute('createdAt');
     }
 
-    public function setCreatedAt(Carbon $createdAt): CompositionHistoryEntry
+    // setCreatedAt is provided by the parent class
+
+    public function getId(): int
     {
-        $this->createdAt = $createdAt;
-        return $this;
+        return $this->getAttribute('id');
     }
 
 }
