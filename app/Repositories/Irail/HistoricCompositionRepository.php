@@ -12,17 +12,13 @@ use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
-use Spatie\Async\Pool;
 use stdClass;
 
 class HistoricCompositionRepository
 {
 
-    private Pool $threadPool;
-
     public function __construct()
     {
-        $this->threadPool = Pool::create();
     }
 
     /**
@@ -32,8 +28,7 @@ class HistoricCompositionRepository
      */
     public function getAllUnits(): array
     {
-        $rows = DB::select('SELECT * FROM CompositionUnit ORDER BY uicCode DESC');
-        return array_map(fn($row) => $this->transformCompositionUnit($row), $rows);
+        return StoredCompositionUnit::all()->orderBy('uicCode', 'desc')->all();
     }
 
     /**
@@ -43,12 +38,12 @@ class HistoricCompositionRepository
      */
     public function getHistoricCompositions(string $vehicleType, int $journeyNumber, int $daysBack = 21): array
     {
-        $rows = DB::select('SELECT * FROM CompositionHistory WHERE journeyType = ? AND journeyNumber = ? AND journeyStartDate >= ?',
-            [$vehicleType, $journeyNumber, Carbon::now()->startOfDay()->subDays($daysBack)]);
-        if (count($rows) == 0) {
-            return [];
-        }
-        return array_map(fn($row) => $this->transformCompositionHistory($row), $rows);
+        return CompositionHistoryEntry::where(
+            [
+                ['journeyType' => $vehicleType],
+                ['journeyNumber' => $journeyNumber],
+                ['journeyStartDate', '>=', Carbon::now()->startOfDay()->subDays($daysBack)]
+            ])->get()->all();
     }
 
     /**
@@ -158,19 +153,6 @@ class HistoricCompositionRepository
         }
     }
 
-
-    private function transformCompositionHistory(StdClass $row): CompositionHistoryEntry
-    {
-        return (new CompositionHistoryEntry())
-            ->setJourneyType($row->journeyType)
-            ->setJourneyNumber($row->journeyNumber)
-            ->setJourneyStartDate(Carbon::parse($row->journeyStartDate))
-            ->setFromStationId($row->fromStationId)
-            ->setToStationId($row->toStationId)
-            ->setPrimaryMaterialType($row->primaryMaterialType)
-            ->setPassengerUnitCount($row->passengerUnitCount)
-            ->setCreatedAt(Carbon::parse($row->createdAt));
-    }
 
     private function transformCompositionUnit(StdClass $row): StoredCompositionUnit
     {
