@@ -8,7 +8,7 @@ class CompositionStatistics
     private int $medianProbableLength;
     private int $mostProbableLength;
     private int $mostProbableLengthOccurrence;
-    private int $mostProbableType;
+    private string $mostProbableType;
     private int $mostProbableTypeOccurrence;
 
     /**
@@ -16,7 +16,7 @@ class CompositionStatistics
      * @param int $medianProbableLength
      * @param int $mostProbableLength
      * @param int $mostProbableLengthOccurrence
-     * @param int $mostProbableType
+     * @param string $mostProbableType
      * @param int $mostProbableTypeOccurrence
      */
     public function __construct(
@@ -24,7 +24,7 @@ class CompositionStatistics
         int $medianProbableLength,
         int $mostProbableLength,
         int $mostProbableLengthOccurrence,
-        int $mostProbableType,
+        string $mostProbableType,
         int $mostProbableTypeOccurrence
     ) {
         $this->numberOfRecords = $numberOfRecords;
@@ -55,7 +55,7 @@ class CompositionStatistics
         return $this->mostProbableLengthOccurrence;
     }
 
-    public function getMostProbableType(): int
+    public function getMostProbableType(): string
     {
         return $this->mostProbableType;
     }
@@ -65,5 +65,13 @@ class CompositionStatistics
         return $this->mostProbableTypeOccurrence;
     }
 
+    public function getFromStationId(): string
+    {
+        return '0'; // TODO: implement
+    }
 
+    public function getToStationId(): string
+    {
+        return '0'; // TODO: implement
+    }
 }

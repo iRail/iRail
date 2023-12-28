@@ -3,6 +3,7 @@
 namespace Irail\Models;
 
 use Carbon\CarbonPeriod;
+use Irail\Models\Dao\CompositionStatistics;
 
 class JourneyLeg
 {
@@ -13,13 +14,20 @@ class JourneyLeg
      * @var DepartureAndArrival[]
      */
     private array $intermediateStops = [];
-    private VehicleDirection $direction;
     private JourneyLegType $legType;
     /**
      * @var Message[]
      */
     private array $alerts = [];
     private bool $reachable;
+    /**
+     * @var CompositionStatistics[]
+     */
+    private array|null $historicCompositionBySegment = [];
+    /**
+     * @var VehicleComposition\TrainComposition[]
+     */
+    private array $composition = [];
 
     public function __construct(DepartureOrArrival $departure, DepartureOrArrival $arrival)
     {
@@ -135,6 +143,36 @@ class JourneyLeg
     public function setReachable(bool $reachable)
     {
         $this->reachable = $reachable;
+    }
+
+    /**
+     * @param CompositionStatistics[] $historicCompositionData
+     * @return void
+     */
+    public function setHistoricCompositionStatistics(array $historicCompositionData)
+    {
+        $this->historicCompositionBySegment = $historicCompositionData;
+    }
+
+    public function setComposition(Result\VehicleCompositionSearchResult $compositionResult)
+    {
+        $this->composition = $compositionResult->getSegments();
+    }
+
+    /**
+     * @return CompositionStatistics[]
+     */
+    public function getCompositionStatsBySegment(): array
+    {
+        return $this->historicCompositionBySegment;
+    }
+
+    /**
+     * @return VehicleComposition\TrainComposition[]
+     */
+    public function getComposition(): array
+    {
+        return $this->composition;
     }
 
 }

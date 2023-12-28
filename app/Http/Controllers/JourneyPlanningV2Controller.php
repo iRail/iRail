@@ -3,31 +3,46 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
 use Irail\Models\Dto\v2\JourneyPlanningV2Converter;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;
+use Irail\Repositories\Irail\HistoricCompositionRepository;
 use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
+use Irail\Repositories\VehicleCompositionRepository;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Spatie\Async\Pool;
 
 class JourneyPlanningV2Controller extends BaseIrailController
 {
+    private JourneyPlanningRepository $journeyPlanningRepository;
+    private VehicleCompositionRepository $vehicleCompositionRepository;
+    private HistoricCompositionRepository $historicCompositionRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        JourneyPlanningRepository $journeyPlanningRepository,
+        VehicleCompositionRepository $vehicleCompositionRepository,
+        HistoricCompositionRepository $historicCompositionRepository
+    ) {
+        $this->journeyPlanningRepository = $journeyPlanningRepository;
+        $this->vehicleCompositionRepository = $vehicleCompositionRepository;
+        $this->historicCompositionRepository = $historicCompositionRepository;
     }
 
     public function getJourneyPlanning(JourneyPlanningV2RequestImpl $request): JsonResponse
     {
-        $repo = app(JourneyPlanningRepository::class);
-        $journeyPlanningResult = $repo->getJourneyPlanning($request);
+        $journeyPlanningResult = $this->journeyPlanningRepository->getJourneyPlanning($request);
+        $this->addCompositionData($journeyPlanningResult);
         $dto = JourneyPlanningV2Converter::convert($request, $journeyPlanningResult);
         $this->logRequest($request, $journeyPlanningResult);
         return $this->outputJson($request, $dto);
@@ -37,6 +52,8 @@ class JourneyPlanningV2Controller extends BaseIrailController
      * @param JourneyPlanningV2RequestImpl $request
      * @param JourneyPlanningSearchResult  $result
      * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function logRequest(JourneyPlanningV2RequestImpl $request, JourneyPlanningSearchResult $result): void
     {
@@ -70,11 +87,35 @@ class JourneyPlanningV2Controller extends BaseIrailController
         return ['journeys' => array_map(fn($leg) => $this->getLegInLogFormat($leg), $journey->getLegs())];
     }
 
-    private function getLegInLogFormat(JourneyLeg $leg): array
-    {
-        return ['trip'          => $leg->getVehicle()->getId(),
-                'departureStop' => $leg->getDeparture()->getStation()->getUri(),
-                'arrivalStop'   => $leg->getDeparture()->getStation()->getUri()
+    private
+    function getLegInLogFormat(
+        JourneyLeg $leg
+    ): array {
+        return [
+            'trip'          => $leg->getVehicle()->getId(),
+            'departureStop' => $leg->getDeparture()->getStation()->getUri(),
+            'arrivalStop'   => $leg->getDeparture()->getStation()->getUri()
         ];
+    }
+
+    /**
+     * @param JourneyPlanningSearchResult $journeyPlanningResult
+     * @return void
+     */
+    public function addCompositionData(JourneyPlanningSearchResult $journeyPlanningResult): void
+    {
+        foreach ($journeyPlanningResult->getJourneys() as $jny) {
+            foreach ($jny->getLegs() as $leg) {
+                try {
+                    $compositionResult = $this->vehicleCompositionRepository->getComposition($leg->getVehicle());
+                    $leg->setComposition($compositionResult);
+                    $this->historicCompositionRepository->recordComposition($compositionResult);
+                } catch (CompositionUnavailableException $e) {
+                    // TODO: fallback with expected data
+                }
+                $leg->setHistoricCompositionStatistics($this->historicCompositionRepository->getHistoricCompositionStatistics(
+                    $leg->getVehicle()->getType(), $leg->getVehicle()->getNumber()));
+            }
+        }
     }
 }

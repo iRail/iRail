@@ -2,9 +2,9 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\VehicleCompositionRequest;
-use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
@@ -49,10 +49,16 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         // Build a result
         $segments = [];
         foreach ($compositionData as $compositionDataForSingleSegment) {
-            $segments[] = $this->parseOneSegmentWithCompositionData(
-                $vehicle,
-                $compositionDataForSingleSegment
-            );
+            // NMBS does not have single-carriage railbusses,
+            // meaning these compositions are only a locomotive and should be filtered out
+            if (count($compositionDataForSingleSegment->materialUnits) > 1) {
+                $segments[] = $this->parseOneSegmentWithCompositionData(
+                    $vehicle,
+                    $compositionDataForSingleSegment
+                );
+            } else {
+                Log::info('Skipping composition with less than 2 carriages');
+            }
         }
 
         return new VehicleCompositionSearchResult($vehicle, $segments);
@@ -79,7 +85,10 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         $units = [];
         foreach ($rawUnits as $i => $compositionUnit) {
-            $units[] = self::parseCompositionUnit($compositionUnit, $i);
+            if (property_exists($compositionUnit, 'uicCode')) {
+                // Only parse valid composition carriages, containing a uic code & material number
+                $units[] = self::parseCompositionUnit($compositionUnit, $i);
+            }
         }
         return $units;
     }
@@ -121,7 +130,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     private static function readDetailsIntoUnit($object, TrainCompositionUnit $trainCompositionUnit): TrainCompositionUnit
     {
-        $trainCompositionUnit->setUicCode($object->uicCode ?: 0);
+        $trainCompositionUnit->setUicCode($object->uicCode);
         $trainCompositionUnit->setHasToilet($object->hasToilets ?: false);
         $trainCompositionUnit->setHasPrmToilet($object->hasPrmToilets ?: false);
         $trainCompositionUnit->setHasTables($object->hasTables ?: false);
@@ -171,6 +180,9 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     private static function setCorrectDirectionForCarriages(array $units): array
     {
+        if (empty($units)) {
+            return $units;
+        }
         for ($i = 1; $i < count($units) - 1; $i++) {
             // When discovering a carriage in another traction position,
             if ($units[$i]->getTractionPosition() < $units[$i + 1]->getTractionPosition()
@@ -186,9 +198,9 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         return $units;
     }
 
-    private static function isM7SteeringCabin($unit): bool
+    private static function isM7SteeringCabin(TrainCompositionUnit $unit): bool
     {
-        return $unit->materialSubTypeName == 'M7BMX' || $unit->materialSubTypeName == 'M7BDXH';
+        return $unit->getMaterialSubTypeName() == 'M7BMX' || $unit->getMaterialSubTypeName() == 'M7BDXH';
     }
 
     /**
@@ -353,7 +365,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         }
         $compositionData = $this->getCachedObject($cacheKey);
 
-        if ($compositionData == null) {
+        if ($compositionData == null || $compositionData->getValue() == null) {
             throw new CompositionUnavailableException($vehicle->getNumber());
         }
 

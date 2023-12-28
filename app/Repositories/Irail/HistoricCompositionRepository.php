@@ -51,7 +51,13 @@ class HistoricCompositionRepository
         return array_map(fn($row) => $this->transformCompositionHistory($row), $rows);
     }
 
-    public function getHistoricCompositionStatistics(string $vehicleType, int $journeyNumber, int $daysBack = 21): CompositionStatistics
+    /**
+     * @param string $vehicleType
+     * @param int    $journeyNumber
+     * @param int    $daysBack
+     * @return CompositionStatistics[]
+     */
+    public function getHistoricCompositionStatistics(string $vehicleType, int $journeyNumber, int $daysBack = 21): array
     {
         $compositions = $this->getHistoricCompositions(
             $vehicleType,
@@ -66,7 +72,10 @@ class HistoricCompositionRepository
         $lengthPercentage = 100 * max($lengthFrequency) / count($compositions);
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $typePercentage = 100 * max($lengthFrequency) / count($compositions);
-        return new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage, $primaryMaterialType, $typePercentage);
+        return [
+            new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage,
+                $primaryMaterialType, $typePercentage)
+        ];
     }
 
     /**
@@ -155,13 +164,12 @@ class HistoricCompositionRepository
         return (new CompositionHistoryEntry())
             ->setJourneyType($row->journeyType)
             ->setJourneyNumber($row->journeyNumber)
-            ->setJourneyStartDate(Carbon::createFromTimeString($row->journeyStartDate))
+            ->setJourneyStartDate(Carbon::parse($row->journeyStartDate))
             ->setFromStationId($row->fromStationId)
             ->setToStationId($row->toStationId)
             ->setPrimaryMaterialType($row->primaryMaterialType)
             ->setPassengerUnitCount($row->passengerUnitCount)
-            ->setCreatedAt(Carbon::createFromTimeString($row->createdAt));
-
+            ->setCreatedAt(Carbon::parse($row->createdAt));
     }
 
     private function transformCompositionUnit(StdClass $row): StoredCompositionUnit
@@ -178,8 +186,8 @@ class HistoricCompositionRepository
             ->setHasPrmSection($row->hasPrmSection)
             ->setSeatsFirstClass($row->seatsFirstClass)
             ->setSeatsSecondClass($row->seatsSecondClass)
-            ->setCreatedAt(Carbon::createFromTimeString($row->createdAt))
-            ->setUpdatedAt(Carbon::createFromTimeString($row->updatedAt));
+            ->setCreatedAt(Carbon::parse($row->createdAt))
+            ->setUpdatedAt(Carbon::parse($row->updatedAt));
     }
 
     /**
@@ -250,11 +258,14 @@ class HistoricCompositionRepository
 
     /**
      * @param $lengths
-     * @return mixed
+     * @return int
      */
-    public function median($lengths): mixed
+    public function median($lengths): int
     {
         $count = count($lengths);
-        return $count % 2 == 1 ? $lengths[$count / 2] : ($lengths[$count / 2] + $lengths[($count / 2) + 1] / 2);
+        if ($count == 0) {
+            return 0;
+        }
+        return $count % 2 == 1 ? $lengths[$count / 2] : ($lengths[($count / 2) - 1] + $lengths[($count / 2)] / 2);
     }
 }

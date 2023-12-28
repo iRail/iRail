@@ -3,6 +3,7 @@
 namespace Irail\Models\Dto\v2;
 
 use Irail\Http\Requests\JourneyPlanningRequest;
+use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;
@@ -17,8 +18,8 @@ class JourneyPlanningV2Converter extends V2Converter
      */
     public static function convert(
         JourneyPlanningRequest $request,
-        JourneyPlanningSearchResult $result): array
-    {
+        JourneyPlanningSearchResult $result
+    ): array {
         return [
             'journeys' => array_map(fn($journey) => self::convertJourney($journey), $result->getJourneys())
         ];
@@ -39,13 +40,16 @@ class JourneyPlanningV2Converter extends V2Converter
     private static function convertLeg(JourneyLeg $leg): array
     {
         return [
-            'type'      => $leg->getLegType(),
-            'departure' => self::convertDepartureOrArrival($leg->getDeparture()),
-            'arrival'   => self::convertDepartureOrArrival($leg->getArrival()),
-            'duration'  => $leg->getDurationSeconds(),
-            'vehicle'   => self::convertVehicle($leg->getVehicle()),
-            'alerts'    => array_map(fn($note) => self::convertMessage($note), $leg->getAlerts()),
-            'stops'     => array_map(fn($departureAndArrival) => self::convertDepartureAndArrival($departureAndArrival), $leg->getIntermediateStops()),
+            'type'                  => $leg->getLegType(),
+            'departure'             => self::convertDepartureOrArrival($leg->getDeparture()),
+            'arrival'               => self::convertDepartureOrArrival($leg->getArrival()),
+            'duration'              => $leg->getDurationSeconds(),
+            'vehicle'               => self::convertVehicle($leg->getVehicle()),
+            'composition'           => array_map(fn($composition) => self::convertComposition($composition), $leg->getComposition()),
+            'compositionStatistics' => array_map(fn($composition) => self::convertCompositionStats($composition), $leg->getCompositionStatsBySegment()),
+            'alerts'                => array_map(fn($note) => self::convertMessage($note), $leg->getAlerts()),
+            'stops'                 => array_map(fn($departureAndArrival) => self::convertDepartureAndArrival($departureAndArrival),
+                $leg->getIntermediateStops()),
         ];
     }
 

@@ -61,6 +61,7 @@ enum OccupancyLevel: string
             case 2:
                 return OccupancyLevel::MEDIUM;
             case 3:
+            case 4:
                 return OccupancyLevel::HIGH;
             default:
                 Log::error("Unknown NMBS occupancy level $level");

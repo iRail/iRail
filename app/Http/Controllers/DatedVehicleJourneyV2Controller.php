@@ -17,7 +17,6 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
     private VehicleJourneyRepository $vehicleJourneyRepository;
     private VehicleCompositionRepository $vehicleCompositionRepository;
     private HistoricCompositionRepository $historicCompositionRepository;
-    private Pool $pool;
 
     /**
      * Create a new controller instance.
@@ -33,14 +32,12 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
         $this->vehicleJourneyRepository = $vehicleJourneyRepository;
         $this->vehicleCompositionRepository = $vehicleCompositionRepository;
         $this->historicCompositionRepository = $historicCompositionRepository;
-        $this->pool = new Pool();
     }
 
     public function getDatedVehicleJourney(DatedVehicleJourneyV2Request $request): JsonResponse
     {
-
-        $statistics = null;
-        $compositionTask = $this->pool
+        $pool = new Pool();
+        $compositionTask = $pool
             ->add(function () use ($request) {
                 // The type may not be determined successfully, but only the number is needed anyway
                 $vehicle = Vehicle::fromName($request->getVehicleId(), $request->getDateTime());
@@ -54,7 +51,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
             $vehicleJourneySearchResult->getVehicle()->getType(),
             $vehicleJourneySearchResult->getVehicle()->getNumber()
         );
-        $this->pool->wait();
+        $pool->wait();
         $composition = $compositionTask->getOutput();
         $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult, $composition->getSegments(), $statistics);
         $this->logRequest($request);
