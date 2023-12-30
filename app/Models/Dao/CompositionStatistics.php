@@ -8,7 +8,7 @@ class CompositionStatistics
     private int $medianProbableLength;
     private int $mostProbableLength;
     private int $mostProbableLengthOccurrence;
-    private string $mostProbableType;
+    private ?string $mostProbableType;
     private int $mostProbableTypeOccurrence;
 
     /**
@@ -24,7 +24,7 @@ class CompositionStatistics
         int $medianProbableLength,
         int $mostProbableLength,
         int $mostProbableLengthOccurrence,
-        string $mostProbableType,
+        ?string $mostProbableType,
         int $mostProbableTypeOccurrence
     ) {
         $this->numberOfRecords = $numberOfRecords;
@@ -55,7 +55,7 @@ class CompositionStatistics
         return $this->mostProbableLengthOccurrence;
     }
 
-    public function getMostProbableType(): string
+    public function getMostProbableType(): ?string
     {
         return $this->mostProbableType;
     }

@@ -3,6 +3,7 @@
 namespace Irail\Repositories\Irail;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Irail\Models\Dao\CompositionHistoryEntry;
 use Irail\Models\Dao\CompositionStatistics;
@@ -40,8 +41,8 @@ class HistoricCompositionRepository
     {
         return CompositionHistoryEntry::where(
             [
-                ['journeyType' => $vehicleType],
-                ['journeyNumber' => $journeyNumber],
+                ['journeyType', '=', $vehicleType],
+                ['journeyNumber', '=', $journeyNumber],
                 ['journeyStartDate', '>=', Carbon::now()->startOfDay()->subDays($daysBack)]
             ])->get()->all();
     }
@@ -54,6 +55,12 @@ class HistoricCompositionRepository
      */
     public function getHistoricCompositionStatistics(string $vehicleType, int $journeyNumber, int $daysBack = 21): array
     {
+        $cacheKey = $this->getStatisticsCacheKey($vehicleType, $journeyNumber, $daysBack);
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue) {
+            return $cachedValue;
+        }
+
         $compositions = $this->getHistoricCompositions(
             $vehicleType,
             $journeyNumber,
@@ -63,14 +70,16 @@ class HistoricCompositionRepository
         $lengthFrequency = array_count_values($lengths);
         $typesFrequency = array_count_values(array_map(fn($comp) => $comp->getPrimaryMaterialType(), $compositions));
         $medianLength = $this->median($lengths);
-        $mostProbableLength = array_keys($lengthFrequency, max($lengthFrequency))[0];
-        $lengthPercentage = 100 * max($lengthFrequency) / count($compositions);
-        $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
-        $typePercentage = 100 * max($lengthFrequency) / count($compositions);
-        return [
+        $mostProbableLength = $lengthFrequency ? array_keys($lengthFrequency, max($lengthFrequency))[0] : 0;
+        $lengthPercentage = $lengthFrequency ? 100 * max($lengthFrequency) / count($compositions) : 0;
+        $primaryMaterialType = $typesFrequency ? array_keys($typesFrequency, max($typesFrequency))[0] : null;
+        $typePercentage = $lengthFrequency ? 100 * max($lengthFrequency) / count($compositions) : 0;
+        $result = [
             new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage,
                 $primaryMaterialType, $typePercentage)
         ];
+        Cache::put($cacheKey, $result, 3600 * 12); // Cache for 12 hours
+        return $result;
     }
 
     /**
@@ -123,6 +132,11 @@ class HistoricCompositionRepository
             return;
         }
 
+        if ($this->hasBeenRecordedPast12Hours($composition)) {
+            // Try to exit without any database queries to combine rich data with fast response times
+            return;
+        }
+
         if ($composition->getLength() < 2
             || $composition->getVehicle()->getJourneyStartDate()->isAfter(Carbon::now()->startOfDay())) {
             // Only record valid compositions for vehicles running today
@@ -151,6 +165,7 @@ class HistoricCompositionRepository
                 $position + 1
             ]);
         }
+        $this->markAsRecorded($composition);
     }
 
 
@@ -249,5 +264,29 @@ class HistoricCompositionRepository
             return 0;
         }
         return $count % 2 == 1 ? $lengths[$count / 2] : ($lengths[($count / 2) - 1] + $lengths[($count / 2)] / 2);
+    }
+
+    private function hasBeenRecordedPast12Hours(TrainComposition|VehicleCompositionSearchResult $composition): bool
+    {
+        return Cache::has($this->getRecordedStatusCacheKey($composition));
+    }
+
+    private function markAsRecorded(TrainComposition|VehicleCompositionSearchResult $composition): bool
+    {
+        return Cache::set($this->getRecordedStatusCacheKey($composition), true, 12 * 3600);
+    }
+
+    /**
+     * @param TrainComposition $composition
+     * @return string
+     */
+    public function getRecordedStatusCacheKey(TrainComposition $composition): string
+    {
+        return "historicCompositionRecorded:{$composition->getVehicle()->getId()}";
+    }
+
+    public function getStatisticsCacheKey(string $vehicleType, int $journeyNumber, int $daysBack): string
+    {
+        return "statistics:$vehicleType$journeyNumber:$daysBack";
     }
 }

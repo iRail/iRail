@@ -4,6 +4,7 @@ namespace Irail\Repositories\Irail;
 
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Irail\Models\Dao\OccupancyReportSource;
 use Irail\Models\DepartureOrArrival;
@@ -37,12 +38,9 @@ class OccupancyRepository
                 $departure->getStation()->getId(),
                 $departure->getScheduledDateTime(),
                 $officialNmbsLevel);
+
         } else {
-            $officialNmbsLevel = $this->getOfficialLevel(
-                $departure->getVehicle()->getId(),
-                $departure->getStation()->getId(),
-                $departure->getScheduledDateTime()
-            );
+            $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure, $officialNmbsLevel);
         }
         $spitsgidsLevel = $this->getSpitsgidsLevel(
             $departure->getVehicle()->getId(),
@@ -77,8 +75,25 @@ class OccupancyRepository
     }
 
 
-    private function store(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate, OccupancyLevel $occupancyLevel): void
-    {
+    private function store(
+        OccupancyReportSource $source,
+        string $vehicleId,
+        int $stationId,
+        Carbon $vehicleJourneyStartDate,
+        OccupancyLevel $occupancyLevel
+    ): void {
+
+        if ($source == OccupancyReportSource::NMBS) {
+            $recordedFlagKey = $this->getNmbsRecordedKey($vehicleId, $stationId, $vehicleJourneyStartDate);
+            // No need to store if this has been stored in the database already.
+            // This cache check prevents unneeded database access where possible
+            if (Cache::has($recordedFlagKey)) {
+                return;
+            }
+            Cache::put($recordedFlagKey, true, 12 * 3600);
+        }
+
+        // Check if this entry is already recorded in the database, since NMBS entries only should be recorded once
         if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate)) > 0) {
             return;
         }
@@ -90,10 +105,18 @@ class OccupancyRepository
             $vehicleJourneyStartDate->copy()->startOfDay(),
             $occupancyLevel->getIntValue()
         ]);
+        $cacheKey = $this->getOccupancyKey($source, $vehicleId, $stationId, $vehicleJourneyStartDate);
+        Cache::delete($cacheKey); // Clear cached value after store
     }
 
     private function getSpitsgidsLevel(string $vehicleId, string $stationId, Carbon $scheduledDateTime): OccupancyLevel
     {
+        $cacheKey = $this->getOccupancyKey(OccupancyReportSource::SPITSGIDS, $vehicleId, $stationId, $scheduledDateTime);
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue != null) {
+            return $cachedValue;
+        }
+
         $reports = $this->readLevels(
             OccupancyReportSource::SPITSGIDS,
             $vehicleId,
@@ -107,7 +130,32 @@ class OccupancyRepository
             return OccupancyLevel::UNKNOWN;
         }
         $average = array_sum($values) / count($values);
-        return OccupancyLevel::fromIntValue($average);
+        $occupancyLevel = OccupancyLevel::fromIntValue($average);
+        Cache::put($cacheKey, $occupancyLevel, 1800);
+        return $occupancyLevel;
+    }
+
+    /**
+     * @param DepartureOrArrival $departure
+     * @param OccupancyLevel     $officialNmbsLevel
+     * @return OccupancyLevel|mixed
+     */
+    public function getStoredNmbsOccupancy(DepartureOrArrival $departure, OccupancyLevel $officialNmbsLevel): mixed
+    {
+        $cacheKey = $this->getOccupancyKey(OccupancyReportSource::NMBS, $departure->getVehicle()->getId(),
+            $departure->getStation()->getId(), $departure->getScheduledDateTime());
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue != null) {
+            $officialNmbsLevel = $cachedValue;
+        } else {
+            $officialNmbsLevel = $this->getOfficialLevel(
+                $departure->getVehicle()->getId(),
+                $departure->getStation()->getId(),
+                $departure->getScheduledDateTime()
+            );
+            Cache::put($cacheKey, $officialNmbsLevel, 3 * 3600);
+        }
+        return $officialNmbsLevel;
     }
 
     private function getOfficialLevel(string $vehicleId, string $stationId, Carbon $scheduledDateTime): OccupancyLevel
@@ -165,5 +213,15 @@ class OccupancyRepository
             'vehicle'    => 'http=>//irail.be/vehicle/' . $row->vehicleId,
             'occupancy'  => OccupancyLevel::fromIntValue($row->occupancy)
         ], $rows);
+    }
+
+    private function getOccupancyKey(OccupancyReportSource $source, string $vehicleId, string $stationId, Carbon $date): string
+    {
+        return "occupancy:{$source->value}:$vehicleId:$stationId:{$date->copy()->startOfDay()->toDateString()}";
+    }
+
+    private function getNmbsRecordedKey(string $vehicleId, string $stationId, Carbon $date): string
+    {
+        return "occupancyRecorded:$vehicleId:$stationId:{$date->copy()->startOfDay()->toDateString()}";
     }
 }
