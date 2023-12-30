@@ -2,6 +2,7 @@
 
 namespace Irail\Repositories\Irail;
 
+use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Models\StationInfo;
@@ -32,6 +33,12 @@ class StationsRepository
     /** @noinspection PhpUnused Used through dependency injection */
     public function findStationByName(string $name): ?StationInfo
     {
+        $cacheKey = "stationsRepository.findStationByName.$name";
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue) {
+            return $cachedValue;
+        }
+
         // first check if it wasn't by any chance an id
         if (str_starts_with($name, '0') || str_starts_with($name, 'BE.NMBS') || str_starts_with($name, 'http://')) {
             throw new InvalidArgumentException("Expected station name, got station id: {$name}", 500);
@@ -57,7 +64,7 @@ class StationsRepository
                 // If we have a near-exact match (based on string length), pick this one
                 $bestMatch = $stationitem;
                 break;
-            } else if (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
+            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
                 // If one of the alternative names if a near-exact match (based on string length), pick it.
                 foreach ($stationitem->alternative as $alt) {
                     if (strlen($alt->{'@value'}) === strlen($name)) {
@@ -65,13 +72,15 @@ class StationsRepository
                         break;
                     }
                 }
-            } else if (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
+            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
                 // If there is only one alternative name, but it matches on string length, pick it.
                 $bestMatch = $stationitem;
                 break;
             }
         }
-        return $this->graphStationToStationInfo($bestMatch);
+        $result = $this->graphStationToStationInfo($bestMatch);
+        Cache::put($cacheKey, $result, 12 * 3600);
+        return $result;
     }
 
     /**
