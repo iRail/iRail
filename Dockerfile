@@ -31,7 +31,7 @@ RUN pecl install pecl_http
 
 # Install apcu
 RUN pecl install apcu
-RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1" > /usr/local/etc/php/php.ini
+RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1" >> /usr/local/etc/php/php.ini
 RUN docker-php-ext-enable apcu http
 
 # Install xdebug
@@ -45,6 +45,9 @@ RUN yes | pecl install xdebug \
 # Install opcache
 RUN docker-php-ext-install opcache
 COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Raise memory limit, needed for handling GTFS data
+RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini
 
 # Installing composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
