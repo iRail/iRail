@@ -38,12 +38,19 @@ RUN docker-php-ext-enable apcu http
 RUN yes | pecl install xdebug \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.mode=develop,coverage,debug,profile,trace" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini
+    && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.output_dir=/tmp/xdebug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.profiler_output_name=xdebug-profile.cachegrind.out.%p" >> /usr/local/etc/php/conf.d/xdebug.ini
+
+# Install opcache
+RUN docker-php-ext-install opcache
+COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Installing composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
+
 
 WORKDIR /var/www
 

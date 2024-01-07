@@ -29,6 +29,7 @@ services:
       - app
     volumes:
       - ./:/var/www
+      - ./docker/debug:/tmp/xdebug
     ports:
       - "8080:8080"
       #MySQL Service
