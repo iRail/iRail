@@ -2,6 +2,7 @@
 
 namespace Irail\Repositories\Irail;
 
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 use Irail\Exceptions\Internal\UnknownStopException;
@@ -97,7 +98,8 @@ class StationsRepository
      */
     public function findAllStations(): array
     {
-        return [];
+        // TODO: implement
+        throw new Exception('TODO: Implement');
     }
 
     public function setLocalizedLanguage(string $lang): void
