@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Irail\Models\Dao\OccupancyReportSource;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\OccupancyInfo;
@@ -82,22 +83,22 @@ class OccupancyDao
         Carbon $vehicleJourneyStartDate,
         OccupancyLevel $occupancyLevel
     ): void {
-
+        $recordedFlagKey = $this->getNmbsRecordedKey($vehicleId, $stationId, $vehicleJourneyStartDate);
         if ($source == OccupancyReportSource::NMBS) {
-            $recordedFlagKey = $this->getNmbsRecordedKey($vehicleId, $stationId, $vehicleJourneyStartDate);
             // No need to store if this has been stored in the database already.
             // This cache check prevents unneeded database access where possible
             if (Cache::has($recordedFlagKey)) {
                 return;
             }
-            Cache::put($recordedFlagKey, true, 12 * 3600);
         }
 
         // Check if this entry is already recorded in the database, since NMBS entries only should be recorded once
         if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate)) > 0) {
+            Cache::put($recordedFlagKey, true, 12 * 3600);
             return;
         }
 
+        Log::debug("Storing occupancy level $occupancyLevel->name for $vehicleId from source $source->name");
         DB::update('INSERT INTO OccupancyReports (source, vehicleId, stopId, journeyStartDate, occupancy) VALUES (?, ?, ?, ?, ?)', [
             $source->value,
             $vehicleId,
@@ -106,6 +107,7 @@ class OccupancyDao
             $occupancyLevel->getIntValue()
         ]);
         $cacheKey = $this->getOccupancyKey($source, $vehicleId, $stationId, $vehicleJourneyStartDate);
+        Cache::put($recordedFlagKey, true, 12 * 3600);
         Cache::delete($cacheKey); // Clear cached value after store
     }
 
@@ -127,6 +129,7 @@ class OccupancyDao
         // the reported values cannot include "unknown", since this value can never be reported in Spitsgids
         $values = array_map(fn($report) => $report->getIntValue(), $reports);
         if (count($values) == 0) {
+            Cache::put($cacheKey, OccupancyLevel::UNKNOWN, 1800);
             return OccupancyLevel::UNKNOWN;
         }
         $average = array_sum($values) / count($values);
@@ -187,6 +190,7 @@ class OccupancyDao
      */
     private function readLevels(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate): array
     {
+        Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
         $rows = DB::select('SELECT occupancy FROM OccupancyReports WHERE source=? AND vehicleId=? AND stopId=? AND journeyStartDate=?',
             [
                 $source->value,
