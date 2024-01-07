@@ -44,6 +44,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
                 $composition = $this->vehicleCompositionRepository->getComposition($vehicle);
                 // Store this in the database, in case it's new.
                 $this->historicCompositionRepository->recordComposition($composition);
+                return $composition;
             });
 
         $vehicleJourneySearchResult = $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
