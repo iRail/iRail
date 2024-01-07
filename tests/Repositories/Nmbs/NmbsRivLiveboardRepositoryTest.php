@@ -45,13 +45,37 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
 
     function testGetLiveboard_departureBoardMissingDestination_shouldGetDirectionFromGtfs(): void
     {
-
+        // TODO: implement in code and test
     }
 
 
     function testGetLiveboard_departureBoardAndGtfsMissingDestination_shouldNotIncludeRowInResult(): void
     {
+        // TODO: implement in code and test
+    }
 
+    function testGetLiveboard_canceledDeparture_shouldBeMarkedAsCanceled(): void
+    {
+        $stationsRepo = new StationsRepository();
+        $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
+        $liveboardRepo = new NmbsRivLiveboardRepository($stationsRepo, $gtfsStartEndExtractor, $rivRepo);
+
+        $request = $this->createRequest('008821006', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 7, 14, 50));
+        $rivRepo->shouldReceive('getLiveboardData')
+            ->with($request)
+            ->atLeast()
+            ->once()
+            ->andReturn(new CachedData(
+                'sample-cache-key',
+                file_get_contents(__DIR__ . '/NmbsRivLiveboardRepositoryTest_antwerpDepartures.json')
+            ));
+
+        $response = $liveboardRepo->getLiveboard($request);
+
+        self::assertEquals(14, count($response->getStops()));
+        self::assertTrue($response->getStops()[3]->isCancelled());
+        self::assertEquals('?', $response->getStops()[3]->getPlatform()->getDesignation());
     }
 
     private function createRequest(string $station, TimeSelection $timeSelection, string $language, Carbon $dateTime): LiveboardRequest

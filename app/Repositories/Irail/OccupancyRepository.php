@@ -40,7 +40,7 @@ class OccupancyRepository
                 $officialNmbsLevel);
 
         } else {
-            $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure, $officialNmbsLevel);
+            $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure);
         }
         $spitsgidsLevel = $this->getSpitsgidsLevel(
             $departure->getVehicle()->getId(),
@@ -137,10 +137,9 @@ class OccupancyRepository
 
     /**
      * @param DepartureOrArrival $departure
-     * @param OccupancyLevel     $officialNmbsLevel
      * @return OccupancyLevel|mixed
      */
-    public function getStoredNmbsOccupancy(DepartureOrArrival $departure, OccupancyLevel $officialNmbsLevel): mixed
+    public function getStoredNmbsOccupancy(DepartureOrArrival $departure): mixed
     {
         $cacheKey = $this->getOccupancyKey(OccupancyReportSource::NMBS, $departure->getVehicle()->getId(),
             $departure->getStation()->getId(), $departure->getScheduledDateTime());

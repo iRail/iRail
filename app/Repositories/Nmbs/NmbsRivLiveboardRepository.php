@@ -10,6 +10,7 @@ use DateTime;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
@@ -61,7 +62,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     }
 
     /**
-     * @throws Exception
+     * @throws UnknownStopException
      */
     private function parseNmbsRawData(LiveboardRequest $request, CachedData $cachedRawData): LiveboardSearchResult
     {
@@ -73,12 +74,10 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         if (str_contains($rawData, ': error :')) {
             throw new UpstreamServerException('The remote server returned an error: ' . $rawData, 504);
         }
+
         // Now we'll actually read the departures/arrivals information.
         $currentStation = $this->stationsRepository->getStationById($request->getStationId());
-        if ($currentStation == null) {
-            throw new UnknownStopException("Failed to match station id {$request->getStationId()} with a known station",
-                500);
-        }
+
         $decodedJsonData = json_decode($rawData, associative: true);
         $stopsAtStation = $decodedJsonData['entries'];
         $departuresOrArrivals = [];
@@ -106,7 +105,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      * @param StationInfo      $currentStation
      * @param array            $stop
      * @return DepartureOrArrival
-     * @throws Exception
+     * @throws UnknownStopException | RequestOutsideTimetableRangeException | UpstreamServerException
      */
     private function parseStopAtStation(LiveboardRequest $request, StationInfo $currentStation, array $stop): DepartureOrArrival
     {
@@ -147,20 +146,20 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopCanceled = key_exists('Status', $stop) && $stop['Status'] == 'Canceled';
 
         $status = null;
-        $statusmap = [
+        $statusMap = [
             'aan perron' => DepartureArrivalState::HALTING,
         ];
-        if (key_exists('DepartureStatusNl', $stop) && key_exists($stop['DepartureStatusNl'], $statusmap)) {
-            $status = $statusmap[$stop['DepartureStatusNl']];
+        if (key_exists('DepartureStatusNl', $stop) && key_exists($stop['DepartureStatusNl'], $statusMap)) {
+            $status = $statusMap[$stop['DepartureStatusNl']];
         }
 
         // using plannedDateTime as trip start date is not 100% correct here, but we don't have anything better. Might cause issues on trains crossing midnight.
         $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $plannedDateTime);
         $direction = $this->stationsRepository->getStationById('00' . $direction);
-        $headsign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
+        $headSign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
             $stop['DestinationNl'] : $stop['OriginNl'];
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
-        $vehicle->setDirection(new VehicleDirection($headsign, $direction));
+        $vehicle->setDirection(new VehicleDirection($headSign, $direction));
 
         // Now all information has been parsed. Put it in a nice object.
         $stopAtStation = new DepartureOrArrival();
@@ -191,13 +190,13 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
-    private function isServiceTrain(array $stop)
+    private function isServiceTrain(array $stop): bool
     {
         return $stop['CommercialType'] == 'SERV';
     }
 
     /**
-     * @throws Exception
+     * @throws UpstreamServerException | RequestOutsideTimetableRangeException
      */
     private function getDirectionUicCode(array $stop, bool $isArrivalBoard, DateTime $scheduledTripDepartureDate)
     {

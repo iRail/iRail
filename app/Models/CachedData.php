@@ -17,8 +17,9 @@ class CachedData
     private int $expiresAt;
 
     /**
-     * @param string $key
-     * @param T      $value
+     * @param string                   $key
+     * @param null|                    $value
+     * @param int                      $ttl
      */
     public function __construct(string $key, null|object|array|string $value, int $ttl = 0)
     {

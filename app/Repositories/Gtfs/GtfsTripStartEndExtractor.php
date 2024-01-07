@@ -5,6 +5,8 @@ namespace Irail\Repositories\Gtfs;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
+use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
@@ -32,7 +34,7 @@ class GtfsTripStartEndExtractor
      * @param string   $vehicleId The vehicle name/id, such as IC538
      * @param DateTime $date The date
      * @return false|VehicleWithOriginAndDestination
-     * @throws Exception
+     * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
     public function getVehicleWithOriginAndDestination(string $vehicleId, DateTime $date): VehicleWithOriginAndDestination|false
     {
@@ -98,7 +100,7 @@ class GtfsTripStartEndExtractor
     /**
      * @param DateTime $date
      * @return VehicleWithOriginAndDestination[]
-     * @throws Exception
+     * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
     private function getTripsWithStartAndEndByDate(DateTime $date): array
     {
@@ -109,7 +111,7 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsByDate = $vehicleDetailsByDate->getValue();
         $dateYmd = $date->format('Ymd');
         if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
-            throw new Exception('Request outside of allowed date period (3 days back, 14 days forward)', 404);
+            throw new RequestOutsideTimetableRangeException('Request outside of allowed date period (3 days back, 14 days forward)', 404);
         }
         return $vehicleDetailsByDate[$dateYmd];
     }
@@ -136,7 +138,7 @@ class GtfsTripStartEndExtractor
 
     /**
      * @return array<string, VehicleWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in ymd format
-     * @throws Exception
+     * @throws UpstreamServerException
      */
     private function loadTripsWithStartAndEndDate(): array
     {
@@ -146,7 +148,7 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsByServiceId = $this->gtfsRepository->readTripsGroupedByServiceId($serviceIdsToRetain);
 
         if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
-            throw new Exception('No response from iRail GTFS', 504);
+            throw new UpstreamServerException('No response from iRail GTFS', 504);
         }
 
         // Create a multidimensional array:
