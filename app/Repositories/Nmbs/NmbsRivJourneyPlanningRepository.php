@@ -12,6 +12,7 @@ namespace Irail\Repositories\Nmbs;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Irail\Database\OccupancyDao;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Http\Requests\JourneyPlanningRequest;
@@ -25,7 +26,6 @@ use Irail\Models\OccupancyLevel;
 use Irail\Models\Result\JourneyPlanningSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
-use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
@@ -39,7 +39,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
 
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
-    private OccupancyRepository $occupancyRepository;
+    private OccupancyDao $occupancyRepository;
 
 
     public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
@@ -51,7 +51,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
         }
 
-        $this->occupancyRepository = App::make(OccupancyRepository::class);
+        $this->occupancyRepository = App::make(OccupancyDao::class);
     }
 
     /**

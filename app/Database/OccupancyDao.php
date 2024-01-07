@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Repositories\Irail;
+namespace Irail\Database;
 
 use Carbon\Carbon;
 use DateTime;
@@ -12,7 +12,7 @@ use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
 use Spatie\Async\Pool;
 
-class OccupancyRepository
+class OccupancyDao
 {
 
     private Pool $threadPool;

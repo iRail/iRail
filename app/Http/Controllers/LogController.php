@@ -4,14 +4,14 @@ namespace Irail\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Irail\Repositories\Irail\LogRepository;
+use Irail\Database\LogDao;
 
 class LogController extends BaseIrailController
 {
 
-    private LogRepository $logRepository;
+    private LogDao $logRepository;
 
-    public function __construct(LogRepository $logRepository)
+    public function __construct(LogDao $logRepository)
     {
         $this->logRepository = $logRepository;
     }

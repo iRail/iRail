@@ -3,26 +3,25 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Irail\Database\HistoricCompositionDao;
+use Irail\Database\LogDao;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
 use Irail\Models\Dto\v2\JourneyPlanningV2Converter;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;
-use Irail\Repositories\Irail\HistoricCompositionRepository;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Spatie\Async\Pool;
 
 class JourneyPlanningV2Controller extends BaseIrailController
 {
     private JourneyPlanningRepository $journeyPlanningRepository;
     private VehicleCompositionRepository $vehicleCompositionRepository;
-    private HistoricCompositionRepository $historicCompositionRepository;
+    private HistoricCompositionDao $historicCompositionRepository;
 
     /**
      * Create a new controller instance.
@@ -32,7 +31,7 @@ class JourneyPlanningV2Controller extends BaseIrailController
     public function __construct(
         JourneyPlanningRepository $journeyPlanningRepository,
         VehicleCompositionRepository $vehicleCompositionRepository,
-        HistoricCompositionRepository $historicCompositionRepository
+        HistoricCompositionDao $historicCompositionRepository
     ) {
         $this->journeyPlanningRepository = $journeyPlanningRepository;
         $this->vehicleCompositionRepository = $vehicleCompositionRepository;
@@ -66,7 +65,7 @@ class JourneyPlanningV2Controller extends BaseIrailController
         $queryResult = [
             'journeyoptions' => array_map(fn($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
         ];
-        app(LogRepository::class)->log('Connections', $query, $request->getUserAgent(), $queryResult);
+        app(LogDao::class)->log('Connections', $query, $request->getUserAgent(), $queryResult);
     }
 
     private function getStopInLogFormat(string $stationId, string $stationSearchValue): array

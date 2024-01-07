@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Repositories\Irail;
+namespace Irail\Database;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -15,7 +15,7 @@ use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use stdClass;
 
-class HistoricCompositionRepository
+class HistoricCompositionDao
 {
 
     public function __construct()

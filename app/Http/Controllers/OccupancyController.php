@@ -4,15 +4,15 @@ namespace Irail\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request as LumenRequest;
+use Irail\Database\OccupancyDao;
 use Irail\Http\Requests\OccupancyReportRequest;
-use Irail\Repositories\Irail\OccupancyRepository;
 
 class OccupancyController extends BaseIrailController
 {
 
-    private OccupancyRepository $occupancyRepository;
+    private OccupancyDao $occupancyRepository;
 
-    public function __construct(OccupancyRepository $occupancyRepository)
+    public function __construct(OccupancyDao $occupancyRepository)
     {
         $this->occupancyRepository = $occupancyRepository;
     }

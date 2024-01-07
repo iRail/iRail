@@ -5,10 +5,10 @@ namespace Irail\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Models\Dto\v1\LiveboardV1Converter;
 use Irail\Proxy\CurlProxy;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsHtmlLiveboardRepository;
@@ -55,6 +55,6 @@ class LiveboardV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogRepository::class)->log('Liveboard', $query, $request->getUserAgent());
+        app(LogDao::class)->log('Liveboard', $query, $request->getUserAgent());
     }
 }

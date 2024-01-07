@@ -3,14 +3,9 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Irail\Http\Requests\LiveboardRequest;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\DatedVehicleJourneyV1Request;
-use Irail\Http\Requests\VehicleCompositionV1Request;
-use Irail\Http\Requests\VehicleCompositionV2Request;
 use Irail\Models\Dto\v1\DatedVehicleJourneyV1Converter;
-use Irail\Models\Dto\v1\LiveboardV1Converter;
-use Irail\Repositories\Irail\LogRepository;
-use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\VehicleJourneyRepository;
 
 class DatedVehicleJourneyV1Controller extends BaseIrailController
@@ -46,6 +41,6 @@ class DatedVehicleJourneyV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'  => 1
         ];
-        app(LogRepository::class)->log('VehicleInformation', $query, $request->getUserAgent());
+        app(LogDao::class)->log('VehicleInformation', $query, $request->getUserAgent());
     }
 }

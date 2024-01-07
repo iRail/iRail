@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\App;
+use Irail\Database\OccupancyDao;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
@@ -23,7 +24,6 @@ use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
-use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -33,7 +33,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
-    private OccupancyRepository $occupancyRepository;
+    private OccupancyDao $occupancyRepository;
 
     public function __construct(
         StationsRepository $stationsRepository,
@@ -44,7 +44,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
 
         $this->rivDataRepository = $rivDataRepository;
-        $this->occupancyRepository = App::make(OccupancyRepository::class);
+        $this->occupancyRepository = App::make(OccupancyDao::class);
     }
 
     /**

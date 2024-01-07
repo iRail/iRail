@@ -1,8 +1,8 @@
 <?php
 
+use Irail\Database\LogDao;
+use Irail\Database\OccupancyDao;
 use Irail\Proxy\CurlProxy;
-use Irail\Repositories\Irail\LogRepository;
-use Irail\Repositories\Irail\OccupancyRepository;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
@@ -101,13 +101,13 @@ $app->singleton(
 );
 
 $app->singleton(
-    OccupancyRepository::class,
-    OccupancyRepository::class
+    OccupancyDao::class,
+    OccupancyDao::class
 );
 
 $app->singleton(
-    LogRepository::class,
-    LogRepository::class
+    LogDao::class,
+    LogDao::class
 );
 
 $app->singleton(

@@ -1,12 +1,12 @@
 <?php
 
-namespace Irail\Repositories\Irail;
+namespace Irail\Database;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Irail\Models\Dao\LogEntry;
 
-class LogRepository
+class LogDao
 {
     public function log(string $queryType, array $query, string $userAgent, array $result = null)
     {

@@ -3,9 +3,9 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Models\Dto\v1\VehicleCompositionV1Converter;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV1Controller extends BaseIrailController
@@ -43,7 +43,7 @@ class CompositionV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogRepository::class)->log('composition', $query, $request->getUserAgent());
+        app(LogDao::class)->log('composition', $query, $request->getUserAgent());
     }
 
 }

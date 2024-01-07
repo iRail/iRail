@@ -3,11 +3,11 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Irail\Database\HistoricCompositionDao;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Models\Dto\v2\DatedVehicleJourneyV2Converter;
 use Irail\Models\Vehicle;
-use Irail\Repositories\Irail\HistoricCompositionRepository;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Repositories\VehicleJourneyRepository;
 use Spatie\Async\Pool;
@@ -16,7 +16,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
 {
     private VehicleJourneyRepository $vehicleJourneyRepository;
     private VehicleCompositionRepository $vehicleCompositionRepository;
-    private HistoricCompositionRepository $historicCompositionRepository;
+    private HistoricCompositionDao $historicCompositionRepository;
 
     /**
      * Create a new controller instance.
@@ -26,7 +26,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
     public function __construct(
         VehicleJourneyRepository $vehicleJourneyRepository,
         VehicleCompositionRepository $vehicleCompositionRepository,
-        HistoricCompositionRepository $historicCompositionRepository
+        HistoricCompositionDao $historicCompositionRepository
     ) {
         //
         $this->vehicleJourneyRepository = $vehicleJourneyRepository;
@@ -69,6 +69,6 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
             'language' => $request->getLanguage(),
             'version'  => 2
         ];
-        app(LogRepository::class)->log('VehicleInformation', $query, $request->getUserAgent());
+        app(LogDao::class)->log('VehicleInformation', $query, $request->getUserAgent());
     }
 }

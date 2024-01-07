@@ -3,12 +3,12 @@
 namespace Tests\Repositories\Irail;
 
 use Carbon\Carbon;
+use Irail\Database\HistoricCompositionDao;
 use Irail\Models\StationInfo;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
-use Irail\Repositories\Irail\HistoricCompositionRepository;
 use Tests\InMemoryTestCase;
 
 class HistoricCompositionRepositoryTest extends InMemoryTestCase
@@ -16,7 +16,7 @@ class HistoricCompositionRepositoryTest extends InMemoryTestCase
     function testRecordComposition_normalCase_shouldStoreCompositionInDatabase()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
-        $repo = new HistoricCompositionRepository();
+        $repo = new HistoricCompositionDao();
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 513, Carbon::createFromDate(2023, 12, 21));
         $origin = new StationInfo('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
@@ -45,7 +45,7 @@ class HistoricCompositionRepositoryTest extends InMemoryTestCase
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
 
-        $repo = new HistoricCompositionRepository();
+        $repo = new HistoricCompositionDao();
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 514);
         $origin = new StationInfo('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
@@ -78,7 +78,7 @@ class HistoricCompositionRepositoryTest extends InMemoryTestCase
     function testRecordComposition_multipleSegments_shouldStoreCompositionForEachSegment()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
-        $repo = new HistoricCompositionRepository();
+        $repo = new HistoricCompositionDao();
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 514, Carbon::createFromDate(2023, 12, 21));
 

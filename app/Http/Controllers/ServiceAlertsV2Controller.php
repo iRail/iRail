@@ -3,9 +3,9 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\ServiceAlertsV2Request;
 use Irail\Models\Dto\v2\ServiceAlertsV2Converter;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\ServiceAlertsRepository;
 
 class ServiceAlertsV2Controller extends BaseIrailController
@@ -39,6 +39,6 @@ class ServiceAlertsV2Controller extends BaseIrailController
             'language'      => $request->getLanguage(),
             'version'       => 2
         ];
-        app(LogRepository::class)->log('Disturbances', $query, $request->getUserAgent());
+        app(LogDao::class)->log('Disturbances', $query, $request->getUserAgent());
     }
 }

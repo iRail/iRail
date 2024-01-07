@@ -3,23 +3,22 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Irail\Http\Requests\DatedVehicleJourneyV2Request;
+use Irail\Database\HistoricCompositionDao;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\VehicleCompositionV2Request;
 use Irail\Models\Dto\v2\VehicleCompositionV2Converter;
-use Irail\Repositories\Irail\HistoricCompositionRepository;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV2Controller extends BaseIrailController
 {
-    private HistoricCompositionRepository $historicCompositionRepository;
+    private HistoricCompositionDao $historicCompositionRepository;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(HistoricCompositionRepository $historicCompositionRepository)
+    public function __construct(HistoricCompositionDao $historicCompositionRepository)
     {
         $this->historicCompositionRepository = $historicCompositionRepository;
     }
@@ -46,6 +45,6 @@ class CompositionV2Controller extends BaseIrailController
             'language' => $request->getLanguage(),
             'version'  => 2
         ];
-        app(LogRepository::class)->log('composition', $query, $request->getUserAgent());
+        app(LogDao::class)->log('composition', $query, $request->getUserAgent());
     }
 }

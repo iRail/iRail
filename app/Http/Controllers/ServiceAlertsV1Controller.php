@@ -3,10 +3,9 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Irail\Http\Requests\LiveboardV1Request;
+use Irail\Database\LogDao;
 use Irail\Http\Requests\ServiceAlertsV1Request;
 use Irail\Models\Dto\v1\ServiceAlertsV1Converter;
-use Irail\Repositories\Irail\LogRepository;
 use Irail\Repositories\ServiceAlertsRepository;
 
 class ServiceAlertsV1Controller extends BaseIrailController
@@ -41,6 +40,6 @@ class ServiceAlertsV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogRepository::class)->log('Disturbances', $query, $request->getUserAgent());
+        app(LogDao::class)->log('Disturbances', $query, $request->getUserAgent());
     }
 }
