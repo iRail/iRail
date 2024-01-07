@@ -10,19 +10,28 @@ use irail\stations\Stations;
 
 class StationsRepository
 {
+    use \Irail\Traits\Cache;
     private string $lang = 'en';
+
+    public function __construct()
+    {
+        $this->setCachePrefix('StationsRepository');
+    }
 
     /**
      * @throws UnknownStopException
      */
-    public function getStationById(string $id): ?StationInfo
+    public function getStationById(string $id): StationInfo
     {
-        $station = Stations::getStationFromID($id);
-        if ($station == null) {
-            throw new UnknownStopException("Could not match id '{$id}' with a station in iRail."
-                . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
-        }
-        return $this->graphStationToStationInfo($station);
+        $result = $this->getCacheWithDefaultCacheUpdate("getStationById|$id", function () use ($id): StationInfo {
+            $station = Stations::getStationFromID($id);
+            if ($station == null) {
+                throw new UnknownStopException(500, "Could not match id '{$id}' with a station in iRail. "
+                    . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
+            }
+            return $this->graphStationToStationInfo($station);
+        }, 3600 * 12);
+        return $result->getValue();
     }
 
     public function getStationByHafasId(string $id): ?StationInfo
