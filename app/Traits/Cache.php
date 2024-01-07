@@ -124,15 +124,13 @@ trait Cache
      */
     private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
     {
-        if (!$this->isCached($cacheKey)) {
+        $cachedData = $this->getCachedObject($cacheKey);
+        if ($cachedData === false) {
             $data = $valueProvider();
             $this->setCachedObject($cacheKey, $data, $ttl);
+            $cachedData = $this->getCachedObject($cacheKey);
         }
-        if (!$this->isCached($cacheKey)) {
-            throw new InternalProcessingException(500,
-                'Cache is not configured correctly! Items are not being cached, but caching is required for iRail to work correctly.');
-        }
-        return $this->getCachedObject($cacheKey);
+        return $cachedData;
     }
 
     /**
