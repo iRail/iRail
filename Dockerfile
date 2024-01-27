@@ -1,7 +1,6 @@
 # This dockerfile is for development purposes and includes xdebug
 FROM php:8.2-fpm
 
-
 RUN apt-get update && apt-get install -y libssl-dev \
     zip \
     unzip \
@@ -23,7 +22,11 @@ RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg -
 RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update && apt-get install -y nodejs
 
-RUN docker-php-ext-install pdo_mysql mbstring tidy && docker-php-ext-enable pdo_mysql mbstring tidy
+RUN docker-php-ext-install mbstring tidy && docker-php-ext-enable mbstring tidy
+RUN docker-php-ext-install pdo_mysql && docker-php-ext-enable pdo_mysql
+
+RUN apt-get install -y libpq-dev
+RUN docker-php-ext-install pdo_pgsql && docker-php-ext-enable pdo_pgsql
 
 # Install ext-http
 RUN pecl install raphf && docker-php-ext-enable raphf
