@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "be23611675b8f963ea69af36882e097d",
+  "content-hash": "0257ea47c027d2f44040a206243e15a4",
     "packages": [
         {
             "name": "brick/math",
@@ -2564,16 +2564,16 @@
         },
         {
             "name": "irail/stations",
-            "version": "1.6.20",
+          "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-                "reference": "d4be689aa0a74d0a72d599f07d56ea959e9b5ccb"
+              "reference": "d410ca002b4a9bd739ad6e89296d63edc3dcd0cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iRail/stations/zipball/d4be689aa0a74d0a72d599f07d56ea959e9b5ccb",
-                "reference": "d4be689aa0a74d0a72d599f07d56ea959e9b5ccb",
+              "url": "https://api.github.com/repos/iRail/stations/zipball/d410ca002b4a9bd739ad6e89296d63edc3dcd0cd",
+              "reference": "d410ca002b4a9bd739ad6e89296d63edc3dcd0cd",
                 "shasum": ""
             },
             "require": {
@@ -2606,9 +2606,9 @@
             "description": "Use the Belgian railway's station in your PHP project",
             "support": {
                 "issues": "https://github.com/iRail/stations/issues",
-                "source": "https://github.com/iRail/stations/tree/1.6.20"
+              "source": "https://github.com/iRail/stations/tree/1.7.0"
             },
-            "time": "2023-06-25T18:09:56+00:00"
+          "time": "2024-01-27T17:36:02+00:00"
         },
         {
             "name": "laravel/lumen-framework",
