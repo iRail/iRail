@@ -10,7 +10,12 @@ class LogDao
 {
     public function log(string $queryType, array $query, string $userAgent, array $result = null)
     {
-        DB::update('INSERT INTO RequestLog (queryType, query, userAgent, result) VALUES (?, ?, ?, ?)', [
+        if ($this->isPostgress()) {
+            $sql = 'INSERT INTO "RequestLog" ("queryType", "query", "userAgent", "result") VALUES (?, ?, ?, ?)';
+        } else {
+            $sql = 'INSERT INTO RequestLog (queryType, query, userAgent, result) VALUES (?, ?, ?, ?)';
+        }
+        DB::update($sql, [
             $queryType,
             json_encode($query, JSON_UNESCAPED_SLASHES),
             $this->maskEmailAddress($userAgent),
@@ -24,7 +29,12 @@ class LogDao
      */
     public function readLastLogs(int $limit): array
     {
-        $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog ORDER BY createdAt DESC LIMIT ?', [$limit]);
+        if ($this->isPostgress()) {
+            $rows = DB::select('SELECT "id", "queryType", "query", "result", "userAgent", "createdAt" FROM "RequestLog" ORDER BY "createdAt" DESC LIMIT ?',
+                [$limit]);
+        } else {
+            $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog ORDER BY createdAt DESC LIMIT ?', [$limit]);
+        }
         return $this->transformRows($rows);
     }
 
@@ -34,8 +44,13 @@ class LogDao
      */
     public function readLogsForDate(Carbon $date): array
     {
-        $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog WHERE DATE(createdAt) = ? ORDER BY createdAt',
-            [$date->format('Y-m-d')]);
+        if ($this->isPostgress()) {
+            $rows = DB::select('SELECT "id", "queryType", "query", "result", "userAgent", "createdAt" FROM "RequestLog" WHERE DATE("createdAt") = ? ORDER BY "createdAt"',
+                [$date->format('Y-m-d')]);
+        } else {
+            $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog WHERE DATE(createdAt) = ? ORDER BY createdAt',
+                [$date->format('Y-m-d')]);
+        }
         return $this->transformRows($rows);
     }
 
@@ -76,5 +91,13 @@ class LogDao
                 new Carbon($row->createdAt));
         }, $rows);
         return $entries;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPostgress(): bool
+    {
+        return strtolower(getenv('DB_CONNECTION')) == 'pgsql';
     }
 }
