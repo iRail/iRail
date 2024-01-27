@@ -126,7 +126,6 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
         $response = preg_replace('/<tr class="sqLinkRow.*?<\/tr>/s', '', $response);
         $response = preg_replace('/onclick="loadDetails(.*?)"/s', '', $response);
-        $response = preg_replace('/<div.*?<\/div>/s', '', $response);
         return $response;
     }
 
@@ -258,8 +257,8 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         // Replace possible double spaces after the space-introducing fixes
         $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
 
-        preg_match('/^(\w+?)\s?(\d+)$/', $vehicleTypeAndNumber, $vehicleTypeAndNumber);
-        return Vehicle::fromTypeAndNumber($vehicleTypeAndNumber[1], $vehicleTypeAndNumber[2]);
+        preg_match('/^(\w+?)\s*(\d+)$/', $vehicleTypeAndNumber, $vehicleTypeAndNumberArray);
+        return Vehicle::fromTypeAndNumber($vehicleTypeAndNumberArray[1], $vehicleTypeAndNumberArray[2]);
     }
 
     /**

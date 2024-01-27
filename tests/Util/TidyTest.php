@@ -14,7 +14,7 @@ class TidyTest extends TestCase
         $this->assertNotEmpty($repairedData);
     }
 
-    public function testRepairXml_htmlData_shouldReturnData()
+    public function testRepairHtml_sampleHtmlData_shouldReturnData()
     {
         $sourceData = file_get_contents(__DIR__ . '/TidyTest_html_data.html');
         $repairedData = Tidy::repairHtmlRemoveJavascript($sourceData);
