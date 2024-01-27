@@ -10,11 +10,10 @@ use Irail\Models\MessageLink;
 use Irail\Models\MessageType;
 use Irail\Models\Result\ServiceAlertsResult;
 use Irail\Proxy\CurlProxy;
-use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\ServiceAlertsRepository;
 use Irail\Traits\Cache;
+use Irail\Util\Tidy;
 use SimpleXMLElement;
-use tidy;
 
 class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
 {
@@ -133,7 +132,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
             $lead = explode('.', $description)[0];
 
             [$description, $links] = $this->extractLinks($description, $item, $request);
-            $description = $this->cleanHtmlText($description, "<br>");
+            $description = $this->cleanHtmlText($description, '<br>');
             $timestamp = new Carbon($item->pubDate);
 
             $type = MessageType::TROUBLE; // tplParamHimMsgInfoGroup=trouble
@@ -141,7 +140,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
                 $type = MessageType::WORKS;
             }
 
-            preg_match("/&messageID=(\d)+/", $item->link, $matches);
+            preg_match('/&messageID=(\d)+/', $item->link, $matches);
             $id = $matches[1];
 
             $disturbances[] = new Message(
@@ -237,12 +236,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
         $xml = str_replace('/>>', '/>', $xml); // Fix a common closing tag error before tidying
 
         // Clean XML. Their RSS XML is completely broken, so this step cannot be skipped!
-        if (class_exists('tidy', false)) {
-            $tidy = new tidy();
-            $tidy->parseString($xml, ['input-xml' => true, 'output-xml' => true], 'utf8');
-            $tidy->cleanRepair();
-            $xml = $tidy->value;
-        }
+        $xml = Tidy::repairXml($xml);
 
         libxml_use_internal_errors(); // Don't print XML errors
         $data = new SimpleXMLElement($xml);

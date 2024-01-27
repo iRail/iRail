@@ -9,8 +9,9 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Requests\LiveboardV2Request;
 use Irail\Models\Dto\v2\LiveboardV2Converter;
+use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
-use Irail\Repositories\LiveboardRepository;
+use Irail\Repositories\Nmbs\NmbsHtmlLiveboardRepository;
 
 class LiveboardV2Controller extends BaseIrailController
 {
@@ -27,7 +28,7 @@ class LiveboardV2Controller extends BaseIrailController
     public function getLiveboardById(LiveboardV2Request $request): JsonResponse
     {
         $this->validateStationId($request);
-        $repo = app(LiveboardRepository::class);
+        $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class));
         $liveboardSearchResult = $repo->getLiveboard($request);
         $dto = LiveboardV2Converter::convert($request, $liveboardSearchResult);
         $this->logRequest($request);

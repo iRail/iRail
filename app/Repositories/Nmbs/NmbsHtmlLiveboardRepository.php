@@ -7,7 +7,6 @@ namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
-use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
 use Irail\Http\Requests\LiveboardRequest;
@@ -25,8 +24,8 @@ use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\Models\Station;
 use Irail\Traits\Cache;
+use Irail\Util\Tidy;
 use SimpleXMLElement;
-use tidy;
 
 class NmbsHtmlLiveboardRepository implements LiveboardRepository
 {
@@ -120,7 +119,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
      */
     public function cleanResponse(CurlHttpResponse $response): string
     {
-        // Only keep the actual data, php tidy can't handle the entire document
+        // Only keep the actual data, so we don't need to try and repair the entire response
         $matches = [];
         preg_match('/<table class="resultTable" cellspacing="0">.*?<\/table>/s', $response->getResponseBody(), $matches);
         $response = $matches[0];
@@ -138,15 +137,9 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     private function parseNmbsData(LiveboardRequest $request, StationInfo $station, string $xml): array
     {
         //clean XML
-        if (class_exists('tidy', false)) {
-            $tidy = new tidy();
-            $tidy->parseString($xml, ['input-xml' => true, 'output-xml' => true], 'utf8');
-            $tidy->cleanRepair();
-        } else {
-            throw new InternalProcessingException('PHP Tidy is required to clean the data sources.', 500);
-        }
+        $xml = Tidy::repairHtmlRemoveJavascript($xml);
 
-        $data = new SimpleXMLElement($tidy);
+        $data = new SimpleXMLElement($xml);
 
         $stBoardEntries = $data->xpath("tr[@class='stboard']");
         // <tr class="stboard">
@@ -202,8 +195,8 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
             $platformChangeInformation = $stBoardEntry->xpath("td[@class='platform']/div[@class='relative']/td[@class='prognosis']");
             $platformInformation = $stBoardEntry->xpath("td[@class='platform']/text()");
             if (!empty($platformInformation)) {
-                $platform = trim((string)$platformInformation[0]);
-                $platform = trim(explode("\n", $platform)[0]); // remove a newline and some garbage characters
+                $platform = self::trim($platformInformation[0]);
+                $platform = self::trim(explode("\n", $platform)[0]); // remove a newline and some garbage characters
                 $platform = str_replace("\xc2\xa0", '', $platform);// Remove non-breaking spaces
             } else {
                 $platform = '?';
@@ -212,13 +205,13 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
             $platformNormal = true;
             if (!empty($platformChangeInformation)) {
                 $platformNormal = false;
-                $platform = trim((string)$platformChangeInformation[0]);
+                $platform = self::trim($platformChangeInformation[0]);
             }
             if (empty($platform)) {
                 $platform = '?';
             }
 
-            $time = trim((string)$stBoardEntry->xpath("td[@class='time']")[0]);
+            $time = self::trim($stBoardEntry->xpath("td[@class='time']")[0]);
             $time = explode(' ', $time)[0];
             $thisTimeIsDualDigit = !str_starts_with($time, '0');
             if (!$thisTimeIsDualDigit && $previousTimeWasDualDigit) {
@@ -256,7 +249,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
      */
     public function parseVehicle(mixed $stBoardEntry): Vehicle
     {
-        $vehicleTypeAndNumber = trim((string)$stBoardEntry->xpath("td[@class='product']/a")[0]);
+        $vehicleTypeAndNumber = self::trim($stBoardEntry->xpath("td[@class='product']/a")[0]);
         // Some trains are split by a newline, some by a space
         $vehicleTypeAndNumber = str_replace("\n", ' ', $vehicleTypeAndNumber);
         // Busses are completely missing a space, TRN trains are missing this sometimes
@@ -277,15 +270,20 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     {
         // http://www.belgianrail.be/Station.ashx?lang=en&stationId=8885001
         if (isset($stBoardEntry->xpath('td')[1]->a['href'])) {
-            $directionName = trim($stBoardEntry->xpath('td')[1]->a, "\n");
+            $directionName = self::trim($stBoardEntry->xpath('td')[1]->a);
             $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
             $directionStation = $this->stationsRepository->getStationById($directionHafasId);
             return new VehicleDirection($directionName, $directionStation);
         } else {
-            $directionName = trim($stBoardEntry->xpath('td')[1], "\n");
+            $directionName = self::trim($stBoardEntry->xpath('td')[1]);
             $directionStation = $this->stationsRepository->findStationByName($directionName);
             return new VehicleDirection($directionName, $directionStation);
         }
 
+    }
+
+    private static function trim(string $str): string
+    {
+        return trim($str, "\ \n\r\t\v\0");
     }
 }
