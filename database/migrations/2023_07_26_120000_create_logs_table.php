@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('query', 1024)->comment('The query, as a json string');
             $table->string('result', 4096)->nullable()->comment('A description of the query result, as a json string');
             $table->string('userAgent', 512)->comment('The user agent submitted along with this request');
-            $table->timestamp('createdAt')->comment('The time when this query was recorded');
+            $table->timestamp('createdAt')->useCurrent()->comment('The time when this query was recorded');
         });
     }
 

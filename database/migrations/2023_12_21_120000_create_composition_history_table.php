@@ -23,7 +23,7 @@ return new class extends Migration {
 
             $table->string('primaryMaterialType', 16)->comment('The type of the majority of the used vehicles, such as I10, M6 or AM96');
             $table->tinyInteger('passengerUnitCount')->comment('The number of units in which passengers can be seated'); // 0 - 255
-            $table->timestamp('createdAt')->comment('The time when this composition was recorded');
+            $table->timestamp('createdAt')->useCurrent()->comment('The time when this composition was recorded');
             $table->unique(['journeyType', 'journeyNumber', 'journeyStartDate', 'fromStationId', 'toStationId'],'UniqueJourneyIdentifier');
             $table->index(['journeyType', 'journeyNumber', 'journeyStartDate'], 'DatedVehicleJourney');
         });

@@ -16,10 +16,10 @@ return new class extends Migration
             $table->id();
             $table->string('vehicleId')->nullable(false)->comment('The id of the vehicle for which occupancy was reported');
             $table->integer('stopId')->nullable(false)->comment('The id of the stop at which this occupancy was reported');
-            $table->date('journeyStartDate')->nullable(false)->comment('The date on which the vehicle started its journey');;
+            $table->date('journeyStartDate')->nullable(false)->comment('The date on which the vehicle started its journey');
             $table->string('source')->nullable(false)->comment('The source, such as Spitsgids or NMBS');
             $table->integer('occupancy')->nullable(false)->comment('The reported occupancy level');
-            $table->timestamp('createdAt');
+            $table->timestamp('createdAt')->useCurrent();
         });
     }
 
