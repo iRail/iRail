@@ -22,11 +22,11 @@ RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg -
 RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update && apt-get install -y nodejs
 
-RUN docker-php-ext-install mbstring tidy && docker-php-ext-enable mbstring tidy
-RUN docker-php-ext-install pdo_mysql && docker-php-ext-enable pdo_mysql
+RUN docker-php-ext-install mbstring tidy intl && docker-php-ext-enable mbstring tidy intl
+RUN docker-php-ext-install pdo_mysql mysqli && docker-php-ext-enable pdo_mysql mysqli
 
 RUN apt-get install -y libpq-dev
-RUN docker-php-ext-install pdo_pgsql && docker-php-ext-enable pdo_pgsql
+RUN docker-php-ext-install pdo_pgsql pgsql && docker-php-ext-enable pdo_pgsql pgsql
 
 # Install ext-http
 RUN pecl install raphf && docker-php-ext-enable raphf

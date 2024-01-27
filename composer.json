@@ -6,12 +6,14 @@
     "type": "project",
     "require": {
         "php": "^8.2",
+        "ext-apcu": "*",
         "ext-curl": "*",
         "ext-libxml": "*",
         "ext-simplexml": "*",
         "ext-tidy": "*",
         "ext-pgsql": "*",
         "ext-mysqli": "*",
+        "ext-zend-opcache": "*",
         "irail/stations": "1.6.20",
         "laravel/lumen-framework": "^10.0",
         "spatie/async": "^1.5"
