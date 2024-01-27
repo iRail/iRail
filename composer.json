@@ -7,7 +7,6 @@
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
-        "ext-http": "*",
         "ext-libxml": "*",
         "ext-simplexml": "*",
         "ext-tidy": "*",
