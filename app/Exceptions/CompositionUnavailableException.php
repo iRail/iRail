@@ -2,7 +2,7 @@
 
 namespace Irail\Exceptions;
 
-class CompositionUnavailableException extends \Exception
+class CompositionUnavailableException extends IrailHttpException
 {
 
     /**
@@ -10,6 +10,6 @@ class CompositionUnavailableException extends \Exception
      */
     public function __construct(int $vehicleNumber, string $message = '')
     {
-        parent::__construct('Composition for vehicle ' . $vehicleNumber . ' is unavailable. ' . $message, 404);
+        parent::__construct(404, 'Composition for vehicle ' . $vehicleNumber . ' is unavailable.' . ($message ? " $message" : ''));
     }
 }
