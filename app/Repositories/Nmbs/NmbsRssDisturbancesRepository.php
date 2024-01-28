@@ -106,8 +106,9 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
      */
     private function fetchData(ServiceAlertsRequest $request): string
     {
-        $scrapeUrl = 'https://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/' . strtolower($request->getLanguage()) . '?tpl=rss_feed';
-        $curlHttpResponse = $this->curlProxy->get($scrapeUrl);
+        // Curl cant make an HTTPS connection to this URL
+        $scrapeUrl = 'http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/' . strtolower($request->getLanguage());
+        $curlHttpResponse = $this->curlProxy->get($scrapeUrl, ['tpl' => 'rss_feed']);
         return $curlHttpResponse->getResponseBody();
     }
 
