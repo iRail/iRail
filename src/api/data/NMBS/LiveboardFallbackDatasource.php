@@ -273,7 +273,7 @@ class LiveboardFallbackDatasource
                 $delay = (int)explode(' ', trim($delay[0]))[0];
             }
 
-            $platformChangeInformation = $stBoardEntry->xpath("td[@class='platform']/div[@class='relative']/td[@class='prognosis']");
+            $platformChangeInformation = $stBoardEntry->xpath("td[@class='platform']/div[@class='relative']/span[@class='prognosis']");
             $platformInformation = $stBoardEntry->xpath("td[@class='platform']/text()");
             if (!empty($platformInformation)) {
                 $platform = trim((string)$platformInformation[0]);
