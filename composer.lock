@@ -2564,16 +2564,16 @@
         },
         {
             "name": "irail/stations",
-          "version": "1.7.0",
+          "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iRail/stations.git",
-              "reference": "d410ca002b4a9bd739ad6e89296d63edc3dcd0cd"
+              "reference": "51cd7b828ffd8130ce0240d53f17764067b0f5d7"
             },
             "dist": {
                 "type": "zip",
-              "url": "https://api.github.com/repos/iRail/stations/zipball/d410ca002b4a9bd739ad6e89296d63edc3dcd0cd",
-              "reference": "d410ca002b4a9bd739ad6e89296d63edc3dcd0cd",
+              "url": "https://api.github.com/repos/iRail/stations/zipball/51cd7b828ffd8130ce0240d53f17764067b0f5d7",
+              "reference": "51cd7b828ffd8130ce0240d53f17764067b0f5d7",
                 "shasum": ""
             },
             "require": {
@@ -2606,9 +2606,9 @@
             "description": "Use the Belgian railway's station in your PHP project",
             "support": {
                 "issues": "https://github.com/iRail/stations/issues",
-              "source": "https://github.com/iRail/stations/tree/1.7.0"
+              "source": "https://github.com/iRail/stations/tree/1.7.1"
             },
-          "time": "2024-01-27T17:36:02+00:00"
+          "time": "2024-01-28T17:12:00+00:00"
         },
         {
             "name": "laravel/lumen-framework",
