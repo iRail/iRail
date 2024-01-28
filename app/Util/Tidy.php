@@ -13,9 +13,12 @@ class Tidy
 {
     public static function repairXml(string $xml): string
     {
+        if (empty($xml)) {
+            return $xml;
+        }
         $domDoc = new DOMDocument;
         $domDoc->recover = true;
-        $domDoc->loadXML($xml);
+        $domDoc->loadXML($xml, LIBXML_ERR_NONE);
         return $domDoc->saveXML();
     }
 
@@ -36,6 +39,11 @@ class Tidy
         $scriptAndStyleFree = str_replace('& ', '&amp; ', $scriptAndStyleFree);
         // Encode incorrect encoded ampersands by checking if they are followed by a semicolon
         $scriptAndStyleFree = preg_replace('/&([^;]{5})/mis', '&amp;$1', $scriptAndStyleFree);
+
+        if (empty($scriptAndStyleFree)) {
+            return $scriptAndStyleFree;
+        }
+
         $domDoc = new DOMDocument;
         $domDoc->recover = true;
         // Load without adding doctype, html, head and body tags
