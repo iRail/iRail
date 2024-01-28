@@ -2,9 +2,11 @@
 
 namespace Irail\Exceptions;
 
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -34,7 +36,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function report(Throwable $exception)
     {
@@ -44,7 +46,7 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param Throwable                $exception
      * @return Response|JsonResponse
      *
@@ -53,7 +55,20 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception): Response|JsonResponse
     {
         if (!method_exists($exception, 'getStatusCode')) {
-            return parent::render($request, $exception);
+            return response()->json(
+                [
+                    'code'     => 500,
+                    'message'  => $exception->getMessage(),
+                    'previous' => $exception->getPrevious(),
+                    'stack'    => $exception->getTrace()
+                ],
+                500,
+                [
+                    'Access-Control-Allow-Origin'   => '*',
+                    'Access-Control-Allow-Headers'  => '*',
+                    'Access-Control-Expose-Headers' => '*',
+                    'Content-Type'                  => 'application/json;charset=UTF-8'
+                ]);
         }
 
         if (str_contains($request->getUri(), '/v1/') && $request->get('format', 'xml') == 'xml') {
