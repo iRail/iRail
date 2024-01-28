@@ -57,10 +57,11 @@ class Handler extends ExceptionHandler
         if (!method_exists($exception, 'getStatusCode')) {
             return response()->json(
                 [
-                    'code'     => 500,
+                    'code'  => $exception->getCode(),
                     'message'  => $exception->getMessage(),
                     'previous' => $exception->getPrevious(),
-                    'stack'    => $exception->getTrace()
+                    'at'    => self::getLastAppMethodCall($exception->getTrace()),
+                    'stack' => array_map(fn($row) => self::formatTrace($row), $exception->getTrace())
                 ],
                 500,
                 [
@@ -96,5 +97,30 @@ class Handler extends ExceptionHandler
                 'Access-Control-Expose-Headers' => '*',
                 'Content-Type'                  => 'application/json;charset=UTF-8'
             ]);
+    }
+
+    /**
+     * Get the last (most recent) entry in a stack trace originating in user-written code, skipping any vendor code.
+     * @param array $trace
+     * @return string
+     */
+    private static function getLastAppMethodCall(array $trace): string
+    {
+        foreach ($trace as $traceItem) {
+            if (str_starts_with($traceItem['file'], '/workspace/app/')) {
+                return $traceItem['file'] . ':' . $traceItem['line'];
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Get the last (most recent) entry in a stack trace originating in user-written code, skipping any vendor code.
+     * @param array $trace
+     * @return string
+     */
+    private static function formatTrace(array $trace): string
+    {
+        return $trace['class'] . $trace['type'] . $trace['function'] . ' (' . $trace['file'] . ':' . $trace['line'] . ')';
     }
 }
