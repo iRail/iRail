@@ -107,7 +107,7 @@ class Handler extends ExceptionHandler
     private static function getLastAppMethodCall(array $trace): string
     {
         foreach ($trace as $traceItem) {
-            if (str_starts_with($traceItem['file'], '/workspace/app/')) {
+            if (key_exists('file', $traceItem) && str_starts_with($traceItem['file'], '/workspace/app/')) {
                 return $traceItem['file'] . ':' . $traceItem['line'];
             }
         }
@@ -121,6 +121,7 @@ class Handler extends ExceptionHandler
      */
     private static function formatTrace(array $trace): string
     {
-        return $trace['class'] . $trace['type'] . $trace['function'] . ' (' . $trace['file'] . ':' . $trace['line'] . ')';
+        $fileAndLine = key_exists('file', $trace) ? ' (' . $trace['file'] . ':' . $trace['line'] . ')' : '';
+        return $trace['class'] . $trace['type'] . $trace['function'] . $fileAndLine;
     }
 }
