@@ -49,6 +49,39 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
         self::assertEquals('Amsterdam Cs (NL)', $response->getStops()[12]->getVehicle()->getDirection()->getName());
     }
 
+    function testGetLiveboard_departureBoardPlatformChanges_shouldParsePlatformsCorrectly(): void
+    {
+        $stationsRepo = new StationsRepository();
+        $curlProxy = new FakeCurlProxy();
+        $curlProxy->fakeGet('http://www.belgianrail.be/jp/nmbs-realtime/stboard.exe/nn', [
+            'ld'                      => 'std',
+            'boardType'               => 'dep',
+            'time'                    => '15:50:00',
+            'date'                    => '28/01/2024',
+            'maxJourneys'             => 50,
+            'wDayExtsq'               => 'Ma|Di|Wo|Do|Vr|Za|Zo',
+            'input'                   => 'Brussel-Zuid/Bruxelles-Midi',
+            'inputRef'                => 'Brussel-Zuid/Bruxelles-Midi#8814001',
+            'REQ0JourneyStopsinputID' => 'A=1@O=Brussel-Zuid/Bruxelles-Midi@X=4356802@Y=50845649@U=80@L=008814001@B=1@p=1669420371@n=ac.1=FA@n=ac.2=LA@n=ac.3=FS@n=ac.4=LS@n=ac.5=GA@',
+            'REQProduct_list'         => '5:1111111000000000',
+            'realtimeMode'            => 'show',
+            'start'                   => 'yes'
+            // language is not passed, since we need to parse the resulting webpage
+        ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_platformChanges.html');
+
+        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy);
+        $request = $this->createRequest('008814001', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 28, 15, 50));
+        $response = $liveboardRepo->getLiveboard($request);
+
+        self::assertEquals(52, count($response->getStops()));
+        self::assertEquals('6', $response->getStops()[0]->getPlatform()->getDesignation());
+        self::assertEquals(true, $response->getStops()[0]->getPlatform()->hasChanged());
+        self::assertEquals('16', $response->getStops()[1]->getPlatform()->getDesignation());
+        self::assertEquals(false, $response->getStops()[1]->getPlatform()->hasChanged());
+        self::assertEquals('?', $response->getStops()[47]->getPlatform()->getDesignation());
+        self::assertEquals(false, $response->getStops()[47]->getPlatform()->hasChanged());
+    }
+
     private function createRequest(string $station, TimeSelection $timeSelection, string $language, Carbon $dateTime): LiveboardRequest
     {
         $mock = Mockery::mock(LiveboardRequest::class);
