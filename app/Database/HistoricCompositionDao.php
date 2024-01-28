@@ -29,7 +29,7 @@ class HistoricCompositionDao
      */
     public function getAllUnits(): array
     {
-        return StoredCompositionUnit::all()->orderBy('uicCode', 'desc')->all();
+        return StoredCompositionUnit::all()->orderBy('uic_code', 'desc')->all();
     }
 
     /**
@@ -41,9 +41,9 @@ class HistoricCompositionDao
     {
         return CompositionHistoryEntry::where(
             [
-                ['journeyType', '=', $vehicleType],
-                ['journeyNumber', '=', $journeyNumber],
-                ['journeyStartDate', '>=', Carbon::now()->startOfDay()->subDays($daysBack)]
+                ['journey_type', '=', $vehicleType],
+                ['journey_number', '=', $journeyNumber],
+                ['journey_start_date', '>=', Carbon::now()->startOfDay()->subDays($daysBack)]
             ])->get()->all();
     }
 
@@ -89,12 +89,12 @@ class HistoricCompositionDao
      */
     public function getHistoricComposition(Vehicle $vehicle): array
     {
-        $rows = DB::select('SELECT CU.*, CH.fromStationId, CH.toStationId, CUU.position 
-            FROM CompositionHistory CH  
-            JOIN CompositionUnitUsage CUU on CH.id = CUU.historicCompositionId
-            JOIN CompositionUnit CU on CU.uicCode = cuu.uicCode
-            WHERE CH.journeyType = ? AND CH.journeyNumber = ? AND CH.journeyStartDate = ? 
-            ORDER BY CH.fromStationId, CUU.position',
+        $rows = DB::select('SELECT CU.*, CH.from_station_id, CH.to_station_id, CUU.position 
+            FROM composition_history CH  
+            JOIN composition_unit_usage CUU on CH.id = CUU.historic_composition_id
+            JOIN composition_unit CU on CU.uic_code = CUU.uic_code
+            WHERE CH.journey_type = ? AND CH.journey_number = ? AND CH.journey_start_date = ? 
+            ORDER BY CH.from_station_id, CUU.position',
             [$vehicle->getType(), $vehicle->getNumber(), $vehicle->getJourneyStartDate()]);
         if (count($rows) == 0) {
             return [];
@@ -103,8 +103,8 @@ class HistoricCompositionDao
         $compositionsBySegment = [];
         foreach ($rows as $row) {
             $unit = $this->transformCompositionUnit($row);
-            $fromStationId = $row->fromStationId;
-            $toStationId = $row->toStationId;
+            $fromStationId = $row->from_station_id;
+            $toStationId = $row->to_station_id;
             $segmentKey = "$fromStationId-$toStationId";
 
             if (!key_exists($segmentKey, $compositionsBySegment)) {
@@ -159,7 +159,7 @@ class HistoricCompositionDao
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
         foreach ($units as $position => $unit) {
             $this->insertIfNotExists($unit);
-            DB::update('INSERT INTO CompositionUnitUsage(uicCode, historicCompositionId, position) VALUES (?,?,?)', [
+            DB::update('INSERT INTO composition_unit_usage(uic_code, historic_composition_id, position) VALUES (?,?,?)', [
                 $unit->getUicCode(),
                 $compositionId,
                 $position + 1
@@ -172,19 +172,19 @@ class HistoricCompositionDao
     private function transformCompositionUnit(StdClass $row): StoredCompositionUnit
     {
         return (new StoredCompositionUnit())
-            ->setUicCode($row->uicCode)
-            ->setMaterialTypeName($row->materialTypeName)
-            ->setMaterialSubTypeName($row->materialSubTypeName)
-            ->setMaterialNumber($row->materialNumber)
-            ->setHasToilet($row->hasToilet)
-            ->setHasPrmToilet($row->hasPrmToilet)
-            ->setHasAirco($row->hasAirco)
-            ->setHasBikeSection($row->hasBikeSection)
-            ->setHasPrmSection($row->hasPrmSection)
-            ->setSeatsFirstClass($row->seatsFirstClass)
-            ->setSeatsSecondClass($row->seatsSecondClass)
-            ->setCreatedAt(Carbon::parse($row->createdAt))
-            ->setUpdatedAt(Carbon::parse($row->updatedAt));
+            ->setUicCode($row->uic_code)
+            ->setMaterialTypeName($row->material_type_name)
+            ->setMaterialSubTypeName($row->material_subtype_name)
+            ->setMaterialNumber($row->material_number)
+            ->setHasToilet($row->has_toilet)
+            ->setHasPrmToilet($row->has_prm_toilet)
+            ->setHasAirco($row->has_airco)
+            ->setHasBikeSection($row->has_bike_section)
+            ->setHasPrmSection($row->has_prm_section)
+            ->setSeatsFirstClass($row->seats_first_class)
+            ->setSeatsSecondClass($row->seats_second_class)
+            ->setCreatedAt(Carbon::parse($row->created_at))
+            ->setUpdatedAt(Carbon::parse($row->updated_at));
     }
 
     /**
@@ -235,20 +235,17 @@ class HistoricCompositionDao
     }
 
     /**
-     * @param Vehicle $vehicle
-     * @param Carbon  $journeyStartDate
-     * @param string  $fromId
-     * @param string  $toId
+     * @param TrainComposition $composition
      * @return int|null
      */
     public function getCompositionId(TrainComposition $composition): ?int
     {
         $first = CompositionHistoryEntry::where([
-            'journeyType'      => $composition->getVehicle()->getType(),
-            'journeyNumber'    => $composition->getVehicle()->getNumber(),
-            'journeyStartDate' => $composition->getVehicle()->getJourneyStartDate(),
-            'fromStationId'    => $composition->getOrigin()->getId(),
-            'toStationId'      => $composition->getDestination()->getId()
+            'journey_type'       => $composition->getVehicle()->getType(),
+            'journey_number'     => $composition->getVehicle()->getNumber(),
+            'journey_start_date' => $composition->getVehicle()->getJourneyStartDate(),
+            'from_station_id'    => $composition->getOrigin()->getId(),
+            'to_station_id'      => $composition->getDestination()->getId()
         ])->first();
         return $first ? $first->getId() : null;
     }
@@ -282,7 +279,9 @@ class HistoricCompositionDao
      */
     public function getRecordedStatusCacheKey(TrainComposition $composition): string
     {
-        return "historicCompositionRecorded:{$composition->getVehicle()->getId()}";
+        return 'historicCompositionRecorded:'
+            . ":{$composition->getVehicle()->getId()}"
+            . ":{$composition->getOrigin()->getId()}:{$composition->getDestination()->getId()}";
     }
 
     public function getStatisticsCacheKey(string $vehicleType, int $journeyNumber, int $daysBack): string

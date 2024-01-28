@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CompositionHistoryEntry extends Model
 {
-    protected $table = 'CompositionHistory';
-    const CREATED_AT = 'createdAt';
+    protected $table = 'composition_history';
+    const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
 
     /**
@@ -19,12 +19,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getJourneyType(): string
     {
-        return $this->getAttribute('journeyType');
+        return $this->getAttribute('journey_type');
     }
 
     public function setJourneyType(string $journeyType): CompositionHistoryEntry
     {
-        $this->setAttribute('journeyType', $journeyType);
+        $this->setAttribute('journey_type', $journeyType);
         return $this;
     }
 
@@ -33,12 +33,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getJourneyNumber(): int
     {
-        return $this->getAttribute('journeyNumber');
+        return $this->getAttribute('journey_number');
     }
 
     public function setJourneyNumber(int $journeyNumber): CompositionHistoryEntry
     {
-        $this->setAttribute('journeyNumber', $journeyNumber);
+        $this->setAttribute('journey_number', $journeyNumber);
         return $this;
     }
 
@@ -47,12 +47,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getDate(): Carbon
     {
-        return $this->getAttribute('journeyStartDate');
+        return $this->getAttribute('journey_start_date');
     }
 
     public function setJourneyStartDate(Carbon $date): CompositionHistoryEntry
     {
-        $this->setAttribute('journeyStartDate', $date);
+        $this->setAttribute('journey_start_date', $date);
         return $this;
     }
 
@@ -61,12 +61,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getFromStationId(): string
     {
-        return $this->getAttribute('fromStationId');
+        return $this->getAttribute('from_station_id');
     }
 
     public function setFromStationId(string $fromStationId): CompositionHistoryEntry
     {
-        $this->setAttribute('fromStationId', $fromStationId);
+        $this->setAttribute('from_station_id', $fromStationId);
         return $this;
     }
 
@@ -75,12 +75,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getToStationId(): string
     {
-        return $this->getAttribute('toStationId');
+        return $this->getAttribute('to_station_id');
     }
 
     public function setToStationId(string $toStationId): CompositionHistoryEntry
     {
-        $this->setAttribute('toStationId', $toStationId);
+        $this->setAttribute('to_station_id', $toStationId);
         return $this;
     }
 
@@ -89,12 +89,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getPrimaryMaterialType(): string
     {
-        return $this->getAttribute('primaryMaterialType');
+        return $this->getAttribute('primary_material_type');
     }
 
     public function setPrimaryMaterialType(string $primaryMaterialType): CompositionHistoryEntry
     {
-        $this->setAttribute('primaryMaterialType', $primaryMaterialType);
+        $this->setAttribute('primary_material_type', $primaryMaterialType);
         return $this;
     }
 
@@ -103,12 +103,12 @@ class CompositionHistoryEntry extends Model
      */
     public function getPassengerUnitCount(): int
     {
-        return $this->getAttribute('passengerUnitCount');
+        return $this->getAttribute('passenger_unit_count');
     }
 
     public function setPassengerUnitCount(int $passengerUnitCount): CompositionHistoryEntry
     {
-        $this->setAttribute('passengerUnitCount', $passengerUnitCount);
+        $this->setAttribute('passenger_unit_count', $passengerUnitCount);
         return $this;
     }
 
@@ -117,7 +117,7 @@ class CompositionHistoryEntry extends Model
      */
     public function getCreatedAt(): Carbon
     {
-        return $this->getAttribute('createdAt');
+        return $this->getAttribute('created_at');
     }
 
     // setCreatedAt is provided by the parent class

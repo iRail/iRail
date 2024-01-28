@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Repositories\Irail;
+namespace Tests\Database;
 
 use Carbon\Carbon;
 use Irail\Database\HistoricCompositionDao;
@@ -11,7 +11,7 @@ use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Tests\InMemoryTestCase;
 
-class HistoricCompositionRepositoryTest extends InMemoryTestCase
+class HistoricCompositionDaoTest extends InMemoryTestCase
 {
     function testRecordComposition_normalCase_shouldStoreCompositionInDatabase()
     {

@@ -23,11 +23,11 @@ abstract class InMemoryTestCase extends TestCase
 
     protected function tearDown(): void
     {
-        DB::update('DELETE FROM CompositionUnitUsage');
-        DB::update('DELETE FROM CompositionUnit');
-        DB::update('DELETE FROM CompositionHistory');
-        DB::update('DELETE FROM OccupancyReports');
-        DB::update('DELETE FROM RequestLog');
+        DB::update('DELETE FROM composition_unit_usage');
+        DB::update('DELETE FROM composition_unit');
+        DB::update('DELETE FROM composition_history');
+        DB::update('DELETE FROM occupancy_reports');
+        DB::update('DELETE FROM request_log');
         parent::tearDown();
     }
 }

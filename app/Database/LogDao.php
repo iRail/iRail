@@ -10,7 +10,7 @@ class LogDao
 {
     public function log(string $queryType, array $query, string $userAgent, array $result = null)
     {
-        DB::update('INSERT INTO RequestLog (queryType, query, userAgent, result) VALUES (?, ?, ?, ?)', [
+        DB::update('INSERT INTO request_log (query_type, query, user_agent, result) VALUES (?, ?, ?, ?)', [
             $queryType,
             json_encode($query, JSON_UNESCAPED_SLASHES),
             $this->maskEmailAddress($userAgent),
@@ -24,7 +24,7 @@ class LogDao
      */
     public function readLastLogs(int $limit): array
     {
-        $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog ORDER BY createdAt DESC LIMIT ?', [$limit]);
+        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY created_at DESC LIMIT ?', [$limit]);
         return $this->transformRows($rows);
     }
 
@@ -34,7 +34,7 @@ class LogDao
      */
     public function readLogsForDate(Carbon $date): array
     {
-        $rows = DB::select('SELECT id, queryType, query, result, userAgent, createdAt FROM RequestLog WHERE DATE(createdAt) = ? ORDER BY createdAt',
+        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE DATE(created_at) = ? ORDER BY created_at',
             [$date->format('Y-m-d')]);
         return $this->transformRows($rows);
     }
@@ -67,14 +67,13 @@ class LogDao
      */
     public function transformRows(array $rows): array
     {
-        $entries = array_map(function ($row): LogEntry {
+        return array_map(function ($row): LogEntry {
             return new LogEntry($row->id,
-                $row->queryType,
+                $row->query_type,
                 json_decode($row->query, associative: true),
                 json_decode($row->result, associative: true),
-                $row->userAgent,
-                new Carbon($row->createdAt));
+                $row->user_agent,
+                new Carbon($row->created_at));
         }, $rows);
-        return $entries;
     }
 }

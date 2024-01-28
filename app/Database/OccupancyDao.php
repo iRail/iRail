@@ -3,7 +3,6 @@
 namespace Irail\Database;
 
 use Carbon\Carbon;
-use DateTime;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -99,7 +98,7 @@ class OccupancyDao
         }
 
         Log::debug("Storing occupancy level $occupancyLevel->name for $vehicleId from source $source->name");
-        DB::update('INSERT INTO OccupancyReports (source, vehicleId, stopId, journeyStartDate, occupancy) VALUES (?, ?, ?, ?, ?)', [
+        DB::update('INSERT INTO occupancy_reports (source, vehicle_id, stop_id, journey_start_date, occupancy) VALUES (?, ?, ?, ?, ?)', [
             $source->value,
             $vehicleId,
             $stationId,
@@ -185,13 +184,13 @@ class OccupancyDao
      * @param OccupancyReportSource $source The source for which to read reports
      * @param string                $vehicleId The vehicle for which to read reports.
      * @param int                   $stationId The station for which to read reports.
-     * @param DateTime              $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
+     * @param Carbon $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
      * @return OccupancyLevel[] The reports which have been found.
      */
     private function readLevels(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate): array
     {
         Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
-        $rows = DB::select('SELECT occupancy FROM OccupancyReports WHERE source=? AND vehicleId=? AND stopId=? AND journeyStartDate=?',
+        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND vehicleId=? AND stop_id=? AND journey_start_date=?',
             [
                 $source->value,
                 $vehicleId,
@@ -203,7 +202,7 @@ class OccupancyDao
 
     private function exportSpitsgidsReport(Carbon $reportDate): array
     {
-        $rows = DB::select('SELECT occupancy FROM OccupancyReports WHERE source=? AND DATE(createdAt)=? ',
+        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND DATE(created_at)=? ',
             [
                 OccupancyReportSource::SPITSGIDS,
                 $reportDate

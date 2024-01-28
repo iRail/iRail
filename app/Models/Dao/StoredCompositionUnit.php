@@ -8,22 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class StoredCompositionUnit extends Model
 {
 
-    protected $table = 'CompositionUnit';
-    protected $primaryKey = 'uicCode';
-    const CREATED_AT = 'createdAt';
-    const UPDATED_AT = 'updatedAt';
+    protected $table = 'composition_unit';
+    protected $primaryKey = 'uic_code';
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
 
     /**
      * @return int The UIC code, for example 508826960330
      */
     public function getUicCode(): int
     {
-        return $this->getAttribute('uicCode');
+        return $this->getAttribute('uic_Code');
     }
 
     public function setUicCode(int $uicCode): StoredCompositionUnit
     {
-        $this->setAttribute('uicCode', $uicCode);
+        $this->setAttribute('uic_Code', $uicCode);
         return $this;
     }
 
@@ -32,12 +32,12 @@ class StoredCompositionUnit extends Model
      */
     public function getMaterialTypeName(): string
     {
-        return $this->getAttribute('materialTypeName');
+        return $this->getAttribute('material_type_name');
     }
 
     public function setMaterialTypeName(string $materialTypeName): StoredCompositionUnit
     {
-        $this->setAttribute('materialTypeName', $materialTypeName);
+        $this->setAttribute('material_type_name', $materialTypeName);
         return $this;
     }
 
@@ -46,12 +46,12 @@ class StoredCompositionUnit extends Model
      */
     public function getMaterialSubTypeName(): string
     {
-        return $this->getAttribute('materialSubTypeName');
+        return $this->getAttribute('material_subtype_name');
     }
 
     public function setMaterialSubTypeName(string $materialSubTypeName): StoredCompositionUnit
     {
-        $this->setAttribute('materialSubTypeName', $materialSubTypeName);
+        $this->setAttribute('material_subtype_name', $materialSubTypeName);
         return $this;
     }
 
@@ -60,12 +60,12 @@ class StoredCompositionUnit extends Model
      */
     public function getMaterialNumber(): int
     {
-        return $this->getAttribute('materialNumber');
+        return $this->getAttribute('material_number');
     }
 
     public function setMaterialNumber(int $materialNumber): StoredCompositionUnit
     {
-        $this->setAttribute('materialNumber', $materialNumber);
+        $this->setAttribute('material_number', $materialNumber);
         return $this;
     }
 
@@ -74,12 +74,12 @@ class StoredCompositionUnit extends Model
      */
     public function hasToilet(): bool
     {
-        return $this->getAttribute('hasToilet');
+        return $this->getAttribute('has_toilet');
     }
 
     public function setHasToilet(bool $hasToilet): StoredCompositionUnit
     {
-        $this->setAttribute('hasToilet', $hasToilet);
+        $this->setAttribute('has_toilet', $hasToilet);
         return $this;
     }
 
@@ -88,12 +88,12 @@ class StoredCompositionUnit extends Model
      */
     public function hasPrmToilet(): bool
     {
-        return $this->getAttribute('hasPrmToilet');
+        return $this->getAttribute('has_prm_toilet');
     }
 
     public function setHasPrmToilet(bool $hasPrmToilet): StoredCompositionUnit
     {
-        $this->setAttribute('hasPrmToilet', $hasPrmToilet);
+        $this->setAttribute('has_prm_toilet', $hasPrmToilet);
         return $this;
     }
 
@@ -102,12 +102,12 @@ class StoredCompositionUnit extends Model
      */
     public function hasAirco(): bool
     {
-        return $this->getAttribute('hasAirco');
+        return $this->getAttribute('has_airco');
     }
 
     public function setHasAirco(bool $hasAirco): StoredCompositionUnit
     {
-        $this->setAttribute('hasAirco', $hasAirco);
+        $this->setAttribute('has_airco', $hasAirco);
         return $this;
     }
 
@@ -116,12 +116,12 @@ class StoredCompositionUnit extends Model
      */
     public function hasBikeSection(): bool
     {
-        return $this->getAttribute('hasBikeSection');
+        return $this->getAttribute('has_bike_section');
     }
 
     public function setHasBikeSection(bool $hasBikeSection): StoredCompositionUnit
     {
-        $this->setAttribute('hasBikeSection', $hasBikeSection);
+        $this->setAttribute('has_bike_section', $hasBikeSection);
         return $this;
     }
 
@@ -130,12 +130,12 @@ class StoredCompositionUnit extends Model
      */
     public function hasPrmSection(): bool
     {
-        return $this->getAttribute('hasPrmSection');
+        return $this->getAttribute('has_prm_section');
     }
 
     public function setHasPrmSection(bool $hasPrmSection): StoredCompositionUnit
     {
-        $this->setAttribute('hasPrmSection', $hasPrmSection);
+        $this->setAttribute('has_prm_section', $hasPrmSection);
         return $this;
     }
 
@@ -144,12 +144,12 @@ class StoredCompositionUnit extends Model
      */
     public function getSeatsFirstClass(): int
     {
-        return $this->getAttribute('seatsFirstClass');
+        return $this->getAttribute('seats_first_class');
     }
 
     public function setSeatsFirstClass(int $seatsFirstClass): StoredCompositionUnit
     {
-        $this->setAttribute('seatsFirstClass', $seatsFirstClass);
+        $this->setAttribute('seats_first_class', $seatsFirstClass);
         return $this;
     }
 
@@ -158,12 +158,12 @@ class StoredCompositionUnit extends Model
      */
     public function getSeatsSecondClass(): int
     {
-        return $this->getAttribute('seatsSecondClass');
+        return $this->getAttribute('seats_second_class');
     }
 
     public function setSeatsSecondClass(int $seatsSecondClass): StoredCompositionUnit
     {
-        $this->setAttribute('seatsSecondClass', $seatsSecondClass);
+        $this->setAttribute('seats_second_class', $seatsSecondClass);
         return $this;
     }
 
@@ -172,7 +172,7 @@ class StoredCompositionUnit extends Model
      */
     public function getCreatedAt(): Carbon
     {
-        return $this->getAttribute('createdAt');
+        return $this->getAttribute('created_at');
     }
 
     // setCreatedAt is provided by the parent class
@@ -182,7 +182,7 @@ class StoredCompositionUnit extends Model
      */
     public function getUpdatedAt(): Carbon
     {
-        return $this->getAttribute('updatedAt');
+        return $this->getAttribute('updated_at');
     }
 
     // setUpdatedAt is provided by the parent class
