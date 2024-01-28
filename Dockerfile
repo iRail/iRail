@@ -50,7 +50,7 @@ RUN docker-php-ext-install opcache
 COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Raise memory limit, needed for handling GTFS data
-RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini
+RUN echo "memory_limit = 512M" >> /usr/local/etc/php/php.ini
 
 # Installing composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
