@@ -61,7 +61,7 @@ class Handler extends ExceptionHandler
                     'message'  => $exception->getMessage(),
                     'previous' => $exception->getPrevious(),
                     'at'    => self::getLastAppMethodCall($exception->getTrace()),
-                    'stack' => array_map(fn($row) => self::formatTrace($row), $exception->getTrace())
+                    'stack' => explode("\n", $exception->getTraceAsString())
                 ],
                 500,
                 [
@@ -114,14 +114,4 @@ class Handler extends ExceptionHandler
         return '';
     }
 
-    /**
-     * Get the last (most recent) entry in a stack trace originating in user-written code, skipping any vendor code.
-     * @param array $trace
-     * @return string
-     */
-    private static function formatTrace(array $trace): string
-    {
-        $fileAndLine = key_exists('file', $trace) ? ' (' . $trace['file'] . ':' . $trace['line'] . ')' : '';
-        return $trace['class'] . $trace['type'] . $trace['function'] . $fileAndLine;
-    }
 }
