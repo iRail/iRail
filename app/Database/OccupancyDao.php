@@ -190,7 +190,7 @@ class OccupancyDao
     private function readLevels(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate): array
     {
         Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
-        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND vehicleId=? AND stop_id=? AND journey_start_date=?',
+        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND stop_id=? AND journey_start_date=?',
             [
                 $source->value,
                 $vehicleId,
