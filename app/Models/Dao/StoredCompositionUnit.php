@@ -18,12 +18,12 @@ class StoredCompositionUnit extends Model
      */
     public function getUicCode(): int
     {
-        return $this->getAttribute('uic_Code');
+        return $this->getAttribute('uic_code');
     }
 
     public function setUicCode(int $uicCode): StoredCompositionUnit
     {
-        $this->setAttribute('uic_Code', $uicCode);
+        $this->setAttribute('uic_code', $uicCode);
         return $this;
     }
 
