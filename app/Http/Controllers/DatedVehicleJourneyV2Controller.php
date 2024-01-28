@@ -5,6 +5,7 @@ namespace Irail\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
+use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Models\Dto\v2\DatedVehicleJourneyV2Converter;
 use Irail\Models\Vehicle;
@@ -45,6 +46,12 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
                 // Store this in the database, in case it's new.
                 $this->historicCompositionRepository->recordComposition($composition);
                 return $composition;
+            })
+            ->catch(function ($exception) {
+                if ($exception instanceof CompositionUnavailableException) {
+                    return null;
+                }
+                throw $exception;
             });
 
         $vehicleJourneySearchResult = $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
@@ -54,7 +61,8 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
         );
         $pool->wait();
         $composition = $compositionTask->getOutput();
-        $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult, $composition->getSegments(), $statistics);
+        $compositionSegments = $composition ? $composition->getSegments() : []; // $composition Can be null when unavailable
+        $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult, $compositionSegments, $statistics);
         $this->logRequest($request);
         return $this->outputJson($request, $dto);
     }
