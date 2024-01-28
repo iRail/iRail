@@ -125,6 +125,9 @@ class Xml extends Printer
         $result .= '>';
 
         if ($named != '') {
+            if ($this->isCdataElement($name)) {
+                $result .= '<![CDATA[';
+            }
             $result .= $named;
         }
         return $result;
@@ -143,7 +146,7 @@ class Xml extends Printer
             $result .= "<$key formatted=\"$form\">$val";
         } else if ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             $result .= "<$key>";
-            if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
+            if ($this->isCdataElement($key)) {
                 $result .= '<![CDATA[';
             }
             $result .= $val;
@@ -158,7 +161,7 @@ class Xml extends Printer
     public function endElement($key): string
     {
         $result = '';
-        if ($key == 'header' || $key == 'title' || $key == 'description' || $key == 'richtext' || $key == 'link' || $key == 'direction') {
+        if ($this->isCdataElement($key)) {
             $result .= ']]>';
         }
 
@@ -201,5 +204,14 @@ class Xml extends Printer
     public function iso8601($unixtime)
     {
         return Carbon::createFromTimestamp($unixtime)->timezone('Europe/Brussels')->format('Y-m-d\TH:i:s');
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function isCdataElement($name): bool
+    {
+        return $name == 'header' || $name == 'title' || $name == 'description' || $name == 'richtext' || $name == 'link' || $name == 'direction';
     }
 }
