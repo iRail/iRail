@@ -84,9 +84,9 @@ trait Cache
      * @param T      $value The object to store
      * @param int    $ttl The number of seconds to keep this in cache. 0 for infinity.
      *                      Negative values will be replaced with the default TTL value.
-     *
+     * @return CachedData<T>
      */
-    public function setCachedObject(string $key, null|object|string|array $value, int $ttl = -1) : void
+    public function setCachedObject(string $key, null|object|string|array $value, int $ttl = -1): CachedData
     {
         if ($ttl < 0) {
             $ttl = $this->defaultTtl;
@@ -98,7 +98,7 @@ trait Cache
             $item = self::$cache->getItem($prefixedKey);
         } catch (InvalidArgumentException $e) {
             Log::error('Failed to read from cache: ' . $e->getMessage());
-            return;
+            throw new InternalProcessingException(500, 'Failed to read from cache: ' . $e->getMessage(), $e);
         }
 
         $cacheEntry = new CachedData($key, $value, $ttl);
@@ -108,6 +108,7 @@ trait Cache
         }
 
         self::$cache->save($item);
+        return $cacheEntry;
     }
 
     /**
@@ -127,8 +128,7 @@ trait Cache
         $cachedData = $this->getCachedObject($cacheKey);
         if ($cachedData === false) {
             $data = $valueProvider();
-            $this->setCachedObject($cacheKey, $data, $ttl);
-            $cachedData = $this->getCachedObject($cacheKey);
+            $cachedData = $this->setCachedObject($cacheKey, $data, $ttl);
         }
         return $cachedData;
     }
