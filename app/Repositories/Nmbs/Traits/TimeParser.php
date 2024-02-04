@@ -28,7 +28,6 @@ trait TimeParser
             $time = '00:' . $time;
         }
 
-        date_default_timezone_set('Europe/Brussels');
         $dayoffset = Tools::safeIntVal(substr($time, 0, 2));
         $hour = Tools::safeIntVal(substr($time, 3, 2));
         $minute = Tools::safeIntVal(substr($time, 6, 2));

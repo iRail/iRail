@@ -123,7 +123,8 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     {
         $hafasVehicle = $this->parseProduct($json['Names']['Name'][0]['Product']);
 
-        $journeyStartDateStr = explode('|', $json['ref'])[4];
+        // Source does not contain leading zeroes
+        $journeyStartDateStr = str_pad(explode('|', $json['ref'])[4], 8, '0', STR_PAD_LEFT);
         $journeyStartDate = Carbon::createFromFormat('dmY', $journeyStartDateStr, 'Europe/Stockholm');
         $vehicle = $hafasVehicle->toVehicle($journeyStartDate);
         $vehicle->setDirection(

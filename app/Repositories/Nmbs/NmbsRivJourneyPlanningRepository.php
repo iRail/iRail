@@ -241,7 +241,9 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $parsedLeg->setLegType(JourneyLegType::JOURNEY);
 
             // for example "ref": "1|5708|2|80|17122023"
-            $journeyStartDateStr = explode('|', $leg['JourneyDetailRef']['ref'])[4];
+            // for example "ref": "1|5708|2|80|5122023"
+            // Source does not contain leading zeroes
+            $journeyStartDateStr = str_pad(explode('|', $leg['JourneyDetailRef']['ref'])[4], 8, '0', STR_PAD_LEFT);
             $journeyStartDate = Carbon::createFromFormat('dmY', $journeyStartDateStr, 'Europe/Stockholm');
             $vehicle = $this->parseProduct($leg['Product'])->toVehicle($journeyStartDate);
 
