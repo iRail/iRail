@@ -78,7 +78,8 @@ class V2Converter
             'uri'    => $obj->getUri(),
             'id'     => $obj->getId(),
             'type'   => $obj->getType(),
-            'number' => $obj->getNumber()
+            'number'           => $obj->getNumber(),
+            'journeyStartDate' => $obj->getJourneyStartDate()->format('Y-m-d')
         ];
     }
 
