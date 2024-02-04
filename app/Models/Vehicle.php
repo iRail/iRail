@@ -16,14 +16,13 @@ class Vehicle
     private VehicleDirection $direction;
 
     /**
-     * @param string $uri
      * @param string $id
      * @param string $type
      * @param int    $number
      */
-    public function __construct(string $uri, string $id, string $type, int $number, Carbon $journeyStartDate = null)
+    public function __construct(string $id, string $type, int $number, Carbon $journeyStartDate = null)
     {
-        $this->uri = $uri;
+        $this->uri = "http://irail.be/vehicle/{$type}{$number}"; // The URI points to the vehicle journey, not the dated vehicle journey
         $this->id = $id;
         $this->type = $type;
         $this->number = $number;
@@ -33,7 +32,6 @@ class Vehicle
     public static function fromTypeAndNumber(string $type, int $number, Carbon $journeyStartDate = null): Vehicle
     {
         return new Vehicle(
-            'http://irail.be/vehicle/' . $type . $number,
             $type . $number,
             $type,
             $number,

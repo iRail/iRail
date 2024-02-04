@@ -1,0 +1,657 @@
+{
+  "Stops": {
+    "Stop": [
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Louvain / Leuven",
+        "id": "A=1@O=Louvain / Leuven@X=4715867@Y=50882280@U=80@L=8833001@",
+        "extId": "8833001",
+        "routeIdx": 0,
+        "lon": 4.715867,
+        "lat": 50.88228,
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "05:19:00",
+        "depDate": "2024-01-30",
+        "depTrack": "8",
+        "rtDepTime": "05:19:00",
+        "rtDepDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Wezemaal",
+        "id": "A=1@O=Wezemaal@X=4747680@Y=50956261@U=80@L=8833233@",
+        "extId": "8833233",
+        "routeIdx": 1,
+        "lon": 4.74768,
+        "lat": 50.956261,
+        "depTime": "05:26:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:26:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:26:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:26:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Aarschot",
+        "id": "A=1@O=Aarschot@X=4824043@Y=50984407@U=80@L=8833209@",
+        "extId": "8833209",
+        "routeIdx": 2,
+        "lon": 4.824043,
+        "lat": 50.984407,
+        "depTime": "05:33:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:31:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "3",
+        "depTrack": "3",
+        "rtDepTime": "05:33:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:31:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Begijnendijk",
+        "id": "A=1@O=Begijnendijk@X=4800339@Y=51021973@U=80@L=8821865@",
+        "extId": "8821865",
+        "routeIdx": 3,
+        "lon": 4.800339,
+        "lat": 51.021973,
+        "depTime": "05:38:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:38:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:38:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:38:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Booischot",
+        "id": "A=1@O=Booischot@X=4773479@Y=51037344@U=80@L=8821857@",
+        "extId": "8821857",
+        "routeIdx": 4,
+        "lon": 4.773479,
+        "lat": 51.037344,
+        "depTime": "05:41:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:41:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:41:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:41:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Heist-op-den-Berg",
+        "id": "A=1@O=Heist-op-den-Berg@X=4708235@Y=51074146@U=80@L=8821832@",
+        "extId": "8821832",
+        "routeIdx": 5,
+        "lon": 4.708235,
+        "lat": 51.074146,
+        "depTime": "05:47:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:46:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:47:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:46:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Melkouwen",
+        "id": "A=1@O=Melkouwen@X=4671532@Y=51094938@U=80@L=8821824@",
+        "extId": "8821824",
+        "routeIdx": 6,
+        "lon": 4.671532,
+        "lat": 51.094938,
+        "depTime": "05:51:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:51:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:51:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:51:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Berlaar",
+        "id": "A=1@O=Berlaar@X=4638811@Y=51113663@U=80@L=8821816@",
+        "extId": "8821816",
+        "routeIdx": 7,
+        "lon": 4.638811,
+        "lat": 51.113663,
+        "depTime": "05:55:00",
+        "depDate": "2024-01-30",
+        "arrTime": "05:55:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "05:55:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "05:55:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Lierre / Lier",
+        "id": "A=1@O=Lierre / Lier@X=4560614@Y=51135758@U=80@L=8821600@",
+        "extId": "8821600",
+        "routeIdx": 8,
+        "lon": 4.560614,
+        "lat": 51.135758,
+        "depTime": "06:05:00",
+        "depDate": "2024-01-30",
+        "arrTime": "06:02:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "06:05:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "06:02:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Boechout",
+        "id": "A=1@O=Boechout@X=4494490@Y=51163481@U=80@L=8821634@",
+        "extId": "8821634",
+        "routeIdx": 9,
+        "lon": 4.49449,
+        "lat": 51.163481,
+        "depTime": "06:11:00",
+        "depDate": "2024-01-30",
+        "arrTime": "06:10:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "06:11:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "06:10:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Mortsel",
+        "id": "A=1@O=Mortsel@X=4448438@Y=51182960@U=80@L=8821147@",
+        "extId": "8821147",
+        "routeIdx": 10,
+        "lon": 4.448438,
+        "lat": 51.18296,
+        "depTime": "06:16:00",
+        "depDate": "2024-01-30",
+        "arrTime": "06:15:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "06:16:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "06:15:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Anvers-Berchem / Antwerpen-Berchem",
+        "id": "A=1@O=Anvers-Berchem / Antwerpen-Berchem@X=4432221@Y=51199231@U=80@L=8821121@",
+        "extId": "8821121",
+        "routeIdx": 11,
+        "lon": 4.432221,
+        "lat": 51.199231,
+        "depTime": "06:20:00",
+        "depDate": "2024-01-30",
+        "arrTime": "06:19:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "8",
+        "depTrack": "8",
+        "rtDepTime": "06:20:00",
+        "rtDepDate": "2024-01-30",
+        "rtArrTime": "06:19:00",
+        "rtArrDate": "2024-01-30"
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Anvers-Central / Antwerpen-Centraal",
+        "id": "A=1@O=Anvers-Central / Antwerpen-Centraal@X=4421102@Y=51217200@U=80@L=8821006@",
+        "extId": "8821006",
+        "routeIdx": 12,
+        "lon": 4.421102,
+        "lat": 51.2172,
+        "arrPrognosisType": "PROGNOSED",
+        "arrTime": "06:24:00",
+        "arrDate": "2024-01-30",
+        "arrTrack": "11",
+        "rtArrTime": "06:24:00",
+        "rtArrDate": "2024-01-30"
+      }
+    ]
+  },
+  "Names": {
+    "Name": [
+      {
+        "Product": {
+          "name": "P 7281",
+          "num": "7281",
+          "catOut": "P       ",
+          "catIn": "044",
+          "catCode": "2",
+          "catOutS": "044",
+          "catOutL": "P  ",
+          "admin": "88____"
+        },
+        "name": "P 7281",
+        "number": "7281",
+        "category": "044",
+        "routeIdxFrom": 0,
+        "routeIdxTo": 12
+      }
+    ]
+  },
+  "Directions": {
+    "Direction": [
+      {
+        "value": "Lierre / Lier & Anvers-Central / Antwerpen-Centraal",
+        "routeIdxFrom": 0,
+        "routeIdxTo": 12
+      }
+    ]
+  },
+  "JourneyStatus": "P",
+  "ServiceDays": [
+    {
+      "planningPeriodBegin": "2023-11-28",
+      "planningPeriodEnd": "2024-12-14",
+      "sDaysR": "Mo - Fr",
+      "sDaysI": "not 1. until 12. Apr 2024, 1., 9., 20. May, 1. Jul until 30. Aug 2024, 1., 11. Nov",
+      "sDaysB": "F327CF80007CF9F3E7CF9F3E7CF9F3E0001F3E6CE9F1E7CF9F3E7C0000000000000001F3E7CF9F3E7CF9E3E3CF9F3E7C",
+      "routeIdxFrom": 0,
+      "routeIdxTo": 12
+    }
+  ],
+  "rtLastPassRouteIdx": -1,
+  "ref": "1|15572|0|80|30012024",
+  "reachable": true,
+  "serverVersion": "2.19.4",
+  "dialectVersion": "2.19",
+  "planRtTs": "2024-01-30 00:13:29+01:00",
+  "requestId": "emk46huck8ib928x"
+}

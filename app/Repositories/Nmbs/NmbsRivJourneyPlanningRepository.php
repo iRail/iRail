@@ -9,6 +9,7 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -239,7 +240,10 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         } else {
             $parsedLeg->setLegType(JourneyLegType::JOURNEY);
 
-            $vehicle = $this->parseProduct($leg['Product'])->toVehicle();
+            // for example "ref": "1|5708|2|80|17122023"
+            $journeyStartDateStr = explode('|', $leg['JourneyDetailRef']['ref'])[4];
+            $journeyStartDate = Carbon::createFromFormat('dmY', $journeyStartDateStr, 'Europe/Stockholm');
+            $vehicle = $this->parseProduct($leg['Product'])->toVehicle($journeyStartDate);
 
             $intermediateStops = $this->parseIntermediateStops($trip, $leg, $lang, $vehicle);
             $parsedLeg->setIntermediateStops($intermediateStops);

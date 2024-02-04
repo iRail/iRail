@@ -60,7 +60,7 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->time = $departure->getScheduledDateTime()->getTimestamp();
         $result->vehicle = $departureLeg->getLegType() == JourneyLegType::JOURNEY
             ? self::convertVehicle($departure->getVehicle())
-            : self::convertVehicle(new Vehicle('', 'WALK', '', ''));
+            : self::convertVehicle(new Vehicle('WALK', '', ''));
         $result->platform = self::convertPlatform($departure->getPlatform());
         $result->canceled = $departure->isCancelled() ? '1' : '0';
         $result->stop = array_map(fn($stop) => self::convertIntermediateStop($stop), $departureLeg->getIntermediateStops());
@@ -80,7 +80,7 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->time = $arrival->getScheduledDateTime()->getTimestamp();
         $result->vehicle = $arrivalLeg->getLegType() == JourneyLegType::JOURNEY
             ? self::convertVehicle($arrival->getVehicle())
-            : self::convertVehicle(new Vehicle('', 'WALK', '', ''));
+            : self::convertVehicle(new Vehicle('WALK', '', ''));
         $result->platform = self::convertPlatform($arrival->getPlatform());
         $result->canceled = $arrival->isCancelled() ? '1' : '0';
         $result->direction = self::convertDirection($arrival);

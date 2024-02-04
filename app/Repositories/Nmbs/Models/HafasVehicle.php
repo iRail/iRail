@@ -3,6 +3,7 @@
 
 namespace Irail\Repositories\Nmbs\Models;
 
+use Carbon\Carbon;
 use Irail\Models\Vehicle;
 
 /**
@@ -83,13 +84,8 @@ class HafasVehicle
         return $this->type;
     }
 
-    public function getUri(): string
+    public function toVehicle(Carbon $journeyStartDate): Vehicle
     {
-        return "http://irail.be/vehicle/{$this->getType()}{$this->getNumber()}";
-    }
-
-    public function toVehicle(): Vehicle
-    {
-        return new Vehicle($this->getUri(), $this->getId(), $this->getType(), $this->getNumber());
+        return new Vehicle($this->getId(), $this->getType(), $this->getNumber(), $journeyStartDate);
     }
 }

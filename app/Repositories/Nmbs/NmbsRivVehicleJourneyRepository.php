@@ -8,6 +8,7 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Irail\Database\OccupancyDao;
@@ -121,7 +122,10 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     private function getVehicleDetails(array $json): Vehicle
     {
         $hafasVehicle = $this->parseProduct($json['Names']['Name'][0]['Product']);
-        $vehicle = $hafasVehicle->toVehicle();
+
+        $journeyStartDateStr = explode('|', $json['ref'])[4];
+        $journeyStartDate = Carbon::createFromFormat('dmY', $journeyStartDateStr, 'Europe/Stockholm');
+        $vehicle = $hafasVehicle->toVehicle($journeyStartDate);
         $vehicle->setDirection(
             new VehicleDirection(
                 $json['Directions']['Direction'][0]['value'],
