@@ -2,12 +2,14 @@
 
 namespace Irail\Repositories\Gtfs;
 
+use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
-use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
+use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
+use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Traits\Cache;
@@ -16,8 +18,7 @@ class GtfsTripStartEndExtractor
 {
     use Cache;
 
-    const GTFS_TRIP_STOPS_CACHE_KEY = 'stopsByTrip';
-    const GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY = 'vehicleDetailsByDate';
+    const string GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY = 'vehicleDetailsByDate';
     private GtfsRepository $gtfsRepository;
 
     public function __construct(?GtfsRepository $gtfsRepository = null)
@@ -30,20 +31,36 @@ class GtfsTripStartEndExtractor
         $this->setCachePrefix('gtfsTrips');
     }
 
+    public function getStartDate(int $journeyNumber, Carbon $activeTime): Carbon
+    {
+        $startDate = $this->getCacheWithDefaultCacheUpdate("getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
+            function () use ($journeyNumber, $activeTime): Carbon {
+                // This will take the start date from the GTFS calendar file
+                // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
+                // a query for 01:00 on a trip running 22:00-02:00 will return the trip starting 22:00 that day, i.e. the next trip.
+                $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime);
+                if ($activeTime->isBefore($originAndDestination->getOriginDepartureTime())) {
+                    return $activeTime->copy()->subDay()->setTime(0, 0);
+                }
+                return $activeTime->copy()->setTime(0, 0);
+            }, ttl: 4 * 3600);// Cache for 4 hours
+        return $startDate->getValue();
+    }
+
     /**
      * @param string   $vehicleId The vehicle name/id, such as IC538
      * @param DateTime $date The date
-     * @return false|VehicleWithOriginAndDestination
+     * @return false|JourneyWithOriginAndDestination
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
-    public function getVehicleWithOriginAndDestination(string $vehicleId, DateTime $date): VehicleWithOriginAndDestination|false
+    public function getVehicleWithOriginAndDestination(string $vehicleId, DateTime $date): JourneyWithOriginAndDestination|false
     {
         $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
         $foundVehicleWithInternationalOriginAndDestination = false;
 
         foreach ($vehicleDetailsForDate as $vehicleWithOriginAndDestination) {
-            if ($vehicleWithOriginAndDestination->getVehicleNumber() == $vehicleNumber) {
+            if ($vehicleWithOriginAndDestination->getJourneyNumber() == $vehicleNumber) {
                 // International journeys are split into two parts at tha Belgian side of the border, where the
                 // border is represented by a "station" with a belgian ID.
                 // If the journey is between belgian stops, return immediatly
@@ -62,36 +79,39 @@ class GtfsTripStartEndExtractor
 
 
     /**
-     * Get alternative origins and destinations for a vehicle, in case one of the first/last stops is cancelled.
+     * Get all successive stops for a vehicle, for use in RIV vehicle search where two non-cancelled points are needed to find a vehicle.
+     * This method is only needed when one of the first/last stops is cancelled.
      *
-     * @param VehicleWithOriginAndDestination $originalVehicle
-     * @return VehicleWithOriginAndDestination[]
+     * @param JourneyWithOriginAndDestination $originalJourney
+     * @return JourneyWithOriginAndDestination[]
      * @throws Exception
      */
-    public function getAlternativeVehicleWithOriginAndDestination(VehicleWithOriginAndDestination $originalVehicle): array
+    public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney): array
     {
-        Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalVehicle->getTripId()}");
-        $stops = self::getStopsForTrip($originalVehicle->getTripId());
+        Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalJourney->getTripId()}");
+        $stops = self::getStopsForTrip($originalJourney->getTripId());
         $results = [];
         for ($i = 1; $i < count($stops); $i++) {
-            $results[] = new VehicleWithOriginAndDestination(
-                $originalVehicle->getTripId(),
-                $originalVehicle->getVehicleType(),
-                $originalVehicle->getVehicleNumber(),
-                $stops[$i - 1],
-                $stops[$i]
+            $results[] = new JourneyWithOriginAndDestination(
+                $originalJourney->getTripId(),
+                $originalJourney->getJourneyType(),
+                $originalJourney->getJourneyNumber(),
+                $stops[$i - 1]->getStopId(),
+                $stops[$i - 1]->getStopTime(),
+                $stops[$i]->getStopId(),
+                $stops[$i]->getStopTime()
             );
         }
         Log::debug('getAlternativeVehicleWithOriginAndDestination found '
-            . count($results) . " for trip {$originalVehicle->getTripId()}");
+            . count($results) . " for trip {$originalJourney->getTripId()}");
         return $results;
     }
 
     /**
-     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return bool
      */
-    private function isBelgianJourney(VehicleWithOriginAndDestination $vehicleWithOriginAndDestination): bool
+    private function isBelgianJourney(JourneyWithOriginAndDestination $vehicleWithOriginAndDestination): bool
     {
         return str_starts_with($vehicleWithOriginAndDestination->getOriginStopId(), '88')
             && str_starts_with($vehicleWithOriginAndDestination->getDestinationStopId(), '88');
@@ -99,14 +119,12 @@ class GtfsTripStartEndExtractor
 
     /**
      * @param DateTime $date
-     * @return VehicleWithOriginAndDestination[]
+     * @return JourneyWithOriginAndDestination[]
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
     private function getTripsWithStartAndEndByDate(DateTime $date): array
     {
-        $vehicleDetailsByDate = $this->getCacheWithDefaultCacheUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
-            return $this->loadTripsWithStartAndEndDate();
-        }, ttl: 2 * 3600); // Cache for 2 hours
+        $vehicleDetailsByDate = $this->getTripsWithStartAndEndDate();
 
         $vehicleDetailsByDate = $vehicleDetailsByDate->getValue();
         $dateYmd = $date->format('Ymd');
@@ -117,54 +135,67 @@ class GtfsTripStartEndExtractor
     }
 
     /**
-     * @return string[]
-     * @throws Exception
+     * @return array<string, JourneyWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in Ymd format
      */
-    private function getStopsForTrip(string $tripId): array
+    private function getTripsWithStartAndEndDate(): array
     {
-        $gtfsRepository = $this->gtfsRepository;
-        $tripStops = $this->getCacheWithDefaultCacheUpdate(self::GTFS_TRIP_STOPS_CACHE_KEY, function () use ($gtfsRepository): array {
-            return $gtfsRepository->readTripStops();
-        }, ttl: 3 * 3600 + 1); // Cache for 3 hours 1 minute. The additional minute reduces the risk that both the stops cache and the trips cache expire
-        // at the same time
-
-        $tripStops = $tripStops->getValue();
-
-        if (!key_exists($tripId, $tripStops)) {
-            throw new Exception('Trip not found', 404);
-        }
-        return $tripStops[$tripId];
+        $vehicleDetailsByDate = $this->getCacheWithDefaultCacheUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
+            return $this->loadTripsWithStartAndEndDate();
+        }, ttl: 4 * 3600);
+        return $vehicleDetailsByDate->getValue(); // Cache for 4 hours
     }
 
     /**
-     * @return array<string, VehicleWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in ymd format
+     * @return array<string, JourneyWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in Ymd format
      * @throws UpstreamServerException
      */
     private function loadTripsWithStartAndEndDate(): array
     {
-        $serviceIdsByCalendarDate = $this->gtfsRepository->readCalendarDates();
         // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
-        $serviceIdsToRetain = $this->gtfsRepository->getServiceIdsInDateRange($serviceIdsByCalendarDate, 3, 14);
-        $vehicleDetailsByServiceId = $this->gtfsRepository->readTripsGroupedByServiceId($serviceIdsToRetain);
+        $tripsByJourneyAndDate = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
+        $tripStops = $this->gtfsRepository->getTripStops();
 
         if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
             throw new UpstreamServerException('No response from iRail GTFS', 504);
         }
 
         // Create a multidimensional array:
-        // date (yyyymmdd) => VehicleWithOriginAndDestination[]
+        // date (Ymd) => VehicleWithOriginAndDestination[]
         $vehicleDetailsByDate = [];
-        foreach ($serviceIdsByCalendarDate as $date => $serviceIds) {
-            $vehicleDetailsByDate[$date] = [];
-            foreach ($serviceIds as $serviceId) {
-                if (key_exists($serviceId, $vehicleDetailsByServiceId)) {
-                    foreach ($vehicleDetailsByServiceId[$serviceId] as $vehicleDetails) {
-                        $vehicleDetailsByDate[$date][] = $vehicleDetails;
-                    }
+        foreach ($tripsByJourneyAndDate as $journeyNumber => $journeysByDate) {
+            foreach ($journeysByDate as $date => $trip) {
+                if (!key_exists($date, $vehicleDetailsByDate)) {
+                    $vehicleDetailsByDate[$date] = [];
                 }
+                $stops = $tripStops[$trip->getTripId()];
+                $firstStop = $stops[0];
+                $lastStop = end($stops);
+                $vehicleDetailsByDate[$date][$journeyNumber] = new JourneyWithOriginAndDestination(
+                    $trip->getTripId(),
+                    $trip->getJourneyType(),
+                    $trip->getJourneyNumber(),
+                    $firstStop->getStopId(),
+                    $firstStop->getStopTime(),
+                    $lastStop->getStopId(),
+                    $lastStop->getStopTime()
+                );
             }
         }
         return $vehicleDetailsByDate;
     }
 
+    /**
+     * @return StopTime[]
+     * @throws Exception
+     */
+    private function getStopsForTrip(string $tripId): array
+    {
+        $tripStops = $this->gtfsRepository->getTripStops();
+
+        if (!key_exists($tripId, $tripStops)) {
+            throw new Exception('Trip not found', 404);
+        }
+
+        return $tripStops[$tripId];
+    }
 }

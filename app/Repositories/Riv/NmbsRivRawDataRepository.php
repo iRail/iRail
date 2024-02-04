@@ -11,7 +11,7 @@ use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
-use Irail\Repositories\Gtfs\Models\VehicleWithOriginAndDestination;
+use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
@@ -147,17 +147,19 @@ class NmbsRivRawDataRepository
     /**
      * @param GtfsTripStartEndExtractor       $gtfsTripExtractor
      * @param VehicleJourneyRequest           $request
-     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|null
      * @throws Exception
      */
     private function getJourneyDetailRef(GtfsTripStartEndExtractor $gtfsTripExtractor,
-        VehicleJourneyRequest $request, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination): ?string
+        VehicleJourneyRequest $request,
+        JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
+    ): ?string
     {
         $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $vehicleWithOriginAndDestination);
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
-            $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getVehicleNumber()}|{$request->getDateTime()->format('Ymd')}";
+            $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getJourneyNumber()}|{$request->getDateTime()->format('Ymd')}";
             $journeyDetailRef = $this->getCacheWithDefaultCacheUpdate($cacheKey,
                 function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination) {
                     return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
@@ -174,17 +176,18 @@ class NmbsRivRawDataRepository
 
     /**
      * @param VehicleJourneyRequest           $request
-     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|false
      */
     private function findVehicleJourneyRefBetweenStops(VehicleJourneyRequest $request,
-        VehicleWithOriginAndDestination $vehicleWithOriginAndDestination): string|false
+        JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
+    ): string|false
     {
         $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
 
         $formattedDateStr = $request->getDateTime()->format('Y-m-d');
 
-        $vehicleName = $vehicleWithOriginAndDestination->getVehicleType() . $vehicleWithOriginAndDestination->getVehicleNumber();
+        $vehicleName = $vehicleWithOriginAndDestination->getJourneyType() . $vehicleWithOriginAndDestination->getJourneyNumber();
         $parameters = [
             'trainFilter' => $vehicleName, // type + number, type is required!
             'originExtId' => $vehicleWithOriginAndDestination->getOriginStopId(),
@@ -208,12 +211,14 @@ class NmbsRivRawDataRepository
      * Get the journey detail reference by trying alternative origin-destination stretches, to cope with cancelled origin/destination stops
      * @param GtfsTripStartEndExtractor       $gtfsTripExtractor
      * @param VehicleJourneyRequest           $request
-     * @param VehicleWithOriginAndDestination $vehicleWithOriginAndDestination
+     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|bool
      * @throws Exception
      */
     private function getJourneyDetailRefAlt(GtfsTripStartEndExtractor $gtfsTripExtractor,
-        VehicleJourneyRequest $request, VehicleWithOriginAndDestination $vehicleWithOriginAndDestination): string|bool
+        VehicleJourneyRequest $request,
+        JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
+    ): string|bool
     {
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
             $vehicleWithOriginAndDestination
