@@ -2,29 +2,11 @@
 
 namespace Irail\Repositories\Nmbs\Tools;
 
-use Irail\Repositories\Nmbs\Models\Station;
-
 /** Copyright (C) 2011 by iRail vzw/asbl
  * This is a class with static tools for you to use on the NMBS scraper. It contains stuff that is needed by all other classes.
  */
 class Tools
 {
-
-
-
-    public static function createDepartureUri(Station $station, $departureTime, string $vehicleId): string
-    {
-        return 'http://irail.be/connections/' . substr(
-            basename($station->{'@id'}),
-            2
-        ) . '/' . date(
-            'Ymd',
-            $departureTime
-        ) . '/' . substr(
-            $vehicleId,
-            strrpos($vehicleId, '.') !== false ? strrpos($vehicleId, '.') + 1 : 0
-        );
-    }
 
     public static function getUserAgent(): string
     {
