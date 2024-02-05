@@ -37,20 +37,19 @@ RUN pecl install apcu
 RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1" >> /usr/local/etc/php/php.ini
 RUN docker-php-ext-enable apcu http
 
+# Install opcache
+RUN docker-php-ext-install opcache
+COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
 # Install xdebug
 RUN yes | pecl install xdebug \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.mode=develop,coverage,debug,profile,trace" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.output_dir=/tmp/xdebug" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.profiler_output_name=xdebug-profile.cachegrind.out.%p" >> /usr/local/etc/php/conf.d/xdebug.ini
+    && echo "xdebug.profiler_output_name=xdebug-profile.cachegrind.out.%p" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/xdebug.ini
 
-# Install opcache
-RUN docker-php-ext-install opcache
-COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-
-# Raise memory limit, needed for handling GTFS data
-RUN echo "memory_limit = 512M" >> /usr/local/etc/php/php.ini
 
 # Installing composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
@@ -70,6 +69,9 @@ RUN mkdir -p /var/log/php/ \
     && chmod 777 /var/log/php/access.log \
     && chmod 777 /var/log/php/error.log
 
+# Raise memory limit, needed for handling GTFS data
+RUN echo "memory_limit = 1024M" >> /usr/local/etc/php/php.ini
+
 # Run the command on container startup
 EXPOSE 8080
-CMD php -S 0.0.0.0:8080 -t /var/www/public/
+#CMD php -S 0.0.0.0:8080 -t /var/www/public/

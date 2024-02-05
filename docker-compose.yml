@@ -24,15 +24,19 @@ services:
       DB_DATABASE: 'irail'
       DB_USERNAME: 'irail-api'
       DB_PASSWORD: 'irail-api'
+    extra_hosts:
+      - host.docker.internal:host-gateway
     working_dir: /var/www
     networks:
       - app
     volumes:
       - ./:/var/www
       - ./docker/debug:/tmp/xdebug
+    links:
+      - db
     ports:
-      - "8080:8080"
-      #MySQL Service
+      - "8088:8080"
+  #MySQL Service
   db:
     image: mariadb:10.4.12
     container_name: db
@@ -49,6 +53,18 @@ services:
       - app
     volumes:
       - irailv2_sqldata:/var/lib/mysql:delegated
+  web:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - '8080:80'
+    volumes:
+      - ./:/var/www/
+      - ./deployment/nginx.docker.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - app
+    networks:
+      - app
 
 #Docker Networks
 networks:
