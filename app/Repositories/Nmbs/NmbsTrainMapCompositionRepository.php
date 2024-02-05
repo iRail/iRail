@@ -5,7 +5,6 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\CompositionUnavailableException;
-use Irail\Http\Requests\VehicleCompositionRequest;
 use Irail\Models\CachedData;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
@@ -39,13 +38,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     /**
      * Scrape the composition of a train from the NMBS trainmap web application.
-     * @param VehicleCompositionRequest|Vehicle $request
+     * @param Vehicle $request
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      * @throws CompositionUnavailableException
      */
-    function getComposition(VehicleCompositionRequest|Vehicle $request): VehicleCompositionSearchResult
+    function getComposition(Vehicle $vehicle): VehicleCompositionSearchResult
     {
-        $vehicle = $request instanceof Vehicle ? $request : Vehicle::fromName($request->getVehicleId());
         $journeyDate = $vehicle->getJourneyStartDate();
         $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($vehicle->getId(), $journeyDate);
         if (!$journeyWithOriginAndDestination) {
@@ -54,7 +52,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
         if (Carbon::now()->timestamp < ($journeyDate->timestamp + $startTimeOffset)) {
-            throw new CompositionUnavailableException($request->getId(),
+            throw new CompositionUnavailableException($vehicle->getId(),
                 'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
         }
 
@@ -76,7 +74,6 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
                 Log::info('Skipping composition with less than 2 carriages');
             }
         }
-
         return new VehicleCompositionSearchResult($vehicle, $segments);
     }
 
