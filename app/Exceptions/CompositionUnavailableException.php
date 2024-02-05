@@ -6,9 +6,10 @@ class CompositionUnavailableException extends IrailHttpException
 {
 
     /**
-     * @param string $message
+     * @param int|string $vehicleNumber
+     * @param string     $message
      */
-    public function __construct(int $vehicleNumber, string $message = '')
+    public function __construct(int|string $vehicleNumber, string $message = '')
     {
         parent::__construct(404, 'Composition for vehicle ' . $vehicleNumber . ' is unavailable.' . ($message ? " $message" : ''));
     }
