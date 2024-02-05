@@ -45,6 +45,19 @@ abstract class V1Converter
         return $result;
     }
 
+    protected static function convertWalk(): StdClass
+    {
+        $result = new StdClass();
+        $result->name = 'BE.NMBS.WALK';
+        $result->shortname = 'WALK';
+        $result->number = '';
+        $result->type = '';
+        $result->locationX = '0';
+        $result->locationY = '0';
+        $result->{'@id'} = '';
+        return $result;
+    }
+
     protected static function convertOccupancy(OccupancyInfo $occupancy)
     {
         $level = $occupancy->getSpitsgidsLevel() != OccupancyLevel::UNKNOWN

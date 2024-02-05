@@ -8,7 +8,6 @@ use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 class Vehicle
 {
     private string $uri;
-    private string $id;
     private string $type;
     private int $number;
     private Carbon $journeyStartDate;
@@ -16,15 +15,13 @@ class Vehicle
     private VehicleDirection $direction;
 
     /**
-     * @param string      $id The id, typically the type and number concatenated. Is never parsed.
      * @param string      $type The type, for example IC, EUR, S10.
      * @param int         $number The journey number, for example 548 or 2078.
      * @param Carbon|null $journeyStartDate The start date of the journey.
      */
-    public function __construct(string $id, string $type, int $number, Carbon $journeyStartDate = null)
+    private function __construct(string $type, int $number, Carbon $journeyStartDate = null)
     {
         $this->uri = "http://irail.be/vehicle/{$type}{$number}"; // The URI points to the vehicle journey, not the dated vehicle journey
-        $this->id = $id;
         $this->type = $type;
         $this->number = $number;
         $this->journeyStartDate = $journeyStartDate ? $journeyStartDate->copy()->startOfDay() : Carbon::now()->startOfDay();
@@ -33,7 +30,6 @@ class Vehicle
     public static function fromTypeAndNumber(string $type, int $number, Carbon $journeyStartDate = null): Vehicle
     {
         return new Vehicle(
-            $type . $number,
             $type,
             $number,
             $journeyStartDate
@@ -63,7 +59,7 @@ class Vehicle
      */
     public function getId(): string
     {
-        return $this->id;
+        return $this->type . $this->getNumber();
     }
 
     /**

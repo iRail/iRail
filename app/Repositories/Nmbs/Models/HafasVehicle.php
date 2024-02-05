@@ -86,6 +86,6 @@ class HafasVehicle
 
     public function toVehicle(Carbon $journeyStartDate): Vehicle
     {
-        return new Vehicle($this->getId(), $this->getType(), $this->getNumber(), $journeyStartDate);
+        return Vehicle::fromTypeAndNumber($this->getType(), $this->getNumber(), $journeyStartDate);
     }
 }
