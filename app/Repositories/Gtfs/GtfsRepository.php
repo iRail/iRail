@@ -112,7 +112,7 @@ class GtfsRepository
             }
         }
         fclose($fileStream);
-        Log::info('readTripsByJourneyNumberAndStartDate found ' . count($trips) . ' journey ids');
+        Log::info('readTripsByJourneyNumberAndStartDate found ' . count($trips) . ' journey ids, peak memory usage ' . (memory_get_peak_usage() / 1024 / 1024));
         return $trips;
     }
 
@@ -190,6 +190,14 @@ class GtfsRepository
     private function readTripStops(): array
     {
         Log::info('Reading ' . self::GTFS_STOP_TIMES_URL);
+
+        $tripIdsToRetain = [];
+        foreach ($this->getTripsByJourneyNumberAndStartDate() as $tripsByStartDate) {
+            foreach ($tripsByStartDate as $trip) {
+                $tripIdsToRetain[$trip->getTripId()] = 1;
+            }
+        }
+
         $fileStream = fopen(self::GTFS_STOP_TIMES_URL, 'r');
         $stopsByTripId = [];
 
@@ -201,8 +209,16 @@ class GtfsRepository
         $DEPARTURE_TIME_COLUMN = array_search('departure_time', $headers);
 
         $numberOfStopTimes = 0;
+        $numberOfSkippedStopTimes = 0;
         while ($row = fgetcsv($fileStream)) {
             $trip_id = $row[$TRIP_ID_COLUMN];
+
+            if (!key_exists($trip_id, $tripIdsToRetain)) {
+                // only keep trips for which we have the start date as well
+                $numberOfSkippedStopTimes++;
+                continue;
+            }
+
             $stopId = $row[$STOP_ID_COLUMN];
             $departure_time = $row[$DEPARTURE_TIME_COLUMN];
 
@@ -219,7 +235,7 @@ class GtfsRepository
             $stopsByTripId[$trip_id][] = new StopTime($stopId, $departure_time);
             $numberOfStopTimes++;
         }
-        Log::info("Read {$numberOfStopTimes} stop_times");
+        Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}, peak memory usage " . (memory_get_peak_usage() / 1024 / 1024));
         fclose($fileStream);
         return $stopsByTripId;
     }
