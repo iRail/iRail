@@ -155,7 +155,7 @@ class GtfsTripStartEndExtractor
         $tripsByJourneyAndDate = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
         $tripStops = $this->gtfsRepository->getTripStops();
 
-        if (empty($serviceIdsByCalendarDate) || empty($vehicleDetailsByServiceId)) {
+        if (empty($tripsByJourneyAndDate) || empty($tripStops)) {
             throw new UpstreamServerException('No response from iRail GTFS', 504);
         }
 

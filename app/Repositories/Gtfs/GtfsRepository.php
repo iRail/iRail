@@ -8,7 +8,6 @@ use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Gtfs\Models\Route;
 use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Gtfs\Models\Trip;
-use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Traits\Cache;
 
 class GtfsRepository
@@ -23,6 +22,7 @@ class GtfsRepository
     const string GTFS_ALL_TRIP_STOPS_CACHE_KEY = 'stopsByTrip';
     const string GTFS_ALL_CALENDAR_DATES = 'calendarDates';
     const string GTFS_ALL_TRIPS = 'trips';
+    const string GTFS_ROUTES_CACHE_KEY = 'routes';
     const int TRIPS_DAYS_BACK = 3;
     const int TRIPS_DAYS_FORWARD = 14;
 
@@ -55,7 +55,7 @@ class GtfsRepository
      */
     private function getRouteIdToJourneyTypeMap(): array
     {
-        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, function (): array {
+        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ROUTES_CACHE_KEY, function (): array {
             $vehicleTypesByRouteId = [];
             foreach ($this->readRoutes() as $route) {
                 // Shortname contains journey type, such as S6, for NMBS.
@@ -74,10 +74,12 @@ class GtfsRepository
      */
     private function readTripsByJourneyNumberAndStartDate(): array
     {
+        Log::info('readTripsByJourneyNumberAndStartDate');
         $trips = [];
         $serviceIdsToRetain = $this->getServiceIdsInDateRange(self::TRIPS_DAYS_BACK, self::TRIPS_DAYS_FORWARD);
         $vehicleTypeByRouteId = $this->getRouteIdToJourneyTypeMap();
 
+        Log::info('Reading ' . self::TRIPS_URL . ', retaining trips for ' . count($serviceIdsToRetain) . ' service ids');
         $fileStream = fopen(self::TRIPS_URL, 'r');
 
         $headers = fgetcsv($fileStream);
@@ -94,7 +96,7 @@ class GtfsRepository
 
             $tripId = $row[$TRIP_ID_COLUMN];
             $tripIdParts = explode(':', $tripId);
-            $journeyNumber = $tripIdParts[3];
+            $journeyNumber = $tripIdParts[6];
 
             if (!key_exists($journeyNumber, $trips)) {
                 $trips[$journeyNumber] = []; // Initialize new array
@@ -103,13 +105,14 @@ class GtfsRepository
             $routeId = $row[$ROUTE_ID_COLUMN];
             $journeyType = $vehicleTypeByRouteId[$routeId];
 
-            $trip = new Trip($tripId, $journeyNumber, $journeyType);
+            $trip = new Trip($tripId, $journeyType, $journeyNumber);
             foreach ($activeDatesYmd as $activeDateYmd) {
                 // A journey number might have different services (trips) on different dates, especially when the GTFS data covers multiple timetable periods
                 $trips[$journeyNumber][$activeDateYmd] = $trip;
             }
         }
         fclose($fileStream);
+        Log::info('readTripsByJourneyNumberAndStartDate found ' . count($trips) . ' journey ids');
         return $trips;
     }
 
@@ -160,6 +163,7 @@ class GtfsRepository
      */
     private function readCalendarDates(): array
     {
+        Log::info('Reading ' . self::CALENDAR_DATES_URL);
         $fileStream = fopen(self::CALENDAR_DATES_URL, 'r');
         $serviceIdsByDate = [];
 
@@ -172,9 +176,10 @@ class GtfsRepository
             if (!key_exists($date, $serviceIdsByDate)) {
                 $serviceIdsByDate[$date] = [];
             }
-            $serviceId = Tools::safeIntVal($row[$SERVICE_ID_COLUMN]);
+            $serviceId = $row[$SERVICE_ID_COLUMN];
             $serviceIdsByDate[$date][] = $serviceId;
         }
+        Log::info('Read ' . count($serviceIdsByDate) . ' dates');
         return $serviceIdsByDate;
     }
 
@@ -184,7 +189,7 @@ class GtfsRepository
      */
     private function readTripStops(): array
     {
-        Log::info('Reading stop_times');
+        Log::info('Reading ' . self::GTFS_STOP_TIMES_URL);
         $fileStream = fopen(self::GTFS_STOP_TIMES_URL, 'r');
         $stopsByTripId = [];
 
@@ -224,12 +229,13 @@ class GtfsRepository
      */
     private function readRoutes(): array
     {
+        Log::info('Reading ' . self::GTFS_ROUTES_URL);
         $fileStream = fopen(self::GTFS_ROUTES_URL, 'r');
         $vehicleTypesByRouteId = [];
 
         $headers = fgetcsv($fileStream);
         $ROUTE_ID_COLUMN = array_search('route_id', $headers);
-        $ROUTE_SHORT_NAME = array_search('route_short_name', $headers);; // Vehicle type is stored as route short name
+        $ROUTE_SHORT_NAME = array_search('route_short_name', $headers); // Vehicle type is stored as route short name
 
         while ($row = fgetcsv($fileStream)) {
             $routeId = $row[$ROUTE_ID_COLUMN];
@@ -237,6 +243,7 @@ class GtfsRepository
             $vehicleTypesByRouteId[$routeId] = new Route($routeId, $routeShortName);
         }
         fclose($fileStream);
+        Log::info('Read ' . count($vehicleTypesByRouteId) . ' GTFS routes.txt');
         return $vehicleTypesByRouteId;
     }
 }
