@@ -96,11 +96,10 @@ class GtfsTripStartEndExtractor
      * This method is only needed when one of the first/last stops is cancelled.
      *
      * @param JourneyWithOriginAndDestination $originalJourney
-     * @param Carbon $journeyStartDate
      * @return JourneyWithOriginAndDestination[]
      * @throws Exception
      */
-    public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney, Carbon $journeyStartDate): array
+    public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney): array
     {
         Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalJourney->getTripId()}");
         $stops = self::getStopsForTrip($originalJourney->getTripId());
