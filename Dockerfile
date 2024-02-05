@@ -34,18 +34,16 @@ RUN pecl install pecl_http
 
 # Install apcu
 RUN pecl install apcu
-RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1" >> /usr/local/etc/php/php.ini
+RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1\napc.shm_size=512M" >> /usr/local/etc/php/php.ini
 RUN docker-php-ext-enable apcu http
 
 # Install opcache
 RUN docker-php-ext-install opcache
-COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Install xdebug
 RUN yes | pecl install xdebug \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.mode=develop,coverage,debug,profile,trace" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.output_dir=/tmp/xdebug" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.profiler_output_name=xdebug-profile.cachegrind.out.%p" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/xdebug.ini
@@ -68,6 +66,9 @@ RUN mkdir -p /var/log/php/ \
     && touch /var/log/php/error.log \
     && chmod 777 /var/log/php/access.log \
     && chmod 777 /var/log/php/error.log
+
+# Copy opcache configuration
+COPY docker-opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Raise memory limit, needed for handling GTFS data
 RUN echo "memory_limit = 1024M" >> /usr/local/etc/php/php.ini
