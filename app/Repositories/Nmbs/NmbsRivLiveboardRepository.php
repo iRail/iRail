@@ -158,7 +158,9 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $direction = $this->stationsRepository->getStationById('00' . $direction);
         $headSign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
             $stop['DestinationNl'] : $stop['OriginNl'];
-        $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $stop['TrainNumber']);
+        $journeyNumber = $stop['TrainNumber'];
+        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $plannedDateTime);
+        $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $journeyNumber, $journeyStartDate);
         $vehicle->setDirection(new VehicleDirection($headSign, $direction));
 
         // Now all information has been parsed. Put it in a nice object.

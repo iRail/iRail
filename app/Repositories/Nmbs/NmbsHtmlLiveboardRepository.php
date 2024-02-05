@@ -20,6 +20,7 @@ use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Proxy\CurlHttpResponse;
 use Irail\Proxy\CurlProxy;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\Models\Station;
@@ -33,15 +34,22 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
+    private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
 
     /**
-     * @param StationsRepository $stationsRepository
-     * @param CurlProxy          $curlProxy
+     * @param StationsRepository        $stationsRepository
+     * @param CurlProxy                 $curlProxy
+     * @param GtfsTripStartEndExtractor $gtfsTripStartEndExtractor Used to find the departure date for trips
      */
-    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
+    public function __construct(
+        StationsRepository $stationsRepository,
+        CurlProxy $curlProxy,
+        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
+    )
     {
         $this->stationsRepository = $stationsRepository;
         $this->curlProxy = $curlProxy;
+        $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
         $this->setCachePrefix('NMBS');
     }
 
@@ -222,7 +230,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
             $dateTime->addDays($daysForward);
 
             $vehicleDirection = $this->parseDirection($stBoardEntry);
-            $vehicle = $this->parseVehicle($stBoardEntry);
+            $vehicle = $this->parseVehicle($stBoardEntry, $dateTime);
             $vehicle->setDirection($vehicleDirection);
 
             $stopAtStation = new DepartureOrArrival();
@@ -243,10 +251,11 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     }
 
     /**
-     * @param mixed $stBoardEntry
+     * @param mixed  $stBoardEntry
+     * @param Carbon $scheduledStopTimeForVehicle Used to determine the start time for the vehicle
      * @return Vehicle
      */
-    public function parseVehicle(mixed $stBoardEntry): Vehicle
+    public function parseVehicle(mixed $stBoardEntry, Carbon $scheduledStopTimeForVehicle): Vehicle
     {
         $vehicleTypeAndNumber = self::trim($stBoardEntry->xpath("td[@class='product']/a")[0]);
         // Some trains are split by a newline, some by a space
@@ -258,7 +267,10 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         $vehicleTypeAndNumber = str_replace('  ', ' ', $vehicleTypeAndNumber);
 
         preg_match('/^(\w+?)\s*(\d+)$/', $vehicleTypeAndNumber, $vehicleTypeAndNumberArray);
-        return Vehicle::fromTypeAndNumber($vehicleTypeAndNumberArray[1], $vehicleTypeAndNumberArray[2]);
+        $journeyNumber = $vehicleTypeAndNumberArray[2];
+        $journeyType = $vehicleTypeAndNumberArray[1];
+        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $scheduledStopTimeForVehicle);
+        return Vehicle::fromTypeAndNumber($journeyType, $journeyNumber, $journeyStartDate);
     }
 
     /**
