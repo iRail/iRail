@@ -2,6 +2,7 @@
 
 namespace Irail\Repositories\Nmbs;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\VehicleCompositionRequest;
@@ -13,6 +14,7 @@ use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Proxy\CurlProxy;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
@@ -42,6 +44,11 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     function getComposition(VehicleCompositionRequest|Vehicle $request): VehicleCompositionSearchResult
     {
         $vehicle = $request instanceof Vehicle ? $request : Vehicle::fromName($request->getVehicleId());
+        $startTime = app(GtfsTripStartEndExtractor::class)->getVehicleWithOriginAndDestination($vehicle->getId(), $vehicle->getJourneyStartDate());
+        if (Carbon::now()->isBefore($startTime)) {
+            throw new CompositionUnavailableException($request->getId(), 'Composition is only available from vehicle start');
+        }
+
         $cachedData = $this->fetchCompositionData($vehicle);
         $compositionData = $cachedData->getValue();
         $cacheAge = $cachedData->getAge();
@@ -386,7 +393,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
         $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
         $responseBody = $curlHttpResponse->getResponseBody();
-        if ($responseBody == "null") {
+        if ($responseBody == 'null') {
             throw new CompositionUnavailableException($vehicleNumber);
         }
         if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
