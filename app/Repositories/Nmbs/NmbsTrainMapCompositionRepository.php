@@ -28,11 +28,13 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     const AUTH_KEY_CACHE_TTL = 60 * 30;
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
+    private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
 
-    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
+    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy, GtfsTripStartEndExtractor $gtfsTripStartEndExtractor)
     {
         $this->stationsRepository = $stationsRepository;
         $this->curlProxy = $curlProxy;
+        $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
     }
 
     /**
@@ -44,9 +46,16 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     function getComposition(VehicleCompositionRequest|Vehicle $request): VehicleCompositionSearchResult
     {
         $vehicle = $request instanceof Vehicle ? $request : Vehicle::fromName($request->getVehicleId());
-        $startTime = app(GtfsTripStartEndExtractor::class)->getVehicleWithOriginAndDestination($vehicle->getId(), $vehicle->getJourneyStartDate());
-        if (Carbon::now()->isBefore($startTime)) {
-            throw new CompositionUnavailableException($request->getId(), 'Composition is only available from vehicle start');
+        $journeyDate = $vehicle->getJourneyStartDate();
+        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($vehicle->getId(), $journeyDate);
+        if (!$journeyWithOriginAndDestination) {
+            throw new CompositionUnavailableException($request->getId(),
+                'Composition is only available from vehicle start. Vehicle is not active on the given date.');
+        }
+        $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
+        if (Carbon::now()->timestamp < ($journeyDate->timestamp + $startTimeOffset)) {
+            throw new CompositionUnavailableException($request->getId(),
+                'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
         }
 
         $cachedData = $this->fetchCompositionData($vehicle);

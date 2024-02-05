@@ -2,15 +2,13 @@
 
 namespace Irail\Repositories\Gtfs\Models;
 
-use Carbon\Carbon;
-
 class JourneyWithOriginAndDestination
 {
     private int $journeyNumber;
     private string $originStopId;
-    private Carbon $originDepartureTime;
+    private int $originDepartureTime;
     private string $destinationStopId;
-    private Carbon $destinationArrivalTime;
+    private int $destinationArrivalTime;
     private string $tripId;
     private string $vehicleType;
 
@@ -19,18 +17,18 @@ class JourneyWithOriginAndDestination
      * @param string $vehicleType The journey type
      * @param int    $vehicleNumber The journey number
      * @param string $originStopId The stop id of the first stop
-     * @param Carbon $originDepartureTime The time of departure at the first stop, as a carbon object in the year 0 with only a time component.
+     * @param int $originDepartureTime The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
      * @param string $destinationStopId The stop id of the last stop
-     * @param Carbon $destinationArrivalTime The time of arrival at the last stop, as a carbon object in the year 0 with only a time component.
+     * @param int $destinationArrivalTime The time of arrival at the last stop, as an offset in seconds from the journey start date at 00:00:00.
      */
     public function __construct(
         string $tripId,
         string $vehicleType,
         int $vehicleNumber,
         string $originStopId,
-        Carbon $originDepartureTime,
+        int $originDepartureTime,
         string $destinationStopId,
-        Carbon $destinationArrivalTime
+        int $destinationArrivalTime
     ) {
         $this->tripId = $tripId;
         $this->journeyNumber = $vehicleNumber;
@@ -67,9 +65,9 @@ class JourneyWithOriginAndDestination
     }
 
     /**
-     * @return Carbon The time of departure at the first stop, as a carbon object in the year 0 with only a time component.
+     * @return int The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
      */
-    public function getOriginDepartureTime(): Carbon
+    public function getOriginDepartureTimeOffset(): int
     {
         return $this->originDepartureTime;
     }
@@ -83,9 +81,9 @@ class JourneyWithOriginAndDestination
     }
 
     /**
-     * @return Carbon The time of arrival at the last stop, as a carbon object in the year 0 with only a time component.
+     * @return int The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
      */
-    public function getDestinationArrivalTime(): Carbon
+    public function getDestinationArrivalTimeOffset(): int
     {
         return $this->destinationArrivalTime;
     }

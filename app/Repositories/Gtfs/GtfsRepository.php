@@ -86,6 +86,7 @@ class GtfsRepository
         $SERVICE_ID_COLUMN = array_search('service_id', $headers);
         $ROUTE_ID_COLUMN = array_search('route_id', $headers);
         $TRIP_ID_COLUMN = array_search('trip_id', $headers);
+        $TRIP_SHORT_NAME_COLUMN = array_search('trip_short_name', $headers);
 
         while ($row = fgetcsv($fileStream)) {
             $serviceId = $row[$SERVICE_ID_COLUMN];
@@ -95,8 +96,7 @@ class GtfsRepository
             $activeDatesYmd = $serviceIdsToRetain[$serviceId];
 
             $tripId = $row[$TRIP_ID_COLUMN];
-            $tripIdParts = explode(':', $tripId);
-            $journeyNumber = $tripIdParts[6];
+            $journeyNumber = $row[$TRIP_SHORT_NAME_COLUMN];
 
             if (!key_exists($journeyNumber, $trips)) {
                 $trips[$journeyNumber] = []; // Initialize new array
@@ -216,7 +216,7 @@ class GtfsRepository
             }
 
             # Assume all stop_times are in chronological order, we don't have time to sort this.
-            $stopsByTripId[$trip_id][] = new StopTime($stopId, Carbon::createFromFormat('H:i:s', $departure_time));
+            $stopsByTripId[$trip_id][] = new StopTime($stopId, $departure_time);
             $numberOfStopTimes++;
         }
         Log::info("Read {$numberOfStopTimes} stop_times");

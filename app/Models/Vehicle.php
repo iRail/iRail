@@ -16,9 +16,10 @@ class Vehicle
     private VehicleDirection $direction;
 
     /**
-     * @param string $id
-     * @param string $type
-     * @param int    $number
+     * @param string      $id The id, typically the type and number concatenated. Is never parsed.
+     * @param string      $type The type, for example IC, EUR, S10.
+     * @param int         $number The journey number, for example 548 or 2078.
+     * @param Carbon|null $journeyStartDate The start date of the journey.
      */
     public function __construct(string $id, string $type, int $number, Carbon $journeyStartDate = null)
     {

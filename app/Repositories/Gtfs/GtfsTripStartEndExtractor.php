@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
@@ -39,7 +40,20 @@ class GtfsTripStartEndExtractor
                 // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
                 // a query for 01:00 on a trip running 22:00-02:00 will return the trip starting 22:00 that day, i.e. the next trip.
                 $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime);
-                if ($activeTime->isBefore($originAndDestination->getOriginDepartureTime())) {
+
+                if (!$originAndDestination) {
+                    // The trip could not be found for the given start date, so it must be in the past!
+                    $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime->copy()->subDay());
+                    if (!$originAndDestination) {
+                        // If still not found, something is wrong. Do not return incorrect results, we prefer not to return any result at all in this case!
+                        throw new InternalProcessingException(500,
+                            "Vehicle start date could not be termined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
+                    }
+                    return $activeTime->copy()->subDay()->setTime(0, 0);
+                }
+
+                // A trip cannot start past 23:59:59, since it simply would have a different start date in that case
+                if ($activeTime->secondsSinceMidnight() < $originAndDestination->getOriginDepartureTimeOffset()) {
                     return $activeTime->copy()->subDay()->setTime(0, 0);
                 }
                 return $activeTime->copy()->setTime(0, 0);
@@ -59,17 +73,16 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
         $foundVehicleWithInternationalOriginAndDestination = false;
 
-        foreach ($vehicleDetailsForDate as $vehicleWithOriginAndDestination) {
-            if ($vehicleWithOriginAndDestination->getJourneyNumber() == $vehicleNumber) {
-                // International journeys are split into two parts at tha Belgian side of the border, where the
-                // border is represented by a "station" with a belgian ID.
-                // If the journey is between belgian stops, return immediatly
-                if ($this->isBelgianJourney($vehicleWithOriginAndDestination)) {
-                    return $vehicleWithOriginAndDestination;
-                }
-                // Otherwise, keep the "international" stretch as a last-change backup should we not find a belgian part.
-                $foundVehicleWithInternationalOriginAndDestination = $vehicleWithOriginAndDestination;
+        $matches = array_filter($vehicleDetailsForDate, fn($journey) => $journey->getJourneyNumber() == $vehicleNumber);
+        foreach ($matches as $vehicleWithOriginAndDestination) {
+            // International journeys are split into two parts at tha Belgian side of the border, where the
+            // border is represented by a "station" with a belgian ID.
+            // If the journey is between belgian stops, return immediatly
+            if ($this->isBelgianJourney($vehicleWithOriginAndDestination)) {
+                return $vehicleWithOriginAndDestination;
             }
+            // Otherwise, keep the "international" stretch as a last-change backup should we not find a belgian part.
+            $foundVehicleWithInternationalOriginAndDestination = $vehicleWithOriginAndDestination;
         }
         if ($foundVehicleWithInternationalOriginAndDestination) {
             return $foundVehicleWithInternationalOriginAndDestination;
@@ -83,10 +96,11 @@ class GtfsTripStartEndExtractor
      * This method is only needed when one of the first/last stops is cancelled.
      *
      * @param JourneyWithOriginAndDestination $originalJourney
+     * @param Carbon $journeyStartDate
      * @return JourneyWithOriginAndDestination[]
      * @throws Exception
      */
-    public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney): array
+    public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney, Carbon $journeyStartDate): array
     {
         Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalJourney->getTripId()}");
         $stops = self::getStopsForTrip($originalJourney->getTripId());
@@ -97,9 +111,9 @@ class GtfsTripStartEndExtractor
                 $originalJourney->getJourneyType(),
                 $originalJourney->getJourneyNumber(),
                 $stops[$i - 1]->getStopId(),
-                $stops[$i - 1]->getStopTime(),
+                $stops[$i - 1]->getDepartureTimeOffset(),
                 $stops[$i]->getStopId(),
-                $stops[$i]->getStopTime()
+                $stops[$i]->getDepartureTimeOffset()
             );
         }
         Log::debug('getAlternativeVehicleWithOriginAndDestination found '
@@ -125,8 +139,6 @@ class GtfsTripStartEndExtractor
     private function getTripsWithStartAndEndByDate(DateTime $date): array
     {
         $vehicleDetailsByDate = $this->getTripsWithStartAndEndDate();
-
-        $vehicleDetailsByDate = $vehicleDetailsByDate->getValue();
         $dateYmd = $date->format('Ymd');
         if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
             throw new RequestOutsideTimetableRangeException('Request outside of allowed date period (3 days back, 14 days forward)', 404);
@@ -170,14 +182,14 @@ class GtfsTripStartEndExtractor
                 $stops = $tripStops[$trip->getTripId()];
                 $firstStop = $stops[0];
                 $lastStop = end($stops);
-                $vehicleDetailsByDate[$date][$journeyNumber] = new JourneyWithOriginAndDestination(
+                $vehicleDetailsByDate[$date][] = new JourneyWithOriginAndDestination( // DO NOT index on journeyNumber, since some journeys may be split and therefore occur twice.
                     $trip->getTripId(),
                     $trip->getJourneyType(),
                     $trip->getJourneyNumber(),
                     $firstStop->getStopId(),
-                    $firstStop->getStopTime(),
+                    $firstStop->getDepartureTimeOffset(),
                     $lastStop->getStopId(),
-                    $lastStop->getStopTime()
+                    $lastStop->getDepartureTimeOffset()
                 );
             }
         }

@@ -221,7 +221,7 @@ class NmbsRivRawDataRepository
     ): string|bool
     {
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
-            $vehicleWithOriginAndDestination
+            $vehicleWithOriginAndDestination, $request->getDateTime()
         );
         // Assume the first and last stop are cancelled, since the normal origin-destination search did not return results
         // This saves 2 requests and should not make a difference.

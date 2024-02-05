@@ -7,16 +7,16 @@ use Carbon\Carbon;
 class StopTime
 {
     private string $stopId;
-    private Carbon $stopTime;
+    private int $departureTime;
 
     /**
      * @param string $stopId
-     * @param Carbon $stopTime
+     * @param string $stopTime the departure time, in hh:mm:ss format
      */
-    public function __construct(string $stopId, Carbon $stopTime)
+    public function __construct(string $stopId, string $stopTime)
     {
         $this->stopId = $stopId;
-        $this->stopTime = $stopTime;
+        $this->departureTime = $this->timeToSeconds($stopTime);
     }
 
     public function getStopId(): string
@@ -24,9 +24,22 @@ class StopTime
         return $this->stopId;
     }
 
-    public function getStopTime(): Carbon
+    public function getDepartureTime(Carbon $journeyStartDate): Carbon
     {
-        return $this->stopTime;
+        return $journeyStartDate->copy()->startOfDay()->addSeconds($this->departureTime);
+    }
+
+    public function getDepartureTimeOffset(): int
+    {
+        return $this->departureTime;
+    }
+
+    private function timeToSeconds(string $stopTime)
+    {
+        $hours = intval(substr($stopTime, 0, 2));
+        $minutes = intval(substr($stopTime, 3, 2));
+        $seconds = intval(substr($stopTime, 6, 2));
+        return $hours * 3600 + $minutes * 60 + $seconds;
     }
 
 
