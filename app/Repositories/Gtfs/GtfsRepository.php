@@ -23,8 +23,22 @@ class GtfsRepository
     const string GTFS_ALL_CALENDAR_DATES = 'calendarDates';
     const string GTFS_ALL_TRIPS = 'trips';
     const string GTFS_ROUTES_CACHE_KEY = 'routes';
-    const int TRIPS_DAYS_BACK = 3;
-    const int TRIPS_DAYS_FORWARD = 14;
+
+    /**
+     * @return int The number of days in the past to read from GTFS files. Affects all endpoints using this data!
+     */
+    public static function getGtfsDaysBackwards(): int
+    {
+        return intval(env('GTFS_RANGE_DAYS_BACKWARDS', 3));
+    }
+
+    /**
+     * @return int The number of days in the future to read from GTFS files. Affects all endpoints using this data!
+     */
+    public static function getGtfsDaysForwards(): int
+    {
+        return intval(env('GTFS_RANGE_DAYS_FORWARDS', 14));
+    }
 
     /**
      * @return array<String, JourneyWithOriginAndDestination[]> VehicleWithOriginAndDestination objects grouped by their service ids.
@@ -76,7 +90,8 @@ class GtfsRepository
     {
         Log::info('readTripsByJourneyNumberAndStartDate');
         $trips = [];
-        $serviceIdsToRetain = $this->getServiceIdsInDateRange(self::TRIPS_DAYS_BACK, self::TRIPS_DAYS_FORWARD);
+
+        $serviceIdsToRetain = $this->getServiceIdsInDateRange(self::getGtfsDaysBackwards(), self::getGtfsDaysForwards());
         $vehicleTypeByRouteId = $this->getRouteIdToJourneyTypeMap();
 
         Log::info('Reading ' . self::TRIPS_URL . ', retaining trips for ' . count($serviceIdsToRetain) . ' service ids');
@@ -128,6 +143,7 @@ class GtfsRepository
         int $daysForward
     ): array
     {
+        Log::info("Searching for service days in range -{$daysBack}, {$daysForward}");
         $serviceIdsByCalendarDate = $this->getCalendarDates();
 
         $date = Carbon::now();
