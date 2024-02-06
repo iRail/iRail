@@ -39,7 +39,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
      */
     public function getServiceAlerts(ServiceAlertsRequest $request): ServiceAlertsResult
     {
-        $serviceAlertData = $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request) {
+        $serviceAlertData = $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshServiceAlerts($request);
         });
         return new ServiceAlertsResult($serviceAlertData->getValue());

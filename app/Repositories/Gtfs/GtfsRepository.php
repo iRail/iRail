@@ -40,12 +40,17 @@ class GtfsRepository
         return intval(env('GTFS_RANGE_DAYS_FORWARDS', 14));
     }
 
+    public function __construct()
+    {
+        $this->setCachePrefix('GtfsRepository');
+    }
+
     /**
      * @return array<String, JourneyWithOriginAndDestination[]> VehicleWithOriginAndDestination objects grouped by their service ids.
      */
     public function getTripsByJourneyNumberAndStartDate(): array
     {
-        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ALL_TRIPS, function (): array {
+        $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIPS, function (): array {
             return $this->readTripsByJourneyNumberAndStartDate();
         }, ttl: 3 * 3600 + 4); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
         return $cachedData->getValue();
@@ -57,7 +62,7 @@ class GtfsRepository
      */
     public function getTripStops(): array
     {
-        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, function (): array {
+        $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, function (): array {
             return $this->readTripStops();
         },
             ttl: 3 * 3600 + 1); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
@@ -69,7 +74,7 @@ class GtfsRepository
      */
     private function getRouteIdToJourneyTypeMap(): array
     {
-        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ROUTES_CACHE_KEY, function (): array {
+        $cachedData = $this->getCacheOrUpdate(self::GTFS_ROUTES_CACHE_KEY, function (): array {
             $vehicleTypesByRouteId = [];
             foreach ($this->readRoutes() as $route) {
                 // Shortname contains journey type, such as S6, for NMBS.
@@ -165,7 +170,7 @@ class GtfsRepository
      */
     private function getCalendarDates(): array
     {
-        $cachedData = $this->getCacheWithDefaultCacheUpdate(self::GTFS_ALL_CALENDAR_DATES, function (): array {
+        $cachedData = $this->getCacheOrUpdate(self::GTFS_ALL_CALENDAR_DATES, function (): array {
             return $this->readCalendarDates();
         }, ttl: 3 * 3600 + 10); // Cache for 3 hours 10 minutes. The additional minutes reduces the risk that multiple caches expire at the same request
         return $cachedData->getValue();

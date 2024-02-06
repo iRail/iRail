@@ -34,7 +34,7 @@ class GtfsTripStartEndExtractor
 
     public function getStartDate(int $journeyNumber, Carbon $activeTime): Carbon
     {
-        $startDate = $this->getCacheWithDefaultCacheUpdate("getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
+        $startDate = $this->getCacheOrUpdate("getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
             function () use ($journeyNumber, $activeTime): Carbon {
                 // This will take the start date from the GTFS calendar file
                 // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
@@ -150,7 +150,7 @@ class GtfsTripStartEndExtractor
      */
     private function getTripsWithStartAndEndDate(): array
     {
-        $vehicleDetailsByDate = $this->getCacheWithDefaultCacheUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
+        $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
             return $this->loadTripsWithStartAndEndDate();
         }, ttl: 4 * 3600);
         return $vehicleDetailsByDate->getValue(); // Cache for 4 hours

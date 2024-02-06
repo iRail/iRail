@@ -417,7 +417,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      */
     private function getAuthKey(): ?string
     {
-        return $this->getCacheWithDefaultCacheUpdate(
+        return $this->getCacheOrUpdate(
             self::NMBS_COMPOSITION_AUTH_CACHE_KEY,
             fn() => self::getNewAuthKey(),
             self::AUTH_KEY_CACHE_TTL

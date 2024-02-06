@@ -40,7 +40,7 @@ class NmbsRivRawDataRepository
      */
     public function getLiveboardData(LiveboardRequest $request): CachedData
     {
-        return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request) {
+        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshLiveboardData($request);
         });
     }
@@ -76,7 +76,7 @@ class NmbsRivRawDataRepository
      */
     public function getRoutePlanningData(JourneyPlanningRequest $request): CachedData
     {
-        return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request) {
+        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshRouteplanningData($request);
         });
     }
@@ -120,7 +120,7 @@ class NmbsRivRawDataRepository
      */
     public function getVehicleJourneyData(VehicleJourneyRequest $request)
     {
-        return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request) {
+        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshVehicleJourneyData($request);
         });
     }
@@ -160,7 +160,7 @@ class NmbsRivRawDataRepository
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
             $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getJourneyNumber()}|{$request->getDateTime()->format('Ymd')}";
-            $journeyDetailRef = $this->getCacheWithDefaultCacheUpdate($cacheKey,
+            $journeyDetailRef = $this->getCacheOrUpdate($cacheKey,
                 function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination) {
                     return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
                 },

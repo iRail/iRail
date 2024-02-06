@@ -73,7 +73,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
     private function getLiveboardHtml(LiveboardRequest $request, StationInfo $station): CachedData
     {
-        return $this->getCacheWithDefaultCacheUpdate($request->getCacheId(), function () use ($request, $station) {
+        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request, $station) {
             return $this->fetchLiveboardHtml($request, $station);
         }, 60);
     }

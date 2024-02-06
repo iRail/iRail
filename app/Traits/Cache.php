@@ -16,6 +16,15 @@ trait Cache
     private string $prefix = '';
     private int $defaultTtl = 15;
 
+    /**
+     * @param string $cacheKey
+     * @return string
+     */
+    public function getSynchronizationLockKey(string $cacheKey): string
+    {
+        return $this->getKeyWithPrefix($cacheKey) . '|synchronizedLock';
+    }
+
     private function initializeCachePool(): void
     {
         if (self::$cache == null) {
@@ -111,6 +120,12 @@ trait Cache
         return $cacheEntry;
     }
 
+    private function deleteCachedObject(string $key): string
+    {
+        $this->initializeCachePool();
+        return self::$cache->delete($this->getKeyWithPrefix($key));
+    }
+
     /**
      * Get data from the cache. If the data is not present in the cache, the value function will be called
      * and the retrieved value will be stored in the cache.
@@ -123,13 +138,75 @@ trait Cache
      *                      Negative values will be replaced with the default TTL value.
      * @return CachedData<T>
      */
-    private function getCacheWithDefaultCacheUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
+    private function getCacheOrUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
     {
         $cachedData = $this->getCachedObject($cacheKey);
         if ($cachedData === false) {
             $data = $valueProvider();
             $cachedData = $this->setCachedObject($cacheKey, $data, $ttl);
         }
+        return $cachedData;
+    }
+
+    /**
+     * Get data from the cache. If the data is not present in the cache, the value function will be called from 1 thread on a best-effort basis,
+     * and the retrieved value will be stored in the cache.
+     *
+     * @template T, the cached data type
+     *
+     * @param string  $cacheKey
+     * @param Closure $valueProvider
+     * @param int     $ttl The number of seconds to keep this in cache. 0 for infinity.
+     *                      Negative values will be replaced with the default TTL value.
+     * @return CachedData<T>
+     */
+    private function getCacheOrSynchronizedUpdate(string $cacheKey, Closure $valueProvider, int $ttl = -1): CachedData
+    {
+        // If cached, return the cached data
+        $cachedData = $this->getCachedObject($cacheKey);
+        if ($cachedData !== false) {
+            return $cachedData;
+        }
+
+        // Get the lock id and a ticket number for this request.
+        $lockId = $this->getSynchronizationLockKey($cacheKey);
+        $callerId = random_int(1, 999_999_999);
+
+        Log::info("Thread (caller $callerId) requires access to lock with id $lockId");
+        // While another request has this lock, wait
+        while ($this->isCached($lockId)) {
+            Log::debug("Thread (caller $callerId) waiting for lock with id $lockId to be released");
+            sleep(1);
+        }
+
+        // Re-check if the data is available now
+        $cachedData = $this->getCachedObject($cacheKey);
+        if ($cachedData !== false) {
+            Log::info("Thread (caller $callerId) does no longer require access to lock with id $lockId: data received while waiting for lock");
+            return $cachedData;
+        }
+
+        // Data was not available. Lock this resource. We can't use real semaphores, so a best-effort solution using the cache will have to do
+        $this->setCachedObject($lockId, $callerId, 30);
+        usleep(1000 * random_int(1, 200));
+        $cachedLock = $this->getCachedObject($lockId);
+
+        // Check if we managed to keep the lock, or if another process tried to grab it at the same time. If not, exit.
+        if ($cachedLock === false || $cachedLock->getValue() != $callerId) {
+            Log::warning("Thread (caller $callerId) failed to obtain lock with id $lockId");
+            throw new InternalProcessingException('Failed to obtain a resource lock. Please try again in a few seconds.');
+        }
+        Log::info("Thread (caller $callerId) obtained lock with id $lockId");
+
+        // Now we have a unique lock, call the provider function
+        $data = $valueProvider();
+        $cachedData = $this->setCachedObject($cacheKey, $data, $ttl);
+
+        // Free the lock
+        $this->deleteCachedObject($lockId);
+        Log::info("Thread (caller $callerId) released lock with id $lockId");
+
+        // Return the result
         return $cachedData;
     }
 
