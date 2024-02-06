@@ -108,9 +108,12 @@ class GtfsRepository
         $TRIP_ID_COLUMN = array_search('trip_id', $headers);
         $TRIP_SHORT_NAME_COLUMN = array_search('trip_short_name', $headers);
 
+        $numberOfSkippedTrips = 0;
+        $numberOfImportedTrips = 0;
         while ($row = fgetcsv($fileStream)) {
             $serviceId = $row[$SERVICE_ID_COLUMN];
             if (!key_exists($serviceId, $serviceIdsToRetain)) {
+                $numberOfSkippedTrips++;
                 continue;
             }
             $activeDatesYmd = $serviceIdsToRetain[$serviceId];
@@ -130,9 +133,10 @@ class GtfsRepository
                 // A journey number might have different services (trips) on different dates, especially when the GTFS data covers multiple timetable periods
                 $trips[$journeyNumber][$activeDateYmd] = $trip;
             }
+            $numberOfImportedTrips++; // Count so we can verify if and how many trips are lost due to having the same journey number
         }
         fclose($fileStream);
-        Log::info('readTripsByJourneyNumberAndStartDate found ' . count($trips) . ' journey ids, peak memory usage ' . (memory_get_peak_usage() / 1024 / 1024));
+        Log::info('readTripsByJourneyNumberAndStartDate found ' . count($trips) . " journey ids after importing $numberOfImportedTrips trips. Skipped $numberOfSkippedTrips trips. " . $this->getMemoryUsage());
         return $trips;
     }
 
@@ -162,6 +166,7 @@ class GtfsRepository
                 $serviceIdsToKeep[$serviceIdOnDay][] = $dateToKeep->format('Ymd');
             }
         }
+        Log::info('Found ' . count($serviceIdsToKeep) . ' service ids in date range. ' . $this->getMemoryUsage());
         return $serviceIdsToKeep;
     }
 
@@ -200,7 +205,7 @@ class GtfsRepository
             $serviceId = $row[$SERVICE_ID_COLUMN];
             $serviceIdsByDate[$date][] = $serviceId;
         }
-        Log::info('Read ' . count($serviceIdsByDate) . ' dates');
+        Log::info('Read ' . count($serviceIdsByDate) . ' dates. ' . $this->getMemoryUsage());
         return $serviceIdsByDate;
     }
 
@@ -256,7 +261,7 @@ class GtfsRepository
             $stopsByTripId[$trip_id][] = new StopTime($stopId, $departure_time);
             $numberOfStopTimes++;
         }
-        Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}, peak memory usage " . (memory_get_peak_usage() / 1024 / 1024));
+        Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}. " . $this->getMemoryUsage());
         fclose($fileStream);
         return $stopsByTripId;
     }
@@ -280,7 +285,12 @@ class GtfsRepository
             $vehicleTypesByRouteId[$routeId] = new Route($routeId, $routeShortName);
         }
         fclose($fileStream);
-        Log::info('Read ' . count($vehicleTypesByRouteId) . ' GTFS routes.txt');
+        Log::info('Read ' . count($vehicleTypesByRouteId) . ' GTFS routes.txt. ' . $this->getMemoryUsage());
         return $vehicleTypesByRouteId;
+    }
+
+    private function getMemoryUsage(): string
+    {
+        return 'Memory usage ' . round(memory_get_usage() / 1024 / 1024, 2) . 'MB, peak ' . round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB';
     }
 }
