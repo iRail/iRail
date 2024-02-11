@@ -269,7 +269,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         preg_match('/^(\w+?)\s*(\d+)$/', $vehicleTypeAndNumber, $vehicleTypeAndNumberArray);
         $journeyNumber = $vehicleTypeAndNumberArray[2];
         $journeyType = $vehicleTypeAndNumberArray[1];
-        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $scheduledStopTimeForVehicle);
+        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $scheduledStopTimeForVehicle) ?: $scheduledStopTimeForVehicle;
         return Vehicle::fromTypeAndNumber($journeyType, $journeyNumber, $journeyStartDate);
     }
 

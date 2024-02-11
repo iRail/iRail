@@ -159,7 +159,8 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $headSign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
             $stop['DestinationNl'] : $stop['OriginNl'];
         $journeyNumber = $stop['TrainNumber'];
-        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $plannedDateTime);
+        // Trains such as eurostar may not be present in the GTFS feed
+        $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $plannedDateTime) ?: $request->getDateTime();
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $journeyNumber, $journeyStartDate);
         $vehicle->setDirection(new VehicleDirection($headSign, $direction));
 

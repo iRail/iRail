@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
@@ -32,10 +31,10 @@ class GtfsTripStartEndExtractor
         $this->setCachePrefix('gtfsTrips');
     }
 
-    public function getStartDate(int $journeyNumber, Carbon $activeTime): Carbon
+    public function getStartDate(int $journeyNumber, Carbon $activeTime): ?Carbon
     {
         $startDate = $this->getCacheOrUpdate("getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
-            function () use ($journeyNumber, $activeTime): Carbon {
+            function () use ($journeyNumber, $activeTime): ?Carbon {
                 // This will take the start date from the GTFS calendar file
                 // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
                 // a query for 01:00 on a trip running 22:00-02:00 will return the trip starting 22:00 that day, i.e. the next trip.
@@ -46,8 +45,8 @@ class GtfsTripStartEndExtractor
                     $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime->copy()->subDay());
                     if (!$originAndDestination) {
                         // If still not found, something is wrong. Do not return incorrect results, we prefer not to return any result at all in this case!
-                        throw new InternalProcessingException(500,
-                            "Vehicle start date could not be determined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
+                        Log::warning("Vehicle start date could not be determined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
+                        return null;
                     }
                     return $activeTime->copy()->subDay()->setTime(0, 0);
                 }
