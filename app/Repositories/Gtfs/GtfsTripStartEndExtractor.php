@@ -47,7 +47,7 @@ class GtfsTripStartEndExtractor
                     if (!$originAndDestination) {
                         // If still not found, something is wrong. Do not return incorrect results, we prefer not to return any result at all in this case!
                         throw new InternalProcessingException(500,
-                            "Vehicle start date could not be termined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
+                            "Vehicle start date could not be determined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
                     }
                     return $activeTime->copy()->subDay()->setTime(0, 0);
                 }
