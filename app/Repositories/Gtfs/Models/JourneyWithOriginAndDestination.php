@@ -98,9 +98,10 @@ class JourneyWithOriginAndDestination
 
     public function __debugInfo(): ?array
     {
+        $formatSeconds = fn($seconds) => sprintf('%02d:%02d:%02d', ($seconds / 3600), ($seconds / 60 % 60), $seconds % 60);
         return [
-            "Train {$this->journeyNumber} from {$this->originStopId} ({$this->originDepartureTime->format('h:i:s')})"
-            . " to {$this->destinationStopId} ({$this->destinationArrivalTime->format('h:i:s')})"
+            "Train {$this->journeyNumber} from {$this->originStopId} ({$formatSeconds($this->originDepartureTime)})"
+            . " to {$this->destinationStopId} ({$formatSeconds($this->destinationArrivalTime)})"
         ];
     }
 }

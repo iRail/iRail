@@ -16,7 +16,7 @@ class StopTime
     public function __construct(string $stopId, string $stopTime)
     {
         $this->stopId = $stopId;
-        $this->departureTime = $this->timeToSeconds($stopTime);
+        $this->departureTime = $this->timeToSeconds($stopTime) - 3600; // Correct for offset in GTFS
     }
 
     public function getStopId(): string

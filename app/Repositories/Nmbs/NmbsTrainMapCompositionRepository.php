@@ -52,7 +52,8 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
                 'Composition is only available from vehicle start. Vehicle is not active on the given date.');
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
-        if (Carbon::now()->timestamp < ($journeyDate->timestamp + $startTimeOffset)) {
+        $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
+        if ($secondsUntilStart > 0) {
             Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
                 . "Start time is $startTimeOffset.");
             throw new CompositionUnavailableException($journey->getId(),
