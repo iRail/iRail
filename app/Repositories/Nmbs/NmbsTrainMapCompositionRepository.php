@@ -83,7 +83,12 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
     {
-        $origin = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarFrom->uicCode);
+        // The destination UIC code is used twice.
+        $fromStationName = $travelSegmentWithCompositionData->ptCarFrom->fromName;
+        // Two languages are usually present.
+        $fromStationName = explode(' - ', $fromStationName)[0];
+        $origin = $this->stationsRepository->findStationByName($fromStationName);
+
         $destination = $this->stationsRepository->getStationByHafasId($travelSegmentWithCompositionData->ptCarTo->uicCode);
         $source = $travelSegmentWithCompositionData->confirmedBy;
         $units = self::parseCompositionData($travelSegmentWithCompositionData->materialUnits);

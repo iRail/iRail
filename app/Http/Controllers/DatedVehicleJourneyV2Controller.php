@@ -8,6 +8,7 @@ use Irail\Database\LogDao;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Models\Dto\v2\DatedVehicleJourneyV2Converter;
+use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Repositories\VehicleJourneyRepository;
@@ -40,12 +41,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
         $pool = new Pool();
         $compositionTask = $pool
             ->add(function () use ($request) {
-                // The type may not be determined successfully, but only the number is needed anyway
-                $vehicle = Vehicle::fromName($request->getVehicleId(), $request->getDateTime());
-                $composition = $this->vehicleCompositionRepository->getComposition($vehicle);
-                // Store this in the database, in case it's new.
-                $this->historicCompositionRepository->recordComposition($composition);
-                return $composition;
+                return $this->getVehicleComposition($request);
             })
             ->catch(function ($exception) {
                 if ($exception instanceof CompositionUnavailableException) {
@@ -79,5 +75,19 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
             'version'  => 2
         ];
         app(LogDao::class)->log('VehicleInformation', $query, $request->getUserAgent());
+    }
+
+    /**
+     * @param DatedVehicleJourneyV2Request $request
+     * @return VehicleCompositionSearchResult
+     */
+    function getVehicleComposition(DatedVehicleJourneyV2Request $request): VehicleCompositionSearchResult
+    {
+// The type may not be determined successfully, but only the number is needed anyway
+        $vehicle = Vehicle::fromName($request->getVehicleId(), $request->getDateTime());
+        $composition = $this->vehicleCompositionRepository->getComposition($vehicle);
+        // Store this in the database, in case it's new.
+        $this->historicCompositionRepository->recordComposition($composition);
+        return $composition;
     }
 }
