@@ -9,6 +9,7 @@ use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Models\DepartureAndArrival;
+use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
@@ -308,7 +309,11 @@ trait BasedOnHafas
             ));
             if (key_exists('arrPrognosisType', $rawIntermediateStop)) {
                 $arrival->setIsCancelled($this->isArrivalCanceledBasedOnState($rawIntermediateStop['arrPrognosisType']));
-                $arrival->setIsReported($rawIntermediateStop['arrPrognosisType'] == 'REPORTED');
+                $left = $rawIntermediateStop['arrPrognosisType'] == 'REPORTED';
+                $arrival->setIsReported($left);
+                if ($left) {
+                    $arrival->setStatus(DepartureArrivalState::LEFT);
+                }
             }
             if (key_exists('rtArrTime', $rawIntermediateStop)) {
                 $arrival->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
@@ -334,7 +339,11 @@ trait BasedOnHafas
             ));
             if (key_exists('depPrognosisType', $rawIntermediateStop)) {
                 $departure->setIsCancelled($this->isDepartureCanceledBasedOnState($rawIntermediateStop['depPrognosisType']));
-                $departure->setIsReported($rawIntermediateStop['depPrognosisType'] == 'REPORTED');
+                $left = $rawIntermediateStop['depPrognosisType'] == 'REPORTED';
+                $departure->setIsReported($left);
+                if ($left) {
+                    $departure->setStatus(DepartureArrivalState::LEFT);
+                }
             }
             if (key_exists('rtDepTime', $rawIntermediateStop)) {
                 $departure->setDelay($this->getSecondsBetweenTwoDatesAndTimes(
@@ -368,7 +377,9 @@ trait BasedOnHafas
         for ($i = count($parsedIntermediateStops) - 2; $i >= 0; $i--) {
             if ($parsedIntermediateStops[$i + 1]->getArrival() && $parsedIntermediateStops[$i + 1]->getArrival()->isReported()) {
                 $parsedIntermediateStops[$i]->getDeparture()?->setIsReported(true);
+                $parsedIntermediateStops[$i]->getDeparture()?->setStatus(DepartureArrivalState::LEFT);
                 $parsedIntermediateStops[$i]->getArrival()?->setIsReported(true);
+                $parsedIntermediateStops[$i]->getArrival()?->setStatus(DepartureArrivalState::LEFT);
             }
         }
     }
