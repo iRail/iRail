@@ -2,6 +2,7 @@
 
 namespace Irail\Models\Dto\v2;
 
+use Carbon\Carbon;
 use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
@@ -36,8 +37,8 @@ class V2Converter
             'station'           => self::convertStation($obj->getStation()),
             'platform'          => self::convertPlatform($obj->getPlatform()),
             'vehicle'           => self::convertVehicle($obj->getVehicle()),
-            'scheduledDateTime' => $obj->getScheduledDateTime(),
-            'realtimeDateTime'  => $obj->getRealtimeDateTime(),
+            'scheduledDateTime' => self::convertDateTime($obj->getScheduledDateTime()),
+            'realtimeDateTime'  => self::convertDateTime($obj->getRealtimeDateTime()),
             'canceled'          => $obj->isCancelled(),
             'status'            => $obj->getStatus()?->value,
             'occupancy'         => self::convertOccupancy($obj->getOccupancy()),
@@ -101,9 +102,9 @@ class V2Converter
             'message'      => $note->getMessage(),
             'plainText'    => $note->getStrippedMessage(),
             'links'        => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
-            'validFrom'    => $note->getValidFrom(),
-            'validUpTo'    => $note->getValidUpTo(),
-            'lastModified' => $note->getLastModified()
+            'validFrom'    => self::convertDateTime($note->getValidFrom()),
+            'validUpTo'    => self::convertDateTime($note->getValidUpTo()),
+            'lastModified' => self::convertDateTime($note->getLastModified())
         ];
     }
 
@@ -200,5 +201,11 @@ class V2Converter
             'mostFrequentType'                       => $compositionStatistics->getMostProbableType(),
             'mostFrequentTypeOccurencePercentage'    => $compositionStatistics->getMostProbableTypeOccurrence(),
         ];
+    }
+
+    protected static function convertDateTime(Carbon $dateTime)
+    {
+        $dateTime->setTimezone('Europe/Brussels');
+        return $dateTime->toAtomString();
     }
 }
