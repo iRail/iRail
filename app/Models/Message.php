@@ -117,23 +117,6 @@ class Message
     }
 
     /**
-     * @return string
-     */
-    public function getPublisher(): string
-    {
-        return $this->publisher;
-    }
-
-    public function extractHtmlLink(): ?MessageLink
-    {
-        preg_match_all("/<a href=\"(.*?)\">(.*?)<\/a>/", urldecode($this->message), $matches);
-        if (count($matches[1]) > 1) {
-            return new MessageLink(urlencode($matches[1][0]), urlencode($matches[2][0]));
-        }
-        return null;
-    }
-
-    /**
      * @return MessageLink[]
      */
     public function getLinks(): array
