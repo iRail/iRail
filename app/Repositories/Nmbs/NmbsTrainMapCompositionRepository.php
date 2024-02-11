@@ -42,21 +42,24 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      * @throws CompositionUnavailableException
      */
-    function getComposition(Vehicle $vehicle): VehicleCompositionSearchResult
+    function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
-        $journeyDate = $vehicle->getJourneyStartDate();
-        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($vehicle->getId(), $journeyDate);
+        $journeyDate = $journey->getJourneyStartDate();
+        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
         if (!$journeyWithOriginAndDestination) {
-            throw new CompositionUnavailableException($request->getId(),
+            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
+            throw new CompositionUnavailableException($journey->getId(),
                 'Composition is only available from vehicle start. Vehicle is not active on the given date.');
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
         if (Carbon::now()->timestamp < ($journeyDate->timestamp + $startTimeOffset)) {
-            throw new CompositionUnavailableException($vehicle->getId(),
+            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
+                . "Start time is $startTimeOffset.");
+            throw new CompositionUnavailableException($journey->getId(),
                 'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
         }
 
-        $cachedData = $this->fetchCompositionData($vehicle);
+        $cachedData = $this->fetchCompositionData($journey);
         $compositionData = $cachedData->getValue();
         $cacheAge = $cachedData->getAge();
 
@@ -67,14 +70,14 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             // meaning these compositions are only a locomotive and should be filtered out
             if (count($compositionDataForSingleSegment->materialUnits) > 1) {
                 $segments[] = $this->parseOneSegmentWithCompositionData(
-                    $vehicle,
+                    $journey,
                     $compositionDataForSingleSegment
                 );
             } else {
                 Log::info('Skipping composition with less than 2 carriages');
             }
         }
-        return new VehicleCompositionSearchResult($vehicle, $segments);
+        return new VehicleCompositionSearchResult($journey, $segments);
     }
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
