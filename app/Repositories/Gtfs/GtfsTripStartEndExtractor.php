@@ -139,7 +139,9 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsByDate = $this->getTripsWithStartAndEndDate();
         $dateYmd = $date->format('Ymd');
         if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
-            throw new RequestOutsideTimetableRangeException('Request outside of allowed date period (3 days back, 14 days forward)', 404);
+            throw new RequestOutsideTimetableRangeException('Request outside of allowed date period '
+                . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward)',
+                404);
         }
         return $vehicleDetailsByDate[$dateYmd];
     }
