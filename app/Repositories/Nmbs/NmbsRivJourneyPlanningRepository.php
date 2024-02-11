@@ -19,6 +19,7 @@ use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Models\CachedData;
 use Irail\Models\DepartureAndArrival;
+use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
@@ -210,13 +211,18 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             $arrival->setIsExtra($departure->isExtra());
         }
         // check if the departure has been reported
-        $departure->setIsReported(self::hasDepartureOrArrivalBeenReported($legStart));
+        if (self::hasDepartureOrArrivalBeenReported($legStart)) {
+            $departure->setIsReported(true);
+            $departure->setStatus(DepartureArrivalState::LEFT);
+        }
 
         // check if the arrival has been reported
         if (self::hasDepartureOrArrivalBeenReported($legEnd)) {
             $arrival->setIsReported(true);
+            $arrival->setStatus(DepartureArrivalState::LEFT);
             // A train can only arrive if it left first in the previous station
             $departure->setIsReported(true);
+            $departure->setStatus(DepartureArrivalState::LEFT);
         } else {
             $arrival->setIsReported(false);
         }
