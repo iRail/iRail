@@ -44,6 +44,28 @@ class StationsRepository
         return $this->getStationById('00' . $id);
     }
 
+    /**
+     * Get a station by its TSI TAF/TAP identifer.
+     * @param string $tafTapIdentifier The TAF/TAP identifier, for example BE00220 for brussels-south.
+     * @return Station|null The station which corresponds with the identifier, null if no station could be found.
+     */
+    public function getStationByTafTapCode(string $tafTapIdentifier): ?Station
+    {
+        if (!Cache::has('stationsTafTapMap')) {
+            $allStations = StationsCsv::getStations();
+            foreach ($allStations as $stationCsv) {
+                if ($stationCsv->getTafTapCode() != null) {
+                    $tafTapMap[$stationCsv->getTafTapCode()] = self::stationsCsvToStation($stationCsv);
+                }
+            }
+            Cache::set('stationsTafTapMap', $tafTapMap, 3600 * 12);
+        } else {
+            $tafTapMap = Cache::get('stationsTafTapMap');
+        }
+
+        return key_exists($tafTapIdentifier, $tafTapMap) ? $tafTapMap[$tafTapIdentifier] : null;
+    }
+
     /** @noinspection PhpUnused Used through dependency injection */
     public function findStationByName(string $name): ?Station
     {
