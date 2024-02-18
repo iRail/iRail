@@ -14,7 +14,7 @@ class HafasDepartureArrival
      */
     public $isExtraStop;
     /**
-     * @var Station
+     * @var HafasStation
      */
     public $station;
     /**

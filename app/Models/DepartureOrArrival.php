@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class DepartureOrArrival
 {
     private Vehicle $vehicle;
-    private StationInfo $station;
+    private Station $station;
 
     private ?PlatformInfo $platform = null;
     private Carbon $scheduledDateTime;
@@ -25,18 +25,18 @@ class DepartureOrArrival
     private ?OccupancyInfo $occupancy = null;
 
     /**
-     * @return StationInfo
+     * @return Station
      */
-    public function getStation(): StationInfo
+    public function getStation(): Station
     {
         return $this->station;
     }
 
     /**
-     * @param StationInfo $station
+     * @param Station $station
      * @return DepartureOrArrival
      */
-    public function setStation(StationInfo $station): DepartureOrArrival
+    public function setStation(Station $station): DepartureOrArrival
     {
         $this->station = $station;
         return $this;

@@ -4,7 +4,7 @@ namespace Tests\Database;
 
 use Carbon\Carbon;
 use Irail\Database\HistoricCompositionDao;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
@@ -19,8 +19,8 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
         $repo = new HistoricCompositionDao();
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 513, Carbon::createFromDate(2023, 12, 21));
-        $origin = new StationInfo('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
-        $destination = new StationInfo('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
+        $origin = new Station('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
+        $destination = new Station('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
         $compositionOnSegment = new TrainComposition($vehicle, $origin, $destination, 'TEST', [
             $this->createUnit(1, 'AM96', 'A', 20, 0, false),
             $this->createUnit(2, 'AM96', 'B', 20, 0, true),
@@ -48,8 +48,8 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
         $repo = new HistoricCompositionDao();
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 514);
-        $origin = new StationInfo('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
-        $destination = new StationInfo('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
+        $origin = new Station('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
+        $destination = new Station('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
         $compositionOnSegment = new TrainComposition($vehicle, $origin, $destination, 'TEST', [
             $this->createUnit(1, 'HLE', 'HLE18', 0, 0, false),
 
@@ -82,10 +82,10 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
 
         $vehicle = Vehicle::fromTypeAndNumber('IC', 514, Carbon::createFromDate(2023, 12, 21));
 
-        $origin = new StationInfo('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
-        $split = new StationInfo('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
-        $dest1 = new StationInfo('008891405', 'http://irail.be/stations/NMBS/008891405', 'Blankenberge', 'Blankenberge', null, null);
-        $dest2 = new StationInfo('008891660', 'http://irail.be/stations/NMBS/008891660', 'Knokke', 'Knokke', null, null);
+        $origin = new Station('008814001', 'http://irail.be/stations/NMBS/008814001', 'Brussel-Zuid', 'Brussel-Zuid', null, null);
+        $split = new Station('008892007', 'http://irail.be/stations/NMBS/008892007', 'Gent', 'Gent', null, null);
+        $dest1 = new Station('008891405', 'http://irail.be/stations/NMBS/008891405', 'Blankenberge', 'Blankenberge', null, null);
+        $dest2 = new Station('008891660', 'http://irail.be/stations/NMBS/008891660', 'Knokke', 'Knokke', null, null);
 
         $compositionOnSegment1 = new TrainComposition($vehicle, $origin, $split, 'TEST', [
             $this->createUnit(1, 'HLE', 'HLE18', 0, 0, false),

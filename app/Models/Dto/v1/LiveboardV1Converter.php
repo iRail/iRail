@@ -8,7 +8,6 @@ use Irail\Http\Requests\TimeSelection;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Result\LiveboardSearchResult;
-use Irail\Models\StationInfo;
 use stdClass;
 
 class LiveboardV1Converter extends V1Converter
@@ -38,8 +37,8 @@ class LiveboardV1Converter extends V1Converter
         $result->time = $departure->getScheduledDateTime()->getTimestamp();
         $result->delay = $departure->getDelay();
         $result->canceled = $departure->isCancelled() ? '1' : '0';
-        $result->left = $departure->getStatus() == DepartureArrivalState::LEFT  ?'1' : '0';;
-        $result->isExtra = $departure->isExtra() ? '1' : '0';;
+        $result->left = $departure->getStatus() == DepartureArrivalState::LEFT  ?'1' : '0';
+        $result->isExtra = $departure->isExtra() ? '1' : '0';
         $result->vehicle = self::convertVehicle($departure->getVehicle());
         $result->platform = self::convertPlatform($departure->getPlatform());
         $result->occupancy = self::convertOccupancy($departure->getOccupancy());
@@ -54,8 +53,8 @@ class LiveboardV1Converter extends V1Converter
         $result->time = $arrival->getScheduledDateTime()->getTimestamp();
         $result->delay = $arrival->getDelay();
         $result->canceled = $arrival->isCancelled() ? '1' : '0';
-        $result->arrived = $arrival->getStatus() == DepartureArrivalState::LEFT  ?'1' : '0';;
-        $result->isExtra = $arrival->isExtra() ? '1' : '0';;
+        $result->arrived = $arrival->getStatus() == DepartureArrivalState::LEFT  ?'1' : '0';
+        $result->isExtra = $arrival->isExtra() ? '1' : '0';
         $result->vehicle = self::convertVehicle($arrival->getVehicle());
         $result->platform = self::convertPlatform($arrival->getPlatform());
         $result->departureConnection = $arrival->getDepartureUri();

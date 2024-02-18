@@ -2,16 +2,16 @@
 
 namespace Irail\Models\VehicleComposition;
 
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 
 class TrainComposition
 {
     private Vehicle $vehicle;
 
-    private StationInfo $origin;
+    private Station $origin;
 
-    private StationInfo $destination;
+    private Station $destination;
 
     /**
      * @var String internal source of this data, for example "Atlas".
@@ -25,12 +25,12 @@ class TrainComposition
 
     /**
      * @param Vehicle                $vehicle
-     * @param StationInfo            $origin
-     * @param StationInfo            $destination
+     * @param Station $origin
+     * @param Station $destination
      * @param string                 $compositionSource
      * @param TrainCompositionUnit[] $units
      */
-    public function __construct(Vehicle $vehicle, StationInfo $origin, StationInfo $destination, string $compositionSource, array $units)
+    public function __construct(Vehicle $vehicle, Station $origin, Station $destination, string $compositionSource, array $units)
     {
         $this->vehicle = $vehicle;
         $this->origin = $origin;
@@ -70,12 +70,12 @@ class TrainComposition
         return $this->vehicle;
     }
 
-    public function getOrigin(): StationInfo
+    public function getOrigin(): Station
     {
         return $this->origin;
     }
 
-    public function getDestination(): StationInfo
+    public function getDestination(): Station
     {
         return $this->destination;
     }

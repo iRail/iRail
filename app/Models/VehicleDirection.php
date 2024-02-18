@@ -4,27 +4,27 @@ namespace Irail\Models;
 
 class VehicleDirection
 {
-    private ?StationInfo $station;
+    private ?Station $station;
     private string $name;
 
-    public function __construct(string $name, ?StationInfo $station)
+    public function __construct(string $name, ?Station $station)
     {
         $this->name = $name;
         $this->station = $station;
     }
 
     /**
-     * @return StationInfo|null
+     * @return Station|null
      */
-    public function getStation(): ?StationInfo
+    public function getStation(): ?Station
     {
         return $this->station;
     }
 
     /**
-     * @param StationInfo|null $station
+     * @param Station|null $station
      */
-    public function setStation(?StationInfo $station): void
+    public function setStation(?Station $station): void
     {
         $this->station = $station;
     }

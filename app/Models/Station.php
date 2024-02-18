@@ -2,7 +2,7 @@
 
 namespace Irail\Models;
 
-class StationInfo
+class Station
 {
     private string $id;
     private string $uri;

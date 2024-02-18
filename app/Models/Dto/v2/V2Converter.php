@@ -11,7 +11,7 @@ use Irail\Models\MessageLink;
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
@@ -46,7 +46,7 @@ class V2Converter
         ];
     }
 
-    public static function convertStation(StationInfo $obj): array
+    public static function convertStation(Station $obj): array
     {
         return [
             'id'            => $obj->getId(),

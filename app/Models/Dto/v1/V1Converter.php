@@ -5,14 +5,14 @@ namespace Irail\Models\Dto\v1;
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
 use Irail\Models\PlatformInfo;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use stdClass;
 
 abstract class V1Converter
 {
 
-    protected static function convertStation(StationInfo $station): StdClass
+    protected static function convertStation(Station $station): StdClass
     {
         $obj = new StdClass();
         $obj->locationX = $station->getLongitude();

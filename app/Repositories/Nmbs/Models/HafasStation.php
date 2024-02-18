@@ -2,7 +2,7 @@
 
 namespace Irail\Repositories\Nmbs\Models;
 
-class Station
+class HafasStation
 {
     public $_hafasId;
 

@@ -3,32 +3,32 @@
 namespace Irail\Models\Result;
 
 use Irail\Models\Journey;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 
 class JourneyPlanningSearchResult
 {
 
     use Cachable;
 
-    private StationInfo $originStation;
-    private StationInfo $destinationStation;
+    private Station $originStation;
+    private Station $destinationStation;
     /**
      * @var Journey[] $journeys
      */
     private array $journeys;
 
     /**
-     * @return StationInfo
+     * @return Station
      */
-    public function getOriginStation(): StationInfo
+    public function getOriginStation(): Station
     {
         return $this->originStation;
     }
 
     /**
-     * @return StationInfo
+     * @return Station
      */
-    public function getDestinationStation(): StationInfo
+    public function getDestinationStation(): Station
     {
         return $this->destinationStation;
     }
@@ -42,12 +42,12 @@ class JourneyPlanningSearchResult
     }
 
 
-    public function setOriginStation(?StationInfo $originStation): void
+    public function setOriginStation(?Station $originStation): void
     {
         $this->originStation = $originStation;
     }
 
-    public function setDestinationStation(?StationInfo $destinationStation): void
+    public function setDestinationStation(?Station $destinationStation): void
     {
         $this->destinationStation = $destinationStation;
     }

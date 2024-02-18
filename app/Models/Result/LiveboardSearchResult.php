@@ -3,32 +3,32 @@
 namespace Irail\Models\Result;
 
 use Irail\Models\DepartureOrArrival;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 
 class LiveboardSearchResult
 {
     use Cachable;
 
-    private StationInfo $station;
+    private Station $station;
     /**
      * @var $stops DepartureOrArrival[]
      */
     private array $stops;
 
     /**
-     * @param StationInfo          $station
+     * @param Station $station
      * @param DepartureOrArrival[] $stops
      */
-    public function __construct(StationInfo $station, array $stops)
+    public function __construct(Station $station, array $stops)
     {
         $this->station = $station;
         $this->stops = $stops;
     }
 
     /**
-     * @return StationInfo
+     * @return Station
      */
-    public function getStation(): StationInfo
+    public function getStation(): Station
     {
         return $this->station;
     }

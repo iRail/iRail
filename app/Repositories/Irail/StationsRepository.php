@@ -2,13 +2,12 @@
 
 namespace Irail\Repositories\Irail;
 
-use Exception;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 use Irail\Exceptions\Internal\UnknownStopException;
-use Irail\Models\StationInfo;
-use Irail\Stations\Station;
-use irail\stations\Stations;
+use Irail\Models\Station;
+use Irail\Stations\Station as StationsCsvStation;
+use irail\stations\Stations as StationsCsv;
 
 class StationsRepository
 {
@@ -21,7 +20,7 @@ class StationsRepository
     /**
      * @throws UnknownStopException
      */
-    public function getStationById(string $id): StationInfo
+    public function getStationById(string $id): Station
     {
         $cacheKey = "getStationById|$id";
         $cachedValue = Cache::get($cacheKey);
@@ -29,24 +28,24 @@ class StationsRepository
             return $cachedValue;
         }
 
-        $station = Stations::getStationFromID($id);
+        $station = StationsCsv::getStationFromID($id);
         if ($station == null) {
             throw new UnknownStopException(500, "Could not match id '{$id}' with a station in iRail. "
                 . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
-        $result = $this->StationsCsvToStationInfo($station);
+        $result = $this->stationsCsvToStation($station);
 
         Cache::put($cacheKey, $result, 3600 * 12);
         return $result;
     }
 
-    public function getStationByHafasId(string $id): ?StationInfo
+    public function getStationByHafasId(string $id): ?Station
     {
         return $this->getStationById('00' . $id);
     }
 
     /** @noinspection PhpUnused Used through dependency injection */
-    public function findStationByName(string $name): ?StationInfo
+    public function findStationByName(string $name): ?Station
     {
         $cacheKey = "stationsRepository.findStationByName.$name";
         $cachedValue = Cache::get($cacheKey);
@@ -66,23 +65,22 @@ class StationsRepository
         $name = explode('/', $name);
         $name = trim($name[0]);
 
-        $stations = Stations::getStations($name);
+        $stations = StationsCsv::getStations($name);
         if (empty($stations)) {
             return null;
         }
         $bestMatch = $stations[0]; // Stations are already sorted in the stations package
-        $result = $this->StationsCsvToStationInfo($bestMatch);
+        $result = $this->stationsCsvToStation($bestMatch);
         Cache::put($cacheKey, $result, 12 * 3600);
         return $result;
     }
 
     /**
-     * @return StationInfo[]
+     * @return Station[]
      */
     public function findAllStations(): array
     {
-        // TODO: implement
-        throw new Exception('TODO: Implement');
+        return array_map(fn($stationCsv) => self::stationsCsvToStation($stationCsv), StationsCsv::getStations());
     }
 
     public function setLocalizedLanguage(string $lang): void
@@ -91,14 +89,14 @@ class StationsRepository
     }
 
     /**
-     * @param Station $stationsCsvStation
-     * @return StationInfo
+     * @param StationsCsvStation $stationsCsvStation
+     * @return Station
      */
-    private function StationsCsvToStationInfo(Station $stationsCsvStation): StationInfo
+    private function stationsCsvToStation(StationsCsvStation $stationsCsvStation): Station
     {
         $localNames = $stationsCsvStation->getLocalizedNames();
 
-        return new StationInfo(
+        return new Station(
             str_replace('http://irail.be/stations/NMBS/', '', $stationsCsvStation->getUri()),
             $stationsCsvStation->getUri(),
             $stationsCsvStation->getName(),

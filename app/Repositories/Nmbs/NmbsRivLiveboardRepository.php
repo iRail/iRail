@@ -20,7 +20,7 @@ use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
-use Irail\Models\StationInfo;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
@@ -102,12 +102,12 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      * Parse the JSON data received from the NMBS.
      *
      * @param LiveboardRequest $request
-     * @param StationInfo      $currentStation
+     * @param Station $currentStation
      * @param array            $stop
      * @return DepartureOrArrival
      * @throws UnknownStopException | RequestOutsideTimetableRangeException | UpstreamServerException
      */
-    private function parseStopAtStation(LiveboardRequest $request, StationInfo $currentStation, array $stop): DepartureOrArrival
+    private function parseStopAtStation(LiveboardRequest $request, Station $currentStation, array $stop): DepartureOrArrival
     {
 
         /*

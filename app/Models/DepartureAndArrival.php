@@ -54,10 +54,10 @@ class DepartureAndArrival
     }
 
     /**
-     * @return StationInfo
+     * @return Station
      * @throws InternalProcessingException
      */
-    public function getStation(): StationInfo
+    public function getStation(): Station
     {
         if ($this->departure) {
             return $this->departure->getStation();

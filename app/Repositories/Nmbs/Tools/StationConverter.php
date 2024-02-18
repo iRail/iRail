@@ -2,15 +2,14 @@
 
 namespace Irail\Repositories\Nmbs\Tools;
 
-use Irail\Models\StationInfo;
-use Irail\Repositories\Nmbs\Models\Station;
+use Irail\Repositories\Nmbs\Models\HafasStation;
 
 class StationConverter
 {
-    public static function convertIrailStationToStationInfo(Station $iRailStation): StationInfo
+    public static function convertIrailStationToStationInfo(HafasStation $iRailStation): HafasStation
     {
         $stationId = substr($iRailStation->id, 8);
-        return new StationInfo($stationId, 'http://irail.be/stations/NMBS/' . $stationId,
+        return new HafasStation($stationId, 'http://irail.be/stations/NMBS/' . $stationId,
             $iRailStation->name, $iRailStation->name,
             $iRailStation->locationX, $iRailStation->locationY);
     }
