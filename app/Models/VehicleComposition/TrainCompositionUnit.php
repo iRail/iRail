@@ -14,11 +14,6 @@ class TrainCompositionUnit
     //--- Data fields
 
     /**
-     * @var int The UIC code of this vehicle
-     */
-    private int $uicCode;
-
-    /**
      * @var boolean Indicates if this unit has toilet.
      */
     private bool $hasToilet;
@@ -53,10 +48,6 @@ class TrainCompositionUnit
      */
     private bool $hasAirco;
 
-    /**
-     * @var integer The number for this car or motor-unit, visible to the traveler.
-     */
-    private int $materialNumber;
 
     private bool $hasBikeSection;
 
@@ -118,11 +109,6 @@ class TrainCompositionUnit
     private bool $hasLuggageSection;
 
     /**
-     * @var string The material subtype name, as specified by the railway company. Examples are AM80_c or M6BUH.
-     */
-    private string $materialSubTypeName;
-
-    /**
      * @var int The traction group in which this carriage belongs. For example, two trains coupled together have 2 traction positions.
      */
     private int $tractionPosition;
@@ -147,17 +133,6 @@ class TrainCompositionUnit
     public function getMaterialType(): RollingMaterialType
     {
         return $this->materialType;
-    }
-
-    public function getUicCode(): int
-    {
-        return $this->uicCode;
-    }
-
-    public function setUicCode(int $uicCode): TrainCompositionUnit
-    {
-        $this->uicCode = $uicCode;
-        return $this;
     }
 
     public function hasToilet(): bool
@@ -234,17 +209,6 @@ class TrainCompositionUnit
     public function setHasAirco(bool $hasAirco): TrainCompositionUnit
     {
         $this->hasAirco = $hasAirco;
-        return $this;
-    }
-
-    public function getMaterialNumber(): int
-    {
-        return $this->materialNumber;
-    }
-
-    public function setMaterialNumber(int $materialNumber): TrainCompositionUnit
-    {
-        $this->materialNumber = $materialNumber;
         return $this;
     }
 
@@ -377,17 +341,6 @@ class TrainCompositionUnit
     public function setHasLuggageSection(bool $hasLuggageSection): TrainCompositionUnit
     {
         $this->hasLuggageSection = $hasLuggageSection;
-        return $this;
-    }
-
-    public function getMaterialSubTypeName(): string
-    {
-        return $this->materialSubTypeName;
-    }
-
-    public function setMaterialSubTypeName(string $materialSubTypeName): TrainCompositionUnit
-    {
-        $this->materialSubTypeName = $materialSubTypeName;
         return $this;
     }
 

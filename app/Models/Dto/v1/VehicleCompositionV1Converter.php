@@ -9,6 +9,7 @@ use Irail\Models\Result\VehicleJourneySearchResult;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
 use stdClass;
 
 class VehicleCompositionV1Converter extends V1Converter
@@ -53,7 +54,7 @@ class VehicleCompositionV1Converter extends V1Converter
         $result->hasFirstClassOutlets = $unit->hasFirstClassOutlets();
         $result->hasHeating = $unit->hasHeating();
         $result->hasAirco = $unit->hasAirco();
-        $result->materialNumber = $unit->getMaterialNumber();
+        $result->materialNumber = $unit instanceof TrainCompositionUnitWithId ? $unit->getMaterialNumber() : null;
         $result->tractionType = $unit->getTractionType();
         $result->canPassToNextUnit = $unit->canPassToNextUnit();
         $result->seatsFirstClass = $unit->getSeatsFirstClass();
@@ -64,7 +65,7 @@ class VehicleCompositionV1Converter extends V1Converter
         $result->standingPlacesSecondClass = $unit->getStandingPlacesSecondClass();
         $result->lengthInMeter = $unit->getLengthInMeter();
         $result->hasSemiAutomaticInteriorDoors = $unit->hasSemiAutomaticInteriorDoors();
-        $result->materialSubTypeName = $unit->getMaterialSubTypeName();
+        $result->materialSubTypeName = $unit instanceof TrainCompositionUnitWithId ? $unit->getMaterialSubTypeName() : null;
         $result->tractionPosition = $unit->getTractionPosition();
         $result->hasPrmSection = $unit->hasPrmSection();
         $result->hasPriorityPlaces = $unit->hasPriorityPlaces();

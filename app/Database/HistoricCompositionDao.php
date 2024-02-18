@@ -5,6 +5,7 @@ namespace Irail\Database;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Irail\Models\Dao\CompositionHistoryEntry;
 use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Dao\StoredComposition;
@@ -13,6 +14,7 @@ use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
 use stdClass;
 
 class HistoricCompositionDao
@@ -158,6 +160,11 @@ class HistoricCompositionDao
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
         foreach ($units as $position => $unit) {
+            if (!($units instanceof TrainCompositionUnitWithId)) {
+                // TODO: When reading these compositions back, the difference between the summary and stored data should be detected
+                Log::debug("Cannot record historic composition due to missing material ids for journey {$composition->getVehicle()->getId()} reported by {$composition->getCompositionSource()}");
+                continue;
+            }
             $this->insertIfNotExists($unit);
             DB::update('INSERT INTO composition_unit_usage(uic_code, historic_composition_id, position) VALUES (?,?,?)', [
                 $unit->getUicCode(),

@@ -12,6 +12,7 @@ use Irail\Models\VehicleComposition\RollingMaterialOrientation;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
@@ -107,10 +108,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     {
         $units = [];
         foreach ($rawUnits as $i => $compositionUnit) {
-            if (property_exists($compositionUnit, 'uicCode')) {
-                // Only parse valid composition carriages, containing a uic code & material number
-                $units[] = self::parseCompositionUnit($compositionUnit, $i);
-            }
+            $units[] = self::parseCompositionUnit($compositionUnit, $i);
         }
         return $units;
     }
@@ -124,8 +122,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     private static function parseCompositionUnit($rawCompositionUnit, int $position): TrainCompositionUnit
     {
         $rollingMaterialType = self::getMaterialType($rawCompositionUnit, $position);
-        $unit = new TrainCompositionUnit($rollingMaterialType);
-        $compositionUnit = self::readDetailsIntoUnit($rawCompositionUnit, $unit);
+        $compositionUnit = self::readDetailsIntoUnit($rawCompositionUnit, $rollingMaterialType);
         return $compositionUnit;
     }
 
@@ -150,9 +147,17 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         return new RollingMaterialType('unknown', 'unknown');
     }
 
-    private static function readDetailsIntoUnit($object, TrainCompositionUnit $trainCompositionUnit): TrainCompositionUnit
+    private static function readDetailsIntoUnit($object, RollingMaterialType $rollingMaterialType): TrainCompositionUnit
     {
-        $trainCompositionUnit->setUicCode($object->uicCode);
+        if (property_exists($object, 'uicCode')) {
+            // containing a uic code & material number
+            $trainCompositionUnit = new TrainCompositionUnitWithId($rollingMaterialType);
+            $trainCompositionUnit->setUicCode($object->uicCode);
+            $trainCompositionUnit->setMaterialNumber($object->materialNumber ?: 0);
+            $trainCompositionUnit->setMaterialSubTypeName($object->materialSubTypeName ?: 'unknown');
+        } else {
+            $trainCompositionUnit = new TrainCompositionUnit($rollingMaterialType);
+        }
         $trainCompositionUnit->setHasToilet($object->hasToilets ?: false);
         $trainCompositionUnit->setHasPrmToilet($object->hasPrmToilets ?: false);
         $trainCompositionUnit->setHasTables($object->hasTables ?: false);
@@ -163,7 +168,6 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $trainCompositionUnit->setHasAirco($object->hasAirco ?: false);
         $trainCompositionUnit->setHasPrmSection(property_exists($object, 'hasPrmSection') && $object->hasPrmSection); // Persons with Reduced Mobility
         $trainCompositionUnit->setHasPriorityPlaces($object->hasPriorityPlaces ?: false);
-        $trainCompositionUnit->setMaterialNumber($object->materialNumber ?: 0);
         $trainCompositionUnit->setTractionType($object->tractionType ?: 'unknown');
         $trainCompositionUnit->setCanPassToNextUnit($object->canPassToNextUnit ?: false);
         $trainCompositionUnit->setStandingPlacesSecondClass($object->standingPlacesSecondClass ?: 0);
@@ -176,7 +180,6 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $trainCompositionUnit->setTractionPosition($object->tractionPosition ?: 0);
         $trainCompositionUnit->setHasSemiAutomaticInteriorDoors($object->hasSemiAutomaticInteriorDoors ?: false);
         $trainCompositionUnit->setHasLuggageSection(property_exists($object, 'hasLuggageSection') && $object->hasLuggageSection);
-        $trainCompositionUnit->setMaterialSubTypeName($object->materialSubTypeName ?: 'unknown');
 
         return $trainCompositionUnit;
     }
@@ -209,7 +212,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
             // When discovering a carriage in another traction position,
             if ($units[$i]->getTractionPosition() < $units[$i + 1]->getTractionPosition()
                 && (
-                    !str_starts_with($units[$i]->getMaterialSubTypeName(), 'M7')
+                    !str_starts_with($units[$i]->getMaterialType()->getSubType(), 'M7')
                     || (self::isM7SteeringCabin($units[$i]) && self::isM7SteeringCabin($units[$i + 1]))
                 )
             ) {

@@ -15,6 +15,7 @@ use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
 use Irail\Models\VehicleDirection;
 
 class V2Converter
@@ -163,9 +164,9 @@ class V2Converter
                 'sub_type'    => $unit->getMaterialType()->getSubType(),
                 'orientation' => $unit->getMaterialType()->getOrientation()->name
             ],
-            'uicCode'                       => $unit->getUicCode(),
-            'materialSubTypeName'           => $unit->getMaterialSubTypeName(),
-            'materialNumber'                => $unit->getMaterialNumber(),
+            'uicCode'             => $unit instanceof TrainCompositionUnitWithId ? $unit->getUicCode() : null,
+            'materialSubTypeName' => $unit instanceof TrainCompositionUnitWithId ? $unit->getMaterialSubTypeName() : null,
+            'materialNumber'      => $unit instanceof TrainCompositionUnitWithId ? $unit->getMaterialNumber() : null,
             'tractionType'                  => $unit->getTractionType(),
             'hasToilets'                    => $unit->hasToilet(),
             'hasPrmToilets'                 => $unit->hasToilet(),
