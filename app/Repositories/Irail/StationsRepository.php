@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Models\StationInfo;
+use Irail\Stations\Station;
 use irail\stations\Stations;
 
 class StationsRepository
@@ -33,7 +34,7 @@ class StationsRepository
             throw new UnknownStopException(500, "Could not match id '{$id}' with a station in iRail. "
                 . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
-        $result = $this->graphStationToStationInfo($station);
+        $result = $this->StationsCsvToStationInfo($station);
 
         Cache::put($cacheKey, $result, 3600 * 12);
         return $result;
@@ -65,34 +66,12 @@ class StationsRepository
         $name = explode('/', $name);
         $name = trim($name[0]);
 
-        $stationsgraph = Stations::getStations($name);
-        if (!isset($stationsgraph->{'@graph'}[0])) {
+        $stations = Stations::getStations($name);
+        if (empty($stations)) {
             return null;
         }
-        $bestMatch = $stationsgraph->{'@graph'}[0];
-
-        // Legacy logic from StationsDatasource
-        // or find exact match using ugly breaks and strlen
-        foreach ($stationsgraph->{'@graph'} as $stationitem) {
-            if (strlen($stationitem->name) === strlen($name)) {
-                // If we have a near-exact match (based on string length), pick this one
-                $bestMatch = $stationitem;
-                break;
-            } elseif (isset($stationitem->alternative) && is_array($stationitem->alternative)) {
-                // If one of the alternative names if a near-exact match (based on string length), pick it.
-                foreach ($stationitem->alternative as $alt) {
-                    if (strlen($alt->{'@value'}) === strlen($name)) {
-                        $bestMatch = $stationitem;
-                        break;
-                    }
-                }
-            } elseif (isset($stationitem->alternative) && strlen($stationitem->alternative->{'@value'}) === strlen($name)) {
-                // If there is only one alternative name, but it matches on string length, pick it.
-                $bestMatch = $stationitem;
-                break;
-            }
-        }
-        $result = $this->graphStationToStationInfo($bestMatch);
+        $bestMatch = $stations[0]; // Stations are already sorted in the stations package
+        $result = $this->StationsCsvToStationInfo($bestMatch);
         Cache::put($cacheKey, $result, 12 * 3600);
         return $result;
     }
@@ -112,28 +91,20 @@ class StationsRepository
     }
 
     /**
-     * @param $iRailGraphStation
+     * @param Station $stationsCsvStation
      * @return StationInfo
      */
-    private function graphStationToStationInfo($iRailGraphStation): StationInfo
+    private function StationsCsvToStationInfo(Station $stationsCsvStation): StationInfo
     {
-        $localName = $iRailGraphStation->{'name'};
-        $translatedName = $localName;
-        if (isset($iRailGraphStation->{'alternative'})) {
-            foreach ($iRailGraphStation->{'alternative'} as $alternatives) {
-                if ($alternatives->{'@language'} == $this->lang) {
-                    $translatedName = $alternatives->{'@value'};
-                }
-            }
-        }
+        $localNames = $stationsCsvStation->getLocalizedNames();
 
         return new StationInfo(
-            str_replace('http://irail.be/stations/NMBS/', '', $iRailGraphStation->{'@id'}),
-            $iRailGraphStation->{'@id'},
-            $localName,
-            $translatedName,
-            $iRailGraphStation->longitude,
-            $iRailGraphStation->latitude,
+            str_replace('http://irail.be/stations/NMBS/', '', $stationsCsvStation->getUri()),
+            $stationsCsvStation->getUri(),
+            $stationsCsvStation->getName(),
+            key_exists($this->lang, $localNames) ? $localNames[$this->lang] : $stationsCsvStation->getName(),
+            $stationsCsvStation->getLongitude(),
+            $stationsCsvStation->getLatitude(),
         );
     }
 }

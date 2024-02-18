@@ -14,7 +14,7 @@
         "ext-simplexml": "*",
         "ext-zend-opcache": "*",
         "ext-dom": "*",
-        "irail/stations": "^1.7",
+      "irail/stations": "^2",
         "laravel/lumen-framework": "^10.0",
         "spatie/async": "^1.5"
     },
