@@ -17,27 +17,27 @@ use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Router;
 
 $router->get('/liveboard', function (Request $request) use ($router) {
-    return redirect(route('v1.liveboard', $_GET));
+    return redirect(route('v1.liveboard', $_GET, $request->isSecure()));
 });
 
 $router->get('/connections', function (Request $request) use ($router) {
-    return redirect(route('v1.journeyPlanning', $_GET));
+    return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()));
 });
 
 $router->get('/vehicle', function (Request $request) use ($router) {
-    return redirect(route('v1.datedVehicleJourney', $_GET));
+    return redirect(route('v1.datedVehicleJourney', $_GET, $request->isSecure()));
 });
 
 $router->get('/disturbances', function (Request $request) use ($router) {
-    return redirect(route('v1.serviceAlerts', $_GET));
+    return redirect(route('v1.serviceAlerts', $_GET, $request->isSecure()));
 });
 
 $router->get('/composition', function (Request $request) use ($router) {
-    return redirect(route('v1.composition', $_GET));
+    return redirect(route('v1.composition', $_GET, $request->isSecure()));
 });
 
 $router->get('/logs', function (Request $request) use ($router) {
-    return redirect(route('v1.logs', $_GET));
+    return redirect(route('v1.logs', $_GET, $request->isSecure()));
 });
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
