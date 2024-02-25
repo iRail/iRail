@@ -14,6 +14,7 @@
 */
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Lumen\Routing\Router;
 
 $router->get('/liveboard', function (Request $request) use ($router) {
@@ -21,6 +22,8 @@ $router->get('/liveboard', function (Request $request) use ($router) {
 });
 
 $router->get('/connections', function (Request $request) use ($router) {
+    // Test this value in production
+    Log::debug('Incoming connection from with scheme ' . $request->getScheme() . ', headers ' . $request->headers);
     return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()));
 });
 
