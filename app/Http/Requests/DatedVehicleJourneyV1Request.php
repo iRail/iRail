@@ -3,8 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-
-use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Request\InvalidRequestException;
 
 class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJourneyRequest
@@ -26,21 +24,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     {
         parent::__construct();
         $this->vehicleId = $this->_request->get('id');
-
-        try {
-            $date = $this->_request->get('date') ?: date('Ymd');
-            $time = $this->_request->get('time') ?: date('Hi');
-            if (strlen($date) == 6) {
-                $date = '20' . $date;
-            }
-            if (strlen($time) == 3) {
-                $time = '0' . $time;
-            }
-            $this->dateTime = Carbon::createFromFormat('Ymd Hi', $date . ' ' . $time);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            throw new InvalidRequestException('Invalid date/time provided');
-        }
+        $this->dateTime = $this->parseIrailV1DateTime();
     }
 
 
