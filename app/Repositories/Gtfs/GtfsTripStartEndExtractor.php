@@ -140,7 +140,7 @@ class GtfsTripStartEndExtractor
         $dateYmd = $date->format('Ymd');
         if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
             throw new RequestOutsideTimetableRangeException('Request outside of allowed date period '
-                . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward)',
+                . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward): ' . $date,
                 404);
         }
         return $vehicleDetailsByDate[$dateYmd];
