@@ -21,7 +21,7 @@ class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, I
             $this->stationId = $this->parseStationId('station', $this->routeOrGet('station'));
         }
         $this->dateTime = $this->parseIrailV1DateTime();
-        $this->departureArrivalMode = $this->parseDepartureArrival($this->routeOrGet('arrdep', 'departure'));
+        $this->departureArrivalMode = $this->parseV1DepartureArrival($this->routeOrGet('arrdep', 'departure'));
     }
 
     /**

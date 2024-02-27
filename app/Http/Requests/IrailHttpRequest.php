@@ -152,7 +152,7 @@ abstract class IrailHttpRequest extends LumenRequest
     {
         try {
             $defaultDateTime = Carbon::now('Europe/Brussels');
-            $date = $this->_request->get('date') ?: $defaultDateTime->format('dmY');
+            $date = $this->_request->get('date') ?: $defaultDateTime->format('dmy');
             $time = $this->_request->get('time') ?: $defaultDateTime->format('Hi');
             if (strlen($date) == 6) {
                 $date = substr($date, 0, 4) . '20' . substr($date, 4);
@@ -184,6 +184,17 @@ abstract class IrailHttpRequest extends LumenRequest
         } catch (Exception $e) {
             throw new InvalidRequestException("The provided date/time {$datetime} is invalid.");
         }
+    }
+
+    /**
+     * @throws InvalidRequestException
+     */
+    protected function parseV1DepartureArrival(string $value): TimeSelection
+    {
+        if (strtolower($value[0]) == 'a') {
+            return TimeSelection::ARRIVAL;
+        }
+        return TimeSelection::DEPARTURE;
     }
 
     /**
