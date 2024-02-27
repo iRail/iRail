@@ -7,6 +7,7 @@
 
 namespace Irail\Http\Requests;
 
+use Carbon\Carbon;
 use Irail\Exceptions\Request\InvalidRequestException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -42,5 +43,11 @@ class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCom
     public function getVehicleId(): string
     {
         return $this->vehicleId;
+    }
+
+    public function getDateTime(): Carbon
+    {
+        // Can't be specified in a V1 request, always "now"
+        return Carbon::now();
     }
 }
