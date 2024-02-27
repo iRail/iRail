@@ -194,7 +194,7 @@ class OccupancyDao
     {
         Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
         $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
-        return $levels[$stationId];
+        return key_exists($stationId, $levels) ? $levels[$stationId] : [];
     }
 
     /**
