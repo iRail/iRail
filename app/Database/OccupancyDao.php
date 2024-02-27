@@ -105,8 +105,11 @@ class OccupancyDao
             $vehicleJourneyStartDate->copy()->startOfDay(),
             $occupancyLevel->getIntValue()
         ]);
-        $cacheKey = $this->getOccupancyKey($source, $vehicleId, $stationId, $vehicleJourneyStartDate);
         Cache::put($recordedFlagKey, true, 12 * 3600);
+
+        $cacheKey = $this->getOccupancyKey($source, $vehicleId, $stationId, $vehicleJourneyStartDate); // Clear cache at station level
+        Cache::delete($cacheKey); // Clear cached value after store
+        $cacheKey = $this->getOccupancyKey($source, $vehicleId, null, $vehicleJourneyStartDate); // Clear cache at vehicle level as well
         Cache::delete($cacheKey); // Clear cached value after store
     }
 
@@ -133,7 +136,7 @@ class OccupancyDao
         }
         $average = array_sum($values) / count($values);
         $occupancyLevel = OccupancyLevel::fromIntValue($average);
-        Cache::put($cacheKey, $occupancyLevel, 1800);
+        Cache::put($cacheKey, $occupancyLevel, 3 * 3600);
         return $occupancyLevel;
     }
 
@@ -190,14 +193,44 @@ class OccupancyDao
     private function readLevels(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate): array
     {
         Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
-        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND stop_id=? AND journey_start_date=?',
+        $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+        return $levels[$stationId];
+    }
+
+    /**
+     * Read all stored occupancy levels from the database for a given vehicle at a given date. Filtering by station needs to be done server-side,
+     * since in many cases data for multiple stops along the vehicles journey is needed anyway. Reducing the number of database round trips improves performance.
+     *
+     * @param OccupancyReportSource $source The source for which to read reports
+     * @param string                $vehicleId The vehicle for which to read reports.
+     * @param Carbon                $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
+     * @return Array<String, OccupancyLevel[]> The reports which have been found for each station.
+     */
+    private function readLevelsForVehicle(OccupancyReportSource $source, string $vehicleId, Carbon $vehicleJourneyStartDate): array
+    {
+        $cacheKey = $this->getOccupancyKey($source, $vehicleId, null, $vehicleJourneyStartDate); // Cache at vehicle level
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue != null) {
+            return $cachedValue;
+        }
+
+        Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
+        $rows = DB::select('SELECT stop_id, occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND journey_start_date=?',
             [
                 $source->value,
                 $vehicleId,
-                $stationId,
                 $vehicleJourneyStartDate->copy()->startOfDay()
             ]);
-        return array_map(fn($row) => OccupancyLevel::fromIntValue($row->occupancy), $rows);
+        // Convert the results
+        $result = [];
+        foreach ($rows as $row) {
+            if (!key_exists($row->stop_id, $result)) {
+                $result[$row->stop_id] = [];
+            }
+            $result[$row->stop_id][] = OccupancyLevel::fromIntValue($row->occupancy);
+        }
+        Cache::put($cacheKey, $result, 3 * 3600);
+        return $result;
     }
 
     private function exportSpitsgidsReport(Carbon $reportDate): array
@@ -217,7 +250,7 @@ class OccupancyDao
         ], $rows);
     }
 
-    private function getOccupancyKey(OccupancyReportSource $source, string $vehicleId, string $stationId, Carbon $date): string
+    private function getOccupancyKey(OccupancyReportSource $source, string $vehicleId, ?string $stationId, Carbon $date): string
     {
         return "occupancy:{$source->value}:$vehicleId:$stationId:{$date->copy()->startOfDay()->toDateString()}";
     }
