@@ -85,6 +85,7 @@ class JourneyPlanningV1Converter extends V1Converter
         $result->direction = self::convertDirection($arrival);
         $result->arrived = $arrival->getStatus()?->hasArrived() ? '1' : '0';
         $result->walking = $arrivalLeg->getLegType() == JourneyLegType::WALKING ? '1' : '0';
+        $result->departureConnection = $arrival->getDepartureUri(); // Not completely correct, but needs to be here for backwards compatibility
         return $result;
     }
 
