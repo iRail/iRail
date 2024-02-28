@@ -10,6 +10,10 @@ use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Models\CachedData;
 use Psr\Cache\InvalidArgumentException;
 
+/**
+ * A trait adding methods to get and set cached items. It uses APC as an underlying cache store. All data is returned as CachedData, which contain the time
+ * when the object was cached and how long it is valid. This feature is not available in the laravel Cache facade, therefore the APCU cache is addressed directly.
+ */
 trait Cache
 {
     private static ?AbstractCachePool $cache = null;
@@ -28,22 +32,30 @@ trait Cache
     private function initializeCachePool(): void
     {
         if (self::$cache == null) {
-            // Try to use APC when available
             if (extension_loaded('apcu')) {
                 self::$cache = new ApcuCachePool();
             } else {
+                // APCu is required since we need to handle large amounts of GTFS data for most of the requests. Without a functioning in-memory cache which
+                // is shared between processes, the iRail API will not deliver adequate performance. Since this is so important, we refuse running on wrongly
+                // configured servers
                 throw new InternalProcessingException(500, 'APCU Cache is not enabled, but required to run iRail');
             }
         }
     }
 
+    /**
+     * Set a prefix which will be added in front of any key submitted in any other method.
+     * @param string $prefix
+     * @return void
+     */
     protected function setCachePrefix(string $prefix): void
     {
         $this->prefix = $prefix;
     }
 
     /**
-     * @param int $defaultTtl
+     * Set the default Time to live (TTL) for objects stored in the cache.
+     * @param int $defaultTtl The default time in seconds.
      */
     public function setDefaultTtl(int $defaultTtl): void
     {
@@ -211,6 +223,7 @@ trait Cache
     }
 
     /**
+     * Get a cache key with invalid tokens removed and the configured prefix added.
      * @param String $key
      * @return string
      */
