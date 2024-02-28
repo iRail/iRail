@@ -9,6 +9,7 @@ use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Http\Responses\v1\VehicleCompositionV1Converter;
 use Irail\Models\Vehicle;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
+use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV1Controller extends BaseIrailController
@@ -26,7 +27,8 @@ class CompositionV1Controller extends BaseIrailController
     public function getVehicleComposition(VehicleCompositionV1Request $request): Response
     {
         $tripStartEndExtractor = app(GtfsTripStartEndExtractor::class);
-        $startDate = $tripStartEndExtractor->getStartDate($request->getVehicleId(), $request->getDateTime());
+        $journeyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
+        $startDate = $tripStartEndExtractor->getStartDate($journeyNumber, $request->getDateTime());
 
         $vehicle = Vehicle::fromName($request->getVehicleId(), $startDate ?: Carbon::now());
         $repo = app(VehicleCompositionRepository::class);

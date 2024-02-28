@@ -391,14 +391,14 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $compositionData = $this->getCachedObject($cacheKey);
 
         if ($compositionData == null || $compositionData->getValue() == null) {
-            throw new CompositionUnavailableException($vehicle->getNumber());
+            throw new CompositionUnavailableException($vehicle->getId());
         }
 
         return $compositionData;
     }
 
     /**
-     * @param string $vehicleId The vehicle ID, numeric only. IC1234 should be passed as '1234'.
+     * @param int $vehicleNumber The vehicle ID, numeric only. IC1234 should be passed as '1234'.
      * @return array The response data, or null when no data was found.
      * @throws CompositionUnavailableException
      */
