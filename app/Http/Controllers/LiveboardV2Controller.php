@@ -5,10 +5,10 @@ namespace Irail\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Irail\Database\LogDao;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Http\Dto\v2\LiveboardV2Converter;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Requests\LiveboardV2Request;
-use Irail\Models\Dto\v2\LiveboardV2Converter;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 

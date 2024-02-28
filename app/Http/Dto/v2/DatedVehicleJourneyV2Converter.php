@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Models\Dto\v2;
+namespace Irail\Http\Dto\v2;
 
 use Irail\Http\Requests\IrailHttpRequest;
 use Irail\Models\Dao\CompositionStatistics;

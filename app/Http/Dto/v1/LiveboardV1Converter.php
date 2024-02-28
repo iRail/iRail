@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Models\Dto\v1;
+namespace Irail\Http\Dto\v1;
 
 use Irail\Http\Requests\IrailHttpRequest;
 use Irail\Http\Requests\LiveboardRequest;

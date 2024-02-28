@@ -4,14 +4,14 @@ namespace Irail\Legacy\Output;
 
 use Exception;
 use InvalidArgumentException;
-use Irail\Models\Dto\v1\DataRoot;
+use Irail\Http\Dto\v1\DataRoot;
 
 /**
  * An abstract class for a printer. It prints a document.
  */
 abstract class Printer
 {
-    const PRIVATE_VAR_PREFIX = "_";
+    const PRIVATE_VAR_PREFIX = '_';
     protected $documentRoot;
     protected $root;
     private $hash;
@@ -33,10 +33,10 @@ abstract class Printer
         }
 
         switch ($format) {
-            case "":
-            case "xml":
+            case '':
+            case 'xml':
                 return new Xml($dataroot);
-            case "json":
+            case 'json':
                 return new Json($dataroot);
         }
         throw new InvalidArgumentException('Incorrect format specified. Please correct this and try again', 402);
@@ -57,7 +57,7 @@ abstract class Printer
      */
     public function getBody(): string
     {
-        $result = "";
+        $result = '';
         // Only create this hash once
         $this->hash = get_object_vars($this->documentRoot);
         //so that people would know that we have a child of the rootelement
@@ -97,7 +97,7 @@ abstract class Printer
      */
     private function printElement($key, $val, $root = false): string
     {
-        $result = "";
+        $result = '';
         if (is_array($val)) {
             $result .= $this->startArray($key, count($val), $root);
             $i = 0;
@@ -153,12 +153,12 @@ abstract class Printer
 
     public function nextArrayElement(): string
     {
-        return "";
+        return '';
     }
 
     public function nextObjectElement(): string
     {
-        return "";
+        return '';
     }
 
     /**

@@ -1,9 +1,8 @@
 <?php
 
-namespace Irail\Models\Dto\v2;
+namespace Irail\Http\Dto\v2;
 
 use Irail\Http\Requests\JourneyPlanningRequest;
-use Irail\Models\Dao\CompositionStatistics;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;

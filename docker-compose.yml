@@ -56,6 +56,7 @@ services:
   web:
     image: nginx:latest
     container_name: nginx
+    restart: unless-stopped
     ports:
       - '8080:80'
     volumes:

@@ -1,10 +1,11 @@
 <?php
 
-namespace Irail\Models\Dto\v1;
+namespace Irail\Http\Dto\v1;
 
 /* Copyright (C) 2011 by iRail vzw/asbl */
 
 use AllowDynamicProperties;
+use Exception;
 
 /**
  * This is the root of every document. It will specify a version and timestamp. It also has the printer class to print the entire document.
@@ -21,7 +22,7 @@ class DataRoot
      * constructor of this class.
      *
      * @param        $rootname
-     * @throws \Exception
+     * @throws Exception
      * @internal param format $string the format of the document: json, json or XML
      */
     public function __construct($rootName)

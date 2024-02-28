@@ -5,8 +5,8 @@ namespace Irail\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
+use Irail\Http\Dto\v2\VehicleCompositionV2Converter;
 use Irail\Http\Requests\VehicleCompositionV2Request;
-use Irail\Models\Dto\v2\VehicleCompositionV2Converter;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV2Controller extends BaseIrailController
