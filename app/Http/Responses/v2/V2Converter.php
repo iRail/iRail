@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Http\Dto\v2;
+namespace Irail\Http\Responses\v2;
 
 use Carbon\Carbon;
 use Irail\Models\Dao\CompositionStatistics;

@@ -4,7 +4,7 @@ namespace Irail\Legacy\Output;
 
 use Exception;
 use InvalidArgumentException;
-use Irail\Http\Dto\v1\DataRoot;
+use Irail\Http\Responses\v1\DataRoot;
 
 /**
  * An abstract class for a printer. It prints a document.

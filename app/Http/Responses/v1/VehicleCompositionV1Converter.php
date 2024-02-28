@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Http\Dto\v1;
+namespace Irail\Http\Responses\v1;
 
 use Irail\Http\Requests\DatedVehicleJourneyV1Request;
 use Irail\Http\Requests\VehicleCompositionV1Request;

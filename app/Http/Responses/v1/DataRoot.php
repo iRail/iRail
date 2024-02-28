@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Http\Dto\v1;
+namespace Irail\Http\Responses\v1;
 
 /* Copyright (C) 2011 by iRail vzw/asbl */
 

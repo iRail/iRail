@@ -4,8 +4,8 @@ namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Irail\Database\LogDao;
-use Irail\Http\Dto\v2\ServiceAlertsV2Converter;
 use Irail\Http\Requests\ServiceAlertsV2Request;
+use Irail\Http\Responses\v2\ServiceAlertsV2Converter;
 use Irail\Repositories\ServiceAlertsRepository;
 
 class ServiceAlertsV2Controller extends BaseIrailController

@@ -4,9 +4,9 @@ namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Irail\Database\LogDao;
-use Irail\Http\Dto\v1\JourneyPlanningV1Converter;
 use Irail\Http\Requests\JourneyPlanningV1RequestImpl;
 use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
+use Irail\Http\Responses\v1\JourneyPlanningV1Converter;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;

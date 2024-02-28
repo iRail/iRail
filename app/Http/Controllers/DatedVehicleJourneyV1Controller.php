@@ -4,8 +4,8 @@ namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Irail\Database\LogDao;
-use Irail\Http\Dto\v1\DatedVehicleJourneyV1Converter;
 use Irail\Http\Requests\DatedVehicleJourneyV1Request;
+use Irail\Http\Responses\v1\DatedVehicleJourneyV1Converter;
 use Irail\Repositories\VehicleJourneyRepository;
 
 class DatedVehicleJourneyV1Controller extends BaseIrailController
