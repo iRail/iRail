@@ -160,12 +160,13 @@ class NmbsRivRawDataRepository
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
             $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getJourneyNumber()}|{$request->getDateTime()->format('Ymd')}";
-            $journeyDetailRef = $this->getCacheOrUpdate($cacheKey,
+            $alternativeResult = $this->getCacheOrUpdate($cacheKey,
                 function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination) {
                     return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
                 },
                 // Cache for 4 hours
                 ttl: 3600 * 4);
+            $journeyDetailRef = $alternativeResult->getValue();
         }
         # If no reference has been found at this stage, fail
         if ($journeyDetailRef === false) {
