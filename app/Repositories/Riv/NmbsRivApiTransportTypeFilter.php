@@ -42,10 +42,12 @@ enum NmbsRivApiTransportTypeFilter: int
             } else {
                 return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
             }
-        } else if ($typeOfTransportFilter == TypeOfTransportFilter::NO_INTERNATIONAL_TRAINS) {
+        } elseif ($typeOfTransportFilter == TypeOfTransportFilter::NO_INTERNATIONAL_TRAINS) {
             return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
-        } else if ($typeOfTransportFilter == TypeOfTransportFilter::ALL_TRAINS) {
+        } elseif ($typeOfTransportFilter == TypeOfTransportFilter::TRAINS) {
             return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
+        } elseif ($typeOfTransportFilter == TypeOfTransportFilter::ALL) {
+            return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ALL;
         }
         // All trains is the default
         return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;

@@ -4,7 +4,8 @@ namespace Irail\Http\Requests;
 
 enum TypeOfTransportFilter
 {
-    case ALL_TRAINS;
+    case ALL;
+    case TRAINS;
     case NO_INTERNATIONAL_TRAINS;
     case AUTOMATIC;
 }
