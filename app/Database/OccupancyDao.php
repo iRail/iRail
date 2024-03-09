@@ -25,11 +25,18 @@ class OccupancyDao
     /**
      * Add occupancy data (also known as spitsgids data) to the object.
      *
-     * @param DepartureOrArrival  $departure
-     * @param OccupancyLevel|null $officialNmbsLevel The official NMBS level, if known. If not known, iRail will attempt to read this from previous response data.
+     * @param DepartureOrArrival          $departure
+     * @param OccupancyLevel|null         $officialNmbsLevel The official NMBS level, if known. If not known, iRail will attempt to read this from previous response data.
+     * @param OccupancyDaoPerformanceMode $performanceMode How the performance of database queries should be optimized.
+     *                                                     Use VEHICLE when many queries for the same vehicle will be made.
+     *                                                     Use station when many queries for the same station will be made.
      * @return OccupancyInfo
      */
-    public function getOccupancy(DepartureOrArrival $departure, ?OccupancyLevel $officialNmbsLevel = null): OccupancyInfo
+    public function getOccupancy(
+        DepartureOrArrival $departure,
+        ?OccupancyLevel $officialNmbsLevel = null,
+        OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
+    ): OccupancyInfo
     {
         if ($officialNmbsLevel != null && $officialNmbsLevel != OccupancyLevel::UNKNOWN) {
             // TODO: perform this operation asynchronous
@@ -40,12 +47,13 @@ class OccupancyDao
                 $officialNmbsLevel);
 
         } else {
-            $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure);
+            $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure, $performanceMode);
         }
         $spitsgidsLevel = $this->getSpitsgidsLevel(
             $departure->getVehicle()->getId(),
             $departure->getStation()->getId(),
-            $departure->getScheduledDateTime()
+            $departure->getScheduledDateTime(),
+            $performanceMode
         );
         return new OccupancyInfo($officialNmbsLevel ?: OccupancyLevel::UNKNOWN, $spitsgidsLevel);
     }
@@ -92,7 +100,7 @@ class OccupancyDao
         }
 
         // Check if this entry is already recorded in the database, since NMBS entries only should be recorded once
-        if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate)) > 0) {
+        if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate, VEHICLE)) > 0) {
             Cache::put($recordedFlagKey, true, 12 * 3600);
             return;
         }
@@ -107,13 +115,21 @@ class OccupancyDao
         ]);
         Cache::put($recordedFlagKey, true, 12 * 3600);
 
+        Log::debug("Clearing occupancy cache for vehicle $vehicleId, station $stationId, source {$source->name}");
         $cacheKey = $this->getOccupancyKey($source, $vehicleId, $stationId, $vehicleJourneyStartDate); // Clear cache at station level
         Cache::delete($cacheKey); // Clear cached value after store
         $cacheKey = $this->getOccupancyKey($source, $vehicleId, null, $vehicleJourneyStartDate); // Clear cache at vehicle level as well
         Cache::delete($cacheKey); // Clear cached value after store
+        $cacheKey = $this->getOccupancyKey($source, null, $stationId, $vehicleJourneyStartDate); // Clear cache at station level as well
+        Cache::delete($cacheKey); // Clear cached value after store
     }
 
-    private function getSpitsgidsLevel(string $vehicleId, string $stationId, Carbon $scheduledDateTime): OccupancyLevel
+    private function getSpitsgidsLevel(
+        string $vehicleId,
+        string $stationId,
+        Carbon $scheduledDateTime,
+        OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
+    ): OccupancyLevel
     {
         $cacheKey = $this->getOccupancyKey(OccupancyReportSource::SPITSGIDS, $vehicleId, $stationId, $scheduledDateTime);
         $cachedValue = Cache::get($cacheKey);
@@ -125,7 +141,8 @@ class OccupancyDao
             OccupancyReportSource::SPITSGIDS,
             $vehicleId,
             $stationId,
-            $scheduledDateTime
+            $scheduledDateTime,
+            $performanceMode
         );
 
         // the reported values cannot include "unknown", since this value can never be reported in Spitsgids
@@ -141,10 +158,14 @@ class OccupancyDao
     }
 
     /**
-     * @param DepartureOrArrival $departure
-     * @return OccupancyLevel|mixed
+     * @param DepartureOrArrival          $departure
+     * @param OccupancyDaoPerformanceMode $performanceMode
+     * @return OccupancyLevel
      */
-    public function getStoredNmbsOccupancy(DepartureOrArrival $departure): mixed
+    public function getStoredNmbsOccupancy(
+        DepartureOrArrival $departure,
+        OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
+    ): OccupancyLevel
     {
         $cacheKey = $this->getOccupancyKey(OccupancyReportSource::NMBS, $departure->getVehicle()->getId(),
             $departure->getStation()->getId(), $departure->getScheduledDateTime());
@@ -155,20 +176,27 @@ class OccupancyDao
             $officialNmbsLevel = $this->getOfficialLevel(
                 $departure->getVehicle()->getId(),
                 $departure->getStation()->getId(),
-                $departure->getScheduledDateTime()
+                $departure->getScheduledDateTime(),
+                $performanceMode
             );
             Cache::put($cacheKey, $officialNmbsLevel, 3 * 3600);
         }
         return $officialNmbsLevel;
     }
 
-    private function getOfficialLevel(string $vehicleId, string $stationId, Carbon $scheduledDateTime): OccupancyLevel
+    private function getOfficialLevel(
+        string $vehicleId,
+        string $stationId,
+        Carbon $scheduledDateTime,
+        OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
+    ): OccupancyLevel
     {
         $reports = $this->readLevels(
             OccupancyReportSource::NMBS,
             $vehicleId,
             $stationId,
-            $scheduledDateTime
+            $scheduledDateTime,
+            $performanceMode
         );
         if (count($reports) == 0) {
             return OccupancyLevel::UNKNOWN;
@@ -184,21 +212,31 @@ class OccupancyDao
     /**
      * Read all stored occupancy levels from the database.
      *
-     * @param OccupancyReportSource $source The source for which to read reports
-     * @param string                $vehicleId The vehicle for which to read reports.
-     * @param int                   $stationId The station for which to read reports.
-     * @param Carbon $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
+     * @param OccupancyReportSource       $source The source for which to read reports
+     * @param string                      $vehicleId The vehicle for which to read reports.
+     * @param int                         $stationId The station for which to read reports.
+     * @param Carbon                      $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
+     * @param OccupancyDaoPerformanceMode $performanceMode
      * @return OccupancyLevel[] The reports which have been found.
      */
-    private function readLevels(OccupancyReportSource $source, string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate): array
+    private function readLevels(
+        OccupancyReportSource $source,
+        string $vehicleId,
+        int $stationId,
+        Carbon $vehicleJourneyStartDate,
+        OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
+    ): array
     {
-        $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+        if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
+            $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+        } else {
+            $levels = $this->readLevelsForStation($source, $stationId, $vehicleJourneyStartDate);
+        }
         return key_exists($stationId, $levels) ? $levels[$stationId] : [];
     }
 
     /**
-     * Read all stored occupancy levels from the database for a given vehicle at a given date. Filtering by station needs to be done server-side,
-     * since in many cases data for multiple stops along the vehicles journey is needed anyway. Reducing the number of database round trips improves performance.
+     * Read all stored occupancy levels from the database for a given vehicle at a given date. Reducing the number of database round trips improves performance.
      *
      * @param OccupancyReportSource $source The source for which to read reports
      * @param string                $vehicleId The vehicle for which to read reports.
@@ -209,11 +247,13 @@ class OccupancyDao
     {
         $cacheKey = $this->getOccupancyKey($source, $vehicleId, null, $vehicleJourneyStartDate); // Cache at vehicle level
         $cachedValue = Cache::get($cacheKey);
-        if ($cachedValue != null) {
+        if ($cachedValue !== null) {
             return $cachedValue;
         }
 
-        Log::debug("Reading occupancy levels for $vehicleId from source $source->name");
+        Log::debug("Reading occupancy levels for vehicle $vehicleId from source $source->name");
+        $startTime = microtime(true);
+
         $rows = DB::select('SELECT stop_id, occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND journey_start_date=?',
             [
                 $source->value,
@@ -228,7 +268,50 @@ class OccupancyDao
             }
             $result[$row->stop_id][] = OccupancyLevel::fromIntValue($row->occupancy);
         }
+
         Cache::put($cacheKey, $result, 3 * 3600);
+        $duration = floor((microtime(true) - $startTime) * 1000);
+        Log::debug("Queried occupancy levels for {$source->name}, vehicle $vehicleId in $duration ms, results: " . count($result));
+        return $result;
+    }
+
+    /**
+     * Read all stored occupancy levels from the database for a given station at a given date. Reducing the number of database round trips improves performance.
+     *
+     * @param OccupancyReportSource $source The source for which to read reports
+     * @param int                   $stationId The station for which to read reports.
+     * @param Carbon                $vehicleJourneyStartDate The vehicle journey start date for which to read reports.
+     * @return Array<String, OccupancyLevel[]> The reports which have been found for each station.
+     */
+    private function readLevelsForStation(OccupancyReportSource $source, int $stationId, Carbon $vehicleJourneyStartDate): array
+    {
+        $cacheKey = $this->getOccupancyKey($source, null, $stationId, $vehicleJourneyStartDate); // Cache at station level
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue !== null) {
+            return $cachedValue;
+        }
+
+        Log::debug("Reading occupancy levels for stop $stationId from source $source->name");
+        $startTime = microtime(true);
+
+        $rows = DB::select('SELECT vehicle_id, occupancy FROM occupancy_reports WHERE source=? AND stop_id=? AND journey_start_date=?',
+            [
+                $source->value,
+                $stationId,
+                $vehicleJourneyStartDate->copy()->startOfDay()
+            ]);
+        // Convert the results
+        $result = [];
+        foreach ($rows as $row) {
+            if (!key_exists($row->vehicle_id, $result)) {
+                $result[$row->vehicle_id] = [];
+            }
+            $result[$row->vehicle_id][] = OccupancyLevel::fromIntValue($row->occupancy);
+        }
+
+        Cache::put($cacheKey, $result, 3 * 3600);
+        $duration = floor((microtime(true) - $startTime) * 1000);
+        Log::debug("Queried occupancy levels for {$source->name}, stop $stationId in $duration ms, results: " . count($result));
         return $result;
     }
 
@@ -249,7 +332,7 @@ class OccupancyDao
         ], $rows);
     }
 
-    private function getOccupancyKey(OccupancyReportSource $source, string $vehicleId, ?string $stationId, Carbon $date): string
+    private function getOccupancyKey(OccupancyReportSource $source, ?string $vehicleId, ?string $stationId, Carbon $date): string
     {
         return "occupancy:{$source->value}:$vehicleId:$stationId:{$date->copy()->startOfDay()->toDateString()}";
     }

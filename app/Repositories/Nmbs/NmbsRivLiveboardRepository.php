@@ -10,6 +10,7 @@ use DateTime;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Irail\Database\OccupancyDao;
+use Irail\Database\OccupancyDaoPerformanceMode;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
@@ -174,7 +175,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $stopAtStation->setIsCancelled($stopCanceled);
         $stopAtStation->setStatus($status);
         $stopAtStation->setIsExtra(key_exists('status', $stop) && $stop['status'] == 'A');
-        $stopAtStation->setOccupancy($this->occupancyRepository->getOccupancy($stopAtStation));
+        $stopAtStation->setOccupancy($this->occupancyRepository->getOccupancy($stopAtStation, null, OccupancyDaoPerformanceMode::STATION));
         return $stopAtStation;
     }
 
