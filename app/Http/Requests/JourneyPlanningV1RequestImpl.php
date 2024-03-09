@@ -26,7 +26,7 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
         $this->originStationId = $this->parseStationId('from', $this->_request->get('from'));
         $this->destinationStationId = $this->parseStationId('to', $this->_request->get('to'));
         $this->dateTime = $this->parseIrailV1DateTime();
-        $this->timeSelection = $this->_request->has('arrdep') ? $this->parseV1DepartureArrival($this->_request->get('arrdep')) : TimeSelection::DEPARTURE;
+        $this->timeSelection = $this->_request->has('timeSel') ? $this->parseV1DepartureArrival($this->_request->get('timeSel')) : TimeSelection::DEPARTURE;
         $this->typesOfTransport = TypeOfTransportFilter::AUTOMATIC; // $this->routeOrGet('typeOfTransport'); // TODO: implement
     }
 
