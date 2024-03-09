@@ -2,10 +2,8 @@
 
 namespace Irail\Http\Responses\v1;
 
-use Irail\Http\Requests\DatedVehicleJourneyV1Request;
 use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Models\Result\VehicleCompositionSearchResult;
-use Irail\Models\Result\VehicleJourneySearchResult;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
@@ -16,15 +14,16 @@ class VehicleCompositionV1Converter extends V1Converter
 {
 
     /**
-     * @param DatedVehicleJourneyV1Request $request
-     * @param VehicleJourneySearchResult   $datedVehicleJourney
+     * @param VehicleCompositionV1Request    $request
+     * @param VehicleCompositionSearchResult $searchResult
      * @return DataRoot
      */
     public static function convert(VehicleCompositionV1Request $request,
         VehicleCompositionSearchResult $searchResult): DataRoot
     {
         $result = new DataRoot('vehicleinformation');
-        $result->segment = array_map(fn($segment) => self::convertSegment($segment), $searchResult->getSegments());
+        $result->composition = new StdClass();
+        $result->composition->segment = array_map(fn($segment) => self::convertSegment($segment), $searchResult->getSegments());
         return $result;
     }
 
