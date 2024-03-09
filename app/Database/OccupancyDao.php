@@ -100,7 +100,7 @@ class OccupancyDao
         }
 
         // Check if this entry is already recorded in the database, since NMBS entries only should be recorded once
-        if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate, VEHICLE)) > 0) {
+        if ($source == OccupancyReportSource::NMBS && count($this->readLevels($source, $vehicleId, $stationId, $vehicleJourneyStartDate)) > 0) {
             Cache::put($recordedFlagKey, true, 12 * 3600);
             return;
         }
