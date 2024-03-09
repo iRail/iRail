@@ -21,6 +21,12 @@ class GtfsTripStartEndExtractor
     const string GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY = 'vehicleDetailsByDate';
     private GtfsRepository $gtfsRepository;
 
+    /**
+     * @var array An array cache for vehicle details by date, to reduce deserializing when frequently accessing this data.
+     * Even reading from cache is slow for this data.
+     */
+    private array $vehicleDetailsByDate = [];
+
     public function __construct(?GtfsRepository $gtfsRepository = null)
     {
         if ($gtfsRepository == null) {
@@ -70,9 +76,12 @@ class GtfsTripStartEndExtractor
     {
         $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($vehicleId));
         $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
-        $foundVehicleWithInternationalOriginAndDestination = false;
+        if (!key_exists($vehicleNumber, $vehicleDetailsForDate)) {
+            return false;
+        }
 
-        $matches = array_filter($vehicleDetailsForDate, fn($journey) => $journey->getJourneyNumber() == $vehicleNumber);
+        $foundVehicleWithInternationalOriginAndDestination = false;
+        $matches = $vehicleDetailsForDate[$vehicleNumber];
         foreach ($matches as $vehicleWithOriginAndDestination) {
             // International journeys are split into two parts at tha Belgian side of the border, where the
             // border is represented by a "station" with a belgian ID.
@@ -131,19 +140,39 @@ class GtfsTripStartEndExtractor
 
     /**
      * @param DateTime $date
-     * @return JourneyWithOriginAndDestination[]
+     * @return array<int, JourneyWithOriginAndDestination[]> journeys with origin and destination by their journey number. One journey number may have multiple journeys.
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
     private function getTripsWithStartAndEndByDate(DateTime $date): array
     {
-        $vehicleDetailsByDate = $this->getTripsWithStartAndEndDate();
+        // Use an array cache on top of the cached data, as deserializing this data takes 80+ms from the cache can take up multiple seconds
+        // when this method is called hundreds of times while reading large liveboards
         $dateYmd = $date->format('Ymd');
-        if (!key_exists($dateYmd, $vehicleDetailsByDate)) {
+        if (key_exists($dateYmd, $this->vehicleDetailsByDate)) {
+            // If we can skip the cache completely, do so! Over 10 method calls. this will shave 50ms of the response time.
+            return $this->vehicleDetailsByDate[$dateYmd];
+        }
+
+        // By caching the individual array key/values, we do not need to deserialize the entire array from cache every time this method is called.
+        // This reduces deserializing times from 80+ms to 5ms.
+        $vehicleDetailsForDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY . '|' . $dateYmd,
+            function () use ($dateYmd): ?array {
+                $tripsWithStartAndEndDate = $this->getTripsWithStartAndEndDate();
+                if (!key_exists($dateYmd, $tripsWithStartAndEndDate)) {
+                    return null;
+                }
+                return $tripsWithStartAndEndDate[$dateYmd];
+            }, ttl: 3600)->getValue();
+
+        if ($vehicleDetailsForDate === null) {
             throw new RequestOutsideTimetableRangeException('Request outside of allowed date period '
-                . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward): ' . $date,
+                . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward): ' . $dateYmd,
                 404);
         }
-        return $vehicleDetailsByDate[$dateYmd];
+
+        // Update the array cache
+        $this->vehicleDetailsByDate[$dateYmd] = $vehicleDetailsForDate;
+        return $vehicleDetailsForDate;
     }
 
     /**
@@ -151,6 +180,8 @@ class GtfsTripStartEndExtractor
      */
     private function getTripsWithStartAndEndDate(): array
     {
+        // IMPORTANT PERFORMANCE NOTE: Deserializing this data takes 80+ms
+        // This is better than the many seconds it takes to calculate this data, but it should still be used wisely!
         $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
             return $this->loadTripsWithStartAndEndDate();
         }, ttl: 4 * 3600);
@@ -158,7 +189,9 @@ class GtfsTripStartEndExtractor
     }
 
     /**
-     * @return array<string, JourneyWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in Ymd format
+     * @return array<string, array<int, JourneyWithOriginAndDestination[]>> An array containing VehicleWithOriginAndDestination objects grouped by date in
+     *                                                                      Ymd format, then by journey number. Multiple vehicles may occur for a given
+     *                                                                      journey number.
      * @throws UpstreamServerException
      */
     private function loadTripsWithStartAndEndDate(): array
@@ -174,15 +207,22 @@ class GtfsTripStartEndExtractor
         // Create a multidimensional array:
         // date (Ymd) => VehicleWithOriginAndDestination[]
         $vehicleDetailsByDate = [];
-        foreach ($tripsByJourneyAndDate as $journeyNumber => $journeysByDate) {
+        foreach ($tripsByJourneyAndDate as $journeysByDate) {
             foreach ($journeysByDate as $date => $trip) {
                 if (!key_exists($date, $vehicleDetailsByDate)) {
                     $vehicleDetailsByDate[$date] = [];
                 }
+                // Some journeys may be split and therefore their number may occur twice!
+                // Index on journey numbers, but allow multiple values
+                if (!key_exists($date, $vehicleDetailsByDate)) {
+                    $vehicleDetailsByDate[$date][$trip->getJourneyNumber()] = [];
+                }
+
                 $stops = $tripStops[$trip->getTripId()];
                 $firstStop = $stops[0];
                 $lastStop = end($stops);
-                $vehicleDetailsByDate[$date][] = new JourneyWithOriginAndDestination( // DO NOT index on journeyNumber, since some journeys may be split and therefore occur twice.
+
+                $vehicleDetailsByDate[$date][$trip->getJourneyNumber()][] = new JourneyWithOriginAndDestination(
                     $trip->getTripId(),
                     $trip->getJourneyType(),
                     $trip->getJourneyNumber(),
