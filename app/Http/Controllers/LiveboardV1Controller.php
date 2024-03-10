@@ -30,7 +30,7 @@ class LiveboardV1Controller extends BaseIrailController
     public function getLiveboardById(LiveboardV1Request $request): Response
     {
         Log::debug('Fetching liveboard for stop ' . $request->getStationId());
-        if ($request->getDateTime()->isBefore(Carbon::now()->subHours(2))) {
+        if ($request->getDateTime()->isBefore(Carbon::now()->subMinutes(30))) {
             // Fallback to HTML data for older
             $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class), app(GtfsTripStartEndExtractor::class));
         } else {
