@@ -15,11 +15,11 @@ abstract class V1Converter
     protected static function convertStation(Station $station): StdClass
     {
         $obj = new StdClass();
-        $obj->locationX = $station->getLongitude();
-        $obj->locationY = $station->getLatitude();
+        $obj->{'@id'} = $station->getUri();
         $obj->id = 'BE.NMBS.' . $station->getId();
         $obj->name = $station->getLocalizedStationName();
-        $obj->{'@id'} = $station->getUri();
+        $obj->locationX = $station->getLongitude();
+        $obj->locationY = $station->getLatitude();
         $obj->standardname = $station->getStationName();
         return $obj;
     }
