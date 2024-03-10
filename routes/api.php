@@ -44,7 +44,7 @@ $router->get('/logs', function (Request $request) use ($router) {
     return redirect(route('v1.logs', $_GET, $request->isSecure()));
 });
 
-$router->get('/feedback/occupancy.php', function (Request $request) use ($router) {
+$router->post('/feedback/occupancy.php', function (Request $request) use ($router) {
     return redirect(route('v1.occupancy', $_GET, $request->isSecure()));
 });
 
