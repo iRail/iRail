@@ -15,6 +15,7 @@ use Irail\Models\CachedData;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\PlatformInfo;
 use Irail\Models\Result\LiveboardSearchResult;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleDirection;
 use Irail\Proxy\CurlHttpResponse;
@@ -22,7 +23,6 @@ use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
-use Irail\Repositories\Nmbs\Models\HafasStation;
 use Irail\Traits\Cache;
 use Irail\Util\Tidy;
 use SimpleXMLElement;
@@ -70,7 +70,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         return new LiveboardSearchResult($station, $entries);
     }
 
-    private function getLiveboardHtml(LiveboardRequest $request, HafasStation $station): CachedData
+    private function getLiveboardHtml(LiveboardRequest $request, Station $station): CachedData
     {
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request, $station) {
             return $this->fetchLiveboardHtml($request, $station);
@@ -80,14 +80,11 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     /**
      * Fetch JSON data from the NMBS.
      *
-     * @param HafasStation $station
-     * @param string       $time Time in hh:mm format
-     * @param string       $date Date in YYYYmmdd format
-     * @param string       $lang
-     * @param string       $timeSel
+     * @param LiveboardRequest $request
+     * @param Station          $station
      * @return string
      */
-    private function fetchLiveboardHtml(LiveboardRequest $request, HafasStation $station): string
+    private function fetchLiveboardHtml(LiveboardRequest $request, Station $station): string
     {
         $url = 'http://www.belgianrail.be/jp/nmbs-realtime/stboard.exe/nn';
         $formattedDateStr = $request->getDateTime()->format('d/m/Y');
@@ -140,7 +137,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
      * @return DepartureOrArrival[]
      * @throws Exception
      */
-    private function parseNmbsData(LiveboardRequest $request, HafasStation $station, string $xml): array
+    private function parseNmbsData(LiveboardRequest $request, Station $station, string $xml): array
     {
         //clean XML
         $xml = Tidy::repairHtmlRemoveJavascript($xml);
@@ -283,13 +280,11 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
             $directionName = self::trim($stBoardEntry->xpath('td')[1]->a);
             $directionHafasId = '00' . substr($stBoardEntry->xpath('td')[1]->a['href'], 57);
             $directionStation = $this->stationsRepository->getStationById($directionHafasId);
-            return new VehicleDirection($directionName, $directionStation);
         } else {
             $directionName = self::trim($stBoardEntry->xpath('td')[1]);
             $directionStation = $this->stationsRepository->findStationByName($directionName);
-            return new VehicleDirection($directionName, $directionStation);
         }
-
+        return new VehicleDirection($directionName, $directionStation);
     }
 
     private static function trim(string $str): string
