@@ -54,7 +54,7 @@ class OccupancyReportRequest extends IrailHttpRequest
         if (!$json->has('vehicle')) {
             abort(400, 'Missing date parameter');
         }
-        return Carbon::createFromFormat('YYYYmmdd', $json->get('date'));
+        return Carbon::createFromFormat('Ymd', $json->get('date'));
     }
 
     /**
