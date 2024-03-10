@@ -16,6 +16,10 @@
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Router;
 
+$router->get('/stations{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.stations', $_GET, $request->isSecure()));
+});
+
 $router->get('/liveboard{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.liveboard', $_GET, $request->isSecure()));
 });
@@ -40,7 +44,12 @@ $router->get('/logs', function (Request $request) use ($router) {
     return redirect(route('v1.logs', $_GET, $request->isSecure()));
 });
 
+$router->get('/feedback/occupancy.php', function (Request $request) use ($router) {
+    return redirect(route('v1.occupancy', $_GET, $request->isSecure()));
+});
+
 $router->group(['prefix' => 'v1'], function () use ($router) {
+    $router->get('/stations', ['as' => 'v1.stations', 'uses' => 'StationsV1Controller@list']);
     $router->get('/liveboard', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
     $router->get('/connections', ['as' => 'v1.journeyPlanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
     $router->get('/vehicle', ['as' => 'v1.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
