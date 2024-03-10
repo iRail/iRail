@@ -59,7 +59,7 @@ class Vehicle
      */
     public function getId(): string
     {
-        return $this->type . $this->getNumber();
+        return $this->getType() . $this->getNumber();
     }
 
     /**
