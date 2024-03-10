@@ -9,6 +9,7 @@ use Irail\Database\LogDao;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Responses\v1\LiveboardV1Converter;
 use Irail\Proxy\CurlProxy;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsHtmlLiveboardRepository;
@@ -31,7 +32,7 @@ class LiveboardV1Controller extends BaseIrailController
         Log::debug('Fetching liveboard for stop ' . $request->getStationId());
         if ($request->getDateTime()->isBefore(Carbon::now()->subHours(2))) {
             // Fallback to HTML data for older
-            $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class));
+            $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class), app(GtfsTripStartEndExtractor::class));
         } else {
             $repo = app(LiveboardRepository::class);
         }
