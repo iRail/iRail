@@ -16,19 +16,19 @@
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Router;
 
-$router->get('/liveboard', function (Request $request) use ($router) {
+$router->get('/liveboard{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.liveboard', $_GET, $request->isSecure()));
 });
 
-$router->get('/connections', function (Request $request) use ($router) {
+$router->get('/connections{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()));
 });
 
-$router->get('/vehicle', function (Request $request) use ($router) {
+$router->get('/vehicle{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.datedVehicleJourney', $_GET, $request->isSecure()));
 });
 
-$router->get('/disturbances', function (Request $request) use ($router) {
+$router->get('/disturbances{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.serviceAlerts', $_GET, $request->isSecure()));
 });
 
@@ -47,7 +47,7 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/disturbances', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
     $router->get('/composition', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
     $router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
-    $router->post('/feedback/occupancy', ['as' => 'v1.occupancy', 'uses' => 'LogController@store']);
+    $router->post('/feedback/occupancy', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@store']);
 });
 
 $router->group(['prefix' => 'v2'], function () use ($router) {
