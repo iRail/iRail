@@ -41,11 +41,11 @@ enum OccupancyLevel: string
     public static function fromUri(string $uri): OccupancyLevel
     {
         switch ($uri) {
-            case OccupancyLevel::LOW:
+            case OccupancyLevel::LOW->value:
                 return OccupancyLevel::LOW;
-            case  OccupancyLevel::MEDIUM:
+            case  OccupancyLevel::MEDIUM->value:
                 return OccupancyLevel::MEDIUM;
-            case  OccupancyLevel::HIGH:
+            case  OccupancyLevel::HIGH->value:
                 return OccupancyLevel::HIGH;
             default:
                 Log::error("Unknown occupancy level uri $uri");

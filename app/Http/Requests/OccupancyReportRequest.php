@@ -78,6 +78,11 @@ class OccupancyReportRequest extends IrailHttpRequest
         if (!$json->has('occupancy')) {
             abort(400, 'Missing occupancy parameter');
         }
-        return OccupancyLevel::fromUri($json->get('occupancy'));
+        $occupancyLevel = OccupancyLevel::fromUri($json->get('occupancy'));
+        if ($occupancyLevel == OccupancyLevel::UNKNOWN) {
+            abort(400, 'Unknown occupancy value ' . $json->get('occupancy') . ', should be one of \'' . join("', '",
+                    array_column(OccupancyLevel::cases(), 'value')) . "'");
+        }
+        return $occupancyLevel;
     }
 }
