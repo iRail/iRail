@@ -38,7 +38,11 @@ class OccupancyReportRequest extends IrailHttpRequest
      */
     public function getFromStationUri(): string
     {
-        return $this->json()->get('from');
+        $json = $this->json();
+        if (!$json->has('vehicle')) {
+            abort(400, 'Missing from parameter');
+        }
+        return $json->get('from');
     }
 
     /**
@@ -46,7 +50,11 @@ class OccupancyReportRequest extends IrailHttpRequest
      */
     public function getDate(): Carbon
     {
-        return Carbon::createFromFormat('YYYYmmdd', $this->json()->get('date'));
+        $json = $this->json();
+        if (!$json->has('vehicle')) {
+            abort(400, 'Missing date parameter');
+        }
+        return Carbon::createFromFormat('YYYYmmdd', $json->get('date'));
     }
 
     /**
@@ -54,7 +62,11 @@ class OccupancyReportRequest extends IrailHttpRequest
      */
     public function getVehicleUri(): string
     {
-        return $this->json()->get('vehicle');
+        $json = $this->json();
+        if (!$json->has('vehicle')) {
+            abort(400, 'Missing vehicle parameter');
+        }
+        return $json->get('vehicle');
     }
 
     /**
@@ -62,6 +74,10 @@ class OccupancyReportRequest extends IrailHttpRequest
      */
     public function getReportedOccupancy(): OccupancyLevel
     {
-        return OccupancyLevel::fromUri($this->json()->get('occupancy'));
+        $json = $this->json();
+        if (!$json->has('occupancy')) {
+            abort(400, 'Missing occupancy parameter');
+        }
+        return OccupancyLevel::fromUri($json->get('occupancy'));
     }
 }
