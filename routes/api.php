@@ -44,9 +44,7 @@ $router->get('/logs', function (Request $request) use ($router) {
     return redirect(route('v1.logs', $_GET, $request->isSecure()));
 });
 
-$router->post('/feedback/occupancy.php', function (Request $request) use ($router) {
-    return redirect(route('v1.occupancy', $_GET, $request->isSecure()));
-});
+// Can't redirect a POST request, so occupancy redirecting is done in Nginx
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/stations', ['as' => 'v1.stations', 'uses' => 'StationsV1Controller@list']);
