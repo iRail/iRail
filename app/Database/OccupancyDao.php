@@ -59,11 +59,11 @@ class OccupancyDao
     }
 
     /**
-     * Record a spitsgids occupancy record
-     * @param string         $vehicleId
-     * @param int            $stationId
-     * @param Carbon         $vehicleJourneyStartDate
-     * @param OccupancyLevel $occupancyLevel
+     * Record a spitsgids occupancy record.
+     * @param string         $vehicleId The vehicle id, for example IC1234.
+     * @param int            $stationId The station id, without leading zeroes, for example 8814001.
+     * @param Carbon         $vehicleJourneyStartDate The journey start date.
+     * @param OccupancyLevel $occupancyLevel The occupancy level to record.
      * @return OccupancyInfo The updated occupancy.
      */
     public function recordSpitsgidsOccupancy(string $vehicleId, int $stationId, Carbon $vehicleJourneyStartDate, OccupancyLevel $occupancyLevel): OccupancyInfo
@@ -105,7 +105,7 @@ class OccupancyDao
             return;
         }
 
-        Log::debug("Storing occupancy level $occupancyLevel->name for $vehicleId from source $source->name");
+        Log::debug("Storing occupancy level $occupancyLevel->name ({$occupancyLevel->getIntValue()}) for $vehicleId at $stationId from source $source->name");
         DB::update('INSERT INTO occupancy_reports (source, vehicle_id, stop_id, journey_start_date, occupancy) VALUES (?, ?, ?, ?, ?)', [
             $source->value,
             $vehicleId,
@@ -151,7 +151,8 @@ class OccupancyDao
             Cache::put($cacheKey, OccupancyLevel::UNKNOWN, 1800);
             return OccupancyLevel::UNKNOWN;
         }
-        $average = array_sum($values) / count($values);
+        // Average instead of median since LOW, LOW, LOW, HIGH, HIGH should return medium
+        $average = round(array_sum($values) / count($values)); // round to the nearest value.
         $occupancyLevel = OccupancyLevel::fromIntValue($average);
         Cache::put($cacheKey, $occupancyLevel, 3 * 3600);
         return $occupancyLevel;
