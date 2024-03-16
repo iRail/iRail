@@ -23,22 +23,22 @@ class CurlProxy
 
         Log::debug("GET $url");
 
-        $startTime = time(); // TODO: record in millis
+        $startTime = microtime(true);
 
         $ch = $this->createCurlHandle($url, $headers);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        $duration = time() - $startTime;
+        $durationMillis = round(1000 * (microtime(true) - $startTime));
 
-        Log::debug("Received response with HTTP code $httpCode for URL $url in $duration secconds");
+        Log::debug("Received response with HTTP code $httpCode for URL $url in $durationMillis ms");
         Log::debug($response);
         if ($httpCode >= 500) {
             Log::warning("HTTP Request 'GET $url' received response code $httpCode");
         }
 
-        $responseObject = new CurlHttpResponse('GET', $url, null, $httpCode, $response, $duration);
+        $responseObject = new CurlHttpResponse('GET', $url, null, $httpCode, $response, $durationMillis);
 
         // Keep track of which HTTP requests were made
         $this->requests[] = $responseObject;
