@@ -124,7 +124,7 @@ class GtfsTripStartEndExtractor
             );
         }
         Log::debug('getAlternativeVehicleWithOriginAndDestination found '
-            . count($results) . " for trip {$originalJourney->getTripId()}");
+            . count($results) . " segments for trip {$originalJourney->getTripId()}");
         return $results;
     }
 

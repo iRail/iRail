@@ -138,7 +138,7 @@ class NmbsRivRawDataRepository
             throw new Exception('Vehicle not found in GTFS data', 404);
         }
         $journeyDetailRef = $this->getJourneyDetailRef($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
-        if ($journeyDetailRef === null) {
+        if ($journeyDetailRef === false) {
             throw new Exception('Vehicle not found', 404);
         }
         return $this->getJourneyDetailResponse($request, $journeyDetailRef);
@@ -224,18 +224,21 @@ class NmbsRivRawDataRepository
         );
         $i = 0;
         $journeyRef = false;
-        while ($journeyRef === false && $i <= count($alternativeOriginDestinations) / 2) {
+        while ($journeyRef === false && $i < count($alternativeOriginDestinations) / 2) {
             Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $i");
             $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i];
             $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
             if ($journeyRef === false) {
                 // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
-                $j = count($alternativeOriginDestinations) - $i;
+                $j = (count($alternativeOriginDestinations) - 1) - $i;
                 Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $j");
                 $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$j];
                 $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
             }
             $i++;
+        }
+        if ($journeyRef === false) {
+            Log::warning("Failed to find journey ref for {$vehicleWithOriginAndDestination->getJourneyNumber()}, trip {$vehicleWithOriginAndDestination->getTripId()}");
         }
         return $journeyRef;
     }

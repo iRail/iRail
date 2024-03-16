@@ -230,8 +230,8 @@ class GtfsRepository
         $headers = fgetcsv($fileStream); // ignore the headers
         $TRIP_ID_COLUMN = array_search('trip_id', $headers);
         $STOP_ID_COLUMN = array_search('stop_id', $headers);
-        $STOP_PICKUP_TYPE = array_search('stop_pickup_type', $headers);
-        $STOP_DROPOFF_TYPE = array_search('stop_dropoff_type', $headers);
+        $STOP_PICKUP_TYPE = array_search('pickup_type', $headers);
+        $STOP_DROPOFF_TYPE = array_search('drop_off_type', $headers);
         $DEPARTURE_TIME_COLUMN = array_search('departure_time', $headers);
 
         $numberOfStopTimes = 0;
