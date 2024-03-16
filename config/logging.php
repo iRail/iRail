@@ -38,14 +38,8 @@ return [
     'channels' => [
         'stack' => [
             'driver'            => 'stack',
-            'channels'          => ['daily', 'artisan', 'stdout', 'stderr'],
+            'channels' => ['daily', 'stdout', 'stderr'],
             'ignore_exceptions' => false,
-        ],
-
-        'artisan' => [
-            'driver'  => 'monolog',
-            'handler' => ArtisanLogger::class,
-            'level'   => env('LOG_LEVEL', 'info'),
         ],
 
         'single' => [
