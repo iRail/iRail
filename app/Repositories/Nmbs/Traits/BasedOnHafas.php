@@ -323,7 +323,10 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtArrTime']
                 ));
             }
-            $arrival->setIsCancelled(key_exists('cancelledArrival', $rawIntermediateStop));
+            $cancelledIntermediateStop = key_exists('cancelledArrival', $rawIntermediateStop);
+            $cancelledVehicleStop = key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] === false;
+            $arrival->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop);
+
             $arrival->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $arrival->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setArrival($arrival);
@@ -353,7 +356,9 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtDepTime']
                 ));
             }
-            $departure->setIsCancelled(key_exists('cancelledDeparture', $rawIntermediateStop));
+            $cancelledIntermediateStop = key_exists('cancelledDeparture', $rawIntermediateStop);
+            $cancelledVehicleStop = key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] === false;
+            $departure->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop);
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setDeparture($departure);
