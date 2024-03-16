@@ -196,8 +196,6 @@ class NmbsRivRawDataRepository
             'date'        => $formattedDateStr,
             'lang'        => $request->getLanguage()
         ];
-        $url = $url . '?' . http_build_query($parameters, '', null,);
-
         $journeyResponse = $this->makeApiCallToMobileRivApi($url, $parameters);
 
         $journeyResponse = json_decode($journeyResponse, true);
