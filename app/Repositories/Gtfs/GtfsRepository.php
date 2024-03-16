@@ -5,6 +5,7 @@ namespace Irail\Repositories\Gtfs;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
+use Irail\Repositories\Gtfs\Models\PickupDropoffType;
 use Irail\Repositories\Gtfs\Models\Route;
 use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Gtfs\Models\Trip;
@@ -233,6 +234,7 @@ class GtfsRepository
         $STOP_PICKUP_TYPE = array_search('pickup_type', $headers);
         $STOP_DROPOFF_TYPE = array_search('drop_off_type', $headers);
         $DEPARTURE_TIME_COLUMN = array_search('departure_time', $headers);
+        $ARRIVAL_TIME_COLUMN = array_search('arrival_time', $headers);
 
         $numberOfStopTimes = 0;
         $numberOfSkippedStopTimes = 0;
@@ -246,23 +248,22 @@ class GtfsRepository
             }
 
             $stopId = $row[$STOP_ID_COLUMN];
+            $arrival_time = $row[$ARRIVAL_TIME_COLUMN];
             $departure_time = $row[$DEPARTURE_TIME_COLUMN];
 
-            if ($row[$STOP_PICKUP_TYPE] == 1 && $row[$STOP_DROPOFF_TYPE] == 1) {
-                // Ignore "stops" where the train only passes, without possibility to embark or disembark.
-                continue;
-            }
+            $pickup_type = PickupDropoffType::from(intval($row[$STOP_PICKUP_TYPE]));
+            $dropoff_type = PickupDropoffType::from(intval($row[$STOP_DROPOFF_TYPE]));
 
             if (!key_exists($trip_id, $stopsByTripId)) {
                 $stopsByTripId[$trip_id] = [];
             }
 
             # Assume all stop_times are in chronological order, we don't have time to sort this.
-            $stopsByTripId[$trip_id][] = new StopTime($stopId, $departure_time);
+            $stopsByTripId[$trip_id][] = new StopTime($stopId, $arrival_time, $departure_time, $dropoff_type, $pickup_type);
             $numberOfStopTimes++;
         }
-        Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}. " . $this->getMemoryUsage());
         fclose($fileStream);
+        Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}. " . $this->getMemoryUsage());
         return $stopsByTripId;
     }
 

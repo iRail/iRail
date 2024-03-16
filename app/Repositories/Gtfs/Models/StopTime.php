@@ -7,16 +7,22 @@ use Carbon\Carbon;
 class StopTime
 {
     private string $stopId;
+    private int $arrivalTime;
     private int $departureTime;
+    private PickupDropoffType $dropoffType;
+    private PickupDropoffType $pickupType;
 
     /**
      * @param string $stopId
-     * @param string $stopTime the departure time, in hh:mm:ss format
+     * @param string $departureTime the departure time, in hh:mm:ss format
      */
-    public function __construct(string $stopId, string $stopTime)
+    public function __construct(string $stopId, string $arrivalTime, string $departureTime, PickupDropoffType $dropoffType, PickupDropoffType $pickupType)
     {
         $this->stopId = $stopId;
-        $this->departureTime = $this->timeToSeconds($stopTime) - 3600; // Correct for offset in GTFS
+        $this->arrivalTime = $this->timeToSeconds($arrivalTime) - 3600; // Correct for offset in GTFS
+        $this->departureTime = $this->timeToSeconds($departureTime) - 3600; // Correct for offset in GTFS
+        $this->dropoffType = $dropoffType;
+        $this->pickupType = $pickupType;
     }
 
     public function getStopId(): string
@@ -32,6 +38,27 @@ class StopTime
     public function getDepartureTimeOffset(): int
     {
         return $this->departureTime;
+    }
+
+    public function getArrivalTimeOffset(): int
+    {
+        return $this->arrivalTime;
+    }
+
+    /**
+     * @return bool True if passengers can embark/disembark at this point. If false, this station is just a waypoint the train is merely passing by.
+     */
+    public function hasPassengerExchange(): bool
+    {
+        return !$this->isOnlyPassingBy();
+    }
+
+    /**
+     * @return bool True if this station is just a waypoint the train is merely passing by.
+     */
+    public function isOnlyPassingBy(): bool
+    {
+        return $this->pickupType == PickupDropoffType::NEVER && $this->dropoffType == PickupDropoffType::NEVER;
     }
 
     private function timeToSeconds(string $stopTime)

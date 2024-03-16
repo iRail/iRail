@@ -110,7 +110,10 @@ class GtfsTripStartEndExtractor
     public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney): array
     {
         Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalJourney->getTripId()}");
-        $stops = self::getStopsForTrip($originalJourney->getTripId());
+        $stops = self::getStopTimesForTrip($originalJourney->getTripId());
+        // Only search between stops where the train actually stops, since stops will also include waypoints.
+        // Array_values to fix gaps between indexes after filtering
+        $stops = array_values(array_filter($stops, fn(StopTime $stop) => $stop->hasPassengerExchange()));
         $results = [];
         for ($i = 1; $i < count($stops); $i++) {
             $results[] = new JourneyWithOriginAndDestination(
@@ -120,7 +123,7 @@ class GtfsTripStartEndExtractor
                 $stops[$i - 1]->getStopId(),
                 $stops[$i - 1]->getDepartureTimeOffset(),
                 $stops[$i]->getStopId(),
-                $stops[$i]->getDepartureTimeOffset()
+                $stops[$i]->getArrivalTimeOffset()
             );
         }
         Log::debug('getAlternativeVehicleWithOriginAndDestination found '
@@ -237,10 +240,12 @@ class GtfsTripStartEndExtractor
     }
 
     /**
-     * @return StopTime[]
+     * Get the stop_times for this trip.
+     * !!! IMPORTANT !!! stop_times may contain waypoints where no passenger exchange is possible. These should be handled correctly when showing results to users.
+     * @return StopTime[] The stop times for this trip, including waypoints where the train is passing by.
      * @throws Exception
      */
-    private function getStopsForTrip(string $tripId): array
+    private function getStopTimesForTrip(string $tripId): array
     {
         $tripStops = $this->gtfsRepository->getTripStops();
 
