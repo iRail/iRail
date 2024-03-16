@@ -224,14 +224,20 @@ class NmbsRivRawDataRepository
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
             $vehicleWithOriginAndDestination
         );
-        // Assume the first and last stop are cancelled, since the normal origin-destination search did not return results
-        // This saves 2 requests and should not make a difference.
-        $i = 1;
+        $i = 0;
         $journeyRef = false;
-        while ($journeyRef === false && $i < count($alternativeOriginDestinations) - 1) {
+        while ($journeyRef === false && $i <= count($alternativeOriginDestinations) / 2) {
             Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $i");
-            $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i++];
+            $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i];
             $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
+            if ($journeyRef === false) {
+                // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
+                $j = count($alternativeOriginDestinations) - $i;
+                Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $j");
+                $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$j];
+                $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
+            }
+            $i++;
         }
         return $journeyRef;
     }
