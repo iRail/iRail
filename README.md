@@ -24,7 +24,9 @@ listed in [composer.json](composer.json) installed on your system_
  * `CACHE_DRIVER` should be set to `apc`, an in-memory cache with good performance.
  * `NMBS_RIV_API_KEY` should contain a valid API key for the internal NMBS RIV API.
  * `GTFS_RANGE_DAYS_BACKWARDS` and `GTFS_RANGE_DAYS_FORWARDS` define how long in the past and future GTFS data will be
-   read. This will affect memory usage, and limits the date ranges of some API endpoints.
+* `APP_TIMEZONE` should be set to `EUROPE/BRUSSELS` to ensure correct times in the responses, since several date/times
+  without timezone information are parsed and interpreted at this timezone.
+  read. This will affect memory usage, and limits the date ranges of some API endpoints.
 * Step 4: Run the docker-compose configuration, which consists of nginx, mariadb and the actual PHP application. If you
   want to use sqlite, adjust the database configuration. Note that sqlite is untested.
 * Step 5: When using mariadb, ensure a database exists on the mariadb server. It should match the database credentials

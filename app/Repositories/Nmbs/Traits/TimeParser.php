@@ -37,6 +37,8 @@ trait TimeParser
         $month = Tools::safeIntVal(substr($date, 5, 2));
         $day = Tools::safeIntVal(substr($date, 8, 2));
 
+        // Having issues with timezones? Check if APP_TIMEZONE is configured correctly
+        // These timestamps are in local time, so include their timezone in the constructor
         return new Carbon(mktime($hour, $minute, $second, $month, $day + $dayoffset, $year), 'Europe/Brussels');
     }
 
