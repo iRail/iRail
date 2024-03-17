@@ -38,14 +38,10 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     private NmbsRivRawDataRepository $rivDataRepository;
     private OccupancyDao $occupancyRepository;
 
-    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository = null)
+    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository)
     {
         $this->stationsRepository = $stationsRepository;
-        if ($rivDataRepository != null) {
-            $this->rivDataRepository = $rivDataRepository;
-        } else {
-            $this->rivDataRepository = new NmbsRivRawDataRepository($this->stationsRepository);
-        }
+        $this->rivDataRepository = $rivDataRepository;
         $this->occupancyRepository = App::make(OccupancyDao::class);
     }
 
