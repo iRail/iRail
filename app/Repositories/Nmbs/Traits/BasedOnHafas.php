@@ -323,9 +323,10 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtArrTime']
                 ));
             }
+            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true;
             $cancelledIntermediateStop = key_exists('cancelledArrival', $rawIntermediateStop);
-            $cancelledVehicleStop = key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] === false;
-            $arrival->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop);
+            $cancelledArrival = key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] === false;
+            $arrival->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop || $cancelledArrival);
 
             $arrival->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $arrival->setPlatform($this->parsePlatform($rawIntermediateStop));
@@ -356,9 +357,10 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtDepTime']
                 ));
             }
+            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true;
             $cancelledIntermediateStop = key_exists('cancelledDeparture', $rawIntermediateStop);
-            $cancelledVehicleStop = key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] === false;
-            $departure->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop);
+            $cancelledDeparture = key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] === false;
+            $departure->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop || $cancelledDeparture);
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setDeparture($departure);
