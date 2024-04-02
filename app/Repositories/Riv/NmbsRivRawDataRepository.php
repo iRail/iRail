@@ -9,6 +9,7 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
+use Irail\Models\Vehicle;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
@@ -112,19 +113,33 @@ class NmbsRivRawDataRepository
     }
 
     /**
-     * Get data for a DatedVehicleJourney (also known as vehicle or trip, one vehicle making an A->B run)
+     * Get data for a DatedVehicleJourney (also known as vehicle or trip, one vehicle making an A->B run on a given date)
      *
      * @param VehicleJourneyRequest $request
      * @return CachedData
      * @throws Exception
      */
-    public function getVehicleJourneyData(VehicleJourneyRequest $request)
+    public function getVehicleJourneyData(VehicleJourneyRequest $request): CachedData
     {
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshVehicleJourneyData($request);
         });
     }
 
+    /**
+     * Get the composition for a vehicle.
+     *
+     * @param Vehicle                         $vehicle
+     * @param JourneyWithOriginAndDestination $originAndDestination
+     * @return CachedData
+     */
+    public function getVehicleCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $originAndDestination): CachedData
+    {
+        return $this->getCacheOrUpdate("composition|{$vehicle->getNumber()}|{$vehicle->getJourneyStartDate()->format('Ymd')}",
+            function () use ($vehicle, $originAndDestination) {
+                return $this->getVehicleCompositionResponse($vehicle, $originAndDestination);
+            });
+    }
     /**
      * @param VehicleJourneyRequest $request
      * @return bool|string
@@ -258,6 +273,24 @@ class NmbsRivRawDataRepository
         return $this->makeApiCallToMobileRivApi($url, $parameters);
     }
 
+    /**
+     * @param Vehicle                         $vehicle
+     * @param JourneyWithOriginAndDestination $journeyWithOriginAndDestination
+     * @return bool|string
+     */
+    private function getVehicleCompositionResponse(Vehicle $vehicle, JourneyWithOriginAndDestination $journeyWithOriginAndDestination): string|bool
+    {
+        $url = 'https://mobile-riv.api.belgianrail.be/api/v1/commercialtraincompositionsbetweenptcars';
+        $parameters = [
+            'TrainNumber'         => $vehicle->getNumber(),
+            'From'                => $journeyWithOriginAndDestination->getOriginStopId(),
+            'To'                  => $journeyWithOriginAndDestination->getDestinationStopId(),
+            'date'                => $vehicle->getJourneyStartDate()->format('Y-m-d'),
+            'FromToAreUicCodes'   => 'true',
+            'IncludeMaterialInfo' => 'true'
+        ];
+        return $this->makeApiCallToMobileRivApi($url, $parameters);
+    }
 
     /**
      * @param string $url

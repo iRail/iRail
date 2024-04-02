@@ -13,27 +13,32 @@ use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
 use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
-use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
+use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
 use stdClass;
 
-class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
+class NmbsRivCompositionRepository implements VehicleCompositionRepository
 {
     use Cache;
 
     const NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
     const AUTH_KEY_CACHE_TTL = 60 * 30;
     private StationsRepository $stationsRepository;
-    private CurlProxy $curlProxy;
+    private NmbsRivRawDataRepository $rivRawDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
 
-    public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy, GtfsTripStartEndExtractor $gtfsTripStartEndExtractor)
+    public function __construct(
+        StationsRepository $stationsRepository,
+        NmbsRivRawDataRepository $rivRawDataRepository,
+        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
+    )
     {
         $this->stationsRepository = $stationsRepository;
-        $this->curlProxy = $curlProxy;
+        $this->rivRawDataRepository = $rivRawDataRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
     }
 
@@ -61,7 +66,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
                 'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
         }
 
-        $cachedData = $this->fetchCompositionData($journey);
+        $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
         $compositionData = $cachedData->getValue();
         $cacheAge = $cachedData->getAge();
 
@@ -366,12 +371,14 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
      * @return CachedData
      * @throws CompositionUnavailableException
      */
-    public function fetchCompositionData(Vehicle $vehicle): CachedData
+    private function fetchCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $startStop): CachedData
     {
         $cacheKey = self::getCacheKey($vehicle->getNumber());
         if (!$this->isCached($cacheKey)) {
             try {
-                $compositionData = $this->getFreshCompositionData($vehicle->getNumber());
+                $cachedData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
+                $json = json_decode($cachedData->getValue());
+                $compositionData = $json->lastPlanned; /* commercialPlanned is also available */
                 if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
                     // Planning data often lacks detail. Store it for 5 minutes
                     $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
@@ -409,7 +416,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
         $authKey = $forceFreshKey ? $this->getNewAuthKey() : $this->getAuthKey();
         $headers = ["auth-code: $authKey"];
 
-        $curlHttpResponse = $this->curlProxy->get($url, [], $headers);
+        $curlHttpResponse = $this->rivRawDataRepository->get($url, [], $headers);
         $responseBody = $curlHttpResponse->getResponseBody();
         if ($responseBody == 'null') {
             throw new CompositionUnavailableException($vehicleNumber);
@@ -444,7 +451,7 @@ class NmbsTrainMapCompositionRepository implements VehicleCompositionRepository
     private function getNewAuthKey(): ?string
     {
         $url = 'https://trainmap.belgiantrain.be/';
-        $curlHttpResponse = $this->curlProxy->get($url);
+        $curlHttpResponse = $this->rivRawDataRepository->get($url);
 
         // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
         $html = $curlHttpResponse->getResponseBody();
