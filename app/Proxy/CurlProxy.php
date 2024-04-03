@@ -32,7 +32,7 @@ class CurlProxy
 
         $durationMillis = round(1000 * (microtime(true) - $startTime));
 
-        Log::debug("Received response with HTTP code $httpCode for URL $url in $durationMillis ms");
+        Log::info("Received response with HTTP code $httpCode for URL $url in $durationMillis ms");
         Log::debug($response);
         if ($httpCode >= 500) {
             Log::warning("HTTP Request 'GET $url' received response code $httpCode");
