@@ -14,21 +14,22 @@ use Irail\Repositories\LiveboardRepository;
 
 class LiveboardV2Controller extends BaseIrailController
 {
+    private LiveboardRepository $liveboardRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(LiveboardRepository $liveboardRepository)
     {
-        //
+        $this->liveboardRepository = $liveboardRepository;
     }
 
     public function getLiveboardById(LiveboardV2Request $request): JsonResponse
     {
         $this->validateStationId($request);
-        $repo = app(LiveboardRepository::class);
-        $liveboardSearchResult = $repo->getLiveboard($request);
+        $liveboardSearchResult = $this->liveboardRepository->getLiveboard($request);
         $dto = LiveboardV2Converter::convert($request, $liveboardSearchResult);
         $this->logRequest($request);
         return $this->outputJson($request, $dto);

@@ -6,9 +6,9 @@ use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
 use Irail\Repositories\LiveboardRepository;
+use Irail\Repositories\Nmbs\NmbsMergedLiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivCompositionRepository;
 use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
-use Irail\Repositories\Nmbs\NmbsRivLiveboardRepository;
 use Irail\Repositories\Nmbs\NmbsRivVehicleJourneyRepository;
 use Irail\Repositories\Nmbs\NmbsRssDisturbancesRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -77,7 +77,7 @@ $app->singleton(
 
 $app->singleton(
     LiveboardRepository::class,
-    NmbsRivLiveboardRepository::class
+    NmbsMergedLiveboardRepository::class
 );
 
 $app->singleton(
