@@ -37,8 +37,8 @@ class LogDao
     {
         $rows = DB::select(
             'SELECT id, query_type, query, result, user_agent, created_at FROM request_log 
-                                                             WHERE created_at BETWEEN (DATE_SUB(NOW(),INTERVAL ? MINUTE)) AND NOW() ORDER BY created_at',
-            [$minutes]
+                                                             WHERE created_at >= ? ORDER BY created_at',
+            [Carbon::now()->subMinutes($minutes)->format('Y-m-d H:i:s')]
         );
         return $this->transformRows($rows);
     }
