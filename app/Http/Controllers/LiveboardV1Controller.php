@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Responses\v1\LiveboardV1Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\LiveboardRepository;
 
 class LiveboardV1Controller extends BaseIrailController
@@ -47,6 +48,6 @@ class LiveboardV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogDao::class)->log('Liveboard', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::LIVEBOARD, $query, $request->getUserAgent());
     }
 }

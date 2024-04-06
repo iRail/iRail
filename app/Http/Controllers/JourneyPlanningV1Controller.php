@@ -7,6 +7,7 @@ use Irail\Database\LogDao;
 use Irail\Http\Requests\JourneyPlanningV1RequestImpl;
 use Irail\Http\Requests\JourneyPlanningV2RequestImpl;
 use Irail\Http\Responses\v1\JourneyPlanningV1Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
 use Irail\Models\Result\JourneyPlanningSearchResult;
@@ -50,7 +51,7 @@ class JourneyPlanningV1Controller extends BaseIrailController
         $queryResult = [
             'journeyoptions' => array_map(fn($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
         ];
-        app(LogDao::class)->log('Connections', $query, $request->getUserAgent(), $queryResult);
+        app(LogDao::class)->log(LogQueryType::JOURNEYPLANNING, $query, $request->getUserAgent(), $queryResult);
     }
 
     private function getStopInLogFormat(string $stationId, string $stationSearchValue): array

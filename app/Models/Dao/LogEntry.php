@@ -7,13 +7,13 @@ use Carbon\Carbon;
 class LogEntry
 {
     private int $id;
-    private string $queryType;
+    private LogQueryType $queryType;
     private array $query;
     private ?array $result;
     private string $userAgent;
     private Carbon $createdAt;
 
-    public function __construct(int $id, string $queryType, array $query, ?array $result, string $userAgent, Carbon $createdAt)
+    public function __construct(int $id, LogQueryType $queryType, array $query, ?array $result, string $userAgent, Carbon $createdAt)
     {
         $this->id = $id;
         $this->queryType = $queryType;
@@ -32,9 +32,9 @@ class LogEntry
     }
 
     /**
-     * @return string
+     * @return LogQueryType
      */
-    public function getQueryType(): string
+    public function getQueryType(): LogQueryType
     {
         return $this->queryType;
     }

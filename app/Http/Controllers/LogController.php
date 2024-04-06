@@ -5,6 +5,7 @@ namespace Irail\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Irail\Database\LogDao;
+use Irail\Models\Dao\LogQueryType;
 
 class LogController extends BaseIrailController
 {
@@ -20,7 +21,7 @@ class LogController extends BaseIrailController
     {
         $logs = $this->logRepository->readLastLogs(1000);
         $json = array_map(fn($logEntry) => [
-            'querytype'  => $logEntry->getQueryType(),
+            'querytype' => $this->getName($logEntry->getQueryType()),
             'querytime'  => $logEntry->getCreatedAt(),
             'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
             'user_agent' => $logEntry->getUserAgent()
@@ -39,5 +40,24 @@ class LogController extends BaseIrailController
             'user_agent' => $logEntry->getUserAgent()
         ], $logs);
         return $this->outputJson($request, $json);
+    }
+
+    private function getName(LogQueryType $getQueryType)
+    {
+        switch ($getQueryType) {
+            case LogQueryType::LIVEBOARD:
+                return 'Liveboard';
+            case LogQueryType::JOURNEYPLANNING:
+                return 'Connections';
+            case LogQueryType::DATEDVEHICLEJOURNEY:
+                return 'VehicleInformation';
+            case LogQueryType::VEHICLECOMPOSITION:
+                return 'Composition';
+            case LogQueryType::STATIONS:
+                return 'Stations';
+            case LogQueryType::SERVICEALERTS:
+                return 'Disturbances';
+        }
+        return '';
     }
 }

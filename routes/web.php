@@ -1,6 +1,6 @@
 <?php
 
-/** @var \Laravel\Lumen\Routing\Router $router */
+/** @var Router $router */
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +13,8 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
+use Laravel\Lumen\Routing\Router;
+
+$router->get('/health', ['as' => 'status.health', 'uses' => 'StatusController@showStatus']);
+$router->get('/cache/loadGtfs', ['as' => 'cache.warmup', 'uses' => 'StatusController@warmupGtfsCache']);
+$router->get('/cache/clear', ['as' => 'cache.clear', 'uses' => 'StatusController@resetCache']);

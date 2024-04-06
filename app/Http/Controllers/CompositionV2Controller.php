@@ -7,6 +7,7 @@ use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\VehicleCompositionV2Request;
 use Irail\Http\Responses\v2\VehicleCompositionV2Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV2Controller extends BaseIrailController
@@ -45,6 +46,6 @@ class CompositionV2Controller extends BaseIrailController
             'language' => $request->getLanguage(),
             'version'  => 2
         ];
-        app(LogDao::class)->log('composition', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::VEHICLECOMPOSITION, $query, $request->getUserAgent());
     }
 }

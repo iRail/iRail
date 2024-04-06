@@ -5,13 +5,14 @@ namespace Irail\Database;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Irail\Models\Dao\LogEntry;
+use Irail\Models\Dao\LogQueryType;
 
 class LogDao
 {
-    public function log(string $queryType, array $query, string $userAgent, array $result = null)
+    public function log(LogQueryType $queryType, array $query, string $userAgent, array $result = null)
     {
         DB::update('INSERT INTO request_log (query_type, query, user_agent, result) VALUES (?, ?, ?, ?)', [
-            $queryType,
+            $queryType->value,
             json_encode($query, JSON_UNESCAPED_SLASHES),
             $this->maskEmailAddress($userAgent),
             $result ? json_encode($result, JSON_UNESCAPED_SLASHES) : null
@@ -25,6 +26,20 @@ class LogDao
     public function readLastLogs(int $limit): array
     {
         $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY created_at DESC LIMIT ?', [$limit]);
+        return $this->transformRows($rows);
+    }
+
+    /**
+     * @param int $minutes
+     * @return LogEntry[]
+     */
+    public function readLogsPastMinutes(int $minutes): array
+    {
+        $rows = DB::select(
+            'SELECT id, query_type, query, result, user_agent, created_at FROM request_log 
+                                                             WHERE created_at BETWEEN (DATE_SUB(NOW(),INTERVAL ? MINUTE)) AND NOW() ORDER BY created_at',
+            [$minutes]
+        );
         return $this->transformRows($rows);
     }
 
@@ -69,7 +84,7 @@ class LogDao
     {
         return array_map(function ($row): LogEntry {
             return new LogEntry($row->id,
-                $row->query_type,
+                LogQueryType::from($row->query_type),
                 json_decode($row->query, associative: true),
                 json_decode($row->result, associative: true),
                 $row->user_agent,

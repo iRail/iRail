@@ -6,6 +6,7 @@ use Illuminate\Http\Response;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\DatedVehicleJourneyV1Request;
 use Irail\Http\Responses\v1\DatedVehicleJourneyV1Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\VehicleJourneyRepository;
 
 class DatedVehicleJourneyV1Controller extends BaseIrailController
@@ -41,6 +42,6 @@ class DatedVehicleJourneyV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'  => 1
         ];
-        app(LogDao::class)->log('VehicleInformation', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::DATEDVEHICLEJOURNEY, $query, $request->getUserAgent());
     }
 }

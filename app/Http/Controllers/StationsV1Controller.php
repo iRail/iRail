@@ -6,6 +6,7 @@ use Illuminate\Http\Response;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\StationsV1Request;
 use Irail\Http\Responses\v1\StationsV1Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Irail\StationsRepository;
 
 class StationsV1Controller extends BaseIrailController
@@ -40,6 +41,6 @@ class StationsV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogDao::class)->log('Stations', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::STATIONS, $query, $request->getUserAgent());
     }
 }

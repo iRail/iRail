@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Http\Responses\v1\VehicleCompositionV1Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Models\Vehicle;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
@@ -52,7 +53,7 @@ class CompositionV1Controller extends BaseIrailController
             'serialization' => $request->getResponseFormat(),
             'version'       => 1
         ];
-        app(LogDao::class)->log('composition', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::VEHICLECOMPOSITION, $query, $request->getUserAgent());
     }
 
 }

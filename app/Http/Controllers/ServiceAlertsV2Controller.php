@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\ServiceAlertsV2Request;
 use Irail\Http\Responses\v2\ServiceAlertsV2Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\ServiceAlertsRepository;
 
 class ServiceAlertsV2Controller extends BaseIrailController
@@ -39,6 +40,6 @@ class ServiceAlertsV2Controller extends BaseIrailController
             'language'      => $request->getLanguage(),
             'version'       => 2
         ];
-        app(LogDao::class)->log('Disturbances', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::SERVICEALERTS, $query, $request->getUserAgent());
     }
 }

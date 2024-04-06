@@ -49,6 +49,7 @@ services:
       MYSQL_USER: irail-api
       MYSQL_PASSWORD: irail-api
       MYSQL_ROOT_PASSWORD: irail-api
+      TZ: Europe/Stockholm
     networks:
       - app
     volumes:

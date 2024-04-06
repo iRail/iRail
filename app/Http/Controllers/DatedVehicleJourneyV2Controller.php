@@ -8,6 +8,7 @@ use Irail\Database\LogDao;
 use Irail\Exceptions\CompositionUnavailableException;
 use Irail\Http\Requests\DatedVehicleJourneyV2Request;
 use Irail\Http\Responses\v2\DatedVehicleJourneyV2Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Repositories\VehicleCompositionRepository;
@@ -74,7 +75,7 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
             'language' => $request->getLanguage(),
             'version'  => 2
         ];
-        app(LogDao::class)->log('VehicleInformation', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::DATEDVEHICLEJOURNEY, $query, $request->getUserAgent());
     }
 
     /**

@@ -9,6 +9,7 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\LiveboardV1Request;
 use Irail\Http\Requests\LiveboardV2Request;
 use Irail\Http\Responses\v2\LiveboardV2Converter;
+use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 
@@ -46,7 +47,7 @@ class LiveboardV2Controller extends BaseIrailController
             'language' => $request->getLanguage(),
             'version'  => 2
         ];
-        app(LogDao::class)->log('Liveboard', $query, $request->getUserAgent());
+        app(LogDao::class)->log(LogQueryType::LIVEBOARD, $query, $request->getUserAgent());
     }
 
     /**

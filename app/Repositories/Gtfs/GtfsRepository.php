@@ -4,7 +4,7 @@ namespace Irail\Repositories\Gtfs;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
+use Irail\Models\CachedData;
 use Irail\Repositories\Gtfs\Models\PickupDropoffType;
 use Irail\Repositories\Gtfs\Models\Route;
 use Irail\Repositories\Gtfs\Models\StopTime;
@@ -47,7 +47,7 @@ class GtfsRepository
     }
 
     /**
-     * @return array<String, JourneyWithOriginAndDestination[]> VehicleWithOriginAndDestination objects grouped by their service ids.
+     * @return Array<String, Array<String, Trip>> Trips by their journey number and start date (Ymd format)
      */
     public function getTripsByJourneyNumberAndStartDate(): array
     {
@@ -55,6 +55,14 @@ class GtfsRepository
             return $this->readTripsByJourneyNumberAndStartDate();
         }, ttl: 3 * 3600 + 4); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
         return $cachedData->getValue();
+    }
+
+    public function getCachedTrips(): false|CachedData
+    {
+        if (!$this->isCached(self::GTFS_ALL_TRIPS)) {
+            return false;
+        }
+        return $this->getCachedObject(self::GTFS_ALL_TRIPS);
     }
 
     /**
