@@ -35,10 +35,12 @@ class LogDao
      */
     public function readLogsPastMinutes(int $minutes): array
     {
+        $startTime = Carbon::now()->subMinutes($minutes)->format('Y-m-d H:i:s');
+        var_dump($startTime);
         $rows = DB::select(
             'SELECT id, query_type, query, result, user_agent, created_at FROM request_log 
                                                              WHERE created_at >= ? ORDER BY created_at',
-            [Carbon::now()->subMinutes($minutes)->format('Y-m-d H:i:s')]
+            ["$startTime"]
         );
         return $this->transformRows($rows);
     }
@@ -84,7 +86,7 @@ class LogDao
     {
         return array_map(function ($row): LogEntry {
             return new LogEntry($row->id,
-                LogQueryType::from($row->query_type),
+                LogQueryType::tryFrom($row->query_type),
                 json_decode($row->query, associative: true),
                 json_decode($row->result, associative: true),
                 $row->user_agent,

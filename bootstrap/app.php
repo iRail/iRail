@@ -2,6 +2,7 @@
 
 use Irail\Database\LogDao;
 use Irail\Database\OccupancyDao;
+use Irail\Database\OutgoingRequestLogDao;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
@@ -113,6 +114,11 @@ $app->singleton(
 $app->singleton(
     CurlProxy::class,
     CurlProxy::class
+);
+
+$app->singleton(
+    OutgoingRequestLogDao::class,
+    OutgoingRequestLogDao::class
 );
 
 /*

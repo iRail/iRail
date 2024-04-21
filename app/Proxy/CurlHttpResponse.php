@@ -2,6 +2,8 @@
 
 namespace Irail\Proxy;
 
+use Carbon\Carbon;
+
 class CurlHttpResponse
 {
     private string $method;
@@ -10,21 +12,34 @@ class CurlHttpResponse
     private int $responseCode;
     private ?string $responseBody;
     private int $duration;
+    private Carbon $timestamp;
 
     /**
+     * @param Carbon $timestamp int The epoch timestamp in milliseconds
+     * @param string $method
      * @param string      $url
      * @param string|null $requestBody
      * @param int         $responseCode
      * @param string|null $responseBody
+     * @param int    $duration
      */
-    public function __construct(string $method, string $url, ?string $requestBody, int $responseCode, ?string $responseBody, int $duration)
+    public function __construct(Carbon $timestamp, string $method, string $url, ?string $requestBody, int $responseCode, ?string $responseBody, int $duration)
     {
+        $this->timestamp = $timestamp;
         $this->url = $url;
         $this->requestBody = $requestBody;
         $this->responseCode = $responseCode;
         $this->responseBody = $responseBody;
         $this->method = $method;
         $this->duration = $duration;
+    }
+
+    /**
+     * @return Carbon The timestamp on which the request was made
+     */
+    public function getTimestamp(): Carbon
+    {
+        return $this->timestamp;
     }
 
     /**

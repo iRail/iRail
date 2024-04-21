@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Carbon\Carbon;
 use Illuminate\Testing\Assert;
 use Irail\Proxy\CurlHttpResponse;
 use Irail\Proxy\CurlProxy;
@@ -35,6 +36,7 @@ class FakeCurlProxy extends CurlProxy
         $url = $this->buildUrl($url, $parameters);
         $responseBody = $responseFixtureFile ? file_get_contents($responseFixtureFile) : null;
         $this->definedResults[$url] = new CurlHttpResponse(
+            Carbon::now(),
             'GET',
             $url,
             null,

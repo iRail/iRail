@@ -2,6 +2,7 @@
 
 namespace Irail\Proxy;
 
+use Carbon\Carbon;
 use CurlHandle;
 use Illuminate\Support\Facades\Log;
 
@@ -23,14 +24,14 @@ class CurlProxy
 
         Log::debug("GET $url");
 
-        $startTime = microtime(true);
+        $startTime = Carbon::now();
 
         $ch = $this->createCurlHandle($url, $headers);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        $durationMillis = round(1000 * (microtime(true) - $startTime));
+        $durationMillis = round(1000 * microtime(true)) - $startTime->getTimestampMs();
 
         Log::info("Received response with HTTP code $httpCode for URL $url in $durationMillis ms");
         Log::debug($response);
@@ -38,7 +39,7 @@ class CurlProxy
             Log::warning("HTTP Request 'GET $url' received response code $httpCode");
         }
 
-        $responseObject = new CurlHttpResponse('GET', $url, null, $httpCode, $response, $durationMillis);
+        $responseObject = new CurlHttpResponse($startTime, 'GET', $url, null, $httpCode, $response, $durationMillis);
 
         // Keep track of which HTTP requests were made
         $this->requests[] = $responseObject;
