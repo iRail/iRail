@@ -3,7 +3,6 @@
 namespace Irail\Traits;
 
 use Cache\Adapter\Apcu\ApcuCachePool;
-use Cache\Adapter\Common\AbstractCachePool;
 use Closure;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
@@ -16,7 +15,7 @@ use Psr\Cache\InvalidArgumentException;
  */
 trait Cache
 {
-    private static ?AbstractCachePool $cache = null;
+    private static ?ApcuCachePool $cache = null;
     private string $prefix = '';
     private int $defaultTtl = 15;
 

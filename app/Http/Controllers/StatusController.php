@@ -2,11 +2,13 @@
 
 namespace Irail\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Irail\Database\LogDao;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Gtfs\GtfsRepository;
+use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
 class StatusController extends BaseIrailController
 {
@@ -26,11 +28,13 @@ class StatusController extends BaseIrailController
         $opcacheStatus = $this->getOpcacheStatus();
         $gtfsStatus = $this->getGtfsStatus();
         $requestStatus = $this->getRequestsStatus();
+        $rivRequestStatus = $this->getRivRateLimitStatus();
         $memoryStatus = $this->getMemoryStatus();
         return 'Mem: ' . $memoryStatus . '<br>'
             . 'GTFS: ' . $gtfsStatus . '<br>'
             . 'APC: ' . $apcStatus . '<br>'
             . 'Opcache: ' . $opcacheStatus . '<br>'
+            . 'NMBS RIV: ' . $rivRequestStatus . '<br>'
             . 'Logs: ' . $requestStatus;
     }
 
@@ -152,4 +156,16 @@ class StatusController extends BaseIrailController
         return $result;
     }
 
+    private function getRivRateLimitStatus(): string
+    {
+        /** @var NmbsRivRawDataRepository $rivRepo */
+        $rivRepo = app(NmbsRivRawDataRepository::class);
+        $result = 'Request rate towards NMBS RIV: <br>';
+
+        for ($i = 0; $i < 6; $i++) {
+            $time = Carbon::now()->subMinutes($i);
+            $result .= $time->format('Y-m-d H:i') . ': ' . $rivRepo->getRequestRate($rivRepo->getRequestRateKey($time)) . '<br>';
+        }
+        return $result;
+    }
 }

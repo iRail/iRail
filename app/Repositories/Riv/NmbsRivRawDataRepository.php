@@ -2,8 +2,10 @@
 
 namespace Irail\Repositories\Riv;
 
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Irail\Exceptions\Upstream\UpstreamRateLimitException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
@@ -16,6 +18,7 @@ use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
+use Psr\Cache\InvalidArgumentException;
 
 class NmbsRivRawDataRepository
 {
@@ -25,6 +28,9 @@ class NmbsRivRawDataRepository
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
 
+    # The maximum number of outgoing requests per minute towards NMBS
+    private int $rateLimit;
+
     /**
      * @param StationsRepository $stationsRepository
      */
@@ -33,6 +39,39 @@ class NmbsRivRawDataRepository
         $this->stationsRepository = $stationsRepository;
         $this->curlProxy = $curlProxy;
         $this->setCachePrefix('NMBS');
+        $this->rateLimit = env('NMBS_RIV_RATE_LIMIT_PER_MINUTE', 10);
+    }
+
+    /**
+     * A cache key for the counter in which requests for a given minute are counted.
+     * @param null $time The time for which to count. Default now.
+     * @return string The cache key to obtain the current request rate from cache.
+     */
+    public function getRequestRateKey($time = null): string
+    {
+        if ($time == null) {
+            $time = Carbon::now();
+        }
+        return 'RequestRate-' . $time->format('Y-m-d_H-i');
+    }
+
+    /**
+     * Get the request rate based on a given cache key.
+     * @param string $key the cache key for which the request rate should be looked up, defaults to the cache key for "now".
+     * @return int The number of requests in a minute.
+     * @throws InvalidArgumentException
+     */
+    public function getRequestRate($key = null): int
+    {
+        if ($key == null) {
+            // Get the cache key of the current "bucket" in which requests are counted
+            $key = $this->getRequestRateKey();
+        }
+        $cachedData = $this->getCachedObject($key);
+        if ($cachedData == null) {
+            return 0;
+        }
+        return $cachedData->getValue();
     }
 
     /**
@@ -292,6 +331,7 @@ class NmbsRivRawDataRepository
         return $this->makeApiCallToMobileRivApi($url, $parameters);
     }
 
+
     /**
      * @param string $url
      * @param array  $parameters
@@ -299,7 +339,21 @@ class NmbsRivRawDataRepository
      */
     private function makeApiCallToMobileRivApi(string $url, array $parameters): string
     {
+        $key = $this->getRequestRateKey();
+        # Get the current request rate for verification
+        $currentRequestRate = $this->getRequestRate($key);
+        if ($currentRequestRate >= $this->rateLimit) {
+            $message = "Current request rate towards NMBS is $currentRequestRate requests per minute. "
+                . "Outgoing request blocked due to rate limiting configured at {$this->rateLimit} requests per minute";
+            Log::error($message);
+            throw new UpstreamRateLimitException($message);
+        }
+
         $response = $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
+
+        # Best effort rate-limiting, not thread safe but good enough to prevent flooding external services
+        $this->setCachedObject($key, $this->getRequestRate($key) + 1, 60);
+
         return $response->getResponseBody();
     }
 

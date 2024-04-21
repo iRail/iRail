@@ -36,7 +36,6 @@ class LogDao
     public function readLogsPastMinutes(int $minutes): array
     {
         $startTime = Carbon::now()->subMinutes($minutes)->format('Y-m-d H:i:s');
-        var_dump($startTime);
         $rows = DB::select(
             'SELECT id, query_type, query, result, user_agent, created_at FROM request_log 
                                                              WHERE created_at >= ? ORDER BY created_at',
