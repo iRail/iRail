@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y libssl-dev \
     zlib1g \
     zlib1g-dev \
     ca-certificates \
-    gnupg
+    gnupg \
+    libpng-dev
 
 # Irail/stations depends on NodeJS
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
@@ -32,13 +33,22 @@ RUN docker-php-ext-install pdo_pgsql pgsql && docker-php-ext-enable pdo_pgsql pg
 RUN pecl install raphf && docker-php-ext-enable raphf
 RUN pecl install pecl_http
 
+# Install graphics capabilities for e.g. APCu cache status graphs
+RUN docker-php-ext-install gd && docker-php-ext-enable gd
+
+# Install opcache
+RUN docker-php-ext-install opcache
+
+# Install igbinary for binary serialization/deserialization, saving up to 90% space while deserializing faster then serialize/deserialize
+# this is crucial when caching large amounts of GTFS data
+RUN pecl install igbinary
+RUN docker-php-ext-enable igbinary
+RUN echo "apc.serializer=igbinary" >> /usr/local/etc/php/php.ini
+
 # Install apcu
 RUN pecl install apcu
 RUN echo "extension=http.so\nextension=apcu.so\napc.enable=1\napc.enable_cli=1\napc.shm_size=512M" >> /usr/local/etc/php/php.ini
 RUN docker-php-ext-enable apcu http
-
-# Install opcache
-RUN docker-php-ext-install opcache
 
 # Install xdebug
 RUN yes | pecl install xdebug \

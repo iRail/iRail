@@ -122,7 +122,7 @@ trait Cache
         }
 
         $cacheEntry = new CachedData($key, $value, $ttl);
-        $item->set($cacheEntry);
+        $item->set(igbinary_serialize($cacheEntry));
         if ($ttl > 0) {
             $item->expiresAfter($ttl);
         }
@@ -240,7 +240,7 @@ trait Cache
     private function getCacheEntry(string $key): ?CachedData
     {
         $cacheItem = self::$cache->getItem($key);
-        $cacheEntry = $cacheItem->get();
+        $cacheEntry = igbinary_unserialize($cacheItem->get());
         if ($cacheEntry == null) {
             return null;
         }
