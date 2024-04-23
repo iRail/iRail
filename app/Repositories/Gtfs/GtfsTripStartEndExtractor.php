@@ -146,7 +146,7 @@ class GtfsTripStartEndExtractor
      * @return array<int, JourneyWithOriginAndDestination[]> journeys with origin and destination by their journey number. One journey number may have multiple journeys.
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
-    private function getTripsWithStartAndEndByDate(DateTime $date): array
+    public function getTripsWithStartAndEndByDate(DateTime $date): array
     {
         // Use an array cache on top of the cached data, as deserializing this data takes 80+ms from the cache can take up multiple seconds
         // when this method is called hundreds of times while reading large liveboards

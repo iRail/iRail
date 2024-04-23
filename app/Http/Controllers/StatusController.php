@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Irail\Database\LogDao;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Gtfs\GtfsRepository;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 
 class StatusController extends BaseIrailController
@@ -15,11 +16,13 @@ class StatusController extends BaseIrailController
 
     private LogDao $logRepository;
     private GtfsRepository $gtfsRepository;
+    private GtfsTripStartEndExtractor $tripStartEndExtractor;
 
-    public function __construct(LogDao $logRepository, GtfsRepository $gtfsRepository)
+    public function __construct(LogDao $logRepository, GtfsRepository $gtfsRepository, GtfsTripStartEndExtractor $tripStartEndExtractor)
     {
         $this->logRepository = $logRepository;
         $this->gtfsRepository = $gtfsRepository;
+        $this->tripStartEndExtractor = $tripStartEndExtractor;
     }
 
     public function showStatus(Request $request): string
@@ -46,9 +49,11 @@ class StatusController extends BaseIrailController
             return 'OK: Already loaded';
         }
         // Calling this method will load the cache
-        $result = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
+        $trips = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
+        $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now());
         Log::info('Warmed up GTFS Cache');
-        return 'OK: Loaded ' . count($result) . ' journeys';
+        $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, ' . count($tripsToday) . ' today<br>';
+        return $gtfsResult . $this->getMemoryStatus();
     }
 
     public function resetCache(): string
@@ -74,7 +79,6 @@ class StatusController extends BaseIrailController
         $bytes_megabytes_factor = 1024 * 1024;
         $currentUsage = round(memory_get_usage() / $bytes_megabytes_factor, 2);
         $peakUsage = round(memory_get_peak_usage() / $bytes_megabytes_factor, 2);
-
 
         $result = '<br>';
 
