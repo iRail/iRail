@@ -128,6 +128,10 @@ abstract class IrailHttpRequest extends LumenRequest
             // iRail URI
             return substr($id, 30);
         }
+        if (str_starts_with($id, 'BE.NMBS.')) {
+            // Old irail id style
+            return substr($id, 8);
+        }
         if (!is_numeric($id)) {
             try {
                 $name = urldecode($id); // ensure spaces etc are decoded
