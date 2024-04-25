@@ -12,16 +12,16 @@ use Carbon\Carbon;
 class CachedData
 {
     private string $key;
-    private null|object|string|array $value;
+    private null|object|string|array|bool $value;
     private int $createdAt;
     private int $expiresAt;
 
     /**
-     * @param string                   $key
-     * @param null|                    $value
-     * @param int                      $ttl
+     * @param string                        $key
+     * @param object|array|string|bool|null $value
+     * @param int                           $ttl
      */
-    public function __construct(string $key, null|object|array|string $value, int $ttl = 0)
+    public function __construct(string $key, null|object|array|string|bool $value, int $ttl = 0)
     {
         $this->key = $key;
         $this->value = $value;

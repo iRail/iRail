@@ -215,13 +215,15 @@ class NmbsRivRawDataRepository
         if ($journeyDetailRef === false) {
             $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getJourneyNumber()}|{$request->getDateTime()->format('Ymd')}";
             $alternativeResult = $this->getCacheOrUpdate($cacheKey,
-                function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination) {
+                function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination): string|bool {
                     return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
                 },
                 // Cache for 4 hours
                 ttl: 3600 * 4);
             $journeyDetailRef = $alternativeResult->getValue();
         }
+
+        Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
         # If no reference has been found at this stage, fail
         if ($journeyDetailRef === false) {
             throw new Exception('Vehicle not found', 404);
@@ -232,7 +234,7 @@ class NmbsRivRawDataRepository
     /**
      * @param VehicleJourneyRequest           $request
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-     * @return string|false
+     * @return string|false The vehicle journey reference, or false if no reference could be found.
      */
     private function findVehicleJourneyRefBetweenStops(VehicleJourneyRequest $request,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination

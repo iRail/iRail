@@ -106,7 +106,7 @@ trait Cache
      *                      Negative values will be replaced with the default TTL value.
      * @return CachedData<T>
      */
-    public function setCachedObject(string $key, null|object|string|array $value, int $ttl = -1): CachedData
+    public function setCachedObject(string $key, null|object|string|array|bool $value, int $ttl = -1): CachedData
     {
         if ($ttl < 0) {
             $ttl = $this->defaultTtl;
