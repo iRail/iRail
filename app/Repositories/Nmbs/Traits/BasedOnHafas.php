@@ -323,9 +323,14 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtArrTime']
                 ));
             }
-            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true;
+            // This first, coarse way of marking a cancelled stop, is set on both completely cancelled stops and on cancelled arrivals/departures
+            // If there are signs the arrival is not cancelled, it should be ignored and only affects the departure
+            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true
+                && !key_exists('rtArrTime', $rawIntermediateStop) && !key_exists('arrPrognosisType', $rawIntermediateStop);
+            // The following fields are specific to the departure and are always taken into account
             $cancelledIntermediateStop = key_exists('cancelledArrival', $rawIntermediateStop);
             $cancelledArrival = key_exists('rtAlighting', $rawIntermediateStop) && $rawIntermediateStop['rtAlighting'] === false;
+            // Combine all 3 fields
             $arrival->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop || $cancelledArrival);
 
             $arrival->setIsExtra(key_exists('additional', $rawIntermediateStop));
@@ -357,10 +362,16 @@ trait BasedOnHafas
                     $rawIntermediateStop['rtDepTime']
                 ));
             }
-            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true;
+            // This first, coarse way of marking a cancelled stop, is set on both completely cancelled stops and on cancelled arrivals/departures
+            // If there are signs the departure is not cancelled, it should be ignored and only affects the arrival
+            $cancelledVehicleStop = key_exists('cancelled', $rawIntermediateStop) && $rawIntermediateStop['cancelled'] === true
+                && !key_exists('rtDepTime', $rawIntermediateStop) && !key_exists('depPrognosisType', $rawIntermediateStop);
+            // The following fields are specific to the departure and are always taken into account
             $cancelledIntermediateStop = key_exists('cancelledDeparture', $rawIntermediateStop);
             $cancelledDeparture = key_exists('rtBoarding', $rawIntermediateStop) && $rawIntermediateStop['rtBoarding'] === false;
+            // Combine all 3 fields
             $departure->setIsCancelled($cancelledIntermediateStop || $cancelledVehicleStop || $cancelledDeparture);
+
             $departure->setIsExtra(key_exists('additional', $rawIntermediateStop));
             $departure->setPlatform($this->parsePlatform($rawIntermediateStop));
             $intermediateStop->setDeparture($departure);

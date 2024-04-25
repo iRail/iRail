@@ -29,6 +29,42 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
         $this->assertCount(13, $result->getStops());
     }
 
+    public function testGetDatedVehicleJourney_ic729_shouldParseCancelStatusCorrectly()
+    {
+        $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
+            new CachedData('test', file_get_contents(__DIR__ . '/NmbsRivVehicleJourneyRepository_ic729.json'), 1)
+        );
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo);
+        $request = $this->createRequest('729', 'en', Carbon::create(2024, 4, 25));
+        $result = $repo->getDatedVehicleJourney($request);
+
+        $stops = $result->getStops();
+        $this->assertEquals('008896008', $stops[7]->getStation()->getId()); // Kortrijk
+
+        // Cancelled from the start
+        $this->assertTrue($stops[0]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[6]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[6]->getArrival()->isCancelled());
+
+        // Starts running at Kortrijk
+        $this->assertTrue($stops[7]->getArrival()->isCancelled());
+        $this->assertFalse($stops[7]->getDeparture()->isCancelled());
+
+        $this->assertFalse($stops[8]->getDeparture()->isCancelled());
+        $this->assertFalse($stops[8]->getArrival()->isCancelled());
+
+        // Only arriving at Sint-Niklaas, not departing.
+        $this->assertFalse($stops[12]->getArrival()->isCancelled());
+        $this->assertTrue($stops[12]->getDeparture()->isCancelled());
+
+        // Cancelled until the end
+        $this->assertTrue($stops[13]->getArrival()->isCancelled());
+        $this->assertTrue($stops[13]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[14]->getArrival()->isCancelled());
+    }
+
+
     private function createRequest(string $journeyId, string $language, Carbon $dateTime): VehicleJourneyRequest
     {
         $mock = Mockery::mock(VehicleJourneyRequest::class);
