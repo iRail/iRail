@@ -58,7 +58,6 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
         $rawData = $this->rivDataRepository->getLiveboardData($request);
-        $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
         return $this->parseNmbsRawData($request, $rawData);
     }
 

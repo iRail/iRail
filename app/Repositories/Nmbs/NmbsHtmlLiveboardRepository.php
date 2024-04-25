@@ -62,7 +62,6 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
      */
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
-        $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
         $station = $this->stationsRepository->getStationById($request->getStationId());
 
         $rawData = $this->getLiveboardHtml($request, $station);

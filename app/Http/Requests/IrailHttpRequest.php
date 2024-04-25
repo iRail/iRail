@@ -40,7 +40,7 @@ abstract class IrailHttpRequest extends LumenRequest
         $this->_request = app('request');
         $this->determineResponseFormat();
         $this->determineLanguage();
-        app(StationsRepository::class)->setLocalizedLanguage($this->language);
+        $this->initializeStationNameLanguage();
     }
 
     /**
@@ -101,6 +101,16 @@ abstract class IrailHttpRequest extends LumenRequest
             throw new InvalidRequestException("Language {$this->language} is not supported. Allowed values are: "
                 . join(', ', self::SUPPORTED_LANGUAGES));
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function initializeStationNameLanguage(): void
+    {
+        /** @var StationsRepository $stationsRepository */
+        $stationsRepository = app(StationsRepository::class);
+        $stationsRepository->setLocalizedLanguage($this->language);
     }
 
     /**

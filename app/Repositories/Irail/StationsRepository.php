@@ -22,7 +22,7 @@ class StationsRepository
      */
     public function getStationById(string $id): Station
     {
-        $cacheKey = "getStationById|$id";
+        $cacheKey = "getStationById|{$this->lang}|$id";
         $cachedValue = Cache::get($cacheKey);
         if ($cachedValue) {
             return $cachedValue;

@@ -55,7 +55,6 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     public function getDatedVehicleJourney(VehicleJourneyRequest $request): VehicleJourneySearchResult
     {
         $rawData = $this->rivDataRepository->getVehicleJourneyData($request);
-        $this->stationsRepository->setLocalizedLanguage($request->getLanguage());
         return $this->parseNmbsRawVehicleJourney($request, $rawData);
     }
 
