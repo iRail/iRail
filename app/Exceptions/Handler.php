@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Irail\Http\Requests\RequestUuidHelper;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
@@ -54,12 +55,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
+        $requestId1 = RequestUuidHelper::getRequestId($request);
         $isIrailException = $exception instanceof IrailHttpException;
         $statusCode = $isIrailException ? $exception->getStatusCode() : $exception->getCode();
         if (!$isIrailException) {
             return response()->json(
                 [
                     'code'  => $exception->getCode(),
+                    'request-id' => $requestId1,
                     'message'  => $exception->getMessage(),
                     'previous' => $exception->getPrevious(),
                     'at'    => self::getLastAppMethodCall($exception->getTrace()),
@@ -77,7 +80,7 @@ class Handler extends ExceptionHandler
         if (str_contains($request->getUri(), '/v1/') && $request->get('format', 'xml') == 'xml') {
             Log::debug('Returning XML error');
             return response(
-                "<error code=\"{$exception->getCode()}\">{$exception->getMessage()}</error>",
+                "<error code=\"{$exception->getCode()}\" requestId=\"{$requestId}\">{$exception->getMessage()}</error>",
                 $statusCode,
                 [
                     'Access-Control-Allow-Origin'   => '*',
@@ -90,6 +93,7 @@ class Handler extends ExceptionHandler
         return response()->json(
             [
                 'code' => $statusCode,
+                'request-id' => $requestId,
                 'message' => $exception->getMessage()
             ],
             $statusCode,

@@ -4,10 +4,10 @@ namespace Irail\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Irail\Database\OutgoingRequestLogDao;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
+use Irail\Http\Requests\RequestUuidHelper;
 use Irail\Proxy\CurlProxy;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -46,7 +46,7 @@ class RequestDumpingMiddleware
      */
     public function logOutgoingRequests(Request $request, Response|InternalProcessingException|UpstreamServerException $result): void
     {
-        $request_id = (string)Str::orderedUuid();
+        $request_id = RequestUuidHelper::getRequestId($request);
         $irail_request_url = $request->getUri();
         $irail_response_code = $result->getStatusCode();
         /**
