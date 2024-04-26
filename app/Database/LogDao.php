@@ -10,19 +10,43 @@ use Irail\Models\Dao\LogQueryType;
 
 class LogDao
 {
+    const int DB_FLUSH_SIZE = 1000;
+
+    /**
+     * Log data to the request log table. This method will keep data in memory until there are enough rows to write to the disk.
+     * Some request may be lost if the server is restarted inbetween flushes, but this is acceptable since this data isn't critical, but performance is.
+     *
+     * @param LogQueryType $queryType
+     * @param array        $query
+     * @param string       $userAgent
+     * @param array|null   $result
+     * @return void
+     */
     public function log(LogQueryType $queryType, array $query, string $userAgent, array $result = null)
     {
-        $start = time();
-        DB::update('INSERT INTO request_log (query_type, query, user_agent, result) VALUES (?, ?, ?, ?)', [
-            $queryType->value,
-            json_encode($query, JSON_UNESCAPED_SLASHES),
-            $this->maskEmailAddress($userAgent),
-            $result ? json_encode($result, JSON_UNESCAPED_SLASHES) : null
-        ]);
-        $duration = time() - $start;
-        if ($duration > 3) {
-            // Warn when this is slowing down requests
-            Log::warn("Slow log writing! Writing log took $duration seconds");
+        apcu_add('Irail|LogDao|insertId', 0, 0); // Create value if it does not exist yet
+        $id = apcu_inc('Irail|LogDao|insertId');
+        $data = [
+            'query_type' => $queryType->value,
+            'query'      => json_encode($query, JSON_UNESCAPED_SLASHES),
+            'user_agent' => $this->maskEmailAddress($userAgent),
+            'result'     => $result ? json_encode($result, JSON_UNESCAPED_SLASHES) : null,
+            'created_at' => Carbon::now()->utc()->format('Y-m-d H:i:s')
+        ];
+        // Store in memory so we don't need to write to the database on every request
+        apcu_store('Irail|LogDao|log|' . $id, $data, 0); // Store until flushed
+        if ($id % self::DB_FLUSH_SIZE == 0) {
+            Log::info('Flushing request log data');
+            $start = time();
+            // Flush to database
+            $sqlData = [];
+            for ($i = $id - self::DB_FLUSH_SIZE + 1; $i <= $id; $i++) {
+                $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
+                apcu_delete('Irail|LogDao|log|' . $i); // Remove from memory
+            }
+            DB::table('request_log')->insert($sqlData);
+            $duration = time() - $start;
+            Log::info("Flushed request log data in $duration seconds");
         }
     }
 
