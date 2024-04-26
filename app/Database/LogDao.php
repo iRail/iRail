@@ -35,7 +35,8 @@ class LogDao
      */
     public function readLogsPastMinutes(int $minutes): array
     {
-        $startTime = Carbon::now()->subMinutes($minutes)->format('Y-m-d H:i:s');
+        $startTime = Carbon::now()->utc()->subMinutes($minutes)->format('Y-m-d H:i:s');
+        // Database timestamps are UTC
         $rows = DB::select(
             'SELECT id, query_type, query, result, user_agent, created_at FROM request_log 
                                                              WHERE created_at >= ? ORDER BY created_at',
@@ -50,8 +51,11 @@ class LogDao
      */
     public function readLogsForDate(Carbon $date): array
     {
-        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE DATE(created_at) = ? ORDER BY created_at',
-            [$date->format('Y-m-d')]);
+        $start = $date->startOfDay()->utc();
+        $end = $date->endOfDay()->utc();
+        // Database timestamps are UTC
+        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at BETWEEN ? AND ? ORDER BY created_at',
+            [$start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]);
         return $this->transformRows($rows);
     }
 
