@@ -55,14 +55,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
-        $requestId1 = RequestUuidHelper::getRequestId($request);
+        $requestId = RequestUuidHelper::getRequestId($request);
         $isIrailException = $exception instanceof IrailHttpException;
         $statusCode = $isIrailException ? $exception->getStatusCode() : $exception->getCode();
         if (!$isIrailException) {
             return response()->json(
                 [
                     'code'  => $exception->getCode(),
-                    'request-id' => $requestId1,
+                    'request-id' => $requestId,
                     'message'  => $exception->getMessage(),
                     'previous' => $exception->getPrevious(),
                     'at'    => self::getLastAppMethodCall($exception->getTrace()),
