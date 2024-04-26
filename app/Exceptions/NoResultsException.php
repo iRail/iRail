@@ -2,9 +2,7 @@
 
 namespace Irail\Exceptions;
 
-use Exception;
-
-class NoResultsException extends Exception
+class NoResultsException extends IrailHttpException
 {
     public function __construct($message, $code = 500)
     {
