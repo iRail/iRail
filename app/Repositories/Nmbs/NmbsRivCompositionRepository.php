@@ -88,12 +88,9 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
     {
-        // UIC code is unreliable, use TAF/TAP instead
-        $fromTafTapCode = 'BE' . str_pad($travelSegmentWithCompositionData->ptCarFrom->id, 5, '0', STR_PAD_LEFT);
-        $origin = $this->stationsRepository->getStationByTafTapCode($fromTafTapCode);
-
-        $toTafTapCode = 'BE' . str_pad($travelSegmentWithCompositionData->ptCarTo->id, 5, '0', STR_PAD_LEFT);
-        $destination = $this->stationsRepository->getStationByTafTapCode($toTafTapCode);
+        // Use the UIC code. id contains the PTCAR id, which for belgian stations maps to the TAF/TAP code but doesn't match for foreign stations.
+        $origin = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData->ptCarFrom->uicCode);
+        $destination = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData->ptCarTo->uicCode);
 
         $source = $travelSegmentWithCompositionData->confirmedBy;
         $units = self::parseCompositionData($travelSegmentWithCompositionData->materialUnits);
