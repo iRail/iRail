@@ -5,6 +5,7 @@ namespace Irail\Repositories\Riv;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\Upstream\UpstreamRateLimitException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\LiveboardRequest;
@@ -341,21 +342,21 @@ class NmbsRivRawDataRepository
      */
     private function makeApiCallToMobileRivApi(string $url, array $parameters): string
     {
-        $key = $this->getRequestRateKey();
-        # Get the current request rate for verification
-        $currentRequestRate = $this->getRequestRate($key);
-        if ($currentRequestRate >= $this->rateLimit) {
+        $response = RateLimiter::attempt(
+            'riv-request',
+            $this->rateLimit,
+            function () use ($url, $parameters) {
+                return $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
+            },
+            60 // 60 seconds buckets, i.e. rate limiting per minute
+        );
+        if ($response === false) {
+            $currentRequestRate = $this->rateLimit - RateLimiter::remaining('riv-request', $this->rateLimit);
             $message = "Current request rate towards NMBS is $currentRequestRate requests per minute. "
                 . "Outgoing request blocked due to rate limiting configured at {$this->rateLimit} requests per minute";
             Log::error($message);
             throw new UpstreamRateLimitException($message);
         }
-
-        $response = $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
-
-        # Best effort rate-limiting, not thread safe but good enough to prevent flooding external services
-        $this->setCachedObject($key, $this->getRequestRate($key) + 1, 60);
-
         return $response->getResponseBody();
     }
 
