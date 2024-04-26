@@ -54,7 +54,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
-        if (!method_exists($exception, 'getStatusCode')) {
+        $isIrailException = $exception instanceof IrailHttpException;
+        $statusCode = $isIrailException ? $exception->getStatusCode() : $exception->getCode();
+        if (!$isIrailException) {
             return response()->json(
                 [
                     'code'  => $exception->getCode(),
@@ -76,7 +78,7 @@ class Handler extends ExceptionHandler
             Log::debug('Returning XML error');
             return response(
                 "<error code=\"{$exception->getCode()}\">{$exception->getMessage()}</error>",
-                $exception->getStatusCode(),
+                $statusCode,
                 [
                     'Access-Control-Allow-Origin'   => '*',
                     'Access-Control-Allow-Headers'  => '*',
@@ -87,10 +89,10 @@ class Handler extends ExceptionHandler
         }
         return response()->json(
             [
-                'code'    => $exception->getStatusCode(),
+                'code' => $statusCode,
                 'message' => $exception->getMessage()
             ],
-            $exception->getStatusCode(),
+            $statusCode,
             [
                 'Access-Control-Allow-Origin'   => '*',
                 'Access-Control-Allow-Headers'  => '*',
