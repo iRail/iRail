@@ -217,7 +217,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             if ($units[$i]->getTractionPosition() < $units[$i + 1]->getTractionPosition()
                 && (
                     !str_starts_with($units[$i]->getMaterialType()->getSubType(), 'M7')
-                    || (self::isM7SteeringCabin($units[$i]) && self::isM7SteeringCabin($units[$i + 1]))
+                    || (self::isM7SteeringCabin($units[$i]) && self::isM7SteeringCabin($units[$i + 1])) // Two steering cabins after each other means right >< left coupling
                 )
             ) {
                 $units[$i]->getMaterialType()->setOrientation(RollingMaterialOrientation::RIGHT); // Switch orientation on the last vehicle in each traction group
@@ -229,7 +229,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 
     private static function isM7SteeringCabin(TrainCompositionUnit $unit): bool
     {
-        return $unit->getMaterialSubTypeName() == 'M7BMX' || $unit->getMaterialSubTypeName() == 'M7BDXH';
+        return $unit->getMaterialType()->getParentType() == 'M7'
+            && ($unit->getMaterialType()->getSubType() == 'BMX' || $unit->getMaterialType()->getSubType() == 'BDXH');
     }
 
     /**
@@ -263,8 +264,10 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
     }
 
     /**
-     * @param RollingMaterialType $materialType
-     * @param int                 $position
+     * @param string $parentType The parent type (e.g. AM08)
+     * @param int    $position The 0-based index defining in which position the given carriage is.
+     * @return string The subtype, typically A,B,C or D based on the position in a multiple-train unit.
+     *                If a multiple-unit train with 5 carriages would be used, the 5th carriage would get subtype E.
      */
     private static function calculateAmMrSubType(string $parentType, int $position): string
     {
@@ -377,7 +380,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             try {
                 $cachedData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
                 $json = json_decode($cachedData->getValue());
-                $compositionData = $json->lastPlanned; /* commercialPlanned is also available */
+                // lastPlanned is likely the latest update, commercialPlanned is likely the timetabled planning
+                $compositionData = property_exists($json, 'lastPlanned') ? $json->lastPlanned : $json->commercialPlanned;
                 if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
                     // Planning data often lacks detail. Store it for 5 minutes
                     $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
