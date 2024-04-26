@@ -17,7 +17,7 @@ class RateLimitMiddleware
      * @param Closure $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         return $this->rateLimitedLongTerm($request, $next);
     }
@@ -27,7 +27,7 @@ class RateLimitMiddleware
      * @param Closure $next
      * @return Response
      */
-    public function rateLimitedLongTerm(Request $request, Closure $next): Response
+    public function rateLimitedLongTerm(Request $request, Closure $next)
     {
         $response = RateLimiter::attempt(
             'request_rate|long-term|' . $request->getClientIp(),
@@ -48,7 +48,7 @@ class RateLimitMiddleware
      * @param Closure $next
      * @return Response
      */
-    public function rateLimitedShortTerm(Request $request, Closure $next): Response
+    public function rateLimitedShortTerm(Request $request, Closure $next)
     {
         $response = RateLimiter::attempt(
             'request_rate|burst|' . $request->getClientIp(),
