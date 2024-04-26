@@ -4,6 +4,7 @@ namespace Irail\Database;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Irail\Models\Dao\LogEntry;
 use Irail\Models\Dao\LogQueryType;
 
@@ -11,12 +12,18 @@ class LogDao
 {
     public function log(LogQueryType $queryType, array $query, string $userAgent, array $result = null)
     {
+        $start = time();
         DB::update('INSERT INTO request_log (query_type, query, user_agent, result) VALUES (?, ?, ?, ?)', [
             $queryType->value,
             json_encode($query, JSON_UNESCAPED_SLASHES),
             $this->maskEmailAddress($userAgent),
             $result ? json_encode($result, JSON_UNESCAPED_SLASHES) : null
         ]);
+        $duration = time() - $start;
+        if ($duration > 3) {
+            // Warn when this is slowing down requests
+            Log::warn("Slow log writing! Writing log took $duration seconds");
+        }
     }
 
     /**
