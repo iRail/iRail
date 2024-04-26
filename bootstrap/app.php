@@ -146,8 +146,9 @@ $app->configure('app');
 */
 
 $app->middleware([
-    Irail\Http\Middleware\RequestDumpingMiddleware::class,
     Irail\Http\Middleware\TrustProxies::class,
+    Irail\Http\Middleware\RateLimitMiddleware::class,
+    Irail\Http\Middleware\RequestDumpingMiddleware::class,
 ]);
 
 // $app->routeMiddleware([
