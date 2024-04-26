@@ -25,8 +25,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 {
     use Cache;
 
-    const NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
-    const AUTH_KEY_CACHE_TTL = 60 * 30;
+    const string NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
+    const int AUTH_KEY_CACHE_TTL = 60 * 30;
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivRawDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
@@ -44,9 +44,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 
     /**
      * Scrape the composition of a train from the NMBS trainmap web application.
-     * @param Vehicle $request
+     * @param Vehicle $journey
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
-     * @throws CompositionUnavailableException
      */
     function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
@@ -402,62 +401,5 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         }
 
         return $compositionData;
-    }
-
-    /**
-     * @param int $vehicleNumber The vehicle ID, numeric only. IC1234 should be passed as '1234'.
-     * @return array The response data, or null when no data was found.
-     * @throws CompositionUnavailableException
-     */
-    private function getFreshCompositionData(int $vehicleNumber, bool $forceFreshKey = false): array
-    {
-        $url = 'https://trainmapjs.azureedge.net/data/composition/' . $vehicleNumber;
-
-        $authKey = $forceFreshKey ? $this->getNewAuthKey() : $this->getAuthKey();
-        $headers = ["auth-code: $authKey"];
-
-        $curlHttpResponse = $this->rivRawDataRepository->get($url, [], $headers);
-        $responseBody = $curlHttpResponse->getResponseBody();
-        if ($responseBody == 'null') {
-            throw new CompositionUnavailableException($vehicleNumber);
-        }
-        if ($responseBody == null && !$forceFreshKey) { // The key may have expired, force a retry with a fresh key
-            return $this->getFreshCompositionData($vehicleNumber, true);
-        } elseif ($responseBody == null && $forceFreshKey) {
-            throw new CompositionUnavailableException($vehicleNumber, 'Invalid response from server');
-        }
-        return json_decode($responseBody);
-    }
-
-    /**
-     * Get an authentication key for the composition API from cache if possible, or fresh if no key is cached.
-     *
-     * @return string|null the auth key, or null if it could not be obtained.
-     */
-    private function getAuthKey(): ?string
-    {
-        return $this->getCacheOrUpdate(
-            self::NMBS_COMPOSITION_AUTH_CACHE_KEY,
-            fn() => self::getNewAuthKey(),
-            self::AUTH_KEY_CACHE_TTL
-        )->getValue();
-    }
-
-    /**
-     * Get an authentication key for the composition API
-     *
-     * @return string|null the auth key, or null if it could not be obtained.
-     */
-    private function getNewAuthKey(): ?string
-    {
-        $url = 'https://trainmap.belgiantrain.be/';
-        $curlHttpResponse = $this->rivRawDataRepository->get($url);
-
-        // Search for localStorage.setItem('tmAuthCode', "6c088db73a11de02eebfc0e5e4d38c75");
-        $html = $curlHttpResponse->getResponseBody();
-        preg_match("/localStorage\.setItem\(\"tmAuthCode\",\"(?<key>[A-Za-z0-9]+)\"\)/", $html, $matches);
-        $key = $matches['key'];
-        $this->setCachedObject(self::NMBS_COMPOSITION_AUTH_CACHE_KEY, $key, self::AUTH_KEY_CACHE_TTL);
-        return $key;
     }
 }
