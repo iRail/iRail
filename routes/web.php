@@ -15,6 +15,10 @@
 
 use Laravel\Lumen\Routing\Router;
 
+$router->get('/', function () {
+    return redirect('https://docs.irail.be');
+});
+
 $router->get('/health', ['as' => 'status.health', 'uses' => 'StatusController@showStatus']);
 $router->get('/cache/loadGtfs', ['as' => 'cache.warmup', 'uses' => 'StatusController@warmupGtfsCache']);
 $router->get('/cache/clear', ['as' => 'cache.clear', 'uses' => 'StatusController@resetCache']);
