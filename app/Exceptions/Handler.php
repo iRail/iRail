@@ -14,6 +14,7 @@ use Irail\Http\Requests\RequestUuidHelper;
 use Irail\Util\InMemoryMetrics;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -56,6 +57,15 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
+        // NotFoundHttpException is thrown when no route can be matched
+        if ($exception instanceof NotFoundHttpException) {
+            return response()->json(
+                [
+                    'code'    => 404,
+                    'message' => 'Not found'
+                ], 404);
+        }
+
         InMemoryMetrics::countError();
         $requestId = RequestUuidHelper::getRequestId($request);
         $isIrailException = $exception instanceof IrailHttpException;
