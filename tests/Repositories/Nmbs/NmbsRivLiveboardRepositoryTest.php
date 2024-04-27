@@ -20,6 +20,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
+        $gtfsStartEndExtractor->expects('getStartDate')->times(20)->andReturn(Carbon::create(2022, 12, 11));
         $liveboardRepo = new NmbsRivLiveboardRepository($stationsRepo, $gtfsStartEndExtractor, $rivRepo);
 
         $request = $this->createRequest('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::create(2022, 12, 11, 20, 20));
@@ -59,6 +60,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
+        $gtfsStartEndExtractor->expects('getStartDate')->times(14)->andReturn(Carbon::create(2024, 1, 7));
         $liveboardRepo = new NmbsRivLiveboardRepository($stationsRepo, $gtfsStartEndExtractor, $rivRepo);
 
         $request = $this->createRequest('008821006', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 7, 14, 50));

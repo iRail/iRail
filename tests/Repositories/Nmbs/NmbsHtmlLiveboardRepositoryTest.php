@@ -5,6 +5,7 @@ namespace Tests\Repositories\Nmbs;
 use Carbon\Carbon;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
+use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\NmbsHtmlLiveboardRepository;
 use Mockery;
@@ -33,7 +34,9 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             // language is not passed, since we need to parse the resulting webpage
         ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_departuresAntwerpen.html');
 
-        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy);
+        $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
+        $gtfsStartEndExtractor->expects('getStartDate')->times(50)->andReturn(Carbon::create(2023, 12, 15));
+        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor);
         $request = $this->createRequest('008821006', TimeSelection::DEPARTURE, 'NL', Carbon::create(2023, 12, 15, 12, 58));
         $response = $liveboardRepo->getLiveboard($request);
 
@@ -69,7 +72,9 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             // language is not passed, since we need to parse the resulting webpage
         ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_platformChanges.html');
 
-        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy);
+        $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
+        $gtfsStartEndExtractor->expects('getStartDate')->times(52)->andReturn(Carbon::create(2023, 12, 15));
+        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor);
         $request = $this->createRequest('008814001', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 28, 15, 50));
         $response = $liveboardRepo->getLiveboard($request);
 
