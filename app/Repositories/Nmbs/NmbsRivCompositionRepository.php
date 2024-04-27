@@ -377,8 +377,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             try {
                 $cachedData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
                 $json = json_decode($cachedData->getValue());
-                // lastPlanned is likely the latest update, commercialPlanned is likely the timetabled planning
-                $compositionData = property_exists($json, 'lastPlanned') ? $json->lastPlanned : $json->commercialPlanned;
+                $compositionData = $this->getCompositionPlan($json, $vehicle);
+
                 if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
                     // Planning data often lacks detail. Store it for 5 minutes
                     $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
@@ -401,6 +401,23 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             throw new CompositionUnavailableException($vehicle->getId());
         }
 
+        return $compositionData;
+    }
+
+    /**
+     * @param mixed   $json
+     * @param Vehicle $vehicle
+     * @return mixed
+     */
+    public function getCompositionPlan(mixed $json, Vehicle $vehicle): mixed
+    {
+        // lastPlanned is likely the latest update, commercialPlanned is likely the timetabled planning
+        $hasLastPlannedData = property_exists($json, 'lastPlanned');
+        $hasCommercialPlannedData = property_exists($json, 'commercialPlanned');
+        if (!$hasLastPlannedData && !$hasCommercialPlannedData) {
+            throw new CompositionUnavailableException($vehicle->getId());
+        }
+        $compositionData = $hasLastPlannedData ? $json->lastPlanned : $json->commercialPlanned;
         return $compositionData;
     }
 }
