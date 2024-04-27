@@ -28,7 +28,7 @@ class TrainCompositionUnitWithId extends TrainCompositionUnit
         return $this->uicCode;
     }
 
-    public function setUicCode(int $uicCode): TrainCompositionUnit
+    public function setUicCode(int $uicCode): TrainCompositionUnitWithId
     {
         $this->uicCode = $uicCode;
         return $this;
@@ -40,7 +40,7 @@ class TrainCompositionUnitWithId extends TrainCompositionUnit
         return $this->materialNumber;
     }
 
-    public function setMaterialNumber(int $materialNumber): TrainCompositionUnit
+    public function setMaterialNumber(int $materialNumber): TrainCompositionUnitWithId
     {
         $this->materialNumber = $materialNumber;
         return $this;
@@ -51,7 +51,7 @@ class TrainCompositionUnitWithId extends TrainCompositionUnit
         return $this->materialSubTypeName;
     }
 
-    public function setMaterialSubTypeName(string $materialSubTypeName): TrainCompositionUnit
+    public function setMaterialSubTypeName(string $materialSubTypeName): TrainCompositionUnitWithId
     {
         $this->materialSubTypeName = $materialSubTypeName;
         return $this;

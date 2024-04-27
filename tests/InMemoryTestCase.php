@@ -28,6 +28,7 @@ abstract class InMemoryTestCase extends TestCase
         DB::update('DELETE FROM composition_history');
         DB::update('DELETE FROM occupancy_reports');
         DB::update('DELETE FROM request_log');
+        DB::update('DELETE FROM outgoing_request_log');
         parent::tearDown();
     }
 }

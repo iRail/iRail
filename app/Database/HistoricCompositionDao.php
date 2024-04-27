@@ -160,9 +160,9 @@ class HistoricCompositionDao
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
         foreach ($units as $position => $unit) {
-            if (!($units instanceof TrainCompositionUnitWithId)) {
+            if (!($unit instanceof TrainCompositionUnitWithId)) {
                 // TODO: When reading these compositions back, the difference between the summary and stored data should be detected
-                Log::debug("Cannot record historic composition due to missing material ids for journey {$composition->getVehicle()->getId()} reported by {$composition->getCompositionSource()}");
+                Log::info("Cannot record historic composition due to missing material ids for journey {$composition->getVehicle()->getId()} reported by {$composition->getCompositionSource()}");
                 continue;
             }
             $this->insertIfNotExists($unit);

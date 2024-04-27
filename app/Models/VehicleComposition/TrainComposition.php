@@ -28,7 +28,7 @@ class TrainComposition
      * @param Station $origin
      * @param Station $destination
      * @param string                 $compositionSource
-     * @param TrainCompositionUnit[] $units
+     * @param TrainCompositionUnit[] | TrainCompositionUnitWithId[] $units
      */
     public function __construct(Vehicle $vehicle, Station $origin, Station $destination, string $compositionSource, array $units)
     {
@@ -48,14 +48,14 @@ class TrainComposition
     }
 
     /**
-     * @return array
+     * @return TrainCompositionUnit[] | TrainCompositionUnitWithId[]
      */
     public function getUnits(): array
     {
         return $this->units;
     }
 
-    public function getUnit(int $i): TrainCompositionUnit
+    public function getUnit(int $i): TrainCompositionUnit|TrainCompositionUnitWithId
     {
         return $this->units[$i];
     }

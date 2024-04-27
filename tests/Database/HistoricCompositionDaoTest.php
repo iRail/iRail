@@ -9,6 +9,7 @@ use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\RollingMaterialType;
 use Irail\Models\VehicleComposition\TrainComposition;
 use Irail\Models\VehicleComposition\TrainCompositionUnit;
+use Irail\Models\VehicleComposition\TrainCompositionUnitWithId;
 use Tests\InMemoryTestCase;
 
 class HistoricCompositionDaoTest extends InMemoryTestCase
@@ -144,7 +145,7 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
         int $seatsFirstClass,
         bool $toilet
     ): TrainCompositionUnit {
-        return (new TrainCompositionUnit(new RollingMaterialType($parentType, $subType)))
+        return (new TrainCompositionUnitWithId(new RollingMaterialType($parentType, $subType)))
             ->setUicCode(88000000 + $uicCode)
             ->setMaterialNumber($uicCode)
             ->setSeatsSecondClass($seatsSecondClass)
