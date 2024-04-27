@@ -24,6 +24,7 @@ services:
       DB_DATABASE: 'irail-api'
       DB_USERNAME: 'irail-api'
       DB_PASSWORD: 'irail-api'
+      LOG_CHANNEL: 'stdout'
     extra_hosts:
       - host.docker.internal:host-gateway
     working_dir: /var/www
