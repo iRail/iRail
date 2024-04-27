@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Irail\Http\Requests\RequestUuidHelper;
+use Irail\Util\InMemoryMetrics;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
@@ -55,6 +56,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response|JsonResponse
     {
+        InMemoryMetrics::countError();
         $requestId = RequestUuidHelper::getRequestId($request);
         $isIrailException = $exception instanceof IrailHttpException;
         $statusCode = $isIrailException ? $exception->getStatusCode() : $exception->getCode();

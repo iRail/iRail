@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\IrailHttpException;
+use Irail\Util\InMemoryMetrics;
 
 class RateLimitMiddleware
 {
@@ -38,6 +39,7 @@ class RateLimitMiddleware
             3600 // 1800 requests per hour, one per 2 seconds
         );
         if ($response === false) {
+            InMemoryMetrics::countRateLimitRejection();
             throw new IrailHttpException(429, 'Too many requests (long-term)');
         }
         return $response;

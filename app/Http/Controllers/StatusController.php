@@ -9,7 +9,7 @@ use Irail\Database\LogDao;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Gtfs\GtfsRepository;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
-use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Irail\Util\InMemoryMetrics;
 
 class StatusController extends BaseIrailController
 {
@@ -32,13 +32,17 @@ class StatusController extends BaseIrailController
         $gtfsStatus = $this->getGtfsStatus();
         $requestStatus = $this->getRequestsStatus();
         $rivRequestStatus = $this->getRivRateLimitStatus();
+        $errorRates = $this->getErrorRateStatus();
+        $rateLimitRates = $this->getRateLimitingStatus();
         $memoryStatus = $this->getMemoryStatus();
         return 'Mem: ' . $memoryStatus . '<br>'
             . 'GTFS: ' . $gtfsStatus . '<br>'
             . 'APC: ' . $apcStatus . '<br>'
-            . 'Opcache: ' . $opcacheStatus . '<br>'
             . 'NMBS RIV: ' . $rivRequestStatus . '<br>'
-            . 'Logs: ' . $requestStatus;
+            . 'Errors: ' . $errorRates . '<br>'
+            . 'Rate Limiting: ' . $rateLimitRates . '<br>'
+            . 'Logs: ' . $requestStatus . '<br>'
+            . 'Opcache: ' . $opcacheStatus;
     }
 
     public function warmupGtfsCache(): string
@@ -134,7 +138,7 @@ class StatusController extends BaseIrailController
         $result = 'Opcache Cached scripts: ' . $status['opcache_statistics']['num_cached_scripts'] . '<br>';
         $result .= 'Opcache Cache hits: ' . $status['opcache_statistics']['hits'] . '<br>';
         $result .= 'Opcache Cache misses: ' . $status['opcache_statistics']['misses'] . '<br>';
-        $result .= 'Opcache Memory usage: ' . $status['memory_usage']['used_memory'] / (1024 * 1024) . ' MB' . '<br>';
+        $result .= 'Opcache Memory usage: ' . round($status['memory_usage']['used_memory'] / (1024 * 1024)) . ' MB' . '<br>';
         return $result;
     }
 
@@ -162,13 +166,40 @@ class StatusController extends BaseIrailController
 
     private function getRivRateLimitStatus(): string
     {
-        /** @var NmbsRivRawDataRepository $rivRepo */
-        $rivRepo = app(NmbsRivRawDataRepository::class);
         $result = 'Request rate towards NMBS RIV: <br>';
+        $metric = InMemoryMetrics::getRivCallCountsLastHour();
+        $result .= $this->formatMetric($metric, 5);
+        return $result;
+    }
 
-        for ($i = 0; $i < 6; $i++) {
-            $time = Carbon::now()->subMinutes($i);
-            $result .= $time->format('Y-m-d H:i') . ': ' . $rivRepo->getRequestRate($rivRepo->getRequestRateKey($time)) . '<br>';
+    private function getErrorRateStatus(): string
+    {
+        $result = 'Error counts: <br>';
+        $metric = InMemoryMetrics::getErrorCountsLastHour();
+        $result .= $this->formatMetric($metric, 15);
+        return $result;
+    }
+
+    private function getRateLimitingStatus(): string
+    {
+        $result = 'Rate limit block counts: <br>';
+        $metric = InMemoryMetrics::getRateLimitRejectionCountsLastHour();
+        $result .= $this->formatMetric($metric, 15);
+        return $result;
+    }
+
+    /**
+     * @param array  $metric
+     * @param string $result
+     * @return string
+     */
+    public function formatMetric(array $metric, int $valuesToPrint): string
+    {
+        $result = '';
+        $timestamps = array_keys($metric);
+        $counts = array_values($metric);
+        for ($i = 0; $i < $valuesToPrint; $i++) {
+            $result .= $timestamps[$i] . ': ' . ($counts[$i] !== false ? $counts[$i] : '0') . '<br>';
         }
         return $result;
     }

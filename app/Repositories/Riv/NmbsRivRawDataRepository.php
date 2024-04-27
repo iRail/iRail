@@ -19,6 +19,7 @@ use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
+use Irail\Util\InMemoryMetrics;
 use Psr\Cache\InvalidArgumentException;
 
 class NmbsRivRawDataRepository
@@ -346,6 +347,7 @@ class NmbsRivRawDataRepository
             'riv-request',
             $this->rateLimit,
             function () use ($url, $parameters) {
+                InMemoryMetrics::countRivCall();
                 return $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
             },
             60 // 60 seconds buckets, i.e. rate limiting per minute
