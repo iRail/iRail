@@ -1,0 +1,534 @@
+{
+  "Stops": {
+    "Stop": [
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Melle",
+        "id": "A=1@O=Melle@X=3797088@Y=51002808@U=80@L=8893039@",
+        "extId": "8893039",
+        "routeIdx": 0,
+        "lon": 3.797088,
+        "lat": 51.002808,
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:16:00",
+        "depDate": "2024-04-27",
+        "depTrack": "1",
+        "rtDepTime": "16:16:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Gontrode",
+        "id": "A=1@O=Gontrode@X=3801673@Y=50980200@U=80@L=8893047@",
+        "extId": "8893047",
+        "routeIdx": 1,
+        "lon": 3.801673,
+        "lat": 50.9802,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:19:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:19:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:20:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:19:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Landskouter",
+        "id": "A=1@O=Landskouter@X=3791147@Y=50970554@U=80@L=8893054@",
+        "extId": "8893054",
+        "routeIdx": 2,
+        "lon": 3.791147,
+        "lat": 50.970554,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:21:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:21:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:22:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:21:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Moortsele",
+        "id": "A=1@O=Moortsele@X=3781339@Y=50953520@U=80@L=8893062@",
+        "extId": "8893062",
+        "routeIdx": 3,
+        "lon": 3.781339,
+        "lat": 50.95352,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:25:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:25:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:26:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:25:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Scheldewindeke",
+        "id": "A=1@O=Scheldewindeke@X=3777843@Y=50937070@U=80@L=8893070@",
+        "extId": "8893070",
+        "routeIdx": 4,
+        "lon": 3.777843,
+        "lat": 50.93707,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:28:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:27:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:29:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:28:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Balegem-Village / Balegem-Dorp",
+        "id": "A=1@O=Balegem-Village / Balegem-Dorp@X=3791425@Y=50919612@U=80@L=8895257@",
+        "extId": "8895257",
+        "routeIdx": 5,
+        "lon": 3.791425,
+        "lat": 50.919612,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:31:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:31:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:32:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:31:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Balegem-Sud / Balegem-Zuid",
+        "id": "A=1@O=Balegem-Sud / Balegem-Zuid@X=3805871@Y=50900510@U=80@L=8895240@",
+        "extId": "8895240",
+        "routeIdx": 6,
+        "lon": 3.805871,
+        "lat": 50.90051,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:34:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:34:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "1",
+        "depTrack": "1",
+        "rtDepTime": "16:35:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:35:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Zottegem",
+        "id": "A=1@O=Zottegem@X=3814411@Y=50869102@U=80@L=8895208@",
+        "extId": "8895208",
+        "routeIdx": 7,
+        "lon": 3.814411,
+        "lat": 50.869102,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:41:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:39:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "5",
+        "depTrack": "5",
+        "rtDepTime": "16:41:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:39:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Lierde",
+        "id": "A=1@O=Lierde@X=3826564@Y=50816237@U=80@L=8895570@",
+        "extId": "8895570",
+        "routeIdx": 8,
+        "lon": 3.826564,
+        "lat": 50.816237,
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "depTime": "16:48:00",
+        "depDate": "2024-04-27",
+        "arrTime": "16:48:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "2",
+        "depTrack": "2",
+        "rtDepTime": "16:48:00",
+        "rtDepDate": "2024-04-27",
+        "rtDepTz": 0,
+        "rtArrTime": "16:47:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      },
+      {
+        "Notes": {
+          "Note": [
+            {
+              "value": "LI - ?",
+              "key": "LI",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "CS - ?",
+              "key": "CS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "GH - ?",
+              "key": "GH",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Light assistance",
+              "key": "LA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "Full assistance",
+              "key": "FA",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "FS - ?",
+              "key": "FS",
+              "type": "A",
+              "priority": 0
+            },
+            {
+              "value": "LS - ?",
+              "key": "LS",
+              "type": "A",
+              "priority": 0
+            }
+          ]
+        },
+        "name": "Grammont / Geraardsbergen",
+        "id": "A=1@O=Grammont / Geraardsbergen@X=3872328@Y=50771129@U=80@L=8895505@",
+        "extId": "8895505",
+        "routeIdx": 9,
+        "lon": 3.872328,
+        "lat": 50.771129,
+        "arrPrognosisType": "PROGNOSED",
+        "arrTime": "16:55:00",
+        "arrDate": "2024-04-27",
+        "arrTrack": "3",
+        "rtArrTime": "16:55:00",
+        "rtArrDate": "2024-04-27",
+        "rtArrTz": 0
+      }
+    ]
+  },
+  "Names": {
+    "Name": [
+      {
+        "Product": {
+          "name": "S52 1866",
+          "num": "1866",
+          "catOut": "S52     ",
+          "catIn": "G71",
+          "catCode": "4",
+          "catOutS": "G71",
+          "catOutL": "S52",
+          "admin": "88____"
+        },
+        "name": "S52 1866",
+        "number": "1866",
+        "category": "G71",
+        "routeIdxFrom": 0,
+        "routeIdxTo": 9
+      }
+    ]
+  },
+  "Directions": {
+    "Direction": [
+      {
+        "routeIdxFrom": 0,
+        "routeIdxTo": 9
+      }
+    ]
+  },
+  "JourneyStatus": "P",
+  "ServiceDays": [
+    {
+      "planningPeriodBegin": "2024-02-25",
+      "planningPeriodEnd": "2024-12-14",
+      "sDaysR": "not every day",
+      "sDaysI": "27., 28. Apr",
+      "sDaysB": "00000000000000030000000000000000000000000000000000000000000000000000000000",
+      "routeIdxFrom": 0,
+      "routeIdxTo": 9
+    }
+  ],
+  "rtLastPassRouteIdx": -1,
+  "ref": "1|3032|9|80|27042024",
+  "reachable": true,
+  "serverVersion": "2.19.4",
+  "dialectVersion": "2.19",
+  "planRtTs": "2024-04-27 15:37:16+02:00",
+  "requestId": "kug24jqwiqxxhk4k"
+}

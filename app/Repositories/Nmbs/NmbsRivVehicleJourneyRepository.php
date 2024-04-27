@@ -122,12 +122,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
         $journeyStartDateStr = str_pad(explode('|', $json['ref'])[4], 8, '0', STR_PAD_LEFT);
         $journeyStartDate = Carbon::createFromFormat('dmY', $journeyStartDateStr, 'Europe/Stockholm');
         $vehicle = $hafasVehicle->toVehicle($journeyStartDate);
-        $vehicle->setDirection(
-            new VehicleDirection(
-                $json['Directions']['Direction'][0]['value'],
-                $this->stationsRepository->getStationByHafasId(end($json['Stops']['Stop'])['extId'])
-            )
-        );
+        $this->setDirection($vehicle, $json);
         return $vehicle;
     }
 
@@ -142,6 +137,32 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
             return $this->parseAlerts($json['Messages']['Message']);
         } else {
             return [];
+        }
+    }
+
+    /**
+     * @param Vehicle $vehicle
+     * @param array   $json
+     * @return void
+     */
+    private function setDirection(Vehicle $vehicle, array $json): void
+    {
+        $directionData = $json['Directions']['Direction'][0];
+        $destinationStation = $json['Stops']['Stop'][$directionData['routeIdxTo']];
+        if (key_exists('value', $directionData)) {
+            $vehicle->setDirection(
+                new VehicleDirection(
+                    $directionData['value'],
+                    $this->stationsRepository->getStationByHafasId($destinationStation['extId'])
+                )
+            );
+        } else {
+            $vehicle->setDirection(
+                new VehicleDirection(
+                    $destinationStation['name'],
+                    $this->stationsRepository->getStationByHafasId($destinationStation['extId'])
+                )
+            );
         }
     }
 

@@ -64,6 +64,21 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
         $this->assertTrue($stops[14]->getArrival()->isCancelled());
     }
 
+    public function testGetDatedVehicleJourney_ic1866_shouldCalculateMissingDirection()
+    {
+        $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
+            new CachedData('test', file_get_contents(__DIR__ . '/NmbsRivVehicleJourneyRepository_ic1866.json'), 1)
+        );
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo);
+        $request = $this->createRequest('1866', 'en', Carbon::create(2024, 4, 27));
+        $result = $repo->getDatedVehicleJourney($request);
+        $this->assertEquals('Grammont / Geraardsbergen', $result->getVehicle()->getDirection()->getName());
+        $this->assertEquals('008895505', $result->getVehicle()->getDirection()->getStation()->getId());
+        $this->assertEquals('Geraardsbergen', $result->getVehicle()->getDirection()->getStation()->getStationName());
+        $this->assertEquals(Carbon::create(2024, 4, 27), $result->getVehicle()->getJourneyStartDate());
+        $this->assertCount(10, $result->getStops());
+    }
 
     private function createRequest(string $journeyId, string $language, Carbon $dateTime): VehicleJourneyRequest
     {
