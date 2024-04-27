@@ -10,7 +10,13 @@ use Irail\Models\Dao\LogQueryType;
 
 class LogDao
 {
-    const int DB_FLUSH_SIZE = 100;
+    /**
+     * How often request logs should be flushed to the database. E.g. every 10th or 100th request.
+     */
+    public static function getFlushInterval(): int
+    {
+        return env('REQUEST_LOG_FLUSH_BUFFER', 100);
+    }
 
     /**
      * Log data to the request log table. This method will keep data in memory until there are enough rows to write to the disk.
@@ -35,12 +41,13 @@ class LogDao
         ];
         // Store in memory so we don't need to write to the database on every request
         apcu_store('Irail|LogDao|log|' . $id, $data, 0); // Store until flushed
-        if ($id % self::DB_FLUSH_SIZE == 0) {
+        $flushInterval = $this->getFlushInterval();
+        if ($id % $flushInterval == 0) {
             Log::info('Flushing request log data');
             $start = time();
             // Flush to database
             $sqlData = [];
-            for ($i = $id - self::DB_FLUSH_SIZE + 1; $i <= $id; $i++) {
+            for ($i = $id - $flushInterval + 1; $i <= $id; $i++) {
                 $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
                 apcu_delete('Irail|LogDao|log|' . $i); // Remove from memory
             }

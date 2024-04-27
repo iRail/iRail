@@ -14,10 +14,10 @@ class LogDaoTest extends InMemoryTestCase
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
         $dao = new LogDao();
-        for ($i = 0; $i < LogDao::DB_FLUSH_SIZE * 2.5; $i++) {
+        for ($i = 0; $i < LogDao::getFlushInterval() * 2.5; $i++) {
             $dao->log(LogQueryType::LIVEBOARD, ['id' => "test-$i"], 'LogDaoTest', null);
         }
         $rowCount = DB::table('request_log')->count();
-        self::assertEquals(2 * LogDao::DB_FLUSH_SIZE, $rowCount);
+        self::assertEquals(2 * LogDao::getFlushInterval(), $rowCount);
     }
 }
