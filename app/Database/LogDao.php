@@ -10,7 +10,7 @@ use Irail\Models\Dao\LogQueryType;
 
 class LogDao
 {
-    const int DB_FLUSH_SIZE = 1000;
+    const int DB_FLUSH_SIZE = 100;
 
     /**
      * Log data to the request log table. This method will keep data in memory until there are enough rows to write to the disk.
