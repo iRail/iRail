@@ -61,7 +61,7 @@ class RateLimitMiddleware
             10 // 30 request per 10 seconds, 3 per second bursts
         );
         if ($response === false) {
-            throw new IrailHttpException(429, 'Too many requests (long-term)');
+            throw new IrailHttpException(429, 'Too many requests (short-term)');
         }
         return $response;
     }
