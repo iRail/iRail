@@ -159,12 +159,14 @@ class HistoricCompositionDao
         $typesFrequency = array_count_values(array_map(fn($unit) => $unit->getMaterialType()->getParentType(), $units));
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
+        Log::debug("Recording historic composition for journey {$composition->getVehicle()->getId()}");
         foreach ($units as $position => $unit) {
             if (!($unit instanceof TrainCompositionUnitWithId)) {
                 // TODO: When reading these compositions back, the difference between the summary and stored data should be detected
                 Log::info("Cannot record historic composition due to missing material ids for journey {$composition->getVehicle()->getId()} reported by {$composition->getCompositionSource()}");
                 continue;
             }
+
             $this->insertIfNotExists($unit);
             DB::update('INSERT INTO composition_unit_usage(uic_code, historic_composition_id, position) VALUES (?,?,?)', [
                 $unit->getUicCode(),

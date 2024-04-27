@@ -4,6 +4,7 @@ namespace Irail\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Response;
+use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
 use Irail\Http\Requests\VehicleCompositionV1Request;
 use Irail\Http\Responses\v1\VehicleCompositionV1Converter;
@@ -15,14 +16,16 @@ use Irail\Repositories\VehicleCompositionRepository;
 
 class CompositionV1Controller extends BaseIrailController
 {
+    private HistoricCompositionDao $historicCompositionRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(HistoricCompositionDao $historicCompositionRepository)
     {
-        //
+        $this->historicCompositionRepository = $historicCompositionRepository;
     }
 
     public function getVehicleComposition(VehicleCompositionV1Request $request): Response
@@ -34,6 +37,7 @@ class CompositionV1Controller extends BaseIrailController
         $vehicle = Vehicle::fromName($request->getVehicleId(), $startDate ?: Carbon::now());
         $repo = app(VehicleCompositionRepository::class);
         $vehicleCompositionSearchResult = $repo->getComposition($vehicle);
+        $this->historicCompositionRepository->recordComposition($vehicleCompositionSearchResult);
         $dataRoot = VehicleCompositionV1Converter::convert($request, $vehicleCompositionSearchResult);
 
         $this->logRequest($request);
