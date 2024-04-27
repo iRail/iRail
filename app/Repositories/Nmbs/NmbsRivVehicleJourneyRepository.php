@@ -148,7 +148,13 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     private function setDirection(Vehicle $vehicle, array $json): void
     {
         $directionData = $json['Directions']['Direction'][0];
-        $destinationStation = $json['Stops']['Stop'][$directionData['routeIdxTo']];
+        $destinationStation = end($json['Stops']['Stop']);
+        if ($destinationStation['routeIdx'] != $directionData['routeIdxTo']) {
+            // Assume the destination station is the last one, as this always seems the case. Throw an exception if this is wrong so it can be fixed.
+            throw new InternalProcessingException(500,
+                'Unexpected destination station with idx ' . $directionData['routeIdxTo'] . ' was not found at the end of the stations list');
+        }
+
         if (key_exists('value', $directionData)) {
             $vehicle->setDirection(
                 new VehicleDirection(
