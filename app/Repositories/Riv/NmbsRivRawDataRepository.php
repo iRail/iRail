@@ -3,7 +3,6 @@
 namespace Irail\Repositories\Riv;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -199,14 +198,14 @@ class NmbsRivRawDataRepository
                 try {
                     return $this->getJourneyDetailRef($request);
                 } catch (GtfsVehicleNotFoundException $e) {
-                    return $e;
+                    return false;
                 }
             }, 4 * 3600
         );
 
-        if ($cachedJourneyDetailRef->getValue() instanceof Exception) {
+        if ($cachedJourneyDetailRef->getValue() === false) {
             // If an exception was cached, throw it
-            throw $cachedJourneyDetailRef->getValue();
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
         }
 
         $journeyDetailRef = $cachedJourneyDetailRef->getValue();
