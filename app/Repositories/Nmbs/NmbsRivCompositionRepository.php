@@ -40,6 +40,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         $this->stationsRepository = $stationsRepository;
         $this->rivRawDataRepository = $rivRawDataRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
+        $this->setCachePrefix('NmbsRivCompositionRepository');
     }
 
     /**
@@ -49,41 +50,43 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      */
     function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
-        $journeyDate = $journey->getJourneyStartDate();
-        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
-        if (!$journeyWithOriginAndDestination) {
-            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
-            throw new CompositionUnavailableException($journey->getId(),
-                'Composition is only available from vehicle start. Vehicle is not active on the given date.');
-        }
-        $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
-        $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
-        if ($secondsUntilStart > 0) {
-            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
-                . "Start time is $startTimeOffset.");
-            throw new CompositionUnavailableException($journey->getId(),
-                'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
-        }
-
-        $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
-        $compositionData = $cachedData->getValue();
-        $cacheAge = $cachedData->getAge();
-
-        // Build a result
-        $segments = [];
-        foreach ($compositionData as $compositionDataForSingleSegment) {
-            // NMBS does not have single-carriage railbusses,
-            // meaning these compositions are only a locomotive and should be filtered out
-            if (count($compositionDataForSingleSegment->materialUnits) > 1) {
-                $segments[] = $this->parseOneSegmentWithCompositionData(
-                    $journey,
-                    $compositionDataForSingleSegment
-                );
-            } else {
-                Log::info('Skipping composition with less than 2 carriages');
+        return $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
+            $journeyDate = $journey->getJourneyStartDate();
+            $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
+            if (!$journeyWithOriginAndDestination) {
+                Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
+                throw new CompositionUnavailableException($journey->getId(),
+                    'Composition is only available from vehicle start. Vehicle is not active on the given date.');
             }
-        }
-        return new VehicleCompositionSearchResult($journey, $segments);
+            $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
+            $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
+            if ($secondsUntilStart > 0) {
+                Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
+                    . "Start time is $startTimeOffset.");
+                throw new CompositionUnavailableException($journey->getId(),
+                    'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
+            }
+
+            $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
+            $compositionData = $cachedData->getValue();
+            $cacheAge = $cachedData->getAge();
+
+            // Build a result
+            $segments = [];
+            foreach ($compositionData as $compositionDataForSingleSegment) {
+                // NMBS does not have single-carriage railbusses,
+                // meaning these compositions are only a locomotive and should be filtered out
+                if (count($compositionDataForSingleSegment->materialUnits) > 1) {
+                    $segments[] = $this->parseOneSegmentWithCompositionData(
+                        $journey,
+                        $compositionDataForSingleSegment
+                    );
+                } else {
+                    Log::info('Skipping composition with less than 2 carriages');
+                }
+            }
+            return new VehicleCompositionSearchResult($journey, $segments);
+        }, 60)->getValue();
     }
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
