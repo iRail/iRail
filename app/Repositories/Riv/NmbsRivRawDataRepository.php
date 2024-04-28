@@ -3,9 +3,9 @@
 namespace Irail\Repositories\Riv;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Upstream\UpstreamRateLimitException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\LiveboardRequest;
@@ -158,7 +158,7 @@ class NmbsRivRawDataRepository
      *
      * @param VehicleJourneyRequest $request
      * @return CachedData
-     * @throws Exception
+     * @throws GtfsVehicleNotFoundException
      */
     public function getVehicleJourneyData(VehicleJourneyRequest $request): CachedData
     {
@@ -184,18 +184,18 @@ class NmbsRivRawDataRepository
     /**
      * @param VehicleJourneyRequest $request
      * @return bool|string
-     * @throws Exception
+     * @throws GtfsVehicleNotFoundException
      */
     protected function getFreshVehicleJourneyData(VehicleJourneyRequest $request): string|bool
     {
         $gtfsTripExtractor = new GtfsTripStartEndExtractor();
         $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $request->getDateTime());
         if ($vehicleWithOriginAndDestination === false) {
-            throw new Exception('Vehicle not found in GTFS data', 404);
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
         }
         $journeyDetailRef = $this->getJourneyDetailRef($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
         if ($journeyDetailRef === false) {
-            throw new Exception('Vehicle not found', 404);
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
         }
         return $this->getJourneyDetailResponse($request, $journeyDetailRef);
     }
@@ -205,7 +205,7 @@ class NmbsRivRawDataRepository
      * @param VehicleJourneyRequest           $request
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|null
-     * @throws Exception
+     * @throws GtfsVehicleNotFoundException
      */
     private function getJourneyDetailRef(GtfsTripStartEndExtractor $gtfsTripExtractor,
         VehicleJourneyRequest $request,
@@ -228,7 +228,7 @@ class NmbsRivRawDataRepository
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
         # If no reference has been found at this stage, fail
         if ($journeyDetailRef === false) {
-            throw new Exception('Vehicle not found', 404);
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
         }
         return $journeyDetailRef;
     }
@@ -270,7 +270,6 @@ class NmbsRivRawDataRepository
      * @param VehicleJourneyRequest           $request
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|bool
-     * @throws Exception
      */
     private function getJourneyDetailRefAlt(GtfsTripStartEndExtractor $gtfsTripExtractor,
         VehicleJourneyRequest $request,

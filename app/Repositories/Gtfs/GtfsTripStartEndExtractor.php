@@ -4,8 +4,8 @@ namespace Irail\Repositories\Gtfs;
 
 use Carbon\Carbon;
 use DateTime;
-use Exception;
 use Illuminate\Support\Facades\Log;
+use Irail\Exceptions\Internal\GtfsTripNotFoundException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
@@ -105,12 +105,16 @@ class GtfsTripStartEndExtractor
      *
      * @param JourneyWithOriginAndDestination $originalJourney
      * @return JourneyWithOriginAndDestination[]
-     * @throws Exception
      */
     public function getAlternativeVehicleWithOriginAndDestination(JourneyWithOriginAndDestination $originalJourney): array
     {
         Log::debug("getAlternativeVehicleWithOriginAndDestination called for trip {$originalJourney->getTripId()}");
-        $stops = self::getStopTimesForTrip($originalJourney->getTripId());
+        try {
+            $stops = self::getStopTimesForTrip($originalJourney->getTripId());
+        } catch (GtfsTripNotFoundException $e) {
+            Log::error($e->getMessage());
+            return [];
+        }
         // Only search between stops where the train actually stops, since stops will also include waypoints.
         // Array_values to fix gaps between indexes after filtering
         $stops = array_values(array_filter($stops, fn(StopTime $stop) => $stop->hasPassengerExchange()));
@@ -243,14 +247,14 @@ class GtfsTripStartEndExtractor
      * Get the stop_times for this trip.
      * !!! IMPORTANT !!! stop_times may contain waypoints where no passenger exchange is possible. These should be handled correctly when showing results to users.
      * @return StopTime[] The stop times for this trip, including waypoints where the train is passing by.
-     * @throws Exception
+     * @throws GtfsTripNotFoundException
      */
     private function getStopTimesForTrip(string $tripId): array
     {
         $tripStops = $this->gtfsRepository->getTripStops();
 
         if (!key_exists($tripId, $tripStops)) {
-            throw new Exception('Trip not found', 404);
+            throw new GtfsTripNotFoundException($tripId);
         }
 
         return $tripStops[$tripId];

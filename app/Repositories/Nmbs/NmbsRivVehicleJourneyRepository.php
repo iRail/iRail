@@ -9,9 +9,9 @@
 namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\App;
 use Irail\Database\OccupancyDao;
+use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
@@ -50,7 +50,7 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
      *
      * @param VehicleJourneyRequest $request
      * @return VehicleJourneySearchResult
-     * @throws Exception
+     * @throws GtfsVehicleNotFoundException
      */
     public function getDatedVehicleJourney(VehicleJourneyRequest $request): VehicleJourneySearchResult
     {
