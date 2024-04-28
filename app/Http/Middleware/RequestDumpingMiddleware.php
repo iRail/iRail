@@ -23,17 +23,11 @@ class RequestDumpingMiddleware
     public function handle(Request $request, Closure $next): mixed
     {
         // Perform the request first
-        try {
-            /** @var Response $result */
-            $result = $next($request);
-            if (getenv('LOG_REQUESTS') == 'ALL') {
-                $this->logOutgoingRequests($request, $result);
-            }
-        } catch (InternalProcessingException|UpstreamServerException $e) {
-            if (getenv('LOG_REQUESTS') == 'ALL' || getenv('LOG_REQUESTS') == 'ERROR') {
-                $this->logOutgoingRequests($request, $e);
-            }
-            throw $e; // re-throw exception without changing it
+        $logConfig = getenv('LOG_REQUESTS');
+        /** @var Response $result */
+        $result = $next($request);
+        if ($logConfig == 'ALL' || ($logConfig == 'ERROR' && $result->getStatusCode() == 500)) {
+            $this->logOutgoingRequests($request, $result);
         }
         return $result;
     }
