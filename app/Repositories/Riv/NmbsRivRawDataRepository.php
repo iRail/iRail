@@ -123,7 +123,7 @@ class NmbsRivRawDataRepository
     {
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshRouteplanningData($request);
-        });
+        }, 30);
     }
 
     /**

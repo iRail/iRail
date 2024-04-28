@@ -29,11 +29,14 @@ class JourneyPlanningV1Controller extends BaseIrailController
 
     public function getJourneyPlanning(JourneyPlanningV1RequestImpl $request): Response
     {
+        /**
+         * @var JourneyPlanningRepository $repo
+         */
         $repo = app(JourneyPlanningRepository::class);
         $journeyPlanningResult = $repo->getJourneyPlanning($request);
         $dataRoot = JourneyPlanningV1Converter::convert($request, $journeyPlanningResult);
         $this->logRequest($request, $journeyPlanningResult);
-        return $this->outputV1($request, $dataRoot);
+        return $this->outputV1($request, $dataRoot, 60);
     }
 
     /**
