@@ -45,10 +45,14 @@ class Handler extends ExceptionHandler
      */
     public function report(Throwable $exception)
     {
+        if ($exception instanceof NotFoundHttpException) {
+            return;
+        }
         if ($exception instanceof GtfsVehicleNotFoundException || $exception instanceof InvalidRequestException) {
             Log::warning($exception->getMessage());
             return; // No need to report these exceptions any further, they're just invalid requests
         }
+        InMemoryMetrics::countError();
         parent::report($exception);
     }
 
@@ -72,7 +76,6 @@ class Handler extends ExceptionHandler
                 ], 404);
         }
 
-        InMemoryMetrics::countError();
         $requestId = RequestUuidHelper::getRequestId($request);
         $isIrailException = $exception instanceof IrailHttpException;
         $statusCode = $isIrailException ? $exception->getStatusCode() : $exception->getCode();
