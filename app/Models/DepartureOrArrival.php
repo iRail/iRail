@@ -9,7 +9,7 @@ use Carbon\Carbon;
  */
 class DepartureOrArrival
 {
-    private Vehicle $vehicle;
+    private ?Vehicle $vehicle;
     private Station $station;
 
     private ?PlatformInfo $platform = null;
@@ -168,18 +168,18 @@ class DepartureOrArrival
     }
 
     /**
-     * @return Vehicle
+     * @return Vehicle|null The vehicle, or null in case of a walking departure/arrival.
      */
-    public function getVehicle(): Vehicle
+    public function getVehicle(): ?Vehicle
     {
         return $this->vehicle;
     }
 
     /**
-     * @param Vehicle $vehicle
+     * @param Vehicle|null $vehicle The vehicle, or null in case of a walking departure/arrival.
      * @return DepartureOrArrival
      */
-    public function setVehicle(Vehicle $vehicle): DepartureOrArrival
+    public function setVehicle(?Vehicle $vehicle): DepartureOrArrival
     {
         $this->vehicle = $vehicle;
         return $this;

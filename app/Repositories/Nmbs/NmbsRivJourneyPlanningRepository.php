@@ -268,12 +268,15 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         }
 
         // TODO: set occupancy data for intermediate stops
-        $parsedLeg->getDeparture()->setOccupancy(
-            $this->occupancyRepository->getOccupancy(
-                $parsedLeg->getDeparture(),
-                $this->getNmbsOccupancyFromHafas($legStart)
-            )
-        );
+        // Only try to set the occupancy for journey legs, walking etc do not have occupancy
+        if ($parsedLeg->getLegType() == JourneyLegType::JOURNEY) {
+            $parsedLeg->getDeparture()->setOccupancy(
+                $this->occupancyRepository->getOccupancy(
+                    $parsedLeg->getDeparture(),
+                    $this->getNmbsOccupancyFromHafas($legStart)
+                )
+            );
+        }
 
         return $parsedLeg;
     }
