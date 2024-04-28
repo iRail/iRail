@@ -105,7 +105,7 @@ class JourneyPlanningV1Converter extends V1Converter
             $via->timebetween = $departingLeg->getDeparture()->getRealtimeDateTime()->getTimestamp()
                 - $arrivingLeg->getArrival()->getRealtimeDateTime()->getTimestamp();
             $via->station = self::convertStation($arrivingLeg->getArrival()->getStation());
-            $via->vehicle = self::convertVehicle($departingLeg->getVehicle());
+            $via->vehicle = $departingLeg->getLegType() == JourneyLegType::JOURNEY ? self::convertVehicle($departingLeg->getVehicle()) : self::convertWalk();
             $result[] = $via;
         }
         return $result;
