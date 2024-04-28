@@ -7,6 +7,7 @@ use Exception;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
+use Irail\Models\JourneyLegType;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\NmbsRivJourneyPlanningRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -18,7 +19,7 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
     /**
      * @throws Exception
      */
-    function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
+    function testGetJourneyPlanning_normalCase_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -41,6 +42,40 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
         self::assertEquals('Gent-Sint-Pieters', $journey->getDeparture()->getStation()->getStationName());
         self::assertEquals(Carbon::create(2023, 12, 17, 15, 19, 0, 'Europe/Brussels'), $journey->getArrival()->getScheduledDateTime());
         self::assertEquals('008814308', $journey->getArrival()->getStation()->getId());
+    }
+
+    function testGetJourneyPlanning_walkingLeg_shouldParseDataCorrectly(): void
+    {
+        $stationsRepo = new StationsRepository();
+        $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $journeyPlanningRepo = new NmbsRivJourneyPlanningRepository($stationsRepo, $rivRepo);
+        $request = $this->createRequest('008821147', '008822210', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 5, 28, 22, 00, 00));
+        $rivRepo->shouldReceive('getRoutePlanningData')
+            ->with($request)
+            ->atLeast()
+            ->once()
+            ->andReturn(new CachedData(
+                'sample-cache-key',
+                file_get_contents(__DIR__ . '/NmbsRivJourneyPlanningRepositoryTest_walkingLeg.json')
+            ));
+
+        $response = $journeyPlanningRepo->getJourneyPlanning($request);
+
+        self::assertEquals(6, count($response->getJourneys()));
+        $journey = $response->getJourneys()[0];
+
+        self::assertNotNull($journey->getDeparture()->getVehicle());
+        self::assertEquals(JourneyLegType::JOURNEY, $journey->getLegs()[0]->getLegType());
+        self::assertNotNull($journey->getLegs()[0]->getVehicle());
+        self::assertNotNull($journey->getLegs()[0]->getDeparture()->getVehicle());
+        self::assertNotNull($journey->getLegs()[0]->getArrival()->getVehicle());
+
+        self::assertNull($journey->getArrival()->getVehicle());
+        self::assertEquals(JourneyLegType::WALKING, $journey->getLegs()[1]->getLegType());
+        self::assertNull($journey->getLegs()[1]->getVehicle());
+        self::assertNull($journey->getLegs()[1]->getDeparture()->getVehicle());
+        self::assertNull($journey->getLegs()[1]->getArrival()->getVehicle());
+
     }
 
     private function createRequest(
