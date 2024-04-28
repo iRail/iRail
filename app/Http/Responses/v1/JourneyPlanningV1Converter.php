@@ -157,7 +157,11 @@ class JourneyPlanningV1Converter extends V1Converter
     public static function convertDirection(DepartureOrArrival $departureOrArrival): StdClass
     {
         $result = new StdClass();
-        $result->name = $departureOrArrival->getVehicle()->getDirection()->getName();
+        if ($departureOrArrival->getVehicle() != null) {
+            $result->name = $departureOrArrival->getVehicle()->getDirection()->getStation()->getStationName();
+        } else {
+            $result->name = 'Walk'; // TODO: translate?
+        }
         return $result;
     }
 

@@ -10,6 +10,7 @@ use Irail\Http\Responses\v1\JourneyPlanningV1Converter;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Models\Journey;
 use Irail\Models\JourneyLeg;
+use Irail\Models\JourneyLegType;
 use Irail\Models\Result\JourneyPlanningSearchResult;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\JourneyPlanningRepository;
@@ -74,7 +75,8 @@ class JourneyPlanningV1Controller extends BaseIrailController
 
     private function getLegInLogFormat(JourneyLeg $leg): array
     {
-        return ['trip'          => $leg->getVehicle()->getId(),
+        return [
+            'trip' => $leg->getLegType() == JourneyLegType::JOURNEY ? $leg->getVehicle()->getId() : 'Walk',
                 'departureStop' => $leg->getDeparture()->getStation()->getUri(),
                 'arrivalStop'   => $leg->getDeparture()->getStation()->getUri()
         ];
