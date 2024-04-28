@@ -28,9 +28,11 @@ use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\LiveboardRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
+use Irail\Traits\Cache;
 
 class NmbsRivLiveboardRepository implements LiveboardRepository
 {
+    use Cache;
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
@@ -46,6 +48,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
 
         $this->rivDataRepository = $rivDataRepository;
         $this->occupancyRepository = App::make(OccupancyDao::class);
+        $this->setCachePrefix('NmbsRivLiveboardRepository');
     }
 
     /**
@@ -57,8 +60,10 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      */
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
-        $rawData = $this->rivDataRepository->getLiveboardData($request);
-        return $this->parseNmbsRawData($request, $rawData);
+        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
+            $rawData = $this->rivDataRepository->getLiveboardData($request);
+            return $this->parseNmbsRawData($request, $rawData);
+        }, 60)->getValue();
     }
 
     /**
