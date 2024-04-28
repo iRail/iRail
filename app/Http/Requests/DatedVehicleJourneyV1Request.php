@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use Irail\Exceptions\Request\InvalidRequestException;
 
 class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJourneyRequest
 {
@@ -13,17 +12,14 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     private string $language;
     private Carbon $dateTime;
 
-    /**
-     * @param string|null $vehicleId
-     * @param string|null $datedJourneyId
-     * @param Carbon    $requestDateTime
-     * @param string      $language
-     * @throws InvalidRequestException
-     */
     public function __construct()
     {
         parent::__construct();
         $this->vehicleId = $this->_request->get('id');
+        if (str_starts_with($this->vehicleId, 'BE.NMBS.')) {
+            // Reformat old style ids
+            $this->vehicleId = substr($this->vehicleId, strlen('BE.NMBS.'));
+        }
         $this->dateTime = $this->parseIrailV1DateTime();
     }
 
