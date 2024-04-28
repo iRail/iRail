@@ -63,7 +63,11 @@ abstract class IrailHttpRequest extends LumenRequest
 
     public function getUserAgent(): string
     {
-        return $this->_request->header('User-Agent') ?: $this->_request->header('user-agent');
+        $userAgent = $this->_request->header('User-Agent') ?: $this->_request->header('user-agent');
+        if ($userAgent == null) {
+            throw new InvalidRequestException("'user-agent' header is not set. Please provide a user-agent when making calls to the iRail API");
+        }
+        return $userAgent;
     }
 
     public function isDebugModeEnabled(): bool
