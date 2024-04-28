@@ -3,6 +3,8 @@
 namespace Irail\Repositories\Riv;
 
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
@@ -17,6 +19,7 @@ use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
+use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
 use Irail\Util\InMemoryMetrics;
@@ -188,41 +191,47 @@ class NmbsRivRawDataRepository
      */
     protected function getFreshVehicleJourneyData(VehicleJourneyRequest $request): string|bool
     {
-        $gtfsTripExtractor = new GtfsTripStartEndExtractor();
-        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $request->getDateTime());
-        if ($vehicleWithOriginAndDestination === false) {
-            throw new GtfsVehicleNotFoundException($request->getVehicleId());
+        $announcedJourneyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
+        $cacheKey = "journeyDetailRef|{$announcedJourneyNumber}|{$request->getDateTime()->format('Ymd')}";
+
+        $cachedJourneyDetailRef = $this->getCacheOrUpdate($cacheKey,
+            function () use ($request) {
+                try {
+                    return $this->getJourneyDetailRef($request);
+                } catch (GtfsVehicleNotFoundException $e) {
+                    return $e;
+                }
+            }, 4 * 3600
+        );
+
+        if ($cachedJourneyDetailRef->getValue() instanceof Exception) {
+            // If an exception was cached, throw it
+            throw $cachedJourneyDetailRef->getValue();
         }
-        $journeyDetailRef = $this->getJourneyDetailRef($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
-        if ($journeyDetailRef === false) {
-            throw new GtfsVehicleNotFoundException($request->getVehicleId());
-        }
+
+        $journeyDetailRef = $cachedJourneyDetailRef->getValue();
         return $this->getJourneyDetailResponse($request, $journeyDetailRef);
     }
 
     /**
-     * @param GtfsTripStartEndExtractor       $gtfsTripExtractor
-     * @param VehicleJourneyRequest           $request
-     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-     * @return string|null
-     * @throws GtfsVehicleNotFoundException
+     * @param VehicleJourneyRequest $request
+     * @throw
+     * @return string
      */
-    private function getJourneyDetailRef(GtfsTripStartEndExtractor $gtfsTripExtractor,
-        VehicleJourneyRequest $request,
-        JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-    ): ?string
-    {
+    private function getJourneyDetailRef(
+        VehicleJourneyRequest $request
+    ): string {
+        /** @var GtfsTripStartEndExtractor $gtfsTripExtractor */
+        $gtfsTripExtractor = App::make(GtfsTripStartEndExtractor::class);
+        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $request->getDateTime());
+        if ($vehicleWithOriginAndDestination === false) {
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
+        }
+
         $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $vehicleWithOriginAndDestination);
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
-            $cacheKey = "getJourneyDetailRefAlt|{$vehicleWithOriginAndDestination->getJourneyNumber()}|{$request->getDateTime()->format('Ymd')}";
-            $alternativeResult = $this->getCacheOrUpdate($cacheKey,
-                function () use ($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination): string|bool {
-                    return $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
-                },
-                // Cache for 4 hours
-                ttl: 3600 * 4);
-            $journeyDetailRef = $alternativeResult->getValue();
+            $journeyDetailRef = $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
         }
 
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
