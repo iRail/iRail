@@ -190,6 +190,9 @@ class DepartureOrArrival
      */
     public function getDepartureUri(): ?string
     {
+        if ($this->vehicle == null) {
+            return null; // Not available on walking legs
+        }
         return 'http://irail.be/connections/' . substr($this->station->getId(), 2) . '/' .
             date('Ymd', $this->scheduledDateTime->getTimestamp()) . '/' .
             str_replace(' ', '', $this->vehicle->getName());
