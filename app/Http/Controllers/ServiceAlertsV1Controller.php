@@ -27,7 +27,7 @@ class ServiceAlertsV1Controller extends BaseIrailController
         $serviceAlertsResult = $repo->getServiceAlerts($request);
         $dataRoot = ServiceAlertsV1Converter::convert($request, $serviceAlertsResult);
         $this->logRequest($request);
-        return $this->outputV1($request, $dataRoot);
+        return $this->outputV1($request, $dataRoot, 120);
     }
 
     /**

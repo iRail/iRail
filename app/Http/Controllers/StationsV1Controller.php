@@ -27,7 +27,7 @@ class StationsV1Controller extends BaseIrailController
         $stations = $repo->findAllStations();
         $dataRoot = StationsV1Converter::convert($request, $stations);
         $this->logRequest($request);
-        return $this->outputV1($request, $dataRoot);
+        return $this->outputV1($request, $dataRoot, 600); // Cache 10 minutes
     }
 
     /**

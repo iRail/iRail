@@ -42,7 +42,7 @@ class CompositionV1Controller extends BaseIrailController
 
         $this->logRequest($request);
 
-        return $this->outputV1($request, $dataRoot);
+        return $this->outputV1($request, $dataRoot, 180); // This data rarely changes, cache for 3 minutes
     }
 
     /**
