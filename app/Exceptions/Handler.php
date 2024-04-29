@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Request\InvalidRequestException;
 use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
+use Irail\Exceptions\Upstream\UpstreamServerUnavailableException;
 use Irail\Http\Requests\RequestUuidHelper;
 use Irail\Util\InMemoryMetrics;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
@@ -50,7 +51,7 @@ class Handler extends ExceptionHandler
             return;
         }
         if ($exception instanceof GtfsVehicleNotFoundException || $exception instanceof InvalidRequestException
-            || $exception instanceof UpstreamServerTimeoutException) {
+            || $exception instanceof UpstreamServerTimeoutException || $exception instanceof UpstreamServerUnavailableException) {
             Log::warning($exception->getMessage());
             return; // No need to report these exceptions any further, they're just invalid requests or upstream timeouts
         }

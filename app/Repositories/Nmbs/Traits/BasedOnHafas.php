@@ -8,6 +8,7 @@ use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
+use Irail\Exceptions\Upstream\UpstreamServerUnavailableException;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
@@ -31,7 +32,7 @@ trait BasedOnHafas
     protected function deserializeAndVerifyResponse(string $rawJsonData): array
     {
         if (empty($rawJsonData)) {
-            throw new UpstreamServerException('The server did not return any data.');
+            throw new UpstreamServerUnavailableException('The server did not return any data.');
         }
         $json = json_decode($rawJsonData, true);
         if ($json == null) {
@@ -39,6 +40,9 @@ trait BasedOnHafas
             Log::error($rawJsonData);
             // Example invalid data:
             // "ERROR reason : error : 9000 : _Service_Handler_Policies : Service Handler - Connection To Backend failed. Please verify backend server status."
+            if (str_contains($rawJsonData, 'ERROR reason : error : 9000 :')) {
+                throw new UpstreamServerUnavailableException('iRail could not read data from the remote server.');
+            }
             throw new UpstreamServerException('iRail could not read the data received from the remote server.');
         }
         $this->throwExceptionOnInvalidResponse($json);

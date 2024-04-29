@@ -27,7 +27,7 @@ class RequestLoggingMiddleware
         /** @var Response $result */
         $result = $next($request);
 
-        $isLoggedErrorHttpCode = $result->getStatusCode() == 500 || $result->getStatusCode() == 502;
+        $isLoggedErrorHttpCode = ($result->getStatusCode() == 500);
         if ($logConfig == 'ALL' || ($logConfig == 'ERROR' && $isLoggedErrorHttpCode)) {
             $this->logOutgoingRequests($request, $result);
         }
