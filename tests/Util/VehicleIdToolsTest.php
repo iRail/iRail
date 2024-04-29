@@ -13,8 +13,8 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_icTrain_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_number('IC', '538');
-        self::verify_extract_train_number('IC', '3427');
+        self::assertTrainNumberIsParsedCorrectly('IC', '538');
+        self::assertTrainNumberIsParsedCorrectly('IC', '3427');
     }
 
     /**
@@ -22,8 +22,8 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_icTrain_shouldReturnCorrectTrainType()
     {
-        self::verify_extract_train_number('IC', '538');
-        self::verify_extract_train_number('IC', '3427');
+        self::assertTrainNumberIsParsedCorrectly('IC', '538');
+        self::assertTrainNumberIsParsedCorrectly('IC', '3427');
     }
 
     /**
@@ -31,7 +31,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_lTrain_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_number('L', '855');
+        self::assertTrainNumberIsParsedCorrectly('L', '855');
     }
 
     /**
@@ -39,7 +39,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_lTrain_shouldReturnCorrectTrainType()
     {
-        self::verify_extract_train_number('L', '855');
+        self::assertTrainNumberIsParsedCorrectly('L', '855');
     }
 
     /**
@@ -47,7 +47,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_pTrain_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_number('P', '7741');
+        self::assertTrainNumberIsParsedCorrectly('P', '7741');
     }
 
     /**
@@ -55,7 +55,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_pTrain_shouldReturnCorrectTrainType()
     {
-        self::verify_extract_train_number('P', '7741');
+        self::assertTrainNumberIsParsedCorrectly('P', '7741');
     }
 
     /**
@@ -63,7 +63,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_iceTrain_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_number('ICE', '10');
+        self::assertTrainNumberIsParsedCorrectly('ICE', '10');
     }
 
     /**
@@ -71,7 +71,7 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_iceTrain_shouldReturnCorrectTrainType()
     {
-        self::verify_extract_train_number('ICE', '10');
+        self::assertTrainNumberIsParsedCorrectly('ICE', '10');
     }
 
     /**
@@ -79,53 +79,45 @@ class VehicleIdToolsTest extends TestCase
      */
     public function testExtractTrainNumber_sTrain_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_number('S1', '1790');
-        self::verify_extract_train_number('S1', '1991');
-        self::verify_extract_train_number('S2', '3770');
-        self::verify_extract_train_number('S5', '3369');
-        self::verify_extract_train_number('S8', '6370');
-        self::verify_extract_train_number('S20', '3070');
-        self::verify_extract_train_number('S32', '2569');
-        self::verify_extract_train_number('S32', '400');
-        self::verify_extract_train_number('S32', '401');
-        self::verify_extract_train_number('S41', '5377');
-        self::verify_extract_train_number('S43', '5370');
-        self::verify_extract_train_number('S44', '5190');
-        self::verify_extract_train_number('S51', '790');
-        self::verify_extract_train_number('S52', '1870');
-        self::verify_extract_train_number('S61', '4590');
+        self::assertTrainNumberIsParsedCorrectly('S1', '1790');
+        self::assertTrainNumberIsParsedCorrectly('S1', '1991');
+        self::assertTrainNumberIsParsedCorrectly('S2', '3770');
+        self::assertTrainNumberIsParsedCorrectly('S5', '3369');
+        self::assertTrainNumberIsParsedCorrectly('S8', '6370');
+        self::assertTrainNumberIsParsedCorrectly('S20', '3070');
+        self::assertTrainNumberIsParsedCorrectly('S32', '2569');
+        self::assertTrainNumberIsParsedCorrectly('S32', '400');
+        self::assertTrainNumberIsParsedCorrectly('S32', '401');
+        self::assertTrainNumberIsParsedCorrectly('S41', '5377');
+        self::assertTrainNumberIsParsedCorrectly('S43', '5370');
+        self::assertTrainNumberIsParsedCorrectly('S44', '5190');
+        self::assertTrainNumberIsParsedCorrectly('S51', '790');
+        self::assertTrainNumberIsParsedCorrectly('S51', '8085');
+        self::assertTrainNumberIsParsedCorrectly('S52', '1870');
+        self::assertTrainNumberIsParsedCorrectly('S61', '4590');
     }
 
-    public function testExtractTrainType_sTrain_shouldReturnCorrectTrainType()
+    /**
+     * Large test based on GTFS data, to ensure all known train numbers are handled correctly.
+     * @throws Exception
+     */
+    public function testExtractTrainNumber_listOfAllKnownTrainNumbers_shouldReturnCorrectTrainNumber()
     {
-        self::verify_extract_train_type('S1', '1790');
-        self::verify_extract_train_type('S1', '1991');
-        self::verify_extract_train_type('S2', '3770');
-        self::verify_extract_train_type('S5', '3369');
-        self::verify_extract_train_type('S8', '6370');
-        self::verify_extract_train_type('S20', '3070');
-        self::verify_extract_train_type('S32', '2569');
-        self::verify_extract_train_type('S32', '400');
-        self::verify_extract_train_type('S32', '402');
-        self::verify_extract_train_type('S41', '5377');
-        self::verify_extract_train_type('S43', '5370');
-        self::verify_extract_train_type('S44', '5190');
-        self::verify_extract_train_type('S51', '790');
-        self::verify_extract_train_type('S52', '1870');
-        self::verify_extract_train_type('S61', '4590');
+        $data = file_get_contents(__DIR__ . '/../Fixtures/trainNumbers.txt');
+        foreach (explode(PHP_EOL, $data) as $trainDesignation) {
+            $trainDesignation = trim($trainDesignation);
+            $type = explode(' ', $trainDesignation)[0];
+            $number = explode(' ', $trainDesignation)[1];
+            self::assertTrainNumberIsParsedCorrectly($type, $number);
+        }
     }
 
-    private static function verify_extract_train_number(string $type, string $number): void
+    private static function assertTrainNumberIsParsedCorrectly(string $type, string $number): void
     {
-        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . ' ' . $number));
-        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . $number));
+        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . ' ' . $number), "Incorrect number while parsing $type $number");
+        self::assertEquals($number, VehicleIdTools::extractTrainNumber($type . $number), "Incorrect number while parsing $type $number as '$type$number'");
+        self::assertEquals($type, VehicleIdTools::extractTrainType($type . ' ' . $number), "Incorrect type while parsing $type $number");
+        self::assertEquals($type, VehicleIdTools::extractTrainType($type . $number), "Incorrect type while parsing $type $number as '$type$number'");
     }
-
-    private static function verify_extract_train_type(string $type, string $number): void
-    {
-        self::assertEquals($type, VehicleIdTools::extractTrainType($type . ' ' . $number));
-        self::assertEquals($type, VehicleIdTools::extractTrainType($type . $number));
-    }
-
 
 }
