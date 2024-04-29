@@ -30,7 +30,7 @@ class StationsRepository
 
         $station = StationsCsv::getStationFromID($id);
         if ($station == null) {
-            throw new UnknownStopException(500, "Could not match id '{$id}' with a station in iRail. "
+            throw new UnknownStopException(404, "Could not match id '{$id}' with a station in iRail. "
                 . 'Please report this issue at https://github.com/irail/stations/issues/new if you think we should support your query.');
         }
         $result = $this->stationsCsvToStation($station);

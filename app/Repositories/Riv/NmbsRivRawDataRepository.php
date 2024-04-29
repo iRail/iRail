@@ -96,7 +96,8 @@ class NmbsRivRawDataRepository
      */
     protected function getFreshLiveboardData(LiveboardRequest $request): string|bool
     {
-        $hafasStationId = $this->iRailToHafasId($request->getStationId());
+        $station = $this->stationsRepository->getStationById($request->getStationId()); // This ensures the station exists, before we send a request
+        $hafasStationId = $this->iRailToHafasId($station->getId());
 
         $url = 'https://mobile-riv.api.belgianrail.be/api/v1.0/dacs';
         $formattedDateTimeStr = $request->getDateTime()->format('Y-m-d H:i:s');
@@ -132,19 +133,22 @@ class NmbsRivRawDataRepository
      */
     private function getFreshRouteplanningData(JourneyPlanningRequest $request): string
     {
+        // This ensures the station exists, before we send a request
+        $origin = $this->stationsRepository->getStationById($request->getOriginStationId());
+        $destination = $this->stationsRepository->getStationById($request->getDestinationStationId());
         $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
 
         $typeOfTransportCode = NmbsRivApiTransportTypeFilter::forTypeOfTransportFilter(
-            $request->getOriginStationId(),
-            $request->getDestinationStationId(),
+            $origin->getId(),
+            $destination->getId(),
             $request->getTypesOfTransport());
 
         $formattedDateStr = $request->getDateTime()->format('Y-m-d');
         $formattedTimeStr = $request->getDateTime()->format('H:i:s');
 
         $parameters = [
-            'originExtId'      => self::iRailToHafasId($request->getOriginStationId()),
-            'destExtId'        => self::iRailToHafasId($request->getDestinationStationId()),
+            'originExtId' => self::iRailToHafasId($origin->getId()),
+            'destExtId'   => self::iRailToHafasId($destination->getId()),
             'date'             => $formattedDateStr, // requires date in yyyy-mm-dd format
             'time'             => $formattedTimeStr, // requires time in hh:mm:ss format
             'lang'             => $request->getLanguage(),
@@ -184,6 +188,7 @@ class NmbsRivRawDataRepository
                 return $this->getVehicleCompositionResponse($vehicle, $originAndDestination);
             });
     }
+
     /**
      * @param VehicleJourneyRequest $request
      * @return bool|string
@@ -247,10 +252,10 @@ class NmbsRivRawDataRepository
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|false The vehicle journey reference, or false if no reference could be found.
      */
-    private function findVehicleJourneyRefBetweenStops(VehicleJourneyRequest $request,
+    private function findVehicleJourneyRefBetweenStops(
+        VehicleJourneyRequest $request,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-    ): string|false
-    {
+    ): string|false {
         $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
 
         $formattedDateStr = $request->getDateTime()->format('Y-m-d');
@@ -280,11 +285,11 @@ class NmbsRivRawDataRepository
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|bool
      */
-    private function getJourneyDetailRefAlt(GtfsTripStartEndExtractor $gtfsTripExtractor,
+    private function getJourneyDetailRefAlt(
+        GtfsTripStartEndExtractor $gtfsTripExtractor,
         VehicleJourneyRequest $request,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-    ): string|bool
-    {
+    ): string|bool {
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
             $vehicleWithOriginAndDestination
         );
