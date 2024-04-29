@@ -11,7 +11,7 @@ use Irail\Http\Requests\RequestUuidHelper;
 use Irail\Proxy\CurlProxy;
 use Symfony\Component\HttpFoundation\Response;
 
-class RequestDumpingMiddleware
+class RequestLoggingMiddleware
 {
     /**
      * Handle an incoming request.
@@ -26,7 +26,9 @@ class RequestDumpingMiddleware
         $logConfig = getenv('LOG_REQUESTS');
         /** @var Response $result */
         $result = $next($request);
-        if ($logConfig == 'ALL' || ($logConfig == 'ERROR' && $result->getStatusCode() == 500)) {
+
+        $isLoggedErrorHttpCode = $result->getStatusCode() == 500 || $result->getStatusCode() == 502;
+        if ($logConfig == 'ALL' || ($logConfig == 'ERROR' && $isLoggedErrorHttpCode)) {
             $this->logOutgoingRequests($request, $result);
         }
         return $result;
