@@ -17,32 +17,38 @@ use Irail\Util\VehicleIdTools;
 class CompositionV1Controller extends BaseIrailController
 {
     private HistoricCompositionDao $historicCompositionRepository;
+    private VehicleCompositionRepository $compositionRepository;
+    private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(HistoricCompositionDao $historicCompositionRepository)
+    public function __construct(
+        HistoricCompositionDao $historicCompositionRepository,
+        VehicleCompositionRepository $compositionRepository,
+        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
+    )
     {
         $this->historicCompositionRepository = $historicCompositionRepository;
+        $this->compositionRepository = $compositionRepository;
+        $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
     }
 
     public function getVehicleComposition(VehicleCompositionV1Request $request): Response
     {
-        $tripStartEndExtractor = app(GtfsTripStartEndExtractor::class);
         $journeyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
-        $startDate = $tripStartEndExtractor->getStartDate($journeyNumber, $request->getDateTime());
+        $startDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $request->getDateTime());
 
         $vehicle = Vehicle::fromName($request->getVehicleId(), $startDate ?: Carbon::now());
-        $repo = app(VehicleCompositionRepository::class);
-        $vehicleCompositionSearchResult = $repo->getComposition($vehicle);
+        $vehicleCompositionSearchResult = $this->compositionRepository->getComposition($vehicle);
         $this->historicCompositionRepository->recordComposition($vehicleCompositionSearchResult);
         $dataRoot = VehicleCompositionV1Converter::convert($request, $vehicleCompositionSearchResult);
 
         $this->logRequest($request);
 
-        return $this->outputV1($request, $dataRoot, 180); // This data rarely changes, cache for 3 minutes
+        return $this->outputV1($request, $dataRoot, 300); // This data rarely changes, cache for 5 minutes
     }
 
     /**
