@@ -18,10 +18,10 @@ use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
-use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
 use Irail\Util\InMemoryMetrics;
+use Irail\Util\VehicleIdTools;
 use Psr\Cache\InvalidArgumentException;
 
 class NmbsRivRawDataRepository

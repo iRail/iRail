@@ -11,8 +11,8 @@ use Irail\Http\Responses\v1\VehicleCompositionV1Converter;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Models\Vehicle;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
-use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Repositories\VehicleCompositionRepository;
+use Irail\Util\VehicleIdTools;
 
 class CompositionV1Controller extends BaseIrailController
 {

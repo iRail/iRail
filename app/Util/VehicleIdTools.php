@@ -1,6 +1,6 @@
 <?php
 
-namespace Irail\Repositories\Nmbs\Tools;
+namespace Irail\Util;
 
 class VehicleIdTools
 {

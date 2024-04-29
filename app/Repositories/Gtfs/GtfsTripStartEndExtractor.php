@@ -11,8 +11,8 @@ use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Nmbs\Tools\Tools;
-use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
 use Irail\Traits\Cache;
+use Irail\Util\VehicleIdTools;
 
 class GtfsTripStartEndExtractor
 {

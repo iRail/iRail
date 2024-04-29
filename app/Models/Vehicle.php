@@ -3,7 +3,7 @@
 namespace Irail\Models;
 
 use Carbon\Carbon;
-use Irail\Repositories\Nmbs\Tools\VehicleIdTools;
+use Irail\Util\VehicleIdTools;
 
 class Vehicle
 {
