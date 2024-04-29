@@ -78,7 +78,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
                 }
             }
             if ($exception && empty($segments)) {
-                throw new InternalProcessingException(500, 'Failed to parse vehicle composition', $exception);
+                throw new InternalProcessingException(500, 'Failed to parse vehicle composition: ' . $exception->getMessage(), $exception);
             }
             return new VehicleCompositionSearchResult($journey, $segments);
         }, 60)->getValue();
