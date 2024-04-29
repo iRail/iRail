@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
-use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
+use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureArrivalState;
 use Irail\Models\DepartureOrArrival;
@@ -61,9 +61,11 @@ trait BasedOnHafas
         }
 
         if ($json['errorCode'] == 'INT_ERR'
-            || $json['errorCode'] == 'INT_GATEWAY'
-            || $json['errorCode'] == 'INT_TIMEOUT') {
-            throw new UpstreamServerConnectionException('NMBS data is temporarily unavailable.');
+            || $json['errorCode'] == 'INT_GATEWAY') {
+            throw new UpstreamServerException('NMBS data is temporarily unavailable.');
+        }
+        if ($json['errorCode'] == 'INT_TIMEOUT') {
+            throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading the data.');
         }
         if ($json['errorCode'] == 'SVC_NO_RESULT') {
             throw new NoResultsException('No results found');
@@ -83,7 +85,7 @@ trait BasedOnHafas
 
 
     /**
-     * Check whether or not the status of the arrival equals cancelled.
+     * Check whether the status of the arrival equals cancelled.
      *
      * @param string $status The status to check.
      *

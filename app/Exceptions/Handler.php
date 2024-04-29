@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Request\InvalidRequestException;
+use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
 use Irail\Http\Requests\RequestUuidHelper;
 use Irail\Util\InMemoryMetrics;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
@@ -48,9 +49,10 @@ class Handler extends ExceptionHandler
         if ($exception instanceof NotFoundHttpException) {
             return;
         }
-        if ($exception instanceof GtfsVehicleNotFoundException || $exception instanceof InvalidRequestException) {
+        if ($exception instanceof GtfsVehicleNotFoundException || $exception instanceof InvalidRequestException
+            || $exception instanceof UpstreamServerTimeoutException) {
             Log::warning($exception->getMessage());
-            return; // No need to report these exceptions any further, they're just invalid requests
+            return; // No need to report these exceptions any further, they're just invalid requests or upstream timeouts
         }
         InMemoryMetrics::countError();
         parent::report($exception);

@@ -8,7 +8,7 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use Exception;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
-use Irail\Exceptions\Upstream\UpstreamServerConnectionException;
+use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Models\CachedData;
@@ -107,7 +107,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         $response = $this->curlProxy->get($url, $parameters);
 
         if ($response->getResponseCode() != 200) {
-            throw new UpstreamServerConnectionException('Failed to fetch data from the NMBS website: ' . $response->getResponseCode());
+            throw new UpstreamServerException('Failed to fetch data from the NMBS website: ' . $response->getResponseCode());
         }
 
         if (str_contains($response->getResponseBody(), 'vallen niet binnen de dienstregelingsperiode')) {

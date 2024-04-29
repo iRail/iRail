@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Upstream\UpstreamRateLimitException;
+use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
@@ -366,7 +367,12 @@ class NmbsRivRawDataRepository
             Log::error($message);
             throw new UpstreamRateLimitException($message);
         }
-        return $response->getResponseBody();
+        $response = $response->getResponseBody();
+        if (str_starts_with($response, '{"exception":"Hacon response time exceeded the defined timeout')) {
+            // TODO: error handling should be grouped somewhere together with JSON parsing.
+            throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading data. Please try again later.');
+        }
+        return $response;
     }
 
 }
