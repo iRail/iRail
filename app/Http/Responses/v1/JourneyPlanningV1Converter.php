@@ -113,20 +113,24 @@ class JourneyPlanningV1Converter extends V1Converter
 
     private static function convertIntermediateStop(DepartureAndArrival $stop)
     {
+        $departure = $stop->getDeparture();
+        // When a train is partially cancelled, departures may be missing. Fallback to departure in this case.
+        $arrival = $stop->getArrival() ? $stop->getArrival() : $departure;
+
         $result = new StdClass();
         $result->station = self::convertStation($stop->getStation());
-        $result->scheduledArrivalTime = $stop->getArrival()->getScheduledDateTime()->getTimestamp();
-        $result->arrivalCanceled = $stop->getArrival()->isCancelled() ? '1' : '0';
+        $result->scheduledArrivalTime = $arrival->getScheduledDateTime()->getTimestamp();
+        $result->arrivalCanceled = $arrival->isCancelled() ? '1' : '0';
         $result->arrived =
-            $stop->getArrival()->getStatus() == DepartureArrivalState::HALTING
-            || $stop->getArrival()->getStatus() == DepartureArrivalState::LEFT;
-        $result->scheduledDepartureTime = $stop->getDeparture()->getScheduledDateTime()->getTimestamp();
-        $result->arrivalDelay = $stop->getArrival()->getDelay();
-        $result->departureDelay = $stop->getDeparture()->getDelay();
-        $result->departureCanceled = $stop->getDeparture()->isCancelled() ? '1' : '0';
-        $result->left = $stop->getDeparture()->getStatus()?->hasLeft() ? '1' : '0';
-        $result->arrived = $stop->getArrival()->getStatus()?->hasArrived() ? '1' : '0';
-        $result->isExtraStop = $stop->getDeparture()->isExtra() || $stop->getArrival()->isExtra() ? '1' : '0';
+            $arrival->getStatus() == DepartureArrivalState::HALTING
+            || $arrival->getStatus() == DepartureArrivalState::LEFT;
+        $result->scheduledDepartureTime = $departure->getScheduledDateTime()->getTimestamp();
+        $result->arrivalDelay = $arrival->getDelay();
+        $result->departureDelay = $departure->getDelay();
+        $result->departureCanceled = $departure->isCancelled() ? '1' : '0';
+        $result->left = $departure->getStatus()?->hasLeft() ? '1' : '0';
+        $result->arrived = $arrival->getStatus()?->hasArrived() ? '1' : '0';
+        $result->isExtraStop = $departure->isExtra() || $arrival->isExtra() ? '1' : '0';
         $result->platform = self::convertPlatform(new PlatformInfo(null, '?', false));
         return $result;
     }

@@ -17,23 +17,23 @@ use Irail\Repositories\JourneyPlanningRepository;
 
 class JourneyPlanningV1Controller extends BaseIrailController
 {
+    private LogDao $logDao;
+    private JourneyPlanningRepository $journeyPlanningRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(JourneyPlanningRepository $journeyPlanningRepository, LogDao $logDao)
     {
-        //
+        $this->journeyPlanningRepository = $journeyPlanningRepository;
+        $this->logDao = $logDao;
     }
 
     public function getJourneyPlanning(JourneyPlanningV1RequestImpl $request): Response
     {
-        /**
-         * @var JourneyPlanningRepository $repo
-         */
-        $repo = app(JourneyPlanningRepository::class);
-        $journeyPlanningResult = $repo->getJourneyPlanning($request);
+        $journeyPlanningResult = $this->journeyPlanningRepository->getJourneyPlanning($request);
         $dataRoot = JourneyPlanningV1Converter::convert($request, $journeyPlanningResult);
         $this->logRequest($request, $journeyPlanningResult);
         return $this->outputV1($request, $dataRoot, 60);
@@ -48,14 +48,14 @@ class JourneyPlanningV1Controller extends BaseIrailController
     {
         $query = [
             'language'      => $request->getLanguage(),
-            'departureStop' => $this->getStopInLogFormat($request->getOriginStationId(), $request->routeOrGet('from')),
-            'arrivalStop'   => $this->getStopInLogFormat($request->getDestinationStationId(), $request->routeOrGet('to')),
+            'departureStop' => $this->getStopInLogFormat($request->getOriginStationId(), $request->getOriginStationId()),
+            'arrivalStop'   => $this->getStopInLogFormat($request->getDestinationStationId(), $request->getDestinationStationId()),
             'version'       => 2
         ];
         $queryResult = [
             'journeyoptions' => array_map(fn($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
         ];
-        app(LogDao::class)->log(LogQueryType::JOURNEYPLANNING, $query, $request->getUserAgent(), $queryResult);
+        $this->logDao->log(LogQueryType::JOURNEYPLANNING, $query, $request->getUserAgent(), $queryResult);
     }
 
     private function getStopInLogFormat(string $stationId, string $stationSearchValue): array
