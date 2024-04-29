@@ -54,11 +54,11 @@ class RateLimitMiddleware
     {
         $response = RateLimiter::attempt(
             'request_rate|burst|' . $request->getClientIp(),
-            30,
+            12,
             function () use ($request, $next) {
                 return $next($request);
             },
-            10 // 30 request per 10 seconds, 3 per second bursts
+            5 // 12 request per 5 seconds, 2 per second bursts
         );
         if ($response === false) {
             InMemoryMetrics::countRateLimitRejection();
