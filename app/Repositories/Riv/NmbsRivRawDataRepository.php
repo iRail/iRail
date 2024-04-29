@@ -356,6 +356,22 @@ class NmbsRivRawDataRepository
      */
     private function makeApiCallToMobileRivApi(string $url, array $parameters): string
     {
+        // Cache raw responses in order to prevent error responses from not being cached.
+        // TODO: this cache should replace the other caching in the NmbsRivRawDataRepository.
+        $cacheKey = str_replace('/', '_', $url) . '?' . http_build_query($parameters);
+        $cachedCurlResponse = $this->getCacheOrUpdate($cacheKey, function () use ($url, $parameters) {
+            return $this->fetchRateLimitedRivResponse($url, $parameters);
+        }, 15);
+        return $cachedCurlResponse->getValue();
+    }
+
+    /**
+     * @param string $url
+     * @param array  $parameters
+     * @return mixed
+     */
+    function fetchRateLimitedRivResponse(string $url, array $parameters)
+    {
         $response = RateLimiter::attempt(
             'riv-request',
             $this->rateLimit,
