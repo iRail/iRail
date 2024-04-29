@@ -5,6 +5,7 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\CompositionUnavailableException;
+use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Models\CachedData;
 use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
@@ -20,6 +21,7 @@ use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
 use stdClass;
+use Throwable;
 
 class NmbsRivCompositionRepository implements VehicleCompositionRepository
 {
@@ -51,42 +53,61 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
     function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
         return $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
-            $journeyDate = $journey->getJourneyStartDate();
-            $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
-            if (!$journeyWithOriginAndDestination) {
-                Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
-                throw new CompositionUnavailableException($journey->getId(),
-                    'Composition is only available from vehicle start. Vehicle is not active on the given date.');
-            }
-            $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
-            $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
-            if ($secondsUntilStart > 0) {
-                Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
-                    . "Start time is $startTimeOffset.");
-                throw new CompositionUnavailableException($journey->getId(),
-                    'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
-            }
-
-            $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
+            $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
             $cacheAge = $cachedData->getAge();
 
+            $exception = false; // Track and save the last exception during parsing
             // Build a result
             $segments = [];
             foreach ($compositionData as $compositionDataForSingleSegment) {
                 // NMBS does not have single-carriage railbusses,
                 // meaning these compositions are only a locomotive and should be filtered out
                 if (count($compositionDataForSingleSegment->materialUnits) > 1) {
+                    try {
                     $segments[] = $this->parseOneSegmentWithCompositionData(
                         $journey,
                         $compositionDataForSingleSegment
                     );
+                    } catch (Throwable $e) {
+                        $exception = $e;
+                        Log::warning('Exception occured while trying to parse composition: ' . $exception->getMessage());
+                    }
                 } else {
                     Log::info('Skipping composition with less than 2 carriages');
                 }
             }
+            if ($exception && empty($segments)) {
+                throw new InternalProcessingException(500, 'Failed to parse vehicle composition', $exception);
+            }
             return new VehicleCompositionSearchResult($journey, $segments);
         }, 60)->getValue();
+    }
+
+    /**
+     * @param Vehicle $journey
+     * @return CachedData
+     */
+    function getCompositionData(Vehicle $journey): CachedData
+    {
+        $journeyDate = $journey->getJourneyStartDate();
+        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
+        if (!$journeyWithOriginAndDestination) {
+            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
+            throw new CompositionUnavailableException($journey->getId(),
+                'Composition is only available from vehicle start. Vehicle is not active on the given date.');
+        }
+        $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
+        $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
+        if ($secondsUntilStart > 0) {
+            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
+                . "Start time is $startTimeOffset.");
+            throw new CompositionUnavailableException($journey->getId(),
+                'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
+        }
+
+        $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
+        return $cachedData;
     }
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
@@ -141,7 +162,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             return self::getHleMaterialType($rawCompositionUnit);
         } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
             return self::getHvMaterialType($rawCompositionUnit);
-        } elseif (str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
+        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
             // Anything else, default fallback
             $parentType = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
             $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
