@@ -48,12 +48,12 @@ $router->get('/logs', function (Request $request) use ($router) {
 $router->post('/feedback/occupancy.php', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@store']);
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
-    $router->get('/stations', ['as' => 'v1.stations', 'uses' => 'StationsV1Controller@list']);
-    $router->get('/liveboard', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
-    $router->get('/connections', ['as' => 'v1.journeyPlanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
-    $router->get('/vehicle', ['as' => 'v1.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
-    $router->get('/disturbances', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
-    $router->get('/composition', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
+    $router->get('/stations{suffix:.*}', ['as' => 'v1.stations', 'uses' => 'StationsV1Controller@list']);
+    $router->get('/liveboard{suffix:.*}', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
+    $router->get('/connections{suffix:.*}', ['as' => 'v1.journeyPlanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
+    $router->get('/vehicle{suffix:.*}', ['as' => 'v1.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
+    $router->get('/disturbances{suffix:.*}', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
+    $router->get('/composition{suffix:.*}', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
     $router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
     $router->post('/feedback/occupancy', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@store']);
 });
