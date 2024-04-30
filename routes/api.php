@@ -13,9 +13,12 @@
 |
 */
 
+use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Router;
 
-$router->get('/stations{suffix:.*}', ['as' => 'v1.stations', 'uses' => 'StationsV1Controller@list']);
+$router->get('/stations{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.stations', $_GET, $request->isSecure()));
+});
 
 $router->get('/liveboard{suffix:.*}', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
 
@@ -25,7 +28,9 @@ $router->get('/vehicle{suffix:.*}', ['as' => 'v1.datedVehicleJourney', 'uses' =>
 
 $router->get('/disturbances{suffix:.*}', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
 
-$router->get('/composition', ['as' => 'v1.composition', 'uses' => 'CompositionV1Controller@getVehiclecomposition']);
+$router->get('/composition', function (Request $request) use ($router) {
+    return redirect(route('v1.composition', $_GET, $request->isSecure()));
+});
 
 $router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
 
