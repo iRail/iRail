@@ -20,19 +20,29 @@ $router->get('/stations{suffix:.*}', function (Request $request) use ($router) {
     return redirect(route('v1.stations', $_GET, $request->isSecure()));
 });
 
-$router->get('/liveboard{suffix:.*}', ['as' => 'v1.liveboard', 'uses' => 'LiveboardV1Controller@getLiveboardById']);
+$router->get('/liveboard{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.liveboard', $_GET, $request->isSecure()));
+});
 
-$router->get('/connections{suffix:.*}', ['as' => 'v1.journeyPlanning', 'uses' => 'JourneyPlanningV1Controller@getJourneyPlanning']);
+$router->get('/connections{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()));
+});
 
-$router->get('/vehicle{suffix:.*}', ['as' => 'v1.datedVehicleJourney', 'uses' => 'DatedVehicleJourneyV1Controller@getVehicleById']);
+$router->get('/vehicle{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.datedVehicleJourney', $_GET, $request->isSecure()));
+});
 
-$router->get('/disturbances{suffix:.*}', ['as' => 'v1.serviceAlerts', 'uses' => 'ServiceAlertsV1Controller@getServiceAlerts']);
+$router->get('/disturbances{suffix:.*}', function (Request $request) use ($router) {
+    return redirect(route('v1.serviceAlerts', $_GET, $request->isSecure()));
+});
 
 $router->get('/composition', function (Request $request) use ($router) {
     return redirect(route('v1.composition', $_GET, $request->isSecure()));
 });
 
-$router->get('/logs', ['as' => 'v1.logs', 'uses' => 'LogController@getLogs']);
+$router->get('/logs', function (Request $request) use ($router) {
+    return redirect(route('v1.logs', $_GET, $request->isSecure()));
+});
 
 // Can't redirect a POST request, so handle this twice
 $router->post('/feedback/occupancy.php', ['as' => 'v1.occupancy', 'uses' => 'OccupancyController@store']);
