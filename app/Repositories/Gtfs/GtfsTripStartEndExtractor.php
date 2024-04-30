@@ -83,51 +83,62 @@ class GtfsTripStartEndExtractor
                     return false;
                 }
 
-                $matches = $vehicleDetailsForDate[$vehicleNumber];
-                if (count($matches) == 0) {
+                $journeyParts = $vehicleDetailsForDate[$vehicleNumber];
+                if (count($journeyParts) == 0) {
                     Log::warning("No matching GTFS trip for '{$vehicleNumber}' on {$date->format('Y-m-d')}");
                     return false;
                 }
-                if (count($matches) == 1) {
-                    Log::debug("Found one matching GTFS trip '{$matches[0]->getTripId()}' for journey '{$vehicleNumber}'");
-                    return $matches[0];
+                if (count($journeyParts) == 1) {
+                    Log::debug("Found one matching GTFS trip '{$journeyParts[0]->getTripId()}' for journey '{$vehicleNumber}'");
+                    return $journeyParts[0];
                 }
 
-                if (count($matches) > 2) { // If this ever occurs, it needs to be investigated before it is implemented.
-                    $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
-                    Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
+                if (count($journeyParts) > 4) { // If this ever occurs, it needs to be investigated and tested before it is implemented.
+                    $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
+                    Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
                     throw new InternalProcessingException(500,
-                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
+                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
                 }
 
-                $firstMatch = $matches[0];
-                $secondMatch = $matches[1];
+                $journeyPartsByStart = [];
+                $journeyPartsByDestination = [];
+                $invalid = false;
 
-                // If the two matches are connected segments, return one large train origin/destination with the id from the first segment
-                if ($firstMatch->getDestinationStopId() == $secondMatch->getOriginStopId()) {
-                    Log::debug("Combining GTFS trips {$firstMatch->getTripId()} and {$secondMatch->getTripId()}");
+                foreach ($journeyParts as $match) {
+                    // Each origin/destination may only occur once
+                    $invalid = $invalid
+                        || array_key_exists($match->getOriginStopId(), $journeyPartsByStart)
+                        || array_key_exists($match->getDestinationStopId(), $journeyPartsByDestination);
+                    $journeyPartsByStart[$match->getOriginStopId()] = $match;
+                    $journeyPartsByDestination[$match->getDestinationStopId()] = $match;
+                }
+
+                # The origin is the only station which doesn't match a destination
+                $origin = array_filter(array_keys($journeyPartsByStart), fn($stopId) => !array_key_exists($stopId, $journeyPartsByDestination))[0];
+                $orderedParts = [];
+                $orderedParts[] = $journeyPartsByStart[$origin];
+                for ($i = 1; $i < count($journeyParts); $i++) {
+                    $part = $journeyPartsByStart[$orderedParts[$i - 1]->getDestinationStopId()];
+                    $orderedParts[] = $part;
+                }
+                $origin = array_shift($orderedParts);
+                $destination = array_pop($orderedParts);
+                // If the two journeyParts are connected segments, return one large train origin/destination with the id from the first segment
+
+                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
+                if (!$invalid) {
+                    Log::debug("Combining GTFS trips $tripIds for journey '$journeyNumber'");
                     return new JourneyWithOriginAndDestination(
-                        $firstMatch->getTripId(), $firstMatch->getJourneyType(), $firstMatch->getJourneyNumber(),
-                        $firstMatch->getOriginStopId(), $firstMatch->getOriginDepartureTimeOffset(),
-                        $secondMatch->getDestinationStopId(), $secondMatch->getDestinationArrivalTimeOffset(),
-                        $firstMatch->getDestinationStopId()
+                        $origin->getTripId(), $origin->getJourneyType(), $origin->getJourneyNumber(),
+                        $origin->getOriginStopId(), $origin->getOriginDepartureTimeOffset(),
+                        $destination->getDestinationStopId(), $destination->getDestinationArrivalTimeOffset(),
+                        $orderedParts
                     );
                 }
 
-                if ($firstMatch->getOriginStopId() == $secondMatch->getDestinationStopId()) {
-                    Log::debug("Combining GTFS trips {$secondMatch->getTripId()} and {$firstMatch->getTripId()}");
-                    return new JourneyWithOriginAndDestination(
-                        $secondMatch->getTripId(), $secondMatch->getJourneyType(), $secondMatch->getJourneyNumber(),
-                        $secondMatch->getOriginStopId(), $secondMatch->getOriginDepartureTimeOffset(),
-                        $firstMatch->getDestinationStopId(), $firstMatch->getDestinationArrivalTimeOffset(),
-                        $secondMatch->getDestinationStopId()
-                    );
-                }
-
-                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
-                Log::error("'{$vehicleNumber}' number occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
+                Log::error("'{$vehicleNumber}' number occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds");
                 throw new InternalProcessingException(500,
-                    "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
+                    "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds");
             }, ttl: 6 * 3600); // Cache for 6 hours
         return $originAndDestination->getValue();
     }
