@@ -47,7 +47,8 @@ class GtfsRepository
     }
 
     /**
-     * @return Array<String, Array<String, Trip>> Trips by their journey number and start date (Ymd format)
+     * @return Array<String, Array<String, Trip[]>>  Trips by their journey number and start date (Ymd format).
+     *                                               A journey number/start date may contain multiple trips.
      */
     public function getTripsByJourneyNumberAndStartDate(): array
     {
@@ -98,7 +99,8 @@ class GtfsRepository
     /**
      * Read all trips.
      *
-     * @return Array<String, Array<String, Trip>> Trips by their journey number and start date (Ymd format)
+     * @return Array<String, Array<String, Trip[]>> Trips by their journey number and start date (Ymd format).
+     *                                              A journey number/start date may contain multiple trips.
      */
     private function readTripsByJourneyNumberAndStartDate(): array
     {
@@ -139,8 +141,12 @@ class GtfsRepository
 
             $trip = new Trip($tripId, $journeyType, $journeyNumber);
             foreach ($activeDatesYmd as $activeDateYmd) {
+                // A journey number can occur multiple times on the same day when a train splits, even when one of the parts does not travel further.
+                if (!array_key_exists($activeDateYmd, $trips[$journeyNumber])) {
+                    $trips[$journeyNumber][$activeDateYmd] = []; // initialize empty array when needed.
+                }
                 // A journey number might have different services (trips) on different dates, especially when the GTFS data covers multiple timetable periods
-                $trips[$journeyNumber][$activeDateYmd] = $trip;
+                $trips[$journeyNumber][$activeDateYmd][] = $trip;
             }
             $numberOfImportedTrips++; // Count so we can verify if and how many trips are lost due to having the same journey number
         }
@@ -228,8 +234,10 @@ class GtfsRepository
 
         $tripIdsToRetain = [];
         foreach ($this->getTripsByJourneyNumberAndStartDate() as $tripsByStartDate) {
-            foreach ($tripsByStartDate as $trip) {
-                $tripIdsToRetain[$trip->getTripId()] = 1;
+            foreach ($tripsByStartDate as $trips) {
+                foreach ($trips as $trip) {
+                    $tripIdsToRetain[$trip->getTripId()] = 1;
+                }
             }
         }
 
