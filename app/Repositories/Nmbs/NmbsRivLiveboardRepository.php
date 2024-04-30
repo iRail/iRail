@@ -158,15 +158,22 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
             $status = $statusMap[$stop['DepartureStatusNl']];
         }
 
-        // using plannedDateTime as trip start date is not 100% correct here, but we don't have anything better. Might cause issues on trains crossing midnight.
-        $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $plannedDateTime);
-        $direction = $this->stationsRepository->getStationById('00' . $direction);
-        $headSign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE ?
-            $stop['DestinationNl'] : $stop['OriginNl'];
         $journeyNumber = $stop['TrainNumber'];
         // Trains such as eurostar may not be present in the GTFS feed
         $journeyStartDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $plannedDateTime) ?: $request->getDateTime();
         $vehicle = Vehicle::fromTypeAndNumber($stop['CommercialType'], $journeyNumber, $journeyStartDate);
+
+        // getDirectionUicCode will fall back on GTFS data in case the direction is missing. It should return either a result or throw an exception.
+        $direction = $this->getDirectionUicCode($stop, $isArrivalBoard, $journeyStartDate);
+        $direction = $this->stationsRepository->getStationById('00' . $direction);
+        if (array_key_exists('DestinationNl', $stop) || array_key_exists('OriginNl', $stop)) {
+            $headSign = $request->getDepartureArrivalMode() == TimeSelection::DEPARTURE
+                ? $stop['DestinationNl']
+                : $stop['OriginNl'];
+        } else {
+            // If no destination is available, obtain it from the destination station
+            $headSign = $direction->getStationName();
+        }
         $vehicle->setDirection(new VehicleDirection($headSign, $direction));
 
         // Now all information has been parsed. Put it in a nice object.
