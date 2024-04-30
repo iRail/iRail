@@ -110,6 +110,32 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
         $journey = $response->getJourneys()[0];
     }
 
+    function testGetJourneyPlanning_noResult_shouldReturn404(): void
+    {
+        $stationsRepo = new StationsRepository();
+        $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+        $journeyPlanningRepo = new NmbsRivJourneyPlanningRepository($stationsRepo, $rivRepo, $occupancyDao);
+
+        $request = $this->createRequest('008821402', '008812005', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 4, 29, 19, 34, 00));
+        $rivRepo->shouldReceive('getRoutePlanningData')
+            ->with($request)
+            ->atLeast()
+            ->once()
+            ->andReturn(new CachedData(
+                'sample-cache-key',
+                file_get_contents(__DIR__ . '/../../Fixtures/journeyPlanning/NmbsRivJourneyPlanning_noResult.json')
+            ));
+
+        try {
+            $journeyPlanningRepo->getJourneyPlanning($request);
+            self::fail('Should throw an exception');
+        } catch (Exception $e) {
+            self::assertEquals(404, $e->getCode());
+        }
+    }
+
     private function createRequest(
         string $origin,
         string $destination,
