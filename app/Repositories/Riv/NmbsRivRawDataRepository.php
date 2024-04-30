@@ -141,7 +141,8 @@ class NmbsRivRawDataRepository
         $typeOfTransportCode = NmbsRivApiTransportTypeFilter::forTypeOfTransportFilter(
             $origin->getId(),
             $destination->getId(),
-            $request->getTypesOfTransport());
+            $request->getTypesOfTransport()
+        );
 
         $formattedDateStr = $request->getDateTime()->format('Y-m-d');
         $formattedTimeStr = $request->getDateTime()->format('H:i:s');
@@ -183,10 +184,12 @@ class NmbsRivRawDataRepository
      */
     public function getVehicleCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $originAndDestination): CachedData
     {
-        return $this->getCacheOrUpdate("composition|{$vehicle->getNumber()}|{$vehicle->getJourneyStartDate()->format('Ymd')}",
+        return $this->getCacheOrUpdate(
+            "composition|{$vehicle->getNumber()}|{$vehicle->getJourneyStartDate()->format('Ymd')}",
             function () use ($vehicle, $originAndDestination) {
                 return $this->getVehicleCompositionResponse($vehicle, $originAndDestination);
-            });
+            }
+        );
     }
 
     /**
@@ -199,14 +202,16 @@ class NmbsRivRawDataRepository
         $announcedJourneyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
         $cacheKey = "journeyDetailRef|{$announcedJourneyNumber}|{$request->getDateTime()->format('Ymd')}";
 
-        $cachedJourneyDetailRef = $this->getCacheOrUpdate($cacheKey,
+        $cachedJourneyDetailRef = $this->getCacheOrUpdate(
+            $cacheKey,
             function () use ($request) {
                 try {
                     return $this->getJourneyDetailRef($request);
                 } catch (GtfsVehicleNotFoundException $e) {
                     return false;
                 }
-            }, 4 * 3600
+            },
+            4 * 3600
         );
 
         if ($cachedJourneyDetailRef->getValue() === false) {
@@ -370,7 +375,7 @@ class NmbsRivRawDataRepository
      * @param array  $parameters
      * @return mixed
      */
-    function fetchRateLimitedRivResponse(string $url, array $parameters)
+    public function fetchRateLimitedRivResponse(string $url, array $parameters)
     {
         $response = RateLimiter::attempt(
             'riv-request',
@@ -395,5 +400,4 @@ class NmbsRivRawDataRepository
         }
         return $response;
     }
-
 }

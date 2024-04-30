@@ -20,7 +20,6 @@ use Irail\Models\VehicleDirection;
 
 class V2Converter
 {
-
     public static function convertDepartureAndArrival(DepartureAndArrival $departureAndArrival): array
     {
         return [
@@ -102,7 +101,7 @@ class V2Converter
             'lead'         => $note->getLeadText(),
             'message'      => $note->getMessage(),
             'plainText'    => $note->getStrippedMessage(),
-            'links'        => array_map(fn($link) => self::convertMessageLink($link), $note->getLinks()),
+            'links'        => array_map(fn ($link) => self::convertMessageLink($link), $note->getLinks()),
             'validFrom'    => self::convertDateTime($note->getValidFrom()),
             'validUpTo'    => self::convertDateTime($note->getValidUpTo()),
             'lastModified' => self::convertDateTime($note->getLastModified())
@@ -148,7 +147,7 @@ class V2Converter
             'fromStationId' => $composition->getOrigin()->getId(),
             'toStationId'   => $composition->getDestination()->getId(),
             'units'         => array_map(
-                fn($unit, $index) => self::convertCompositionUnit($index, $unit),
+                fn ($unit, $index) => self::convertCompositionUnit($index, $unit),
                 $composition->getUnits(),
                 array_keys($composition->getUnits())
             )

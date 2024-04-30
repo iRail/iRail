@@ -124,8 +124,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
     private function parseHafasTrip(
         JourneyPlanningRequest $request,
         array $trip
-    ): Journey
-    {
+    ): Journey {
         $connection = new Journey();
 
 
@@ -155,8 +154,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
     private function parseTripLegs(
         array $trip,
         string $lang
-    ): array
-    {
+    ): array {
         $legs = [];
         // For the sake of code readability and maintainability: the response contains trains, not vias.
         // Therefore, just parse the trains and walks first, and create iRail via's based on the trains later.
@@ -184,8 +182,7 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         array $leg,
         array $trip,
         string $lang
-    ): JourneyLeg
-    {
+    ): JourneyLeg {
         $legStart = $leg['Origin'];
         $legEnd = $leg['Destination'];
 
@@ -341,8 +338,10 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
             return 0;
         }
         return $this->getSecondsBetweenTwoDatesAndTimes(
-            $departureOrArrival['date'], $departureOrArrival['time'],
-            $departureOrArrival['rtDate'], $departureOrArrival['rtTime']
+            $departureOrArrival['date'],
+            $departureOrArrival['time'],
+            $departureOrArrival['rtDate'],
+            $departureOrArrival['rtTime']
         );
     }
 
@@ -374,5 +373,4 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         }
         return OccupancyLevel::UNKNOWN;
     }
-
 }

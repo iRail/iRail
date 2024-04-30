@@ -8,7 +8,8 @@ class Message
 {
     private string $id;
 
-    private ?Carbon $validFrom, $validUpTo;
+    private ?Carbon $validFrom;
+    private ?Carbon $validUpTo;
     private ?Carbon $lastModified;
     private string $header;
     private string $leadText;
@@ -37,8 +38,7 @@ class Message
         string $message,
         string $publisher,
         array $links
-    )
-    {
+    ) {
         $this->id = $id;
         $this->validFrom = $validFrom;
         $this->validUpTo = $validUpTo;

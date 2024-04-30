@@ -17,7 +17,6 @@ use SimpleXMLElement;
 
 class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
 {
-
     use Cache;
 
     private array $readMoreStrings = [
@@ -28,7 +27,8 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
     ];
     private CurlProxy $curlProxy;
 
-    public function __construct(CurlProxy $curlProxy){
+    public function __construct(CurlProxy $curlProxy)
+    {
         $this->curlProxy = $curlProxy;
     }
 
@@ -53,7 +53,6 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
      */
     public function getFreshServiceAlerts(ServiceAlertsRequest $request): array
     {
-
         try {
             $xmlData = $this->fetchData($request);
             $parsedData = $this->parseData($xmlData, $request);
@@ -80,7 +79,8 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
                 'Routeplanning or live data might not be available.',
                 'It seems there are problems with the NMBS/SNCB website. Routeplanning or live data might not be available. You are viewing the last available service alerts cached by iRail.',
                 'iRail',
-                [new MessageLink('https://belgianrail.be/', 'Open the NMBS website')]);
+                [new MessageLink('https://belgianrail.be/', 'Open the NMBS website')]
+            );
             array_unshift($parsedData, $disturbance);
             return $parsedData;
         }
@@ -126,7 +126,6 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
         $disturbances = [];
         // Loop through all news items.
         foreach ($data->channel->item as $item) {
-
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
             $title = trim((string) $item->title, "\r\n ");
             $description = trim((string) $item->description, "\r\n ");

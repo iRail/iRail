@@ -2,7 +2,6 @@
 
 namespace Irail\Http\Requests;
 
-
 use Carbon\Carbon;
 
 class JourneyPlanningV2RequestImpl extends IrailHttpRequest implements JourneyPlanningRequest
@@ -27,34 +26,35 @@ class JourneyPlanningV2RequestImpl extends IrailHttpRequest implements JourneyPl
     {
         parent::__construct();
         $this->originStationId = $this->parseStationId('from', $this->routeOrGet('from'));
-        $this->destinationStationId = $this->parseStationId('to', $this->routeOrGet('to'));;
+        $this->destinationStationId = $this->parseStationId('to', $this->routeOrGet('to'));
+        ;
         $this->dateTime = $this->parseDateTime($this->_request->get('datetime'));
         $this->timeSelection = $this->routeOrGet('arrdep') ? $this->parseDepartureArrival($this->routeOrGet('arrdep')) : TimeSelection::DEPARTURE;
         $this->typesOfTransport = TypeOfTransportFilter::AUTOMATIC; // $this->routeOrGet('typeOfTransport'); // TODO: implement
     }
 
 
-    function getOriginStationId(): string
+    public function getOriginStationId(): string
     {
         return $this->originStationId;
     }
 
-    function getDestinationStationId(): string
+    public function getDestinationStationId(): string
     {
         return $this->destinationStationId;
     }
 
-    function getDateTime(): Carbon
+    public function getDateTime(): Carbon
     {
         return $this->dateTime;
     }
 
-    function getTimeSelection(): TimeSelection
+    public function getTimeSelection(): TimeSelection
     {
         return $this->timeSelection;
     }
 
-    function getTypesOfTransport(): TypeOfTransportFilter
+    public function getTypesOfTransport(): TypeOfTransportFilter
     {
         return $this->typesOfTransport;
     }

@@ -9,7 +9,6 @@ use Irail\Models\Dao\LogQueryType;
 
 class LogController extends BaseIrailController
 {
-
     private LogDao $logRepository;
 
     public function __construct(LogDao $logRepository)
@@ -20,7 +19,7 @@ class LogController extends BaseIrailController
     public function getLogs(Request $request)
     {
         $logs = $this->logRepository->readLastLogs(1000);
-        $json = array_map(fn($logEntry) => [
+        $json = array_map(fn ($logEntry) => [
             'querytype' => $this->getName($logEntry->getQueryType()),
             'querytime'  => $logEntry->getCreatedAt(),
             'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
@@ -33,7 +32,7 @@ class LogController extends BaseIrailController
     {
         $date = Carbon::createFromFormat('Ymd', $request->route('date'));
         $logs = $this->logRepository->readLogsForDate($date);
-        $json = array_map(fn($logEntry) => [
+        $json = array_map(fn ($logEntry) => [
             'querytype'  => $logEntry->getQueryType(),
             'querytime'  => $logEntry->getCreatedAt(),
             'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),

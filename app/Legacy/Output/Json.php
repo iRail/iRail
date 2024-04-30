@@ -102,7 +102,7 @@ class Json extends Printer
                 // to be compatible with 1.0
                 $result .= "\"$name\":\"$object->name\",";
                 $result .= '"' . $name . 'info":{';
-            } else if ($this->rootname != 'vehicle' && $name == 'vehicle') {
+            } elseif ($this->rootname != 'vehicle' && $name == 'vehicle') {
                 // split vehicle into vehicle and vehicleinfo to be compatible with 1.0
                 $result .= "\"$name\":\"$object->name\",";
                 $result .= '"' . $name . 'info":{';

@@ -11,7 +11,8 @@ class OutgoingRequestLogDao
 {
     public function log(string $request_id, string $irail_request_url, int $irail_response_code, int $index, CurlHttpResponse $request): void
     {
-        DB::update('INSERT INTO outgoing_request_log (irail_request_id, irail_request_url, irail_response_code, irail_request_outgoing_index, 
+        DB::update(
+            'INSERT INTO outgoing_request_log (irail_request_id, irail_request_url, irail_response_code, irail_request_outgoing_index, 
                                   timestamp, duration, response_code, method, url, request_body, response_body)
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
@@ -26,7 +27,8 @@ class OutgoingRequestLogDao
                 $request->getUrl(),
                 $request->getRequestBody(),
                 $request->getResponseBody(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -35,8 +37,10 @@ class OutgoingRequestLogDao
      */
     public function readLastLogs(int $limit): array
     {
-        $rows = DB::select('SELECT timestamp,  method, url, request_body, response_code, duration, response_body FROM outgoing_request_log ORDER BY timestamp DESC LIMIT ?',
-            [$limit]);
+        $rows = DB::select(
+            'SELECT timestamp,  method, url, request_body, response_code, duration, response_body FROM outgoing_request_log ORDER BY timestamp DESC LIMIT ?',
+            [$limit]
+        );
         return $this->transformRows($rows);
     }
 
@@ -54,7 +58,8 @@ class OutgoingRequestLogDao
                 $row->request_body,
                 $row->response_code,
                 $row->response_body,
-                $row->duration);
+                $row->duration
+            );
         }, $rows);
     }
 }

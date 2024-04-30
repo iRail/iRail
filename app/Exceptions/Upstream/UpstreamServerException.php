@@ -7,7 +7,7 @@ use Throwable;
 
 class UpstreamServerException extends IrailHttpException
 {
-    function __construct(string $message = '', int $code = 500, ?Throwable $previous = null)
+    public function __construct(string $message = '', int $code = 500, ?Throwable $previous = null)
     {
         parent::__construct($code, $message, $previous);
     }

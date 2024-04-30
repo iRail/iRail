@@ -32,7 +32,8 @@ class DataRoot
         $this->timestamp = date('U');
     }
 
-    public function getRootName():string{
+    public function getRootName():string
+    {
         return $this->rootName;
     }
 }

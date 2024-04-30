@@ -155,7 +155,6 @@ abstract class IrailHttpRequest extends LumenRequest
                     return $station->getId();
                 }
             } catch (Exception $ignored) {
-
             }
         }
         throw new RequestedStopNotFoundException($id);

@@ -1,6 +1,7 @@
 <?php
 
 namespace Irail\Models;
+
 use Carbon\Carbon;
 
 /**
@@ -83,6 +84,4 @@ class CachedData
     {
         return time() - $this->createdAt;
     }
-
-
 }

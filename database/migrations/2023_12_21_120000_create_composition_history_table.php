@@ -16,10 +16,14 @@ return new class extends Migration {
             $table->integer('journey_number')->comment('The journey number, for example "513" in IC 513');
             $table->date('journey_start_date')->nullable()->comment('The date on which this journey ran');
 
-            $table->string('from_station_id',
-                9)->nullable(false)->comment('The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.');
-            $table->string('to_station_id',
-                9)->nullable(false)->comment('The id of the station to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.');
+            $table->string(
+                'from_station_id',
+                9
+            )->nullable(false)->comment('The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split.');
+            $table->string(
+                'to_station_id',
+                9
+            )->nullable(false)->comment('The id of the station to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split.');
 
             $table->string('primary_material_type', 16)->comment('The type of the majority of the used vehicles, such as I10, M6 or AM96');
             $table->tinyInteger('passenger_unit_count')->comment('The number of units in which passengers can be seated'); // 0 - 255

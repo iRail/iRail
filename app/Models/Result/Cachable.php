@@ -6,8 +6,7 @@ use Carbon\Carbon;
 
 trait Cachable
 {
-    function mergeCacheValidity(Carbon $createdAt, Carbon $expiresAt): void
+    public function mergeCacheValidity(Carbon $createdAt, Carbon $expiresAt): void
     {
-
     }
 }

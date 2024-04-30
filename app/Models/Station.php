@@ -21,9 +21,14 @@ class Station
      * @param float|null $latitude
      * @param float|null $longitude
      */
-    public function __construct(string $id, string $uri,
-        string $stationName, string $localizedStationName,
-        ?float $longitude = null, ?float $latitude = null)
+    public function __construct(
+        string $id,
+        string $uri,
+        string $stationName,
+        string $localizedStationName,
+        ?float $longitude = null,
+        ?float $latitude = null
+    )
     {
         $this->id = $id;
         $this->uri = $uri;
@@ -80,5 +85,4 @@ class Station
     {
         return $this->longitude;
     }
-
 }

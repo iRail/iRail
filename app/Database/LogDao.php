@@ -92,8 +92,10 @@ class LogDao
         $start = $date->startOfDay()->utc();
         $end = $date->endOfDay()->utc();
         // Database timestamps are UTC
-        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at BETWEEN ? AND ? ORDER BY created_at',
-            [$start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]);
+        $rows = DB::select(
+            'SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at BETWEEN ? AND ? ORDER BY created_at',
+            [$start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]
+        );
         return $this->transformRows($rows);
     }
 
@@ -126,12 +128,14 @@ class LogDao
     public function transformRows(array $rows): array
     {
         return array_map(function ($row): LogEntry {
-            return new LogEntry($row->id,
+            return new LogEntry(
+                $row->id,
                 LogQueryType::tryFrom($row->query_type),
                 json_decode($row->query, associative: true),
                 json_decode($row->result, associative: true),
                 $row->user_agent,
-                new Carbon($row->created_at));
+                new Carbon($row->created_at)
+            );
         }, $rows);
     }
 }

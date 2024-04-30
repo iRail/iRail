@@ -114,7 +114,6 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      */
     private function parseStopAtStation(LiveboardRequest $request, Station $currentStation, array $stop): DepartureOrArrival
     {
-
         /*
          * {
          *    "EntryDate": "2022-11-07 19:55:00",
@@ -133,7 +132,8 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         $isArrivalBoard = $request->getDepartureArrivalMode() == TimeSelection::ARRIVAL;
 
         // The date of this departure
-        $plannedDateTime = Carbon::createFromFormat('Y-m-d H:i:s',
+        $plannedDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
             $isArrivalBoard ? $stop['PlannedArrival'] : $stop['PlannedDeparture'],
             'Europe/Brussels'
         );

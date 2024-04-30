@@ -79,5 +79,4 @@ class TrainComposition
     {
         return $this->destination;
     }
-
 }

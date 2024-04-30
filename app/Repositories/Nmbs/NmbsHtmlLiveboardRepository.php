@@ -44,8 +44,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
         StationsRepository $stationsRepository,
         CurlProxy $curlProxy,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
-    )
-    {
+    ) {
         $this->stationsRepository = $stationsRepository;
         $this->curlProxy = $curlProxy;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
@@ -187,7 +186,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
             if (empty($delay)) {
                 $delay = 0;
-            } else if ($delay[0] == 'Cancelled') {
+            } elseif ($delay[0] == 'Cancelled') {
                 $delay = 0;
                 $canceled = true;
             } else {

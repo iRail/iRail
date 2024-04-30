@@ -14,7 +14,7 @@ use Tests\InMemoryTestCase;
 
 class HistoricCompositionDaoTest extends InMemoryTestCase
 {
-    function testRecordComposition_normalCase_shouldStoreCompositionInDatabase()
+    public function testRecordComposition_normalCase_shouldStoreCompositionInDatabase()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
         $repo = new HistoricCompositionDao();
@@ -42,7 +42,7 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
         self::assertCount(1, $compositions);
     }
 
-    function testRecordComposition_mixedCarriageTypes_shouldCorrectlyDeterminePrimaryType()
+    public function testRecordComposition_mixedCarriageTypes_shouldCorrectlyDeterminePrimaryType()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
 
@@ -76,7 +76,7 @@ class HistoricCompositionDaoTest extends InMemoryTestCase
     }
 
 
-    function testRecordComposition_multipleSegments_shouldStoreCompositionForEachSegment()
+    public function testRecordComposition_multipleSegments_shouldStoreCompositionForEachSegment()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
         $repo = new HistoricCompositionDao();

@@ -13,16 +13,17 @@ use stdClass;
 
 class ServiceAlertsV1Converter extends V1Converter
 {
-
     /**
      * @param IrailHttpRequest      $request
      * @param LiveboardSearchResult $result
      */
-    public static function convert(ServiceAlertsV1Request $request,
-        ServiceAlertsResult $serviceAlerts): DataRoot
+    public static function convert(
+        ServiceAlertsV1Request $request,
+        ServiceAlertsResult $serviceAlerts
+    ): DataRoot
     {
         $result = new DataRoot('disturbances');
-        $result->disturbance = array_map(fn($alert) => self::convertDisturbance($alert), $serviceAlerts->getAlerts());
+        $result->disturbance = array_map(fn ($alert) => self::convertDisturbance($alert), $serviceAlerts->getAlerts());
 
         return $result;
     }
@@ -36,7 +37,7 @@ class ServiceAlertsV1Converter extends V1Converter
         $disturbance->link = $alert->getLinks()[0]->getLink();
         $disturbance->timestamp = $alert->getLastModified()->getTimestamp();
         $disturbance->richtext = $alert->getMessage();
-        $disturbance->descriptionLink = array_map(fn($link) => self::convertDisturbanceLink($link), $alert->getLinks());
+        $disturbance->descriptionLink = array_map(fn ($link) => self::convertDisturbanceLink($link), $alert->getLinks());
         return $disturbance;
     }
 
@@ -47,5 +48,4 @@ class ServiceAlertsV1Converter extends V1Converter
         $result->text = $link->getText();
         return $result;
     }
-
 }

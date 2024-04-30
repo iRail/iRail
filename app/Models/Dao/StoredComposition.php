@@ -6,7 +6,6 @@ use Carbon\Carbon;
 
 class StoredComposition
 {
-
     private string $fromStationId;
     private string $toStationId;
 
@@ -95,6 +94,4 @@ class StoredComposition
         $this->units = $units;
         return $this;
     }
-
-
 }

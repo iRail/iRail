@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Log;
 
 class CurlProxy
 {
-
     const CURL_HEADER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36';
     const CURL_HEADER_REFERRER = 'http://api.irail.be/';
     const CURL_TIMEOUT = 30;
@@ -78,6 +77,6 @@ class CurlProxy
      */
     protected function buildUrl(string $url, array $parameters): string
     {
-        return $url . '?' . http_build_query($parameters, '', null,);
+        return $url . '?' . http_build_query($parameters, '', null, );
     }
 }

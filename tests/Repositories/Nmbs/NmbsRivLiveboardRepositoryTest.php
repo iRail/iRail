@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class NmbsRivLiveboardRepositoryTest extends TestCase
 {
-    function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
+    public function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -38,24 +38,23 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
         self::assertEquals(20, count($response->getStops()));
     }
 
-    function testGetLiveboard_departureBoardIncludingServiceTrain_shouldNotBeIncludedInResult(): void
+    public function testGetLiveboard_departureBoardIncludingServiceTrain_shouldNotBeIncludedInResult(): void
     {
-
     }
 
 
-    function testGetLiveboard_departureBoardMissingDestination_shouldGetDirectionFromGtfs(): void
-    {
-        // TODO: implement in code and test
-    }
-
-
-    function testGetLiveboard_departureBoardAndGtfsMissingDestination_shouldNotIncludeRowInResult(): void
+    public function testGetLiveboard_departureBoardMissingDestination_shouldGetDirectionFromGtfs(): void
     {
         // TODO: implement in code and test
     }
 
-    function testGetLiveboard_canceledDeparture_shouldBeMarkedAsCanceled(): void
+
+    public function testGetLiveboard_departureBoardAndGtfsMissingDestination_shouldNotIncludeRowInResult(): void
+    {
+        // TODO: implement in code and test
+    }
+
+    public function testGetLiveboard_canceledDeparture_shouldBeMarkedAsCanceled(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);

@@ -13,7 +13,6 @@ class TimeParserTest extends TestCase
 
     public function testTransformDurationHHMMSS()
     {
-
         self::assertEquals(1800, $this->transformDurationHHMMSS('003000'));
         self::assertEquals(3600, $this->transformDurationHHMMSS('010000'));
         self::assertEquals(5400, $this->transformDurationHHMMSS('013000'));

@@ -102,7 +102,7 @@ class StationsRepository
      */
     public function findAllStations(): array
     {
-        return array_map(fn($stationCsv) => self::stationsCsvToStation($stationCsv), StationsCsv::getStations());
+        return array_map(fn ($stationCsv) => self::stationsCsvToStation($stationCsv), StationsCsv::getStations());
     }
 
     public function setLocalizedLanguage(string $lang): void

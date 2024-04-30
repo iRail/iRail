@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
 
 trait LiveboardCacheId
 {
@@ -17,12 +16,11 @@ trait LiveboardCacheId
             ]);
     }
 
-    abstract function getStationId(): string;
+    abstract public function getStationId(): string;
 
-    abstract function getDateTime(): Carbon;
+    abstract public function getDateTime(): Carbon;
 
-    abstract function getDepartureArrivalMode(): TimeSelection;
+    abstract public function getDepartureArrivalMode(): TimeSelection;
 
-    abstract function getLanguage(): string;
-
+    abstract public function getLanguage(): string;
 }

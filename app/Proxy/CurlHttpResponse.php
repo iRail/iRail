@@ -99,5 +99,4 @@ class CurlHttpResponse
     {
         return "{$this->responseCode} [{$this->method}] {$this->url} ({$this->duration} ms)\n\n" . ($this->requestBody ?: 'no request body') . "\n\n" . $this->getResponseBody() ?: 'no response body';
     }
-
 }

@@ -3,7 +3,6 @@
 namespace Irail\Http\Requests;
 
 use Carbon\Carbon;
-use DateTime;
 
 interface LiveboardRequest extends CacheableRequest
 {

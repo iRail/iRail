@@ -106,7 +106,6 @@ class DepartureOrArrival
      */
     public function setDelay(int $delay): DepartureOrArrival
     {
-
         $this->delay = $delay;
         return $this;
     }
@@ -217,5 +216,4 @@ class DepartureOrArrival
     {
         return $this->status;
     }
-
 }

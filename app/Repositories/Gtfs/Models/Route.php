@@ -26,6 +26,4 @@ class Route
     {
         return $this->routeShortName;
     }
-
-
 }

@@ -9,7 +9,6 @@ class MessageLink
 
     public function __construct(string $link, string $text)
     {
-
         $this->link = $link;
         $this->text = $text;
     }
@@ -46,5 +45,4 @@ class MessageLink
         }
         return null;
     }
-
 }

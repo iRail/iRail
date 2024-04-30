@@ -76,7 +76,9 @@ class Handler extends ExceptionHandler
                 [
                     'code'    => 404,
                     'message' => 'Not found'
-                ], 404);
+                ],
+                404
+            );
         }
 
         $requestId = RequestUuidHelper::getRequestId($request);
@@ -98,7 +100,8 @@ class Handler extends ExceptionHandler
                     'Access-Control-Allow-Headers'  => '*',
                     'Access-Control-Expose-Headers' => '*',
                     'Content-Type'                  => 'application/json;charset=UTF-8'
-                ]);
+                ]
+            );
         }
 
         if (str_contains($request->getUri(), '/v1/') && $request->get('format', 'xml') == 'xml') {
@@ -126,7 +129,8 @@ class Handler extends ExceptionHandler
                 'Access-Control-Allow-Headers'  => '*',
                 'Access-Control-Expose-Headers' => '*',
                 'Content-Type'                  => 'application/json;charset=UTF-8'
-            ]);
+            ]
+        );
     }
 
     /**
@@ -143,5 +147,4 @@ class Handler extends ExceptionHandler
         }
         return '';
     }
-
 }

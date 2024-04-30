@@ -4,11 +4,11 @@ namespace Irail\Http\Requests;
 
 interface IrailV1Request
 {
-    function getResponseFormat(): string;
+    public function getResponseFormat(): string;
 
-    function getLanguage(): string;
+    public function getLanguage(): string;
 
-    function getUserAgent(): string;
+    public function getUserAgent(): string;
 
-    function isDebugModeEnabled(): bool;
+    public function isDebugModeEnabled(): bool;
 }

@@ -82,9 +82,9 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
      * @param DatedVehicleJourneyV2Request $request
      * @return VehicleCompositionSearchResult
      */
-    function getVehicleComposition(DatedVehicleJourneyV2Request $request): VehicleCompositionSearchResult
+    public function getVehicleComposition(DatedVehicleJourneyV2Request $request): VehicleCompositionSearchResult
     {
-// The type may not be determined successfully, but only the number is needed anyway
+        // The type may not be determined successfully, but only the number is needed anyway
         $vehicle = Vehicle::fromName($request->getVehicleId(), $request->getDateTime());
         $composition = $this->vehicleCompositionRepository->getComposition($vehicle);
         // Store this in the database, in case it's new.

@@ -15,7 +15,6 @@ class ServiceAlertsResult
      */
     public function __construct(array $alerts)
     {
-
         $this->alerts = $alerts;
     }
 

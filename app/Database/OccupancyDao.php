@@ -14,7 +14,6 @@ use Spatie\Async\Pool;
 
 class OccupancyDao
 {
-
     private Pool $threadPool;
 
     public function __construct()
@@ -36,16 +35,16 @@ class OccupancyDao
         DepartureOrArrival $departure,
         ?OccupancyLevel $officialNmbsLevel = null,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
-    ): OccupancyInfo
-    {
+    ): OccupancyInfo {
         if ($officialNmbsLevel != null && $officialNmbsLevel != OccupancyLevel::UNKNOWN) {
             // TODO: perform this operation asynchronous
-            $this->store(OccupancyReportSource::NMBS,
+            $this->store(
+                OccupancyReportSource::NMBS,
                 $departure->getVehicle()->getId(),
                 $departure->getStation()->getId(),
                 $departure->getScheduledDateTime(),
-                $officialNmbsLevel);
-
+                $officialNmbsLevel
+            );
         } else {
             $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure, $performanceMode);
         }
@@ -129,8 +128,7 @@ class OccupancyDao
         string $stationId,
         Carbon $scheduledDateTime,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
-    ): OccupancyLevel
-    {
+    ): OccupancyLevel {
         $cacheKey = $this->getOccupancyKey(OccupancyReportSource::SPITSGIDS, $vehicleId, $stationId, $scheduledDateTime);
         $cachedValue = Cache::get($cacheKey);
         if ($cachedValue != null) {
@@ -146,7 +144,7 @@ class OccupancyDao
         );
 
         // the reported values cannot include "unknown", since this value can never be reported in Spitsgids
-        $values = array_map(fn($report) => $report->getIntValue(), $reports);
+        $values = array_map(fn ($report) => $report->getIntValue(), $reports);
         if (count($values) == 0) {
             Cache::put($cacheKey, OccupancyLevel::UNKNOWN, 1800);
             return OccupancyLevel::UNKNOWN;
@@ -166,10 +164,13 @@ class OccupancyDao
     public function getStoredNmbsOccupancy(
         DepartureOrArrival $departure,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
-    ): OccupancyLevel
-    {
-        $cacheKey = $this->getOccupancyKey(OccupancyReportSource::NMBS, $departure->getVehicle()->getId(),
-            $departure->getStation()->getId(), $departure->getScheduledDateTime());
+    ): OccupancyLevel {
+        $cacheKey = $this->getOccupancyKey(
+            OccupancyReportSource::NMBS,
+            $departure->getVehicle()->getId(),
+            $departure->getStation()->getId(),
+            $departure->getScheduledDateTime()
+        );
         $cachedValue = Cache::get($cacheKey);
         if ($cachedValue != null) {
             $officialNmbsLevel = $cachedValue;
@@ -190,8 +191,7 @@ class OccupancyDao
         string $stationId,
         Carbon $scheduledDateTime,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
-    ): OccupancyLevel
-    {
+    ): OccupancyLevel {
         $reports = $this->readLevels(
             OccupancyReportSource::NMBS,
             $vehicleId,
@@ -226,8 +226,7 @@ class OccupancyDao
         int $stationId,
         Carbon $vehicleJourneyStartDate,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
-    ): array
-    {
+    ): array {
         if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
             $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
         } else {
@@ -255,12 +254,14 @@ class OccupancyDao
         Log::debug("Reading occupancy levels for vehicle $vehicleId from source $source->name");
         $startTime = microtime(true);
 
-        $rows = DB::select('SELECT stop_id, occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND journey_start_date=?',
+        $rows = DB::select(
+            'SELECT stop_id, occupancy FROM occupancy_reports WHERE source=? AND vehicle_id=? AND journey_start_date=?',
             [
                 $source->value,
                 $vehicleId,
                 $vehicleJourneyStartDate->copy()->startOfDay()
-            ]);
+            ]
+        );
         // Convert the results
         $result = [];
         foreach ($rows as $row) {
@@ -295,12 +296,14 @@ class OccupancyDao
         Log::debug("Reading occupancy levels for stop $stationId from source $source->name");
         $startTime = microtime(true);
 
-        $rows = DB::select('SELECT vehicle_id, occupancy FROM occupancy_reports WHERE source=? AND stop_id=? AND journey_start_date=?',
+        $rows = DB::select(
+            'SELECT vehicle_id, occupancy FROM occupancy_reports WHERE source=? AND stop_id=? AND journey_start_date=?',
             [
                 $source->value,
                 $stationId,
                 $vehicleJourneyStartDate->copy()->startOfDay()
-            ]);
+            ]
+        );
         // Convert the results
         $result = [];
         foreach ($rows as $row) {
@@ -318,13 +321,15 @@ class OccupancyDao
 
     private function exportSpitsgidsReport(Carbon $reportDate): array
     {
-        $rows = DB::select('SELECT occupancy FROM occupancy_reports WHERE source=? AND DATE(created_at)=? ',
+        $rows = DB::select(
+            'SELECT occupancy FROM occupancy_reports WHERE source=? AND DATE(created_at)=? ',
             [
                 OccupancyReportSource::SPITSGIDS,
                 $reportDate
-            ]);
+            ]
+        );
 
-        return array_map(fn($row) => [
+        return array_map(fn ($row) => [
             'connection' => "http=>//irail.be/connections/{$row->stationId}/{$row->date}/{$row->vehicleId}",
             'from'       => 'http=>//irail.be/stations/NMBS/00' . $row->stationId,
             'date'       => $row->date,

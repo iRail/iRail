@@ -16,12 +16,11 @@ trait VehicleJourneyCacheId
             ]);
     }
 
-    abstract function getVehicleId(): ?string;
+    abstract public function getVehicleId(): ?string;
 
-    abstract function getDatedJourneyId(): ?string;
+    abstract public function getDatedJourneyId(): ?string;
 
-    abstract function getDateTime(): Carbon;
+    abstract public function getDateTime(): Carbon;
 
-    abstract function getLanguage(): string;
-
+    abstract public function getLanguage(): string;
 }

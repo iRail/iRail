@@ -9,7 +9,6 @@ use Irail\Http\Requests\OccupancyReportRequest;
 
 class OccupancyController extends BaseIrailController
 {
-
     private OccupancyDao $occupancyRepository;
 
     public function __construct(OccupancyDao $occupancyRepository)
@@ -21,7 +20,8 @@ class OccupancyController extends BaseIrailController
     {
         $vehicleId = basename($request->getVehicleUri());
         $stationId = basename($request->getFromStationUri());
-        return $this->outputJson($request,
+        return $this->outputJson(
+            $request,
             $this->occupancyRepository->recordSpitsgidsOccupancy(
                 $vehicleId,
                 $stationId,

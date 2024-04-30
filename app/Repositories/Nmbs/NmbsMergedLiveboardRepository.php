@@ -16,7 +16,6 @@ use Irail\Repositories\Riv\NmbsRivRawDataRepository;
  */
 class NmbsMergedLiveboardRepository implements LiveboardRepository
 {
-
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
         if ($this->isOutsideRivDateRange($request)) {

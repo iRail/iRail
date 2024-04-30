@@ -7,7 +7,6 @@ namespace Irail\Models\VehicleComposition;
  */
 class TrainCompositionUnitWithId extends TrainCompositionUnit
 {
-
     /**
      * @var int The UIC code of this vehicle
      */
@@ -56,5 +55,4 @@ class TrainCompositionUnitWithId extends TrainCompositionUnit
         $this->materialSubTypeName = $materialSubTypeName;
         return $this;
     }
-
 }

@@ -58,5 +58,4 @@ class RollingMaterialType
         $this->orientation = $value;
         return $this;
     }
-
 }

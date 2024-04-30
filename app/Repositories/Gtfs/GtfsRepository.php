@@ -72,10 +72,13 @@ class GtfsRepository
      */
     public function getTripStops(): array
     {
-        $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, function (): array {
+        $cachedData = $this->getCacheOrSynchronizedUpdate(
+            self::GTFS_ALL_TRIP_STOPS_CACHE_KEY,
+            function (): array {
             return $this->readTripStops();
         },
-            ttl: 3 * 3600 + 1); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
+            ttl: 3 * 3600 + 1
+        ); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
         return $cachedData->getValue();
     }
 
@@ -84,7 +87,9 @@ class GtfsRepository
      */
     private function getRouteIdToJourneyTypeMap(): array
     {
-        $cachedData = $this->getCacheOrUpdate(self::GTFS_ROUTES_CACHE_KEY, function (): array {
+        $cachedData = $this->getCacheOrUpdate(
+            self::GTFS_ROUTES_CACHE_KEY,
+            function (): array {
             $vehicleTypesByRouteId = [];
             foreach ($this->readRoutes() as $route) {
                 // Shortname contains journey type, such as S6, for NMBS.
@@ -92,7 +97,8 @@ class GtfsRepository
             }
             return $vehicleTypesByRouteId;
         },
-            ttl: 3 * 3600 + 7); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
+            ttl: 3 * 3600 + 7
+        ); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
         return $cachedData->getValue();
     }
 
@@ -165,8 +171,7 @@ class GtfsRepository
     private function getServiceIdsInDateRange(
         int $daysBack,
         int $daysForward
-    ): array
-    {
+    ): array {
         Log::info("Searching for service days in range -{$daysBack}, {$daysForward}");
         $serviceIdsByCalendarDate = $this->getCalendarDates();
 

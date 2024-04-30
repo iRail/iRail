@@ -14,10 +14,11 @@ class ServiceAlertsV2Converter extends V2Converter
      */
     public static function convert(
         ServiceAlertsRequest $request,
-        ServiceAlertsResult $result): array
+        ServiceAlertsResult $result
+    ): array
     {
         return [
-            'alerts' => array_map(fn($obj) => self::convertMessage($obj), $result->getAlerts())
+            'alerts' => array_map(fn ($obj) => self::convertMessage($obj), $result->getAlerts())
         ];
     }
 }

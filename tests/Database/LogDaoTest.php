@@ -10,7 +10,7 @@ use Tests\InMemoryTestCase;
 
 class LogDaoTest extends InMemoryTestCase
 {
-    function testLog_multipleCalls_shouldFlushRegularly()
+    public function testLog_multipleCalls_shouldFlushRegularly()
     {
         Carbon::setTestNow(Carbon::createFromDate(2023, 12, 21));
         $dao = new LogDao();

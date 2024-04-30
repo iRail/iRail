@@ -68,6 +68,4 @@ class StopTime
         $seconds = intval(substr($stopTime, 6, 2));
         return $hours * 3600 + $minutes * 60 + $seconds;
     }
-
-
 }

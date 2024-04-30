@@ -22,7 +22,7 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
     /**
      * @throws Exception
      */
-    function testGetJourneyPlanning_normalCase_shouldParseDataCorrectly(): void
+    public function testGetJourneyPlanning_normalCase_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -50,7 +50,7 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
         self::assertEquals('008814308', $journey->getArrival()->getStation()->getId());
     }
 
-    function testGetJourneyPlanning_walkingLeg_shouldParseDataCorrectly(): void
+    public function testGetJourneyPlanning_walkingLeg_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -86,7 +86,7 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
         self::assertNull($journey->getLegs()[1]->getArrival()->getVehicle());
     }
 
-    function testGetJourneyPlanning_missingDepartureIntermediateStop_shouldParseDataCorrectly(): void
+    public function testGetJourneyPlanning_missingDepartureIntermediateStop_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -110,7 +110,7 @@ class NmbsRivJourneyPlanningRepositoryTest extends TestCase
         $journey = $response->getJourneys()[0];
     }
 
-    function testGetJourneyPlanning_noResult_shouldReturn404(): void
+    public function testGetJourneyPlanning_noResult_shouldReturn404(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);

@@ -43,5 +43,4 @@ class PlatformInfo
     {
         return $this->hasChanged;
     }
-
 }

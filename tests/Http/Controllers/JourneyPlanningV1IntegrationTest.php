@@ -19,7 +19,7 @@ use Tests\TestCase;
 
 class JourneyPlanningV1IntegrationTest extends TestCase
 {
-    function testGetJourneyPlanning_walkingLeg_shouldParseDataCorrectly(): void
+    public function testGetJourneyPlanning_walkingLeg_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);
@@ -45,7 +45,7 @@ class JourneyPlanningV1IntegrationTest extends TestCase
         self::assertEquals(200, $response->getStatusCode()); // Just ensure the response could be parsed and converted.
     }
 
-    function testGetJourneyPlanning_missingDepartureIntermediateStop_shouldParseDataCorrectly(): void
+    public function testGetJourneyPlanning_missingDepartureIntermediateStop_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $rivRepo = Mockery::mock(NmbsRivRawDataRepository::class);

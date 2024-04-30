@@ -44,6 +44,4 @@ class VehicleDirection
     {
         $this->name = $name;
     }
-
-
 }

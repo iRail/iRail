@@ -37,8 +37,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         StationsRepository $stationsRepository,
         NmbsRivRawDataRepository $rivRawDataRepository,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
-    )
-    {
+    ) {
         $this->stationsRepository = $stationsRepository;
         $this->rivRawDataRepository = $rivRawDataRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
@@ -50,7 +49,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      * @param Vehicle $journey
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      */
-    function getComposition(Vehicle $journey): VehicleCompositionSearchResult
+    public function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
         return $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
             $cachedData = $this->getCompositionData($journey);
@@ -65,10 +64,10 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
                 // meaning these compositions are only a locomotive and should be filtered out
                 if (count($compositionDataForSingleSegment->materialUnits) > 1) {
                     try {
-                    $segments[] = $this->parseOneSegmentWithCompositionData(
-                        $journey,
-                        $compositionDataForSingleSegment
-                    );
+                        $segments[] = $this->parseOneSegmentWithCompositionData(
+                            $journey,
+                            $compositionDataForSingleSegment
+                        );
                     } catch (Throwable $e) {
                         $exception = $e;
                         Log::warning('Exception occured while trying to parse composition: ' . $exception->getMessage());
@@ -88,22 +87,26 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      * @param Vehicle $journey
      * @return CachedData
      */
-    function getCompositionData(Vehicle $journey): CachedData
+    public function getCompositionData(Vehicle $journey): CachedData
     {
         $journeyDate = $journey->getJourneyStartDate();
         $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination($journey->getId(), $journeyDate);
         if (!$journeyWithOriginAndDestination) {
             Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
-            throw new CompositionUnavailableException($journey->getId(),
-                'Composition is only available from vehicle start. Vehicle is not active on the given date.');
+            throw new CompositionUnavailableException(
+                $journey->getId(),
+                'Composition is only available from vehicle start. Vehicle is not active on the given date.'
+            );
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
         $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
         if ($secondsUntilStart > 0) {
             Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
                 . "Start time is $startTimeOffset.");
-            throw new CompositionUnavailableException($journey->getId(),
-                'Composition is only available from vehicle start, Vehicle is not active yet at this time.');
+            throw new CompositionUnavailableException(
+                $journey->getId(),
+                'Composition is only available from vehicle start, Vehicle is not active yet at this time.'
+            );
         }
 
         $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
@@ -348,8 +351,10 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         } elseif (property_exists($rawCompositionUnit, 'materialTypeName') && $rawCompositionUnit->materialTypeName == 'M7BMX') {
             $parentType = 'M7';
             $subType = 'BMX';
-        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName,
-                'M7')) { // HV mislabeled as HLE :(
+        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with(
+            $rawCompositionUnit->materialSubTypeName,
+            'M7'
+        )) { // HV mislabeled as HLE :(
             $parentType = 'M7';
             $subType = substr($rawCompositionUnit->materialSubTypeName, 2);
         } else {

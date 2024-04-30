@@ -19,7 +19,6 @@ use stdClass;
 
 class HistoricCompositionDao
 {
-
     public function __construct()
     {
     }
@@ -46,7 +45,8 @@ class HistoricCompositionDao
                 ['journey_type', '=', $vehicleType],
                 ['journey_number', '=', $journeyNumber],
                 ['journey_start_date', '>=', Carbon::now()->startOfDay()->subDays($daysBack)]
-            ])->get()->all();
+            ]
+        )->get()->all();
     }
 
     /**
@@ -66,19 +66,26 @@ class HistoricCompositionDao
         $compositions = $this->getHistoricCompositions(
             $vehicleType,
             $journeyNumber,
-            $daysBack);
-        $lengths = array_map(fn($comp) => $comp->getPassengerUnitCount(), $compositions);
+            $daysBack
+        );
+        $lengths = array_map(fn ($comp) => $comp->getPassengerUnitCount(), $compositions);
         sort($lengths);
         $lengthFrequency = array_count_values($lengths);
-        $typesFrequency = array_count_values(array_map(fn($comp) => $comp->getPrimaryMaterialType(), $compositions));
+        $typesFrequency = array_count_values(array_map(fn ($comp) => $comp->getPrimaryMaterialType(), $compositions));
         $medianLength = $this->median($lengths);
         $mostProbableLength = $lengthFrequency ? array_keys($lengthFrequency, max($lengthFrequency))[0] : 0;
         $lengthPercentage = $lengthFrequency ? 100 * max($lengthFrequency) / count($compositions) : 0;
         $primaryMaterialType = $typesFrequency ? array_keys($typesFrequency, max($typesFrequency))[0] : null;
         $typePercentage = $lengthFrequency ? 100 * max($lengthFrequency) / count($compositions) : 0;
         $result = [
-            new CompositionStatistics(count($compositions), $medianLength, $mostProbableLength, $lengthPercentage,
-                $primaryMaterialType, $typePercentage)
+            new CompositionStatistics(
+                count($compositions),
+                $medianLength,
+                $mostProbableLength,
+                $lengthPercentage,
+                $primaryMaterialType,
+                $typePercentage
+            )
         ];
         Cache::put($cacheKey, $result, 3600 * 12); // Cache for 12 hours
         return $result;
@@ -91,13 +98,15 @@ class HistoricCompositionDao
      */
     public function getHistoricComposition(Vehicle $vehicle): array
     {
-        $rows = DB::select('SELECT CU.*, CH.from_station_id, CH.to_station_id, CUU.position 
+        $rows = DB::select(
+            'SELECT CU.*, CH.from_station_id, CH.to_station_id, CUU.position 
             FROM composition_history CH  
             JOIN composition_unit_usage CUU on CH.id = CUU.historic_composition_id
             JOIN composition_unit CU on CU.uic_code = CUU.uic_code
             WHERE CH.journey_type = ? AND CH.journey_number = ? AND CH.journey_start_date = ? 
             ORDER BY CH.from_station_id, CUU.position',
-            [$vehicle->getType(), $vehicle->getNumber(), $vehicle->getJourneyStartDate()]);
+            [$vehicle->getType(), $vehicle->getNumber(), $vehicle->getJourneyStartDate()]
+        );
         if (count($rows) == 0) {
             return [];
         }
@@ -156,7 +165,7 @@ class HistoricCompositionDao
                 $passengerCarriageCount++;
             }
         }
-        $typesFrequency = array_count_values(array_map(fn($unit) => $unit->getMaterialType()->getParentType(), $units));
+        $typesFrequency = array_count_values(array_map(fn ($unit) => $unit->getMaterialType()->getParentType(), $units));
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
         Log::debug("Recording historic composition for journey {$composition->getVehicle()->getId()}");

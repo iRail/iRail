@@ -6,7 +6,7 @@ use Throwable;
 
 class UpstreamServerTimeoutException extends UpstreamServerException
 {
-    function __construct(string $message = '', ?Throwable $previous = null)
+    public function __construct(string $message = '', ?Throwable $previous = null)
     {
         parent::__construct($message, 504, $previous);
     }

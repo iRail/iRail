@@ -11,7 +11,6 @@ use stdClass;
 
 abstract class V1Converter
 {
-
     protected static function convertStation(Station $station): StdClass
     {
         $obj = new StdClass();

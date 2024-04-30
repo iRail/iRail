@@ -13,7 +13,7 @@ class Trip
      * @param string $journeyType
      * @param int    $journeyNumber
      */
-    public function __construct(string $tripId, string $journeyType, int $journeyNumber,)
+    public function __construct(string $tripId, string $journeyType, int $journeyNumber)
     {
         $this->tripId = $tripId;
         $this->journeyType = $journeyType;
@@ -34,6 +34,4 @@ class Trip
     {
         return $this->journeyNumber;
     }
-
-
 }

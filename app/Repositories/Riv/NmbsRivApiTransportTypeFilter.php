@@ -52,6 +52,4 @@ enum NmbsRivApiTransportTypeFilter: int
         // All trains is the default
         return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
     }
-
-
 }

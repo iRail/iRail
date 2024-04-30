@@ -22,7 +22,6 @@ use Irail\Repositories\Nmbs\Models\HafasVehicle;
 
 trait BasedOnHafas
 {
-
     /**
      * @param string $rawJsonData data to decode.
      * @return array an associative array representing the JSON response
@@ -302,8 +301,7 @@ trait BasedOnHafas
         StationsRepository $stationsRepository,
         array $rawIntermediateStop,
         Vehicle $vehicle,
-    ): DepartureAndArrival
-    {
+    ): DepartureAndArrival {
         $intermediateStop = new DepartureAndArrival();
         $station = $stationsRepository->getStationByHafasId($rawIntermediateStop['extId']);
 
@@ -414,5 +412,4 @@ trait BasedOnHafas
     {
         return substr($iRailStationId, 2);
     }
-
 }

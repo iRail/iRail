@@ -18,16 +18,17 @@ use stdClass;
 
 class JourneyPlanningV1Converter extends V1Converter
 {
-
     /**
      * @param IrailHttpRequest      $request
      * @param LiveboardSearchResult $result
      */
-    public static function convert(JourneyPlanningRequest $request,
-        JourneyPlanningSearchResult $journeyPlanning): DataRoot
+    public static function convert(
+        JourneyPlanningRequest $request,
+        JourneyPlanningSearchResult $journeyPlanning
+    ): DataRoot
     {
         $result = new DataRoot('connections');
-        $result->connection = array_map(fn($jny) => self::convertJourneyPlan($jny), $journeyPlanning->getJourneys());
+        $result->connection = array_map(fn ($jny) => self::convertJourneyPlan($jny), $journeyPlanning->getJourneys());
         return $result;
     }
 
@@ -62,7 +63,7 @@ class JourneyPlanningV1Converter extends V1Converter
             : self::convertWalk();
         $result->platform = self::convertPlatform($departure->getPlatform());
         $result->canceled = $departure->isCancelled() ? '1' : '0';
-        $result->stop = array_map(fn($stop) => self::convertIntermediateStop($stop), $departureLeg->getIntermediateStops());
+        $result->stop = array_map(fn ($stop) => self::convertIntermediateStop($stop), $departureLeg->getIntermediateStops());
         $result->departureConnection = $departure->getDepartureUri();
         $result->direction = self::convertDirection($departure);
         $result->left = $departure->getStatus()?->hasLeft() ? '1' : '0';
@@ -168,5 +169,4 @@ class JourneyPlanningV1Converter extends V1Converter
         }
         return $result;
     }
-
 }

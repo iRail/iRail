@@ -4,7 +4,6 @@ namespace Irail\Exceptions;
 
 class CompositionUnavailableException extends IrailHttpException
 {
-
     /**
      * @param int|string $vehicleNumber
      * @param string     $message

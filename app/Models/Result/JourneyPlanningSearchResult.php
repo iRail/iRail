@@ -7,7 +7,6 @@ use Irail\Models\Station;
 
 class JourneyPlanningSearchResult
 {
-
     use Cachable;
 
     private Station $originStation;

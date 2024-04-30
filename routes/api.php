@@ -73,4 +73,3 @@ $router->group(['prefix' => 'v2'], function () use ($router) {
     // A raw dump endpoint, so these logs can still be published to gtfs.irail.be even if they are stored in a database
     $router->get('/feedback/reports', ['as' => 'v2.occupancy.export', 'uses' => 'OccupancyController@dump']);
 });
-

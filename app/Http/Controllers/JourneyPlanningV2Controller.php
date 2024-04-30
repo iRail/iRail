@@ -64,7 +64,7 @@ class JourneyPlanningV2Controller extends BaseIrailController
             'version'       => 2
         ];
         $queryResult = [
-            'journeyoptions' => array_map(fn($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
+            'journeyoptions' => array_map(fn ($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
         ];
         app(LogDao::class)->log(LogQueryType::JOURNEYPLANNING, $query, $request->getUserAgent(), $queryResult);
     }
@@ -79,16 +79,14 @@ class JourneyPlanningV2Controller extends BaseIrailController
             'name'      => $stop->getStationName(),
             'query'     => $stationSearchValue,
         ];
-
     }
 
     private function getResultInLogformat(Journey $journey): array
     {
-        return ['journeys' => array_map(fn($leg) => $this->getLegInLogFormat($leg), $journey->getLegs())];
+        return ['journeys' => array_map(fn ($leg) => $this->getLegInLogFormat($leg), $journey->getLegs())];
     }
 
-    private
-    function getLegInLogFormat(
+    private function getLegInLogFormat(
         JourneyLeg $leg
     ): array {
         return [
@@ -114,7 +112,9 @@ class JourneyPlanningV2Controller extends BaseIrailController
                     // TODO: fallback with expected data
                 }
                 $leg->setHistoricCompositionStatistics($this->historicCompositionRepository->getHistoricCompositionStatistics(
-                    $leg->getVehicle()->getType(), $leg->getVehicle()->getNumber()));
+                    $leg->getVehicle()->getType(),
+                    $leg->getVehicle()->getNumber()
+                ));
             }
         }
     }

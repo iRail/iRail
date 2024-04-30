@@ -80,8 +80,10 @@ class OccupancyReportRequest extends IrailHttpRequest
         }
         $occupancyLevel = OccupancyLevel::fromUri($json->get('occupancy'));
         if ($occupancyLevel == OccupancyLevel::UNKNOWN) {
-            abort(400, 'Unknown occupancy value ' . $json->get('occupancy') . ', should be one of \'' . join("', '",
-                    array_column(OccupancyLevel::cases(), 'value')) . "'");
+            abort(400, 'Unknown occupancy value ' . $json->get('occupancy') . ', should be one of \'' . join(
+                "', '",
+                array_column(OccupancyLevel::cases(), 'value')
+            ) . "'");
         }
         return $occupancyLevel;
     }

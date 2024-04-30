@@ -126,5 +126,4 @@ class CompositionHistoryEntry extends Model
     {
         return $this->getAttribute('id');
     }
-
 }

@@ -6,5 +6,4 @@ use Irail\Exceptions\IrailHttpException;
 
 class InternalProcessingException extends IrailHttpException
 {
-
 }

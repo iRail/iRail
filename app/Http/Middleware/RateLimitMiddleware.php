@@ -66,5 +66,4 @@ class RateLimitMiddleware
         }
         return $response;
     }
-
 }

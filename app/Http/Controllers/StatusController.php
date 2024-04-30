@@ -13,7 +13,6 @@ use Irail\Util\InMemoryMetrics;
 
 class StatusController extends BaseIrailController
 {
-
     private LogDao $logRepository;
     private GtfsRepository $gtfsRepository;
     private GtfsTripStartEndExtractor $tripStartEndExtractor;

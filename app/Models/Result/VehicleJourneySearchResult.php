@@ -68,6 +68,4 @@ class VehicleJourneySearchResult
     {
         return $this->alerts;
     }
-
-
 }

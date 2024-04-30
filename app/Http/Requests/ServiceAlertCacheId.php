@@ -2,8 +2,6 @@
 
 namespace Irail\Http\Requests;
 
-use DateTime;
-
 trait ServiceAlertCacheId
 {
     public function getCacheId(): string
@@ -13,6 +11,5 @@ trait ServiceAlertCacheId
             ]);
     }
 
-    abstract function getLanguage(): string;
-
+    abstract public function getLanguage(): string;
 }

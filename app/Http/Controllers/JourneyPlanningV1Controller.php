@@ -53,7 +53,7 @@ class JourneyPlanningV1Controller extends BaseIrailController
             'version'       => 2
         ];
         $queryResult = [
-            'journeyoptions' => array_map(fn($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
+            'journeyoptions' => array_map(fn ($journey) => $this->getResultInLogformat($journey), $result->getJourneys())
         ];
         $this->logDao->log(LogQueryType::JOURNEYPLANNING, $query, $request->getUserAgent(), $queryResult);
     }
@@ -68,12 +68,11 @@ class JourneyPlanningV1Controller extends BaseIrailController
             'name'      => $stop->getStationName(),
             'query'     => $stationSearchValue,
         ];
-
     }
 
     private function getResultInLogformat(Journey $journey): array
     {
-        return ['journeys' => array_map(fn($leg) => $this->getLegInLogFormat($leg), $journey->getLegs())];
+        return ['journeys' => array_map(fn ($leg) => $this->getLegInLogFormat($leg), $journey->getLegs())];
     }
 
     private function getLegInLogFormat(JourneyLeg $leg): array

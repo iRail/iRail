@@ -12,18 +12,19 @@ use stdClass;
 
 class VehicleCompositionV1Converter extends V1Converter
 {
-
     /**
      * @param VehicleCompositionV1Request    $request
      * @param VehicleCompositionSearchResult $searchResult
      * @return DataRoot
      */
-    public static function convert(VehicleCompositionV1Request $request,
-        VehicleCompositionSearchResult $searchResult): DataRoot
+    public static function convert(
+        VehicleCompositionV1Request $request,
+        VehicleCompositionSearchResult $searchResult
+    ): DataRoot
     {
         $result = new DataRoot('vehicleinformation');
         $result->composition = new StdClass();
-        $result->composition->segment = array_map(fn($segment) => self::convertSegment($segment), $searchResult->getSegments());
+        $result->composition->segment = array_map(fn ($segment) => self::convertSegment($segment), $searchResult->getSegments());
         return $result;
     }
 
@@ -40,7 +41,7 @@ class VehicleCompositionV1Converter extends V1Converter
     {
         $result = new StdClass;
         $result->source = $composition->getCompositionSource();
-        $result->unit = array_map(fn($unit) => self::convertUnit($unit), $composition->getUnits());
+        $result->unit = array_map(fn ($unit) => self::convertUnit($unit), $composition->getUnits());
         return $result;
     }
 
@@ -80,5 +81,4 @@ class VehicleCompositionV1Converter extends V1Converter
         $result->orientation = $materialType->getOrientation()->name;
         return $result;
     }
-
 }

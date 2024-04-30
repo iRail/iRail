@@ -48,6 +48,4 @@ class OccupancyInfo
     {
         $this->spitsgidsLevel = $spitsgidsLevel;
     }
-
-
 }

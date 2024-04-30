@@ -35,27 +35,27 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
     }
 
 
-    function getOriginStationId(): string
+    public function getOriginStationId(): string
     {
         return $this->originStationId;
     }
 
-    function getDestinationStationId(): string
+    public function getDestinationStationId(): string
     {
         return $this->destinationStationId;
     }
 
-    function getDateTime(): Carbon
+    public function getDateTime(): Carbon
     {
         return $this->dateTime;
     }
 
-    function getTimeSelection(): TimeSelection
+    public function getTimeSelection(): TimeSelection
     {
         return $this->timeSelection;
     }
 
-    function getTypesOfTransport(): TypeOfTransportFilter
+    public function getTypesOfTransport(): TypeOfTransportFilter
     {
         return $this->typesOfTransport;
     }

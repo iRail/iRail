@@ -40,7 +40,8 @@ class GtfsTripStartEndExtractor
 
     public function getStartDate(int $journeyNumber, Carbon $activeTime): ?Carbon
     {
-        $startDate = $this->getCacheOrUpdate("getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
+        $startDate = $this->getCacheOrUpdate(
+            "getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
             function () use ($journeyNumber, $activeTime): ?Carbon {
                 // This will take the start date from the GTFS calendar file
                 // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
@@ -63,7 +64,9 @@ class GtfsTripStartEndExtractor
                     return $activeTime->copy()->subDay()->setTime(0, 0);
                 }
                 return $activeTime->copy()->setTime(0, 0);
-            }, ttl: 6 * 3600); // Cache for 6 hours
+            },
+            ttl: 6 * 3600
+        ); // Cache for 6 hours
         return $startDate->getValue();
     }
 
@@ -75,7 +78,8 @@ class GtfsTripStartEndExtractor
      */
     public function getVehicleWithOriginAndDestination(string $journeyNumber, DateTime $date): JourneyWithOriginAndDestination|false
     {
-        $originAndDestination = $this->getCacheOrUpdate("getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd-Hi')}",
+        $originAndDestination = $this->getCacheOrUpdate(
+            "getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd-Hi')}",
             function () use ($journeyNumber, $date): JourneyWithOriginAndDestination|false {
                 $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($journeyNumber));
                 $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
@@ -94,13 +98,15 @@ class GtfsTripStartEndExtractor
                 }
 
                 if (count($journeyParts) > 4) { // If this ever occurs, it needs to be investigated and tested before it is implemented.
-                    $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
+                    $tripIds = join(', ', array_map(fn ($match) => $match->getTripId(), $journeyParts));
                     Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
-                    throw new InternalProcessingException(500,
-                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
+                    throw new InternalProcessingException(
+                        500,
+                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds"
+                    );
                 }
 
-                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
+                $tripIds = join(', ', array_map(fn ($match) => $match->getTripId(), $journeyParts));
                 Log::debug("Combining GTFS trips $tripIds for journey '$journeyNumber'");
 
                 $journeyPartsByStart = [];
@@ -118,7 +124,7 @@ class GtfsTripStartEndExtractor
                 }
 
                 # The origin is the only station which doesn't match a destination
-                $origin = array_filter(array_keys($journeyPartsByStart), fn($stopId) => !array_key_exists($stopId, $journeyPartsByDestination))[0];
+                $origin = array_filter(array_keys($journeyPartsByStart), fn ($stopId) => !array_key_exists($stopId, $journeyPartsByDestination))[0];
                 $orderedParts = [];
                 $orderedParts[] = $journeyPartsByStart[$origin];
                 for ($i = 1; $i < count($journeyParts); $i++) {
@@ -131,17 +137,25 @@ class GtfsTripStartEndExtractor
 
                 if (!$invalid) {
                     return new JourneyWithOriginAndDestination(
-                        $origin->getTripId(), $origin->getJourneyType(), $origin->getJourneyNumber(),
-                        $origin->getOriginStopId(), $origin->getOriginDepartureTimeOffset(),
-                        $destination->getDestinationStopId(), $destination->getDestinationArrivalTimeOffset(),
+                        $origin->getTripId(),
+                        $origin->getJourneyType(),
+                        $origin->getJourneyNumber(),
+                        $origin->getOriginStopId(),
+                        $origin->getOriginDepartureTimeOffset(),
+                        $destination->getDestinationStopId(),
+                        $destination->getDestinationArrivalTimeOffset(),
                         $orderedParts
                     );
                 }
 
                 Log::error("'{$vehicleNumber}' number occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds");
-                throw new InternalProcessingException(500,
-                    "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds");
-            }, ttl: 6 * 3600); // Cache for 6 hours
+                throw new InternalProcessingException(
+                    500,
+                    "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds"
+                );
+            },
+            ttl: 6 * 3600
+        ); // Cache for 6 hours
         return $originAndDestination->getValue();
     }
 
@@ -164,7 +178,7 @@ class GtfsTripStartEndExtractor
         }
         // Only search between stops where the train actually stops, since stops will also include waypoints.
         // Array_values to fix gaps between indexes after filtering
-        $stops = array_values(array_filter($stops, fn(StopTime $stop) => $stop->hasPassengerExchange()));
+        $stops = array_values(array_filter($stops, fn (StopTime $stop) => $stop->hasPassengerExchange()));
         $results = [];
         for ($i = 1; $i < count($stops); $i++) {
             $results[] = new JourneyWithOriginAndDestination(
@@ -209,19 +223,24 @@ class GtfsTripStartEndExtractor
 
         // By caching the individual array key/values, we do not need to deserialize the entire array from cache every time this method is called.
         // This reduces deserializing times from 80+ms to 5ms.
-        $vehicleDetailsForDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY . '|' . $dateYmd,
+        $vehicleDetailsForDate = $this->getCacheOrUpdate(
+            self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY . '|' . $dateYmd,
             function () use ($dateYmd): ?array {
                 $tripsWithStartAndEndDate = $this->getTripsWithStartAndEndDate();
                 if (!key_exists($dateYmd, $tripsWithStartAndEndDate)) {
                     return null;
                 }
                 return $tripsWithStartAndEndDate[$dateYmd];
-            }, ttl: 3600)->getValue();
+            },
+            ttl: 3600
+        )->getValue();
 
         if ($vehicleDetailsForDate === null) {
-            throw new RequestOutsideTimetableRangeException('Request outside of allowed date period '
+            throw new RequestOutsideTimetableRangeException(
+                'Request outside of allowed date period '
                 . '(' . GtfsRepository::getGtfsDaysBackwards() . ' days back, ' . GtfsRepository::getGtfsDaysForwards() . ' days forward): ' . $dateYmd,
-                404);
+                404
+            );
         }
 
         // Update the array cache

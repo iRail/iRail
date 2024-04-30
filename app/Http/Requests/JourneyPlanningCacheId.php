@@ -2,7 +2,6 @@
 
 namespace Irail\Http\Requests;
 
-
 use Carbon\Carbon;
 
 trait JourneyPlanningCacheId
@@ -19,19 +18,19 @@ trait JourneyPlanningCacheId
             ]);
     }
 
-    abstract function getOriginStationId(): string;
+    abstract public function getOriginStationId(): string;
 
-    abstract function getDestinationStationId(): string;
+    abstract public function getDestinationStationId(): string;
 
-    abstract function getDateTime(): Carbon;
+    abstract public function getDateTime(): Carbon;
 
-    abstract function getTimeSelection(): TimeSelection;
+    abstract public function getTimeSelection(): TimeSelection;
 
-    abstract function getTypesOfTransport(): TypeOfTransportFilter;
+    abstract public function getTypesOfTransport(): TypeOfTransportFilter;
 
     /**
      * Get the requested response language, as an ISO2 code.
      * @return string
      */
-    abstract function getLanguage(): string;
+    abstract public function getLanguage(): string;
 }

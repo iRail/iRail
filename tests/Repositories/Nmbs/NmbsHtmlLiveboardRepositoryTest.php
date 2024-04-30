@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class NmbsHtmlLiveboardRepositoryTest extends TestCase
 {
-    function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
+    public function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $curlProxy = new FakeCurlProxy();
@@ -52,7 +52,7 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
         self::assertEquals('Amsterdam Cs (NL)', $response->getStops()[12]->getVehicle()->getDirection()->getName());
     }
 
-    function testGetLiveboard_departureBoardPlatformChanges_shouldParsePlatformsCorrectly(): void
+    public function testGetLiveboard_departureBoardPlatformChanges_shouldParsePlatformsCorrectly(): void
     {
         $stationsRepo = new StationsRepository();
         $curlProxy = new FakeCurlProxy();

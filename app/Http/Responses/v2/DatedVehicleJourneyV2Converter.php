@@ -9,7 +9,6 @@ use Irail\Models\VehicleComposition\TrainComposition;
 
 class DatedVehicleJourneyV2Converter extends V2Converter
 {
-
     /**
      * @param IrailHttpRequest           $request
      * @param VehicleJourneySearchResult $result
@@ -25,10 +24,9 @@ class DatedVehicleJourneyV2Converter extends V2Converter
     ): array {
         return [
             'vehicle'               => self::convertVehicle($result->getVehicle()),
-            'stops'                 => array_map(fn($obj) => self::convertDepartureAndArrival($obj), $result->getStops()),
-            'composition'           => array_map(fn($segment) => self::convertComposition($segment), $composition),
-            'compositionStatistics' => array_map(fn($statistics) => self::convertCompositionStats($statistics), $compositionStatistics)
+            'stops'                 => array_map(fn ($obj) => self::convertDepartureAndArrival($obj), $result->getStops()),
+            'composition'           => array_map(fn ($segment) => self::convertComposition($segment), $composition),
+            'compositionStatistics' => array_map(fn ($statistics) => self::convertCompositionStats($statistics), $compositionStatistics)
         ];
     }
-
 }

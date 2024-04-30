@@ -8,7 +8,8 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
 {
     use VehicleJourneyCacheId;
 
-    private ?string $vehicleId, $datedJourneyId;
+    private ?string $vehicleId;
+    private ?string $datedJourneyId;
     private string $language;
     private Carbon $dateTime;
 

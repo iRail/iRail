@@ -17,7 +17,6 @@ use Tests\TestCase;
 
 class NmbsRivCompositionRepositoryTest extends TestCase
 {
-
     public function testGetVehicleComposition_emptyResponse_shouldHandleEmptyResponseAsTrainNotFound()
     {
         $startEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);

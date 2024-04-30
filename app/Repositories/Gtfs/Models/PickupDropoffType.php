@@ -23,5 +23,4 @@ enum PickupDropoffType: int
      * Must coordinate with driver to arrange pickup/dropoff.
      */
     case    REQUEST_STOP = 3;
-
 }

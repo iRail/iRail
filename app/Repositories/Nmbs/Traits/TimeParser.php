@@ -12,7 +12,6 @@ use Irail\Repositories\Nmbs\Tools\Tools;
 
 trait TimeParser
 {
-
     /**
      * @param string $date -> in Y-m-d
      * @param string $time -> in hh:mm:ss or dd:hh:mm:ss format

@@ -12,20 +12,21 @@ use stdClass;
 
 class LiveboardV1Converter extends V1Converter
 {
-
     /**
      * @param IrailHttpRequest      $request
      * @param LiveboardSearchResult $result
      */
-    public static function convert(LiveboardRequest $request,
-        LiveboardSearchResult $liveboard): DataRoot
+    public static function convert(
+        LiveboardRequest $request,
+        LiveboardSearchResult $liveboard
+    ): DataRoot
     {
         $result = new DataRoot('liveboard');
         $result->station = self::convertStation($liveboard->getStation());
         if ($request->getDepartureArrivalMode() == TimeSelection::DEPARTURE) {
-            $result->departure = array_map(fn($dep) => self::convertDeparture($dep), $liveboard->getStops());
+            $result->departure = array_map(fn ($dep) => self::convertDeparture($dep), $liveboard->getStops());
         } else {
-            $result->arrival = array_map(fn($arr) => self::convertArrival($arr), $liveboard->getStops());
+            $result->arrival = array_map(fn ($arr) => self::convertArrival($arr), $liveboard->getStops());
         }
         return $result;
     }
@@ -60,5 +61,4 @@ class LiveboardV1Converter extends V1Converter
         $result->departureConnection = $arrival->getDepartureUri();
         return $result;
     }
-
 }

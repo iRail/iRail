@@ -174,5 +174,4 @@ class JourneyLeg
     {
         return $this->composition;
     }
-
 }

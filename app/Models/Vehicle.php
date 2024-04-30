@@ -103,5 +103,4 @@ class Vehicle
     {
         return $this->journeyStartDate;
     }
-
 }

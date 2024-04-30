@@ -7,7 +7,6 @@ use Irail\Models\Station;
 
 class StationsV1Converter extends V1Converter
 {
-
     /**
      * @param StationsV1Request $request
      * @param Station[]         $stations
@@ -18,9 +17,8 @@ class StationsV1Converter extends V1Converter
         array $stations
     ): DataRoot {
         $result = new DataRoot('stations');
-        usort($stations, fn(Station $a, Station $b) => strcmp($a->getLocalizedStationName(), $b->getLocalizedStationName()));
-        $result->station = array_map(fn($station) => self::convertStation($station), $stations);
+        usort($stations, fn (Station $a, Station $b) => strcmp($a->getLocalizedStationName(), $b->getLocalizedStationName()));
+        $result->station = array_map(fn ($station) => self::convertStation($station), $stations);
         return $result;
     }
-
 }

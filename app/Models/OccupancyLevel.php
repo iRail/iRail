@@ -20,6 +20,7 @@ enum OccupancyLevel: string
      * NMBS/SNCB: Low
      * GTFS: MANY_SEATS_AVAILABLE
      */
+    // no break
     case LOW = 'http://api.irail.be/terms/low';
 
     /**
@@ -28,6 +29,7 @@ enum OccupancyLevel: string
      * NMBS/SNCB: Medium (yellow)
      * GTFS: FEW_SEATS_AVAILABLE
      */
+    // no break
     case MEDIUM = 'http://api.irail.be/terms/medium';
 
     /**
@@ -36,6 +38,7 @@ enum OccupancyLevel: string
      * NMBS/SNCB: Medium (Orange)
      * GTFS: STANDING_ROOM_ONLY
      */
+    // no break
     case HIGH = 'http://api.irail.be/terms/high';
 
     public static function fromUri(string $uri): OccupancyLevel
@@ -43,6 +46,7 @@ enum OccupancyLevel: string
         switch ($uri) {
             case OccupancyLevel::LOW->value:
                 return OccupancyLevel::LOW;
+                // no break
             case  OccupancyLevel::MEDIUM->value:
                 return OccupancyLevel::MEDIUM;
             case  OccupancyLevel::HIGH->value:
@@ -89,8 +93,8 @@ enum OccupancyLevel: string
         switch ($value) {
             default:
                 throw new InvalidArgumentException();
-            case 1;
-                return OccupancyLevel::LOW;
+            case 1:
+            return OccupancyLevel::LOW;
             case 2:
                 return OccupancyLevel::MEDIUM;
             case 3:

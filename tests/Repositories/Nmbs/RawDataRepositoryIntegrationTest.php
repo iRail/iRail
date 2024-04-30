@@ -18,10 +18,13 @@ class RawDataRepositoryIntegrationTest extends TestCase
     {
         $repo = new NmbsRivRawDataRepository(new StationsRepository(), new CurlProxy());
         $liveboardData = (string)$repo->getLiveboardData(
-            $this->createLiveboardRequest('008814001',
+            $this->createLiveboardRequest(
+                '008814001',
                 TimeSelection::DEPARTURE,
                 'nl',
-                Carbon::now()))->getValue();
+                Carbon::now()
+            )
+        )->getValue();
         self::assertNotEmpty($liveboardData);
         self::assertTrue(strlen($liveboardData) > 100, 'Liveboard raw data is shorter than expected');
         self::assertTrue(str_contains($liveboardData, 'DestinationNl'), 'Liveboard raw data should contain the expected destination field');
@@ -31,9 +34,12 @@ class RawDataRepositoryIntegrationTest extends TestCase
     {
         $repo = new NmbsRivRawDataRepository(new StationsRepository(), new CurlProxy());
         $vehicleJourneyData = (string)$repo->getVehicleJourneyData(
-            $this->createDatedVehicleJourneyRequest('IC1545',
+            $this->createDatedVehicleJourneyRequest(
+                'IC1545',
                 Carbon::now(),
-                'en'))->getValue();
+                'en'
+            )
+        )->getValue();
         self::assertNotEmpty($vehicleJourneyData);
         self::assertTrue(strlen($vehicleJourneyData) > 100, 'Vehicle journey raw data is shorter than expected');
         self::assertTrue(str_contains($vehicleJourneyData, '1545'), 'Vehicle journey raw data should contain the vehicle name');

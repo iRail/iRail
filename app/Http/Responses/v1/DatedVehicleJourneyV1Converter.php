@@ -10,18 +10,19 @@ use stdClass;
 
 class DatedVehicleJourneyV1Converter extends V1Converter
 {
-
     /**
      * @param DatedVehicleJourneyV1Request $request
      * @param VehicleJourneySearchResult   $datedVehicleJourney
      * @return DataRoot
      */
-    public static function convert(DatedVehicleJourneyV1Request $request,
-        VehicleJourneySearchResult $datedVehicleJourney): DataRoot
+    public static function convert(
+        DatedVehicleJourneyV1Request $request,
+        VehicleJourneySearchResult $datedVehicleJourney
+    ): DataRoot
     {
         $result = new DataRoot('vehicleinformation');
         $result->vehicle = self::convertVehicle($datedVehicleJourney->getVehicle());
-        $result->stop = array_map(fn($stop) => self::convertDeparture($stop), $datedVehicleJourney->getStops());
+        $result->stop = array_map(fn ($stop) => self::convertDeparture($stop), $datedVehicleJourney->getStops());
         return $result;
     }
 
@@ -54,5 +55,4 @@ class DatedVehicleJourneyV1Converter extends V1Converter
 
         return $result;
     }
-
 }

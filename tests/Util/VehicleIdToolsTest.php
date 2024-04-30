@@ -119,5 +119,4 @@ class VehicleIdToolsTest extends TestCase
         self::assertEquals($type, VehicleIdTools::extractTrainType($type . ' ' . $number), "Incorrect type while parsing $type $number");
         self::assertEquals($type, VehicleIdTools::extractTrainType($type . $number), "Incorrect type while parsing $type $number as '$type$number'");
     }
-
 }

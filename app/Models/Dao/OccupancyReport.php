@@ -90,6 +90,4 @@ class OccupancyReport
     {
         return $this->createdAt;
     }
-
-
 }

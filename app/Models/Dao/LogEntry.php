@@ -70,6 +70,4 @@ class LogEntry
     {
         return $this->createdAt;
     }
-
-
 }

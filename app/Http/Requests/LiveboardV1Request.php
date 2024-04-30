@@ -47,6 +47,4 @@ class LiveboardV1Request extends IrailHttpRequest implements LiveboardRequest, I
     {
         return $this->departureArrivalMode;
     }
-
-
 }

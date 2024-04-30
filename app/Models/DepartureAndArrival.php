@@ -67,5 +67,4 @@ class DepartureAndArrival
         }
         throw new InternalProcessingException('Trying to read the station from a DepartureAndArrival which neither has a departure nor arrival');
     }
-
 }

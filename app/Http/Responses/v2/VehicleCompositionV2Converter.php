@@ -10,7 +10,6 @@ use Irail\Models\VehicleComposition\TrainCompositionUnit;
 
 class VehicleCompositionV2Converter extends V2Converter
 {
-
     /**
      * @param VehicleCompositionV2Request    $request
      * @param VehicleCompositionSearchResult $searchResult
@@ -22,7 +21,7 @@ class VehicleCompositionV2Converter extends V2Converter
     ): array {
         return [
             'vehicle'     => self::convertVehicleWithoutDirection($searchResult->getVehicle()),
-            'composition' => array_map(fn($segment) => self::convertSegment($segment), $searchResult->getSegments())
+            'composition' => array_map(fn ($segment) => self::convertSegment($segment), $searchResult->getSegments())
         ];
     }
 
@@ -32,7 +31,7 @@ class VehicleCompositionV2Converter extends V2Converter
             'origin'      => self::convertStation($segment->getOrigin()),
             'destination' => self::convertStation($segment->getDestination()),
             'source'      => $segment->getCompositionSource(),
-            'units'       => array_map(fn($unit) => self::convertUnit($unit), $segment->getUnits())
+            'units'       => array_map(fn ($unit) => self::convertUnit($unit), $segment->getUnits())
         ];
     }
 
@@ -73,5 +72,4 @@ class VehicleCompositionV2Converter extends V2Converter
             'orientation' => $materialType->getOrientation(),
         ];
     }
-
 }

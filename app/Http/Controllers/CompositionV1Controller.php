@@ -29,8 +29,7 @@ class CompositionV1Controller extends BaseIrailController
         HistoricCompositionDao $historicCompositionRepository,
         VehicleCompositionRepository $compositionRepository,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
-    )
-    {
+    ) {
         $this->historicCompositionRepository = $historicCompositionRepository;
         $this->compositionRepository = $compositionRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
@@ -65,5 +64,4 @@ class CompositionV1Controller extends BaseIrailController
         ];
         app(LogDao::class)->log(LogQueryType::VEHICLECOMPOSITION, $query, $request->getUserAgent());
     }
-
 }

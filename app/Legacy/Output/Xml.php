@@ -117,7 +117,7 @@ class Xml extends Printer
                     $elementval = intval($elementval);
                 }
                 $result .= " $elementkey=\"$elementval\"";
-            } else if ($elementkey == 'name') {
+            } elseif ($elementkey == 'name') {
                 $named = $elementval;
             }
         }
@@ -144,7 +144,7 @@ class Xml extends Printer
         if ($key == 'time' || $key == 'startTime' || $key == 'endTime' || $key == 'departureTime' || $key == 'arrivalTime' || $key == 'scheduledDepartureTime' || $key == 'scheduledArrivalTime') {
             $form = $this->iso8601($val);
             $result .= "<$key formatted=\"$form\">$val";
-        } else if ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
+        } elseif ($key != 'name' && !in_array($key, $this->ATTRIBUTES)) {
             $result .= "<$key>";
             if ($this->isCdataElement($key)) {
                 $result .= '<![CDATA[';

@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class StationsRepositoryTest extends TestCase
 {
-    function testGetStation_getLocalizedName_shouldReturnCorrectTranslation()
+    public function testGetStation_getLocalizedName_shouldReturnCorrectTranslation()
     {
         $stationsRepo = new StationsRepository();
         $stationsRepo->setLocalizedLanguage('nl');
@@ -21,7 +21,7 @@ class StationsRepositoryTest extends TestCase
         $this->assertEquals('Brussels-South/Brussels-Midi', $stationsRepo->getStationById('008814001')->getLocalizedStationName());
     }
 
-    function testGetStation_getLocalizedName_useDefaultNameWhenNotTranslated()
+    public function testGetStation_getLocalizedName_useDefaultNameWhenNotTranslated()
     {
         $stationsRepo = new StationsRepository();
         $stationsRepo->setLocalizedLanguage('de');

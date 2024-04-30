@@ -110,7 +110,7 @@ abstract class Printer
                 $i++;
             }
             $result .= $this->endArray($key, $root);
-        } else if (is_object($val)) {
+        } elseif (is_object($val)) {
             $result .= $this->startObject($key, $val);
             $allObjectVars = get_object_vars($val);
 
@@ -135,11 +135,11 @@ abstract class Printer
                 $counter++;
             }
             $result .= $this->endObject($key);
-        } else if (is_bool($val)) {
+        } elseif (is_bool($val)) {
             $val = $val ? 1 : 0; //turn boolean into an int
             $result .= $this->startKeyVal($key, $val);
             $result .= $this->endElement($key);
-        } else if (!is_null($val)) {
+        } elseif (!is_null($val)) {
             $result .= $this->startKeyVal($key, $val);
             $result .= $this->endElement($key);
         } else {
@@ -240,5 +240,5 @@ abstract class Printer
     }
 
 
-    public abstract function getHeaders(): array;
+    abstract public function getHeaders(): array;
 }

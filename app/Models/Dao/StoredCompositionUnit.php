@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class StoredCompositionUnit extends Model
 {
-
     protected $table = 'composition_unit';
     protected $primaryKey = 'uic_code';
     const CREATED_AT = 'created_at';
@@ -186,5 +185,4 @@ class StoredCompositionUnit extends Model
     }
 
     // setUpdatedAt is provided by the parent class
-
 }
