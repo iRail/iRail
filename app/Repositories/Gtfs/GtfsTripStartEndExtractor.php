@@ -11,7 +11,6 @@ use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Gtfs\Models\StopTime;
-use Irail\Repositories\Gtfs\Models\Trip;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Traits\Cache;
 use Irail\Util\VehicleIdTools;
@@ -95,7 +94,7 @@ class GtfsTripStartEndExtractor
                 }
 
                 if (count($matches) > 2) { // If this ever occurs, it needs to be investigated before it is implemented.
-                    $tripIds = join(', ', array_map(fn(Trip $match) => $match->getTripId(), $matches));
+                    $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
                     Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
                     throw new InternalProcessingException("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
                 }
@@ -124,8 +123,7 @@ class GtfsTripStartEndExtractor
                     );
                 }
 
-
-                $tripIds = join(', ', array_map(fn(Trip $match) => $match->getTripId(), $matches));
+                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
                 Log::error("'{$vehicleNumber}' number occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
                 throw new InternalProcessingException("'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
             }, ttl: 6 * 3600); // Cache for 6 hours
