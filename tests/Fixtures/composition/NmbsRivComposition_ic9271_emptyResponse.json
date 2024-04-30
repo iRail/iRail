@@ -1,0 +1,10 @@
+{
+  "messageDateTime": "2024-04-26 22:08:40.7708613+02:00",
+  "trainKey": {
+    "trainNumber": 9271,
+    "circulationType": "commItinerary",
+    "discriminator": 0,
+    "departureDate": "2024-04-26 00:00:00"
+  },
+  "warnings": []
+}

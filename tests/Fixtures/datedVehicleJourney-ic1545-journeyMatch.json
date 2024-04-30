@@ -1,0 +1,114 @@
+{
+  "ver": "1.21",
+  "lang": "eng",
+  "id": "quiuyiis4xgjhg4k",
+  "err": "OK",
+  "svcResL": [
+    {
+      "meth": "JourneyMatch",
+      "err": "OK",
+      "res": {
+        "common": {
+          "locL": [
+            {
+              "lid": "A=1@O=Landen@X=5079660@Y=50747927@U=80@L=8833605@",
+              "type": "S",
+              "name": "Landen",
+              "icoX": 1,
+              "extId": "8833605",
+              "state": "F",
+              "crd": {
+                "x": 5079660,
+                "y": 50747927,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 628
+            },
+            {
+              "lid": "A=1@O=Brugge@X=3216727@Y=51197226@U=80@L=8891009@",
+              "type": "S",
+              "name": "Brugge",
+              "icoX": 1,
+              "extId": "8891009",
+              "state": "F",
+              "crd": {
+                "x": 3216727,
+                "y": 51197226,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            }
+          ],
+          "prodL": [
+            {
+              "name": "IC 1545",
+              "nameS": "IC 1545",
+              "number": "1545",
+              "icoX": 0,
+              "cls": 4
+            }
+          ],
+          "polyL": [],
+          "layerL": [
+            {
+              "id": "standard",
+              "name": "standard",
+              "index": 0,
+              "annoCnt": 0
+            }
+          ],
+          "crdSysL": [
+            {
+              "id": "standard",
+              "index": 0,
+              "type": "WGS84"
+            }
+          ],
+          "opL": [],
+          "remL": [],
+          "icoL": [
+            {
+              "res": "prod_ic"
+            },
+            {
+              "res": "STA_SNCB"
+            }
+          ]
+        },
+        "jnyL": [
+          {
+            "jid": "1|1233|0|80|14112021",
+            "date": "20211114",
+            "prodX": 0,
+            "stopL": [
+              {
+                "locX": 0,
+                "dTimeS": "215800"
+              },
+              {
+                "locX": 1,
+                "aTimeS": "004800"
+              }
+            ],
+            "sDaysL": [
+              {
+                "sDaysR": "not every day",
+                "sDaysI": "14. until 28. Nov 2021 Sa, Su; not 27. Nov 2021",
+                "sDaysB": "0106040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ],
+            "procRT": -1,
+            "lPassStRT": {
+              "idx": -1
+            }
+          }
+        ],
+        "fpB": "20211107",
+        "fpE": "20221210",
+        "planrtTS": "1637013446"
+      }
+    }
+  ]
+}

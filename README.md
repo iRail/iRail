@@ -16,49 +16,30 @@ API Documentation can be found at [https://docs.irail.be]().
 
 ## Installation for development purposes ##
 
-_note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and PHP curl extension installed on your system_
+_note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and the PHP extensions
+listed in [composer.json](composer.json) installed on your system_
 
  * Step 1: Clone this repo
- * Step 2: If you don't need the occupancy functionality, you can remove the `mongodb/mongodb` requirement from the composer file. You can now run `composer install`. If you'd like to have support for the occupancy scores, read below on how to setup mongo before proceeding to run `composer install`.
- * Step 3: Make sure storage is writable: `chmod 777 storage`
- * Step 4: Run your test server: `php -S localhost:8008 -t api`
- * Step 5: Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
+* Step 2: Create an `.env` file which will contain your configuration.
+ * `CACHE_DRIVER` should be set to `apc`, an in-memory cache with good performance.
+ * `NMBS_RIV_API_KEY` should contain a valid API key for the internal NMBS RIV API.
+ * `GTFS_RANGE_DAYS_BACKWARDS` and `GTFS_RANGE_DAYS_FORWARDS` define how long in the past and future GTFS data will be
+* `APP_TIMEZONE` should be set to `EUROPE/BRUSSELS` to ensure correct times in the responses, since several date/times
+  without timezone information are parsed and interpreted at this timezone.
+  read. This will affect memory usage, and limits the date ranges of some API endpoints.
+* Step 4: Run the docker-compose configuration, which consists of nginx, mariadb and the actual PHP application. If you
+  want to use sqlite, adjust the database configuration. Note that sqlite is untested.
+* Step 5: When using mariadb, ensure a database exists on the mariadb server. It should match the database credentials
+  specified for the php application in the docker-compose file.
+* Step 6: Run the database migrations in order to create the necessary database tables: `php artisan migrate`
+* Step 7: Enjoy your own iRail API at http://localhost:8080/. All routes are defined in the [routes](routes/api.php)
+  file. See the laravel docs for more information if needed.
 
-### MongoDB / Spitsgids setup ###
-**Optional**: if you want to set up the iRail API with occupancy scores you will need to set up a MongoDB database:
+### Caching and performance ###
 
- * Install [MongoDB](https://www.mongodb.com/download-center?jmp=nav#community)
- * Install the MongoDB module for PHP: `pecl install mongodb`
- Make sure PHP loads the module: the conf.d folder for your PHP installation should contain a file with contents `extension=mongodb.so` in order to load the module. Both the CLI and web version need this, as Composer will run from the CLI
- * Add MongoDB environment variables: `cp .env.example .env` (If your MongoDB URL is different or you want another database name you can change this file)
- * Import the data (the structural.csv file) in MongoDB: `mongoimport -d irail -c structural --type csv --file occupancy/data/structural.csv --headerline`
- * Run the startscript to push structural data to the occupancy table: `php occupancy/scripts/startscript.php`
- * Once the startscript has ran, the task of pushing structural data to the occupancy table should be automated: `crontab -e` => `30 3 * * * php $PATH_TO_IRAIL_FOLDER/occupancy/scripts/cronjob.php`
- * Enjoy the occupancy scores in all the GET requests. [Read the docs](https://docs.irail.be/) on how to post occupancy data.
- 
-**Important**: If you plan on using spitsgids in a production environment, don't forget to add indices. Most queries check either the connection (routes, liveboards endpoints) or vehicle field (vehicle endpoint). Example indices can be found below.
-- For queries on vehicles: `db.occupancy.createIndex({vehicle: 1})` or `db.occupancy.createIndex({date: -1, vehicle: 1})`
-- For queries on connections: `db.occupancy.createIndex({connection: 1})`
-
-### Improving performance ###
-**Optional**: you can improve performance by using [APCu](http://php.net/manual/en/book.apcu.php). APCu in-memory caching will automaticly be used when the APCu extension is available. When installed, every request to the NMBS will be cached for 15 seconds.
-
-
-## Install with docker
- 1. Clone this repo
- 2. Run `docker-compose build` on the project root
- 3. After building the container, start them using `docker-compose up -d`
- 4. Run `docker-compose exec php composer install` to install project dependency
- 5. Enjoy your own iRail API at http://localhost:8008/connections.php?from=Gent%20Sint%20Pieters&to=Antwerp
- 
- **Optional**: if you want to set up the iRail API with occupancy scores you will need to import data to MongoDB:
- 
-1. First run `cp .env.example .env`
-2. Replace `MONGODB_URL="mongodb://localhost:27017"` with `MONGODB_URL="mongodb://mongo:27017"`
-3. Run this to to push structural data to the occupancy table : `docker-compose exec php php cupancy/scripts/startscript.php`
-4. Run this to import the data (the structural.csv file) in MongoDB `docker-compose exec mongo mongoimport -d irail -c structural --type csv --file /data/structural.csv --headerline`
-5. Once the startscript has ran, the task of pushing structural data to the occupancy table should be automated. In order to do this, edit the  `docker/php/crontab` file and uncomment the following line: `30 3 * * * root /usr/local/bin/php /var/www/html/occupancy/scripts/cronjob.php >> /var/log/cron.log 2>&1`
-
+A working cache is required for the API to work correctly. Ensure APC is configured correctly when running this outside
+of the docker environment.
+**Outgoing requests to NMBS servers should always be limited as much as possible!**
 
 ## Update stations list ##
 

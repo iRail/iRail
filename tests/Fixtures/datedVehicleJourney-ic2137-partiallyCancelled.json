@@ -1,0 +1,1345 @@
+{
+  "ver": "1.21",
+  "lang": "eng",
+  "id": "6jgi7m866a8qg24s",
+  "err": "OK",
+  "svcResL": [
+    {
+      "meth": "JourneyDetails",
+      "err": "OK",
+      "res": {
+        "common": {
+          "locL": [
+            {
+              "lid": "A=1@O=Arlon@X=5809971@Y=49680530@U=80@L=8866001@",
+              "type": "S",
+              "name": "Arlon",
+              "icoX": 1,
+              "extId": "8866001",
+              "state": "F",
+              "crd": {
+                "x": 5809971,
+                "y": 49680530,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Marbehan@X=5539755@Y=49727328@U=80@L=8866175@",
+              "type": "S",
+              "name": "Marbehan",
+              "icoX": 1,
+              "extId": "8866175",
+              "state": "F",
+              "crd": {
+                "x": 5539755,
+                "y": 49727328,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Libramont@X=5379271@Y=49920434@U=80@L=8865003@",
+              "type": "S",
+              "name": "Libramont",
+              "icoX": 1,
+              "extId": "8865003",
+              "state": "F",
+              "crd": {
+                "x": 5379271,
+                "y": 49920434,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Rochefort-Jemelle@X=5266699@Y=50160402@U=80@L=8864006@",
+              "type": "S",
+              "name": "Rochefort-Jemelle",
+              "icoX": 1,
+              "extId": "8864006",
+              "state": "F",
+              "crd": {
+                "x": 5266699,
+                "y": 50160402,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Marloie@X=5313892@Y=50202822@U=80@L=8864345@",
+              "type": "S",
+              "name": "Marloie",
+              "icoX": 1,
+              "extId": "8864345",
+              "state": "F",
+              "crd": {
+                "x": 5313892,
+                "y": 50202822,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Ciney@X=5091409@Y=50291051@U=80@L=8864501@",
+              "type": "S",
+              "name": "Ciney",
+              "icoX": 1,
+              "extId": "8864501",
+              "state": "F",
+              "crd": {
+                "x": 5091409,
+                "y": 50291051,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Namur@X=4862220@Y=50468794@U=80@L=8863008@",
+              "type": "S",
+              "name": "Namur",
+              "icoX": 1,
+              "extId": "8863008",
+              "state": "F",
+              "crd": {
+                "x": 4862220,
+                "y": 50468794,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 628
+            },
+            {
+              "lid": "A=1@O=Gembloux@X=4691497@Y=50570480@U=80@L=8861200@",
+              "type": "S",
+              "name": "Gembloux",
+              "icoX": 1,
+              "extId": "8861200",
+              "state": "F",
+              "crd": {
+                "x": 4691497,
+                "y": 50570480,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 628
+            },
+            {
+              "lid": "A=1@O=Ottignies@X=4569361@Y=50673668@U=80@L=8811601@",
+              "type": "S",
+              "name": "Ottignies",
+              "icoX": 1,
+              "extId": "8811601",
+              "state": "F",
+              "crd": {
+                "x": 4569361,
+                "y": 50673668,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 628
+            },
+            {
+              "lid": "A=1@O=Bru.-Luxemburg/brux.-Luxembourg@X=4373675@Y=50838943@U=80@L=8811304@",
+              "type": "S",
+              "name": "Bru.-Luxemburg/brux.-Luxembourg",
+              "icoX": 1,
+              "extId": "8811304",
+              "state": "F",
+              "crd": {
+                "x": 4373675,
+                "y": 50838943,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 596
+            },
+            {
+              "lid": "A=1@O=Bru.-Schuman / Brux.-Schuman@X=4380722@Y=50843276@U=80@L=8811916@",
+              "type": "S",
+              "name": "Bru.-Schuman / Brux.-Schuman",
+              "icoX": 1,
+              "extId": "8811916",
+              "state": "F",
+              "crd": {
+                "x": 4380722,
+                "y": 50843276,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 852
+            },
+            {
+              "lid": "A=1@O=Bru.-Noord / Brux.-Nord@X=4360847@Y=50859663@U=80@L=8812005@",
+              "type": "S",
+              "name": "Bru.-Noord / Brux.-Nord",
+              "icoX": 1,
+              "extId": "8812005",
+              "state": "F",
+              "crd": {
+                "x": 4360847,
+                "y": 50859663,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 1621
+            },
+            {
+              "lid": "A=1@O=Bru.-Centraal / Brux.-Central@X=4356802@Y=50845649@U=80@L=8813003@",
+              "type": "S",
+              "name": "Bru.-Centraal / Brux.-Central",
+              "icoX": 1,
+              "extId": "8813003",
+              "state": "F",
+              "crd": {
+                "x": 4356802,
+                "y": 50845649,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 852
+            },
+            {
+              "lid": "A=1@O=Brussel-Zuid / Bruxelles-Midi@X=4336531@Y=50835707@U=80@L=8814001@",
+              "type": "S",
+              "name": "Brussel-Zuid / Bruxelles-Midi",
+              "icoX": 1,
+              "extId": "8814001",
+              "state": "F",
+              "crd": {
+                "x": 4336531,
+                "y": 50835707,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 1909
+            },
+            {
+              "lid": "A=1@O=Viville@X=5786527@Y=49688243@U=80@L=8866118@",
+              "type": "S",
+              "name": "Viville",
+              "icoX": 1,
+              "extId": "8866118",
+              "state": "F",
+              "crd": {
+                "x": 5786527,
+                "y": 49688243,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Stockem@X=5769115@Y=49690940@U=80@L=8862018@",
+              "type": "S",
+              "name": "Stockem",
+              "icoX": 1,
+              "extId": "8862018",
+              "state": "F",
+              "crd": {
+                "x": 5769115,
+                "y": 49690940,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Habay@X=5632686@Y=49718249@U=80@L=8866142@",
+              "type": "S",
+              "name": "Habay",
+              "icoX": 1,
+              "extId": "8866142",
+              "state": "F",
+              "crd": {
+                "x": 5632686,
+                "y": 49718249,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Neufchateau@X=5452560@Y=49854319@U=80@L=8866258@",
+              "type": "S",
+              "name": "Neufchateau",
+              "icoX": 1,
+              "extId": "8866258",
+              "state": "F",
+              "crd": {
+                "x": 5452560,
+                "y": 49854319,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Poix-Saint-Hubert@X=5292642@Y=50019514@U=80@L=8865227@",
+              "type": "S",
+              "name": "Poix-Saint-Hubert",
+              "icoX": 1,
+              "extId": "8865227",
+              "state": "F",
+              "crd": {
+                "x": 5292642,
+                "y": 50019514,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Grupont@X=5280524@Y=50090600@U=80@L=8864337@",
+              "type": "S",
+              "name": "Grupont",
+              "icoX": 1,
+              "extId": "8864337",
+              "state": "F",
+              "crd": {
+                "x": 5280524,
+                "y": 50090600,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Forrieres@X=5276785@Y=50132760@U=80@L=8864311@",
+              "type": "S",
+              "name": "Forrieres",
+              "icoX": 1,
+              "extId": "8864311",
+              "state": "F",
+              "crd": {
+                "x": 5276785,
+                "y": 50132760,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Aye@X=5301092@Y=50224126@U=80@L=8864352@",
+              "type": "S",
+              "name": "Aye",
+              "icoX": 1,
+              "extId": "8864352",
+              "state": "F",
+              "crd": {
+                "x": 5301092,
+                "y": 50224126,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Haversin@X=5194372@Y=50249044@U=80@L=8864832@",
+              "type": "S",
+              "name": "Haversin",
+              "icoX": 1,
+              "extId": "8864832",
+              "state": "F",
+              "crd": {
+                "x": 5194372,
+                "y": 50249044,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 68
+            },
+            {
+              "lid": "A=1@O=Chapois@X=5124256@Y=50262366@U=80@L=8864824@",
+              "type": "S",
+              "name": "Chapois",
+              "icoX": 1,
+              "extId": "8864824",
+              "state": "F",
+              "crd": {
+                "x": 5124256,
+                "y": 50262366,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Leignon@X=5107779@Y=50267769@U=80@L=8864816@",
+              "type": "S",
+              "name": "Leignon",
+              "icoX": 1,
+              "extId": "8864816",
+              "state": "F",
+              "crd": {
+                "x": 5107779,
+                "y": 50267769,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Natoye@X=5061161@Y=50343296@U=80@L=8864915@",
+              "type": "S",
+              "name": "Natoye",
+              "icoX": 1,
+              "extId": "8864915",
+              "state": "F",
+              "crd": {
+                "x": 5061161,
+                "y": 50343296,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 68
+            },
+            {
+              "lid": "A=1@O=Assesse@X=5022840@Y=50368142@U=80@L=8864931@",
+              "type": "S",
+              "name": "Assesse",
+              "icoX": 1,
+              "extId": "8864931",
+              "state": "F",
+              "crd": {
+                "x": 5022840,
+                "y": 50368142,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 68
+            },
+            {
+              "lid": "A=1@O=Courriere@X=4996052@Y=50387442@U=80@L=8864949@",
+              "type": "S",
+              "name": "Courriere",
+              "icoX": 1,
+              "extId": "8864949",
+              "state": "F",
+              "crd": {
+                "x": 4996052,
+                "y": 50387442,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Sart-Bernard@X=4949739@Y=50406373@U=80@L=8864956@",
+              "type": "S",
+              "name": "Sart-Bernard",
+              "icoX": 1,
+              "extId": "8864956",
+              "state": "F",
+              "crd": {
+                "x": 4949739,
+                "y": 50406373,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Naninne@X=4929756@Y=50419686@U=80@L=8864964@",
+              "type": "S",
+              "name": "Naninne",
+              "icoX": 1,
+              "extId": "8864964",
+              "state": "F",
+              "crd": {
+                "x": 4929756,
+                "y": 50419686,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Dave-Saint-Martin@X=4884415@Y=50429098@U=80@L=8863362@",
+              "type": "S",
+              "name": "Dave-Saint-Martin",
+              "icoX": 1,
+              "extId": "8863362",
+              "state": "F",
+              "crd": {
+                "x": 4884415,
+                "y": 50429098,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 68
+            },
+            {
+              "lid": "A=1@O=Jambes-Est@X=4880262@Y=50454798@U=80@L=8863354@",
+              "type": "S",
+              "name": "Jambes-Est",
+              "icoX": 1,
+              "extId": "8863354",
+              "state": "F",
+              "crd": {
+                "x": 4880262,
+                "y": 50454798,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 580
+            },
+            {
+              "lid": "A=1@O=Rhisnes@X=4801867@Y=50499349@U=80@L=8861440@",
+              "type": "S",
+              "name": "Rhisnes",
+              "icoX": 1,
+              "extId": "8861440",
+              "state": "F",
+              "crd": {
+                "x": 4801867,
+                "y": 50499349,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Saint-Denis-Bovesse@X=4767789@Y=50521300@U=80@L=8861432@",
+              "type": "S",
+              "name": "Saint-Denis-Bovesse",
+              "icoX": 1,
+              "extId": "8861432",
+              "state": "F",
+              "crd": {
+                "x": 4767789,
+                "y": 50521300,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Beuzet@X=4748534@Y=50534209@U=80@L=8861424@",
+              "type": "S",
+              "name": "Beuzet",
+              "icoX": 1,
+              "extId": "8861424",
+              "state": "F",
+              "crd": {
+                "x": 4748534,
+                "y": 50534209,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 100
+            },
+            {
+              "lid": "A=1@O=Lonzee@X=4720101@Y=50551936@U=80@L=8861416@",
+              "type": "S",
+              "name": "Lonzee",
+              "icoX": 1,
+              "extId": "8861416",
+              "state": "F",
+              "crd": {
+                "x": 4720101,
+                "y": 50551936,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 100
+            },
+            {
+              "lid": "A=1@O=Ernage@X=4668539@Y=50590823@U=80@L=8861515@",
+              "type": "S",
+              "name": "Ernage",
+              "icoX": 1,
+              "extId": "8861515",
+              "state": "F",
+              "crd": {
+                "x": 4668539,
+                "y": 50590823,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Chastre@X=4648888@Y=50608819@U=80@L=8861523@",
+              "type": "S",
+              "name": "Chastre",
+              "icoX": 1,
+              "extId": "8861523",
+              "state": "F",
+              "crd": {
+                "x": 4648888,
+                "y": 50608819,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Blanmont@X=4636393@Y=50619454@U=80@L=8861531@",
+              "type": "S",
+              "name": "Blanmont",
+              "icoX": 1,
+              "extId": "8861531",
+              "state": "F",
+              "crd": {
+                "x": 4636393,
+                "y": 50619454,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Mont-Saint-Guibert@X=4613884@Y=50637612@U=80@L=8861549@",
+              "type": "S",
+              "name": "Mont-Saint-Guibert",
+              "icoX": 1,
+              "extId": "8861549",
+              "state": "F",
+              "crd": {
+                "x": 4613884,
+                "y": 50637612,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 612
+            },
+            {
+              "lid": "A=1@O=Profondsart@X=4545431@Y=50699646@U=80@L=8811544@",
+              "type": "S",
+              "name": "Profondsart",
+              "icoX": 1,
+              "extId": "8811544",
+              "state": "F",
+              "crd": {
+                "x": 4545431,
+                "y": 50699646,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 20
+            },
+            {
+              "lid": "A=1@O=Rixensart@X=4532856@Y=50711413@U=80@L=8811536@",
+              "type": "S",
+              "name": "Rixensart",
+              "icoX": 1,
+              "extId": "8811536",
+              "state": "F",
+              "crd": {
+                "x": 4532856,
+                "y": 50711413,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 532
+            },
+            {
+              "lid": "A=1@O=Genval@X=4514832@Y=50725697@U=80@L=8811528@",
+              "type": "S",
+              "name": "Genval",
+              "icoX": 1,
+              "extId": "8811528",
+              "state": "F",
+              "crd": {
+                "x": 4514832,
+                "y": 50725697,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 532
+            },
+            {
+              "lid": "A=1@O=La Hulpe@X=4497061@Y=50737958@U=80@L=8811510@",
+              "type": "S",
+              "name": "La Hulpe",
+              "icoX": 1,
+              "extId": "8811510",
+              "state": "F",
+              "crd": {
+                "x": 4497061,
+                "y": 50737958,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 532
+            },
+            {
+              "lid": "A=1@O=Hoeilaart@X=4467414@Y=50760162@U=80@L=8811460@",
+              "type": "S",
+              "name": "Hoeilaart",
+              "icoX": 1,
+              "extId": "8811460",
+              "state": "F",
+              "crd": {
+                "x": 4467414,
+                "y": 50760162,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 20
+            },
+            {
+              "lid": "A=1@O=Groenendaal@X=4449490@Y=50766104@U=80@L=8811445@",
+              "type": "S",
+              "name": "Groenendaal",
+              "icoX": 1,
+              "extId": "8811445",
+              "state": "F",
+              "crd": {
+                "x": 4449490,
+                "y": 50766104,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 532
+            },
+            {
+              "lid": "A=1@O=Bosvoorde / Boitsfort@X=4408112@Y=50794698@U=80@L=8811437@",
+              "type": "S",
+              "name": "Bosvoorde / Boitsfort",
+              "icoX": 1,
+              "extId": "8811437",
+              "state": "F",
+              "crd": {
+                "x": 4408112,
+                "y": 50794698,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 1556
+            },
+            {
+              "lid": "A=1@O=Watermaal / Watermael@X=4399887@Y=50809171@U=80@L=8811429@",
+              "type": "S",
+              "name": "Watermaal / Watermael",
+              "icoX": 1,
+              "extId": "8811429",
+              "state": "F",
+              "crd": {
+                "x": 4399887,
+                "y": 50809171,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 532
+            },
+            {
+              "lid": "A=1@O=Etterbeek@X=4389514@Y=50822187@U=80@L=8811411@",
+              "type": "S",
+              "name": "Etterbeek",
+              "icoX": 1,
+              "extId": "8811411",
+              "state": "F",
+              "crd": {
+                "x": 4389514,
+                "y": 50822187,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 1620
+            },
+            {
+              "lid": "A=1@O=Bru.-Congres / Brux.-Congres@X=4362052@Y=50852068@U=80@L=8813045@",
+              "type": "S",
+              "name": "Bru.-Congres / Brux.-Congres",
+              "icoX": 1,
+              "extId": "8813045",
+              "state": "F",
+              "crd": {
+                "x": 4362052,
+                "y": 50852068,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 1808
+            },
+            {
+              "lid": "A=1@O=Bru.kapellekerk/brux-Chapelle@X=4347867@Y=50841128@U=80@L=8813037@",
+              "type": "S",
+              "name": "Bru.kapellekerk/brux-Chapelle",
+              "icoX": 1,
+              "extId": "8813037",
+              "state": "F",
+              "crd": {
+                "x": 4347867,
+                "y": 50841128,
+                "layerX": 0,
+                "crdSysX": 0
+              },
+              "pCls": 528
+            }
+          ],
+          "prodL": [
+            {
+              "name": "IC 2137",
+              "number": "2137",
+              "icoX": 0,
+              "cls": 4,
+              "prodCtx": {
+                "name": "IC  2137",
+                "num": "2137",
+                "matchId": "2137",
+                "catOut": "IC      ",
+                "catOutS": "007",
+                "catOutL": "IC ",
+                "catIn": "007",
+                "catCode": "2",
+                "admin": "88____"
+              }
+            }
+          ],
+          "polyL": [
+            {
+              "delta": true,
+              "dim": 2,
+              "crdEncYX": "iffnHiwmb@eo@pqC{OxkBsiDtsYww@xcQuxW|_Pg|K`iMgjRl|Oi{LvjAofGjVwkD`~@chG_fHcdC~nAwzC~ySgrAfuLw`@~eBqpCheBoeI~{DizCnnFswBlfDiuBn`HerAz{Byy@jzGs_D|XovAvoB}}DfxJghC~sEsoAhwBymBtpD}rBxqDc~BnnCmoBxyBoaA`mAopBtkCi`FfuGkaDptCqhArmAgxAroBskA`nByiChxDcd@~nBuqDraGoyAlr@ipAx_AwgB~aBaZak@meBf{Bnn@qFbg@x_@f[zv@z`@xeA",
+              "crdEncS": "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+              "crdEncF": "???????????????????????????????????????????????????",
+              "ppLocRefL": [
+                {
+                  "ppIdx": 0,
+                  "locX": 0
+                },
+                {
+                  "ppIdx": 1,
+                  "locX": 14
+                },
+                {
+                  "ppIdx": 2,
+                  "locX": 15
+                },
+                {
+                  "ppIdx": 3,
+                  "locX": 16
+                },
+                {
+                  "ppIdx": 4,
+                  "locX": 1
+                },
+                {
+                  "ppIdx": 5,
+                  "locX": 17
+                },
+                {
+                  "ppIdx": 6,
+                  "locX": 2
+                },
+                {
+                  "ppIdx": 7,
+                  "locX": 18
+                },
+                {
+                  "ppIdx": 8,
+                  "locX": 19
+                },
+                {
+                  "ppIdx": 9,
+                  "locX": 20
+                },
+                {
+                  "ppIdx": 10,
+                  "locX": 3
+                },
+                {
+                  "ppIdx": 11,
+                  "locX": 4
+                },
+                {
+                  "ppIdx": 12,
+                  "locX": 21
+                },
+                {
+                  "ppIdx": 13,
+                  "locX": 22
+                },
+                {
+                  "ppIdx": 14,
+                  "locX": 23
+                },
+                {
+                  "ppIdx": 15,
+                  "locX": 24
+                },
+                {
+                  "ppIdx": 16,
+                  "locX": 5
+                },
+                {
+                  "ppIdx": 17,
+                  "locX": 25
+                },
+                {
+                  "ppIdx": 18,
+                  "locX": 26
+                },
+                {
+                  "ppIdx": 19,
+                  "locX": 27
+                },
+                {
+                  "ppIdx": 20,
+                  "locX": 28
+                },
+                {
+                  "ppIdx": 21,
+                  "locX": 29
+                },
+                {
+                  "ppIdx": 22,
+                  "locX": 30
+                },
+                {
+                  "ppIdx": 23,
+                  "locX": 31
+                },
+                {
+                  "ppIdx": 24,
+                  "locX": 6
+                },
+                {
+                  "ppIdx": 25,
+                  "locX": 32
+                },
+                {
+                  "ppIdx": 26,
+                  "locX": 33
+                },
+                {
+                  "ppIdx": 27,
+                  "locX": 34
+                },
+                {
+                  "ppIdx": 28,
+                  "locX": 35
+                },
+                {
+                  "ppIdx": 29,
+                  "locX": 7
+                },
+                {
+                  "ppIdx": 30,
+                  "locX": 36
+                },
+                {
+                  "ppIdx": 31,
+                  "locX": 37
+                },
+                {
+                  "ppIdx": 32,
+                  "locX": 38
+                },
+                {
+                  "ppIdx": 33,
+                  "locX": 39
+                },
+                {
+                  "ppIdx": 34,
+                  "locX": 8
+                },
+                {
+                  "ppIdx": 35,
+                  "locX": 40
+                },
+                {
+                  "ppIdx": 36,
+                  "locX": 41
+                },
+                {
+                  "ppIdx": 37,
+                  "locX": 42
+                },
+                {
+                  "ppIdx": 38,
+                  "locX": 43
+                },
+                {
+                  "ppIdx": 39,
+                  "locX": 44
+                },
+                {
+                  "ppIdx": 40,
+                  "locX": 45
+                },
+                {
+                  "ppIdx": 41,
+                  "locX": 46
+                },
+                {
+                  "ppIdx": 42,
+                  "locX": 47
+                },
+                {
+                  "ppIdx": 43,
+                  "locX": 48
+                },
+                {
+                  "ppIdx": 44,
+                  "locX": 9
+                },
+                {
+                  "ppIdx": 45,
+                  "locX": 10
+                },
+                {
+                  "ppIdx": 46,
+                  "locX": 11
+                },
+                {
+                  "ppIdx": 47,
+                  "locX": 49
+                },
+                {
+                  "ppIdx": 48,
+                  "locX": 12
+                },
+                {
+                  "ppIdx": 49,
+                  "locX": 50
+                },
+                {
+                  "ppIdx": 50,
+                  "locX": 13
+                }
+              ]
+            }
+          ],
+          "layerL": [
+            {
+              "id": "standard",
+              "name": "standard",
+              "index": 0,
+              "annoCnt": 0
+            }
+          ],
+          "crdSysL": [
+            {
+              "id": "standard",
+              "index": 0,
+              "type": "WGS84"
+            }
+          ],
+          "opL": [],
+          "remL": [],
+          "himL": [
+            {
+              "hid": "45523",
+              "act": true,
+              "head": "Travel information #MoveSafe",
+              "lead": "Travel information #MoveSafe",
+              "text": "Wearing a mask is mandatory at stations, on platforms and on trains.",
+              "icoX": 2,
+              "prio": 75,
+              "prod": 65535,
+              "lModDate": "20211123",
+              "lModTime": "181757",
+              "sDate": "20211115",
+              "sTime": "000500",
+              "eDate": "20220130",
+              "eTime": "235900",
+              "sDaily": "000000",
+              "eDaily": "235900",
+              "comp": "SNCB",
+              "catRefL": [
+                0
+              ],
+              "pubChL": [
+                {
+                  "name": "timetable",
+                  "fDate": "20211115",
+                  "fTime": "000500",
+                  "tDate": "20220130",
+                  "tTime": "235900"
+                }
+              ]
+            }
+          ],
+          "icoL": [
+            {
+              "res": "prod_ic"
+            },
+            {
+              "res": "STA_SNCB"
+            },
+            {
+              "res": "HIM11"
+            }
+          ],
+          "himMsgCatL": [
+            {
+              "id": 11
+            }
+          ],
+          "dirL": [
+            {
+              "txt": "Brussel-Zuid / Bruxelles-Midi"
+            }
+          ]
+        },
+        "journey": {
+          "jid": "1|1778|0|80|19122021",
+          "date": "20211219",
+          "prodX": 0,
+          "dirTxt": "Brussel-Zuid / Bruxelles-Midi",
+          "status": "P",
+          "isRchbl": true,
+          "stopL": [
+            {
+              "locX": 0,
+              "idx": 0,
+              "dProdX": 0,
+              "dPlatfS": "5",
+              "dInR": true,
+              "dTimeS": "143700",
+              "dTimeR": "143800",
+              "dProgType": "REPORTED",
+              "dDirTxt": "Brussel-Zuid / Bruxelles-Midi",
+              "type": "N"
+            },
+            {
+              "locX": 1,
+              "idx": 4,
+              "aProdX": 0,
+              "aPlatfS": "2",
+              "aOutR": true,
+              "aTimeS": "145100",
+              "aTimeR": "145100",
+              "aProgType": "REPORTED",
+              "dProdX": 0,
+              "dPlatfS": "2",
+              "dInR": true,
+              "dTimeS": "145200",
+              "dTimeR": "145200",
+              "dProgType": "REPORTED",
+              "type": "N"
+            },
+            {
+              "locX": 2,
+              "idx": 6,
+              "aProdX": 0,
+              "aPlatfS": "2",
+              "aOutR": true,
+              "aTimeS": "150700",
+              "aTimeR": "150700",
+              "aProgType": "REPORTED",
+              "dProdX": 0,
+              "dPlatfS": "2",
+              "dInR": true,
+              "dTimeS": "151000",
+              "dTimeR": "151100",
+              "dProgType": "REPORTED",
+              "type": "N"
+            },
+            {
+              "locX": 3,
+              "idx": 10,
+              "aProdX": 0,
+              "aPlatfS": "6",
+              "aOutR": true,
+              "aTimeS": "153400",
+              "aTimeR": "153400",
+              "aProgType": "REPORTED",
+              "dProdX": 0,
+              "dPlatfS": "6",
+              "dInR": true,
+              "dTimeS": "153800",
+              "dTimeR": "155200",
+              "dProgType": "REPORTED"
+            },
+            {
+              "locX": 4,
+              "idx": 11,
+              "aProdX": 0,
+              "aPlatfS": "3",
+              "aPlatfR": "2",
+              "aOutR": true,
+              "aTimeS": "154300",
+              "aTimeR": "155700",
+              "aProgType": "REPORTED",
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "154400",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 5,
+              "idx": 16,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "160100",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "160200",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 6,
+              "idx": 24,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "161800",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "162000",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 7,
+              "idx": 29,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "163100",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "163200",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 8,
+              "idx": 34,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "164200",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "164400",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 9,
+              "idx": 44,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "170400",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "170600",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 10,
+              "idx": 45,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "170800",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "170900",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 11,
+              "idx": 46,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "171700",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "171900",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 12,
+              "idx": 48,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "172300",
+              "aCncl": true,
+              "dProdX": 0,
+              "dInR": false,
+              "dTimeS": "172400",
+              "dCncl": true,
+              "type": "N"
+            },
+            {
+              "locX": 13,
+              "idx": 50,
+              "aProdX": 0,
+              "aOutR": false,
+              "aTimeS": "172800",
+              "aCncl": true,
+              "type": "N"
+            }
+          ],
+          "sDaysL": [
+            {
+              "sDaysR": "Su",
+              "sDaysI": "not 23. Jan, 6., 13., 27. Feb, 3. Jul until 28. Aug 2022; also 25. Dec, 1. Jan, 18. Apr, 26. May, 6. Jun, 1., 11. Nov",
+              "sDaysB": "81060C08100040000200081020408103040810204481820408000000000000000020408102040810284281020400",
+              "fLocX": 0,
+              "tLocX": 13,
+              "fLocIdx": 0,
+              "tLocIdx": 50
+            }
+          ],
+          "polyG": {
+            "polyXL": [
+              0
+            ],
+            "layerX": 0,
+            "crdSysX": 0
+          },
+          "procRT": 0,
+          "lPassStRT": {
+            "idx": 13
+          },
+          "msgL": [
+            {
+              "type": "HIM",
+              "himX": 0,
+              "fLocX": 0,
+              "tLocX": 0,
+              "tagL": [
+                "SUM_GLB_HDR_H3",
+                "RES_GLB_HDR_H3"
+              ]
+            }
+          ],
+          "subscr": "F",
+          "prodL": [
+            {
+              "prodX": 0,
+              "fLocX": 0,
+              "tLocX": 13,
+              "fIdx": 0,
+              "tIdx": 50
+            }
+          ],
+          "dirL": [
+            {
+              "dirX": 0,
+              "fLocX": 0,
+              "tLocX": 13,
+              "fIdx": 0,
+              "tIdx": 50
+            }
+          ]
+        },
+        "fpB": "20211212",
+        "fpE": "20221210",
+        "planrtTS": "1639947878"
+      }
+    }
+  ]
+}
