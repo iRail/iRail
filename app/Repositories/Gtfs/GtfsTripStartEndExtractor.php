@@ -96,7 +96,8 @@ class GtfsTripStartEndExtractor
                 if (count($matches) > 2) { // If this ever occurs, it needs to be investigated before it is implemented.
                     $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
                     Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
-                    throw new InternalProcessingException("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
+                    throw new InternalProcessingException(500,
+                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids:  . $tripIds");
                 }
 
                 $firstMatch = $matches[0];
@@ -125,7 +126,8 @@ class GtfsTripStartEndExtractor
 
                 $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $matches));
                 Log::error("'{$vehicleNumber}' number occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
-                throw new InternalProcessingException("'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
+                throw new InternalProcessingException(500,
+                    "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids:  . $tripIds");
             }, ttl: 6 * 3600); // Cache for 6 hours
         return $originAndDestination->getValue();
     }
