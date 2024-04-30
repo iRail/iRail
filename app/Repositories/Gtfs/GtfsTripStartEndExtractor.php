@@ -100,6 +100,9 @@ class GtfsTripStartEndExtractor
                         "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
                 }
 
+                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
+                Log::debug("Combining GTFS trips $tripIds for journey '$journeyNumber'");
+
                 $journeyPartsByStart = [];
                 $journeyPartsByDestination = [];
                 $invalid = false;
@@ -109,6 +112,7 @@ class GtfsTripStartEndExtractor
                     $invalid = $invalid
                         || array_key_exists($match->getOriginStopId(), $journeyPartsByStart)
                         || array_key_exists($match->getDestinationStopId(), $journeyPartsByDestination);
+                    Log::debug("From {$match->getOriginStopId()} to {$match->getDestinationStopId()}");
                     $journeyPartsByStart[$match->getOriginStopId()] = $match;
                     $journeyPartsByDestination[$match->getDestinationStopId()] = $match;
                 }
@@ -125,9 +129,7 @@ class GtfsTripStartEndExtractor
                 $destination = array_pop($orderedParts);
                 // If the two journeyParts are connected segments, return one large train origin/destination with the id from the first segment
 
-                $tripIds = join(', ', array_map(fn($match) => $match->getTripId(), $journeyParts));
                 if (!$invalid) {
-                    Log::debug("Combining GTFS trips $tripIds for journey '$journeyNumber'");
                     return new JourneyWithOriginAndDestination(
                         $origin->getTripId(), $origin->getJourneyType(), $origin->getJourneyNumber(),
                         $origin->getOriginStopId(), $origin->getOriginDepartureTimeOffset(),
@@ -275,13 +277,26 @@ class GtfsTripStartEndExtractor
                     $firstStop = $stops[0];
                     $lastStop = end($stops);
 
+                    $firstStopId = explode(':', $trip->getTripId())[3];
+                    $lastStopId = explode(':', $trip->getTripId())[4];
+
+                    // Border crossing may have different ids for stops on each side of the border, so use station ids from the trip id
+                    // 84____:L72::8400424:8849064:4:2230:20240608,22:18:00,22:18:00,8400424,1,,0,1,
+                    // 84____:L72::8400424:8849064:4:2230:20240608,22:21:00,22:21:00,8400426,2,,0,1,
+                    // 84____:L72::8400424:8849064:4:2230:20240608,22:28:00,22:28:00,8400219,3,,0,1,
+                    // 88____:L72::8849064:8841004:4:2250:20240608,22:32:00,22:33:00,8846201,5,,0,0,
+                    // 88____:L72::8849064:8841004:4:2250:20240608,22:42:00,22:43:00,8843901,6,,0,0,
+                    // 88____:L72::8849064:8841004:4:2250:20240608,22:50:00,22:50:00,8841004,7,,1,0,
+                    // We'll use the trip id as a fallback to prevent this
+
+
                     $vehicleDetailsByDate[$date][$trip->getJourneyNumber()][] = new JourneyWithOriginAndDestination(
                         $trip->getTripId(),
                         $trip->getJourneyType(),
                         $trip->getJourneyNumber(),
-                        $firstStop->getStopId(),
+                        $firstStopId,
                         $firstStop->getDepartureTimeOffset(),
-                        $lastStop->getStopId(),
+                        $lastStopId,
                         $lastStop->getDepartureTimeOffset()
                     );
                 }
