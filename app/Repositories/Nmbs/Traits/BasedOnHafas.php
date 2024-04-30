@@ -64,9 +64,11 @@ trait BasedOnHafas
             return;
         }
 
-        if ($json['errorCode'] == 'INT_ERR'
-            || $json['errorCode'] == 'INT_GATEWAY') {
+        if ($json['errorCode'] == 'INT_ERR') {
             throw new UpstreamServerException('NMBS data is temporarily unavailable.');
+        }
+        if ($json['errorCode'] == 'INT_GATEWAY') {
+            throw new UpstreamServerUnavailableException('NMBS data is temporarily unavailable.');
         }
         if ($json['errorCode'] == 'INT_TIMEOUT') {
             throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading the data.');
