@@ -107,7 +107,8 @@ class GtfsTripStartEndExtractor
             return new JourneyWithOriginAndDestination(
                 $firstMatch->getTripId(), $firstMatch->getJourneyType(), $firstMatch->getJourneyNumber(),
                 $firstMatch->getOriginStopId(), $firstMatch->getOriginDepartureTimeOffset(),
-                $secondMatch->getDestinationStopId(), $secondMatch->getDestinationArrivalTimeOffset()
+                $secondMatch->getDestinationStopId(), $secondMatch->getDestinationArrivalTimeOffset(),
+                $firstMatch->getDestinationStopId()
             );
         }
 
@@ -116,7 +117,8 @@ class GtfsTripStartEndExtractor
             return new JourneyWithOriginAndDestination(
                 $secondMatch->getTripId(), $secondMatch->getJourneyType(), $secondMatch->getJourneyNumber(),
                 $secondMatch->getOriginStopId(), $secondMatch->getOriginDepartureTimeOffset(),
-                $firstMatch->getDestinationStopId(), $firstMatch->getDestinationArrivalTimeOffset()
+                $firstMatch->getDestinationStopId(), $firstMatch->getDestinationArrivalTimeOffset(),
+                $secondMatch->getDestinationStopId()
             );
         }
 

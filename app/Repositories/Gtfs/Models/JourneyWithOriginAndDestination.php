@@ -11,15 +11,17 @@ class JourneyWithOriginAndDestination
     private int $destinationArrivalTime;
     private string $tripId;
     private string $vehicleType;
+    private ?string $splitsAtStopId;
 
     /**
-     * @param string $tripId The trip id
-     * @param string $vehicleType The journey type
-     * @param int    $vehicleNumber The journey number
-     * @param string $originStopId The stop id of the first stop
-     * @param int $originDepartureTime The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
-     * @param string $destinationStopId The stop id of the last stop
-     * @param int $destinationArrivalTime The time of arrival at the last stop, as an offset in seconds from the journey start date at 00:00:00.
+     * @param string      $tripId The trip id
+     * @param string      $vehicleType The journey type
+     * @param int         $vehicleNumber The journey number
+     * @param string      $originStopId The stop id of the first stop
+     * @param int         $originDepartureTime The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
+     * @param string      $destinationStopId The stop id of the last stop
+     * @param int         $destinationArrivalTime The time of arrival at the last stop, as an offset in seconds from the journey start date at 00:00:00.
+     * @param string|null $splitsAtStopId The stop at which this train splits or joins. e.g. IC1 (A->C) and IC 2 (B->C) come together and form IC1 (C->D), in which case C should be in this field.
      */
     public function __construct(
         string $tripId,
@@ -28,7 +30,8 @@ class JourneyWithOriginAndDestination
         string $originStopId,
         int $originDepartureTime,
         string $destinationStopId,
-        int $destinationArrivalTime
+        int $destinationArrivalTime,
+        ?string $splitsAtStopId = null
     ) {
         $this->tripId = $tripId;
         $this->journeyNumber = $vehicleNumber;
@@ -37,6 +40,7 @@ class JourneyWithOriginAndDestination
         $this->destinationStopId = $destinationStopId;
         $this->destinationArrivalTime = $destinationArrivalTime;
         $this->vehicleType = $vehicleType;
+        $this->splitsAtStopId = $splitsAtStopId;
     }
 
     /**
@@ -95,6 +99,17 @@ class JourneyWithOriginAndDestination
     {
         return $this->tripId;
     }
+
+    /**
+     * The stop at which this train splits or joins. e.g. IC1 (A->C) and IC 2 (B->C) come together and form IC1 (C->D), in which case C should be in this field.
+     * @return string|null Null if this train does not split/join
+     */
+    public function getSplitsAtStopId(): ?string
+    {
+        return $this->splitsAtStopId;
+    }
+
+
 
     public function __debugInfo(): ?array
     {
