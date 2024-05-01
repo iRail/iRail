@@ -176,7 +176,12 @@ abstract class IrailHttpRequest extends LumenRequest
                 $date = substr($date, 0, 4) . '20' . substr($date, 4);
             }
             if (strlen($time) == 3) {
+                // Add missing leading zero
                 $time = '0' . $time;
+            }
+            if (strlen($time) == 6) {
+                // Strip away seconds
+                $time = substr($time,0,4);
             }
             return Carbon::createFromFormat('dmY Hi', $date . ' ' . $time);
         } catch (Exception $e) {
