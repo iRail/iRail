@@ -3,8 +3,11 @@
 namespace Tests\Repositories\Nmbs;
 
 use Carbon\Carbon;
+use Irail\Database\OccupancyDao;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\NmbsRivVehicleJourneyRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
@@ -17,9 +20,11 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
     {
         $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
-            new CachedData('test', file_get_contents(__DIR__ . '/NmbsRivVehicleJourneyRepository_p7281.json'), 1)
+            new CachedData('test', file_get_contents(__DIR__ . '/../../Fixtures/datedVehicleJourney/NmbsRivVehicleJourneyRepository_p7281.json'), 1)
         );
-        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo);
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo, $occupancyDao);
         $request = $this->createRequest('7281', 'en', Carbon::create(2024, 1, 20));
         $result = $repo->getDatedVehicleJourney($request);
         $this->assertEquals('Lierre / Lier & Anvers-Central / Antwerpen-Centraal', $result->getVehicle()->getDirection()->getName());
@@ -33,9 +38,11 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
     {
         $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
-            new CachedData('test', file_get_contents(__DIR__ . '/NmbsRivVehicleJourneyRepository_ic729.json'), 1)
+            new CachedData('test', file_get_contents(__DIR__ . '/../../Fixtures/datedVehicleJourney/NmbsRivVehicleJourneyRepository_ic729.json'), 1)
         );
-        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo);
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo, $occupancyDao);
         $request = $this->createRequest('729', 'en', Carbon::create(2024, 4, 25));
         $result = $repo->getDatedVehicleJourney($request);
 
@@ -64,13 +71,46 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
         $this->assertTrue($stops[14]->getArrival()->isCancelled());
     }
 
+    public function testGetDatedVehicleJourney_l892_shouldParseCancelStatusCorrectly()
+    {
+        $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
+        $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
+            new CachedData('test', file_get_contents(__DIR__ . '/../../Fixtures/datedVehicleJourney/NmbsRivVehicleJourney_L892_4stopsCancelled.json'), 1)
+        );
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo, $occupancyDao);
+        $request = $this->createRequest('729', 'en', Carbon::create(2024, 4, 25));
+        $result = $repo->getDatedVehicleJourney($request);
+
+        $stops = $result->getStops();
+        $this->assertEquals('008896008', $stops[15]->getStation()->getId()); // Kortrijk
+
+        // Direct from Ghent to Kortijk
+        $this->assertFalse($stops[10]->getArrival()->isCancelled());
+        $this->assertFalse($stops[10]->getDeparture()->isCancelled());
+        $this->assertFalse($stops[15]->getArrival()->isCancelled());
+
+        // Cancelled between Ghent and Kortrijk
+        $this->assertTrue($stops[11]->getArrival()->isCancelled());
+        $this->assertTrue($stops[11]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[12]->getArrival()->isCancelled());
+        $this->assertTrue($stops[12]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[13]->getArrival()->isCancelled());
+        $this->assertTrue($stops[13]->getDeparture()->isCancelled());
+        $this->assertTrue($stops[14]->getArrival()->isCancelled());
+        $this->assertTrue($stops[14]->getDeparture()->isCancelled());
+    }
+
     public function testGetDatedVehicleJourney_ic1866_shouldCalculateMissingDirection()
     {
         $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $rawRivDataRepo->expects('getVehicleJourneyData')->andReturn(
-            new CachedData('test', file_get_contents(__DIR__ . '/NmbsRivVehicleJourneyRepository_ic1866.json'), 1)
+            new CachedData('test', file_get_contents(__DIR__ . '/../../Fixtures/datedVehicleJourney/NmbsRivVehicleJourneyRepository_ic1866.json'), 1)
         );
-        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo);
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+        $repo = new NmbsRivVehicleJourneyRepository(new StationsRepository(), $rawRivDataRepo, $occupancyDao);
         $request = $this->createRequest('1866', 'en', Carbon::create(2024, 4, 27));
         $result = $repo->getDatedVehicleJourney($request);
         $this->assertEquals('Grammont / Geraardsbergen', $result->getVehicle()->getDirection()->getName());

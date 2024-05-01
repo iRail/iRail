@@ -9,7 +9,6 @@
 namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\App;
 use Irail\Database\OccupancyDao;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\Internal\InternalProcessingException;
@@ -38,11 +37,11 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
     private NmbsRivRawDataRepository $rivDataRepository;
     private OccupancyDao $occupancyRepository;
 
-    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository)
+    public function __construct(StationsRepository $stationsRepository, NmbsRivRawDataRepository $rivDataRepository, OccupancyDao $occupancyDao)
     {
         $this->stationsRepository = $stationsRepository;
         $this->rivDataRepository = $rivDataRepository;
-        $this->occupancyRepository = App::make(OccupancyDao::class);
+        $this->occupancyRepository = $occupancyDao;
     }
 
     /**
