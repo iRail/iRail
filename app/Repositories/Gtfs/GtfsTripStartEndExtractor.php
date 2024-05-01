@@ -65,8 +65,8 @@ class GtfsTripStartEndExtractor
                 }
                 return $activeTime->copy()->setTime(0, 0);
             },
-            ttl: 6 * 3600
-        ); // Cache for 6 hours
+            GtfsRepository::secondsUntilNextGtfsUpdate() + 60 // Cache until GTFS is updated
+        );
         return $startDate->getValue();
     }
 
@@ -153,9 +153,8 @@ class GtfsTripStartEndExtractor
                     500,
                     "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds"
                 );
-            },
-            ttl: 6 * 3600
-        ); // Cache for 6 hours
+            }, GtfsRepository::secondsUntilNextGtfsUpdate() + 60 // Cache until GTFS is updated
+        );
         return $originAndDestination->getValue();
     }
 
@@ -257,8 +256,8 @@ class GtfsTripStartEndExtractor
         // This is better than the many seconds it takes to calculate this data, but it should still be used wisely!
         $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
             return $this->loadTripsWithStartAndEndDate();
-        }, ttl: 4 * 3600);
-        return $vehicleDetailsByDate->getValue(); // Cache for 4 hours
+        }, GtfsRepository::secondsUntilNextGtfsUpdate() + 60); // Cache until GTFS is updated
+        return $vehicleDetailsByDate->getValue();
     }
 
     /**

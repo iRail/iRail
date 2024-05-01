@@ -54,7 +54,7 @@ class GtfsRepository
     {
         $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIPS, function (): array {
             return $this->readTripsByJourneyNumberAndStartDate();
-        }, ttl: 3 * 3600 + 4); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
+        }, $this->secondsUntilNextGtfsUpdate() + 2); // Additional two seconds so underlying data surely has expired and will refresh before this one is updated.
         return $cachedData->getValue();
     }
 
@@ -76,9 +76,8 @@ class GtfsRepository
             self::GTFS_ALL_TRIP_STOPS_CACHE_KEY,
             function (): array {
             return $this->readTripStops();
-        },
-            ttl: 3 * 3600 + 1
-        ); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
+            }, $this->secondsUntilNextGtfsUpdate()
+        );
         return $cachedData->getValue();
     }
 
@@ -96,9 +95,8 @@ class GtfsRepository
                 $vehicleTypesByRouteId[$route->getRouteId()] = $route->getRouteShortName();
             }
             return $vehicleTypesByRouteId;
-        },
-            ttl: 3 * 3600 + 7
-        ); // The additional minutes reduces the risk that both the stops cache and the trips cache expire at the same request.
+            }, $this->secondsUntilNextGtfsUpdate() + 1 // One additional second so the underlying caches surely have expired before this one expires
+        );
         return $cachedData->getValue();
     }
 
@@ -197,7 +195,7 @@ class GtfsRepository
     {
         $cachedData = $this->getCacheOrUpdate(self::GTFS_ALL_CALENDAR_DATES, function (): array {
             return $this->readCalendarDates();
-        }, ttl: 3 * 3600 + 10); // Cache for 3 hours 10 minutes. The additional minutes reduces the risk that multiple caches expire at the same request
+        }, $this->secondsUntilNextGtfsUpdate());
         return $cachedData->getValue();
     }
 
@@ -314,5 +312,15 @@ class GtfsRepository
     private function getMemoryUsage(): string
     {
         return 'Memory usage ' . round(memory_get_usage() / 1024 / 1024, 2) . 'MB, peak ' . round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB';
+    }
+
+    public static function secondsUntilNextGtfsUpdate(): int
+    {
+        $now = Carbon::now();
+        $gtfsReleaseTime = $now->copy()->setTime(4, 30);
+        if ($gtfsReleaseTime->isBefore($now)) {
+            $gtfsReleaseTime = $gtfsReleaseTime->addDay();
+        }
+        return $gtfsReleaseTime->diffInSeconds($now);
     }
 }
