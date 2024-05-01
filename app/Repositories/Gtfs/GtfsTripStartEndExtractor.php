@@ -97,15 +97,6 @@ class GtfsTripStartEndExtractor
                     return $journeyParts[0];
                 }
 
-                if (count($journeyParts) > 4) { // If this ever occurs, it needs to be investigated and tested before it is implemented.
-                    $tripIds = join(', ', array_map(fn ($match) => $match->getTripId(), $journeyParts));
-                    Log::error("A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds");
-                    throw new InternalProcessingException(
-                        500,
-                        "A journey number cannot occur more than twice on the same day! '{$vehicleNumber}' has GTFS trip ids: $tripIds"
-                    );
-                }
-
                 $tripIds = join(', ', array_map(fn ($match) => $match->getTripId(), $journeyParts));
                 Log::debug("Combining GTFS trips $tripIds for journey '$journeyNumber'");
 
