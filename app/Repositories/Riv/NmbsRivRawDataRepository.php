@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
+use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamRateLimitException;
 use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
 use Irail\Http\Requests\JourneyPlanningRequest;
@@ -211,7 +212,7 @@ class NmbsRivRawDataRepository
                     return false;
                 }
             },
-            4 * 3600
+            6 * 3600
         );
 
         if ($cachedJourneyDetailRef->getValue() === false) {
@@ -247,7 +248,7 @@ class NmbsRivRawDataRepository
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
         # If no reference has been found at this stage, fail
         if ($journeyDetailRef === false) {
-            throw new GtfsVehicleNotFoundException($request->getVehicleId());
+            throw new NoResultsException('No vehicle journey reference could be found for vehicle ' . $request->getVehicleId());
         }
         return $journeyDetailRef;
     }
@@ -261,26 +262,46 @@ class NmbsRivRawDataRepository
         VehicleJourneyRequest $request,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
     ): string|false {
-        $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
-
-        $formattedDateStr = $request->getDateTime()->format('Y-m-d');
-
-        $vehicleName = $vehicleWithOriginAndDestination->getJourneyType() . $vehicleWithOriginAndDestination->getJourneyNumber();
-        $parameters = [
-            'trainFilter' => $vehicleName, // type + number, type is required!
-            'originExtId' => $vehicleWithOriginAndDestination->getOriginStopId(),
-            'destExtId'   => $vehicleWithOriginAndDestination->getDestinationStopId(),
-            'date'        => $formattedDateStr,
-            'lang'        => $request->getLanguage()
-        ];
-        $journeyResponse = $this->makeApiCallToMobileRivApi($url, $parameters);
-
-        $journeyResponse = json_decode($journeyResponse, true);
-
-        if ($journeyResponse === null || !key_exists('Trip', $journeyResponse)) {
-            return false;
+        $splitOrJoinStopIds = $vehicleWithOriginAndDestination->getSplitOrJoinStopIds();
+        if (empty($splitOrJoinStopIds)) {
+            $startStopCombinations = [
+                [$vehicleWithOriginAndDestination->getOriginStopId(), $vehicleWithOriginAndDestination->getDestinationStopId()]
+            ];
+        } else {
+            // For some reason, some trains need to be sought specifically using their first or last segment. This code ensures those two extra segments are tried.
+            $startStopCombinations = [
+                [$vehicleWithOriginAndDestination->getOriginStopId(), $vehicleWithOriginAndDestination->getDestinationStopId()],
+                [$vehicleWithOriginAndDestination->getOriginStopId(), $splitOrJoinStopIds[0]],
+                [end($splitOrJoinStopIds), $vehicleWithOriginAndDestination->getDestinationStopId()],
+            ];
+            Log::info("Multiple journeys will be tried in order to obtain reference for journey {$request->getVehicleId()} consisting of " . (count($splitOrJoinStopIds) + 1) . ' segments');
         }
-        return $journeyResponse['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];
+        $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
+        $formattedDateStr = $request->getDateTime()->format('Y-m-d');
+        $vehicleName = $vehicleWithOriginAndDestination->getJourneyType() . $vehicleWithOriginAndDestination->getJourneyNumber();
+        $journeyRef = false;
+        $combinationIndex = 0;
+        while ($journeyRef === false && $combinationIndex < count($startStopCombinations)) {
+            $parameters = [
+                'trainFilter' => $vehicleName, // type + number, type is required!
+                'originExtId' => $startStopCombinations[$combinationIndex][0],
+                'destExtId'   => $startStopCombinations[$combinationIndex][1],
+                'date'        => $formattedDateStr,
+                'lang'        => $request->getLanguage()
+            ];
+            $journeyResponse = $this->makeApiCallToMobileRivApi($url, $parameters, 150); // Cache this data for a while
+
+            $journeyResponse = json_decode($journeyResponse, true);
+
+            if ($journeyResponse === null || !key_exists('Trip', $journeyResponse)) {
+                // No journeyref found, move on to the next combination
+            } else {
+                // Ref found
+                $journeyRef = $journeyResponse['Trip'][0]['LegList']['Leg'][0]['JourneyDetailRef']['ref'];
+            }
+            $combinationIndex++;
+        }
+        return $journeyRef;
     }
 
     /**
@@ -359,14 +380,14 @@ class NmbsRivRawDataRepository
      * @param array  $parameters
      * @return string
      */
-    private function makeApiCallToMobileRivApi(string $url, array $parameters): string
+    private function makeApiCallToMobileRivApi(string $url, array $parameters, int $ttl = 15): string
     {
         // Cache raw responses in order to prevent error responses from not being cached.
         // TODO: this cache should replace the other caching in the NmbsRivRawDataRepository.
         $cacheKey = str_replace('/', '_', $url) . '?' . http_build_query($parameters);
         $cachedCurlResponse = $this->getCacheOrUpdate($cacheKey, function () use ($url, $parameters) {
             return $this->fetchRateLimitedRivResponse($url, $parameters);
-        }, 15);
+        }, $ttl);
         return $cachedCurlResponse->getValue();
     }
 
