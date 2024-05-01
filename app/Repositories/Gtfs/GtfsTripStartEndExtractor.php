@@ -124,9 +124,12 @@ class GtfsTripStartEndExtractor
                 }
                 $origin = array_shift($orderedParts);
                 $destination = array_pop($orderedParts);
-                $intermediateStops = [$orderedParts[0]->getOriginStopId()];
-                for ($i = 0; $i < count($orderedParts); $i++) {
-                    $intermediateStops[] = $orderedParts[$i]->getDestinationStopId();
+                $intermediateStops = [];
+                if (count($orderedParts) > 0) {
+                    $intermediateStops[] = $orderedParts[0]->getOriginStopId();
+                    for ($i = 0; $i < count($orderedParts); $i++) {
+                        $intermediateStops[] = $orderedParts[$i]->getDestinationStopId();
+                    }
                 }
                 // If the two journeyParts are connected segments, return one large train origin/destination with the id from the first segment
 
