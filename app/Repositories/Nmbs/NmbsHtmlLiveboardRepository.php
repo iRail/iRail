@@ -7,6 +7,7 @@ namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
+use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\LiveboardRequest;
@@ -63,8 +64,12 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     {
         $station = $this->stationsRepository->getStationById($request->getStationId());
 
-        $rawData = $this->getLiveboardHtml($request, $station);
-        $entries = $this->parseNmbsData($request, $station, $rawData->getValue());
+        try {
+            $rawData = $this->getLiveboardHtml($request, $station);
+            $entries = $this->parseNmbsData($request, $station, $rawData->getValue());
+        } catch (NoResultsException $e) {
+            $entries = []; // Return an empty array when no results can be found, similar to how the RIV liveboard operates
+        }
         return new LiveboardSearchResult($station, $entries);
     }
 
@@ -81,6 +86,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
      * @param LiveboardRequest $request
      * @param Station          $station
      * @return string
+     * @throws NoResultsException
      */
     private function fetchLiveboardHtml(LiveboardRequest $request, Station $station): string
     {
@@ -111,6 +117,9 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
         if (str_contains($response->getResponseBody(), 'vallen niet binnen de dienstregelingsperiode')) {
             throw new RequestOutsideTimetableRangeException('The data for which you requested data is too far in the past or future.', 404);
+        }
+        if (str_contains($response->getResponseBody(), 'opgegeven tijdsbestek stoppen op dit station geen treinen')) {
+            throw new NoResultsException('There are no departures at the requested time.', 404);
         }
         return $this->cleanResponse($response);
     }
