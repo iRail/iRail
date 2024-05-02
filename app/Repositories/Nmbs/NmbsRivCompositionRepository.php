@@ -412,10 +412,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
                     // Planning data often lacks detail. Store it for 5 minutes
                     $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
                 } else {
-                    // Confirmed data doesn't change and contains all details. This data dispersal after the train ride,
-                    // so cache it long enough so it doesn't disappear instantly after the ride.
-                    // TODO: data should not be cached for too long into the next day, or a departure date should be added to the query
-                    $this->setCachedObject($cacheKey, $compositionData, 60 * 60 * 6);
+                    // Confirmed data can still change, but less often
+                    $this->setCachedObject($cacheKey, $compositionData, 3600);
                 }
             } catch (CompositionUnavailableException $e) {
                 // Cache "data unavailable" for 5 minutes to limit outgoing requests. Only do this after a fresh attempts,

@@ -212,7 +212,7 @@ class NmbsRivRawDataRepository
                     return false;
                 }
             },
-            6 * 3600
+            2 * 3600 // Journey detail references seem to change in some cases, so don't cache them for too long
         );
 
         if ($cachedJourneyDetailRef->getValue() === false) {

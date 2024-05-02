@@ -11,20 +11,21 @@ use Irail\Repositories\VehicleJourneyRepository;
 
 class DatedVehicleJourneyV1Controller extends BaseIrailController
 {
+    private VehicleJourneyRepository $vehicleJourneyRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(VehicleJourneyRepository $vehicleJourneyRepository)
     {
-        //
+        $this->vehicleJourneyRepository = $vehicleJourneyRepository;
     }
 
     public function getVehicleById(DatedVehicleJourneyV1Request $request): Response
     {
-        $repo = app(VehicleJourneyRepository::class);
-        $vehicleJourneySearchResult = $repo->getDatedVehicleJourney($request);
+        $vehicleJourneySearchResult = $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
         $dataRoot = DatedVehicleJourneyV1Converter::convert($request, $vehicleJourneySearchResult);
         $this->logRequest($request);
         return $this->outputV1($request, $dataRoot);
