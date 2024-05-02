@@ -2,7 +2,6 @@
 
 namespace Irail\Repositories\Riv;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -24,7 +23,6 @@ use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
 use Irail\Util\InMemoryMetrics;
 use Irail\Util\VehicleIdTools;
-use Psr\Cache\InvalidArgumentException;
 
 class NmbsRivRawDataRepository
 {
@@ -46,38 +44,6 @@ class NmbsRivRawDataRepository
         $this->curlProxy = $curlProxy;
         $this->setCachePrefix('NMBS');
         $this->rateLimit = env('NMBS_RIV_RATE_LIMIT_PER_MINUTE', 10);
-    }
-
-    /**
-     * A cache key for the counter in which requests for a given minute are counted.
-     * @param null $time The time for which to count. Default now.
-     * @return string The cache key to obtain the current request rate from cache.
-     */
-    public function getRequestRateKey($time = null): string
-    {
-        if ($time == null) {
-            $time = Carbon::now();
-        }
-        return 'RequestRate-' . $time->format('Y-m-d_H-i');
-    }
-
-    /**
-     * Get the request rate based on a given cache key.
-     * @param string $key the cache key for which the request rate should be looked up, defaults to the cache key for "now".
-     * @return int The number of requests in a minute.
-     * @throws InvalidArgumentException
-     */
-    public function getRequestRate($key = null): int
-    {
-        if ($key == null) {
-            // Get the cache key of the current "bucket" in which requests are counted
-            $key = $this->getRequestRateKey();
-        }
-        $cachedData = $this->getCachedObject($key);
-        if ($cachedData == null) {
-            return 0;
-        }
-        return $cachedData->getValue();
     }
 
     /**
