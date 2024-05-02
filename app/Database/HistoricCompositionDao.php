@@ -153,18 +153,15 @@ class HistoricCompositionDao
             // Only record valid compositions for vehicles running today
             return;
         }
-        if ($this->getCompositionId($composition) != null) {
-            return; // Don't overwrite existing compositions
+
+        $compositionId = $this->getCompositionId($composition);
+        if ($compositionId != null) {
+            Log::warning("Composition for '{$composition->getVehicle()->getId()}' collides with existing record '$compositionId', deleting before update");
+            $this->deleteCompositionHistory($compositionId);
         }
 
         $units = $composition->getUnits();
-        $passengerCarriageCount = 0;
-
-        foreach ($units as $unit) {
-            if ($unit->getSeatsFirstClass() + $unit->getSeatsSecondClass() > 0) {
-                $passengerCarriageCount++;
-            }
-        }
+        $passengerCarriageCount = $this->countPassengerCarriages($units);
         $typesFrequency = array_count_values(array_map(fn ($unit) => $unit->getMaterialType()->getParentType(), $units));
         $primaryMaterialType = array_keys($typesFrequency, max($typesFrequency))[0];
         $compositionId = $this->insertComposition($composition, $primaryMaterialType, $passengerCarriageCount);
@@ -268,6 +265,28 @@ class HistoricCompositionDao
         return $first ? $first->getId() : null;
     }
 
+    private function deleteCompositionHistory(int $id)
+    {
+        Log::warning("Deleting historic composition with id $id");
+        CompositionHistoryEntry::destroy($id);
+    }
+
+    /**
+     * @param array $units
+     * @return int
+     */
+    public function countPassengerCarriages(array $units): int
+    {
+        $passengerCarriageCount = 0;
+
+        foreach ($units as $unit) {
+            if ($unit->getSeatsFirstClass() + $unit->getSeatsSecondClass() > 0) {
+                $passengerCarriageCount++;
+            }
+        }
+        return $passengerCarriageCount;
+    }
+
     /**
      * @param $lengths
      * @return int
@@ -281,14 +300,16 @@ class HistoricCompositionDao
         return $count % 2 == 1 ? $lengths[$count / 2] : ($lengths[($count / 2) - 1] + $lengths[($count / 2)] / 2);
     }
 
-    private function hasBeenRecordedPast12Hours(TrainComposition|VehicleCompositionSearchResult $composition): bool
+    private function hasBeenRecordedPast12Hours(TrainComposition $composition): bool
     {
-        return Cache::has($this->getRecordedStatusCacheKey($composition));
+        // Detect changes in composition length, which should trigger a database update
+        return Cache::has($this->getRecordedStatusCacheKey($composition))
+            && Cache::get($this->getRecordedStatusCacheKey($composition)) == $composition->getLength();
     }
 
-    private function markAsRecorded(TrainComposition|VehicleCompositionSearchResult $composition): bool
+    private function markAsRecorded(TrainComposition $composition): bool
     {
-        return Cache::set($this->getRecordedStatusCacheKey($composition), true, 12 * 3600);
+        return Cache::set($this->getRecordedStatusCacheKey($composition), $composition->getLength(), 12 * 3600);
     }
 
     /**
