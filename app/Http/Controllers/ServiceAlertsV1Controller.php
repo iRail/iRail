@@ -11,20 +11,21 @@ use Irail\Repositories\ServiceAlertsRepository;
 
 class ServiceAlertsV1Controller extends BaseIrailController
 {
+    private ServiceAlertsRepository $serviceAlertsRepository;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(ServiceAlertsRepository $serviceAlertsRepository)
     {
-        //
+        $this->serviceAlertsRepository = $serviceAlertsRepository;
     }
 
     public function getServiceAlerts(ServiceAlertsV1Request $request): Response
     {
-        $repo = app(ServiceAlertsRepository::class);
-        $serviceAlertsResult = $repo->getServiceAlerts($request);
+        $serviceAlertsResult = $this->serviceAlertsRepository->getServiceAlerts($request);
         $dataRoot = ServiceAlertsV1Converter::convert($request, $serviceAlertsResult);
         $this->logRequest($request);
         return $this->outputV1($request, $dataRoot, 120);

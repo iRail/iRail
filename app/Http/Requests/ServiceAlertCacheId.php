@@ -6,9 +6,7 @@ trait ServiceAlertCacheId
 {
     public function getCacheId(): string
     {
-        return '|ServiceAlerts|' . join('|', [
-                $this->getLanguage()
-            ]);
+        return '|ServiceAlerts|' . $this->getLanguage();
     }
 
     abstract public function getLanguage(): string;

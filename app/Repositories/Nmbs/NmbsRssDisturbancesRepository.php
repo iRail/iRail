@@ -30,6 +30,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
     public function __construct(CurlProxy $curlProxy)
     {
         $this->curlProxy = $curlProxy;
+        $this->setCachePrefix('NmbsRssDisturbancesRepository');
     }
 
     /**
@@ -41,7 +42,7 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
     {
         $serviceAlertData = $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             return $this->getFreshServiceAlerts($request);
-        });
+        }, 300);
         return new ServiceAlertsResult($serviceAlertData->getValue());
     }
 
