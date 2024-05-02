@@ -2,7 +2,6 @@
 
 namespace Irail\Http\Controllers;
 
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Irail\Database\LogDao;
 use Irail\Models\Dao\LogQueryType;
@@ -19,25 +18,18 @@ class LogController extends BaseIrailController
     public function getLogs(Request $request)
     {
         $logs = $this->logRepository->readLastLogs(1000);
-        $json = array_map(fn ($logEntry) => [
-            'querytype' => $this->getName($logEntry->getQueryType()),
-            'querytime'  => $logEntry->getCreatedAt(),
-            'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
-            'user_agent' => $logEntry->getUserAgent()
-        ], $logs);
-        return $this->outputJson($request, $json);
-    }
-
-    public function getLogsForDate(Request $request)
-    {
-        $date = Carbon::createFromFormat('Ymd', $request->route('date'));
-        $logs = $this->logRepository->readLogsForDate($date);
-        $json = array_map(fn ($logEntry) => [
-            'querytype'  => $logEntry->getQueryType(),
-            'querytime'  => $logEntry->getCreatedAt(),
-            'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
-            'user_agent' => $logEntry->getUserAgent()
-        ], $logs);
+        $json = array_map(function ($logEntry) {
+            $result = [
+                'querytype'  => $this->getName($logEntry->getQueryType()),
+                'querytime'  => $logEntry->getCreatedAt(),
+                'query'      => $logEntry->getQuery(),
+                'user_agent' => $logEntry->getUserAgent()
+            ];
+            if ($logEntry->getResult()) {
+                $result['journeyoptions'] = $logEntry->getResult();
+            }
+            return $result;
+        }, $logs);
         return $this->outputJson($request, $json);
     }
 
