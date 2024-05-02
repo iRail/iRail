@@ -61,29 +61,19 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
-            $rawData = $this->rivDataRepository->getLiveboardData($request);
-            return $this->parseNmbsRawData($request, $rawData);
+            $jsonData = $this->rivDataRepository->getLiveboardData($request);
+            return $this->parseNmbsRawData($request, $jsonData);
         }, 60)->getValue();
     }
 
     /**
      * @throws UnknownStopException
      */
-    private function parseNmbsRawData(LiveboardRequest $request, CachedData $cachedRawData): LiveboardSearchResult
+    private function parseNmbsRawData(LiveboardRequest $request, CachedData $cachedJsonData): LiveboardSearchResult
     {
-        $rawData = $cachedRawData->getValue();
-
-        if (empty($rawData)) {
-            throw new UpstreamServerException('The server did not return any data.', 500);
-        }
-        if (str_contains($rawData, ': error :')) {
-            throw new UpstreamServerException('The remote server returned an error: ' . $rawData, 504);
-        }
-
-        // Now we'll actually read the departures/arrivals information.
         $currentStation = $this->stationsRepository->getStationById($request->getStationId());
 
-        $decodedJsonData = json_decode($rawData, associative: true);
+        $decodedJsonData = $cachedJsonData->getValue();
         $stopsAtStation = $decodedJsonData['entries'];
         $departuresOrArrivals = [];
         foreach ($stopsAtStation as $stop) {
@@ -99,7 +89,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         }
 
         $liveboardSearchResult = new LiveboardSearchResult($currentStation, $departuresOrArrivals);
-        $liveboardSearchResult->mergeCacheValidity($cachedRawData->getCreatedAt(), $cachedRawData->getExpiresAt());
+        $liveboardSearchResult->mergeCacheValidity($cachedJsonData->getCreatedAt(), $cachedJsonData->getExpiresAt());
         return $liveboardSearchResult;
     }
 

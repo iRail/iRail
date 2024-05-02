@@ -51,10 +51,10 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      */
     public function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
-        return $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
+        $cachedResult = $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
             $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
-            $cacheAge = $cachedData->getAge();
+
 
             $exception = false; // Track and save the last exception during parsing
             // Build a result
@@ -79,8 +79,13 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             if ($exception && empty($segments)) {
                 throw new InternalProcessingException(500, 'Failed to parse vehicle composition: ' . $exception->getMessage(), $exception);
             }
-            return new VehicleCompositionSearchResult($journey, $segments);
-        }, 300)->getValue();
+            $result = new VehicleCompositionSearchResult($journey, $segments);
+            $result->mergeCacheValidity($cachedData->getCreatedAt(), $cachedData->getExpiresAt());
+            return $result;
+        }, 300); // Only recalculate once every 5 minutes
+        $result = $cachedResult->getValue();
+        $result->mergeCacheValidity($cachedResult); // Combine cache validities to ensure we don't serve an "expires" value which lies in the past.
+        return $result;
     }
 
     /**
@@ -404,8 +409,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         $cacheKey = self::getCacheKey($vehicle->getNumber());
         if (!$this->isCached($cacheKey)) {
             try {
-                $cachedData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
-                $json = json_decode($cachedData->getValue());
+                $cachedJsonData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
+                $json = $cachedJsonData->getValue();
                 $compositionData = $this->getCompositionPlan($json, $vehicle);
 
                 if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
@@ -444,7 +449,6 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         if (!$hasLastPlannedData && !$hasCommercialPlannedData) {
             throw new CompositionUnavailableException($vehicle->getId());
         }
-        $compositionData = $hasLastPlannedData ? $json->lastPlanned : $json->commercialPlanned;
-        return $compositionData;
+        return $hasLastPlannedData ? $json->lastPlanned : $json->commercialPlanned;
     }
 }

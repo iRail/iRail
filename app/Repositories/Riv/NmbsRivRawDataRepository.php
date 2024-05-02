@@ -4,11 +4,9 @@ namespace Irail\Repositories\Riv;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
 use Irail\Exceptions\NoResultsException;
-use Irail\Exceptions\Upstream\UpstreamRateLimitException;
-use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
+use Irail\Exceptions\Upstream\UpstreamParameterException;
 use Irail\Http\Requests\JourneyPlanningRequest;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
@@ -21,7 +19,6 @@ use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\Traits\BasedOnHafas;
 use Irail\Traits\Cache;
-use Irail\Util\InMemoryMetrics;
 use Irail\Util\VehicleIdTools;
 
 class NmbsRivRawDataRepository
@@ -29,11 +26,10 @@ class NmbsRivRawDataRepository
     use Cache;
     use BasedOnHafas;
 
+    const string JOURNEY_DETAIL_REF_PREFIX = "journeyDetailRef|";
     private StationsRepository $stationsRepository;
-    private CurlProxy $curlProxy;
+    private RivClient $rivClient;
 
-    # The maximum number of outgoing requests per minute towards NMBS
-    private int $rateLimit;
 
     /**
      * @param StationsRepository $stationsRepository
@@ -41,9 +37,8 @@ class NmbsRivRawDataRepository
     public function __construct(StationsRepository $stationsRepository, CurlProxy $curlProxy)
     {
         $this->stationsRepository = $stationsRepository;
-        $this->curlProxy = $curlProxy;
         $this->setCachePrefix('NMBS');
-        $this->rateLimit = env('NMBS_RIV_RATE_LIMIT_PER_MINUTE', 10);
+        $this->rivClient = new RivClient($curlProxy);
     }
 
     /**
@@ -52,18 +47,8 @@ class NmbsRivRawDataRepository
      */
     public function getLiveboardData(LiveboardRequest $request): CachedData
     {
-        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
-            return $this->getFreshLiveboardData($request);
-        });
-    }
-
-    /**
-     * @param LiveboardRequest $request
-     * @return bool|string
-     */
-    protected function getFreshLiveboardData(LiveboardRequest $request): string|bool
-    {
-        $station = $this->stationsRepository->getStationById($request->getStationId()); // This ensures the station exists, before we send a request
+        // This ensures the station exists, before we send a request
+        $station = $this->stationsRepository->getStationById($request->getStationId()); 
         $hafasStationId = $this->iRailToHafasId($station->getId());
 
         $url = 'https://mobile-riv.api.belgianrail.be/api/v1.0/dacs';
@@ -80,7 +65,7 @@ class NmbsRivRawDataRepository
             'Count'    => 100, // 100 results
             // language is not passed, responses contain both Dutch and French destinations
         ];
-        return $this->makeApiCallToMobileRivApi($url, $parameters);
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters);
     }
 
     /**
@@ -88,17 +73,6 @@ class NmbsRivRawDataRepository
      * @return CachedData the data, along with information about its age and validity
      */
     public function getRoutePlanningData(JourneyPlanningRequest $request): CachedData
-    {
-        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
-            return $this->getFreshRouteplanningData($request);
-        }, 30);
-    }
-
-    /**
-     * @param JourneyPlanningRequest $request
-     * @return string The JSON data returned by the HAFAS system
-     */
-    private function getFreshRouteplanningData(JourneyPlanningRequest $request): string
     {
         // This ensures the station exists, before we send a request
         $origin = $this->stationsRepository->getStationById($request->getOriginStationId());
@@ -125,7 +99,7 @@ class NmbsRivRawDataRepository
             'numF'             => 6, // request 6 (the max) results forward in time
             'products'         => $typeOfTransportCode->value
         ];
-        return $this->makeApiCallToMobileRivApi($url, $parameters);
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 30);
     }
 
     /**
@@ -137,57 +111,27 @@ class NmbsRivRawDataRepository
      */
     public function getVehicleJourneyData(VehicleJourneyRequest $request): CachedData
     {
-        return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
-            return $this->getFreshVehicleJourneyData($request);
-        });
-    }
-
-    /**
-     * Get the composition for a vehicle.
-     *
-     * @param Vehicle                         $vehicle
-     * @param JourneyWithOriginAndDestination $originAndDestination
-     * @return CachedData
-     */
-    public function getVehicleCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $originAndDestination): CachedData
-    {
-        return $this->getCacheOrUpdate(
-            "composition|{$vehicle->getNumber()}|{$vehicle->getJourneyStartDate()->format('Ymd')}",
-            function () use ($vehicle, $originAndDestination) {
-                return $this->getVehicleCompositionResponse($vehicle, $originAndDestination);
-            }
-        );
-    }
-
-    /**
-     * @param VehicleJourneyRequest $request
-     * @return bool|string
-     * @throws GtfsVehicleNotFoundException
-     */
-    protected function getFreshVehicleJourneyData(VehicleJourneyRequest $request): string|bool
-    {
         $announcedJourneyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
-        $cacheKey = "journeyDetailRef|{$announcedJourneyNumber}|{$request->getDateTime()->format('Ymd')}";
-
-        $cachedJourneyDetailRef = $this->getCacheOrUpdate(
-            $cacheKey,
-            function () use ($request) {
-                try {
-                    return $this->getJourneyDetailRef($request);
-                } catch (GtfsVehicleNotFoundException $e) {
-                    return false;
-                }
-            },
-            2 * 3600 // Journey detail references seem to change in some cases, so don't cache them for too long
-        );
-
-        if ($cachedJourneyDetailRef->getValue() === false) {
-            // If an exception was cached, throw it
-            throw new GtfsVehicleNotFoundException($request->getVehicleId());
-        }
+        $cachedJourneyDetailRef = $this->getCachedJourneyDetailRef($announcedJourneyNumber, $request);
 
         $journeyDetailRef = $cachedJourneyDetailRef->getValue();
-        return $this->getJourneyDetailResponse($request, $journeyDetailRef);
+        $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey/detail';
+        $parameters = [
+            'id'   => $journeyDetailRef,
+            'lang' => $request->getLanguage()
+        ];
+        try {
+            $journeyDetailResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 30);
+        } catch (UpstreamParameterException) {
+            // SVC_PARAM exception is returned when the parameter is invalid.
+            // In this case, the Hafas data has likely been updated, and all journey references need to be refreshed
+            $this->deleteCachedObjectsByPrefix(self::JOURNEY_DETAIL_REF_PREFIX);
+            // Retry after clearing the cache
+            return $this->getVehicleJourneyData($request);
+        }
+        // cachedJourneyDetailRef createdAt/maxAge should not be included in this response, as it is purely internal and cached a long time for performance
+        // The real data is updated independently
+        return $journeyDetailResponse;
     }
 
     /**
@@ -195,9 +139,8 @@ class NmbsRivRawDataRepository
      * @throw
      * @return string
      */
-    private function getJourneyDetailRef(
-        VehicleJourneyRequest $request
-    ): string {
+    private function getJourneyDetailRef(VehicleJourneyRequest $request): string
+    {
         /** @var GtfsTripStartEndExtractor $gtfsTripExtractor */
         $gtfsTripExtractor = App::make(GtfsTripStartEndExtractor::class);
         $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $request->getDateTime());
@@ -208,7 +151,7 @@ class NmbsRivRawDataRepository
         $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $vehicleWithOriginAndDestination);
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
-            $journeyDetailRef = $this->getJourneyDetailRefAlt($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
+            $journeyDetailRef = $this->getJourneyDetailRefForPartiallyCanceledTrip($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
         }
 
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
@@ -255,10 +198,7 @@ class NmbsRivRawDataRepository
                 'date'        => $formattedDateStr,
                 'lang'        => $request->getLanguage()
             ];
-            $journeyResponse = $this->makeApiCallToMobileRivApi($url, $parameters, 150); // Cache this data for a while
-
-            $journeyResponse = json_decode($journeyResponse, true);
-
+            $journeyResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 150)->getValue(); // Cache this data for a while
             if ($journeyResponse === null || !key_exists('Trip', $journeyResponse)) {
                 // No journeyref found, move on to the next combination
             } else {
@@ -277,7 +217,7 @@ class NmbsRivRawDataRepository
      * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
      * @return string|bool
      */
-    private function getJourneyDetailRefAlt(
+    private function getJourneyDetailRefForPartiallyCanceledTrip(
         GtfsTripStartEndExtractor $gtfsTripExtractor,
         VehicleJourneyRequest $request,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
@@ -307,26 +247,40 @@ class NmbsRivRawDataRepository
     }
 
     /**
+     * @param string                $announcedJourneyNumber
      * @param VehicleJourneyRequest $request
-     * @param string                $journeyDetailRef
-     * @return bool|string
+     * @return mixed
      */
-    private function getJourneyDetailResponse(VehicleJourneyRequest $request, string $journeyDetailRef): string|bool
+    public function getCachedJourneyDetailRef(string $announcedJourneyNumber, VehicleJourneyRequest $request): CachedData
     {
-        $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey/detail';
-        $parameters = [
-            'id'   => $journeyDetailRef,
-            'lang' => $request->getLanguage()
-        ];
-        return $this->makeApiCallToMobileRivApi($url, $parameters);
+        $journeyRefCacheKey = self::JOURNEY_DETAIL_REF_PREFIX . "{$announcedJourneyNumber}|{$request->getDateTime()->format('Ymd')}";
+        $cachedJourneyDetailRef = $this->getCacheOrUpdate(
+            $journeyRefCacheKey,
+            function () use ($request) {
+                try {
+                    return $this->getJourneyDetailRef($request);
+                } catch (GtfsVehicleNotFoundException $e) {
+                    return false;
+                }
+            },
+            6 * 3600 // Journey detail references may change, but in that case the cache should be cleared.
+        );
+        if ($cachedJourneyDetailRef->getValue() === false) {
+            // If an exception was cached, throw it
+            throw new GtfsVehicleNotFoundException($request->getVehicleId());
+        }
+        return $cachedJourneyDetailRef;
     }
 
+
     /**
+     * Get the composition for a vehicle.
+     *
      * @param Vehicle                         $vehicle
      * @param JourneyWithOriginAndDestination $journeyWithOriginAndDestination
-     * @return bool|string
+     * @return CachedData
      */
-    private function getVehicleCompositionResponse(Vehicle $vehicle, JourneyWithOriginAndDestination $journeyWithOriginAndDestination): string|bool
+    public function getVehicleCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $journeyWithOriginAndDestination): CachedData
     {
         $url = 'https://mobile-riv.api.belgianrail.be/api/v1/commercialtraincompositionsbetweenptcars';
         $parameters = [
@@ -337,54 +291,6 @@ class NmbsRivRawDataRepository
             'FromToAreUicCodes'   => 'true',
             'IncludeMaterialInfo' => 'true'
         ];
-        return $this->makeApiCallToMobileRivApi($url, $parameters);
-    }
-
-
-    /**
-     * @param string $url
-     * @param array  $parameters
-     * @return string
-     */
-    private function makeApiCallToMobileRivApi(string $url, array $parameters, int $ttl = 15): string
-    {
-        // Cache raw responses in order to prevent error responses from not being cached.
-        // TODO: this cache should replace the other caching in the NmbsRivRawDataRepository.
-        $cacheKey = str_replace('/', '_', $url) . '?' . http_build_query($parameters);
-        $cachedCurlResponse = $this->getCacheOrUpdate($cacheKey, function () use ($url, $parameters) {
-            return $this->fetchRateLimitedRivResponse($url, $parameters);
-        }, $ttl);
-        return $cachedCurlResponse->getValue();
-    }
-
-    /**
-     * @param string $url
-     * @param array  $parameters
-     * @return mixed
-     */
-    public function fetchRateLimitedRivResponse(string $url, array $parameters)
-    {
-        $response = RateLimiter::attempt(
-            'riv-request',
-            $this->rateLimit,
-            function () use ($url, $parameters) {
-                InMemoryMetrics::countRivCall();
-                return $this->curlProxy->get($url, $parameters, ['x-api-key: ' . getenv('NMBS_RIV_API_KEY')]);
-            },
-            60 // 60 seconds buckets, i.e. rate limiting per minute
-        );
-        if ($response === false) {
-            $currentRequestRate = $this->rateLimit - RateLimiter::remaining('riv-request', $this->rateLimit);
-            $message = "Current request rate towards NMBS is $currentRequestRate requests per minute. "
-                . "Outgoing request blocked due to rate limiting configured at {$this->rateLimit} requests per minute";
-            Log::error($message);
-            throw new UpstreamRateLimitException($message);
-        }
-        $response = $response->getResponseBody();
-        if (str_starts_with($response, '{"exception":"Hacon response time exceeded the defined timeout')) {
-            // TODO: error handling should be grouped somewhere together with JSON parsing.
-            throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading data. Please try again later.');
-        }
-        return $response;
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters);
     }
 }

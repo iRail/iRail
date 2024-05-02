@@ -30,6 +30,17 @@ class CachedData
         $this->expiresAt = time() + $ttl;
     }
 
+    public function mergeValidity(CachedData $cachedData): void
+    {
+        $this->createdAt = min($cachedData->getCreatedAt(), $this->createdAt);
+        $this->expiresAt = max($cachedData->getExpiresAt(), $this->expiresAt);
+    }
+
+    public function setValue(mixed $value): void
+    {
+        $this->value = $value;
+    }
+
     /**
      * The key of this cache entry.
      *

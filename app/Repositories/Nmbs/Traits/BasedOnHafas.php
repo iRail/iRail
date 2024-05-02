@@ -2,12 +2,10 @@
 
 namespace Irail\Repositories\Nmbs\Traits;
 
-use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
 use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
-use Irail\Exceptions\Upstream\UpstreamServerTimeoutException;
 use Irail\Exceptions\Upstream\UpstreamServerUnavailableException;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureArrivalState;
@@ -33,60 +31,12 @@ trait BasedOnHafas
         if (empty($rawJsonData)) {
             throw new UpstreamServerUnavailableException('The server did not return any data.');
         }
-        $json = json_decode($rawJsonData, true);
-        if ($json == null) {
-            Log::error('Failed to read raw json data:');
-            Log::error($rawJsonData);
-            // Example invalid data:
-            // "ERROR reason : error : 9000 : _Service_Handler_Policies : Service Handler - Connection To Backend failed. Please verify backend server status."
-            if (str_contains($rawJsonData, 'ERROR reason : error : 9000 :')) {
-                throw new UpstreamServerUnavailableException('iRail could not read data from the remote server.');
-            }
-            throw new UpstreamServerException('iRail could not read the data received from the remote server.');
-        }
+
         $this->throwExceptionOnInvalidResponse($json);
         return $json;
     }
 
-    /**
-     * Throw an exception if the JSON API response contains an error instead of a result.
-     *
-     * @param array|null $json The JSON response as an associative array.
-     *
-     * @throws UpstreamServerException An Exception containing an error message in case the JSON response contains an error message.
-     * @throws NoResultsException
-     */
-    public static function throwExceptionOnInvalidResponse(?array $json): void
-    {
-        if (!key_exists('errorCode', $json)) {
-            // all ok!
-            return;
-        }
 
-        if ($json['errorCode'] == 'INT_ERR') {
-            throw new UpstreamServerException('NMBS data is temporarily unavailable.');
-        }
-        if ($json['errorCode'] == 'INT_GATEWAY') {
-            throw new UpstreamServerUnavailableException('NMBS data is temporarily unavailable.');
-        }
-        if ($json['errorCode'] == 'INT_TIMEOUT') {
-            throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading the data.');
-        }
-        if ($json['errorCode'] == 'SVC_NO_RESULT') {
-            throw new NoResultsException('No results found');
-        }
-        if ($json['errorCode'] == 'SVC_LOC') {
-            throw new NoResultsException('Location not found');
-        }
-        if ($json['errorCode'] == 'SVC_LOC_EQUAL') {
-            throw new NoResultsException('Origin and destination location are the same', 400);
-        }
-        if ($json['errorCode'] == 'SVC_DATETIME_PERIOD' || $json['errorCode'] == 'SVC_DATATIME_PERIOD') {
-            // Some versions of Hafas contain a typo in this error code
-            throw new NoResultsException('Date outside of the timetable period. Check your query.');
-        }
-        throw new UpstreamServerException('This request failed. Please check your query. Error code ' . $json['errorCode'], 500);
-    }
 
 
     /**

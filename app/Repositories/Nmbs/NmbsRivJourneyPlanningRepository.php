@@ -89,19 +89,19 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
      */
     public function getJourneyPlanning(JourneyPlanningRequest $request): JourneyPlanningSearchResult
     {
-        $data = $this->rivDataRepository->getRoutePlanningData($request);
-        return $this->parseJourneyPlanning($request, $data);
+        $cachedJsonData = $this->rivDataRepository->getRoutePlanningData($request);
+        return $this->parseJourneyPlanning($request, $cachedJsonData);
     }
 
     /**
      * @throws Exception
      */
-    private function parseJourneyPlanning(JourneyPlanningRequest $request, CachedData $data): JourneyPlanningSearchResult
+    private function parseJourneyPlanning(JourneyPlanningRequest $request, CachedData $cachedJsonData): JourneyPlanningSearchResult
     {
-        $json = $this->deserializeAndVerifyResponse($data->getValue());
+        $json = $cachedJsonData->getValue();
 
         $result = new JourneyPlanningSearchResult();
-        $result->mergeCacheValidity($data->getCreatedAt(), $data->getExpiresAt());
+        $result->mergeCacheValidity($cachedJsonData->getCreatedAt(), $cachedJsonData->getExpiresAt());
         $result->setOriginStation($this->stationsRepository->getStationById($request->getOriginStationId()));
         $result->setDestinationStation($this->stationsRepository->getStationById($request->getDestinationStationId()));
         $connections = [];

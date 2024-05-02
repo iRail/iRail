@@ -53,8 +53,8 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
      */
     public function getDatedVehicleJourney(VehicleJourneyRequest $request): VehicleJourneySearchResult
     {
-        $rawData = $this->rivDataRepository->getVehicleJourneyData($request);
-        return $this->parseNmbsRawVehicleJourney($request, $rawData);
+        $cachedJsonData = $this->rivDataRepository->getVehicleJourneyData($request);
+        return $this->parseNmbsRawVehicleJourney($request, $cachedJsonData);
     }
 
     /**
@@ -66,17 +66,16 @@ class NmbsRivVehicleJourneyRepository implements VehicleJourneyRepository
      * @throws UpstreamServerException
      * @throws NoResultsException
      */
-    private function parseNmbsRawVehicleJourney(VehicleJourneyRequest $request, CachedData $cachedRawData): VehicleJourneySearchResult
+    private function parseNmbsRawVehicleJourney(VehicleJourneyRequest $request, CachedData $cachedJsonData): VehicleJourneySearchResult
     {
-        $rawData = $cachedRawData->getValue();
-        $json = $this->deserializeAndVerifyResponse($rawData);
+        $json = $cachedJsonData->getValue();
 
         $vehicle = $this->getVehicleDetails($json);
         $stops = $this->parseVehicleStops($json, $vehicle, $request->getLanguage());
         $alerts = $this->getAlerts($json);
 
         $vehicleJourneySearchResult = new VehicleJourneySearchResult($vehicle, $stops, $alerts);
-        $vehicleJourneySearchResult->mergeCacheValidity($cachedRawData->getCreatedAt(), $cachedRawData->getExpiresAt());
+        $vehicleJourneySearchResult->mergeCacheValidity($cachedJsonData->getCreatedAt(), $cachedJsonData->getExpiresAt());
         return $vehicleJourneySearchResult;
     }
 

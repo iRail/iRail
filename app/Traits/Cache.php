@@ -2,6 +2,7 @@
 
 namespace Irail\Traits;
 
+use APCUIterator;
 use Cache\Adapter\Apcu\ApcuCachePool;
 use Closure;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +26,7 @@ trait Cache
      */
     public function getSynchronizationLockKey(string $cacheKey): string
     {
-        return $this->getKeyWithPrefix($cacheKey) . '|synchronizedLock';
+        return $this->addPrefixToKey($cacheKey) . '|synchronizedLock';
     }
 
     private function initializeCachePool(): void
@@ -60,10 +61,9 @@ trait Cache
     {
         $this->defaultTtl = $defaultTtl;
     }
-
     public function isCached(string $key): bool
     {
-        $prefixedKey = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->addPrefixToKey($key);
         $this->initializeCachePool();
         try {
             return self::$cache->hasItem($prefixedKey);
@@ -80,7 +80,7 @@ trait Cache
      */
     public function getCachedObject(string $key): CachedData|false
     {
-        $prefixedKey = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->addPrefixToKey($key);
         $this->initializeCachePool();
 
         try {
@@ -112,7 +112,7 @@ trait Cache
             $ttl = $this->defaultTtl;
         }
 
-        $prefixedKey = $this->getKeyWithPrefix($key);
+        $prefixedKey = $this->addPrefixToKey($key);
         $this->initializeCachePool();
         try {
             $item = self::$cache->getItem($prefixedKey);
@@ -134,7 +134,14 @@ trait Cache
     private function deleteCachedObject(string $key): string
     {
         $this->initializeCachePool();
-        return self::$cache->delete($this->getKeyWithPrefix($key));
+        return self::$cache->delete($this->addPrefixToKey($key));
+    }
+
+    protected function deleteCachedObjectsByPrefix(string $prefix): void
+    {
+        $prefix = $this->addPrefixToKey($prefix);
+        $iterator = new APCUIterator('user', '/^' . $prefix . '/');
+        apcu_delete($iterator);
     }
 
     /**
@@ -226,7 +233,7 @@ trait Cache
      * @param String $key
      * @return string
      */
-    private function getKeyWithPrefix(string $key): string
+    private function addPrefixToKey(string $key): string
     {
         return $this->cleanCacheKey($this->prefix . '|' . $key);
     }
