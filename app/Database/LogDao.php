@@ -89,11 +89,11 @@ class LogDao
      */
     public function readLogsForDate(Carbon $date): array
     {
-        $start = $date->startOfDay()->utc();
-        $end = $date->endOfDay()->utc();
+        $start = $date->copy()->startOfDay()->utc();
+        $end = $date->copy()->endOfDay()->utc();
         // Database timestamps are UTC
         $rows = DB::select(
-            'SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at BETWEEN ? AND ? ORDER BY created_at',
+            'SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at >= ? AND created_at <= ? ORDER BY created_at asc',
             [$start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]
         );
         return $this->transformRows($rows);
