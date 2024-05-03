@@ -11,9 +11,9 @@ interface VehicleCompositionRepository
     /**
      * Get the composition of a vehicle.
      *
-     * @param Vehicle $request
+     * @param Vehicle $journey
      * @return VehicleCompositionSearchResult The response data. Null if no composition is available.
      * @throws CompositionUnavailableException
      */
-    public function getComposition(Vehicle $request): VehicleCompositionSearchResult;
+    public function getComposition(Vehicle $journey): VehicleCompositionSearchResult;
 }

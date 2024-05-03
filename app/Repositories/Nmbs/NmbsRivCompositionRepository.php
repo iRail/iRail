@@ -20,15 +20,12 @@ use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Riv\NmbsRivRawDataRepository;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Traits\Cache;
-use stdClass;
 use Throwable;
 
 class NmbsRivCompositionRepository implements VehicleCompositionRepository
 {
     use Cache;
 
-    const string NMBS_COMPOSITION_AUTH_CACHE_KEY = 'NMBSCompositionAuth';
-    const int AUTH_KEY_CACHE_TTL = 60 * 30;
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivRawDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
@@ -62,7 +59,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             foreach ($compositionData as $compositionDataForSingleSegment) {
                 // NMBS does not have single-carriage railbusses,
                 // meaning these compositions are only a locomotive and should be filtered out
-                if (count($compositionDataForSingleSegment->materialUnits) > 1) {
+                if (count($compositionDataForSingleSegment['materialUnits']) > 1) {
                     try {
                         $segments[] = $this->parseOneSegmentWithCompositionData(
                             $journey,
@@ -84,7 +81,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             return $result;
         }, 300); // Only recalculate once every 5 minutes
         $result = $cachedResult->getValue();
-        $result->mergeCacheValidity($cachedResult); // Combine cache validities to ensure we don't serve an "expires" value which lies in the past.
+        $result->mergeCacheValidity($cachedResult->getCreatedAt(), $cachedResult->getExpiresAt()); // Combine cache validities to ensure we don't serve an "expires" value which lies in the past.
         return $result;
     }
 
@@ -114,18 +111,17 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             );
         }
 
-        $cachedData = $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
-        return $cachedData;
+        return $this->fetchCompositionData($journey, $journeyWithOriginAndDestination);
     }
 
     private function parseOneSegmentWithCompositionData(Vehicle $vehicle, $travelSegmentWithCompositionData): TrainComposition
     {
         // Use the UIC code. id contains the PTCAR id, which for belgian stations maps to the TAF/TAP code but doesn't match for foreign stations.
-        $origin = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData->ptCarFrom->uicCode);
-        $destination = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData->ptCarTo->uicCode);
+        $origin = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData['ptCarFrom']['uicCode']);
+        $destination = $this->stationsRepository->getStationById('00' . $travelSegmentWithCompositionData['ptCarTo']['uicCode']);
 
-        $source = $travelSegmentWithCompositionData->confirmedBy;
-        $units = self::parseCompositionData($travelSegmentWithCompositionData->materialUnits);
+        $source = $travelSegmentWithCompositionData['confirmedBy'];
+        $units = self::parseCompositionData($travelSegmentWithCompositionData['materialUnits']);
 
         // Set the left/right orientation on carriages. This can only be done by evaluating all carriages at the same time
         $units = self::setCorrectDirectionForCarriages($units);
@@ -148,71 +144,72 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 
     /**
      * Parse a train composition unit, typically one carriage or locomotive.
-     * @param      $rawCompositionUnit StdClass the raw composition unit data.
-     * @param int  $position The index/position of this vehicle.
+     * @param array $rawCompositionUnit StdClass the raw composition unit data.
+     * @param int   $position The index/position of this vehicle.
      * @return TrainCompositionUnit The parsed and cleaned TrainCompositionUnit.
      */
-    private static function parseCompositionUnit($rawCompositionUnit, int $position): TrainCompositionUnit
+    private static function parseCompositionUnit(array $rawCompositionUnit, int $position): TrainCompositionUnit
     {
         $rollingMaterialType = self::getMaterialType($rawCompositionUnit, $position);
         $compositionUnit = self::readDetailsIntoUnit($rawCompositionUnit, $rollingMaterialType);
         return $compositionUnit;
     }
 
-    public static function getMaterialType($rawCompositionUnit, $position): RollingMaterialType
+    public static function getMaterialType(array $rawCompositionUnit, int $position): RollingMaterialType
     {
         if (
-            (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'AM/MR')
-            || (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with($rawCompositionUnit->materialSubTypeName, 'AM'))
+            (array_key_exists('tractionType', $rawCompositionUnit) && $rawCompositionUnit['tractionType'] == 'AM/MR')
+            || (array_key_exists('materialSubTypeName', $rawCompositionUnit) && str_starts_with($rawCompositionUnit['materialSubTypeName'], 'AM'))
         ) {
             return self::getAmMrMaterialType($rawCompositionUnit, $position);
-        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HLE') {
+        } elseif (array_key_exists('tractionType', $rawCompositionUnit) && $rawCompositionUnit['tractionType'] == 'HLE') {
             return self::getHleMaterialType($rawCompositionUnit);
-        } elseif (property_exists($rawCompositionUnit, 'tractionType') && $rawCompositionUnit->tractionType == 'HV') {
+        } elseif (array_key_exists('tractionType', $rawCompositionUnit) && $rawCompositionUnit['tractionType'] == 'HV') {
             return self::getHvMaterialType($rawCompositionUnit);
-        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_contains($rawCompositionUnit->materialSubTypeName, '_')) {
+        } elseif (array_key_exists('materialSubTypeName', $rawCompositionUnit) && str_contains($rawCompositionUnit['materialSubTypeName'], '_')) {
             // Anything else, default fallback
-            $parentType = explode('_', $rawCompositionUnit->materialSubTypeName)[0];
-            $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1];
+            $parentType = explode('_', $rawCompositionUnit['materialSubTypeName'])[0];
+            $subType = explode('_', $rawCompositionUnit['materialSubTypeName'])[1];
             return new RollingMaterialType($parentType, $subType);
         }
 
         return new RollingMaterialType('unknown', 'unknown');
     }
 
-    private static function readDetailsIntoUnit($object, RollingMaterialType $rollingMaterialType): TrainCompositionUnit
+    private static function readDetailsIntoUnit(array $rawComposition, RollingMaterialType $rollingMaterialType): TrainCompositionUnit
     {
-        if (property_exists($object, 'uicCode')) {
+        if (array_key_exists('uicCode', $rawComposition)) {
             // containing a uic code & material number
             $trainCompositionUnit = new TrainCompositionUnitWithId($rollingMaterialType);
-            $trainCompositionUnit->setUicCode($object->uicCode);
-            $trainCompositionUnit->setMaterialNumber($object->materialNumber ?: 0);
-            $trainCompositionUnit->setMaterialSubTypeName($object->materialSubTypeName ?: 'unknown');
+            $trainCompositionUnit->setUicCode($rawComposition['uicCode']);
+            $trainCompositionUnit->setMaterialNumber($rawComposition['materialNumber'] ?: 0);
+            $trainCompositionUnit->setMaterialSubTypeName($rawComposition['materialSubTypeName'] ?: 'unknown');
         } else {
             $trainCompositionUnit = new TrainCompositionUnit($rollingMaterialType);
         }
-        $trainCompositionUnit->setHasToilet($object->hasToilets ?: false);
-        $trainCompositionUnit->setHasPrmToilet($object->hasPrmToilets ?: false);
-        $trainCompositionUnit->setHasTables($object->hasTables ?: false);
-        $trainCompositionUnit->setHasBikeSection(property_exists($object, 'hasBikeSection') && $object->hasBikeSection);
-        $trainCompositionUnit->setHasSecondClassOutlets($object->hasSecondClassOutlets ?: false);
-        $trainCompositionUnit->setHasFirstClassOutlets($object->hasFirstClassOutlets ?: false);
-        $trainCompositionUnit->setHasHeating($object->hasHeating ?: false);
-        $trainCompositionUnit->setHasAirco($object->hasAirco ?: false);
-        $trainCompositionUnit->setHasPrmSection(property_exists($object, 'hasPrmSection') && $object->hasPrmSection); // Persons with Reduced Mobility
-        $trainCompositionUnit->setHasPriorityPlaces($object->hasPriorityPlaces ?: false);
-        $trainCompositionUnit->setTractionType($object->tractionType ?: 'unknown');
-        $trainCompositionUnit->setCanPassToNextUnit($object->canPassToNextUnit ?: false);
-        $trainCompositionUnit->setStandingPlacesSecondClass($object->standingPlacesSecondClass ?: 0);
-        $trainCompositionUnit->setStandingPlacesFirstClass($object->standingPlacesFirstClass ?: 0);
-        $trainCompositionUnit->setSeatsCoupeSecondClass($object->seatsCoupeSecondClass ?: 0);
-        $trainCompositionUnit->setSeatsCoupeFirstClass($object->seatsCoupeFirstClass ?: 0);
-        $trainCompositionUnit->setSeatsSecondClass($object->seatsSecondClass ?: 0);
-        $trainCompositionUnit->setSeatsFirstClass($object->seatsFirstClass ?: 0);
-        $trainCompositionUnit->setLengthInMeter($object->lengthInMeter ?: 0);
-        $trainCompositionUnit->setTractionPosition($object->tractionPosition ?: 0);
-        $trainCompositionUnit->setHasSemiAutomaticInteriorDoors($object->hasSemiAutomaticInteriorDoors ?: false);
-        $trainCompositionUnit->setHasLuggageSection(property_exists($object, 'hasLuggageSection') && $object->hasLuggageSection);
+        $trainCompositionUnit->setHasToilet($rawComposition['hasToilets'] ?: false);
+        $trainCompositionUnit->setHasPrmToilet($rawComposition['hasPrmToilets'] ?: false);
+        $trainCompositionUnit->setHasTables($rawComposition['hasTables'] ?: false);
+        $trainCompositionUnit->setHasBikeSection(array_key_exists('hasBikeSection', $rawComposition) && $rawComposition['hasBikeSection']);
+        $trainCompositionUnit->setHasSecondClassOutlets($rawComposition['hasSecondClassOutlets'] ?: false);
+        $trainCompositionUnit->setHasFirstClassOutlets($rawComposition['hasFirstClassOutlets'] ?: false);
+        $trainCompositionUnit->setHasHeating($rawComposition['hasHeating'] ?: false);
+        $trainCompositionUnit->setHasAirco($rawComposition['hasAirco'] ?: false);
+        $trainCompositionUnit->setHasPrmSection(array_key_exists('hasPrmSection',
+                $rawComposition) && $rawComposition['hasPrmSection']); // Persons with Reduced Mobility
+        $trainCompositionUnit->setHasPriorityPlaces($rawComposition['hasPriorityPlaces'] ?: false);
+        $trainCompositionUnit->setTractionType($rawComposition['tractionType'] ?: 'unknown');
+        $trainCompositionUnit->setCanPassToNextUnit($rawComposition['canPassToNextUnit'] ?: false);
+        $trainCompositionUnit->setStandingPlacesSecondClass($rawComposition['standingPlacesSecondClass'] ?: 0);
+        $trainCompositionUnit->setStandingPlacesFirstClass($rawComposition['standingPlacesFirstClass'] ?: 0);
+        $trainCompositionUnit->setSeatsCoupeSecondClass($rawComposition['seatsCoupeSecondClass'] ?: 0);
+        $trainCompositionUnit->setSeatsCoupeFirstClass($rawComposition['seatsCoupeFirstClass'] ?: 0);
+        $trainCompositionUnit->setSeatsSecondClass($rawComposition['seatsSecondClass'] ?: 0);
+        $trainCompositionUnit->setSeatsFirstClass($rawComposition['seatsFirstClass'] ?: 0);
+        $trainCompositionUnit->setLengthInMeter($rawComposition['lengthInMeter'] ?: 0);
+        $trainCompositionUnit->setTractionPosition($rawComposition['tractionPosition'] ?: 0);
+        $trainCompositionUnit->setHasSemiAutomaticInteriorDoors($rawComposition['hasSemiAutomaticInteriorDoors'] ?: false);
+        $trainCompositionUnit->setHasLuggageSection(array_key_exists('hasLuggageSection', $rawComposition) && $rawComposition['hasLuggageSection']);
 
         return $trainCompositionUnit;
     }
@@ -272,14 +269,14 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         // "materialSubTypeName": "AM80_c",
         // "parentMaterialSubTypeName": "AM80",
         // parentMaterialTypeName seems to be only present in case the subtype is not known. Therefore, it's presence indicates the lack of detailed data.
-        if (property_exists($rawCompositionUnit, 'parentMaterialTypeName')
-            || property_exists($rawCompositionUnit, 'parentMaterialSubTypeName')) {
-            $parentType = $rawCompositionUnit->parentMaterialSubTypeName;
+        if (array_key_exists('parentMaterialTypeName', $rawCompositionUnit)
+            || array_key_exists('parentMaterialSubTypeName', $rawCompositionUnit)) {
+            $parentType = $rawCompositionUnit['parentMaterialSubTypeName'];
             if (str_contains($parentType, '-')) {
                 $parentType = explode('-', $parentType)[0]; // AM62-66 should become AM62
             }
-            if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-                $subType = explode('_', $rawCompositionUnit->materialSubTypeName)[1]; // C
+            if (array_key_exists('materialSubTypeName', $rawCompositionUnit)) {
+                $subType = explode('_', $rawCompositionUnit['materialSubTypeName'])[1]; // C
             } else {
                 // This data isn't available in the planning stage
                 $subType = self::calculateAmMrSubType($parentType, $position);
@@ -349,22 +346,22 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
     private static function getHleMaterialType($rawCompositionUnit): RollingMaterialType
     {
         // Electric locomotives
-        if (property_exists($rawCompositionUnit, 'materialSubTypeName')
-            && str_starts_with($rawCompositionUnit->materialSubTypeName, 'HLE')) {
-            $parentType = substr($rawCompositionUnit->materialSubTypeName, 0, 5); //HLE27
-            $subType = substr($rawCompositionUnit->materialSubTypeName, 5);
-        } elseif (property_exists($rawCompositionUnit, 'materialTypeName') && $rawCompositionUnit->materialTypeName == 'M7BMX') {
+        if (array_key_exists('materialSubTypeName', $rawCompositionUnit)
+            && str_starts_with($rawCompositionUnit['materialSubTypeName'], 'HLE')) {
+            $parentType = substr($rawCompositionUnit['materialSubTypeName'], 0, 5); //HLE27
+            $subType = substr($rawCompositionUnit['materialSubTypeName'], 5);
+        } elseif (array_key_exists('materialTypeName', $rawCompositionUnit) && $rawCompositionUnit['materialTypeName'] == 'M7BMX') {
             $parentType = 'M7';
             $subType = 'BMX';
-        } elseif (property_exists($rawCompositionUnit, 'materialSubTypeName') && str_starts_with(
-            $rawCompositionUnit->materialSubTypeName,
+        } elseif (array_key_exists('materialSubTypeName', $rawCompositionUnit) && str_starts_with(
+                $rawCompositionUnit['materialSubTypeName'],
             'M7'
         )) { // HV mislabeled as HLE :(
             $parentType = 'M7';
-            $subType = substr($rawCompositionUnit->materialSubTypeName, 2);
+            $subType = substr($rawCompositionUnit['materialSubTypeName'], 2);
         } else {
-            $parentType = substr($rawCompositionUnit->materialTypeName, 0, 5); //HLE18
-            $subType = substr($rawCompositionUnit->materialTypeName, 5);
+            $parentType = substr($rawCompositionUnit['materialTypeName'], 0, 5); //HLE18
+            $subType = substr($rawCompositionUnit['materialTypeName'], 5);
         }
         return new RollingMaterialType($parentType, $subType);
     }
@@ -377,20 +374,20 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
     private static function getHvMaterialType($rawCompositionUnit): RollingMaterialType
     {
         // Separate carriages
-        if (property_exists($rawCompositionUnit, 'materialSubTypeName')) {
-            if (preg_match('/NS(\w+)$/', $rawCompositionUnit->materialSubTypeName, $matches) == 1) {
+        if (array_key_exists('materialSubTypeName', $rawCompositionUnit)) {
+            if (preg_match('/NS(\w+)$/', $rawCompositionUnit['materialSubTypeName'], $matches) == 1) {
                 // International NS train handling
                 $parentType = 'NS';
                 $subType = $matches[1];
             } else {
-                preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit->materialSubTypeName, $matches);
+                preg_match('/([A-Z]+\d+)(\s|_)?(.*)$/', $rawCompositionUnit['materialSubTypeName'], $matches);
                 $parentType = $matches[1]; // M6, I11
                 $subType = $matches[3]; // A, B, BDX, BUH, ...
             }
         } else {
             // Some special cases, typically when data is missing
-            if (property_exists($rawCompositionUnit, 'materialTypeName')) {
-                $parentType = $rawCompositionUnit->materialTypeName;
+            if (array_key_exists('materialTypeName', $rawCompositionUnit)) {
+                $parentType = $rawCompositionUnit['materialTypeName'];
             } else {
                 $parentType = 'unknown';
             }
@@ -413,7 +410,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
                 $json = $cachedJsonData->getValue();
                 $compositionData = $this->getCompositionPlan($json, $vehicle);
 
-                if ($compositionData[0]->confirmedBy == 'Planning' || count($compositionData[0]->materialUnits) < 2) {
+                if ($compositionData[0]['confirmedBy'] == 'Planning' || count($compositionData[0]['materialUnits']) < 2) {
                     // Planning data often lacks detail. Store it for 5 minutes
                     $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
                 } else {
@@ -441,14 +438,14 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      * @param Vehicle $vehicle
      * @return mixed
      */
-    public function getCompositionPlan(mixed $json, Vehicle $vehicle): mixed
+    public function getCompositionPlan(array $json, Vehicle $vehicle): mixed
     {
         // lastPlanned is likely the latest update, commercialPlanned is likely the timetabled planning
-        $hasLastPlannedData = property_exists($json, 'lastPlanned');
-        $hasCommercialPlannedData = property_exists($json, 'commercialPlanned');
+        $hasLastPlannedData = key_exists('lastPlanned', $json);
+        $hasCommercialPlannedData = key_exists('commercialPlanned', $json);
         if (!$hasLastPlannedData && !$hasCommercialPlannedData) {
             throw new CompositionUnavailableException($vehicle->getId());
         }
-        return $hasLastPlannedData ? $json->lastPlanned : $json->commercialPlanned;
+        return $hasLastPlannedData ? $json['lastPlanned'] : $json['commercialPlanned'];
     }
 }
