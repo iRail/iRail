@@ -17,7 +17,7 @@ class RawDataRepositoryIntegrationTest extends TestCase
     public function testGetFreshLiveboardData_brusselsSouth_shouldReturnValidJson()
     {
         $repo = new NmbsRivRawDataRepository(new StationsRepository(), new CurlProxy());
-        $liveboardData = (string)$repo->getLiveboardData(
+        $liveboardData = $repo->getLiveboardData(
             $this->createLiveboardRequest(
                 '008814001',
                 TimeSelection::DEPARTURE,
@@ -26,8 +26,9 @@ class RawDataRepositoryIntegrationTest extends TestCase
             )
         )->getValue();
         self::assertNotEmpty($liveboardData);
-        self::assertTrue(strlen($liveboardData) > 100, 'Liveboard raw data is shorter than expected');
-        self::assertTrue(str_contains($liveboardData, 'DestinationNl'), 'Liveboard raw data should contain the expected destination field');
+        $stringValue = json_encode($liveboardData);
+        self::assertTrue(strlen($stringValue) > 100, 'Liveboard raw data is shorter than expected');
+        self::assertTrue(str_contains($stringValue, 'DestinationNl'), 'Liveboard raw data should contain the expected destination field');
     }
 
     public function testGetFreshVehicleJourneyData_IC1545_shouldReturnValidJson()
@@ -41,8 +42,9 @@ class RawDataRepositoryIntegrationTest extends TestCase
             )
         )->getValue();
         self::assertNotEmpty($vehicleJourneyData);
-        self::assertTrue(strlen($vehicleJourneyData) > 100, 'Vehicle journey raw data is shorter than expected');
-        self::assertTrue(str_contains($vehicleJourneyData, '1545'), 'Vehicle journey raw data should contain the vehicle name');
+        $stringValue = json_encode($vehicleJourneyData);
+        self::assertTrue(strlen($stringValue) > 100, 'Vehicle journey raw data is shorter than expected');
+        self::assertTrue(str_contains($stringValue, '1545'), 'Vehicle journey raw data should contain the vehicle name');
     }
 
     private function createLiveboardRequest(string $station, TimeSelection $timeSelection, string $language, Carbon $dateTime): LiveboardRequest

@@ -79,7 +79,7 @@ class RivClient
      * @return array JSON data as an associative array
      * @throws UpstreamServerException
      */
-    public function validateAndDecodeRivResponse(string $response): array
+    public static function validateAndDecodeRivResponse(string $response): array
     {
         if (empty($response)) {
             throw new UpstreamServerException('The server did not return any data.', 500);
@@ -94,8 +94,8 @@ class RivClient
             Log::error($response);
             throw new UpstreamServerException('iRail could not read data from the remote server.');
         }
-        $this->throwExceptionOnRivException($json);
-        $this->throwExceptionOnHafasErrorCode($json);
+        self::throwExceptionOnRivException($json);
+        self::throwExceptionOnHafasErrorCode($json);
         return $json;
     }
 
@@ -103,7 +103,7 @@ class RivClient
      * @param mixed $json
      * @return void
      */
-    public function throwExceptionOnRivException(mixed $json): void
+    private static function throwExceptionOnRivException(mixed $json): void
     {
 
         if (array_key_exists('exception', $json) && str_starts_with($json['exception'], 'Hacon response time exceeded the defined timeout')) {
@@ -117,7 +117,7 @@ class RivClient
      * @param array $json The JSON response as an associative array.
      *
      */
-    private function throwExceptionOnHafasErrorCode(array $json): void
+    private static function throwExceptionOnHafasErrorCode(array $json): void
     {
         if (!key_exists('errorCode', $json)) {
             // all ok!

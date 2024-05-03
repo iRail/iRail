@@ -8,7 +8,6 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
-use Illuminate\Support\Facades\App;
 use Irail\Database\OccupancyDao;
 use Irail\Database\OccupancyDaoPerformanceMode;
 use Irail\Exceptions\Internal\UnknownStopException;
@@ -41,13 +40,14 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
     public function __construct(
         StationsRepository $stationsRepository,
         GtfsTripStartEndExtractor $gtfsTripStartEndExtractor,
-        NmbsRivRawDataRepository $rivDataRepository
+        NmbsRivRawDataRepository $rivDataRepository,
+        OccupancyDao $occupancyDao
     ) {
         $this->stationsRepository = $stationsRepository;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
 
         $this->rivDataRepository = $rivDataRepository;
-        $this->occupancyRepository = App::make(OccupancyDao::class);
+        $this->occupancyRepository = $occupancyDao;
         $this->setCachePrefix('NmbsRivLiveboardRepository');
     }
 
