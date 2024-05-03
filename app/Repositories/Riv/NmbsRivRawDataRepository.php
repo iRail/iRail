@@ -26,7 +26,7 @@ class NmbsRivRawDataRepository
     use Cache;
     use BasedOnHafas;
 
-    const string JOURNEY_DETAIL_REF_PREFIX = "journeyDetailRef|";
+    const string JOURNEY_DETAIL_REF_PREFIX = 'journeyDetailRef|';
     private StationsRepository $stationsRepository;
     private RivClient $rivClient;
 
