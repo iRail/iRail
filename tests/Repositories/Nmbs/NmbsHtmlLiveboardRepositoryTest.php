@@ -3,8 +3,11 @@
 namespace Tests\Repositories\Nmbs;
 
 use Carbon\Carbon;
+use Irail\Database\OccupancyDao;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
+use Irail\Models\OccupancyInfo;
+use Irail\Models\OccupancyLevel;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Irail\StationsRepository;
 use Irail\Repositories\Nmbs\NmbsHtmlLiveboardRepository;
@@ -34,9 +37,13 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             // language is not passed, since we need to parse the resulting webpage
         ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_departuresAntwerpen.html');
 
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
+
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
         $gtfsStartEndExtractor->expects('getStartDate')->times(50)->andReturn(Carbon::create(2023, 12, 15));
-        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor);
+
+        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor, $occupancyDao);
         $request = $this->createRequest('008821006', TimeSelection::DEPARTURE, 'NL', Carbon::create(2023, 12, 15, 12, 58));
         $response = $liveboardRepo->getLiveboard($request);
 
@@ -71,10 +78,13 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             'start'                   => 'yes'
             // language is not passed, since we need to parse the resulting webpage
         ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_platformChanges.html');
+        $occupancyDao = Mockery::mock(OccupancyDao::class);
+        $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
 
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
         $gtfsStartEndExtractor->expects('getStartDate')->times(52)->andReturn(Carbon::create(2023, 12, 15));
-        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor);
+
+        $liveboardRepo = new NmbsHtmlLiveboardRepository($stationsRepo, $curlProxy, $gtfsStartEndExtractor, $occupancyDao);
         $request = $this->createRequest('008814001', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 28, 15, 50));
         $response = $liveboardRepo->getLiveboard($request);
 

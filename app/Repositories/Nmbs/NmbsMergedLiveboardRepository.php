@@ -3,6 +3,7 @@
 namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
+use Irail\Database\OccupancyDao;
 use Irail\Http\Requests\LiveboardRequest;
 use Irail\Models\Result\LiveboardSearchResult;
 use Irail\Proxy\CurlProxy;
@@ -20,9 +21,11 @@ class NmbsMergedLiveboardRepository implements LiveboardRepository
     {
         if ($this->isOutsideRivDateRange($request)) {
             // Fallback to HTML data for requests far in the past or future
-            $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class), app(GtfsTripStartEndExtractor::class));
+            $repo = new NmbsHtmlLiveboardRepository(app(StationsRepository::class), app(CurlProxy::class),
+                app(GtfsTripStartEndExtractor::class), app(OccupancyDao::class));
         } else {
-            $repo = new NmbsRivLiveboardRepository(app(StationsRepository::class), app(GtfsTripStartEndExtractor::class), app(NmbsRivRawDataRepository::class));
+            $repo = new NmbsRivLiveboardRepository(app(StationsRepository::class), app(GtfsTripStartEndExtractor::class),
+                app(NmbsRivRawDataRepository::class), app(OccupancyDao::class));
         }
         return $repo->getLiveboard($request);
     }

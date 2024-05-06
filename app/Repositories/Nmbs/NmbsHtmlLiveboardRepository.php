@@ -7,6 +7,8 @@ namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
+use Irail\Database\OccupancyDao;
+use Irail\Database\OccupancyDaoPerformanceMode;
 use Irail\Exceptions\NoResultsException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
@@ -35,20 +37,24 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
     private StationsRepository $stationsRepository;
     private CurlProxy $curlProxy;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
+    private OccupancyDao $occupancyRepository;
 
     /**
      * @param StationsRepository        $stationsRepository
      * @param CurlProxy                 $curlProxy
      * @param GtfsTripStartEndExtractor $gtfsTripStartEndExtractor Used to find the departure date for trips
+     * @param OccupancyDao              $occupancyRepository
      */
     public function __construct(
         StationsRepository $stationsRepository,
         CurlProxy $curlProxy,
-        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor
+        GtfsTripStartEndExtractor $gtfsTripStartEndExtractor,
+        OccupancyDao $occupancyRepository
     ) {
         $this->stationsRepository = $stationsRepository;
         $this->curlProxy = $curlProxy;
         $this->gtfsTripStartEndExtractor = $gtfsTripStartEndExtractor;
+        $this->occupancyRepository = $occupancyRepository;
         $this->setCachePrefix('NMBS');
     }
 
@@ -246,7 +252,7 @@ class NmbsHtmlLiveboardRepository implements LiveboardRepository
 
             $stopAtStation->setIsExtra(false); // Not available from this data source
             $stopAtStation->setIsReported(false); // Not available from this data source
-
+            $stopAtStation->setOccupancy($this->occupancyRepository->getOccupancy($stopAtStation, null, OccupancyDaoPerformanceMode::STATION));
             $departureArrivals[] = $stopAtStation;
         }
 
