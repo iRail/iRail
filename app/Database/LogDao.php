@@ -84,22 +84,6 @@ class LogDao
     }
 
     /**
-     * @param Carbon $date
-     * @return LogEntry[]
-     */
-    public function readLogsForDate(Carbon $date): array
-    {
-        $start = $date->startOfDay()->utc();
-        $end = $date->endOfDay()->utc();
-        // Database timestamps are UTC
-        $rows = DB::select(
-            'SELECT id, query_type, query, result, user_agent, created_at FROM request_log WHERE created_at BETWEEN ? AND ? ORDER BY created_at',
-            [$start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]
-        );
-        return $this->transformRows($rows);
-    }
-
-    /**
      * Obfuscate an email address in a user agent. abcd@defg.be becomes a***@d***.be.
      *
      * @param $userAgent
