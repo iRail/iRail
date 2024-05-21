@@ -55,7 +55,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
             $cacheAge = $cachedData->getAge();
-
+            $journey = $this->standardizeJourneyType($journey); //
             $exception = false; // Track and save the last exception during parsing
             // Build a result
             $segments = [];
@@ -446,5 +446,23 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         }
         $compositionData = $hasLastPlannedData ? $json->lastPlanned : $json->commercialPlanned;
         return $compositionData;
+    }
+
+    /**
+     * @param Vehicle $journey
+     * @return Vehicle
+     */
+    function standardizeJourneyType(Vehicle $journey): Vehicle
+    {
+        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination(
+            $journey->getId(),
+            $journey->getJourneyStartDate()
+        );
+        $journey = Vehicle::fromTypeAndNumber(
+            $journeyWithOriginAndDestination->getJourneyType(),
+            $journeyWithOriginAndDestination->getJourneyNumber(),
+            $journey->getJourneyStartDate()
+        );
+        return $journey;
     }
 }
