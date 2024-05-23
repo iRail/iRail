@@ -323,20 +323,26 @@ class HistoricCompositionDao
             return;
         }
         $startTime = microtime(true);
+        $date = Carbon::now()->startOfDay();
 
         /**
          * @var $compositions CompositionHistoryEntry[]
          */
-        $compositions = CompositionHistoryEntry::where('journey_start_date', Carbon::now()->startOfDay())
+        $compositions = CompositionHistoryEntry::where('journey_start_date', $date)
             ->get()->all();
 
+        $compositionUnitCounts = DB::select('Select historic_composition_id, count(1) as length FROM composition_unit_usage
+                WHERE EXISTS(Select 1 FROM composition_history WHERE id = historic_composition_id AND journey_start_date = ?)
+                GROUP BY historic_composition_id', [$date]);
+        $lengths = [];
+        foreach ($compositionUnitCounts as $row) {
+            $lengths[$row->historic_composition_id] = $row->length;
+        }
+
         foreach ($compositions as $compositionEntry) {
-            $length = DB::selectOne('Select count(1) FROM composition_unit_usage WHERE historic_composition_id = ?', [
-                $compositionEntry->getId()
-            ]);
 
             $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
-            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $length, $ttl);
+            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $lengths[$compositionEntry->getId()], $ttl);
         }
 
         $duration = floor((microtime(true) - $startTime) * 1000);
