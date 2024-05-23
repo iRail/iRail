@@ -229,10 +229,11 @@ class OccupancyDao
     ): array {
         if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
             $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+            return key_exists($stationId, $levels) ? $levels[$stationId] : [];
         } else {
             $levels = $this->readLevelsForStation($source, $stationId, $vehicleJourneyStartDate);
+            return key_exists($vehicleId, $levels) ? $levels[$vehicleId] : [];
         }
-        return key_exists($stationId, $levels) ? $levels[$stationId] : [];
     }
 
     /**
