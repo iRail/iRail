@@ -5,6 +5,7 @@ namespace Irail\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
 use Irail\Database\OccupancyDao;
 use Irail\Models\Dao\LogQueryType;
@@ -54,7 +55,14 @@ class StatusController extends BaseIrailController
         $occupancyDao = app(OccupancyDao::class);
         $occupancyDao->readLevelsForDateIntoCache(Carbon::now());
 
-        // Step 2: preload GTFS data, which is performed if the cache has expired
+        // Step 2: preload composition data, which is only performed once
+        /**
+         * @var HistoricCompositionDao $compositionDao
+         */
+        $compositionDao = app(HistoricCompositionDao::class);
+        $compositionDao->warmupCache();
+
+        // Step 3: preload GTFS data, which is performed if the cache has expired
         Log::info('Warming up GTFS Cache');
         if ($this->gtfsRepository->getCachedTrips()) {
             Log::info('GTFS cache is already loaded, not warming up');

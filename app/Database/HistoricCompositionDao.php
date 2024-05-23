@@ -313,11 +313,37 @@ class HistoricCompositionDao
     }
 
     /**
+     * Check the database and mark recorded trains as recorded in the cache, to prevent needless writes.
+     * @return void
+     */
+    public function warmupCache()
+    {
+        if (Cache::has('HistoricCompositionDao_cache_primed')) {
+            Log::debug('HistoricCompositionDao.warmupCache: Cache already primed, doing nothing');
+            return;
+        }
+        $compositions = CompositionHistoryEntry::where('journey_start_date', Carbon::now()->startOfDay())
+            ->get()->all();
+
+        foreach ($compositions as $compositionEntry) {
+            $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
+            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $compositionEntry->getLength(), $ttl);
+        }
+        Log::info('HistoricCompositionDao.warmupCache() marked ' . count($compositions) . ' compositions as recorded based on database records');
+        Cache::forever('HistoricCompositionDao_cache_primed', true);
+    }
+
+    /**
      * @param TrainComposition $composition
      * @return string
      */
-    public function getRecordedStatusCacheKey(TrainComposition $composition): string
+    public function getRecordedStatusCacheKey(TrainComposition|CompositionHistoryEntry $composition): string
     {
+        if ($composition instanceof CompositionHistoryEntry) {
+            return 'historicCompositionRecorded:'
+                . ":{$composition->getJourneyNumber()}"
+                . ":{$composition->getFromStationId()}:{$composition->getToStationId()}";
+        }
         return 'historicCompositionRecorded:'
             . ":{$composition->getVehicle()->getId()}"
             . ":{$composition->getOrigin()->getId()}:{$composition->getDestination()->getId()}";
