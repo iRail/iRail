@@ -10,6 +10,7 @@ use Irail\Models\Dao\OccupancyReportSource;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
+use Irail\Repositories\Irail\StationsRepository;
 use Spatie\Async\Pool;
 
 class OccupancyDao
@@ -360,28 +361,40 @@ class OccupancyDao
                 $vehicleJourneyStartDate->copy()->startOfDay()
             ]
         );
+
+        /**
+         * @var StationsRepository $stationsRepo
+         */
+        $stationsRepo = app(StationsRepository::class);
+
         // Convert the results
         $byStop = [];
         $byJourney = [];
+
+        foreach ($stationsRepo->getAllStations() as $station) {
+            $byStop[intval($station->getId())] = []; // Initialize all stations, so even "empty" stations are present and cached
+        }
+
         foreach ($rows as $row) {
             $occupancyLevel = OccupancyLevel::fromIntValue($row->occupancy);
             // By stop ID
-            if (!key_exists($row->stop_id, $byStop)) {
-                $byStop[$row->stop_id] = [];
+            $stopId = $row->stop_id;
+            if (!key_exists($stopId, $byStop)) {
+                $byStop[$stopId] = [];
             }
-            if (!key_exists($row->vehicle_id, $byStop[$row->stop_id])) {
-                $byStop[$row->stop_id][$row->vehicle_id] = [];
+            if (!key_exists($row->vehicle_id, $byStop[$stopId])) {
+                $byStop[$stopId][$row->vehicle_id] = [];
             }
-            $byStop[$row->stop_id][$row->vehicle_id][] = $occupancyLevel;
+            $byStop[$stopId][$row->vehicle_id][] = $occupancyLevel;
 
             // By vehicle ID
             if (!key_exists($row->vehicle_id, $byJourney)) {
                 $byJourney[$row->vehicle_id] = [];
             }
-            if (!key_exists($row->stop_id, $byJourney[$row->vehicle_id])) {
+            if (!key_exists($stopId, $byJourney[$row->vehicle_id])) {
                 $byJourney[$row->vehicle_id][$row->vehicle_id] = [];
             }
-            $byJourney[$row->stop_id][$row->vehicle_id][] = $occupancyLevel;
+            $byJourney[$stopId][$row->vehicle_id][] = $occupancyLevel;
         }
         foreach ($byStop as $stationId => $journeysWithOccupancy) {
             $cacheKey = $this->getOccupancyKey($source, null, $stationId, $vehicleJourneyStartDate); // Cache at station level
