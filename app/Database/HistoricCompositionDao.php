@@ -322,14 +322,26 @@ class HistoricCompositionDao
             Log::debug('HistoricCompositionDao.warmupCache: Cache already primed, doing nothing');
             return;
         }
+        $startTime = microtime(true);
+
+        /**
+         * @var $compositions CompositionHistoryEntry[]
+         */
         $compositions = CompositionHistoryEntry::where('journey_start_date', Carbon::now()->startOfDay())
             ->get()->all();
 
         foreach ($compositions as $compositionEntry) {
+            $length = DB::selectOne('Select count(1) FROM composition_unit_usage WHERE historic_composition_id = ?', [
+                $compositionEntry->getId()
+            ]);
+
             $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
-            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $compositionEntry->getLength(), $ttl);
+            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $length, $ttl);
         }
-        Log::info('HistoricCompositionDao.warmupCache() marked ' . count($compositions) . ' compositions as recorded based on database records');
+
+        $duration = floor((microtime(true) - $startTime) * 1000);
+
+        Log::info('HistoricCompositionDao.warmupCache() marked ' . count($compositions) . " compositions as recorded based on database records in $duration ms");
         Cache::forever('HistoricCompositionDao_cache_primed', true);
     }
 
