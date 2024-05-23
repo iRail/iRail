@@ -329,7 +329,7 @@ class HistoricCompositionDao
          * @var $compositions CompositionHistoryEntry[]
          */
         $compositions = CompositionHistoryEntry::where('journey_start_date', $date)
-            ->get()->all();
+            ->get()->all(); // Selecting complete objects first
 
         $compositionUnitCounts = DB::select('Select historic_composition_id, count(1) as length FROM composition_unit_usage
                 WHERE EXISTS(Select 1 FROM composition_history WHERE id = historic_composition_id AND journey_start_date = ?)
@@ -339,15 +339,19 @@ class HistoricCompositionDao
             $lengths[$row->historic_composition_id] = $row->length;
         }
 
+        $cachedRows = 0;
         foreach ($compositions as $compositionEntry) {
-
-            $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
-            Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $lengths[$compositionEntry->getId()], $ttl);
+            // The cache should be able to handle changes in the data due to other instances altering the database in-between queries
+            if (array_key_exists($compositionEntry->getId(), $lengths)) {
+                $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
+                Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $lengths[$compositionEntry->getId()], $ttl);
+                $cachedRows++;
+            }
         }
 
         $duration = floor((microtime(true) - $startTime) * 1000);
 
-        Log::info('HistoricCompositionDao.warmupCache() marked ' . count($compositions) . " compositions as recorded based on database records in $duration ms");
+        Log::info("HistoricCompositionDao.warmupCache() marked $cachedRows out of " . count($compositions) . " compositions as recorded based on database records in $duration ms");
         Cache::forever('HistoricCompositionDao_cache_primed', true);
     }
 
