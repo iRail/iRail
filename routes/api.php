@@ -17,31 +17,59 @@ use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Router;
 
 $router->get('/stations{suffix:.*}', function (Request $request) use ($router) {
-    return redirect(route('v1.stations', $_GET, $request->isSecure()));
+    return redirect(route('v1.stations', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/liveboard{suffix:.*}', function (Request $request) use ($router) {
-    return redirect(route('v1.liveboard', $_GET, $request->isSecure()));
+    return redirect(route('v1.liveboard', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/connections{suffix:.*}', function (Request $request) use ($router) {
-    return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()));
+    return redirect(route('v1.journeyPlanning', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/vehicle{suffix:.*}', function (Request $request) use ($router) {
-    return redirect(route('v1.datedVehicleJourney', $_GET, $request->isSecure()));
+    return redirect(route('v1.datedVehicleJourney', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/disturbances{suffix:.*}', function (Request $request) use ($router) {
-    return redirect(route('v1.serviceAlerts', $_GET, $request->isSecure()));
+    return redirect(route('v1.serviceAlerts', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/composition', function (Request $request) use ($router) {
-    return redirect(route('v1.composition', $_GET, $request->isSecure()));
+    return redirect(route('v1.composition', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 $router->get('/logs', function (Request $request) use ($router) {
-    return redirect(route('v1.logs', $_GET, $request->isSecure()));
+    return redirect(route('v1.logs', $_GET, $request->isSecure()), 301, [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Headers'  => '*',
+        'Access-Control-Expose-Headers' => '*',
+    ]);
 });
 
 // Can't redirect a POST request, so handle this twice
