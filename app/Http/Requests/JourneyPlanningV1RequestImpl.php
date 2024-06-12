@@ -29,9 +29,11 @@ class JourneyPlanningV1RequestImpl extends IrailHttpRequest implements JourneyPl
 
         // Both casing styles have been used in the past and should be supported for backwards compatibility
         if ($this->_request->has('timesel')) {
-            $this->timeSelection = $this->_request->has('timesel') ? $this->parseV1DepartureArrival($this->_request->get('timesel')) : TimeSelection::DEPARTURE;
+            $this->timeSelection = $this->parseV1DepartureArrival($this->_request->get('timesel'));
         } elseif ($this->_request->has('timeSel')) {
-            $this->timeSelection = $this->_request->has('timeSel') ? $this->parseV1DepartureArrival($this->_request->get('timeSel')) : TimeSelection::DEPARTURE;
+            $this->timeSelection = $this->parseV1DepartureArrival($this->_request->get('timeSel'));
+        } else {
+            $this->timeSelection = TimeSelection::DEPARTURE;
         }
 
         if ($this->_request->has('typeOfTransport')) {
