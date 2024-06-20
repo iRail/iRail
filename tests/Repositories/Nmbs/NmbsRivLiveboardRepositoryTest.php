@@ -19,7 +19,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
     public function testGetLiveboard_departureBoardNormalCase_shouldParseDataCorrectly(): void
     {
         $request = $this->createRequest('008892007', TimeSelection::DEPARTURE, 'NL', Carbon::create(2022, 12, 11, 20, 20));
-        $rivRepo = $this->mockFixtureLiveboardResponse($request, 'departures/NmbsRivLiveboardRepositoryTest_ghentDepartures.json');
+        $rivRepo = $this->mockFixtureLiveboardResponse($request, 'departures/ghentDepartures.json');
 
         $stationsRepo = new StationsRepository();
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
@@ -51,7 +51,7 @@ class NmbsRivLiveboardRepositoryTest extends TestCase
     public function testGetLiveboard_canceledDeparture_shouldBeMarkedAsCanceled(): void
     {
         $request = $this->createRequest('008821006', TimeSelection::DEPARTURE, 'NL', Carbon::create(2024, 1, 7, 14, 50));
-        $rivRepo = $this->mockFixtureLiveboardResponse($request, 'departures/NmbsRivLiveboardRepositoryTest_antwerpDepartures.json');
+        $rivRepo = $this->mockFixtureLiveboardResponse($request, 'departures/antwerpDepartures.json');
 
         $stationsRepo = new StationsRepository();
         $gtfsStartEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);

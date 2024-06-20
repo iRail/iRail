@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Repositories\Nmbs;
+namespace Http;
 
 use Carbon\Carbon;
 use Irail\Database\OccupancyDao;
@@ -35,7 +35,7 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             'realtimeMode'            => 'show',
             'start'                   => 'yes'
             // language is not passed, since we need to parse the resulting webpage
-        ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_departuresAntwerpen.html');
+        ], [], 200, __DIR__ . '/../Fixtures/departures/departuresAntwerpen.html');
 
         $occupancyDao = Mockery::mock(OccupancyDao::class);
         $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
@@ -77,7 +77,7 @@ class NmbsHtmlLiveboardRepositoryTest extends TestCase
             'realtimeMode'            => 'show',
             'start'                   => 'yes'
             // language is not passed, since we need to parse the resulting webpage
-        ], [], 200, __DIR__ . '/NmbsHtmlLiveboardRepositoryTest_platformChanges.html');
+        ], [], 200, __DIR__ . '/../Fixtures/departures/platformChanges.html');
         $occupancyDao = Mockery::mock(OccupancyDao::class);
         $occupancyDao->shouldReceive('getOccupancy')->andReturn(new OccupancyInfo(OccupancyLevel::UNKNOWN, OccupancyLevel::UNKNOWN));
 
