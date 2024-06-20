@@ -28,7 +28,8 @@ class NmbsRivCompositionRepositoryTest extends TestCase
         $vehicle = Vehicle::fromName('92271', Carbon::create(2024, 4, 27));
 
         $rawRivDataRepo->expects('getVehicleCompositionData')->with($vehicle, $journeyStartEnd)->andReturn(
-            new CachedData('test', file_get_contents(__DIR__ . '/../../Fixtures/composition/NmbsRivComposition_ic9271_emptyResponse.json'), 1)
+            new CachedData('test', json_decode(file_get_contents(__DIR__ . '/../../Fixtures/composition/NmbsRivComposition_ic9271_emptyResponse.json'), true),
+                1)
         );
 
         try {
@@ -43,13 +44,11 @@ class NmbsRivCompositionRepositoryTest extends TestCase
     {
         $vehicle = Vehicle::fromName('13606', Carbon::create(2024, 4, 27));
         $journeyStartEnd = new JourneyWithOriginAndDestination('test', '', 0, '', Carbon::now()->secondsSinceMidnight(), '', 0);
-        $rivRawDataRepo = $this->mockFixtureVehicleCompositionResponse($vehicle,$journeyStartEnd,'composition/NmbsRivComposition_ic13606_missingDetails_OR.json');
+        $rivRawDataRepo = $this->mockFixtureVehicleCompositionResponse($vehicle, $journeyStartEnd,
+            'composition/NmbsRivComposition_ic13606_missingDetails_OR.json');
         $startEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);
         $startEndExtractor->shouldReceive('getVehicleWithOriginAndDestination')->andReturn($journeyStartEnd);
         $rivCompositionRepo = new NmbsRivCompositionRepository(new StationsRepository(), $rivRawDataRepo, $startEndExtractor);
-
-
-
 
         $result = $rivCompositionRepo->getComposition($vehicle);
         self::assertCount(1, $result->getSegments());

@@ -25,7 +25,7 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
         $this->assertEquals('Lierre / Lier & Anvers-Central / Antwerpen-Centraal', $result->getVehicle()->getDirection()->getName());
         $this->assertEquals('008821006', $result->getVehicle()->getDirection()->getStation()->getId());
         $this->assertEquals('Antwerpen-Centraal', $result->getVehicle()->getDirection()->getStation()->getStationName());
-        $this->assertEquals(Carbon::create(2024, 1, 30), $result->getVehicle()->getJourneyStartDate());
+        $this->assertEquals(Carbon::create(2024, 1, 30, 0, 0, 0, 'Europe/Brussels'), $result->getVehicle()->getJourneyStartDate());
         $this->assertCount(13, $result->getStops());
     }
 
@@ -97,7 +97,7 @@ class NmbsRivVehicleJourneyRepositoryTest extends TestCase
         $this->assertEquals('Grammont / Geraardsbergen', $result->getVehicle()->getDirection()->getName());
         $this->assertEquals('008895505', $result->getVehicle()->getDirection()->getStation()->getId());
         $this->assertEquals('Geraardsbergen', $result->getVehicle()->getDirection()->getStation()->getStationName());
-        $this->assertEquals(Carbon::create(2024, 4, 27), $result->getVehicle()->getJourneyStartDate());
+        $this->assertEquals(Carbon::create(2024, 4, 27, 0, 0, 0, 'Europe/Brussels'), $result->getVehicle()->getJourneyStartDate());
         $this->assertCount(10, $result->getStops());
     }
 
