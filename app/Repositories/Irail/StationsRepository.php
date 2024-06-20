@@ -100,7 +100,7 @@ class StationsRepository
     /**
      * @return Station[]
      */
-    public function findAllStations(): array
+    public function getAllStations(): array
     {
         return array_map(fn ($stationCsv) => self::stationsCsvToStation($stationCsv), StationsCsv::getStations());
     }

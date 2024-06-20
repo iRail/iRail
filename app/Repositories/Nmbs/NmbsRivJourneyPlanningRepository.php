@@ -11,7 +11,6 @@ namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Irail\Database\OccupancyDao;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Internal\UnknownStopException;
@@ -136,11 +135,6 @@ class NmbsRivJourneyPlanningRepository implements JourneyPlanningRepository
         $connection->setLegs($trainsInConnection);
         $connection->setNotes(self::parseNotes($trip));
         $connection->setServiceAlerts($this->parseAlerts($trip));
-
-        if ($connection->getDurationSeconds() != $this->transformIso8601Duration($trip['duration'])) {
-            Log::warning('Duration does not match for connection. A possible parsing error has occured!');
-        }
-
         return $connection;
     }
 

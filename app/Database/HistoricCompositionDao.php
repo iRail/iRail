@@ -313,11 +313,59 @@ class HistoricCompositionDao
     }
 
     /**
+     * Check the database and mark recorded trains as recorded in the cache, to prevent needless writes.
+     * @return void
+     */
+    public function warmupCache()
+    {
+        if (Cache::has('HistoricCompositionDao_cache_primed')) {
+            Log::debug('HistoricCompositionDao.warmupCache: Cache already primed, doing nothing');
+            return;
+        }
+        $startTime = microtime(true);
+        $date = Carbon::now()->startOfDay();
+
+        /**
+         * @var $compositions CompositionHistoryEntry[]
+         */
+        $compositions = CompositionHistoryEntry::where('journey_start_date', $date)
+            ->get()->all(); // Selecting complete objects first
+
+        $compositionUnitCounts = DB::select('Select historic_composition_id, count(1) as length FROM composition_unit_usage
+                WHERE EXISTS(Select 1 FROM composition_history WHERE id = historic_composition_id AND journey_start_date = ?)
+                GROUP BY historic_composition_id', [$date]);
+        $lengths = [];
+        foreach ($compositionUnitCounts as $row) {
+            $lengths[$row->historic_composition_id] = $row->length;
+        }
+
+        $cachedRows = 0;
+        foreach ($compositions as $compositionEntry) {
+            // The cache should be able to handle changes in the data due to other instances altering the database in-between queries
+            if (array_key_exists($compositionEntry->getId(), $lengths)) {
+                $ttl = 3600 + rand(0, 7200); // Wait 1-3 hours before invalidating to spread out the load
+                Cache::set($this->getRecordedStatusCacheKey($compositionEntry), $lengths[$compositionEntry->getId()], $ttl);
+                $cachedRows++;
+            }
+        }
+
+        $duration = floor((microtime(true) - $startTime) * 1000);
+
+        Log::info("HistoricCompositionDao.warmupCache() marked $cachedRows out of " . count($compositions) . " compositions as recorded based on database records in $duration ms");
+        Cache::forever('HistoricCompositionDao_cache_primed', true);
+    }
+
+    /**
      * @param TrainComposition $composition
      * @return string
      */
-    public function getRecordedStatusCacheKey(TrainComposition $composition): string
+    public function getRecordedStatusCacheKey(TrainComposition|CompositionHistoryEntry $composition): string
     {
+        if ($composition instanceof CompositionHistoryEntry) {
+            return 'historicCompositionRecorded:'
+                . ":{$composition->getJourneyNumber()}"
+                . ":{$composition->getFromStationId()}:{$composition->getToStationId()}";
+        }
         return 'historicCompositionRecorded:'
             . ":{$composition->getVehicle()->getId()}"
             . ":{$composition->getOrigin()->getId()}:{$composition->getDestination()->getId()}";

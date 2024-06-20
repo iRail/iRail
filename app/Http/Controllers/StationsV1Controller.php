@@ -11,20 +11,21 @@ use Irail\Repositories\Irail\StationsRepository;
 
 class StationsV1Controller extends BaseIrailController
 {
+    private StationsRepository $repo;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(StationsRepository $repo)
     {
-        //
+        $this->repo = $repo;
     }
 
     public function list(StationsV1Request $request): Response
     {
-        $repo = app(StationsRepository::class);
-        $stations = $repo->findAllStations();
+        $stations = $this->repo->getAllStations();
         $dataRoot = StationsV1Converter::convert($request, $stations);
         $this->logRequest($request);
         return $this->outputV1($request, $dataRoot, 600); // Cache 10 minutes

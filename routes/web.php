@@ -20,5 +20,6 @@ $router->get('/', function () {
 });
 
 $router->get('/health', ['as' => 'status.health', 'uses' => 'StatusController@showStatus']);
-$router->get('/cache/loadGtfs', ['as' => 'cache.warmup', 'uses' => 'StatusController@warmupGtfsCache']);
+$router->get('/cache/loadGtfs', ['as' => 'cache.warmup', 'uses' => 'StatusController@warmupCache']);
+$router->get('/cache/preload', ['as' => 'cache.warmup', 'uses' => 'StatusController@warmupCache']);
 $router->get('/cache/clear', ['as' => 'cache.clear', 'uses' => 'StatusController@resetCache']);

@@ -13,6 +13,9 @@ class CompositionHistoryEntry extends Model
     protected $table = 'composition_history';
     const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
+    protected $casts = [
+        'journey_start_date' => 'date'
+    ];
 
     /**
      * @return string $journeyType The journey type, for example "IC" in IC 513
@@ -45,7 +48,7 @@ class CompositionHistoryEntry extends Model
     /**
      * @return Carbon $date The date on which this journey ran
      */
-    public function getDate(): Carbon
+    public function getJourneyStartDate(): Carbon
     {
         return $this->getAttribute('journey_start_date');
     }

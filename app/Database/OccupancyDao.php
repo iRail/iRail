@@ -10,6 +10,7 @@ use Irail\Models\Dao\OccupancyReportSource;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
+use Irail\Repositories\Irail\StationsRepository;
 use Spatie\Async\Pool;
 
 class OccupancyDao
@@ -229,10 +230,11 @@ class OccupancyDao
     ): array {
         if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
             $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+            return key_exists($stationId, $levels) ? $levels[$stationId] : [];
         } else {
             $levels = $this->readLevelsForStation($source, $stationId, $vehicleJourneyStartDate);
+            return key_exists($vehicleId, $levels) ? $levels[$vehicleId] : [];
         }
-        return key_exists($stationId, $levels) ? $levels[$stationId] : [];
     }
 
     /**
@@ -317,6 +319,92 @@ class OccupancyDao
         $duration = floor((microtime(true) - $startTime) * 1000);
         Log::debug("Queried occupancy levels for {$source->name}, stop $stationId in $duration ms, results: " . count($result));
         return $result;
+    }
+
+    /**
+     * Prime the cache by reading all NMBS reports for a given date at once. This prevents a large rush-in load on the database when deploying a new instance.
+     * This method will only perform its job once, afterwards it will do nothing.
+     *
+     * @param Carbon $vehicleJourneyStartDate The date to prime.
+     * @return void
+     */
+    public function readLevelsForDateIntoCache(Carbon $vehicleJourneyStartDate): void
+    {
+        if (Cache::has('OccupancyDao_cache_primed')) {
+            Log::debug('readLevelsForDateIntoCache: Cache already primed, doing nothing');
+            return;
+        }
+        $dateStr = $vehicleJourneyStartDate->toDateString();
+        Log::debug("Priming cache by reading occupancy levels for date $dateStr");
+        $startTime = microtime(true);
+
+        $rowCountNmbs = $this->readLevelsForDateAndFeedIntoCache(OccupancyReportSource::NMBS, $vehicleJourneyStartDate);
+        $rowCountSpitsgids = $this->readLevelsForDateAndFeedIntoCache(OccupancyReportSource::SPITSGIDS, $vehicleJourneyStartDate);
+
+        $duration = floor((microtime(true) - $startTime) * 1000);
+        Log::info("Primed cache by reading occupancy levels for $dateStr in $duration ms, rows read: " . ($rowCountNmbs + $rowCountSpitsgids));
+        Cache::forever('OccupancyDao_cache_primed', true);
+    }
+
+    /**
+     * Prime the cache by reading all NMBS reports for a given date at once. This prevents a large rush-in load on the database when deploying a new instance.
+     * @param OccupancyReportSource $source The source to prime.
+     * @param Carbon $vehicleJourneyStartDate The date to prime.
+     * @return int the number of rows which has been read.
+     */
+    public function readLevelsForDateAndFeedIntoCache(OccupancyReportSource $source, Carbon $vehicleJourneyStartDate): int
+    {
+        $rows = DB::select(
+            'SELECT stop_id, vehicle_id, occupancy FROM occupancy_reports WHERE source=? AND journey_start_date=?',
+            [
+                $source->value,
+                $vehicleJourneyStartDate->copy()->startOfDay()
+            ]
+        );
+
+        /**
+         * @var StationsRepository $stationsRepo
+         */
+        $stationsRepo = app(StationsRepository::class);
+
+        // Convert the results
+        $byStop = [];
+        $byJourney = [];
+
+        foreach ($stationsRepo->getAllStations() as $station) {
+            $byStop[intval($station->getId())] = []; // Initialize all stations, so even "empty" stations are present and cached
+        }
+
+        foreach ($rows as $row) {
+            $occupancyLevel = OccupancyLevel::fromIntValue($row->occupancy);
+            // By stop ID
+            $stopId = $row->stop_id;
+            if (!key_exists($stopId, $byStop)) {
+                $byStop[$stopId] = [];
+            }
+            if (!key_exists($row->vehicle_id, $byStop[$stopId])) {
+                $byStop[$stopId][$row->vehicle_id] = [];
+            }
+            $byStop[$stopId][$row->vehicle_id][] = $occupancyLevel;
+
+            // By vehicle ID
+            if (!key_exists($row->vehicle_id, $byJourney)) {
+                $byJourney[$row->vehicle_id] = [];
+            }
+            if (!key_exists($stopId, $byJourney[$row->vehicle_id])) {
+                $byJourney[$row->vehicle_id][$row->vehicle_id] = [];
+            }
+            $byJourney[$stopId][$row->vehicle_id][] = $occupancyLevel;
+        }
+        foreach ($byStop as $stationId => $journeysWithOccupancy) {
+            $cacheKey = $this->getOccupancyKey($source, null, $stationId, $vehicleJourneyStartDate); // Cache at station level
+            Cache::put($cacheKey, $journeysWithOccupancy, 3 * 3600 + rand(1, 60)); // Prevent all caches from expiring at the exact same time
+        }
+        foreach ($byJourney as $journeyId => $stopsWithOccupancy) {
+            $cacheKey = $this->getOccupancyKey($source, $journeyId, null, $vehicleJourneyStartDate); // Cache at station level
+            Cache::put($cacheKey, $stopsWithOccupancy, 3 * 3600 + rand(1, 60)); // Prevent all caches from expiring at the exact same time
+        }
+        return count($rows);
     }
 
     private function exportSpitsgidsReport(Carbon $reportDate): array

@@ -51,8 +51,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         $cachedResult = $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
             $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
-
-
+            $journey = $this->standardizeJourneyType($journey); //
             $exception = false; // Track and save the last exception during parsing
             // Build a result
             $segments = [];
@@ -447,5 +446,23 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             throw new CompositionUnavailableException($vehicle->getId());
         }
         return $hasLastPlannedData ? $json['lastPlanned'] : $json['commercialPlanned'];
+    }
+
+    /**
+     * @param Vehicle $journey
+     * @return Vehicle
+     */
+    function standardizeJourneyType(Vehicle $journey): Vehicle
+    {
+        $journeyWithOriginAndDestination = $this->gtfsTripStartEndExtractor->getVehicleWithOriginAndDestination(
+            $journey->getId(),
+            $journey->getJourneyStartDate()
+        );
+        $journey = Vehicle::fromTypeAndNumber(
+            $journeyWithOriginAndDestination->getJourneyType(),
+            $journeyWithOriginAndDestination->getJourneyNumber(),
+            $journey->getJourneyStartDate()
+        );
+        return $journey;
     }
 }

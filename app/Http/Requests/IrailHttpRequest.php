@@ -183,10 +183,16 @@ abstract class IrailHttpRequest extends LumenRequest
                 // Strip away seconds
                 $time = substr($time,0,4);
             }
-            return Carbon::createFromFormat('dmY Hi', $date . ' ' . $time);
+            $carbon = Carbon::createFromFormat('dmY Hi', $date . ' ' . $time);
+            if ($carbon->year < Carbon::now()->year - 1 || $carbon->year > Carbon::now()->year + 1) {
+                // The date format for old request isn't always intuitive, and is hard to check for reversed input (ymd instead of dmy)
+                // A sanity check on the year should catch most issues, since yyyymmdd will lead to "mmdd" being interpreted as years 0-1231
+                throw new InvalidRequestException('Ensure the date is not too far in the past or future, and in the ddmmyy or ddmmyyyy format.');
+            }
+            return $carbon;
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            throw new InvalidRequestException('Invalid date/time provided');
+            throw new InvalidRequestException('Invalid date/time provided. ' . $e->getMessage());
         }
     }
 

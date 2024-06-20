@@ -5,7 +5,9 @@ namespace Irail\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
+use Irail\Database\OccupancyDao;
 use Irail\Models\Dao\LogQueryType;
 use Irail\Repositories\Gtfs\GtfsRepository;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
@@ -44,8 +46,23 @@ class StatusController extends BaseIrailController
             . 'Opcache: ' . $opcacheStatus;
     }
 
-    public function warmupGtfsCache(): string
+    public function warmupCache(): string
     {
+        // Step 1: preload occupancy data, which is only performed once
+        /**
+         * @var OccupancyDao $occupancyDao
+         */
+        $occupancyDao = app(OccupancyDao::class);
+        $occupancyDao->readLevelsForDateIntoCache(Carbon::now());
+
+        // Step 2: preload composition data, which is only performed once
+        /**
+         * @var HistoricCompositionDao $compositionDao
+         */
+        $compositionDao = app(HistoricCompositionDao::class);
+        $compositionDao->warmupCache();
+
+        // Step 3: preload GTFS data, which is performed if the cache has expired
         Log::info('Warming up GTFS Cache');
         if ($this->gtfsRepository->getCachedTrips()) {
             Log::info('GTFS cache is already loaded, not warming up');
@@ -56,6 +73,7 @@ class StatusController extends BaseIrailController
         $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now());
         Log::info('Warmed up GTFS Cache');
         $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, ' . count($tripsToday) . ' today<br>';
+
         return $gtfsResult . $this->getMemoryStatus();
     }
 

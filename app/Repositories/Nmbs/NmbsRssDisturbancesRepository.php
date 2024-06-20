@@ -4,6 +4,7 @@ namespace Irail\Repositories\Nmbs;
 
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Irail\Http\Requests\ServiceAlertsRequest;
 use Irail\Models\Message;
 use Irail\Models\MessageLink;
@@ -128,8 +129,8 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
         // Loop through all news items.
         foreach ($data->channel->item as $item) {
             // Each string has to be converted to force parsing the CDATA. Also trim any leading or trailing newlines.
-            $title = trim((string) $item->title, "\r\n ");
-            $description = trim((string) $item->description, "\r\n ");
+            $title = trim((string)$item->title, "\r\n ");
+            $description = trim((string)$item->description, "\r\n ");
             $lead = explode('.', $description)[0];
 
             [$description, $links] = $this->extractLinks($description, $item, $request);
@@ -142,7 +143,12 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
             }
 
             preg_match('/&messageID=(\d)+/', $item->link, $matches);
-            $id = $matches[1];
+            if ($matches) {
+                $id = $matches[1];
+            } else {
+                Log::warning("Disturbance message without id! $title: $description");
+                $id = 0;
+            }
 
             $disturbances[] = new Message(
                 $id,
@@ -157,7 +163,6 @@ class NmbsRssDisturbancesRepository implements ServiceAlertsRepository
                 $links
             );
         }
-
         return $disturbances;
     }
 
