@@ -71,8 +71,14 @@ class StatusController extends BaseIrailController
         // Calling this method will load the cache
         $trips = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
         $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now());
+        // Yesterday and tomorrow are also frequently queried, and should be loaded in the cache to reduce risk for overloading a freshly started instance
+        $tripsYesterday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now()->subDay());
+        $tripsTomorrow = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now()->addDay());
         Log::info('Warmed up GTFS Cache');
-        $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, ' . count($tripsToday) . ' today<br>';
+        $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, '
+            . count($tripsToday) . ' today, '
+            . count($tripsYesterday) . ' yesterday, '
+            . count($tripsTomorrow) . ' tomorrow<br>';
 
         return $gtfsResult . $this->getMemoryStatus();
     }
