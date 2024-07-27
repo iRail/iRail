@@ -229,7 +229,7 @@ class GtfsTripStartEndExtractor
                 }
                 return $tripsWithStartAndEndDate[$dateYmd];
             },
-            ttl: 3600
+            ttl: 3600 + rand(10, 120) // Prevent all caches from expiring at the exact same time
         )->getValue();
 
         if ($vehicleDetailsForDate === null) {
