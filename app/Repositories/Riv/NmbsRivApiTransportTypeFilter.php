@@ -16,19 +16,21 @@ enum NmbsRivApiTransportTypeFilter: int
 
     // bitcodes for product selection:
     // national_express: bit 0 (Thalys, Eurostar, ...)
-    // national: bit 1 (???)
+    // bit 1, always 0 as of 08-2024
     // regional_exp: bit 2 (IC, P)
-    // regional: bit 3
+    // bit 3, always 0 as of 08-2024
     // suburban: bit 4 (S)
-    // bus: bit 5
-    // ferry: bit 6 (L ?!)
-    // subway: bit 7
-    // tram: bit 8
-    // taxi: bit 9
+    // EC trains: bit 5
+    // bit 6
+    // bit 7
+    // metro: bit 8
+    // bus: bit 9
+    // tram: bit 10
 
-    case TYPE_TRANSPORT_BITCODE_ALL = 511; // 0111111111 TODO: VERIFY
+    // bus and train 1001110101
+    case TYPE_TRANSPORT_BITCODE_ALL = 2047; // all ones
     case TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS = 94; // 0001011110 TODO: VERIFY
-    case TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = 95; // 0001011111 TODO: VERIFY
+    case TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = 117; // 0001110101
 
     public static function forTypeOfTransportFilter(string $fromStationId, string $toStationId, TypeOfTransportFilter $typeOfTransportFilter): NmbsRivApiTransportTypeFilter
     {
