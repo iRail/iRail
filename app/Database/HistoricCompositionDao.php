@@ -367,10 +367,12 @@ class HistoricCompositionDao
     {
         if ($composition instanceof CompositionHistoryEntry) {
             return 'historicCompositionRecorded:'
+                . ":{$composition->getJourneyStartDate()->format('Ymd')}"
                 . ":{$composition->getJourneyNumber()}"
                 . ":{$composition->getFromStationId()}:{$composition->getToStationId()}";
         }
         return 'historicCompositionRecorded:'
+            . ":{$composition->getVehicle()->getJourneyStartDate()->format('Ymd')}"
             . ":{$composition->getVehicle()->getId()}"
             . ":{$composition->getOrigin()->getId()}:{$composition->getDestination()->getId()}";
     }

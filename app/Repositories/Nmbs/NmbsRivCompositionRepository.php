@@ -26,6 +26,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
 {
     use Cache;
 
+    const int COMPOSITION_MAX_DAYS_IN_FUTURE = 2;
     private StationsRepository $stationsRepository;
     private NmbsRivRawDataRepository $rivRawDataRepository;
     private GtfsTripStartEndExtractor $gtfsTripStartEndExtractor;
@@ -104,8 +105,9 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
         $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
-        if ($secondsUntilStart > 0) {
-            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which has not departed yet according to GTFS. "
+        if ($secondsUntilStart > 86400 * self::COMPOSITION_MAX_DAYS_IN_FUTURE) {
+            Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which departs more than "
+                . self::COMPOSITION_MAX_DAYS_IN_FUTURE . ' days in the future according to GTFS. '
                 . "Start time is $startTimeOffset.");
             throw new CompositionUnavailableException(
                 $journey->getId(),

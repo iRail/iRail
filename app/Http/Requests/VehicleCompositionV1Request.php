@@ -16,6 +16,7 @@ class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCom
 {
     private string $vehicleId;
     private bool $returnRawData;
+    private Carbon $date;
 
     /**
      * @throws InvalidRequestException
@@ -26,6 +27,7 @@ class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCom
     {
         parent::__construct();
         $this->vehicleId = $this->_request->get('id');
+        $this->date = $this->parseIrailV1DateTime()->startOfDay();
         $this->returnRawData = $this->_request->get('data') === 'all';
     }
 
@@ -48,6 +50,6 @@ class VehicleCompositionV1Request extends IrailHttpRequest implements VehicleCom
     public function getDateTime(): Carbon
     {
         // Can't be specified in a V1 request, always "now"
-        return Carbon::now();
+        return $this->date;
     }
 }
