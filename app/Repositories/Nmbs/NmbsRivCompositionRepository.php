@@ -49,7 +49,8 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      */
     public function getComposition(Vehicle $journey): VehicleCompositionSearchResult
     {
-        $cachedResult = $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
+        $cacheKey = self::getCacheKey($journey);
+        $cachedResult = $this->getCacheOrUpdate($cacheKey, function () use ($journey) {
             $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
 
@@ -223,6 +224,16 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             return $default;
         }
         return $rawComposition[$key];
+    }
+
+    /**
+     * Get a unique key to identify data in the in-memory cache which reduces the number of requests to the NMBS.
+     * @param Vehicle $journey The journey
+     * @return string The key for the cached data.
+     */
+    public static function getCacheKey(Vehicle $journey): string
+    {
+        return 'NMBSComposition|' . $journey->getNumber() . '|' . $journey->getJourneyStartDate()->format('Ymd');
     }
 
     /**
@@ -409,7 +420,6 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      */
     private function fetchCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $startStop): CachedData
     {
-
         $cachedJsonData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
 
         if ($cachedJsonData->getAge() == 0) { // If this cache entry was created now, adjust the expiration date based on contents
