@@ -12,7 +12,7 @@ interface VehicleCompositionRequest
     public function getVehicleId(): string;
 
     /**
-     * @return Carbon
+     * @return ?Carbon
      */
-    public function getDateTime(): Carbon;
+    public function getDateTime(): ?Carbon;
 }

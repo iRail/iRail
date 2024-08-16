@@ -11,7 +11,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     private ?string $vehicleId;
     private ?string $datedJourneyId;
     private string $language;
-    private Carbon $dateTime;
+    private ?Carbon $dateTime;
 
     public function __construct()
     {
@@ -21,7 +21,12 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
             // Reformat old style ids
             $this->vehicleId = substr($this->vehicleId, strlen('BE.NMBS.'));
         }
-        $this->dateTime = $this->parseIrailV1DateTime();
+        if ($this->_request->has('date')){
+            $this->dateTime = $this->parseIrailV1DateTime();
+            $this->dateTime->startOfDay();
+        } else {
+            $this->dateTime = null;
+        }
     }
 
 
@@ -44,7 +49,7 @@ class DatedVehicleJourneyV1Request extends IrailHttpRequest implements VehicleJo
     /**
      * @inheritDoc
      */
-    public function getDateTime(): Carbon
+    public function getDateTime(): ?Carbon
     {
         return $this->dateTime;
     }

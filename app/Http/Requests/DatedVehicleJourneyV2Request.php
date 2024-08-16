@@ -11,19 +11,18 @@ class DatedVehicleJourneyV2Request extends IrailHttpRequest implements VehicleJo
     private ?string $vehicleId;
     private ?string $datedJourneyId;
     private string $language;
-    private Carbon $dateTime;
+    private ?Carbon $dateTime;
 
-    /**
-     * @param string|null $vehicleId
-     * @param string|null $datedJourneyId
-     * @param Carbon    $requestDateTime
-     * @param string      $language
-     */
     public function __construct()
     {
         parent::__construct();
         $this->vehicleId = $this->routeOrGet('id');
-        $this->dateTime = $this->parseDateTime($this->routeOrGet('date'));
+        if ($this->routeOrGet('date')){
+            $this->dateTime = $this->parseDateTime($this->routeOrGet('date'));
+        } else {
+            $this->dateTime = null;
+        }
+
     }
 
     /**
@@ -45,7 +44,7 @@ class DatedVehicleJourneyV2Request extends IrailHttpRequest implements VehicleJo
     /**
      * @inheritDoc
      */
-    public function getDateTime(): Carbon
+    public function getDateTime(): ?Carbon
     {
         return $this->dateTime;
     }

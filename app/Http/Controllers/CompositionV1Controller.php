@@ -38,9 +38,13 @@ class CompositionV1Controller extends BaseIrailController
     public function getVehicleComposition(VehicleCompositionV1Request $request): Response
     {
         $journeyNumber = VehicleIdTools::extractTrainNumber($request->getVehicleId());
-        $startDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, $request->getDateTime());
-
-        $vehicle = Vehicle::fromName($request->getVehicleId(), $startDate ?: Carbon::now());
+        if ($request->getDateTime() == null) {
+            $startDate = $this->gtfsTripStartEndExtractor->getStartDate($journeyNumber, Carbon::now());
+        } else {
+            // if specified, use the requested date and time
+            $startDate = $request->getDateTime();
+        }
+        $vehicle = Vehicle::fromName($request->getVehicleId(), $startDate);
         $vehicleCompositionSearchResult = $this->compositionRepository->getComposition($vehicle);
         $this->historicCompositionRepository->recordComposition($vehicleCompositionSearchResult);
         $dataRoot = VehicleCompositionV1Converter::convert($request, $vehicleCompositionSearchResult);

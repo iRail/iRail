@@ -17,9 +17,9 @@ interface VehicleJourneyRequest extends CacheableRequest
     public function getDatedJourneyId(): ?string;
 
     /**
-     * @return Carbon
+     * @return ?Carbon
      */
-    public function getDateTime(): Carbon;
+    public function getDateTime(): ?Carbon;
 
     /**
      * Get the requested response language, as an ISO2 code.

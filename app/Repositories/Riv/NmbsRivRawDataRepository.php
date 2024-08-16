@@ -2,6 +2,7 @@
 
 namespace Irail\Repositories\Riv;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\GtfsVehicleNotFoundException;
@@ -150,15 +151,27 @@ class NmbsRivRawDataRepository
     {
         /** @var GtfsTripStartEndExtractor $gtfsTripExtractor */
         $gtfsTripExtractor = App::make(GtfsTripStartEndExtractor::class);
-        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $request->getDateTime());
+
+        if ($request->getDateTime() == null) {
+            // When nothing is specified, the user wants to find the vehicle which is driving today.
+            // However, when searching at 01.00 at night for a train which starts at 23:30 and drives until 02:00, they want "yesterdays" departure which is
+            // still driving
+            $startDate = $gtfsTripExtractor->getStartDate($request->getVehicleId(), Carbon::now());
+            Log::debug("Found start date {$startDate->format('Y-m-d')} for vehicle {$request->getVehicleId()}");
+        } else {
+            // if specified, use the requested date and time
+            $startDate = $request->getDateTime();
+        }
+
+        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $startDate);
         if ($vehicleWithOriginAndDestination === false) {
             throw new GtfsVehicleNotFoundException($request->getVehicleId());
         }
 
-        $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $vehicleWithOriginAndDestination);
+        $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $startDate, $vehicleWithOriginAndDestination);
         # If false, the journey might have been partially cancelled. Try to find it by searching for parts of the journey
         if ($journeyDetailRef === false) {
-            $journeyDetailRef = $this->getJourneyDetailRefForPartiallyCanceledTrip($gtfsTripExtractor, $request, $vehicleWithOriginAndDestination);
+            $journeyDetailRef = $this->getJourneyDetailRefForPartiallyCanceledTrip($gtfsTripExtractor, $request, $startDate, $vehicleWithOriginAndDestination);
         }
 
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
@@ -176,6 +189,7 @@ class NmbsRivRawDataRepository
      */
     private function findVehicleJourneyRefBetweenStops(
         VehicleJourneyRequest $request,
+        Carbon $vehicleJourneyStartDate,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
     ): string|false {
         $splitOrJoinStopIds = $vehicleWithOriginAndDestination->getSplitOrJoinStopIds();
@@ -193,7 +207,7 @@ class NmbsRivRawDataRepository
             Log::info("Multiple journeys will be tried in order to obtain reference for journey {$request->getVehicleId()} consisting of " . (count($splitOrJoinStopIds) + 1) . ' segments');
         }
         $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
-        $formattedDateStr = $request->getDateTime()->format('Y-m-d');
+        $formattedDateStr = $vehicleJourneyStartDate->format('Y-m-d');
         $vehicleName = $vehicleWithOriginAndDestination->getJourneyType() . $vehicleWithOriginAndDestination->getJourneyNumber();
         $journeyRef = false;
         $combinationIndex = 0;
@@ -228,6 +242,7 @@ class NmbsRivRawDataRepository
     private function getJourneyDetailRefForPartiallyCanceledTrip(
         GtfsTripStartEndExtractor $gtfsTripExtractor,
         VehicleJourneyRequest $request,
+        Carbon $journeyStartDate,
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
     ): string|bool {
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
@@ -235,16 +250,17 @@ class NmbsRivRawDataRepository
         );
         $i = 0;
         $journeyRef = false;
+        $vehicleId = $vehicleWithOriginAndDestination->getJourneyType() . ' ' . $vehicleWithOriginAndDestination->getJourneyNumber();
         while ($journeyRef === false && $i < count($alternativeOriginDestinations) / 2) {
-            Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $i");
+            Log::debug("Searching for vehicle {$vehicleId} using alternative segments, $i");
             $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$i];
-            $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
+            $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $journeyStartDate, $altVehicleWithOriginAndDestination);
             if ($journeyRef === false) {
                 // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
                 $j = (count($alternativeOriginDestinations) - 1) - $i;
-                Log::debug("Searching for vehicle {$request->getVehicleId()} using alternative segments, $j");
+                Log::debug("Searching for vehicle {$vehicleId} using alternative segments, $j");
                 $altVehicleWithOriginAndDestination = $alternativeOriginDestinations[$j];
-                $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $altVehicleWithOriginAndDestination);
+                $journeyRef = $this->findVehicleJourneyRefBetweenStops($request, $journeyStartDate, $altVehicleWithOriginAndDestination);
             }
             $i++;
         }
@@ -261,7 +277,7 @@ class NmbsRivRawDataRepository
      */
     public function getCachedJourneyDetailRef(string $announcedJourneyNumber, VehicleJourneyRequest $request): CachedData
     {
-        $journeyRefCacheKey = self::JOURNEY_DETAIL_REF_PREFIX . "{$announcedJourneyNumber}|{$request->getDateTime()->format('Ymd')}";
+        $journeyRefCacheKey = self::JOURNEY_DETAIL_REF_PREFIX . "{$announcedJourneyNumber}|{$request->getDateTime()?->format('Ymd')}";
         $cachedJourneyDetailRef = $this->getCacheOrUpdate(
             $journeyRefCacheKey,
             function () use ($request) {

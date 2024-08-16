@@ -40,30 +40,30 @@ class GtfsTripStartEndExtractor
 
     public function getStartDate(int $journeyNumber, Carbon $activeTime): ?Carbon
     {
+        Log::debug("Getting start date for $journeyNumber at {$activeTime->format('Y-m-d H:i:s')}");
         $startDate = $this->getCacheOrUpdate(
             "getStartDate|$journeyNumber|{$activeTime->format('Ymd-Hi')}",
             function () use ($journeyNumber, $activeTime): ?Carbon {
                 // This will take the start date from the GTFS calendar file
                 // i.e. a query for 11:00 on a trip running 07-12 will return the trip of the same day
                 // a query for 01:00 on a trip running 22:00-02:00 will return the trip starting 22:00 that day, i.e. the next trip.
-                $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime);
+                $trip = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime);
+                $yesterdayTrip = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime->copy()->subDay());
 
-                if (!$originAndDestination) {
-                    // The trip could not be found for the given start date, so it must be in the past!
-                    $originAndDestination = $this->getVehicleWithOriginAndDestination($journeyNumber, $activeTime->copy()->subDay());
-                    if (!$originAndDestination) {
-                        // If still not found, something is wrong. Do not return incorrect results, we prefer not to return any result at all in this case!
-                        Log::warning("Vehicle start date could not be determined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
-                        return null;
-                    }
-                    return $activeTime->copy()->subDay()->setTime(0, 0);
+                if ($yesterdayTrip !== false) {
+                    $tripCrossesMidnight = $yesterdayTrip->getOriginDepartureTimeOffset() > $yesterdayTrip->getDestinationArrivalTimeOffset();
+                    $currentTimePastTodaysTrip = $activeTime->secondsSinceMidnight() < $yesterdayTrip->getDestinationArrivalTimeOffset();
+                    // return the date and time for departure
+                    return $activeTime->copy()->subDay()->setTime(0, 0)->addSeconds($yesterdayTrip->getOriginDepartureTimeOffset());
                 }
 
-                // A trip cannot start past 23:59:59, since it simply would have a different start date in that case
-                if ($activeTime->secondsSinceMidnight() < $originAndDestination->getOriginDepartureTimeOffset()) {
-                    return $activeTime->copy()->subDay()->setTime(0, 0);
+                if (!$trip) {
+                    // If the trip is not found, something is wrong. Do not return incorrect results, we prefer not to return any result at all in this case!
+                    Log::warning("Vehicle start date could not be determined: $journeyNumber active at {$activeTime->format('Y-m-d H:i:s')}");
+                    return null;
                 }
-                return $activeTime->copy()->setTime(0, 0);
+                // return the date and time for departure
+                return $activeTime->copy()->setTime(0, 0)->addSeconds($trip->getOriginDepartureTimeOffset());
             },
             GtfsRepository::secondsUntilGtfsCacheExpires() + rand(60, 120) // Cache until GTFS is updated. Spread random to prevent load spike. Always more than underlying cache getVehicleWithOriginAndDestination.
         );
@@ -78,6 +78,7 @@ class GtfsTripStartEndExtractor
      */
     public function getVehicleWithOriginAndDestination(string $journeyNumber, DateTime $date): JourneyWithOriginAndDestination|false
     {
+        Log::debug("getVehicleWithOriginAndDestination $journeyNumber {$date->format('Y-m-d H:i:s')}");
         $originAndDestination = $this->getCacheOrUpdate(
             "getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd')}",
             function () use ($journeyNumber, $date): JourneyWithOriginAndDestination|false {
@@ -109,7 +110,6 @@ class GtfsTripStartEndExtractor
                     $invalid = $invalid
                         || array_key_exists($match->getOriginStopId(), $journeyPartsByStart)
                         || array_key_exists($match->getDestinationStopId(), $journeyPartsByDestination);
-                    Log::debug("From {$match->getOriginStopId()} to {$match->getDestinationStopId()}");
                     $journeyPartsByStart[$match->getOriginStopId()] = $match;
                     $journeyPartsByDestination[$match->getDestinationStopId()] = $match;
                 }
