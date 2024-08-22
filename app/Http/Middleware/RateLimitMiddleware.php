@@ -20,29 +20,7 @@ class RateLimitMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        return $this->rateLimitedLongTerm($request, $next);
-    }
-
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
-     */
-    public function rateLimitedLongTerm(Request $request, Closure $next)
-    {
-        $response = RateLimiter::attempt(
-            'request_rate|long-term|' . $request->getClientIp(),
-            1800,
-            function () use ($request, $next) {
-                return $this->rateLimitedShortTerm($request, $next);
-            },
-            3600 // 1800 requests per hour, one per 2 seconds
-        );
-        if ($response === false) {
-            InMemoryMetrics::countRateLimitRejection();
-            throw new IrailHttpException(429, 'Too many requests (long-term)');
-        }
-        return $response;
+        return $this->rateLimitedShortTerm($request, $next);
     }
 
     /**
