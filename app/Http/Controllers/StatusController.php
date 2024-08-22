@@ -28,10 +28,14 @@ class StatusController extends BaseIrailController
 
     public function showStatus(Request $request): string
     {
+        Log::info('Fetching APC and OPCACHE status');
         $apcStatus = $this->getApcStatus();
         $opcacheStatus = $this->getOpcacheStatus();
+        Log::info('Fetching GTFS status');
         $gtfsStatus = $this->getGtfsStatus();
+        Log::info('Fetching request limit status');
         $requestStatus = $this->getRequestsStatus();
+        Log::info('Fetching RIV rate limit status');
         $rivRequestStatus = $this->getRivRateLimitStatus();
         $errorRates = $this->getErrorRateStatus();
         $rateLimitRates = $this->getRateLimitingStatus();
