@@ -30,8 +30,7 @@ class LogDao
      */
     public function log(LogQueryType $queryType, array $query, string $userAgent, array $result = null)
     {
-        apcu_add('Irail|LogDao|insertId', 0, 0); // Create value if it does not exist yet
-        $id = apcu_inc('Irail|LogDao|insertId');
+        $id = apcu_inc('Irail|LogDao|insertId'); // will initialize at 1
         $data = [
             'query_type' => $queryType->value,
             'query'      => json_encode($query, JSON_UNESCAPED_SLASHES),
@@ -40,20 +39,30 @@ class LogDao
             'created_at' => Carbon::now()->utc()->format('Y-m-d H:i:s')
         ];
         // Store in memory so we don't need to write to the database on every request
-        apcu_store('Irail|LogDao|log|' . $id, $data, 0); // Store until flushed
+        apcu_store('Irail|LogDao|log|' . $id, $data, 1800); // Store until flushed, but never more than 30 minutes
         $flushInterval = $this->getFlushInterval();
         if ($id % $flushInterval == 0) {
             Log::info('Flushing request log data');
+
+            $lastFlushId = apcu_fetch('Irail|LogDao|lastFlushId');
+            if (!$lastFlushId) {
+                $lastFlushId = $id - $flushInterval;
+            }
+
             $start = time();
             // Flush to database
             $sqlData = [];
-            for ($i = $id - $flushInterval + 1; $i <= $id; $i++) {
+            $keysToClear = [];
+            for ($i = $lastFlushId + 1; $i <= $id; $i++) {
                 $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
-                apcu_delete('Irail|LogDao|log|' . $i); // Remove from memory
+                $keysToClear[] = 'Irail|LogDao|log|' . $i;
             }
+            apcu_delete($keysToClear); // Remove from memory cache
             DB::table('request_log')->insert($sqlData);
             $duration = time() - $start;
             Log::info("Flushed request log data in $duration seconds");
+
+            apcu_store('Irail|LogDao|lastFlushId', $id);
         }
     }
 
