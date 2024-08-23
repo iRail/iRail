@@ -10,16 +10,18 @@ use Irail\Models\Dao\LogQueryType;
 class LogController extends BaseIrailController
 {
     private LogDao $logRepository;
+    private int $cacheDuration;
 
     public function __construct(LogDao $logRepository)
     {
         $this->logRepository = $logRepository;
+        $this->cacheDuration = env('CACHE_DURATION_LOGS_ENDPOINT', 10);
     }
 
     public function getLogs(Request $request)
     {
-        // Prevent high database load by caching this for at least a couple seconds, effectively rate-limiting everyone to 12 requests per second.
-        $data = Cache::remember('logs', 5, function () use ($request) {
+        // Prevent high database load by caching this for at least a couple seconds, effectively rate-limiting everyone to 60/cacheDuration requests per second.
+        $data = Cache::remember('logs', $this->cacheDuration, function () use ($request) {
             $logs = $this->logRepository->readLastLogs(1000);
             $data = array_map(fn($logEntry) => [
                 'querytype'  => $this->getName($logEntry->getQueryType()),
