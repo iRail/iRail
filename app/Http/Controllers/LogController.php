@@ -3,6 +3,7 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Irail\Database\LogDao;
 use Irail\Models\Dao\LogQueryType;
 
@@ -17,14 +18,19 @@ class LogController extends BaseIrailController
 
     public function getLogs(Request $request)
     {
-        $logs = $this->logRepository->readLastLogs(1000);
-        $json = array_map(fn ($logEntry) => [
-            'querytype' => $this->getName($logEntry->getQueryType()),
-            'querytime'  => $logEntry->getCreatedAt(),
-            'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
-            'user_agent' => $logEntry->getUserAgent()
-        ], $logs);
-        return $this->outputJson($request, $json);
+        // Prevent high database load by caching this for at least a couple seconds, effectively rate-limiting everyone to 12 requests per second.
+        $data = Cache::remember('logs', 5, function () use ($request) {
+            $logs = $this->logRepository->readLastLogs(1000);
+            $data = array_map(fn($logEntry) => [
+                'querytype'  => $this->getName($logEntry->getQueryType()),
+                'querytime'  => $logEntry->getCreatedAt(),
+                'query'      => $logEntry->getQuery() + ($logEntry->getResult() ?: []),
+                'user_agent' => $logEntry->getUserAgent()
+            ], $logs);
+            return $data;
+        });
+
+        return $this->outputJson($request, $data);
     }
 
     private function getName(LogQueryType $getQueryType)
