@@ -50,19 +50,25 @@ class LogDao
             }
 
             $start = time();
-            // Flush to database
-            $sqlData = [];
-            $keysToClear = [];
-            for ($i = $lastFlushId + 1; $i <= $id; $i++) {
-                $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
-                $keysToClear[] = 'Irail|LogDao|log|' . $i;
-            }
-            apcu_delete($keysToClear); // Remove from memory cache
-            DB::table('request_log')->insert($sqlData);
-            $duration = time() - $start;
-            Log::info("Flushed request log data in $duration seconds");
 
-            apcu_store('Irail|LogDao|lastFlushId', $id);
+            try {
+                // Flush to database
+                $sqlData = [];
+                $keysToClear = [];
+
+                for ($i = $lastFlushId + 1; $i <= $id; $i++) {
+                    $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
+                    $keysToClear[] = 'Irail|LogDao|log|' . $i;
+                }
+                DB::table('request_log')->insert($sqlData);
+                $duration = time() - $start;
+                apcu_delete($keysToClear); // Remove from memory cache
+                apcu_store('Irail|LogDao|lastFlushId', $id);
+                Log::info("Flushed request log data in $duration seconds");
+            } catch (\Exception $exception) {
+                // Logging to database should never negatively affect requests
+                Log::error("Failed to store logs in database: {$exception->getMessage()}");
+            }
         }
     }
 

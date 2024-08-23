@@ -106,13 +106,19 @@ class OccupancyDao
         }
 
         Log::debug("Storing occupancy level $occupancyLevel->name ({$occupancyLevel->getIntValue()}) for $vehicleId at $stationId from source $source->name");
-        DB::update('INSERT INTO occupancy_reports (source, vehicle_id, stop_id, journey_start_date, occupancy) VALUES (?, ?, ?, ?, ?)', [
-            $source->value,
-            $vehicleId,
-            $stationId,
-            $vehicleJourneyStartDate->copy()->startOfDay(),
-            $occupancyLevel->getIntValue()
-        ]);
+        try {
+            DB::update('INSERT INTO occupancy_reports (source, vehicle_id, stop_id, journey_start_date, occupancy) VALUES (?, ?, ?, ?, ?)', [
+                $source->value,
+                $vehicleId,
+                $stationId,
+                $vehicleJourneyStartDate->copy()->startOfDay(),
+                $occupancyLevel->getIntValue()
+            ]);
+        } catch (\Exception $e){
+            Log::error("Failed to store occupancy for $vehicleId at $stationId from source $source->name: {$e->getMessage()}");
+            return; // Don't flag as recorded, don't reset caches
+        }
+
         Cache::put($recordedFlagKey, true, 12 * 3600);
 
         Log::debug("Clearing occupancy cache for vehicle $vehicleId, station $stationId, source {$source->name}");
@@ -228,12 +234,17 @@ class OccupancyDao
         Carbon $vehicleJourneyStartDate,
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
     ): array {
-        if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
-            $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
-            return key_exists($stationId, $levels) ? $levels[$stationId] : [];
-        } else {
-            $levels = $this->readLevelsForStation($source, $stationId, $vehicleJourneyStartDate);
-            return key_exists($vehicleId, $levels) ? $levels[$vehicleId] : [];
+        try {
+            if ($performanceMode == OccupancyDaoPerformanceMode::VEHICLE) {
+                $levels = $this->readLevelsForVehicle($source, $vehicleId, $vehicleJourneyStartDate);
+                return key_exists($stationId, $levels) ? $levels[$stationId] : [];
+            } else {
+                $levels = $this->readLevelsForStation($source, $stationId, $vehicleJourneyStartDate);
+                return key_exists($vehicleId, $levels) ? $levels[$vehicleId] : [];
+            }
+        } catch (\Exception $exception) {
+            Log::error("Failed to fetch occupancy from database {$exception->getMessage()}");
+            return []; // Just continue without occupancy
         }
     }
 

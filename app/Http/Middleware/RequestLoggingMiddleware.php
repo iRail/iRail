@@ -4,6 +4,7 @@ namespace Irail\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Irail\Database\OutgoingRequestLogDao;
 use Irail\Exceptions\Internal\InternalProcessingException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
@@ -42,18 +43,23 @@ class RequestLoggingMiddleware
      */
     public function logOutgoingRequests(Request $request, Response|InternalProcessingException|UpstreamServerException $result): void
     {
-        $request_id = RequestUuidHelper::getRequestId($request);
-        $irail_request_url = $request->getUri();
-        $irail_response_code = $result->getStatusCode();
-        /**
-         * @var CurlProxy $curlProxy
-         */
-        $curlProxy = app(CurlProxy::class);
+        try {
+            $request_id = RequestUuidHelper::getRequestId($request);
+            $irail_request_url = $request->getUri();
+            $irail_response_code = $result->getStatusCode();
+            /**
+             * @var CurlProxy $curlProxy
+             */
+            $curlProxy = app(CurlProxy::class);
 
-        /** @var OutgoingRequestLogDao $requestLogDao */
-        $requestLogDao = app(OutgoingRequestLogDao::class);
-        foreach ($curlProxy->getRequests() as $index => $request) {
-            $requestLogDao->log($request_id, $irail_request_url, $irail_response_code, $index + 1, $request);
+            /** @var OutgoingRequestLogDao $requestLogDao */
+            $requestLogDao = app(OutgoingRequestLogDao::class);
+            foreach ($curlProxy->getRequests() as $index => $request) {
+                $requestLogDao->log($request_id, $irail_request_url, $irail_response_code, $index + 1, $request);
+            }
+        } catch (\Exception $e) {
+            // Logging to database should never negatively affect requests
+            Log::error("Failed to log outgoing requests: {$e->getMessage()}");
         }
     }
 }
