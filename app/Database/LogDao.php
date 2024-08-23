@@ -78,7 +78,8 @@ class LogDao
      */
     public function readLastLogs(int $limit): array
     {
-        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY created_at DESC LIMIT ?', [$limit]);
+        // order by id, which is incremental. Id is already sorted in the database, while created_at will force db to sort the entire table
+        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY id DESC LIMIT ?', [$limit]);
         return $this->transformRows($rows);
     }
 
