@@ -89,7 +89,7 @@ class RivClient
             throw new UpstreamServerUnavailableException('iRail could not read data from the remote server.');
         } elseif ($json == null && str_contains($response, ': error :')) {
                throw new UpstreamServerException('The remote server returned an error: ' . $response, 504);
-        } elseif ($json == null) {
+        } elseif ($json == null || !is_array($json)) {
             Log::error('Failed to read raw json data:');
             Log::error($response);
             throw new UpstreamServerException('iRail could not read data from the remote server.');

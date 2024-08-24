@@ -10,6 +10,8 @@ use Irail\Models\Dao\LogQueryType;
 
 class LogDao
 {
+    const int MAX_STORE_ATTEMPTS_BEFORE_CLEAR = 4;
+
     /**
      * How often request logs should be flushed to the database. E.g. every 10th or 100th request.
      */
@@ -54,10 +56,10 @@ class LogDao
 
             $start = time();
 
+            $keysToClear = [];
             try {
                 // Flush to database
                 $sqlData = [];
-                $keysToClear = [];
 
                 for ($i = $lastFlushId + 1; $i <= $id; $i++) {
                     $row = apcu_fetch('Irail|LogDao|log|' . $i);
@@ -74,6 +76,13 @@ class LogDao
             } catch (\Exception $exception) {
                 // Logging to database should never negatively affect requests
                 Log::error("Failed to store logs in database: {$exception->getMessage()}");
+
+                if (count($keysToClear) >= self::MAX_STORE_ATTEMPTS_BEFORE_CLEAR * $flushInterval) {
+                    // Even if we did not manage to store the log data after a few attempts, it should never linger and keep causing issues.
+                    // Just skip the current batch to save the next.
+                    apcu_delete($keysToClear); // Remove from memory cache
+                    apcu_store('Irail|LogDao|lastFlushId', $id);
+                }
             }
         }
     }
