@@ -48,6 +48,9 @@ class LogDao
             if (!$lastFlushId) {
                 $lastFlushId = $id - $flushInterval;
             }
+            // If there are more than 10.000 rows to be flushed, something has gone wrong, for example with the database connection on previous flushes.
+            // Prevent this problem from cascading and blowing up (an insert can only have 65k variables) by never storing more than 10k rows.
+            $lastFlushId = max($id - 10000, $lastFlushId);
 
             $start = time();
 
@@ -57,8 +60,11 @@ class LogDao
                 $keysToClear = [];
 
                 for ($i = $lastFlushId + 1; $i <= $id; $i++) {
-                    $sqlData[] = apcu_fetch('Irail|LogDao|log|' . $i);
-                    $keysToClear[] = 'Irail|LogDao|log|' . $i;
+                    $row = apcu_fetch('Irail|LogDao|log|' . $i);
+                    if ($row) { // check if the entry was still present in the cache
+                        $sqlData[] = $row;
+                        $keysToClear[] = 'Irail|LogDao|log|' . $i;
+                    }
                 }
                 DB::table('request_log')->insert($sqlData);
                 $duration = time() - $start;
@@ -79,7 +85,7 @@ class LogDao
     public function readLastLogs(int $limit): array
     {
         // order by id, which is incremental. Id is already sorted in the database, while created_at will force db to sort the entire table
-        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY id DESC LIMIT ?', [$limit]);
+        $rows = DB::select('SELECT id, query_type, query, result, user_agent, created_at FROM request_log ORDER BY created_at DESC LIMIT ?', [$limit]);
         return $this->transformRows($rows);
     }
 
