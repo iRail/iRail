@@ -185,7 +185,6 @@ trait Cache
     {
         $cachedData = $this->getCachedObject($cacheKey);
         if ($cachedData === false) {
-            Log::error("Could not find $cacheKey");
             $data = $valueProvider();
             if ($data instanceof Cachable && $data->getExpiresAt() != null) {
                 $newTtl = max($ttl, $data->getRemainingTtl());
