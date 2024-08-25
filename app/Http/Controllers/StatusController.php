@@ -50,6 +50,35 @@ class StatusController extends BaseIrailController
             . 'Opcache: ' . $opcacheStatus;
     }
 
+    public function maintain()
+    {
+        $cacheResult = $this->warmupCache();
+        $cleanedCount = $this->removeExpiredCacheEntries();
+        Log::info("Maintainance/Healtcheck 200 ok");
+        return $cacheResult . PHP_EOL . '<br>' . PHP_EOL . "Cleaned  $cleanedCount expired items from cache";
+    }
+
+    public function removeExpiredCacheEntries(): int
+    {
+        if (apcu_enabled()) {
+            $apcu = apcu_cache_info();
+            $time = time();
+            $keysToDelete = [];
+            foreach ($apcu['cache_list'] as $item) {
+                $expiryTime = $item['mtime'] + $item['ttl'];
+                if ($item['ttl'] > 0 && $expiryTime < $time) {
+                    $keysToDelete[] = $item['info'];
+                }
+            }
+            Log::info('Clearing ' . count($keysToDelete) . ' out of ' . count($apcu['cache_list']) . ' APC keys');
+            apcu_delete($keysToDelete);
+            return count($keysToDelete);
+        } else {
+            Log::debug('APCU not enabled, not clearing old cache entries');
+            return 0;
+        }
+    }
+
     public function warmupCache(): string
     {
         // Step 1: preload occupancy data, which is only performed once
@@ -67,11 +96,11 @@ class StatusController extends BaseIrailController
         $compositionDao->warmupCache();
 
         // Step 3: preload GTFS data, which is performed if the cache has expired
-        Log::info('Warming up GTFS Cache');
         if ($this->gtfsRepository->getCachedTrips()) {
             Log::info('GTFS cache is already loaded, not warming up');
             return 'OK: Already loaded';
         }
+        Log::info('Warming up GTFS Cache');
         // Calling this method will load the cache
         $trips = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
         $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now());
@@ -87,7 +116,7 @@ class StatusController extends BaseIrailController
         return $gtfsResult . $this->getMemoryStatus();
     }
 
-    public function resetCache(): string
+    public function clearCache(): string
     {
         Log::warning('Clearing cache!');
         $result = '';
