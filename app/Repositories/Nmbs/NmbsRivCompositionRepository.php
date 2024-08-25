@@ -184,46 +184,43 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             // containing a uic code & material number
             $trainCompositionUnit = new TrainCompositionUnitWithId($rollingMaterialType);
             $trainCompositionUnit->setUicCode($rawComposition['uicCode']);
-            $trainCompositionUnit->setMaterialNumber($rawComposition['materialNumber'] ?: 0);
-            $trainCompositionUnit->setMaterialSubTypeName($rawComposition['materialSubTypeName'] ?: 'unknown');
+            $trainCompositionUnit->setMaterialNumber(self::readAttribute($rawComposition, 'materialNumber', 0));
+            $trainCompositionUnit->setMaterialSubTypeName(self::readAttribute($rawComposition, 'materialSubTypeName', 'unknown'));
         } else {
             $trainCompositionUnit = new TrainCompositionUnit($rollingMaterialType);
         }
-        $trainCompositionUnit->setHasToilet($rawComposition['hasToilets'] ?: false);
-        $trainCompositionUnit->setHasPrmToilet($rawComposition['hasPrmToilets'] ?: false);
-        $trainCompositionUnit->setHasTables($rawComposition['hasTables'] ?: false);
-        $trainCompositionUnit->setHasBikeSection(array_key_exists('hasBikeSection', $rawComposition) && $rawComposition['hasBikeSection']);
-        $trainCompositionUnit->setHasSecondClassOutlets($rawComposition['hasSecondClassOutlets'] ?: false);
-        $trainCompositionUnit->setHasFirstClassOutlets($rawComposition['hasFirstClassOutlets'] ?: false);
-        $trainCompositionUnit->setHasHeating($rawComposition['hasHeating'] ?: false);
-        $trainCompositionUnit->setHasAirco($rawComposition['hasAirco'] ?: false);
-        $trainCompositionUnit->setHasPrmSection(array_key_exists('hasPrmSection',
-                $rawComposition) && $rawComposition['hasPrmSection']); // Persons with Reduced Mobility
-        $trainCompositionUnit->setHasPriorityPlaces($rawComposition['hasPriorityPlaces'] ?: false);
-        $trainCompositionUnit->setTractionType($rawComposition['tractionType'] ?: 'unknown');
-        $trainCompositionUnit->setCanPassToNextUnit($rawComposition['canPassToNextUnit'] ?: false);
-        $trainCompositionUnit->setStandingPlacesSecondClass($rawComposition['standingPlacesSecondClass'] ?: 0);
-        $trainCompositionUnit->setStandingPlacesFirstClass($rawComposition['standingPlacesFirstClass'] ?: 0);
-        $trainCompositionUnit->setSeatsCoupeSecondClass($rawComposition['seatsCoupeSecondClass'] ?: 0);
-        $trainCompositionUnit->setSeatsCoupeFirstClass($rawComposition['seatsCoupeFirstClass'] ?: 0);
-        $trainCompositionUnit->setSeatsSecondClass($rawComposition['seatsSecondClass'] ?: 0);
-        $trainCompositionUnit->setSeatsFirstClass($rawComposition['seatsFirstClass'] ?: 0);
-        $trainCompositionUnit->setLengthInMeter($rawComposition['lengthInMeter'] ?: 0);
-        $trainCompositionUnit->setTractionPosition($rawComposition['tractionPosition'] ?: 0);
-        $trainCompositionUnit->setHasSemiAutomaticInteriorDoors($rawComposition['hasSemiAutomaticInteriorDoors'] ?: false);
-        $trainCompositionUnit->setHasLuggageSection(array_key_exists('hasLuggageSection', $rawComposition) && $rawComposition['hasLuggageSection']);
+        $trainCompositionUnit->setHasToilet(self::readAttribute($rawComposition, 'hasToilets', false));
+        $trainCompositionUnit->setHasPrmToilet(self::readAttribute($rawComposition, 'hasPrmToilets', false));
+        $trainCompositionUnit->setHasTables(self::readAttribute($rawComposition, 'hasTables', false));
+        $trainCompositionUnit->setHasBikeSection(self::readAttribute($rawComposition, 'hasBikeSection', false));
+        $trainCompositionUnit->setHasSecondClassOutlets(self::readAttribute($rawComposition, 'hasSecondClassOutlets', false));
+        $trainCompositionUnit->setHasFirstClassOutlets(self::readAttribute($rawComposition, 'hasFirstClassOutlets', false));
+        $trainCompositionUnit->setHasHeating(self::readAttribute($rawComposition, 'hasHeating', false));
+        $trainCompositionUnit->setHasAirco(self::readAttribute($rawComposition, 'hasAirco', false));
+        $trainCompositionUnit->setHasPrmSection(self::readAttribute($rawComposition, 'hasPrmSection', false)); // Persons with Reduced Mobility
+        $trainCompositionUnit->setHasPriorityPlaces(self::readAttribute($rawComposition, 'hasPriorityPlaces', false));
+        $trainCompositionUnit->setTractionType(self::readAttribute($rawComposition, 'tractionType', 'unknown'));
+        $trainCompositionUnit->setCanPassToNextUnit(self::readAttribute($rawComposition, 'canPassToNextUnit', false));
+        $trainCompositionUnit->setStandingPlacesSecondClass(self::readAttribute($rawComposition, 'standingPlacesSecondClass', 0));
+        $trainCompositionUnit->setStandingPlacesFirstClass(self::readAttribute($rawComposition, 'standingPlacesFirstClass', 0));
+        $trainCompositionUnit->setSeatsCoupeSecondClass(self::readAttribute($rawComposition, 'seatsCoupeSecondClass', 0));
+        $trainCompositionUnit->setSeatsCoupeFirstClass(self::readAttribute($rawComposition, 'seatsCoupeFirstClass', 0));
+        $trainCompositionUnit->setSeatsSecondClass(self::readAttribute($rawComposition, 'seatsSecondClass', 0));
+        $trainCompositionUnit->setSeatsFirstClass(self::readAttribute($rawComposition, 'seatsFirstClass', 0));
+        $trainCompositionUnit->setLengthInMeter(self::readAttribute($rawComposition, 'lengthInMeter', 0));
+        $trainCompositionUnit->setTractionPosition(self::readAttribute($rawComposition, 'tractionPosition', 0));
+        $trainCompositionUnit->setHasSemiAutomaticInteriorDoors(self::readAttribute($rawComposition, 'hasSemiAutomaticInteriorDoors', false));
+        $trainCompositionUnit->setHasLuggageSection(self::readAttribute($rawComposition, 'hasLuggageSection', false));
 
         return $trainCompositionUnit;
     }
 
-    /**
-     * Get a unique key to identify data in the in-memory cache which reduces the number of requests to the NMBS.
-     * @param string $id The train id.
-     * @return string The key for the cached data.
-     */
-    public static function getCacheKey(string $id): string
+    private static function readAttribute(array $rawComposition, string $key, bool|int $default)
     {
-        return 'NMBSComposition|' . $id;
+        if (!key_exists($key, $rawComposition)) {
+            return $default;
+        }
+        return $rawComposition[$key];
     }
 
     /**
@@ -277,6 +274,11 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             if (str_contains($parentType, '-')) {
                 $parentType = explode('-', $parentType)[0]; // AM62-66 should become AM62
             }
+
+            if ($parentType == 'AMFLIRTMC'){
+                $parentType = 'FLIRT';
+            }
+
             if (array_key_exists('materialSubTypeName', $rawCompositionUnit)) {
                 $subType = explode('_', $rawCompositionUnit['materialSubTypeName'])[1]; // C
             } else {
