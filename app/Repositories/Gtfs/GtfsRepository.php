@@ -317,7 +317,7 @@ class GtfsRepository
     public static function secondsUntilNextGtfsUpdate(): int
     {
         $now = Carbon::now();
-        $gtfsReleaseTime = $now->copy()->setTime(4, 30);
+        $gtfsReleaseTime = $now->copy()->setTime(6, 30);
         if ($gtfsReleaseTime->isBefore($now)) {
             $gtfsReleaseTime = $gtfsReleaseTime->addDay();
         }

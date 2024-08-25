@@ -51,6 +51,9 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
         $cachedResult = $this->getCacheOrUpdate($journey->getNumber(), function () use ($journey) {
             $cachedData = $this->getCompositionData($journey);
             $compositionData = $cachedData->getValue();
+
+            $compositionData = $this->getCompositionPlan($compositionData, $journey);
+
             $journey = $this->standardizeJourneyType($journey); //
             $exception = false; // Track and save the last exception during parsing
             // Build a result
@@ -78,7 +81,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             $result = new VehicleCompositionSearchResult($journey, $segments);
             $result->mergeCacheValidity($cachedData->getCreatedAt(), $cachedData->getExpiresAt());
             return $result;
-        }, 300); // Only recalculate once every 5 minutes
+        }, 300); // Only recalculate at most once every 5 minutes
         $result = $cachedResult->getValue();
         $result->mergeCacheValidity($cachedResult->getCreatedAt(), $cachedResult->getExpiresAt()); // Combine cache validities to ensure we don't serve an "expires" value which lies in the past.
         return $result;
@@ -96,7 +99,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which could not be found in the GTFS feed.");
             throw new CompositionUnavailableException(
                 $journey->getId(),
-                'Composition is only available from vehicle start. Vehicle is not active on the given date.'
+                'Composition unavailable. The vehicle may not be active on the given date.'
             );
         }
         $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTimeOffset();
@@ -402,34 +405,23 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
      */
     private function fetchCompositionData(Vehicle $vehicle, JourneyWithOriginAndDestination $startStop): CachedData
     {
-        $cacheKey = self::getCacheKey($vehicle->getNumber());
-        if (!$this->isCached($cacheKey)) {
-            try {
-                $cachedJsonData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
-                $json = $cachedJsonData->getValue();
-                $compositionData = $this->getCompositionPlan($json, $vehicle);
 
-                if ($compositionData[0]['confirmedBy'] == 'Planning' || count($compositionData[0]['materialUnits']) < 2) {
-                    // Planning data often lacks detail. Store it for 5 minutes
-                    $this->setCachedObject($cacheKey, $compositionData, 5 * 60);
-                } else {
-                    // Confirmed data can still change, but less often
-                    $this->setCachedObject($cacheKey, $compositionData, 3600);
-                }
-            } catch (CompositionUnavailableException $e) {
-                // Cache "data unavailable" for 5 minutes to limit outgoing requests. Only do this after a fresh attempts,
-                // so we don't keep increasing the TTL on every cache hit which returns null
-                $this->setCachedObject($cacheKey, null, 300);
-                throw $e;
+        $cachedJsonData = $this->rivRawDataRepository->getVehicleCompositionData($vehicle, $startStop);
+
+        if ($cachedJsonData->getAge() == 0) { // If this cache entry was created now, adjust the expiration date based on contents
+            $json = $cachedJsonData->getValue();
+            $compositionData = $this->getCompositionPlan($json, $vehicle);
+            if ($compositionData[0]['confirmedBy'] == 'Planning' || count($compositionData[0]['materialUnits']) < 2) {
+                // Planning data often lacks detail. Store it for 5 minutes
+                $cachedJsonData->setTtl(300);
+            } else {
+                // Confirmed data can still change, but less often
+                $cachedJsonData->setTtl(3600);
             }
-        }
-        $compositionData = $this->getCachedObject($cacheKey);
-
-        if ($compositionData == null || $compositionData->getValue() == null) {
-            throw new CompositionUnavailableException($vehicle->getId());
+            $this->update($cachedJsonData);
         }
 
-        return $compositionData;
+        return $cachedJsonData;
     }
 
     /**

@@ -2,12 +2,13 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\Cachable;
 use Irail\Models\Journey;
 use Irail\Models\Station;
 
-class JourneyPlanningSearchResult
+class JourneyPlanningSearchResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 
     private Station $originStation;
     private Station $destinationStation;

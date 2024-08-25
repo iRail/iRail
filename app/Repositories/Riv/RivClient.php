@@ -2,6 +2,7 @@
 
 namespace Irail\Repositories\Riv;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Irail\Exceptions\NoResultsException;
@@ -37,14 +38,32 @@ class RivClient
      */
     public function makeApiCallToMobileRivApi(string $url, array $parameters, int $ttl = 15): CachedData
     {
+
         $cacheKey = str_replace('/', '_', $url) . '?' . http_build_query($parameters);
-        $cachedResponse = $this->getCacheOrUpdate($cacheKey, function () use ($url, $parameters) {
-            return $this->fetchRateLimitedRivResponse($url, $parameters);
-        }, $ttl);
-        $stringData = $cachedResponse->getValue();
-        $jsonData = $this->validateAndDecodeRivResponse($stringData);
-        // Replace the string data with the json data in the CachedData object.
-        $cachedResponse->setValue($jsonData);
+
+        // Check if this request failed in the last few seconds, in which case we don't re-attempt
+        if ($this->isCached($cacheKey) && $this->getCachedObject($cacheKey)->getValue() instanceof RivCachedException) {
+            $cachedResponse = $this->getCachedObject($cacheKey);
+            Log::notice("Re-throwing cached exception for $url, remaining cache TTL: {$cachedResponse->getRemainingTtl()}");
+            throw $cachedResponse->getValue()->toException();
+        }
+
+        try {
+            if ($ttl >= 0) { // when set to a negative value. the cache should be bypassed.
+                // We don't want to needlessly store items in cache since this causes fragmentation and requires a write-lock.
+                $cachedResponse = $this->getCacheOrUpdate($cacheKey, function () use ($url, $parameters) {
+                    return $this->fetchRateLimitedRivResponse($url, $parameters);
+                }, $ttl);
+            } else {
+                $data = $this->fetchRateLimitedRivResponse($url, $parameters);
+                $cachedResponse = new CachedData('', $data, 0); // pretend this was cached for compatibility with the default "cached" flow
+            }
+        } catch (Exception $e) {
+            // Store exceptions for 15s
+            Log::warning("Caching RIV exception for 15 seconds. When trying to call $url, the following exception was thrown: {$e->getMessage()}");
+            $this->setCachedObject($cacheKey, new RivCachedException($e), 15);
+            throw $e;
+        }
         return $cachedResponse;
     }
 
@@ -71,7 +90,9 @@ class RivClient
             Log::error($message);
             throw new UpstreamRateLimitException($message);
         }
-        return $response->getResponseBody();
+        $stringData = $response->getResponseBody();
+        $jsonData = $this->validateAndDecodeRivResponse($stringData);
+        return $jsonData;
     }
 
     /**

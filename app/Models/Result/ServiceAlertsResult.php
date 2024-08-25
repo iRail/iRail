@@ -2,11 +2,12 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\Cachable;
 use Irail\Models\Message;
 
-class ServiceAlertsResult
+class ServiceAlertsResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 
     private array $alerts;
 

@@ -2,12 +2,13 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\Cachable;
 use Irail\Models\Vehicle;
 use Irail\Models\VehicleComposition\TrainComposition;
 
-class VehicleCompositionSearchResult
+class VehicleCompositionSearchResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 
     /**
      * @var $segment TrainComposition[] A list of all segments with their own composition for this train ride.

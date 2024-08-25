@@ -65,21 +65,21 @@ class GtfsTripStartEndExtractor
                 }
                 return $activeTime->copy()->setTime(0, 0);
             },
-            GtfsRepository::secondsUntilNextGtfsUpdate() + 60 // Cache until GTFS is updated
+            GtfsRepository::secondsUntilNextGtfsUpdate() + 360 // Cache until GTFS is updated
         );
         return $startDate->getValue();
     }
 
     /**
      * @param string $journeyNumber The vehicle name/id, such as IC538
-     * @param DateTime $date The date
+     * @param DateTime $date The journey start date
      * @return false|JourneyWithOriginAndDestination
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
     public function getVehicleWithOriginAndDestination(string $journeyNumber, DateTime $date): JourneyWithOriginAndDestination|false
     {
         $originAndDestination = $this->getCacheOrUpdate(
-            "getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd-Hi')}",
+            "getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd')}",
             function () use ($journeyNumber, $date): JourneyWithOriginAndDestination|false {
                 $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($journeyNumber));
                 $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
@@ -151,7 +151,7 @@ class GtfsTripStartEndExtractor
                     500,
                     "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds"
                 );
-            }, GtfsRepository::secondsUntilNextGtfsUpdate() + 60 // Cache until GTFS is updated
+            }, GtfsRepository::secondsUntilNextGtfsUpdate() + 300 // Cache until GTFS is updated
         );
         return $originAndDestination->getValue();
     }
@@ -229,7 +229,7 @@ class GtfsTripStartEndExtractor
                 }
                 return $tripsWithStartAndEndDate[$dateYmd];
             },
-            ttl: 3600 + rand(10, 120) // Prevent all caches from expiring at the exact same time
+            ttl: GtfsRepository::secondsUntilNextGtfsUpdate() + 360
         )->getValue();
 
         if ($vehicleDetailsForDate === null) {
@@ -254,7 +254,7 @@ class GtfsTripStartEndExtractor
         // This is better than the many seconds it takes to calculate this data, but it should still be used wisely!
         $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
             return $this->loadTripsWithStartAndEndDate();
-        }, GtfsRepository::secondsUntilNextGtfsUpdate() + 60); // Cache until GTFS is updated
+        }, GtfsRepository::secondsUntilNextGtfsUpdate() + 210); // Cache until GTFS is updated
         return $vehicleDetailsByDate->getValue();
     }
 

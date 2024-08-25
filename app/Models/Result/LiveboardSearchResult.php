@@ -2,12 +2,13 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\Cachable;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Station;
 
-class LiveboardSearchResult
+class LiveboardSearchResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 
     private Station $station;
     /**

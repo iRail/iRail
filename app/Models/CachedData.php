@@ -10,12 +10,12 @@ use Carbon\Carbon;
  * @template T, the cached data type
  * @template-implements CachedData<T>
  */
-class CachedData
+class CachedData implements Cachable
 {
     private string $key;
     private null|object|string|array|bool $value;
     private int $createdAt;
-    private int $expiresAt;
+    private ?int $expiresAt;
 
     /**
      * @param string                        $key
@@ -27,13 +27,11 @@ class CachedData
         $this->key = $key;
         $this->value = $value;
         $this->createdAt = time();
-        $this->expiresAt = time() + $ttl;
-    }
-
-    public function mergeValidity(CachedData $cachedData): void
-    {
-        $this->createdAt = min($cachedData->getCreatedAt(), $this->createdAt);
-        $this->expiresAt = max($cachedData->getExpiresAt(), $this->expiresAt);
+        if ($ttl > 0) {
+            $this->expiresAt = time() + $ttl;
+        } else {
+            $this->expiresAt = null;
+        }
     }
 
     public function setValue(mixed $value): void
@@ -70,11 +68,11 @@ class CachedData
     }
 
     /**
-     * @return Carbon
+     * @return ?Carbon
      */
-    public function getExpiresAt(): Carbon
+    public function getExpiresAt(): ?Carbon
     {
-        return Carbon::createFromTimestamp($this->expiresAt);
+        return $this->expiresAt == null ? null : Carbon::createFromTimestamp($this->expiresAt);
     }
 
     /**
@@ -94,5 +92,21 @@ class CachedData
     public function getAge(): int
     {
         return time() - $this->createdAt;
+    }
+
+    public function getRemainingTtl(): int
+    {
+        return $this->expiresAt - time();
+    }
+
+    public function setTtl(int $ttl)
+    {
+        if ($ttl == 0) {
+            $this->expiresAt = 0;
+        } elseif ($ttl < 0) {
+            $this->expiresAt = time();
+        } else {
+            $this->expiresAt = time() + $ttl;
+        }
     }
 }

@@ -2,7 +2,9 @@
 
 namespace Irail\Models\Result;
 
-class StopSearchResult
+use Irail\Models\Cachable;
+
+class StopSearchResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 }

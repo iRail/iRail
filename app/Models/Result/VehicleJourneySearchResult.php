@@ -2,14 +2,15 @@
 
 namespace Irail\Models\Result;
 
+use Irail\Models\Cachable;
 use Irail\Models\DepartureAndArrival;
 use Irail\Models\DepartureOrArrival;
 use Irail\Models\Message;
 use Irail\Models\Vehicle;
 
-class VehicleJourneySearchResult
+class VehicleJourneySearchResult implements Cachable
 {
-    use Cachable;
+    use CachableResult;
 
     private Vehicle $vehicle;
     private array $stops;

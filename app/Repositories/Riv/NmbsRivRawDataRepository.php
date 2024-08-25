@@ -27,6 +27,10 @@ class NmbsRivRawDataRepository
     use BasedOnHafas;
 
     const string JOURNEY_DETAIL_REF_PREFIX = 'journeyDetailRef|';
+    const int LIVEBOARD_TTL = 30;
+    const int JOURNEYPLANNER_TTL = 30;
+    const int VEHICLE_JOURNEY_DATA = 30;
+    const int VEHICLE_JOURNEY_REF_TTL = 150;
     private StationsRepository $stationsRepository;
     private RivClient $rivClient;
 
@@ -65,7 +69,7 @@ class NmbsRivRawDataRepository
             'Count'    => 100, // 100 results
             // language is not passed, responses contain both Dutch and French destinations
         ];
-        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters);
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::LIVEBOARD_TTL);
     }
 
     /**
@@ -99,7 +103,7 @@ class NmbsRivRawDataRepository
             'numF'             => 6, // request 6 (the max) results forward in time
             'products'         => $typeOfTransportCode->value
         ];
-        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 30);
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::JOURNEYPLANNER_TTL);
     }
 
     /**
@@ -121,8 +125,10 @@ class NmbsRivRawDataRepository
             'lang' => $request->getLanguage()
         ];
         try {
-            $journeyDetailResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 30);
-        } catch (UpstreamParameterException) {
+            $journeyDetailResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::VEHICLE_JOURNEY_DATA);
+        } catch (UpstreamParameterException $e) {
+            Log::warning('Journey detail refs are likely outdated, clearing journey detail ref cache! Exception while trying to get data:'
+                . $e->getMessage());
             // SVC_PARAM exception is returned when the parameter is invalid.
             // In this case, the Hafas data has likely been updated, and all journey references need to be refreshed
             $this->deleteCachedObjectsByPrefix(self::JOURNEY_DETAIL_REF_PREFIX);
@@ -198,7 +204,8 @@ class NmbsRivRawDataRepository
                 'date'        => $formattedDateStr,
                 'lang'        => $request->getLanguage()
             ];
-            $journeyResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 150)->getValue(); // Cache this data for a while
+            // This is already cached on a higher level, so no need to cache individual requests
+            $journeyResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, -1)->getValue();
             if ($journeyResponse === null || !key_exists('Trip', $journeyResponse)) {
                 // No journeyref found, move on to the next combination
             } else {
@@ -291,6 +298,6 @@ class NmbsRivRawDataRepository
             'FromToAreUicCodes'   => 'true',
             'IncludeMaterialInfo' => 'true'
         ];
-        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters);
+        return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, 300);
     }
 }

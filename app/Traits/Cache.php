@@ -7,6 +7,7 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Closure;
 use Illuminate\Support\Facades\Log;
 use Irail\Exceptions\Internal\InternalProcessingException;
+use Irail\Models\Cachable;
 use Irail\Models\CachedData;
 use Psr\Cache\InvalidArgumentException;
 
@@ -90,7 +91,7 @@ trait Cache
                 return false;
             }
         } catch (InvalidArgumentException $e) {
-            Log::error('Failed to read from cache: ' . $e->getMessage());
+            Log::error('getCachedObject: Failed to read from cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -117,11 +118,11 @@ trait Cache
         try {
             $item = self::$cache->getItem($prefixedKey);
         } catch (InvalidArgumentException $e) {
-            Log::error('Failed to read from cache: ' . $e->getMessage());
+            Log::error('setCachedObject: Failed to read from cache: ' . $e->getMessage());
             throw new InternalProcessingException(500, 'Failed to read from cache: ' . $e->getMessage(), $e);
         }
 
-        $cacheEntry = new CachedData($key, $value, $ttl);
+        $cacheEntry = new CachedData($prefixedKey, $value, $ttl);
         $item->set(igbinary_serialize($cacheEntry));
         if ($ttl > 0) {
             $item->expiresAfter($ttl);
@@ -129,6 +130,30 @@ trait Cache
 
         self::$cache->save($item);
         return $cacheEntry;
+    }
+
+    /**
+     * Update a cache entry with a new TTL/expiry date.
+     * @param CachedData $cachedData
+     * @return CachedData
+     */
+    public function update(CachedData $cachedData): CachedData
+    {
+        $this->initializeCachePool();
+        try {
+            $item = self::$cache->getItem($cachedData->getKey());
+        } catch (InvalidArgumentException $e) {
+            Log::error('update: Failed to read from cache: ' . $e->getMessage());
+            throw new InternalProcessingException(500, 'Failed to read from cache: ' . $e->getMessage(), $e);
+        }
+
+        $item->set(igbinary_serialize($cachedData));
+        if ($cachedData->getRemainingTtl() > 0) {
+            $item->expiresAfter($cachedData->getRemainingTtl());
+        }
+
+        self::$cache->save($item);
+        return $cachedData;
     }
 
     private function deleteCachedObject(string $key): string
@@ -160,7 +185,13 @@ trait Cache
     {
         $cachedData = $this->getCachedObject($cacheKey);
         if ($cachedData === false) {
+            Log::error("Could not find $cacheKey");
             $data = $valueProvider();
+            if ($data instanceof Cachable && $data->getExpiresAt() != null) {
+                $newTtl = max($ttl, $data->getRemainingTtl());
+                Log::debug("Adjusting TTL for cache item $cacheKey from $ttl to $newTtl based on cached content with ttls {$data->getRemainingTtl()}");
+                $ttl = $newTtl;
+            }
             $cachedData = $this->setCachedObject($cacheKey, $data, $ttl);
         }
         return $cachedData;
@@ -240,13 +271,13 @@ trait Cache
 
     /**
      * @template T, the cached data type
-     * @param string $key
+     * @param string $prefixedKey
      * @return CachedData<T>|null
      * @throws InvalidArgumentException
      */
-    private function getCacheEntry(string $key): ?CachedData
+    private function getCacheEntry(string $prefixedKey): ?CachedData
     {
-        $cacheItem = self::$cache->getItem($key);
+        $cacheItem = self::$cache->getItem($prefixedKey);
         $cacheEntry = igbinary_unserialize($cacheItem->get());
         if ($cacheEntry == null) {
             return null;
