@@ -13,11 +13,19 @@ class LogDao
     const int MAX_STORE_ATTEMPTS_BEFORE_CLEAR = 4;
 
     /**
-     * How often request logs should be flushed to the database. E.g. every 10th or 100th request.
+     * How many request logs should be collected before flushing to the database. E.g. every 10th or 100th request.
      */
     public static function getFlushInterval(): int
     {
-        return env('REQUEST_LOG_FLUSH_BUFFER', 100);
+        return env('REQUEST_LOG_FLUSH_BUFFER', 50);
+    }
+
+    /**
+     * Limit on how long to keep logs in memory while waiting for flush.
+     */
+    public static function getLogTtl(): int
+    {
+        return env('REQUEST_LOG_MEMORY_TTL', 3600);
     }
 
     /**
@@ -41,7 +49,7 @@ class LogDao
             'created_at' => Carbon::now()->utc()->format('Y-m-d H:i:s')
         ];
         // Store in memory so we don't need to write to the database on every request
-        apcu_store('Irail|LogDao|log|' . $id, $data, 1800); // Store until flushed, but never more than 30 minutes
+        apcu_store('Irail|LogDao|log|' . $id, $data, self::getLogTtl()); // Store until flushed, but never more than 30 minutes
         $flushInterval = $this->getFlushInterval();
         if ($id % $flushInterval == 0) {
             Log::info('Flushing request log data');
