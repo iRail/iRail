@@ -54,7 +54,8 @@ class GtfsRepository
     {
         $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIPS, function (): array {
             return $this->readTripsByJourneyNumberAndStartDate();
-        }, $this->secondsUntilNextGtfsUpdate() + 2); // Additional two seconds so underlying data surely has expired and will refresh before this one is updated.
+        },
+            $this->secondsUntilGtfsCacheExpires() + 2); // Additional two seconds so underlying data surely has expired and will refresh before this one is updated.
         return $cachedData->getValue();
     }
 
@@ -67,18 +68,35 @@ class GtfsRepository
     }
 
     /**
+     * @return void Force a refresh of trips data, without deleting the current data first.
+     */
+    public function forceTripsRefresh(): void
+    {
+        $data = $this->readTripsByJourneyNumberAndStartDate();
+        $this->setCachedObject(self::GTFS_ALL_TRIPS, $data, $this->secondsUntilGtfsCacheExpires() + 2);
+    }
+
+    /**
      * Get an array mapping each trip_id to the stops on that trip.
      * @return array<String, StopTime[]>
      */
     public function getTripStops(): array
     {
-        $cachedData = $this->getCacheOrSynchronizedUpdate(
-            self::GTFS_ALL_TRIP_STOPS_CACHE_KEY,
+        $cachedData = $this->getCacheOrSynchronizedUpdate(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY,
             function (): array {
-            return $this->readTripStops();
-            }, $this->secondsUntilNextGtfsUpdate()
+                return $this->readTripStops();
+            }, $this->secondsUntilGtfsCacheExpires()
         );
         return $cachedData->getValue();
+    }
+
+    /**
+     * @return void Force a refresh of trip stops data, without deleting the current data first.
+     */
+    public function forceTripStopsRefresh(): void
+    {
+        $data = $this->readTripStops();
+        $this->setCachedObject(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, $data, $this->secondsUntilGtfsCacheExpires());
     }
 
     /**
@@ -95,7 +113,7 @@ class GtfsRepository
                 $vehicleTypesByRouteId[$route->getRouteId()] = $route->getRouteShortName();
             }
             return $vehicleTypesByRouteId;
-            }, $this->secondsUntilNextGtfsUpdate() + 1 // One additional second so the underlying caches surely have expired before this one expires
+            }, $this->secondsUntilGtfsCacheExpires() + 1 // One additional second so the underlying caches surely have expired before this one expires
         );
         return $cachedData->getValue();
     }
@@ -195,7 +213,7 @@ class GtfsRepository
     {
         $cachedData = $this->getCacheOrUpdate(self::GTFS_ALL_CALENDAR_DATES, function (): array {
             return $this->readCalendarDates();
-        }, $this->secondsUntilNextGtfsUpdate());
+        }, $this->secondsUntilGtfsCacheExpires());
         return $cachedData->getValue();
     }
 
@@ -312,6 +330,21 @@ class GtfsRepository
     private function getMemoryUsage(): string
     {
         return 'Memory usage ' . round(memory_get_usage() / 1024 / 1024, 2) . 'MB, peak ' . round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB';
+    }
+
+    /**
+     * @return int The number of seconds between when a new GTFS file becomes available, and when the cache for the currently cached GTFS data expires. During
+     * this window, cached data can be replaced by a cron job without causing a huge load spike.
+     */
+    public static function getGtfsBackgroundRefreshWindowSeconds(): int
+    {
+        return 3600;
+    }
+
+
+    public static function secondsUntilGtfsCacheExpires(): int
+    {
+        return self::secondsUntilNextGtfsUpdate() + self::getGtfsBackgroundRefreshWindowSeconds();
     }
 
     public static function secondsUntilNextGtfsUpdate(): int

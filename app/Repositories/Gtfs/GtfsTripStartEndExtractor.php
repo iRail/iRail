@@ -65,7 +65,7 @@ class GtfsTripStartEndExtractor
                 }
                 return $activeTime->copy()->setTime(0, 0);
             },
-            GtfsRepository::secondsUntilNextGtfsUpdate() + 360 // Cache until GTFS is updated
+            GtfsRepository::secondsUntilGtfsCacheExpires() + rand(60, 120) // Cache until GTFS is updated. Spread random to prevent load spike. Always more than underlying cache getVehicleWithOriginAndDestination.
         );
         return $startDate->getValue();
     }
@@ -151,7 +151,7 @@ class GtfsTripStartEndExtractor
                     500,
                     "'{$vehicleNumber}' occurs twice on the same day at non-connected segments! GTFS trip ids: $tripIds"
                 );
-            }, GtfsRepository::secondsUntilNextGtfsUpdate() + 300 // Cache until GTFS is updated
+            }, GtfsRepository::secondsUntilGtfsCacheExpires() + rand(15, 59) // Cache until GTFS is updated
         );
         return $originAndDestination->getValue();
     }
@@ -194,16 +194,6 @@ class GtfsTripStartEndExtractor
     }
 
     /**
-     * @param JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
-     * @return bool
-     */
-    private function isBelgianJourney(JourneyWithOriginAndDestination $vehicleWithOriginAndDestination): bool
-    {
-        return str_starts_with($vehicleWithOriginAndDestination->getOriginStopId(), '88')
-            && str_starts_with($vehicleWithOriginAndDestination->getDestinationStopId(), '88');
-    }
-
-    /**
      * @param DateTime $date
      * @return array<int, JourneyWithOriginAndDestination[]> journeys with origin and destination by their journey number. One journey number may have multiple journeys.
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
@@ -229,7 +219,7 @@ class GtfsTripStartEndExtractor
                 }
                 return $tripsWithStartAndEndDate[$dateYmd];
             },
-            ttl: GtfsRepository::secondsUntilNextGtfsUpdate() + 360
+            ttl: GtfsRepository::secondsUntilGtfsCacheExpires() + rand(1,10) // Cache until GTFS is updated
         )->getValue();
 
         if ($vehicleDetailsForDate === null) {
@@ -254,7 +244,7 @@ class GtfsTripStartEndExtractor
         // This is better than the many seconds it takes to calculate this data, but it should still be used wisely!
         $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
             return $this->loadTripsWithStartAndEndDate();
-        }, GtfsRepository::secondsUntilNextGtfsUpdate() + 210); // Cache until GTFS is updated
+        }, GtfsRepository::secondsUntilGtfsCacheExpires()); // Cache until GTFS is updated
         return $vehicleDetailsByDate->getValue();
     }
 
