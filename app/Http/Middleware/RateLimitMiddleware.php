@@ -30,8 +30,15 @@ class RateLimitMiddleware
      */
     public function rateLimitedShortTerm(Request $request, Closure $next)
     {
+        $clientIp = $request->getClientIp();
+
+        if ($request->hasHeader('do-connecting-ip')) {
+            // Read from the right HTTP header when deployed on DigitalOcean App Platform
+            $clientIp = $request->header('do-connecting-ip');
+        }
+
         $response = RateLimiter::attempt(
-            'request_rate|burst|' . $request->getClientIp(),
+            'request_rate|burst|' . $clientIp,
             30,
             function () use ($request, $next) {
                 return $next($request);
