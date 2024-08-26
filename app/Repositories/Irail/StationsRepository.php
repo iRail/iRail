@@ -66,9 +66,9 @@ class StationsRepository
         return key_exists($tafTapIdentifier, $tafTapMap) ? $tafTapMap[$tafTapIdentifier] : null;
     }
 
-    /** @noinspection PhpUnused Used through dependency injection */
     public function findStationByName(string $name): ?Station
     {
+        $name = strtolower(trim($name));
         $cacheKey = "stationsRepository.findStationByName.$name";
         $cachedValue = Cache::get($cacheKey);
         if ($cachedValue) {
@@ -76,13 +76,13 @@ class StationsRepository
         }
 
         // first check if it wasn't by any chance an id
-        if (str_starts_with($name, '0') || str_starts_with($name, 'BE.NMBS') || str_starts_with($name, 'http://')) {
+        if (str_starts_with($name, '0') || str_starts_with($name, 'be.nmbs') || str_starts_with($name, 'http://')) {
             throw new InvalidArgumentException("Expected station name, got station id: {$name}", 500);
         }
 
         $name = html_entity_decode($name, ENT_COMPAT | ENT_HTML401, 'UTF-8');
-        $name = preg_replace('/[ ]?\([a-zA-Z]+\)/', '', $name);
-        $name = str_replace(' [NMBS/SNCB]', '', $name);
+        $name = preg_replace('/ ?\([a-zA-Z]+\)/', '', $name);
+        $name = str_ireplace(' [NMBS/SNCB]', '', $name);
         $name = str_replace(' `', '', $name);
         $name = explode('/', $name);
         $name = trim($name[0]);
