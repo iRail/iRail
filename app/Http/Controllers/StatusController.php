@@ -100,16 +100,16 @@ class StatusController extends BaseIrailController
         // can trigger a GTFS update
         $cachedData = $this->gtfsRepository->getCachedTrips();
         if ($cachedData && $cachedData->getRemainingTtl() > GtfsRepository::getGtfsBackgroundRefreshWindowSeconds()) {
-            Log::info('GTFS cache is already loaded, not warming up');
-            return 'OK: Already loaded';
+            Log::info('GTFS cache is already loaded, not warming up. Remaining TTL ' . $cachedData->getRemainingTtl());
+            return 'OK: Already loaded. GTFS update in ' . GtfsRepository::secondsUntilNextGtfsUpdate() . "s, cache valid for " . $cachedData->getRemainingTtl();
         } elseif ($cachedData === false) {
             Log::info('Warming up GTFS Cache');
             // Calling this method will load the cache
             $trips = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
-            $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now());
+            $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now());
             // Yesterday and tomorrow are also frequently queried, and should be loaded in the cache to reduce risk for overloading a freshly started instance
-            $tripsYesterday = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now()->subDay());
-            $tripsTomorrow = $this->tripStartEndExtractor->getTripsWithStartAndEndByDate(Carbon::now()->addDay());
+            $tripsYesterday = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->subDay());
+            $tripsTomorrow = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->addDay());
             Log::info('Warmed up GTFS Cache');
             $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, '
                 . count($tripsToday) . ' today, '
@@ -124,6 +124,8 @@ class StatusController extends BaseIrailController
             Log::info('Refreshed GTFS Trips');
             $this->gtfsRepository->forceTripStopsRefresh();
             Log::info('Refreshed GTFS Stop times');
+            $this->tripStartEndExtractor->refreshTripsWithStartAndEndByDate();
+            Log::info('Refreshed journeys by start and end date');
             return 'Refreshed GTFS cache';
         }
     }

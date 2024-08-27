@@ -73,6 +73,7 @@ class GtfsRepository
     public function forceTripsRefresh(): void
     {
         $data = $this->readTripsByJourneyNumberAndStartDate();
+        Log::info('GTFS Trips refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires() + 2);
         $this->setCachedObject(self::GTFS_ALL_TRIPS, $data, $this->secondsUntilGtfsCacheExpires() + 2);
     }
 
@@ -96,6 +97,7 @@ class GtfsRepository
     public function forceTripStopsRefresh(): void
     {
         $data = $this->readTripStops();
+        Log::info('GTFS trip stops refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
         $this->setCachedObject(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, $data, $this->secondsUntilGtfsCacheExpires());
     }
 
@@ -349,8 +351,8 @@ class GtfsRepository
 
     public static function secondsUntilNextGtfsUpdate(): int
     {
-        $now = Carbon::now();
-        $gtfsReleaseTime = $now->copy()->setTime(6, 30);
+        $now = Carbon::now()->timezone('Europe/Brussels');
+        $gtfsReleaseTime = $now->copy()->timezone('Europe/Brussels')->setTime(06, 52);
         if ($gtfsReleaseTime->isBefore($now)) {
             $gtfsReleaseTime = $gtfsReleaseTime->addDay();
         }

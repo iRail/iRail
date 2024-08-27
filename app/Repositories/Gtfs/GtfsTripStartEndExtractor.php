@@ -82,7 +82,7 @@ class GtfsTripStartEndExtractor
             "getVehicleWithOriginAndDestination|$journeyNumber|{$date->format('Ymd')}",
             function () use ($journeyNumber, $date): JourneyWithOriginAndDestination|false {
                 $vehicleNumber = Tools::safeIntVal(VehicleIdTools::extractTrainNumber($journeyNumber));
-                $vehicleDetailsForDate = self::getTripsWithStartAndEndByDate($date);
+                $vehicleDetailsForDate = self::getTripsWithStartAndEndForDate($date);
                 if (!key_exists($vehicleNumber, $vehicleDetailsForDate)) {
                     return false;
                 }
@@ -198,7 +198,7 @@ class GtfsTripStartEndExtractor
      * @return array<int, JourneyWithOriginAndDestination[]> journeys with origin and destination by their journey number. One journey number may have multiple journeys.
      * @throws RequestOutsideTimetableRangeException | UpstreamServerException
      */
-    public function getTripsWithStartAndEndByDate(DateTime $date): array
+    public function getTripsWithStartAndEndForDate(DateTime $date): array
     {
         // Use an array cache on top of the cached data, as deserializing this data takes 80+ms from the cache can take up multiple seconds
         // when this method is called hundreds of times while reading large liveboards
@@ -213,7 +213,7 @@ class GtfsTripStartEndExtractor
         $vehicleDetailsForDate = $this->getCacheOrUpdate(
             self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY . '|' . $dateYmd,
             function () use ($dateYmd): ?array {
-                $tripsWithStartAndEndDate = $this->getTripsWithStartAndEndDate();
+                $tripsWithStartAndEndDate = $this->getTripsWithStartAndEndByDate();
                 if (!key_exists($dateYmd, $tripsWithStartAndEndDate)) {
                     return null;
                 }
@@ -238,14 +238,21 @@ class GtfsTripStartEndExtractor
     /**
      * @return array<string, JourneyWithOriginAndDestination[]> An array containing VehicleWithOriginAndDestination objects grouped by date in Ymd format
      */
-    private function getTripsWithStartAndEndDate(): array
+    private function getTripsWithStartAndEndByDate(): array
     {
         // IMPORTANT PERFORMANCE NOTE: Deserializing this data takes 80+ms
         // This is better than the many seconds it takes to calculate this data, but it should still be used wisely!
-        $vehicleDetailsByDate = $this->getCacheOrUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
-            return $this->loadTripsWithStartAndEndDate();
+        // Synchronized to prevent memory usage spikes on cache expiration
+        $vehicleDetailsByDate = $this->getCacheOrSynchronizedUpdate(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, function (): array {
+            return $this->loadTripsWithStartAndEndByDate();
         }, GtfsRepository::secondsUntilGtfsCacheExpires()); // Cache until GTFS is updated
         return $vehicleDetailsByDate->getValue();
+    }
+
+    public function refreshTripsWithStartAndEndByDate(): void{
+        $data = $this->loadTripsWithStartAndEndByDate();
+        Log::info('GTFS journeys with origin and destination by date refresh forced, TTL ' . (GtfsRepository::secondsUntilGtfsCacheExpires() + 1));
+        $this->setCachedObject(self::GTFS_VEHICLE_DETAILS_BY_DATE_CACHE_KEY, $data, GtfsRepository::secondsUntilGtfsCacheExpires() + 1);
     }
 
     /**
@@ -254,7 +261,7 @@ class GtfsTripStartEndExtractor
      *                                                                      journey number.
      * @throws UpstreamServerException
      */
-    private function loadTripsWithStartAndEndDate(): array
+    private function loadTripsWithStartAndEndByDate(): array
     {
         // Only keep service ids in a specific date range (x days back, y days forward), to keep cpu/ram usage down
         $tripsByJourneyAndDate = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
