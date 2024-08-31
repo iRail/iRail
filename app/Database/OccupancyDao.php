@@ -188,7 +188,8 @@ class OccupancyDao
                 $departure->getScheduledDateTime(),
                 $performanceMode
             );
-            Cache::put($cacheKey, $officialNmbsLevel, 3 * 3600);
+            // spread out cache expiration to prevent database load peaks when everything expires
+            Cache::put($cacheKey, $officialNmbsLevel, 3 * 3600 + rand(0, 600));
         }
         return $officialNmbsLevel;
     }
@@ -283,8 +284,8 @@ class OccupancyDao
             }
             $result[$row->stop_id][] = OccupancyLevel::fromIntValue($row->occupancy);
         }
-
-        Cache::put($cacheKey, $result, 3 * 3600);
+        // spread out cache expiration to prevent database load peaks when everything expires
+        Cache::put($cacheKey, $result, 3 * 3600 + rand(0, 900));
         $duration = floor((microtime(true) - $startTime) * 1000);
         Log::debug("Queried occupancy levels for {$source->name}, vehicle $vehicleId in $duration ms, results: " . count($result));
         return $result;
@@ -326,7 +327,8 @@ class OccupancyDao
             $result[$row->vehicle_id][] = OccupancyLevel::fromIntValue($row->occupancy);
         }
 
-        Cache::put($cacheKey, $result, 3 * 3600);
+        // spread out cache expiration to prevent database load peaks when everything expires
+        Cache::put($cacheKey, $result, 3 * 3600 + rand(0, 900));
         $duration = floor((microtime(true) - $startTime) * 1000);
         Log::debug("Queried occupancy levels for {$source->name}, stop $stationId in $duration ms, results: " . count($result));
         return $result;
@@ -409,11 +411,11 @@ class OccupancyDao
         }
         foreach ($byStop as $stationId => $journeysWithOccupancy) {
             $cacheKey = $this->getOccupancyKey($source, null, $stationId, $vehicleJourneyStartDate); // Cache at station level
-            Cache::put($cacheKey, $journeysWithOccupancy, 3 * 3600 + rand(1, 60)); // Prevent all caches from expiring at the exact same time
+            Cache::put($cacheKey, $journeysWithOccupancy, 3 * 3600 + rand(1, 3600)); // Prevent all caches from expiring at the exact same time
         }
         foreach ($byJourney as $journeyId => $stopsWithOccupancy) {
             $cacheKey = $this->getOccupancyKey($source, $journeyId, null, $vehicleJourneyStartDate); // Cache at station level
-            Cache::put($cacheKey, $stopsWithOccupancy, 3 * 3600 + rand(1, 60)); // Prevent all caches from expiring at the exact same time
+            Cache::put($cacheKey, $stopsWithOccupancy, 3 * 3600 + rand(1, 3600)); // Prevent all caches from expiring at the exact same time
         }
         return count($rows);
     }

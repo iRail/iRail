@@ -81,7 +81,7 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             $result = new VehicleCompositionSearchResult($journey, $segments);
             $result->mergeCacheValidity($cachedData->getCreatedAt(), $cachedData->getExpiresAt());
             return $result;
-        }, 300); // Only recalculate at most once every 5 minutes
+        }, rand(300, 360)); // Only recalculate at most once every 5 minutes
         $result = $cachedResult->getValue();
         $result->mergeCacheValidity($cachedResult->getCreatedAt(), $cachedResult->getExpiresAt()); // Combine cache validities to ensure we don't serve an "expires" value which lies in the past.
         return $result;
@@ -415,10 +415,10 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
             $compositionData = $this->getCompositionPlan($json, $vehicle);
             if ($compositionData[0]['confirmedBy'] == 'Planning' || count($compositionData[0]['materialUnits']) < 2) {
                 // Planning data often lacks detail. Store it for 5 minutes
-                $cachedJsonData->setTtl(300);
+                $cachedJsonData->setTtl(300 + rand(0, 30));
             } else {
                 // Confirmed data can still change, but less often
-                $cachedJsonData->setTtl(3600);
+                $cachedJsonData->setTtl(3600 + rand(0, 600));
             }
             $this->update($cachedJsonData);
         }

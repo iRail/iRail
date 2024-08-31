@@ -87,7 +87,7 @@ class HistoricCompositionDao
                 $typePercentage
             )
         ];
-        Cache::put($cacheKey, $result, 3600 * 12); // Cache for 12 hours
+        Cache::put($cacheKey, $result, 3600 * 12 + rand(0, 600)); // Cache for 12 hours
         return $result;
     }
 
