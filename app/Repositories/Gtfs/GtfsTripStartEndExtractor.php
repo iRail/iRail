@@ -119,8 +119,18 @@ class GtfsTripStartEndExtractor
                 $orderedParts = [];
                 $orderedParts[] = $journeyPartsByStart[$origin];
                 for ($i = 1; $i < count($journeyParts); $i++) {
-                    $part = $journeyPartsByStart[$orderedParts[$i - 1]->getDestinationStopId()];
-                    $orderedParts[] = $part;
+                    $nextOrigin = $orderedParts[$i - 1]->getDestinationStopId();
+                    if (key_exists($nextOrigin, $journeyPartsByDestination)) {
+                        $part = $journeyPartsByStart[$nextOrigin];
+                        $orderedParts[] = $part;
+                    } else {
+                        $startValues = join(', ', array_keys($journeyPartsByStart));
+                        Log::warning("Invalid GTFS data: origin for part $i of journey $journeyNumber should be $nextOrigin, "
+                        . "but not present in possible starts $startValues"
+                        . ", found trip ids: $tripIds");
+                        $invalid = true;
+                        break;
+                    }
                 }
                 $origin = array_shift($orderedParts);
                 $destination = array_pop($orderedParts);
