@@ -120,6 +120,10 @@ class StatusController extends BaseIrailController
         } else {
             // in the cache refresh window
             Log::info('Refreshing GTFS Cache');
+            $this->gtfsRepository->forceRoutesRefresh();
+            Log::info('Refreshed GTFS routes');
+            $this->gtfsRepository->forceCalendarDateStopsRefresh();
+            Log::info('Refreshed GTFS calendar dates');
             $this->gtfsRepository->forceTripsRefresh();
             Log::info('Refreshed GTFS Trips');
             $this->gtfsRepository->forceTripStopsRefresh();

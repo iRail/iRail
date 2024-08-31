@@ -220,6 +220,16 @@ class GtfsRepository
     }
 
     /**
+     * @return void Force a refresh of calendar dates data, without deleting the current data first.
+     */
+    public function forceCalendarDateStopsRefresh(): void
+    {
+        $data = $this->readCalendarDates();
+        Log::info('GTFS calendar dates refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
+        $this->setCachedObject(self::GTFS_ALL_CALENDAR_DATES, $data, $this->secondsUntilGtfsCacheExpires());
+    }
+
+    /**
      * Read the calendar_dates file from a GTFS feed. Note that this function is naive, and only supports gtfs feeds
      * where the calendar.txt file is not used, i.e. where all dates in calendar_dates are additions to an empty calendar.
      *
@@ -304,6 +314,17 @@ class GtfsRepository
         fclose($fileStream);
         Log::info("Read {$numberOfStopTimes} stop_times, skipped {$numberOfSkippedStopTimes}. " . $this->getMemoryUsage());
         return $stopsByTripId;
+    }
+
+
+    /**
+     * @return void Force a refresh of routes data, without deleting the current data first.
+     */
+    public function forceRoutesRefresh(): void
+    {
+        $data = $this->readRoutes();
+        Log::info('GTFS routes refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
+        $this->setCachedObject(self::GTFS_ROUTES_CACHE_KEY, $data, $this->secondsUntilGtfsCacheExpires());
     }
 
     /**
