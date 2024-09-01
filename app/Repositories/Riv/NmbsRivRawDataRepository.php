@@ -14,6 +14,7 @@ use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
 use Irail\Models\Vehicle;
 use Irail\Proxy\CurlProxy;
+use Irail\Repositories\Gtfs\GtfsRepository;
 use Irail\Repositories\Gtfs\GtfsTripStartEndExtractor;
 use Irail\Repositories\Gtfs\Models\JourneyWithOriginAndDestination;
 use Irail\Repositories\Irail\StationsRepository;
@@ -270,7 +271,7 @@ class NmbsRivRawDataRepository
                     return false;
                 }
             },
-            6 * 3600 // Journey detail references may change, but in that case the cache should be cleared.
+            GtfsRepository::secondsUntilGtfsCacheExpires() + rand(0, 900) // Journey detail references may change, but in that case the cache should be cleared.
         );
         if ($cachedJourneyDetailRef->getValue() === false) {
             // If an exception was cached, throw it

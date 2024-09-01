@@ -67,15 +67,6 @@ class GtfsRepository
         return $this->getCachedObject(self::GTFS_ALL_TRIPS);
     }
 
-    /**
-     * @return void Force a refresh of trips data, without deleting the current data first.
-     */
-    public function forceTripsRefresh(): void
-    {
-        $data = $this->readTripsByJourneyNumberAndStartDate();
-        Log::info('GTFS Trips refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires() + 2);
-        $this->setCachedObject(self::GTFS_ALL_TRIPS, $data, $this->secondsUntilGtfsCacheExpires() + 2);
-    }
 
     /**
      * Get an array mapping each trip_id to the stops on that trip.
@@ -89,16 +80,6 @@ class GtfsRepository
             }, $this->secondsUntilGtfsCacheExpires()
         );
         return $cachedData->getValue();
-    }
-
-    /**
-     * @return void Force a refresh of trip stops data, without deleting the current data first.
-     */
-    public function forceTripStopsRefresh(): void
-    {
-        $data = $this->readTripStops();
-        Log::info('GTFS trip stops refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
-        $this->setCachedObject(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY, $data, $this->secondsUntilGtfsCacheExpires());
     }
 
     /**
@@ -220,13 +201,14 @@ class GtfsRepository
     }
 
     /**
-     * @return void Force a refresh of calendar dates data, without deleting the current data first.
+     * @return void Clear the GTFS cached data.
      */
-    public function forceCalendarDateStopsRefresh(): void
+    public function clearCache(): void
     {
-        $data = $this->readCalendarDates();
-        Log::info('GTFS calendar dates refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
-        $this->setCachedObject(self::GTFS_ALL_CALENDAR_DATES, $data, $this->secondsUntilGtfsCacheExpires());
+        $this->deleteCachedObject(self::GTFS_ALL_CALENDAR_DATES);
+        $this->deleteCachedObject(self::GTFS_ROUTES_CACHE_KEY);
+        $this->deleteCachedObject(self::GTFS_ALL_TRIPS);
+        $this->deleteCachedObject(self::GTFS_ALL_TRIP_STOPS_CACHE_KEY);
     }
 
     /**
@@ -316,16 +298,6 @@ class GtfsRepository
         return $stopsByTripId;
     }
 
-
-    /**
-     * @return void Force a refresh of routes data, without deleting the current data first.
-     */
-    public function forceRoutesRefresh(): void
-    {
-        $data = $this->readRoutes();
-        Log::info('GTFS routes refresh forced, TTL ' . $this->secondsUntilGtfsCacheExpires());
-        $this->setCachedObject(self::GTFS_ROUTES_CACHE_KEY, $data, $this->secondsUntilGtfsCacheExpires());
-    }
 
     /**
      * @return array<String,Route> An associative array mapping route ids to route objects

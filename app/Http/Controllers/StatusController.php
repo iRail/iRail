@@ -119,15 +119,9 @@ class StatusController extends BaseIrailController
             return $gtfsResult . $this->getMemoryStatus();
         } else {
             // in the cache refresh window
-            Log::info('Refreshing GTFS Cache');
-            $this->gtfsRepository->forceRoutesRefresh();
-            Log::info('Refreshed GTFS routes');
-            $this->gtfsRepository->forceCalendarDateStopsRefresh();
-            Log::info('Refreshed GTFS calendar dates');
-            $this->gtfsRepository->forceTripsRefresh();
-            Log::info('Refreshed GTFS Trips');
-            $this->gtfsRepository->forceTripStopsRefresh();
-            Log::info('Refreshed GTFS Stop times');
+            Log::info('Clearing GTFS cache');
+            $this->gtfsRepository->clearCache();
+            Log::info('Cleared GTFS cache, refreshing trips with start/end date');
             $this->tripStartEndExtractor->refreshTripsWithStartAndEndByDate();
             Log::info('Refreshed journeys by start and end date');
             return 'Refreshed GTFS cache';
