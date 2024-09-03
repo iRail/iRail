@@ -8,6 +8,7 @@ namespace Irail\Repositories\Nmbs;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Irail\Database\OccupancyDao;
 use Irail\Database\OccupancyDaoPerformanceMode;
 use Irail\Exceptions\Internal\UnknownStopException;
@@ -85,7 +86,11 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
                 continue;
             }
 
-            $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
+            try {
+                $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
+            } catch (Exception $e) {
+                Log::error('Failed to parse stop at station: ' . $e->getMessage());
+            }
         }
 
         $liveboardSearchResult = new LiveboardSearchResult($currentStation, $departuresOrArrivals);
