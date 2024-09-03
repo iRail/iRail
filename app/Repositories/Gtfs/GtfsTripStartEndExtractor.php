@@ -120,7 +120,7 @@ class GtfsTripStartEndExtractor
                 $orderedParts[] = $journeyPartsByStart[$origin];
                 for ($i = 1; $i < count($journeyParts); $i++) {
                     $nextOrigin = $orderedParts[$i - 1]->getDestinationStopId();
-                    if (key_exists($nextOrigin, $journeyPartsByDestination)) {
+                    if (key_exists($nextOrigin, $journeyPartsByStart)) {
                         $part = $journeyPartsByStart[$nextOrigin];
                         $orderedParts[] = $part;
                     } else {
