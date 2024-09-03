@@ -89,7 +89,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
             try {
                 $departuresOrArrivals[] = $this->parseStopAtStation($request, $currentStation, $stop);
             } catch (Exception $e) {
-                Log::error('Failed to parse stop at station: ' . $e->getMessage());
+                Log::error('Failed to parse stop at station: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
 

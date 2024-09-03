@@ -313,6 +313,42 @@ class GtfsTripStartEndExtractor
                     // We'll use the trip id as a fallback to prevent this
 
 
+                    if (key_exists($trip->getJourneyNumber(), $vehicleDetailsByDate[$date])) {
+                        // When there are 2 train parts, where one part is an integral part of the other
+                        // e.g. A-B-C-D-E where there is one trip A-E and one trip C-E or A-C
+                        // the complete trip should be retained, and the other discarded
+                        // We already do this here, since storing the necessary stops data along with the journey origin/destination would be too memory intensive
+                        $existingTrips = $vehicleDetailsByDate[$date][$trip->getJourneyNumber()];
+                        $currentTripStops = $tripStops[$trip->getTripId()];
+
+                        $toBeIgnored = false;
+                        $indexesToBeRemoved = [];
+
+                        foreach ($existingTrips as $index => $existingTrip) {
+                            $existingTripStops = $tripStops[$existingTrip->getTripId()];
+                            if ($this->tripsOverlap($currentTripStops, $existingTripStops)) {
+                                if (count($currentTripStops) < count($existingTripStops)) { // The largest result should be retained
+                                    $toBeIgnored = true;
+                                } else {
+                                    // the other trip should be removed
+                                    $indexesToBeRemoved[] = $index;
+                                }
+                            }
+                        }
+                        if ($toBeIgnored) {
+                            Log::warning("Ignoring trip {$trip->getTripId()} with journey number {$trip->getJourneyNumber()} at date $date due "
+                            . "to overlapping train segments between trips such as {$vehicleDetailsByDate[$date][$trip->getJourneyNumber()][0]->getTripId()}");
+                            continue; // This trip should not be stored. Cannot occur in combination with indexes which should be removed
+                        }
+                        foreach ($indexesToBeRemoved as $index) {
+                            Log::warning("Dropping index $index for trip {$trip->getJourneyNumber()} at date $date due to overlapping train segments "
+                            . "between trips {$vehicleDetailsByDate[$date][$trip->getJourneyNumber()][$index]->getTripId()} and {$trip->getTripId()}");
+                            unset($vehicleDetailsByDate[$date][$trip->getJourneyNumber()][$index]);
+                            // restore numeric ordering
+                            $vehicleDetailsByDate[$date][$trip->getJourneyNumber()] = array_values($vehicleDetailsByDate[$date][$trip->getJourneyNumber()]);
+                        }
+                    }
+
                     $vehicleDetailsByDate[$date][$trip->getJourneyNumber()][] = new JourneyWithOriginAndDestination(
                         $trip->getTripId(),
                         $trip->getJourneyType(),
@@ -343,5 +379,36 @@ class GtfsTripStartEndExtractor
         }
 
         return $tripStops[$tripId];
+    }
+
+    /**
+     * @param StopTime[] $currentTripStops
+     * @param StopTime[] $existingTripStops
+     * @return bool
+     */
+    private function tripsOverlap(array $currentTripStops, array $existingTripStops): bool
+    {
+        if (count($currentTripStops) < count($existingTripStops)) {
+            $shortTripStops = $currentTripStops;
+            $longTripStops = $existingTripStops;
+        } else {
+            $longTripStops = $currentTripStops;
+            $shortTripStops = $existingTripStops;
+        }
+
+        foreach ($longTripStops as $index => $stop) {
+            if ($stop->getStopId() == $shortTripStops[0]->getStopId()
+                && $stop->getDepartureTimeOffset() == $shortTripStops[0]->getDepartureTimeOffset()) {
+                // Found the start
+                $endIndex = $index + count($shortTripStops) - 1;
+                if ($endIndex < count($longTripStops)
+                    && $longTripStops[$endIndex]->getStopId() == end($shortTripStops)->getStopId()
+                    && $longTripStops[$endIndex]->getArrivalTimeOffset() == end($shortTripStops)->getArrivalTimeOffset()) {
+                    // ends also match
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
