@@ -4,6 +4,7 @@ namespace Irail\Database;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Irail\Models\Dao\OccupancyReportSource;
@@ -11,15 +12,13 @@ use Irail\Models\DepartureOrArrival;
 use Irail\Models\OccupancyInfo;
 use Irail\Models\OccupancyLevel;
 use Irail\Repositories\Irail\StationsRepository;
-use Spatie\Async\Pool;
 
 class OccupancyDao
 {
-    private Pool $threadPool;
 
     public function __construct()
     {
-        $this->threadPool = Pool::create();
+
     }
 
     /**
@@ -38,14 +37,15 @@ class OccupancyDao
         OccupancyDaoPerformanceMode $performanceMode = OccupancyDaoPerformanceMode::VEHICLE
     ): OccupancyInfo {
         if ($officialNmbsLevel != null && $officialNmbsLevel != OccupancyLevel::UNKNOWN) {
-            // TODO: perform this operation asynchronous
-            $this->store(
-                OccupancyReportSource::NMBS,
-                $departure->getVehicle()->getId(),
-                $departure->getStation()->getId(),
-                $departure->getScheduledDateTime(),
-                $officialNmbsLevel
-            );
+            Concurrency::defer(function () use ($departure, $officialNmbsLevel) {
+                $this->store(
+                    OccupancyReportSource::NMBS,
+                    $departure->getVehicle()->getId(),
+                    $departure->getStation()->getId(),
+                    $departure->getScheduledDateTime(),
+                    $officialNmbsLevel
+                );
+            });
         } else {
             $officialNmbsLevel = $this->getStoredNmbsOccupancy($departure, $performanceMode);
         }

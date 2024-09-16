@@ -3,6 +3,7 @@
 namespace Irail\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Concurrency;
 use Irail\Database\HistoricCompositionDao;
 use Irail\Database\LogDao;
 use Irail\Exceptions\CompositionUnavailableException;
@@ -13,7 +14,7 @@ use Irail\Models\Result\VehicleCompositionSearchResult;
 use Irail\Models\Vehicle;
 use Irail\Repositories\VehicleCompositionRepository;
 use Irail\Repositories\VehicleJourneyRepository;
-use Spatie\Async\Pool;
+use Irail\Util\VehicleIdTools;
 
 class DatedVehicleJourneyV2Controller extends BaseIrailController
 {
@@ -39,25 +40,31 @@ class DatedVehicleJourneyV2Controller extends BaseIrailController
 
     public function getDatedVehicleJourney(DatedVehicleJourneyV2Request $request): JsonResponse
     {
-        $pool = new Pool();
-        $compositionTask = $pool
-            ->add(function () use ($request) {
-                return $this->getVehicleComposition($request);
-            })
-            ->catch(function ($exception) {
-                if ($exception instanceof CompositionUnavailableException) {
+        // TODO: concurrency::run needs the illuminate/concurrency package, which has not been split yet from laravel 11.x
+        [$vehicleJourneySearchResult, $composition, $statistics] = Concurrency::run([
+            function () use ($request) {
+                return $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
+            },
+            function () use ($request) {
+                try {
+                    return $this->getVehicleComposition($request);
+                } catch (CompositionUnavailableException $exception) {
                     return null;
                 }
-                throw $exception;
-            });
+            },
+            function () use ($request) {
+                $trainType = VehicleIdTools::extractTrainType($request->getVehicleId());
+                if (empty($trainType)){
+                    // TODO: look up train type based on GTFS
+                    return [];
+                }
+                return $this->historicCompositionRepository->getHistoricCompositionStatistics(
+                    $trainType,
+                    VehicleIdTools::extractTrainNumber($request->getVehicleId())
+                );
+            },
+        ]);
 
-        $vehicleJourneySearchResult = $this->vehicleJourneyRepository->getDatedVehicleJourney($request);
-        $statistics = $this->historicCompositionRepository->getHistoricCompositionStatistics(
-            $vehicleJourneySearchResult->getVehicle()->getType(),
-            $vehicleJourneySearchResult->getVehicle()->getNumber()
-        );
-        $pool->wait();
-        $composition = $compositionTask->getOutput();
         $compositionSegments = $composition ? $composition->getSegments() : []; // $composition Can be null when unavailable
         $dto = DatedVehicleJourneyV2Converter::convert($request, $vehicleJourneySearchResult, $compositionSegments, $statistics);
         $this->logRequest($request);
