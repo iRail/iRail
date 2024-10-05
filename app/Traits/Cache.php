@@ -62,6 +62,7 @@ trait Cache
     {
         $this->defaultTtl = $defaultTtl;
     }
+
     public function isCached(string $key): bool
     {
         $prefixedKey = $this->addPrefixToKey($key);
@@ -165,7 +166,8 @@ trait Cache
     protected function deleteCachedObjectsByPrefix(string $prefix): void
     {
         $prefix = $this->addPrefixToKey($prefix);
-        $iterator = new APCUIterator('user', '/^' . $prefix . '/');
+        // increase chunk size since there can be up to 100.000 cached variables, which typically are small
+        $iterator = new APCUIterator('/^' . $prefix . '/', APC_LIST_ACTIVE, 500);
         apcu_delete($iterator);
     }
 
