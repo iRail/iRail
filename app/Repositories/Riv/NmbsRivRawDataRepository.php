@@ -152,20 +152,22 @@ class NmbsRivRawDataRepository
         /** @var GtfsTripStartEndExtractor $gtfsTripExtractor */
         $gtfsTripExtractor = App::make(GtfsTripStartEndExtractor::class);
 
+        $vehicleId = $request->getVehicleId();
+        $vehicleNumber = VehicleIdTools::extractTrainNumber($vehicleId);
         if ($request->getDateTime() == null) {
             // When nothing is specified, the user wants to find the vehicle which is driving today.
             // However, when searching at 01.00 at night for a train which starts at 23:30 and drives until 02:00, they want "yesterdays" departure which is
             // still driving
-            $startDate = $gtfsTripExtractor->getStartDate($request->getVehicleId(), Carbon::now());
-            Log::debug("Found start date {$startDate->format('Y-m-d')} for vehicle {$request->getVehicleId()}");
+            $startDate = $gtfsTripExtractor->getStartDate($vehicleNumber, Carbon::now());
+            Log::debug("Found start date {$startDate->format('Y-m-d')} for vehicle {$vehicleId}");
         } else {
             // if specified, use the requested date and time
             $startDate = $request->getDateTime();
         }
 
-        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($request->getVehicleId(), $startDate);
+        $vehicleWithOriginAndDestination = $gtfsTripExtractor->getVehicleWithOriginAndDestination($vehicleId, $startDate);
         if ($vehicleWithOriginAndDestination === false) {
-            throw new GtfsVehicleNotFoundException($request->getVehicleId());
+            throw new GtfsVehicleNotFoundException($vehicleId);
         }
 
         $journeyDetailRef = self::findVehicleJourneyRefBetweenStops($request, $startDate, $vehicleWithOriginAndDestination);
@@ -177,7 +179,7 @@ class NmbsRivRawDataRepository
         Log::debug("Found journey detail ref: '{$journeyDetailRef}' between {$vehicleWithOriginAndDestination->getOriginStopId()} and destination {$vehicleWithOriginAndDestination->getdestinationStopId()}");
         # If no reference has been found at this stage, fail
         if ($journeyDetailRef === false) {
-            throw new NoResultsException('No vehicle journey reference could be found for vehicle ' . $request->getVehicleId());
+            throw new NoResultsException('No vehicle journey reference could be found for vehicle ' . $vehicleId);
         }
         return $journeyDetailRef;
     }
@@ -287,7 +289,7 @@ class NmbsRivRawDataRepository
                     return false;
                 }
             },
-            GtfsRepository::secondsUntilGtfsCacheExpires() + rand(0, 900) // Journey detail references may change, but in that case the cache should be cleared.
+            GtfsRepository::secondsUntilGtfsCacheExpires() + rand(0, 1800) // Journey detail references may change, but in that case the cache should be cleared.
         );
         if ($cachedJourneyDetailRef->getValue() === false) {
             // If an exception was cached, throw it
