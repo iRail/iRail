@@ -60,8 +60,8 @@ class RivClient
             }
         } catch (Exception $e) {
             // Store exceptions for 15s
-            Log::warning("Caching RIV exception for 15 seconds. When trying to call $url, the following exception was thrown: {$e->getMessage()}");
-            $this->setCachedObject($cacheKey, new RivCachedException($e), 15);
+            Log::warning("Caching RIV exception for 30 seconds. When trying to call $url, the following exception was thrown: {$e->getMessage()}");
+            $this->setCachedObject($cacheKey, new RivCachedException($e), 30);
             throw $e;
         }
         return $cachedResponse;
