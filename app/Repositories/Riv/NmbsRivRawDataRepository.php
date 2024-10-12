@@ -159,6 +159,10 @@ class NmbsRivRawDataRepository
             // However, when searching at 01.00 at night for a train which starts at 23:30 and drives until 02:00, they want "yesterdays" departure which is
             // still driving
             $startDate = $gtfsTripExtractor->getStartDate($vehicleNumber, Carbon::now());
+            if ($startDate === null) {
+                Log::debug("Vehicle {$vehicleId} is not running right now, no start date found");
+                throw new GtfsVehicleNotFoundException($vehicleId);
+            }
             Log::debug("Found start date {$startDate->format('Y-m-d')} for vehicle {$vehicleId}");
         } else {
             // if specified, use the requested date and time
@@ -279,7 +283,8 @@ class NmbsRivRawDataRepository
      */
     public function getCachedJourneyDetailRef(string $announcedJourneyNumber, VehicleJourneyRequest $request): CachedData
     {
-        $journeyRefCacheKey = self::JOURNEY_DETAIL_REF_PREFIX . "{$announcedJourneyNumber}|{$request->getDateTime()?->format('Ymd')}";
+        $date = $request->getDateTime() != null ? $request->getDateTime()->format('Ymd') : Carbon::now()->format('now-Ymd-H'); // include hours when searching for now
+        $journeyRefCacheKey = self::JOURNEY_DETAIL_REF_PREFIX . "{$announcedJourneyNumber}|{$date}";
         $cachedJourneyDetailRef = $this->getCacheOrUpdate(
             $journeyRefCacheKey,
             function () use ($request) {
