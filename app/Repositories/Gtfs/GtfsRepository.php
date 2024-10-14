@@ -180,7 +180,7 @@ class GtfsRepository
         $startDate = $date->copy()->subDays(abs($daysBack));
         $endDate = $date->copy()->addDays(abs($daysForward));
         for ($dateToKeep = $startDate->copy(); $dateToKeep <= $endDate; $dateToKeep->addDay()) {
-            $serviceIdsOnDay = $serviceIdsByCalendarDate[$dateToKeep->format('Ymd')];
+            $serviceIdsOnDay = array_key_exists($dateToKeep->format('Ymd'), $serviceIdsByCalendarDate) ? $serviceIdsByCalendarDate[$dateToKeep->format('Ymd')] : [];
             foreach ($serviceIdsOnDay as $serviceIdOnDay) {
                 $serviceIdsToKeep[$serviceIdOnDay][] = $dateToKeep->format('Ymd');
             }
