@@ -52,9 +52,12 @@ class GtfsTripStartEndExtractor
 
                 if ($yesterdayTrip !== false) {
                     $tripCrossesMidnight = $yesterdayTrip->getOriginDepartureTimeOffset() > $yesterdayTrip->getDestinationArrivalTimeOffset();
-                    $currentTimePastTodaysTrip = $activeTime->secondsSinceMidnight() < $yesterdayTrip->getDestinationArrivalTimeOffset();
+                    // if yesterday's trip ends at 01:30 past midnight, we want to return it until that time + 15 minutes margin (so it doesn't instantly disappear when it comes in a few minutes late)
+                    $currentTimeBeforeYesterdayEnd = $activeTime->secondsSinceMidnight() < ($yesterdayTrip->getDestinationArrivalTimeOffset() % 86400) + 900;
                     // return the date and time for departure
-                    return $activeTime->copy()->subDay()->setTime(0, 0)->addSeconds($yesterdayTrip->getOriginDepartureTimeOffset());
+                    if (!$trip || ($tripCrossesMidnight && $currentTimeBeforeYesterdayEnd)) {
+                        return $activeTime->copy()->subDay()->setTime(0, 0)->addSeconds($yesterdayTrip->getOriginDepartureTimeOffset());
+                    };
                 }
 
                 if (!$trip) {
