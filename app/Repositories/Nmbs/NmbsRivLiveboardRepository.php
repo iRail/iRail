@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Irail\Database\OccupancyDao;
 use Irail\Database\OccupancyDaoPerformanceMode;
 use Irail\Exceptions\Internal\UnknownStopException;
+use Irail\Exceptions\IrailHttpException;
 use Irail\Exceptions\Request\RequestOutsideTimetableRangeException;
 use Irail\Exceptions\Upstream\UpstreamServerException;
 use Irail\Http\Requests\LiveboardRequest;
@@ -61,6 +62,9 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
      */
     public function getLiveboard(LiveboardRequest $request): LiveboardSearchResult
     {
+        if (getenv('DISABLE_RIV_LIVEBOARD') == "1") {
+            throw new IrailHttpException(503, "Endpoint temporary unavailable");
+        }
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             $jsonData = $this->rivDataRepository->getLiveboardData($request);
             return $this->parseNmbsRawData($request, $jsonData);
