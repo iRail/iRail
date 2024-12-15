@@ -14,6 +14,7 @@ use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Traits\Cache;
 use Irail\Util\VehicleIdTools;
+use function PHPUnit\Framework\isEmpty;
 
 class GtfsTripStartEndExtractor
 {
@@ -96,6 +97,7 @@ class GtfsTripStartEndExtractor
                     Log::warning("No matching GTFS trip for '{$vehicleNumber}' on {$date->format('Y-m-d')}");
                     return false;
                 }
+
                 if (count($journeyParts) == 1) {
                     Log::debug("Found one matching GTFS trip '{$journeyParts[0]->getTripId()}' for journey '{$vehicleNumber}'");
                     return $journeyParts[0];
@@ -118,7 +120,13 @@ class GtfsTripStartEndExtractor
                 }
 
                 # The origin is the only station which doesn't match a destination
-                $origin = array_filter(array_keys($journeyPartsByStart), fn ($stopId) => !array_key_exists($stopId, $journeyPartsByDestination))[0];
+                $stopsWhichAreNeverDestination = array_filter(array_keys($journeyPartsByStart), fn($stopId) => !array_key_exists($stopId, $journeyPartsByDestination));
+                if (isEmpty($stopsWhichAreNeverDestination)){
+                    Log::error("Could not find origin for journey $journeyNumber from trip ids $tripIds");
+                    return false;
+                }
+
+                $origin = $stopsWhichAreNeverDestination[0];
                 $orderedParts = [];
                 $orderedParts[] = $journeyPartsByStart[$origin];
                 for ($i = 1; $i < count($journeyParts); $i++) {
