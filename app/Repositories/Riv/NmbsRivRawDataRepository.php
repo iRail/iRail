@@ -30,8 +30,8 @@ class NmbsRivRawDataRepository
 
     const string JOURNEY_DETAIL_REF_PREFIX = 'journeyDetailRef|';
     const int LIVEBOARD_TTL = 30;
-    const int JOURNEYPLANNER_TTL = 30;
-    const int VEHICLE_JOURNEY_DATA = 30;
+    const int JOURNEYPLANNER_TTL = 60;
+    const int VEHICLE_JOURNEY_DATA_TTL = 60;
     const int VEHICLE_JOURNEY_REF_TTL = 150;
     private StationsRepository $stationsRepository;
     private RivClient $rivClient;
@@ -127,7 +127,7 @@ class NmbsRivRawDataRepository
             'lang' => $request->getLanguage()
         ];
         try {
-            $journeyDetailResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::VEHICLE_JOURNEY_DATA);
+            $journeyDetailResponse = $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::VEHICLE_JOURNEY_DATA_TTL);
         } catch (UpstreamParameterException $e) {
             Log::warning('Journey detail refs are likely outdated, clearing journey detail ref cache! Exception while trying to get data:'
                 . $e->getMessage());
