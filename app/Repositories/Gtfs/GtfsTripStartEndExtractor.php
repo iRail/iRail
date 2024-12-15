@@ -14,7 +14,6 @@ use Irail\Repositories\Gtfs\Models\StopTime;
 use Irail\Repositories\Nmbs\Tools\Tools;
 use Irail\Traits\Cache;
 use Irail\Util\VehicleIdTools;
-use function PHPUnit\Framework\isEmpty;
 
 class GtfsTripStartEndExtractor
 {
@@ -121,7 +120,7 @@ class GtfsTripStartEndExtractor
 
                 # The origin is the only station which doesn't match a destination
                 $stopsWhichAreNeverDestination = array_filter(array_keys($journeyPartsByStart), fn($stopId) => !array_key_exists($stopId, $journeyPartsByDestination));
-                if (isEmpty($stopsWhichAreNeverDestination)){
+                if (empty($stopsWhichAreNeverDestination)){
                     Log::error("Could not find origin for journey $journeyNumber from trip ids $tripIds");
                     return false;
                 }
