@@ -163,7 +163,12 @@ class JourneyPlanningV1Converter extends V1Converter
     {
         $result = new StdClass();
         if ($departureOrArrival->getVehicle() != null) {
-            $result->name = $departureOrArrival->getVehicle()->getDirection()->getStation()->getLocalizedStationName();
+            $station = $departureOrArrival->getVehicle()->getDirection()->getStation();
+            if ($station != null) {
+                $result->name = $station->getLocalizedStationName();
+            } else {
+                $result->name = $departureOrArrival->getVehicle()->getDirection()->getName();
+            }
         } else {
             $result->name = 'Walk'; // TODO: translate?
         }
