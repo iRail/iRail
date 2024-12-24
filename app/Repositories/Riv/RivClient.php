@@ -158,7 +158,7 @@ class RivClient
             throw new NoResultsException('No results found');
         }
         if ($json['errorCode'] == 'SVC_LOC') {
-            throw new NoResultsException('Location not found');
+            throw new NoResultsException('Location not found by route-planner engine');
         }
         if ($json['errorCode'] == 'SVC_LOC_EQUAL') {
             throw new NoResultsException('Origin and destination location are the same', 400);
