@@ -13,6 +13,7 @@ use Irail\Http\Requests\LiveboardRequest;
 use Irail\Http\Requests\TimeSelection;
 use Irail\Http\Requests\VehicleJourneyRequest;
 use Irail\Models\CachedData;
+use Irail\Models\Station;
 use Irail\Models\Vehicle;
 use Irail\Proxy\CurlProxy;
 use Irail\Repositories\Gtfs\GtfsRepository;
@@ -86,8 +87,7 @@ class NmbsRivRawDataRepository
         $url = 'https://mobile-riv.api.belgianrail.be/riv/v1.0/journey';
 
         $typeOfTransportCode = NmbsRivApiTransportTypeFilter::forTypeOfTransportFilter(
-            $origin->getId(),
-            $destination->getId(),
+            $this->isInternationalQuery($origin, $destination),
             $request->getTypesOfTransport()
         );
 
@@ -103,9 +103,15 @@ class NmbsRivRawDataRepository
             'passlist'         => true, // include intermediate stops along the way
             'searchForArrival' => ($request->getTimeSelection() == TimeSelection::ARRIVAL), // include intermediate stops along the way
             'numF'             => 6, // request 6 (the max) results forward in time
-            'products'         => $typeOfTransportCode->value
+            'products' => $typeOfTransportCode->value,
+            'economic' => $this->isInternationalQuery($origin, $destination) ? 1 : 0,
         ];
         return $this->rivClient->makeApiCallToMobileRivApi($url, $parameters, self::JOURNEYPLANNER_TTL);
+    }
+
+    private function isInternationalQuery(Station $origin, Station $destination): bool
+    {
+        return !str_starts_with($origin->getId(), '0088') || !str_starts_with($destination->getId(), '0088');
     }
 
     /**

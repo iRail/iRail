@@ -32,17 +32,17 @@ enum NmbsRivApiTransportTypeFilter: int
     case TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS = 94; // 0001011110 TODO: VERIFY
     case TYPE_TRANSPORT_BITCODE_ONLY_TRAINS = 117; // 0001110101
 
-    public static function forTypeOfTransportFilter(string $fromStationId, string $toStationId, TypeOfTransportFilter $typeOfTransportFilter): NmbsRivApiTransportTypeFilter
+    public static function forTypeOfTransportFilter(bool $isInternationalTrip, TypeOfTransportFilter $typeOfTransportFilter): NmbsRivApiTransportTypeFilter
     {
         // Convert the type of transport key to a bitcode needed in the request payload
         // Automatic is the default type, which prevents that local trains aren't shown because a high-speed train provides a faster connection
         if ($typeOfTransportFilter == TypeOfTransportFilter::AUTOMATIC) {
             // 2 national stations: no international trains
             // Internation station: all
-            if (str_starts_with($fromStationId, '0088') && str_starts_with($toStationId, '0088')) {
-                return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
-            } else {
+            if ($isInternationalTrip) {
                 return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_ONLY_TRAINS;
+            } else {
+                return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
             }
         } elseif ($typeOfTransportFilter == TypeOfTransportFilter::NO_INTERNATIONAL_TRAINS) {
             return NmbsRivApiTransportTypeFilter::TYPE_TRANSPORT_BITCODE_NO_INTERNATIONAL_TRAINS;
