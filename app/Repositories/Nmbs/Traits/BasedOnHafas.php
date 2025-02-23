@@ -157,10 +157,10 @@ trait BasedOnHafas
                 $rawAlert['eDate'],
                 $rawAlert['eTime']
             );
-            $modifiedTime = $this->parseDateAndTime(
+            $modifiedTime = key_exists('modDate', $rawAlert) ? $this->parseDateAndTime(
                 $rawAlert['modDate'],
                 $rawAlert['modTime']
-            );
+            ) : $startTime;
             $organisation = $rawAlert['company'];
 
             $links = [];
