@@ -333,7 +333,8 @@ class GtfsRepository
      */
     public static function getGtfsBackgroundRefreshWindowSeconds(): int
     {
-        return 3600;
+        // Keep stale GTFS data cached for a day until it is refreshed
+        return 24 * 3600;
     }
 
 
