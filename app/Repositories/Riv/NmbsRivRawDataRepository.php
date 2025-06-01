@@ -30,7 +30,7 @@ class NmbsRivRawDataRepository
     use BasedOnHafas;
 
     const string JOURNEY_DETAIL_REF_PREFIX = 'journeyDetailRef|';
-    const int LIVEBOARD_TTL = 30;
+    const int LIVEBOARD_TTL = 60;
     const int JOURNEYPLANNER_TTL = 60;
     const int VEHICLE_JOURNEY_DATA_TTL = 60;
     const int VEHICLE_JOURNEY_REF_TTL = 150;

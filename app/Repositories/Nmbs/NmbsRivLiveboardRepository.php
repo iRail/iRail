@@ -68,7 +68,7 @@ class NmbsRivLiveboardRepository implements LiveboardRepository
         return $this->getCacheOrUpdate($request->getCacheId(), function () use ($request) {
             $jsonData = $this->rivDataRepository->getLiveboardData($request);
             return $this->parseNmbsRawData($request, $jsonData);
-        }, 60)->getValue();
+        }, 70)->getValue(); // increased ttl to better handle high api load
     }
 
     /**
