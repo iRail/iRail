@@ -23,7 +23,7 @@ class NmbsRivCompositionRepositoryTest extends TestCase
         $rawRivDataRepo = Mockery::mock(NmbsRivRawDataRepository::class);
         $repo = new NmbsRivCompositionRepository(new StationsRepository(), $rawRivDataRepo, $startEndExtractor);
 
-        $journeyStartEnd = new JourneyWithOriginAndDestination('test', '', 0, '', Carbon::now()->secondsSinceMidnight(), '', 0);
+        $journeyStartEnd = new JourneyWithOriginAndDestination('', 0, '', Carbon::now()->secondsSinceMidnight(), '', 0);
         $startEndExtractor->shouldReceive('getVehicleWithOriginAndDestination')->andReturn($journeyStartEnd);
         $vehicle = Vehicle::fromName('92271', Carbon::create(2024, 4, 27));
 
@@ -43,7 +43,7 @@ class NmbsRivCompositionRepositoryTest extends TestCase
     public function testGetVehicleComposition_missingMaterialSubtype_shouldHandleEmptyResponseAsTrainNotFound()
     {
         $vehicle = Vehicle::fromName('13606', Carbon::create(2024, 4, 27));
-        $journeyStartEnd = new JourneyWithOriginAndDestination('test', '', 0, '', Carbon::now()->secondsSinceMidnight(), '', 0);
+        $journeyStartEnd = new JourneyWithOriginAndDestination('', 0, '', Carbon::now()->secondsSinceMidnight(), '', 0);
         $rivRawDataRepo = $this->mockFixtureVehicleCompositionResponse($vehicle, $journeyStartEnd,
             'composition/NmbsRivComposition_ic13606_missingDetails_OR.json');
         $startEndExtractor = Mockery::mock(GtfsTripStartEndExtractor::class);

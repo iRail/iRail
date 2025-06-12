@@ -9,22 +9,19 @@ class JourneyWithOriginAndDestination
     private int $originDepartureTime;
     private string $destinationStopId;
     private int $destinationArrivalTime;
-    private string $tripId;
     private string $vehicleType;
     private array $splitOrJoinStopIds;
 
     /**
-     * @param string   $tripId The trip id
      * @param string   $vehicleType The journey type
      * @param int      $vehicleNumber The journey number
      * @param string   $originStopId The stop id of the first stop
-     * @param int      $originDepartureTime The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
+     * @param int      $originDepartureTime The time of departure at the first stop, as an epoch timestamp.
      * @param string   $destinationStopId The stop id of the last stop
-     * @param int      $destinationArrivalTime The time of arrival at the last stop, as an offset in seconds from the journey start date at 00:00:00.
+     * @param int      $destinationArrivalTime The time of arrival at the last stop, as an epoch timestamp.
      * @param string[] $splitOrJoinStopIds One or more stops at which this train splits or joins. e.g. IC1 (A->C) and IC 2 (B->C) come together and form IC1 (C->D), in which case C should be in this field. Empty for trains which do not split or join.
      */
     public function __construct(
-        string $tripId,
         string $vehicleType,
         int $vehicleNumber,
         string $originStopId,
@@ -33,7 +30,6 @@ class JourneyWithOriginAndDestination
         int $destinationArrivalTime,
         array $splitOrJoinStopIds = []
     ) {
-        $this->tripId = $tripId;
         $this->journeyNumber = $vehicleNumber;
         $this->originStopId = $originStopId;
         $this->originDepartureTime = $originDepartureTime;
@@ -71,7 +67,7 @@ class JourneyWithOriginAndDestination
     /**
      * @return int The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
      */
-    public function getOriginDepartureTimeOffset(): int
+    public function getOriginDepartureTime(): int
     {
         return $this->originDepartureTime;
     }
@@ -87,17 +83,9 @@ class JourneyWithOriginAndDestination
     /**
      * @return int The time of departure at the first stop, as an offset in seconds from the journey start date at 00:00:00.
      */
-    public function getDestinationArrivalTimeOffset(): int
+    public function getDestinationArrivalTime(): int
     {
         return $this->destinationArrivalTime;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTripId(): string
-    {
-        return $this->tripId;
     }
 
     /**
@@ -115,7 +103,7 @@ class JourneyWithOriginAndDestination
     {
         $formatSeconds = fn ($seconds) => sprintf('%02d:%02d:%02d', ($seconds / 3600), ($seconds / 60 % 60), $seconds % 60);
         return [
-            "Train {$this->journeyNumber} from {$this->originStopId} ({$formatSeconds($this->originDepartureTime)})"
+            "Train {$this->vehicleType} {$this->journeyNumber} from {$this->originStopId} ({$formatSeconds($this->originDepartureTime)})"
             . " to {$this->destinationStopId} ({$formatSeconds($this->destinationArrivalTime)})"
         ];
     }

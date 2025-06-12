@@ -246,6 +246,7 @@ class NmbsRivRawDataRepository
         JourneyWithOriginAndDestination $vehicleWithOriginAndDestination
     ): string|bool {
         $alternativeOriginDestinations = $gtfsTripExtractor->getAlternativeVehicleWithOriginAndDestination(
+            $journeyStartDate,
             $vehicleWithOriginAndDestination
         );
         $i = 0;
