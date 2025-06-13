@@ -156,8 +156,12 @@ class GtfsTripStartEndExtractor
         $dateStr = $date->format('Y-m-d');
         $data = file_get_contents('https://gtfs.irail.be/nmbs/gtfs/journeys/' . $dateStr . '/index.json');
         $json = json_decode($data, true);
-        return array_map(fn($number, $item) => new JourneyWithOriginAndDestination($item['type'], $number, $item['origin'], $item['departureTime'],
-            $item['destination'], $item['arrivalTime'], $item['compositionChangeLocations']), array_keys($json), $json);
+        $results = [];
+        foreach ($json as $journeyNumber => $item){
+            $results[$journeyNumber] = new JourneyWithOriginAndDestination($item['type'], $journeyNumber, $item['origin'], $item['departureTime'],
+                $item['destination'], $item['arrivalTime'], $item['compositionChangeLocations']);
+        }
+        return $results;
     }
 
     /**
