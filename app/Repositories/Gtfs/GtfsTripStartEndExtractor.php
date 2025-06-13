@@ -153,6 +153,13 @@ class GtfsTripStartEndExtractor
      */
     public function readGtfsJourneyIndex(DateTime $date): array
     {
+        $dateOffset = Carbon::now()->diffInDays($date);
+        $gtfsDaysBackwards = GtfsRepository::getGtfsDaysBackwards();
+        $gtfsDaysForwards = GtfsRepository::getGtfsDaysForwards();
+        if ($dateOffset > $gtfsDaysForwards || ($date < Carbon::now() && $dateOffset > $gtfsDaysBackwards)){
+            Log::info("Not reading index for date {$date->format('Y-m-d')}, out of configured period -$gtfsDaysBackwards / $gtfsDaysForwards");
+            return [];
+        }
         $dateStr = $date->format('Y-m-d');
         $data = file_get_contents('https://gtfs.irail.be/nmbs/gtfs/journeys/' . $dateStr . '/index.json');
         $json = json_decode($data, true);

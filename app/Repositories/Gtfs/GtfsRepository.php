@@ -31,4 +31,20 @@ class GtfsRepository
         }
         return $gtfsReleaseTime->diffInSeconds($now);
     }
+
+    /**
+     * @return int The number of days in the past to read from GTFS files. Affects all endpoints using this data!
+     */
+    public static function getGtfsDaysBackwards(): int
+    {
+        return intval(env('GTFS_RANGE_DAYS_BACKWARDS', 3));
+    }
+
+    /**
+     * @return int The number of days in the future to read from GTFS files. Affects all endpoints using this data!
+     */
+    public static function getGtfsDaysForwards(): int
+    {
+        return intval(env('GTFS_RANGE_DAYS_FORWARDS', 14));
+    }
 }
