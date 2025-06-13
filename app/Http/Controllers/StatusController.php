@@ -148,13 +148,9 @@ class StatusController extends BaseIrailController
      */
     public function getGtfsStatus(): string
     {
-        $cachedGtfsData = $this->gtfsRepository->getCachedTrips();
         $gtfsStatus = 'GTFS configured to read '
             . GtfsRepository::getGtfsDaysBackwards() . ' day(s) back, '
             . GtfsRepository::getGtfsDaysForwards() . ' day(s) forward.<br>';
-        $gtfsStatus .= $cachedGtfsData === false
-            ? 'Not loaded'
-            : 'Loaded ' . count($cachedGtfsData->getValue()) . " vehicle journeys since {$cachedGtfsData->getCreatedAt()}, valid until {$cachedGtfsData->getExpiresAt()}";
         return $gtfsStatus . '<br>';
     }
 
