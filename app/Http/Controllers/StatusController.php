@@ -52,10 +52,10 @@ class StatusController extends BaseIrailController
 
     public function maintain()
     {
-        $cacheResult = $this->warmupCache();
+        $this->warmupCache();
         $cleanedCount = $this->removeExpiredCacheEntries();
         Log::info('Maintainance/Healtcheck 200 ok');
-        return $cacheResult . PHP_EOL . '<br>' . PHP_EOL . "Cleaned  $cleanedCount expired items from cache";
+        return "Cleaned $cleanedCount expired items from cache";
     }
 
     public function removeExpiredCacheEntries(): int
@@ -79,7 +79,7 @@ class StatusController extends BaseIrailController
         }
     }
 
-    public function warmupCache(): string
+    public function warmupCache(): void
     {
         // Step 1: preload occupancy data, which is only performed once
         /**
@@ -98,34 +98,9 @@ class StatusController extends BaseIrailController
         // Step 3: preload GTFS data, which is performed if the cache has expired
         // In case new data is available, the GTFS data will be updated in the background since this avoid a lot of concurrency issues compared to when requests
         // can trigger a GTFS update
-        $cachedData = $this->gtfsRepository->getCachedTrips();
-        if ($cachedData && $cachedData->getRemainingTtl() > GtfsRepository::getGtfsBackgroundRefreshWindowSeconds()) {
-            Log::info('GTFS cache is already loaded, not warming up. Remaining TTL ' . $cachedData->getRemainingTtl());
-            return 'OK: Already loaded. GTFS update in ' . GtfsRepository::secondsUntilNextGtfsUpdate() . "s, cache valid for " . $cachedData->getRemainingTtl();
-        } elseif ($cachedData === false) {
-            Log::info('Warming up GTFS Cache');
-            // Calling this method will load the cache
-            $trips = $this->gtfsRepository->getTripsByJourneyNumberAndStartDate();
-            $tripsToday = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now());
-            // Yesterday and tomorrow are also frequently queried, and should be loaded in the cache to reduce risk for overloading a freshly started instance
-            $tripsYesterday = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->subDay());
-            $tripsTomorrow = $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->addDay());
-            Log::info('Warmed up GTFS Cache');
-            $gtfsResult = 'OK: Loaded ' . count($trips) . ' journeys, '
-                . count($tripsToday) . ' today, '
-                . count($tripsYesterday) . ' yesterday, '
-                . count($tripsTomorrow) . ' tomorrow<br>';
-
-            return $gtfsResult . $this->getMemoryStatus();
-        } else {
-            // in the cache refresh window
-            Log::info('Clearing GTFS cache');
-            $this->gtfsRepository->clearCache();
-            Log::info('Cleared GTFS cache, refreshing trips with start/end date');
-            $this->tripStartEndExtractor->refreshTripsWithStartAndEndByDate();
-            Log::info('Refreshed journeys by start and end date');
-            return 'Refreshed GTFS cache';
-        }
+        $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now());
+        $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->addDay());
+        $this->tripStartEndExtractor->getTripsWithStartAndEndForDate(Carbon::now()->addDays(2));
     }
 
     public function clearCache(): string
