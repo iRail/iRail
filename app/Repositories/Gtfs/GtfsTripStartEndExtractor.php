@@ -46,7 +46,7 @@ class GtfsTripStartEndExtractor
                 if ($yesterdayTrip !== false) {
                     // if yesterday's trip ends at 01:30 past midnight, we want to return it until that time + 30 minutes margin (so it doesn't instantly disappear when it comes in a few minutes late)
                     if (!$trip || ($activeTime->timestamp < $yesterdayTrip->getDestinationArrivalTime() + 1800)) {
-                        return $activeTime->copy()->subDay()->setTime(0, 0)->addSeconds($yesterdayTrip->getOriginDepartureTime());
+                        return Carbon::createFromTimestamp($yesterdayTrip->getOriginDepartureTime());
                     };
                 }
 
