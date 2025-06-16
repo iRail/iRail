@@ -104,12 +104,12 @@ class NmbsRivCompositionRepository implements VehicleCompositionRepository
                 'Composition unavailable. The vehicle may not be active on the given date.'
             );
         }
-        $startTimeOffset = $journeyWithOriginAndDestination->getOriginDepartureTime();
-        $secondsUntilStart = ($journeyDate->timestamp + $startTimeOffset) - Carbon::now()->timestamp;
+        $startTime = $journeyWithOriginAndDestination->getOriginDepartureTime();
+        $secondsUntilStart = $startTime - Carbon::now()->timestamp;
         if ($secondsUntilStart > 86400 * self::COMPOSITION_MAX_DAYS_IN_FUTURE) {
             Log::debug("Not fetching composition for journey {$journey->getId()} at date $journeyDate which departs more than "
                 . self::COMPOSITION_MAX_DAYS_IN_FUTURE . ' days in the future according to GTFS. '
-                . "Start time is $startTimeOffset.");
+                . "Start time is $startTime.");
             throw new CompositionUnavailableException(
                 $journey->getId(),
                 'Composition is only available from vehicle start, Vehicle is not active yet at this time.'
