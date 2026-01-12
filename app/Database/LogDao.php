@@ -29,6 +29,15 @@ class LogDao
     }
 
     /**
+     * Limit on how long to keep logs in memory while waiting for flush.
+     */
+    public static function isPersistentLogStorageEnabled(): int
+    {
+        return env('PERSISTENT_LOG_STORAGE_ENABLED', false);
+    }
+
+
+    /**
      * Log data to the request log table. This method will keep data in memory until there are enough rows to write to the disk.
      * Some request may be lost if the server is restarted inbetween flushes, but this is acceptable since this data isn't critical, but performance is.
      *
@@ -40,6 +49,10 @@ class LogDao
      */
     public function log(LogQueryType $queryType, array $query, string $userAgent, array $result = null)
     {
+        if (!self::isPersistentLogStorageEnabled()){
+            return;
+        }
+
         $id = apcu_inc('Irail|LogDao|insertId'); // will initialize at 1
         $data = [
             'query_type' => $queryType->value,
