@@ -130,6 +130,9 @@ class RivClient
         if (array_key_exists('exception', $json) && str_starts_with($json['exception'], 'Hacon response time exceeded the defined timeout')) {
             throw new UpstreamServerTimeoutException('The upstream server encountered a timeout while loading data. Please try again later.');
         }
+        if (array_key_exists('exception', $json) && str_starts_with($json['exception'], 'Unable to get')) {
+            throw new UpstreamServerTimeoutException('The upstream server encountered a connection issues while loading data. Please try again later.');
+        }
     }
 
     /**
