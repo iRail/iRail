@@ -68,6 +68,8 @@ return [
             'prefix'      => env('DB_PREFIX', ''),
             'search_path' => env('DB_SCHEMA', 'public'),
             'sslmode'     => env('DB_SSL_MODE', 'prefer'),
+            'connect_via_database' => env('DB_DATABASE_VIA'),
+            'connect_via_port' => env('DB_PORT_VIA'),
         ],
 
         'sqlsrv' => [
