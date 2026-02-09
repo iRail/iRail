@@ -1,35 +1,35 @@
 package be.irail.api.gtfs.dao;
 
-import be.irail.api.exception.InternalProcessingException;
+import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.gtfs.reader.models.Route;
 import be.irail.api.gtfs.reader.models.StopTime;
 import be.irail.api.gtfs.reader.models.Trip;
 import be.irail.api.riv.JourneyWithOriginAndDestination;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class GtfsTripStartEndExtractor {
+    private static final Logger log = LogManager.getLogger(GtfsTripStartEndExtractor.class);
 
     private record JourneyNumberAndDate(int journeyNumber, LocalDate date) {
     }
 
-    private final Cache<JourneyNumberAndDate, JourneyWithOriginAndDestination> cache = CacheBuilder.newBuilder()
+    private final Cache<JourneyNumberAndDate, Optional<JourneyWithOriginAndDestination>> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
             .expireAfterWrite(4, TimeUnit.HOURS)
             .build();
 
-    public LocalDate getStartDate(int journeyNumber, LocalDateTime plannedDateTime) {
+    public LocalDate getStartDate(int journeyNumber, LocalDateTime plannedDateTime) throws JourneyNotFoundException {
         JourneyWithOriginAndDestination journey = getVehicleWithOriginAndDestination(journeyNumber, plannedDateTime);
         if (journey != null) {
             // First stop departure time is in seconds from midnight of the start date
@@ -38,12 +38,12 @@ public class GtfsTripStartEndExtractor {
         return null;
     }
 
-    public JourneyWithOriginAndDestination getVehicleWithOriginAndDestination(int journeyNumber, LocalDateTime date) {
+    public JourneyWithOriginAndDestination getVehicleWithOriginAndDestination(int journeyNumber, LocalDateTime date) throws JourneyNotFoundException {
         try {
             return cache.get(new JourneyNumberAndDate(journeyNumber, date.toLocalDate()), () -> {
                 GtfsInMemoryDao dao = GtfsInMemoryDao.getInstance();
                 if (dao == null) {
-                    return null;
+                    return Optional.empty();
                 }
                 // By forcing a number to be passed, we ensure the type is stripped away
                 List<Trip> trips = dao.getTripsByJourneyNumber(journeyNumber);
@@ -61,23 +61,25 @@ public class GtfsTripStartEndExtractor {
                         Route route = dao.getRoute(trip.routeId());
                         String vehicleType = (route != null) ? route.shortName() : "";
 
-                        return new JourneyWithOriginAndDestination(
-                                trip.id(),
-                                vehicleType,
-                                journeyNumber,
-                                first.stopId(),
-                                first.departureTime(),
-                                last.stopId(),
-                                last.arrivalTime(),
-                                Collections.emptyList()
+                        return Optional.of(new JourneyWithOriginAndDestination(
+                                        trip.id(),
+                                        vehicleType,
+                                        journeyNumber,
+                                        first.stopId(),
+                                        first.departureTime(),
+                                        last.stopId(),
+                                        last.arrivalTime(),
+                                        Collections.emptyList()
+                                )
                         );
                     }
                 }
 
-                return null;
-            });
+                log.warn("Found no trip start and end station for trip {}", journeyNumber);
+                return Optional.empty();
+            }).orElseThrow(() -> new JourneyNotFoundException(journeyNumber, date, "Failed to find trip start and end station, trip not present in GTFS data"));
         } catch (ExecutionException e) {
-            throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
+            throw new JourneyNotFoundException(journeyNumber, date, "Failed to get trip start and end station: " + e.getMessage());
         }
     }
 

@@ -6,6 +6,7 @@ import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.*;
 import be.irail.api.dto.result.LiveboardSearchResult;
+import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
@@ -106,7 +107,18 @@ public class NmbsRivLiveboardClient {
         String commercialType = entry.get("CommercialType").asText();
 
         // Use GTFS for journey start date if possible
-        LocalDate journeyStartDate = gtfsTripStartEndExtractor.getStartDate(journeyNumber, plannedDateTime);
+        LocalDate journeyStartDate;
+        try {
+            if (!commercialType.equals("EUR") && !commercialType.equals("ICE")) {
+                journeyStartDate = gtfsTripStartEndExtractor.getStartDate(journeyNumber, plannedDateTime);
+            } else {
+                // Don't even try to lookup Eurostar and ICE trains in the GTFS data
+                journeyStartDate = plannedDateTime.toLocalDate();
+            }
+        } catch (JourneyNotFoundException e) {
+            // Riv API contains trains which aren't present in the GTFS data
+            journeyStartDate = plannedDateTime.toLocalDate();
+        }
         Vehicle vehicle = Vehicle.fromTypeAndNumber(commercialType, journeyNumber, journeyStartDate);
 
         String directionUic = getDirectionUicCode(entry, isArrivalBoard, plannedDateTime);

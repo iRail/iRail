@@ -3,6 +3,7 @@ package be.irail.api.config;
 import be.irail.api.controllers.StatusController;
 import be.irail.api.controllers.V2Controller;
 import be.irail.api.controllers.v1.*;
+import be.irail.api.exception.IrailExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,5 +29,6 @@ public class JerseyConfig extends ResourceConfig {
 
         register(V2Controller.class);
         register(StatusController.class);
+        register(IrailExceptionMapper.class);
     }
 }

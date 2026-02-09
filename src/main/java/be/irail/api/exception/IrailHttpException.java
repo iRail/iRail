@@ -12,4 +12,8 @@ public class IrailHttpException extends RuntimeException {
         super(message, cause);
         this.httpCode = httpCode;
     }
+
+    public int getHttpCode() {
+        return httpCode;
+    }
 }
