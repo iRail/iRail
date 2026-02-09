@@ -50,7 +50,7 @@ public class GtfsReader {
 
     public GtfsData readGtfs() {
         log.info("Fetching static GTFS from {}, requires around 1gb free memory, current heap usage/max heap usage: {}/{}",
-                gtfsStaticUrl, Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
+                gtfsStaticUrl, Runtime.getRuntime().totalMemory() / 1024 / 1024, Runtime.getRuntime().maxMemory() / 1024 / 1024);
         Path tempFile = null;
         try {
             tempFile = Files.createTempFile("gtfs-static", ".zip");
@@ -75,7 +75,7 @@ public class GtfsReader {
             reader.run();
             reader.close();
             log.info("Finished reading GTFS data, mapping to internal model. Current heap memory usage {}:",
-                    Runtime.getRuntime().totalMemory());
+                    Runtime.getRuntime().totalMemory() / 1024 / 1024);
             GtfsData gtfsData = mapToInternalModel(dao);
             log.info("Finished parsing and converting GTFS data");
             return gtfsData;
