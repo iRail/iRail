@@ -19,25 +19,25 @@ public class LegacyRedirectController {
     @GET
     @Path("/stations")
     public Response redirectStations() {
-        return Response.seeOther(URI.create("https://" + request.getRemoteHost() + "/v1/stations?" + request.getQueryString())).build();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/stations?" + request.getQueryString())).build();
     }
 
     @GET
     @Path("/liveboard")
     public Response redirectLiveboard() {
-        return Response.seeOther(URI.create("https://" + request.getRemoteHost() + "/v1/liveboard?" + request.getQueryString())).build();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/liveboard?" + request.getQueryString())).build();
     }
 
     @GET
     @Path("/connections")
     public Response redirectConnections() {
-        return Response.seeOther(URI.create("https://" + request.getRemoteHost() + "/v1/connections?" + request.getQueryString())).build();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/connections?" + request.getQueryString())).build();
     }
 
     @GET
     @Path("/vehicle")
     public Response redirectVehicle() {
-        return Response.seeOther(URI.create("https://" + request.getRemoteHost() + "/v1/vehicle?" + request.getQueryString())).build();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/vehicle?" + request.getQueryString())).build();
     }
 
     @GET

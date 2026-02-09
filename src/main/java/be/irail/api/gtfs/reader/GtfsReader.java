@@ -74,7 +74,7 @@ public class GtfsReader {
             reader.setEntityStore(dao);
             reader.run();
             reader.close();
-            log.info("Finished reading GTFS data, mapping to internal model. Current heap memory usage {}:",
+            log.info("Finished reading GTFS data, mapping to internal model. Current heap memory usage {}",
                     Runtime.getRuntime().totalMemory() / 1024 / 1024);
             GtfsData gtfsData = mapToInternalModel(dao);
             log.info("Finished parsing and converting GTFS data");
