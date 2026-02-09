@@ -148,7 +148,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             return station;
         }
 
-        List<Station> stations = stationsDao.getStations(stationInput, "");
+        List<Station> stations = stationsDao.getStations(stationInput);
         if (!stations.isEmpty()) {
             return stations.getFirst();
         }

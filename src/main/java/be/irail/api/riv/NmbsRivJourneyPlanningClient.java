@@ -8,14 +8,12 @@ import be.irail.api.dto.*;
 import be.irail.api.dto.result.JourneyPlanningSearchResult;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +115,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
             String lastStationName = directionParts[directionParts.length - 1].trim();
 
             // Try to find direction station by name (best effort)
-            List<Station> found = stationsDao.getStations(lastStationName, "");
+            List<Station> found = stationsDao.getStations(lastStationName);
             StationDto directionStation = !found.isEmpty() ? convertToModelStation(found.getFirst(), request.language()) : null;
 
             vehicle.setDirection(new VehicleDirection(directionName, directionStation));

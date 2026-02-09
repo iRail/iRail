@@ -108,7 +108,7 @@ public class LiveboardV1Controller extends V1Controller {
             return dbStation;
         }
 
-        List<Station> stations = stationsDao.getStations(searchInput, "");
+        List<Station> stations = stationsDao.getStations(searchInput);
         if (!stations.isEmpty()) {
             dbStation = stations.getFirst();
         }

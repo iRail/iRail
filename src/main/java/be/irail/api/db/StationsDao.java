@@ -1,5 +1,8 @@
 package be.irail.api.db;
 
+import be.irail.api.exception.InternalProcessingException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
@@ -7,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,69 +31,81 @@ public class StationsDao {
     private List<Station> stationsSortedBySize;
     private static final int STATION_SEARCH_RESULT_COUNT = 5;
 
+    private final Cache<String, Optional<Station>> stationByIdCache = CacheBuilder.newBuilder()
+            .maximumSize(3600)
+            .expireAfterWrite(8, TimeUnit.HOURS)
+            .build();
+
+    private final Cache<String, List<Station>> stationByNameCache = CacheBuilder.newBuilder()
+            .maximumSize(3600)
+            .expireAfterWrite(4, TimeUnit.HOURS)
+            .build();
+
     /**
      * Gets you stations in a list ordered by relevance to the optional query.
      *
-     * @param query   The name or part of a name to search for
-     * @param country shortcode for a country (e.g., be, de, fr...)
+     * @param query The name or part of a name to search for
      * @return a list of stations
      */
-    public List<Station> getStations(String query, String country) {
+    public List<Station> getStations(String query) {
         if (query == null || query.isEmpty()) {
             return new ArrayList<>(this.stationsSortedBySize);
         }
 
-        // Standardization and normalization
-        String normalizedQuery = standardizeQuery(query);
-        normalizedQuery = normalizeAccents(normalizedQuery);
-        // Dashes are the same as spaces
-        normalizedQuery = normalizedQuery.replaceAll("([- ])+", " ");
+        try {
+            return stationByNameCache.get(query, () -> {
+                // Standardization and normalization
+                String normalizedQuery = standardizeQuery(query);
+                normalizedQuery = normalizeAccents(normalizedQuery);
+                // Dashes are the same as spaces
+                normalizedQuery = normalizedQuery.replaceAll("([- ])+", " ");
 
-        int count = 0;
-        List<Station> resultStations = new ArrayList<>();
+                int count = 0;
+                List<Station> resultStations = new ArrayList<>();
 
-        for (Station station : this.stationsSortedBySize) {
-            if (country != null && !country.isEmpty() && !country.equalsIgnoreCase(station.getCountryCode())) {
-                continue;
-            }
+                for (Station station : this.stationsSortedBySize) {
+                    boolean exactMatch = false;
+                    boolean partialMatch = false;
 
-            boolean exactMatch = false;
-            boolean partialMatch = false;
+                    List<String> allNames = new ArrayList<>();
+                    allNames.add(station.getName());
+                    allNames.addAll(station.getLocalizedNames());
+                    // unique names
+                    allNames = allNames.stream().distinct().collect(Collectors.toList());
 
-            List<String> allNames = new ArrayList<>();
-            allNames.add(station.getName());
-            allNames.addAll(station.getLocalizedNames());
-            // unique names
-            allNames = allNames.stream().distinct().collect(Collectors.toList());
+                    for (String name : allNames) {
+                        String testStationName = normalizeAccents(name).replace(" am ", " ");
+                        testStationName = testStationName.replaceAll("([- ])+", " ");
 
-            for (String name : allNames) {
-                String testStationName = normalizeAccents(name).replace(" am ", " ");
-                testStationName = testStationName.replaceAll("([- ])+", " ");
+                        if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
+                            exactMatch = true;
+                            break;
+                        }
 
-                if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
-                    exactMatch = true;
-                    break;
+                        if (isQueryPartOfName(normalizedQuery, testStationName)) {
+                            partialMatch = true;
+                        }
+                    }
+
+                    if (exactMatch) {
+                        putInFirstPlace(resultStations, station);
+                        count++;
+                    } else if (partialMatch) {
+                        resultStations.add(station);
+                        count++;
+                    }
+
+                    if (count > STATION_SEARCH_RESULT_COUNT) {
+                        return resultStations;
+                    }
                 }
 
-                if (isQueryPartOfName(normalizedQuery, testStationName)) {
-                    partialMatch = true;
-                }
-            }
-
-            if (exactMatch) {
-                putInFirstPlace(resultStations, station);
-                count++;
-            } else if (partialMatch) {
-                resultStations.add(station);
-                count++;
-            }
-
-            if (count > STATION_SEARCH_RESULT_COUNT) {
                 return resultStations;
-            }
+            });
+        } catch (ExecutionException e) {
+            log.error("Failed to get stations for query {}", query, e);
+            throw new InternalProcessingException(e);
         }
-
-        return resultStations;
     }
 
     /**
@@ -98,14 +115,21 @@ public class StationsDao {
      * @return a Station or null
      */
     public Station getStationFromId(String id) {
-        if (this.stationsById == null) {
-            initializeStations();
+        try {
+            return stationByIdCache.get(id, () -> {
+                if (this.stationsById == null) {
+                    initializeStations();
+                }
+
+                String irailId = uriOrIdToIrailId(id);
+
+                // The keys in our map are 9-digit ids
+                return Optional.ofNullable(stationsById.get(irailId));
+            }).orElse(null);
+        } catch (ExecutionException e) {
+            log.error("Failed to get station for id {}", id, e);
+            throw new InternalProcessingException(e);
         }
-
-        String irailId = uriOrIdToIrailId(id);
-
-        // The keys in our map are 9-digit ids
-        return stationsById.get(irailId);
     }
 
     private String uriOrIdToIrailId(String id) {

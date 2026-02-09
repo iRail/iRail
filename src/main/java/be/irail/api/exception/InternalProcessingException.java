@@ -5,6 +5,10 @@ public class InternalProcessingException extends IrailHttpException {
         super(500, message);
     }
 
+    public InternalProcessingException(Throwable cause) {
+        super(500, cause.getMessage(), cause);
+    }
+
     public InternalProcessingException(String message, Throwable cause) {
         super(500, message, cause);
     }
