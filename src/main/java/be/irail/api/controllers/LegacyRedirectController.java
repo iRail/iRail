@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +15,7 @@ public class LegacyRedirectController {
 
     @Context
     private HttpServletRequest request;
+
     @GET
     @Path("/stations")
     public Response redirectStations() {
@@ -46,6 +46,7 @@ public class LegacyRedirectController {
         return Response.status(Response.Status.BAD_REQUEST).entity(
                 "The iRail API uses prefixes to indicate versions, and has been returning redirects for a while now. "
                         + "Please migrate your application to use /v1/ in front of the legacy endpoints to avoid unnecessary redirects. "
-                        + "The composition endpoint is only available through the updated URL.").build();
+                        + "The composition endpoint is only available through the updated URL: "
+                        + URI.create("https://" + request.getRemoteHost() + "/v1/composition?" + request.getQueryString())).build();
     }
 }
