@@ -74,7 +74,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             @QueryParam("to") String to,
             @QueryParam("date") String date,
             @QueryParam("time") String time,
-            @QueryParam("timesel") @DefaultValue("departure") String timesel,
+            @QueryParam("timeSel") @DefaultValue("departure") String timesel,
             @QueryParam("typeOfTransport") @DefaultValue("automatic") String typeOfTransport,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {

@@ -1,12 +1,11 @@
 package be.irail.api.controllers.v1;
 
-import be.irail.api.db.Station;
-import be.irail.api.dto.Language;
-import be.irail.api.dto.StationDto;
+import be.irail.api.config.Metrics;
+import be.irail.api.dto.Format;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.printer.V1JsonPrinter;
 import be.irail.api.legacy.printer.V1XmlPrinter;
-import be.irail.api.dto.Format;
+import com.codahale.metrics.Timer;
 import jakarta.ws.rs.core.Response;
 import org.jspecify.annotations.NonNull;
 
@@ -16,6 +15,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public abstract class V1Controller {
+    private final Timer serializeV1Timer = Metrics.getRegistry().timer("serialize-v1");
 
     protected LocalDate parseDate(String date) {
         LocalDate localDate = LocalDate.now();
@@ -30,6 +30,7 @@ public abstract class V1Controller {
 
         return localDate;
     }
+
     /**
      * Parses V1 date and time parameters into LocalDateTime.
      */
@@ -57,10 +58,12 @@ public abstract class V1Controller {
     }
 
     protected Response v1Response(DataRoot dataRoot, Format outputFormat) throws Exception {
-        // Serialize to output format
-        String body = serializeOutput(dataRoot, outputFormat);
-        String contentType = getContentType(outputFormat);
-        return Response.ok(body, contentType).build();
+        try (Timer.Context ignored = serializeV1Timer.time()) {
+            // Serialize to output format
+            String body = serializeOutput(dataRoot, outputFormat);
+            String contentType = getContentType(outputFormat);
+            return Response.ok(body, contentType).build();
+        }
     }
 
     private static @NonNull String getContentType(Format outputFormat) {
