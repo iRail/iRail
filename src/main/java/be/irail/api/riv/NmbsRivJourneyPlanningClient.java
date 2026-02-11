@@ -8,8 +8,8 @@ import be.irail.api.dto.*;
 import be.irail.api.dto.result.JourneyPlanningSearchResult;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Service
 public class NmbsRivJourneyPlanningClient extends RivClient {
-    private static final Logger logger = LoggerFactory.getLogger(NmbsRivJourneyPlanningClient.class);
+    private static final Logger log = LogManager.getLogger(NmbsRivJourneyPlanningClient.class);
 
     private final NmbsRivRawDataRepository rivDataRepository;
     private final StationsDao stationsDao;
@@ -99,7 +99,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
             JsonNode product = legNode.get("Product");
             String trainType = product.get("catOutL").asText().trim();
             if (!product.has("num")) {
-                logger.warn("Could not parse train number from leg: {}", legNode);
+                log.warn("Could not parse train number from leg: {}", legNode);
             }
             int trainNumber = product.get("num").asInt();
             String ref = legNode.get("JourneyDetailRef").get("ref").asText();
@@ -117,7 +117,9 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
             // Try to find direction station by name (best effort)
             List<Station> found = stationsDao.getStations(lastStationName);
             StationDto directionStation = !found.isEmpty() ? convertToModelStation(found.getFirst(), request.language()) : null;
-
+            if (found.isEmpty()) {
+                log.warn("Direction station not found: " + lastStationName);
+            }
             vehicle.setDirection(new VehicleDirection(directionName, directionStation));
             parsedLeg.setVehicle(vehicle);
 

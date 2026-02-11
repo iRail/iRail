@@ -6,6 +6,7 @@ import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.TimeSelection;
 import be.irail.api.dto.result.JourneyPlanningSearchResult;
+import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.request.BadRequestException;
 import be.irail.api.exception.request.RequestedStopNotFoundException;
 import be.irail.api.legacy.DataRoot;
@@ -107,9 +108,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             return v1Response(dataRoot, outputFormat);
         } catch (Exception exception) {
             logger.error("Error fetching connections from {} to {}: {}", from, to, exception.getMessage(), exception);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error fetching connections: " + exception.getMessage())
-                    .build();
+            throw new InternalProcessingException("Error fetching connections: " + exception.getMessage(), exception);
         }
     }
 

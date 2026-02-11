@@ -57,9 +57,7 @@ public class StationsDao {
                 // Standardization and normalization
                 String normalizedQuery = standardizeQuery(query);
                 normalizedQuery = normalizeAccents(normalizedQuery);
-                // Dashes are the same as spaces
-                normalizedQuery = normalizedQuery.replaceAll("([- ])+", " ");
-
+                normalizedQuery = normalize(normalizedQuery);
                 int count = 0;
                 List<Station> resultStations = new ArrayList<>();
 
@@ -74,7 +72,7 @@ public class StationsDao {
                     allNames = allNames.stream().distinct().collect(Collectors.toList());
 
                     for (String name : allNames) {
-                        String testStationName = normalizeAccents(name).replace(" am ", " ");
+                        String testStationName = normalize(normalizeAccents(name));
                         testStationName = testStationName.replaceAll("([- ])+", " ");
 
                         if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
@@ -100,12 +98,23 @@ public class StationsDao {
                     }
                 }
 
+                log.trace("Found {} stations for query {}: {}", resultStations.size(), query, resultStations.stream().map(Station::getName).collect(Collectors.joining(", ")));
                 return resultStations;
             });
         } catch (ExecutionException e) {
             log.error("Failed to get stations for query {}", query, e);
             throw new InternalProcessingException(e);
         }
+    }
+
+    private String normalize(String query) {
+        // Dashes are the same as spaces
+        query = query.replaceAll("([- ])+", " ");
+        // Parentheses are removed
+        query = query.replaceAll("\\(.*?\\)", "");
+        query = query.replace(" am ", " ");
+        query = query.replace("  ", " ");
+        return query.trim();
     }
 
     /**
