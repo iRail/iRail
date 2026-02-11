@@ -148,8 +148,8 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
             end.setDelay((int) java.time.Duration.between(ldt, rtLdt).getSeconds());
         }
 
-        String platform = node.has("rtPlatf") ? node.get("rtPlatf").asText() : (node.has("platf") ? node.get("platf").asText() : null);
-        boolean platformChanged = node.has("rtPlatf") && node.has("platf") && !node.get("rtPlatf").asText().equals(node.get("platf").asText());
+        String platform = node.has("rtTrack") ? node.get("rtTrack").asText() : (node.has("track") ? node.get("track").asText() : null);
+        boolean platformChanged = node.has("rtTrack") && node.has("track") && !node.get("rtTrack").asText().equals(node.get("track").asText());
         end.setPlatform(new PlatformInfo(end.getStation().getId(), platform, platformChanged));
 
         return end;
