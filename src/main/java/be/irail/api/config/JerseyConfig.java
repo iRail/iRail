@@ -1,6 +1,7 @@
 package be.irail.api.config;
 
 import be.irail.api.controllers.LegacyRedirectController;
+import be.irail.api.controllers.OccupancyReportController;
 import be.irail.api.controllers.StatusController;
 import be.irail.api.controllers.V2Controller;
 import be.irail.api.controllers.v1.*;
@@ -28,6 +29,7 @@ public class JerseyConfig extends ResourceConfig {
         register(CompositionV1Controller.class);
         register(LogsV1Controller.class);
         register(LegacyRedirectController.class);
+        register(OccupancyReportController.class);
 
         register(V2Controller.class);
         register(StatusController.class);
