@@ -278,15 +278,11 @@ public class NmbsRivRawDataRepository {
                 }
             });
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof IrailHttpException) {
-                throw (IrailHttpException) e.getCause();
+            if (e.getCause().getCause() instanceof IrailHttpException irailHttpException) {
+                throw irailHttpException;
             }
             throw e;
         }
-    }
-
-    public String fetchData(String url) {
-        return fetchRateLimitedRivResponse(url);
     }
 
     private String fetchRateLimitedRivResponse(String url) {

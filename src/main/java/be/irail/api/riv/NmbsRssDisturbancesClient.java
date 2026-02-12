@@ -5,6 +5,7 @@ import be.irail.api.dto.Message;
 import be.irail.api.dto.MessageLink;
 import be.irail.api.dto.MessageType;
 import be.irail.api.dto.result.ServiceAlertsResult;
+import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.riv.requests.ServiceAlertsRequest;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -14,10 +15,17 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +35,10 @@ import java.util.regex.Pattern;
 @Service
 public class NmbsRssDisturbancesClient {
 
-    private record LinkExtractionResult(String filteredDescription, List<MessageLink> links) {}
+    private final HttpClient httpClient;
+
+    private record LinkExtractionResult(String filteredDescription, List<MessageLink> links) {
+    }
 
     private final NmbsRivRawDataRepository rivDataRepository;
 
@@ -40,15 +51,33 @@ public class NmbsRssDisturbancesClient {
 
     public NmbsRssDisturbancesClient(NmbsRivRawDataRepository rivDataRepository) {
         this.rivDataRepository = rivDataRepository;
+        this.httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
     }
 
     public ServiceAlertsResult getServiceAlerts(ServiceAlertsRequest request) {
-        String url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/" + request.language().getValue().toLowerCase();
-        // The PHP code adds ?tpl=rss_feed. NmbsRivRawDataRepository.fetchData currently doesn't handle params but we can append it.
-        String xml = rivDataRepository.fetchData(url + "?tpl=rss_feed");
-
+        String xml = fetchData(request);
         List<Message> alerts = parseData(xml, request);
         return new ServiceAlertsResult(alerts);
+    }
+
+    private String fetchData(ServiceAlertsRequest request) {
+        String url = "http://www.belgianrail.be/jp/sncb-nmbs-routeplanner/help.exe/"
+                + request.language().getValue().toLowerCase()
+                + "?tpl=rss_feed";
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json");
+        HttpRequest httpRequest = builder.build();
+        String xml;
+        try {
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            xml = response.body();
+        } catch (IOException | InterruptedException e) {
+            throw new UpstreamServerException("Failed to fetch data from NMBS", e);
+        }
+        return xml;
     }
 
     private List<Message> parseData(String xml, ServiceAlertsRequest request) {
@@ -56,7 +85,7 @@ public class NmbsRssDisturbancesClient {
         try {
             // Very basic XML cleaning as in PHP's Tidy::repairXml (best effort)
             xml = xml.replace("/>>", "/>");
-            
+
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
@@ -64,17 +93,17 @@ public class NmbsRssDisturbancesClient {
             NodeList items = doc.getElementsByTagName("item");
             for (int i = 0; i < items.getLength(); i++) {
                 Element item = (Element) items.item(i);
-                
+
                 String title = getTagValue(item, "title").trim();
                 String description = getTagValue(item, "description").trim();
                 String link = getTagValue(item, "link").trim();
                 String pubDate = getTagValue(item, "pubDate").trim();
 
                 String lead = description.split("\\.")[0];
-                
+
                 LinkExtractionResult linkExtractionResult = extractLinks(description, link, request.language());
                 String cleanedDescription = cleanHtmlText(linkExtractionResult.filteredDescription, "\n");
-                
+
                 // RFC 1123 date format is common in RSS
                 OffsetDateTime timestamp = OffsetDateTime.parse(pubDate, DateTimeFormatter.RFC_1123_DATE_TIME);
 
@@ -120,23 +149,25 @@ public class NmbsRssDisturbancesClient {
     }
 
     private String cleanHtmlText(String description, String newlineChar) {
-        if (description == null) return "";
-        
+        if (description == null) {
+            return "";
+        }
+
         description = description.replace("\u00A0", " ");
         description = description.replaceAll("<br\\s*/?>", "%%NEWLINE%%");
-        
+
         // Strip tags
         description = description.replaceAll("<[^>]*>", "");
         description = description.replaceAll("\\s+", " ");
         description = description.replace("%%NEWLINE%%", newlineChar);
-        
+
         return description.trim();
     }
 
     private LinkExtractionResult extractLinks(String description, String itemLink, Language language) {
         List<MessageLink> links = new ArrayList<>();
         String modifiedDescription = description;
-        
+
         Pattern p = Pattern.compile("<a href=\"([^\"]+)\"[^>]*>([^<]+)</a>");
         Matcher m = p.matcher(description);
         boolean found = false;
@@ -144,7 +175,7 @@ public class NmbsRssDisturbancesClient {
             links.add(new MessageLink(m.group(1), m.group(2)));
             found = true;
         }
-        
+
         if (found) {
             // Remove download links as in PHP
             modifiedDescription = description.replaceAll("<a href=\"http://www\\.belgianrail\\.be/jp/download/brail_him/[^\"]+\">[^<]+</a>", "");
@@ -152,7 +183,7 @@ public class NmbsRssDisturbancesClient {
             String linkText = READ_MORE_STRINGS.getOrDefault(language, "Read more");
             links.add(new MessageLink(itemLink, linkText));
         }
-        
+
         return new LinkExtractionResult(modifiedDescription, links);
     }
 }
