@@ -1,5 +1,7 @@
 package be.irail.api.exception;
 
+import be.irail.api.config.Metrics;
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -12,18 +14,27 @@ import java.util.List;
 @Provider
 public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
 
+    private final Meter irailBadRequestMeter = Metrics.getRegistry().meter("Exceptions, Irail, Bad request");
+    private final Meter irailExceptionMeter = Metrics.getRegistry().meter("Exceptions, Irail");
+    private final Meter exceptionMeter = Metrics.getRegistry().meter("Exceptions, unchecked");
+    private final Meter notFoundMeter = Metrics.getRegistry().meter("404 Not found");
+
     @Override
     public Response toResponse(Throwable throwable) {
         if (throwable instanceof IrailHttpException exception) {
             if (exception.getHttpCode() >= 400 && exception.getHttpCode() < 500) {
+                irailBadRequestMeter.mark();
                 return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
             }
+            irailExceptionMeter.mark();
             return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception)).build();
         }
         if (throwable instanceof NotFoundException exception) {
             // Dont print a stacktrace for 404
+            notFoundMeter.mark();
             return Response.status(404).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
         }
+        exceptionMeter.mark();
         return Response.status(500).header("Content-Type", "application/json").entity(new ExceptionDto(throwable)).build();
     }
 
