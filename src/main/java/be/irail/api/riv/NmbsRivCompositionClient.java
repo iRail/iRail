@@ -198,7 +198,7 @@ public class NmbsRivCompositionClient {
         } else if ("M7BMX".equals(materialTypeName)) {
             parentType = "M7";
             subType = "BMX";
-        } else if (materialSubTypeName.startsWith("M7")) {
+        } else if (materialSubTypeName.startsWith("M7") || materialTypeName.startsWith("M6")) {
             parentType = "M7";
             subType = materialSubTypeName.substring(2);
         } else {
@@ -213,18 +213,21 @@ public class NmbsRivCompositionClient {
         String subType = "unknown";
 
         if (rawUnit.has("materialSubTypeName")) {
-            String mstn = rawUnit.get("materialSubTypeName").asText();
-            if (mstn.endsWith("NS")) { // Simplified NS check
+            String subTypeName = rawUnit.get("materialSubTypeName").asText();
+            if (subTypeName.endsWith("NS")) { // Simplified NS check
                 parentType = "NS";
-                subType = mstn.substring(0, mstn.length() - 2);
+                subType = subTypeName.substring(0, subTypeName.length() - 2);
             } else {
                 // Simplified regex-like logic: M6_A -> M6, A
-                if (mstn.contains("_")) {
-                    String[] parts = mstn.split("_");
+                if (subTypeName.contains("_")) {
+                    String[] parts = subTypeName.split("_");
                     parentType = parts[0];
                     subType = parts.length > 1 ? parts[1] : "unknown";
+                }else if (subTypeName.startsWith("M6") || subTypeName.startsWith("M7")) {
+                    parentType = subTypeName.substring(0, 2);
+                    subType = subTypeName.substring(2);
                 } else {
-                    parentType = mstn;
+                    parentType = subTypeName;
                 }
             }
         } else if (rawUnit.has("materialTypeName")) {
