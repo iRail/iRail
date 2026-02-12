@@ -2,7 +2,7 @@ package be.irail.api.controllers;
 
 import be.irail.api.db.OccupancyDao;
 import be.irail.api.db.OccupancyReport;
-import be.irail.api.dto.OccupancyReportRequestDTO;
+import be.irail.api.dto.request.OccupancyReportRequestDTO;
 import be.irail.api.exception.request.BadRequestException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * Controller for handling occupancy reports.
