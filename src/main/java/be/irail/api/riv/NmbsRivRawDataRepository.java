@@ -289,7 +289,7 @@ public class NmbsRivRawDataRepository {
     }
 
     private String fetchRateLimitedRivResponse(String url) {
-        if (rivHttpRequestTimer.getCount() > rateLimit) {
+        if (rivHttpRequestTimer.getOneMinuteRate() > rateLimit) {
             log.warn("Upstream rate limit exceeded. Current rate {}", rivHttpRequestTimer.getCount());
             throw new UpstreamRateLimitException();
         }
