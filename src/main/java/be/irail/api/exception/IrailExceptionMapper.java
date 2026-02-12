@@ -1,6 +1,7 @@
 package be.irail.api.exception;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -18,6 +19,10 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
                 return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
             }
             return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception)).build();
+        }
+        if (throwable instanceof NotFoundException exception) {
+            // Dont print a stacktrace for 404
+            return Response.status(404).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
         }
         return Response.status(500).header("Content-Type", "application/json").entity(new ExceptionDto(throwable)).build();
     }
