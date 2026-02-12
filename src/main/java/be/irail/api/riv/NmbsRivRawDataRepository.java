@@ -278,6 +278,9 @@ public class NmbsRivRawDataRepository {
                 }
             });
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof IrailHttpException irailHttpException) {
+                throw irailHttpException;
+            }
             if (e.getCause().getCause() instanceof IrailHttpException irailHttpException) {
                 throw irailHttpException;
             }
