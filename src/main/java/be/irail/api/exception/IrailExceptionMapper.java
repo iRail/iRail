@@ -50,6 +50,8 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
     private static final class ExceptionDto {
 
         @JsonProperty
+        private final String exception;
+        @JsonProperty
         private final String message;
         @JsonProperty
         private final String cause;
@@ -59,6 +61,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         private final List<String> stackTrace;
 
         private ExceptionDto(Throwable throwable) {
+            this.exception = throwable.getClass().getSimpleName();
             this.message = throwable.getMessage();
             this.cause = throwable.getCause() != null ? throwable.getCause().getMessage() : "";
             this.at = throwable.getStackTrace()[0].getFileName() + ":" + throwable.getStackTrace()[0].getLineNumber();
@@ -66,6 +69,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         }
 
         private ExceptionDto(String message, Throwable throwable) {
+            this.exception = throwable.getClass().getSimpleName();
             this.message = message;
             this.cause = "";
             this.at = throwable.getStackTrace()[0].getFileName() + ":" + throwable.getStackTrace()[0].getLineNumber();

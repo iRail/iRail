@@ -7,6 +7,7 @@ import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.TimeSelection;
 import be.irail.api.dto.result.LiveboardSearchResult;
+import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.request.BadRequestException;
 import be.irail.api.exception.request.RequestedStopNotFoundException;
 import be.irail.api.legacy.DataRoot;
@@ -135,6 +136,9 @@ public class LiveboardV1Controller extends V1Controller {
                 return LiveboardV1Converter.convert(request, liveboardResult);
             } catch (Exception exception) {
                 log.error("Error fetching liveboard for station {}: {}", request.station().getIrailId(), exception.getMessage(), exception);
+                if (exception instanceof IrailHttpException irailException) {
+                    throw irailException; // Don't modify exceptions which have been caught/handled already
+                }
                 throw exception;
             }
         }

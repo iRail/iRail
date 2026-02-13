@@ -4,6 +4,8 @@ import be.irail.api.config.Metrics;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
+import be.irail.api.exception.InternalProcessingException;
+import be.irail.api.exception.IrailHttpException;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.DatedVehicleJourneyV1Converter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
@@ -86,11 +88,12 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             // Serialize to output format
             return v1Response(dataRoot, outputFormat);
 
-        } catch (Exception exception) {
+        } catch (Throwable exception) {
             logger.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error fetching vehicle: " + exception.getMessage())
-                    .build();
+            if (exception instanceof IrailHttpException irailException) {
+                throw irailException; // Don't modify exceptions which have been caught/handled already
+            }
+            throw new InternalProcessingException("Error fetching vehicle journey", exception);
         }
     }
 

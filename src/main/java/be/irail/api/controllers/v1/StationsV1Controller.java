@@ -6,6 +6,8 @@ import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.StationDto;
+import be.irail.api.exception.InternalProcessingException;
+import be.irail.api.exception.IrailHttpException;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.StationsV1Converter;
 import be.irail.api.util.RequestParser;
@@ -67,9 +69,10 @@ public class StationsV1Controller extends V1Controller {
             return v1Response(dataRoot, outputFormat);
         } catch (Exception exception) {
             logger.error("Error fetching stations: {}", exception.getMessage(), exception);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error fetching stations: " + exception.getMessage())
-                    .build();
+            if (exception instanceof IrailHttpException irailException) {
+                throw irailException; // Don't modify exceptions which have been caught/handled already
+            }
+            throw new InternalProcessingException("Error fetching stations: " + exception.getMessage(), exception);
         }
     }
 
