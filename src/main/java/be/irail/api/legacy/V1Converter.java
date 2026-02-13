@@ -19,7 +19,7 @@ public abstract class V1Converter {
         V1Platform result = new V1Platform();
         result.name = platform != null ? platform.getDesignation() : "?";
         result.name = result.name == null ? "?" : result.name;
-        result.normal = (platform == null || platform.hasChanged()) ? "0" : "1";
+        result.normal = (platform == null || !platform.hasChanged()) ? "1" : "0";
         return result;
     }
 

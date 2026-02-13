@@ -121,11 +121,7 @@ public class V1XmlPrinter extends Printer {
 
             if (ATTRIBUTES.contains(elementKey)) {
                 String attrName = "@id".equals(elementKey) || "atId".equals(elementKey) ? "URI" : elementKey;
-                Object attrVal = elementVal;
-                if ("normal".equals(elementKey) || "canceled".equals(elementKey)) {
-                    attrVal = (elementVal instanceof Boolean && (Boolean) elementVal) ? 1 : 0;
-                }
-                result.append(" ").append(attrName).append("=\"").append(attrVal).append("\"");
+                result.append(" ").append(attrName).append("=\"").append(elementVal).append("\"");
             } else if ("name".equals(elementKey)) {
                 named = elementVal.toString();
             }
