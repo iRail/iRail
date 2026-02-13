@@ -49,6 +49,13 @@ public class LegacyRedirectController {
     }
 
     @GET
+    @Path("/disturbances")
+    public Response redirectDisturbances() {
+        redirectMeter.mark();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/disturbances?" + request.getQueryString())).build();
+    }
+
+    @GET
     @Path("/composition")
     public Response redirectComposition() {
         redirectMeter.mark();
