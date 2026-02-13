@@ -5,6 +5,7 @@ import be.irail.api.dto.Message;
 import be.irail.api.dto.MessageLink;
 import be.irail.api.dto.MessageType;
 import be.irail.api.dto.result.ServiceAlertsResult;
+import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.riv.requests.ServiceAlertsRequest;
 import org.springframework.stereotype.Service;
@@ -134,7 +135,7 @@ public class NmbsRssDisturbancesClient {
             }
         } catch (Exception e) {
             // In a real scenario, we would use backup cache here
-            throw new RuntimeException("Failed to parse NMBS RSS disturbances", e);
+            throw new InternalProcessingException("Failed to parse NMBS RSS disturbances", e);
         }
 
         return disturbances;

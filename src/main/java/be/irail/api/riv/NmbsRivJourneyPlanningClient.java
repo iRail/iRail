@@ -6,6 +6,7 @@ import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.*;
 import be.irail.api.dto.result.JourneyPlanningSearchResult;
+import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +50,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
     private JourneyPlanningSearchResult parseJourneyPlanning(JourneyPlanningRequest request, CachedData<JsonNode> data) {
         JsonNode json = data.getValue();
         if (json == null || json.isNull()) {
-            throw new RuntimeException("The server did not return any data.");
+            throw new UpstreamServerException("The server did not return any data.");
         }
 
         JourneyPlanningSearchResult result = new JourneyPlanningSearchResult();

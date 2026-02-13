@@ -333,7 +333,7 @@ public class NmbsRivRawDataRepository {
                 case "INT_TIMEOUT":
                     throw new UpstreamServerException("The upstream server encountered a timeout while loading the data.");
                 case "SVC_NO_RESULT":
-                    throw new RuntimeException("No results found");
+                    throw new UpstreamServerException("No results found");
                 case "SVC_LOC":
                     throw new UpstreamServerException("Location not found");
                 case "SVC_LOC_EQUAL":

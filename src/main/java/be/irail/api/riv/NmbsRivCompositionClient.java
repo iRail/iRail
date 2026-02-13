@@ -6,6 +6,7 @@ import be.irail.api.dto.CachedData;
 import be.irail.api.dto.Vehicle;
 import be.irail.api.dto.result.VehicleCompositionSearchResult;
 import be.irail.api.dto.vehiclecomposition.*;
+import be.irail.api.exception.CompositionNotFoundException;
 import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,8 +62,8 @@ public class NmbsRivCompositionClient {
 
             CachedData<JsonNode> cachedData = rivRawDataRepository.getVehicleCompositionData(
                     String.valueOf(journey.getNumber()),
-                    journeyWithOriginAndDestination.getOriginStopId().substring(0,7),
-                    journeyWithOriginAndDestination.getDestinationStopId().substring(0,7),
+                    journeyWithOriginAndDestination.getOriginStopId().substring(0, 7),
+                    journeyWithOriginAndDestination.getDestinationStopId().substring(0, 7),
                     journey.getJourneyStartDate()
             );
 
@@ -70,7 +71,7 @@ public class NmbsRivCompositionClient {
             JsonNode compositionData = json.has("lastPlanned") ? json.get("lastPlanned") : json.get("commercialPlanned");
 
             if (compositionData == null || !compositionData.isArray()) {
-                throw new RuntimeException("No composition data available for " + journey.getId());
+                throw new CompositionNotFoundException(journey.getName(), journey.getJourneyStartDate());
             }
 
             List<TrainComposition> segments = new ArrayList<>();
@@ -223,7 +224,7 @@ public class NmbsRivCompositionClient {
                     String[] parts = subTypeName.split("_");
                     parentType = parts[0];
                     subType = parts.length > 1 ? parts[1] : "unknown";
-                }else if (subTypeName.startsWith("M6") || subTypeName.startsWith("M7")) {
+                } else if (subTypeName.startsWith("M6") || subTypeName.startsWith("M7")) {
                     parentType = subTypeName.substring(0, 2);
                     subType = subTypeName.substring(2);
                 } else {

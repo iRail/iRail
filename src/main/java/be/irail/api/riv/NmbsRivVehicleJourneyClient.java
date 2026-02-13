@@ -6,6 +6,7 @@ import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.*;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
+import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jspecify.annotations.NonNull;
@@ -48,7 +49,7 @@ public class NmbsRivVehicleJourneyClient extends RivClient {
     private VehicleJourneySearchResult parseNmbsRawVehicleJourney(VehicleJourneyRequest request, CachedData<JsonNode> cachedRawData) {
         JsonNode json = cachedRawData.getValue();
         if (json == null || json.isNull()) {
-            throw new RuntimeException("The server did not return any data.");
+            throw new UpstreamServerException("The server did not return any data.");
         }
 
         Vehicle vehicle = getVehicleDetails(json, request);
