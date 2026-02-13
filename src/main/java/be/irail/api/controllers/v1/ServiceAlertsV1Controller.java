@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.result.ServiceAlertsResult;
@@ -9,6 +10,7 @@ import be.irail.api.legacy.ServiceAlertsV1Converter;
 import be.irail.api.riv.NmbsRssDisturbancesClient;
 import be.irail.api.riv.requests.ServiceAlertsRequest;
 import be.irail.api.util.RequestParser;
+import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.ws.rs.*;
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class ServiceAlertsV1Controller extends V1Controller {
 
     private static final Logger log = LogManager.getLogger(ServiceAlertsV1Controller.class);
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Disturbances");
 
     private final NmbsRssDisturbancesClient serviceAlertsClient;
     private static final Cache<ServiceAlertsRequest, DataRoot> cache = CacheBuilder.newBuilder()
@@ -58,6 +61,7 @@ public class ServiceAlertsV1Controller extends V1Controller {
     public Response getServiceAlerts(
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
+        requestMeter.mark();
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
         ServiceAlertsRequest request = new ServiceAlertsRequest(language);

@@ -6,8 +6,6 @@ import be.irail.api.dto.Language;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.DatedVehicleJourneyV1Converter;
-import be.irail.api.legacy.printer.V1JsonPrinter;
-import be.irail.api.legacy.printer.V1XmlPrinter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
 import be.irail.api.util.RequestParser;

@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
@@ -8,6 +9,7 @@ import be.irail.api.dto.StationDto;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.StationsV1Converter;
 import be.irail.api.util.RequestParser;
+import com.codahale.metrics.Meter;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -27,7 +29,7 @@ import java.util.List;
 public class StationsV1Controller extends V1Controller {
 
     private static final Logger logger = LoggerFactory.getLogger(StationsV1Controller.class);
-
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Stations");
     private final StationsDao stationsDao;
 
     @Autowired
@@ -47,6 +49,7 @@ public class StationsV1Controller extends V1Controller {
     public Response listStations(
             @QueryParam("format") @DefaultValue("xml") String format,
             @QueryParam("lang") @DefaultValue("en") String lang) {
+        requestMeter.mark();
         Format outputFormat = RequestParser.parseFormat(format);
         Language language = RequestParser.parseLanguage(lang);
 
