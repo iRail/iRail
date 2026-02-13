@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
  * Ported from OccupancyController.php.
  */
 @Component
-@Path("/occupancy")
+@Path("/feedback")
 public class OccupancyReportController {
 
     private final OccupancyDao occupancyDao;
@@ -35,6 +35,7 @@ public class OccupancyReportController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/occupancy{suffix:(.php)?}")
     public Response store(OccupancyReportRequestDTO request) {
         if (request == null) {
             throw new BadRequestException("Missing request body", "body");
