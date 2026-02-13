@@ -1,5 +1,6 @@
 package be.irail.api.db;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.dto.Vehicle;
 import be.irail.api.dto.result.VehicleCompositionSearchResult;
 import be.irail.api.dto.vehiclecomposition.RollingMaterialType;
@@ -7,6 +8,7 @@ import be.irail.api.dto.vehiclecomposition.TrainComposition;
 import be.irail.api.dto.vehiclecomposition.TrainCompositionUnit;
 import be.irail.api.dto.vehiclecomposition.TrainCompositionUnitWithId;
 import be.irail.api.util.VehicleIdTools;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.ArrayListMultimap;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -45,20 +47,21 @@ public class CompositionDao {
     }
 
     /**
-     * Map from "journeyNumber|journeyStartDate" to list of CompositionHistory entries
+     * Map from "journeyNumber|journeyStartDate" to list of CompositionHistory entries.
      */
     private final ArrayListMultimap<DatedVehicleJourneyKey, CompositionHistoryEntry> compositionsByJourneyKey = ArrayListMultimap.create();
-    ;
 
     /**
-     * Map from compositionHistoryId to list of CompositionUnitUsage entries
+     * Map from compositionHistoryId to list of CompositionUnitUsage entries.
      */
     private final ArrayListMultimap<Long, StoredCompositionUnit> unitsByCompositionId = ArrayListMultimap.create();
+
     /**
-     * Map from uic code to list of CompositionUnitUsage entries
+     * Map from uic code to list of CompositionUnitUsage entries.
      */
     private final Map<Long, StoredCompositionUnit> unitsByUicId = new HashMap<>();
 
+    private final Timer storeCompositionTimer = Metrics.getRegistry().timer("CompositionDao, store");
 
     /**
      * Initializes the in-memory cache by reading compositions from yesterday onwards.
@@ -121,37 +124,47 @@ public class CompositionDao {
 
     @Transactional
     public void storeComposition(Vehicle vehicle, VehicleCompositionSearchResult result) {
-        log.debug("Storing composition for vehicle {} with {} segments", vehicle.getId(), result.getSegments().size());
+        try (var timer = storeCompositionTimer.time()) {
+            log.debug("Storing composition for vehicle {} with {} segments", vehicle.getId(), result.getSegments().size());
 
-        for (TrainComposition segment : result.getSegments()) {
-            boolean isAnyUnitMissingId = segment.getUnits().stream().map(u -> u instanceof TrainCompositionUnitWithId).anyMatch(hasId -> !hasId);
-            if (isAnyUnitMissingId) {
-                log.warn("Composition segment {} has usages with missing IDs, ignoring. Contained {} usages.",
-                        segment.getCompositionSource() + " " + segment.getOrigin().getName() + "-" + segment.getDestination().getName(),
-                        segment.getLength());
-                continue;
+            for (TrainComposition segment : result.getSegments()) {
+                storeCompositionSegment(segment);
             }
-
-            CompositionHistoryEntry compositionHistoryEntry = convertTrainComposition(segment);
-            entityManager.persist(compositionHistoryEntry);
-
-            List<CompositionUnitUsage> usages = new ArrayList<>();
-            var segmentUnits = segment.getUnits();
-            for (int i = 0; i < segmentUnits.size(); i++) {
-                TrainCompositionUnit apiUnit = segmentUnits.get(i);
-                long uicCode = ((TrainCompositionUnitWithId) apiUnit).getUicCode();
-                if (!unitsByUicId.containsKey(uicCode)) {
-                    log.info("Unit {} not found in database, inserting...", uicCode);
-                    StoredCompositionUnit unit = convertUnit((TrainCompositionUnitWithId) apiUnit);
-                    entityManager.persist(unit);
-                    unitsByUicId.put(uicCode, unit);
-                }
-
-                CompositionUnitUsage compositionUnitUsage = new CompositionUnitUsage(compositionHistoryEntry.getId(), uicCode, i);
-                usages.add(compositionUnitUsage);
-            }
-            usages.forEach(entityManager::persist);
+        } catch (Exception e) {
+            log.error("Failed to store composition for vehicle {}: {}", vehicle.getId(), e.getMessage(), e);
         }
+    }
+
+    private void storeCompositionSegment(TrainComposition segment) {
+        boolean isAnyUnitMissingId = segment.getUnits().stream()
+                .map(u -> u instanceof TrainCompositionUnitWithId)
+                .anyMatch(hasId -> !hasId);
+        if (isAnyUnitMissingId) {
+            log.warn("Composition segment {} has usages with missing IDs, ignoring. Contained {} usages.",
+                    segment.getCompositionSource() + " " + segment.getOrigin().getName() + "-" + segment.getDestination().getName(),
+                    segment.getLength());
+            return;
+        }
+
+        CompositionHistoryEntry compositionHistoryEntry = convertTrainComposition(segment);
+        entityManager.persist(compositionHistoryEntry);
+
+        List<CompositionUnitUsage> usages = new ArrayList<>();
+        var segmentUnits = segment.getUnits();
+        for (int i = 0; i < segmentUnits.size(); i++) {
+            TrainCompositionUnit apiUnit = segmentUnits.get(i);
+            long uicCode = ((TrainCompositionUnitWithId) apiUnit).getUicCode();
+            if (!unitsByUicId.containsKey(uicCode)) {
+                log.info("Unit {} not found in database, inserting...", uicCode);
+                StoredCompositionUnit unit = convertUnit((TrainCompositionUnitWithId) apiUnit);
+                entityManager.persist(unit);
+                unitsByUicId.put(uicCode, unit);
+            }
+
+            CompositionUnitUsage compositionUnitUsage = new CompositionUnitUsage(compositionHistoryEntry.getId(), uicCode, i);
+            usages.add(compositionUnitUsage);
+        }
+        usages.forEach(entityManager::persist);
     }
 
     private CompositionHistoryEntry convertTrainComposition(TrainComposition trainComposition) {
@@ -191,7 +204,9 @@ public class CompositionDao {
                 dbUnit.getMaterialSubtypeName()
         );
 
-        TrainCompositionUnit unit = new TrainCompositionUnit(materialType);
+        TrainCompositionUnitWithId unit = new TrainCompositionUnitWithId(materialType);
+        unit.setUicCode(dbUnit.getUicCode());
+        unit.setMaterialNumber(dbUnit.getMaterialNumber());
         unit.setHasToilet(dbUnit.isHasToilet())
                 .setHasAirco(dbUnit.isHasAirco())
                 .setSeatsFirstClass(dbUnit.getSeatsFirstClass() != null ? dbUnit.getSeatsFirstClass() : 0)

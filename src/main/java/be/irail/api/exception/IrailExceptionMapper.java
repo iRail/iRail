@@ -15,6 +15,7 @@ import java.util.List;
 public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
 
     private final Meter irailBadRequestMeter = Metrics.getRegistry().meter("Exceptions, Irail, Bad request");
+    private final Meter irailNotFoundMeter = Metrics.getRegistry().meter("Exceptions, Irail, Journey or station not found");
     private final Meter irailExceptionMeter = Metrics.getRegistry().meter("Exceptions, Irail");
     private final Meter exceptionMeter = Metrics.getRegistry().meter("Exceptions, unchecked");
     private final Meter notFoundMeter = Metrics.getRegistry().meter("404 Not found");
@@ -22,8 +23,11 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable throwable) {
         if (throwable instanceof IrailHttpException exception) {
-            if (exception.getHttpCode() >= 400 && exception.getHttpCode() < 500) {
+            if (exception.getHttpCode() == 400) {
                 irailBadRequestMeter.mark();
+                return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
+            } else if (exception.getHttpCode() == 404) {
+                irailNotFoundMeter.mark();
                 return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
             }
             irailExceptionMeter.mark();

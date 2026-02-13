@@ -8,6 +8,10 @@ public class JourneyNotFoundException extends IrailHttpException {
         super(404, "Could not find journey with id '" + journeyId + "' on date " + date);
     }
 
+    public JourneyNotFoundException(int journeyId, LocalDate date) {
+        this(String.valueOf(journeyId), date);
+    }
+
     public JourneyNotFoundException(String journeyId, LocalDate date, String message) {
         this(journeyId, date.atStartOfDay(), message);
     }

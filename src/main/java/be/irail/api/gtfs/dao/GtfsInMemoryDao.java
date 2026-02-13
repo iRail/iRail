@@ -117,7 +117,7 @@ public class GtfsInMemoryDao {
             }
         }
         if (matchingTripsOnDate.size() > 1) {
-            throw new IllegalStateException(String.format("Multiple trips found for journey number " +  journeyNumber + " on " + date + ": "
+            throw new IllegalStateException(String.format("Multiple trips found for journey number " + journeyNumber + " on " + date + ": "
                     + matchingTripsOnDate.stream().map(Trip::id).collect(Collectors.joining(","))));
         }
 
@@ -138,6 +138,9 @@ public class GtfsInMemoryDao {
 
     public Vehicle getVehicle(int journeyNumber, LocalDate date) {
         Journey journeyByNumber = getJourneyByNumber(journeyNumber, date);
+        if (journeyByNumber == null) {
+            throw new JourneyNotFoundException(journeyNumber, date);
+        }
         return Vehicle.fromTypeAndNumber(journeyByNumber.route().shortName(), journeyByNumber.trip().shortName(), date);
     }
 }

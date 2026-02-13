@@ -47,6 +47,11 @@ public class VehicleCompositionV1Converter extends V1Converter {
 
     private V1Unit convertUnit(TrainCompositionUnit unit) {
         V1Unit result = new V1Unit();
+        if (unit instanceof TrainCompositionUnitWithId identifiedUnit) {
+            result.materialNumber = identifiedUnit.getMaterialNumber();
+        } else {
+            result.materialNumber = null;
+        }
         result.materialType = convertMaterialType(unit.getMaterialType());
         result.hasToilets = unit.hasToilet();
         result.hasSecondClassOutlets = unit.hasSecondClassOutlets();

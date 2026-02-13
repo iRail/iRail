@@ -7,6 +7,7 @@ import be.irail.api.dto.Language;
 import be.irail.api.dto.Vehicle;
 import be.irail.api.dto.result.VehicleCompositionSearchResult;
 import be.irail.api.dto.vehiclecomposition.TrainComposition;
+import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.legacy.DataRoot;
@@ -95,9 +96,7 @@ public class CompositionV1Controller extends V1Controller {
             return v1Response(dataRoot, outputFormat);
         } catch (Exception exception) {
             log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error fetching composition: " + exception.getMessage())
-                    .build();
+            throw new InternalProcessingException("Error fetching composition: " + exception.getMessage(), exception);
         }
     }
 
