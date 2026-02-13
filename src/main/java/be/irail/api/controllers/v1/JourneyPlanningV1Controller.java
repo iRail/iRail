@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
@@ -15,6 +16,7 @@ import be.irail.api.riv.NmbsRivJourneyPlanningClient;
 import be.irail.api.riv.TypeOfTransportFilter;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import be.irail.api.util.RequestParser;
+import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.ws.rs.*;
@@ -48,6 +50,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
     private final NmbsRivJourneyPlanningClient journeyPlanningClient;
     private final StationsDao stationsDao;
 
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, JourneyPlanning");
 
     @Autowired
     public JourneyPlanningV1Controller(NmbsRivJourneyPlanningClient journeyPlanningClient, StationsDao stationsDao) {
@@ -79,7 +82,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             @QueryParam("typeOfTransport") @DefaultValue("automatic") String typeOfTransport,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
-
+        requestMeter.mark();
         TimeSelection timeSelection = RequestParser.parseV1TimeSelection(timesel);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);

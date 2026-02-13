@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
@@ -10,6 +11,7 @@ import be.irail.api.legacy.printer.V1XmlPrinter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
 import be.irail.api.util.RequestParser;
+import com.codahale.metrics.Meter;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -34,6 +36,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
     private static final Logger logger = LoggerFactory.getLogger(DatedVehicleJourneyV1Controller.class);
 
     private final NmbsRivVehicleJourneyClient vehicleJourneyClient;
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Vehicle");
 
     @Autowired
     public DatedVehicleJourneyV1Controller(NmbsRivVehicleJourneyClient vehicleJourneyClient) {
@@ -56,7 +59,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             @QueryParam("date") String date,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
-
+        requestMeter.mark();
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
 

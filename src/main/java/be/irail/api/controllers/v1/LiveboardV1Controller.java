@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
@@ -13,6 +14,7 @@ import be.irail.api.legacy.LiveboardV1Converter;
 import be.irail.api.riv.NmbsRivLiveboardClient;
 import be.irail.api.riv.requests.LiveboardRequest;
 import be.irail.api.util.RequestParser;
+import com.codahale.metrics.Meter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -45,6 +47,8 @@ public class LiveboardV1Controller extends V1Controller {
     private final LoadingCache<LiveboardRequest, DataRoot> cache;
     private final LiveboardLoader loader;
 
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Liveboard");
+
     @Autowired
     public LiveboardV1Controller(NmbsRivLiveboardClient liveboardClient, StationsDao stationsDao) {
         log.info("Initializing Liveboard V1 controller");
@@ -76,7 +80,7 @@ public class LiveboardV1Controller extends V1Controller {
             @QueryParam("arrdep") @DefaultValue("departure") String arrdep,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) throws Exception {
-
+        requestMeter.mark();
         TimeSelection timeSelection = RequestParser.parseV1TimeSelection(arrdep);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);

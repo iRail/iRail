@@ -1,5 +1,6 @@
 package be.irail.api.controllers.v1;
 
+import be.irail.api.config.Metrics;
 import be.irail.api.db.CompositionDao;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
@@ -13,6 +14,7 @@ import be.irail.api.legacy.VehicleCompositionV1Converter;
 import be.irail.api.riv.NmbsRivCompositionClient;
 import be.irail.api.util.RequestParser;
 import be.irail.api.util.VehicleIdTools;
+import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.ws.rs.*;
@@ -41,6 +43,7 @@ public class CompositionV1Controller extends V1Controller {
     private final CompositionDao compositionDao;
     private final NmbsRivCompositionClient compositionClient;
 
+    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Composition");
     private final Cache<CompositionRequest, DataRoot> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
             .expireAfterWrite(15, TimeUnit.MINUTES)
@@ -78,6 +81,7 @@ public class CompositionV1Controller extends V1Controller {
                     .build();
         }
 
+        requestMeter.mark();
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
 
