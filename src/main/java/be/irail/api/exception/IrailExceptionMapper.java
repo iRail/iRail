@@ -3,6 +3,7 @@ package be.irail.api.exception;
 import be.irail.api.config.Metrics;
 import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -22,6 +23,9 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable throwable) {
+        while (throwable instanceof UncheckedExecutionException) {
+            throwable = throwable.getCause();
+        }
         if (throwable instanceof IrailHttpException exception) {
             if (exception.getHttpCode() == 400) {
                 irailBadRequestMeter.mark();
