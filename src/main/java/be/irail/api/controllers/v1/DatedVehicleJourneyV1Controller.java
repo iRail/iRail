@@ -111,6 +111,11 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             }
         }
 
-        return LocalDateTime.of(localDate, LocalTime.NOON);
+        LocalTime now = LocalTime.now();
+        LocalTime queryTime = now
+                .withMinute(0) // Round to hours for better caching
+                .withSecond(0)
+                .withNano(0);
+        return LocalDateTime.of(localDate, queryTime);
     }
 }

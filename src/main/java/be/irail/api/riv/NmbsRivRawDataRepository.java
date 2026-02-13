@@ -134,7 +134,7 @@ public class NmbsRivRawDataRepository {
                     () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
             );
             String journeyDetailRefValue = journeyDetailRef
-                    .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate()));
+                    .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
             return getJourneyDetailResponse(journeyDetailRefValue, request.language() != null ? request.language().name() : "en");
         }
     }

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class GtfsTripStartEndExtractor {
     private static final Logger log = LogManager.getLogger(GtfsTripStartEndExtractor.class);
+    public static final int SECONDS_IN_DAY = 86400;
 
     private record JourneyNumberAndDate(int journeyNumber, LocalDate date) {
     }
@@ -72,6 +73,41 @@ public class GtfsTripStartEndExtractor {
                                         Collections.emptyList()
                                 )
                         );
+                    }
+                }
+
+                // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
+                if (date.getHour() < 4) {
+                    LocalDate dayBefore = date.toLocalDate().minusDays(1);
+                    for (Trip trip : trips) {
+                        if (isServiceActiveOnDate(dao, trip.serviceId(), dayBefore)) {
+                            List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
+                            if (stopTimes.isEmpty()) {
+                                continue;
+                            }
+
+                            StopTime first = stopTimes.getFirst();
+                            StopTime last = stopTimes.getLast();
+
+                            if (last.arrivalTime() < SECONDS_IN_DAY) {
+                                continue; // Trip not active past midnight
+                            }
+
+                            Route route = dao.getRoute(trip.routeId());
+                            String vehicleType = (route != null) ? route.shortName() : "";
+                            log.info("Found trip start and end station for trip {} on day before", journeyNumber);
+                            return Optional.of(new JourneyWithOriginAndDestination(
+                                            trip.id(),
+                                            vehicleType,
+                                            journeyNumber,
+                                            first.stopId(),
+                                            first.departureTime(),
+                                            last.stopId(),
+                                            last.arrivalTime(),
+                                            Collections.emptyList()
+                                    )
+                            );
+                        }
                     }
                 }
 
