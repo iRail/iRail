@@ -59,10 +59,11 @@ public class LegacyRedirectController {
     @Path("/composition")
     public Response redirectComposition() {
         redirectMeter.mark();
-        return Response.status(Response.Status.BAD_REQUEST).entity(
-                "The iRail API uses prefixes to indicate versions, and has been returning redirects for a while now. "
-                        + "Please migrate your application to use /v1/ in front of the legacy endpoints to avoid unnecessary redirects. "
-                        + "The composition endpoint is only available through the updated URL: "
-                        + URI.create("https://" + request.getRemoteHost() + "/v1/composition?" + request.getQueryString())).build();
+        return Response.seeOther(URI.create("https://" + request.getServerName() + "/v1/composition?" + request.getQueryString())).build();
+        // return Response.status(Response.Status.BAD_REQUEST).entity(
+        //         "The iRail API uses prefixes to indicate versions, and has been returning redirects for a while now. "
+        //                 + "Please migrate your application to use /v1/ in front of the legacy endpoints to avoid unnecessary redirects. "
+        //                 + "The composition endpoint is only available through the updated URL: "
+        //                 + URI.create("https://" + request.getRemoteHost() + "/v1/composition?" + request.getQueryString())).build();
     }
 }
