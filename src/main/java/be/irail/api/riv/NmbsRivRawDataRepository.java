@@ -6,6 +6,7 @@ import be.irail.api.dto.TimeSelection;
 import be.irail.api.exception.IrailConfigurationException;
 import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.JourneyNotFoundException;
+import be.irail.api.exception.JourneyPlanNotFoundException;
 import be.irail.api.exception.upstream.UpstreamRateLimitException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.exception.upstream.UpstreamServerUnavailableException;
@@ -334,7 +335,7 @@ public class NmbsRivRawDataRepository {
                 case "INT_TIMEOUT":
                     throw new UpstreamServerException("The upstream server encountered a timeout while loading the data.");
                 case "SVC_NO_RESULT":
-                    throw new UpstreamServerException("No results found");
+                    throw new JourneyPlanNotFoundException();
                 case "SVC_LOC":
                     throw new UpstreamServerException("Location not found");
                 case "SVC_LOC_EQUAL":
