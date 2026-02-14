@@ -39,6 +39,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
 
     private final NmbsRivVehicleJourneyClient vehicleJourneyClient;
     private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Vehicle");
+    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, Vehicle, Successful");
 
     @Autowired
     public DatedVehicleJourneyV1Controller(NmbsRivVehicleJourneyClient vehicleJourneyClient) {
@@ -88,8 +89,9 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             DataRoot dataRoot = DatedVehicleJourneyV1Converter.convert(vehicleJourneyResult);
 
             // Serialize to output format
-            return v1Response(dataRoot, outputFormat);
-
+            Response response = v1Response(dataRoot, outputFormat);
+            successRequestMeter.mark();
+            return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
             logger.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {

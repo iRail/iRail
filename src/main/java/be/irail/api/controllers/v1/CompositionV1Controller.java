@@ -47,6 +47,7 @@ public class CompositionV1Controller extends V1Controller {
     private final NmbsRivCompositionClient compositionClient;
 
     private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Composition");
+    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, Composition, Successful");
     private final Cache<CompositionRequest, DataRoot> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
             .expireAfterWrite(15, TimeUnit.MINUTES)
@@ -95,7 +96,9 @@ public class CompositionV1Controller extends V1Controller {
             DataRoot dataRoot = getCachedData(journeyId, date, language);
 
             // Serialize to output format
-            return v1Response(dataRoot, outputFormat);
+            Response response = v1Response(dataRoot, outputFormat);
+            successRequestMeter.mark();
+            return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
             log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {

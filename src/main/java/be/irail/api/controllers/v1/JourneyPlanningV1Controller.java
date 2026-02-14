@@ -53,6 +53,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
     private final StationsDao stationsDao;
 
     private final Meter requestMeter = Metrics.getRegistry().meter("Requests, JourneyPlanning");
+    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, JourneyPlanning, Successful");
 
     @Autowired
     public JourneyPlanningV1Controller(NmbsRivJourneyPlanningClient journeyPlanningClient, StationsDao stationsDao) {
@@ -110,7 +111,9 @@ public class JourneyPlanningV1Controller extends V1Controller {
         try {
             DataRoot dataRoot = cache.get(request, () -> loadJourneyPlanningResult(request));
             // Serialize to output format
-            return v1Response(dataRoot, outputFormat);
+            Response response = v1Response(dataRoot, outputFormat);
+            successRequestMeter.mark();
+            return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
             logger.error("Error fetching connections from {} to {}: {}", from, to, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {

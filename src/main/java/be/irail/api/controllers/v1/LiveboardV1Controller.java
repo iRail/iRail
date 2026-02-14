@@ -49,6 +49,7 @@ public class LiveboardV1Controller extends V1Controller {
     private final LiveboardLoader loader;
 
     private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Liveboard");
+    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, Liveboard, Successful");
 
     @Autowired
     public LiveboardV1Controller(NmbsRivLiveboardClient liveboardClient, StationsDao stationsDao) {
@@ -97,7 +98,9 @@ public class LiveboardV1Controller extends V1Controller {
         DataRoot result = cache.get(request);
 
         // Convert to V1 format
-        return v1Response(result, outputFormat);
+        Response response = v1Response(result, outputFormat);
+        successRequestMeter.mark();
+        return response;
     }
 
     private Station findStation(String id, String stationName) throws BadRequestException {
