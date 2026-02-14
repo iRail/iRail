@@ -9,6 +9,7 @@ import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.exception.JourneyPlanNotFoundException;
 import be.irail.api.exception.upstream.UpstreamRateLimitException;
 import be.irail.api.exception.upstream.UpstreamServerException;
+import be.irail.api.exception.upstream.UpstreamServerParameterException;
 import be.irail.api.exception.upstream.UpstreamServerUnavailableException;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
@@ -128,6 +129,7 @@ public class NmbsRivRawDataRepository {
 
     public CachedData<JsonNode> getVehicleJourneyData(VehicleJourneyRequest request) throws ExecutionException {
         try (var timer = rivVehicleJourneyTimer.time()) {
+            String language = request.language() != null ? request.language().name() : "en";
             int journeyNumber = VehicleIdTools.extractTrainNumber(request.vehicleId());
             var cacheKey = new JourneyDetailRefKey(journeyNumber, request.dateTime().toLocalDate());
 
@@ -136,7 +138,20 @@ public class NmbsRivRawDataRepository {
             );
             String journeyDetailRefValue = journeyDetailRef
                     .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
-            return getJourneyDetailResponse(journeyDetailRefValue, request.language() != null ? request.language().name() : "en");
+            try {
+                return getJourneyDetailResponse(journeyDetailRefValue, language);
+            } catch (UpstreamServerParameterException e) {
+                // A cached journeyDetailRef may no longer be valid
+                log.warn("JourneyDetailRef {} is no longer valid, fetching new one", journeyDetailRefValue);
+                journeyDetailRefCache.invalidate(cacheKey);
+                journeyDetailRef = journeyDetailRefCache.get(cacheKey,
+                        () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
+                );
+                journeyDetailRefValue = journeyDetailRef
+                        .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
+                log.warn("Obtained new journey detail ref {}", journeyDetailRefValue);
+                return getJourneyDetailResponse(journeyDetailRefValue, language);
+            }
         }
     }
 
@@ -340,6 +355,8 @@ public class NmbsRivRawDataRepository {
                     throw new UpstreamServerException("Location not found");
                 case "SVC_LOC_EQUAL":
                     throw new UpstreamServerException("Origin and destination location are the same");
+                case "SVC_PARAM":
+                    throw new UpstreamServerParameterException(json.get("errorText").asText());
                 case "SVC_DATETIME_PERIOD":
                 case "SVC_DATATIME_PERIOD":
                     throw new UpstreamServerException("Date outside of the timetable period. Check your query.");
