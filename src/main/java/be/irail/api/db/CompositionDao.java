@@ -3,10 +3,7 @@ package be.irail.api.db;
 import be.irail.api.config.Metrics;
 import be.irail.api.dto.Vehicle;
 import be.irail.api.dto.result.VehicleCompositionSearchResult;
-import be.irail.api.dto.vehiclecomposition.RollingMaterialType;
-import be.irail.api.dto.vehiclecomposition.TrainComposition;
-import be.irail.api.dto.vehiclecomposition.TrainCompositionUnit;
-import be.irail.api.dto.vehiclecomposition.TrainCompositionUnitWithId;
+import be.irail.api.dto.vehiclecomposition.*;
 import be.irail.api.util.VehicleIdTools;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ArrayListMultimap;
@@ -116,6 +113,23 @@ public class CompositionDao {
             List<StoredCompositionUnit> units = unitsByCompositionId.get(composition.getId());
             TrainComposition result = new TrainComposition(vehicle, origin, destination, "Cache",
                     units.stream().map(this::convertUnit).toList());
+            for (int i = 1; i < result.getUnits().size(); i++) {
+                TrainCompositionUnit unit = result.getUnits().get(i);
+                TrainCompositionUnit nextUnit = i < result.getUnits().size() - 1 ? result.getUnits().get(i + 1) : null;
+                if (nextUnit != null && nextUnit.getTractionPosition() > unit.getTractionPosition()) {
+                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+                }
+                if (nextUnit != null
+                        && unit.getMaterialType().getParentType().startsWith("AM")
+                        && nextUnit.getMaterialType().getSubType().equals("a")) {
+                    // next unit is a "a" carriage, this unit is the end of an AM set
+                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+                }
+                if (i == result.getUnits().size() - 1 && unit.getMaterialType().getParentType().startsWith("AM")) {
+                    // last unit of a multi-unit
+                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+                }
+            }
             results.add(result);
         }
 
