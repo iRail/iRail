@@ -53,88 +53,10 @@ public class NmbsRivVehicleJourneyClient extends RivClient {
         }
 
         Vehicle vehicle = getVehicleDetails(json, request);
-        List<DepartureAndArrival> stops = parseVehicleStops(json, vehicle, request.language());
+        List<DepartureAndArrival> stops = parseVehicleStops(stationsDao,occupancyDao, json, vehicle, request.language());
         List<Message> alerts = getAlerts(json);
 
         return new VehicleJourneySearchResult(vehicle, stops, alerts);
-    }
-
-    private List<DepartureAndArrival> parseVehicleStops(JsonNode json, Vehicle vehicle, Language language) {
-        List<DepartureAndArrival> stops = new ArrayList<>();
-        JsonNode stopsNode = json.get("Stops").get("Stop");
-
-        for (JsonNode rawStop : stopsNode) {
-            DepartureAndArrival stop = parseHafasIntermediateStop(rawStop, vehicle, language);
-            if (stop.getDeparture() != null) {
-                stop.getDeparture().setOccupancy(getOccupancy(stop.getDeparture()));
-            }
-            stops.add(stop);
-        }
-        return stops;
-    }
-
-    private DepartureAndArrival parseHafasIntermediateStop(JsonNode rawStop, Vehicle vehicle, Language language) {
-        String hafasId = rawStop.get("extId").asText();
-        Station dbStation = stationsDao.getStationFromId("00" + hafasId);
-        StationDto currentStation = convertToModelStation(dbStation, language);
-
-        DepartureAndArrival departureAndArrival = new DepartureAndArrival();
-
-        // Arrival
-        if (rawStop.has("arrTime")) {
-            departureAndArrival.setArrival(parseStopPart(rawStop, currentStation, vehicle, true));
-        }
-
-        // Departure
-        if (rawStop.has("depTime")) {
-            departureAndArrival.setDeparture(parseStopPart(rawStop, currentStation, vehicle, false));
-        }
-
-        return departureAndArrival;
-    }
-
-    private DepartureOrArrival parseStopPart(JsonNode rawStop, StationDto station, Vehicle vehicle, boolean isArrival) {
-        String prefix = isArrival ? "Arr" : "Dep";
-        String timeS = rawStop.get(prefix.toLowerCase() + "Time").asText();
-        String dateS = rawStop.get(prefix.toLowerCase() + "Date").asText();
-        LocalDateTime ldt = parseTimeAndDateCombination(timeS, dateS);
-
-        int delay = 0;
-        if (rawStop.has("rt" + prefix + "Time")) {
-            String timeR = rawStop.get("rt" + prefix + "Time").asText();
-            String dateR = rawStop.get("rt" + prefix + "Date").asText();
-            LocalDateTime ldtR = parseTimeAndDateCombination(timeR, dateR);
-            delay = (int) java.time.Duration.between(ldt, ldtR).getSeconds();
-        }
-
-        DepartureOrArrival part = new DepartureOrArrival();
-        part.setStation(station);
-        part.setVehicle(vehicle);
-        part.setScheduledDateTime(ldt);
-        part.setDelay(delay);
-
-        String platform = getFieldOrNull(rawStop, prefix.toLowerCase() + "Track");
-        String realtimePlatform = getFieldOrNull(rawStop, "rt" + prefix + "Track");
-        boolean platformChanged = realtimePlatform != null && !realtimePlatform.equals(platform);
-        platform = platformChanged ? realtimePlatform : platform;
-
-        part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
-        part.setIsCancelled(rawStop.has(prefix + "Cncl") && rawStop.get(prefix + "Cncl").asBoolean());
-
-        return part;
-    }
-
-    private static String getFieldOrNull(JsonNode rawStop, String field) {
-        return rawStop.has(field) ? rawStop.get(field).asText() : null;
-    }
-
-    private static @NonNull LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
-        if (timeS.length() == 5 || timeS.length() == 7) {
-            timeS = "0" + timeS;
-        }
-        // A leading 0 may be needed on time
-        LocalDateTime ldt = LocalDateTime.parse(dateS + timeS, DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss"));
-        return ldt;
     }
 
     private Vehicle getVehicleDetails(JsonNode json, VehicleJourneyRequest request) {
@@ -172,49 +94,4 @@ public class NmbsRivVehicleJourneyClient extends RivClient {
         return new ArrayList<>();
     }
 
-    private OccupancyInfo getOccupancy(DepartureOrArrival stop) {
-        List<OccupancyReport> reports = occupancyDao.getReportsForJourney(
-                stop.getVehicle().getId(),
-                stop.getScheduledDateTime().toLocalDate()
-        );
-
-        OccupancyLevel official = OccupancyLevel.UNKNOWN;
-        OccupancyLevel spitsgids = OccupancyLevel.UNKNOWN;
-
-        Integer stopId = extractNumericStopId(stop.getStation().getId());
-
-        for (OccupancyReport report : reports) {
-            if (report.getStopId().equals(stopId)) {
-                if (report.getSource() == OccupancyReport.OccupancyReportSource.NMBS) {
-                    official = mapOccupancyLevel(report.getOccupancy());
-                } else if (report.getSource() == OccupancyReport.OccupancyReportSource.SPITSGIDS) {
-                    spitsgids = mapOccupancyLevel(report.getOccupancy());
-                }
-            }
-        }
-
-        return new OccupancyInfo(official, spitsgids);
-    }
-
-    private Integer extractNumericStopId(String stationId) {
-        if (stationId == null) {
-            return null;
-        }
-        try {
-            return Integer.parseInt(stationId.replaceAll("\\D+", ""));
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private OccupancyLevel mapOccupancyLevel(OccupancyReport.OccupancyLevel dbLevel) {
-        if (dbLevel == null) {
-            return OccupancyLevel.UNKNOWN;
-        }
-        return switch (dbLevel) {
-            case LOW -> OccupancyLevel.LOW;
-            case MEDIUM -> OccupancyLevel.MEDIUM;
-            case HIGH -> OccupancyLevel.HIGH;
-        };
-    }
 }

@@ -123,7 +123,9 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
             }
             vehicle.setDirection(new VehicleDirection(directionName, directionStation));
             parsedLeg.setVehicle(vehicle);
-
+            List<DepartureAndArrival> parsedStops = parseVehicleStops(stationsDao, occupancyDao, legNode, vehicle, request.language());
+            List<DepartureAndArrival> intermediateStops = parsedStops.subList(1, parsedStops.size() - 1);
+            parsedLeg.setIntermediateStops(intermediateStops);
             // Set occupancy for departure
             departure.setOccupancy(getOccupancy(departure, legNode.get("Origin")));
         }
@@ -152,7 +154,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         String platform = node.has("rtTrack") ? node.get("rtTrack").asText() : (node.has("track") ? node.get("track").asText() : null);
         boolean platformChanged = node.has("rtTrack") && node.has("track") && !node.get("rtTrack").asText().equals(node.get("track").asText());
         end.setPlatform(new PlatformInfo(end.getStation().getId(), platform, platformChanged));
-
+        end.setIsReported(node.has("prognosisType") && "REPORTED".equals(node.get("prognosisType").asText()));
         return end;
     }
 
