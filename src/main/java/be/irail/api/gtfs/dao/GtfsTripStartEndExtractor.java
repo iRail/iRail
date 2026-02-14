@@ -80,7 +80,6 @@ public class GtfsTripStartEndExtractor {
                         );
                     }
                 }
-
                 // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
                 if (date.getHour() < 4) {
                     LocalDate dayBefore = date.toLocalDate().minusDays(1);
@@ -94,7 +93,9 @@ public class GtfsTripStartEndExtractor {
                             StopTime first = stopTimes.getFirst();
                             StopTime last = stopTimes.getLast();
 
-                            if (last.arrivalTime() < SECONDS_IN_DAY) {
+                            // Departure needs to be after 4, arrival needs to be past midnight,
+                            // to count as a desired midnight passing trip
+                            if (last.arrivalTime() < SECONDS_IN_DAY || first.departureTime() < 14400) {
                                 continue; // Trip not active past midnight
                             }
 

@@ -25,11 +25,33 @@ public abstract class RivClient {
 
         for (JsonNode rawStop : stopsNode) {
             DepartureAndArrival stop = parseHafasIntermediateStop(stationsDao, rawStop, vehicle, language);
-            if (stop.getDeparture() != null) {
+            if (stop.hasDeparture()) {
                 stop.getDeparture().setOccupancy(getOccupancy(occupancyDao, stop.getDeparture()));
             }
             stops.add(stop);
         }
+
+        boolean foundLaterReportedArrival = false;
+        for (int i = stops.size() - 1; i >= 0; i--) {
+            DepartureAndArrival stop = stops.get(i);
+            if (stop.hasDeparture() && stop.getDeparture().getStatus() == DepartureArrivalState.REPORTED && stop.hasArrival()) {
+                stop.getArrival().setStatus(DepartureArrivalState.REPORTED);
+            }
+
+            if (foundLaterReportedArrival) {
+                if (stop.hasArrival()) {
+                    stop.getArrival().setStatus(DepartureArrivalState.REPORTED);
+                }
+                // departure is always present as this line cannot be reached for the last stop
+                stop.getDeparture().setStatus(DepartureArrivalState.REPORTED);
+            }
+
+            if (!foundLaterReportedArrival && stop.hasArrival() && stop.getArrival().getStatus() == DepartureArrivalState.REPORTED) {
+                foundLaterReportedArrival = true;
+            }
+
+        }
+
         return stops;
     }
 
@@ -79,18 +101,54 @@ public abstract class RivClient {
         boolean platformChanged = realtimePlatform != null && !realtimePlatform.equals(platform);
         platform = platformChanged ? realtimePlatform : platform;
 
-        if (!isArrival && getFieldOrNull(rawStop, "depPrognosisType") != null) {
-            part.setIsReported("REPORTED".equals(getFieldOrNull(rawStop, "depPrognosisType")));
-        } else if (isArrival && getFieldOrNull(rawStop, "arrPrognosisType") != null) {
-            part.setIsReported("REPORTED".equals(getFieldOrNull(rawStop, "arrPrognosisType")));
+        if (!isArrival) {
+            String depPrognosisType = getFieldOrNull(rawStop, "depPrognosisType");
+            if (depPrognosisType != null) {
+                part.setStatus("REPORTED".equals(depPrognosisType) ? DepartureArrivalState.REPORTED : null);
+                part.setIsCancelled(isDepartureCanceledBasedOnState(depPrognosisType));
+            }
+        } else {
+            String arrPrognosisType = getFieldOrNull(rawStop, "arrPrognosisType");
+            if (arrPrognosisType != null) {
+                part.setStatus("REPORTED".equals(arrPrognosisType) ? DepartureArrivalState.REPORTED : null);
+                part.setIsCancelled(isArrivalCanceledBasedOnState(arrPrognosisType));
+            }
         }
 
         part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
 
-        // TODO verify cancel
-        part.setIsCancelled(rawStop.has(prefix + "Cncl") && rawStop.get(prefix + "Cncl").asBoolean());
         // TODO: read alighting/boarding booleans, see international trains
         return part;
+    }
+
+    /**
+     * Check whether the status of the arrival equals cancelled.
+     *
+     * @param status The status to check.
+     * @return bool True if the arrival is cancelled, or if the status has an unrecognized value.
+     */
+    public boolean isArrivalCanceledBasedOnState(String status) {
+        return !status.equals("SCHEDULED") &&
+                !status.equals("REPORTED") &&
+                !status.equals("PROGNOSED") &&
+                !status.equals("CALCULATED") &&
+                !status.equals("CORRECTED") &&
+                !status.equals("PARTIAL_FAILURE_AT_DEP");
+    }
+
+    /**
+     * Check whether or not the status of the departure equals cancelled.
+     *
+     * @param status The status to check.
+     * @return bool True if the departure is cancelled, or if the status has an unrecognized value.
+     */
+    public boolean isDepartureCanceledBasedOnState(String status) {
+        return !status.equals("SCHEDULED") &&
+                !status.equals("REPORTED") &&
+                !status.equals("PROGNOSED") &&
+                !status.equals("CALCULATED") &&
+                !status.equals("CORRECTED") &&
+                !status.equals("PARTIAL_FAILURE_AT_ARR");
     }
 
     private static String getFieldOrNull(JsonNode rawStop, String field) {

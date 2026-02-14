@@ -40,7 +40,7 @@ public class LiveboardV1Converter extends V1Converter {
         result.time = departure.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.delay = departure.getDelay();
         result.canceled = departure.isCancelled() ? "1" : "0";
-        result.left = departure.getStatus() == DepartureArrivalState.LEFT ? "1" : "0";
+        result.left = departure.getStatus() == DepartureArrivalState.REPORTED ? "1" : "0";
         result.isExtra = departure.isExtra() ? "1" : "0";
         result.vehicle = convertVehicle(departure.getVehicle());
         result.platform = convertPlatform(departure.getPlatform());
@@ -55,7 +55,7 @@ public class LiveboardV1Converter extends V1Converter {
         result.time = arrival.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.delay = arrival.getDelay();
         result.canceled = arrival.isCancelled() ? "1" : "0";
-        result.arrived = arrival.getStatus() == DepartureArrivalState.LEFT ? "1" : "0";
+        result.arrived = arrival.getStatus() == DepartureArrivalState.REPORTED ? "1" : "0";
         result.isExtra = arrival.isExtra() ? "1" : "0";
         result.vehicle = convertVehicle(arrival.getVehicle());
         result.platform = convertPlatform(arrival.getPlatform());

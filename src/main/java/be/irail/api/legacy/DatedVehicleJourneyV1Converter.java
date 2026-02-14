@@ -43,7 +43,7 @@ public class DatedVehicleJourneyV1Converter extends V1Converter {
         result.arrivalCanceled = arrival.isCancelled() ? "1" : "0";
         result.left = (departure.getStatus() != null && departure.getStatus().hasLeft()) ? "1" : "0";
         result.arrived = (arrival.getStatus() == DepartureArrivalState.HALTING
-                || arrival.getStatus() == DepartureArrivalState.LEFT) ? "1" : "0";
+                || arrival.getStatus() == DepartureArrivalState.REPORTED) ? "1" : "0";
         result.isExtraStop = (departure.isExtra() || arrival.isExtra()) ? "1" : "0";
 
         if (stop.getDeparture() != null) {

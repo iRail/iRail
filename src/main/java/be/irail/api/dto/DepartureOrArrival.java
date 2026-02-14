@@ -15,7 +15,6 @@ public class DepartureOrArrival {
     private LocalDateTime scheduledDateTime;
     private int delay = 0;
     private boolean isCancelled = false;
-    private boolean isReported = false;
     private boolean isExtra = false;
     private DepartureArrivalState status;
     private OccupancyInfo occupancy;
@@ -124,24 +123,6 @@ public class DepartureOrArrival {
      */
     public DepartureOrArrival setIsCancelled(boolean isCancelled) {
         this.isCancelled = isCancelled;
-        return this;
-    }
-
-    /**
-     * Checks if this stop has been reported as "passed" in real-time.
-     * @return true if reported
-     */
-    public boolean isReported() {
-        return this.isReported;
-    }
-
-    /**
-     * Sets whether this stop has been reported as "passed" in real-time.
-     * @param isReported true if reported
-     * @return this instance for chaining
-     */
-    public DepartureOrArrival setIsReported(boolean isReported) {
-        this.isReported = isReported;
         return this;
     }
 

@@ -70,4 +70,12 @@ public class DepartureAndArrival {
         }
         throw new InternalProcessingException("Trying to read the station from a DepartureAndArrival which neither has a departure nor arrival");
     }
+
+    public boolean hasArrival() {
+        return this.arrival != null;
+    }
+
+    public boolean hasDeparture() {
+        return this.departure != null;
+    }
 }

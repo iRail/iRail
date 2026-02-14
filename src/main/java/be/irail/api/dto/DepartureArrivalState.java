@@ -9,14 +9,14 @@ public enum DepartureArrivalState {
     /** The vehicle is currently halting at the station */
     HALTING,
     /** The vehicle has already left the station */
-    LEFT;
+    REPORTED;
 
     /**
      * Checks if the vehicle has already arrived at the station (either halting or already left).
      * @return true if the vehicle has arrived
      */
     public boolean hasArrived() {
-        return this == HALTING || this == LEFT;
+        return this == HALTING || this == REPORTED;
     }
 
     /**
@@ -24,6 +24,6 @@ public enum DepartureArrivalState {
      * @return true if the vehicle has left
      */
     public boolean hasLeft() {
-        return this == LEFT;
+        return this == REPORTED;
     }
 }
