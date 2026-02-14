@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -170,6 +171,11 @@ public class NmbsRivRawDataRepository {
                 log.debug("Could not find vehicle {} in GTFS data for date {}", journeyNumber, request.dateTime());
                 return null;
             }
+            if (optVehicle.get().getJourneyType().equals("BUS")) {
+                // Dont even attempt to make a request
+                log.debug("Cannot get journey detail ref for bus traffic, this doesn't work in the NMBS app either");
+                return null;
+            }
             JourneyWithOriginAndDestination vehicle = optVehicle.get();
 
             String journeyDetailRef = findVehicleJourneyRefBetweenStops(request, vehicle);
@@ -294,11 +300,8 @@ public class NmbsRivRawDataRepository {
                     throw new UpstreamServerException("iRail could not read the data received from the remote server.", e);
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             if (e.getCause() instanceof IrailHttpException irailHttpException) {
-                throw irailHttpException;
-            }
-            if (e.getCause().getCause() instanceof IrailHttpException irailHttpException) {
                 throw irailHttpException;
             }
             throw e;

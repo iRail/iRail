@@ -8,6 +8,7 @@ import be.irail.api.gtfs.reader.models.Trip;
 import be.irail.api.riv.JourneyWithOriginAndDestination;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -120,7 +121,7 @@ public class GtfsTripStartEndExtractor {
                 log.warn("Found no trip start and end station for trip {}", journeyNumber);
                 return Optional.empty();
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
         }
     }

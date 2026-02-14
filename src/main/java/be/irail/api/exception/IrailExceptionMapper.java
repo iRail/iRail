@@ -53,13 +53,13 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         private final String exception;
         @JsonProperty
         private final String message;
-        @JsonProperty
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        private final ExceptionDto cause;
-        @JsonProperty
+        @JsonProperty()
         private final String at;
         @JsonProperty
         private final List<String> stackTrace;
+        @JsonProperty
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private final ExceptionDto cause;
 
         private ExceptionDto(Throwable throwable) {
            this(throwable, false);
