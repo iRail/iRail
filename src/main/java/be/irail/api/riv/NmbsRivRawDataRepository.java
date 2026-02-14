@@ -378,6 +378,7 @@ public class NmbsRivRawDataRepository {
         //noinspection OptionalAssignedToNull , the optional<String> is the generic, but can still be null in this particular case
         if (journeyDetailRefCache.getIfPresent(key) == null) {
             journeyRefDiscoveryMeter.mark(); // Keep track of how useful this is
+            log.debug("Caching journey reference {} for vehicle {} on {} based on other responses", journeyDetailRef, journeyNumber, journeyStartDate);
             journeyDetailRefCache.put(key, Optional.ofNullable(journeyDetailRef));
         }
     }
