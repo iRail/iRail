@@ -1,5 +1,6 @@
 package be.irail.api.gtfs.dao;
 
+import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.gtfs.reader.models.Route;
 import be.irail.api.gtfs.reader.models.StopTime;
@@ -30,16 +31,20 @@ public class GtfsTripStartEndExtractor {
             .expireAfterWrite(4, TimeUnit.HOURS)
             .build();
 
-    public LocalDate getStartDate(int journeyNumber, LocalDateTime plannedDateTime) throws JourneyNotFoundException {
-        JourneyWithOriginAndDestination journey = getVehicleWithOriginAndDestination(journeyNumber, plannedDateTime);
-        if (journey != null) {
+    public Optional<LocalDate> getStartDate(int journeyNumber, LocalDateTime plannedDateTime) throws JourneyNotFoundException {
+        Optional<JourneyWithOriginAndDestination> journey = getVehicleWithOriginAndDestination(journeyNumber, plannedDateTime);
+        if (journey.isPresent()) {
             // First stop departure time is in seconds from midnight of the start date
-            return plannedDateTime.toLocalDate();
+            if (journey.get().getDestinationArrivalTimeOffset() > SECONDS_IN_DAY) {
+                return Optional.of(plannedDateTime.toLocalDate().minusDays(1));
+            } else {
+                return Optional.of(plannedDateTime.toLocalDate());
+            }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public JourneyWithOriginAndDestination getVehicleWithOriginAndDestination(int journeyNumber, LocalDateTime date) throws JourneyNotFoundException {
+    public Optional<JourneyWithOriginAndDestination> getVehicleWithOriginAndDestination(int journeyNumber, LocalDateTime date) throws JourneyNotFoundException {
         try {
             return cache.get(new JourneyNumberAndDate(journeyNumber, date.toLocalDate()), () -> {
                 GtfsInMemoryDao dao = GtfsInMemoryDao.getInstance();
@@ -113,9 +118,9 @@ public class GtfsTripStartEndExtractor {
 
                 log.warn("Found no trip start and end station for trip {}", journeyNumber);
                 return Optional.empty();
-            }).orElseThrow(() -> new JourneyNotFoundException(journeyNumber, date, "Failed to find trip start and end station, trip not present in GTFS data"));
+            });
         } catch (ExecutionException e) {
-            throw new JourneyNotFoundException(journeyNumber, date, "Failed to get trip start and end station: " + e.getMessage());
+            throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
         }
     }
 

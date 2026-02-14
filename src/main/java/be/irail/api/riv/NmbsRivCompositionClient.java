@@ -16,9 +16,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -51,19 +53,19 @@ public class NmbsRivCompositionClient {
     public VehicleCompositionSearchResult getComposition(Vehicle journey) throws ExecutionException {
         return cache.get(journey, () -> {
             log.info("Fetching composition for vehicle {} from NMBS", journey.getId());
-            JourneyWithOriginAndDestination journeyWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+            Optional<JourneyWithOriginAndDestination> journeyWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
                     journey.getNumber(),
                     journey.getJourneyStartDate().atStartOfDay()
             );
 
-            if (journeyWithOriginAndDestination == null) {
+            if (journeyWithOriginAndDestination.isEmpty()) {
                 throw new JourneyNotFoundException(journey.getId(), journey.getJourneyStartDate(), "Composition is only available from vehicle start. Vehicle is not active on the given date.");
             }
 
             CachedData<JsonNode> cachedData = rivRawDataRepository.getVehicleCompositionData(
                     String.valueOf(journey.getNumber()),
-                    journeyWithOriginAndDestination.getOriginStopId().substring(0, 7),
-                    journeyWithOriginAndDestination.getDestinationStopId().substring(0, 7),
+                    journeyWithOriginAndDestination.get().getOriginStopId().substring(0, 7),
+                    journeyWithOriginAndDestination.get().getDestinationStopId().substring(0, 7),
                     journey.getJourneyStartDate()
             );
 

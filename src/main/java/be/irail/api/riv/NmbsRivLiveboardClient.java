@@ -8,7 +8,6 @@ import be.irail.api.dto.*;
 import be.irail.api.dto.result.LiveboardSearchResult;
 import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.exception.upstream.UpstreamServerException;
-import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.riv.requests.LiveboardRequest;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,11 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -110,7 +108,8 @@ public class NmbsRivLiveboardClient {
         LocalDate journeyStartDate;
         try {
             if (!commercialType.equals("EUR") && !commercialType.equals("ICE")) {
-                journeyStartDate = gtfsTripStartEndExtractor.getStartDate(journeyNumber, plannedDateTime);
+                journeyStartDate = gtfsTripStartEndExtractor.getStartDate(journeyNumber, plannedDateTime)
+                        .orElseThrow(() -> new JourneyNotFoundException(journeyNumber, plannedDateTime, "Failed to get journey start date from GTFS"));
             } else {
                 // Don't even try to lookup Eurostar and ICE trains in the GTFS data
                 journeyStartDate = plannedDateTime.toLocalDate();
@@ -182,16 +181,16 @@ public class NmbsRivLiveboardClient {
             return entry.get(key).asText();
         }
 
-        JourneyWithOriginAndDestination gtfsJourney = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+        Optional<JourneyWithOriginAndDestination> gtfsJourney = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
                 entry.get("TrainNumber").asInt(),
                 plannedDateTime
         );
 
-        if (gtfsJourney != null) {
-            return isArrivalBoard ? gtfsJourney.getOriginStopId() : gtfsJourney.getDestinationStopId();
+        if (gtfsJourney.isPresent()) {
+            return isArrivalBoard ? gtfsJourney.get().getOriginStopId() : gtfsJourney.get().getDestinationStopId();
         }
-
-        return "0000000"; // Fallback
+        // TODO what are the consequences here?
+        return null;
     }
 
     private OccupancyInfo getOccupancy(DepartureOrArrival stop) {

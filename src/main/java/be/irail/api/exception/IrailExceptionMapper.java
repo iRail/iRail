@@ -2,7 +2,7 @@ package be.irail.api.exception;
 
 import be.irail.api.config.Metrics;
 import com.codahale.metrics.Meter;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -54,16 +54,21 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         @JsonProperty
         private final String message;
         @JsonProperty
-        private final String cause;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private final ExceptionDto cause;
         @JsonProperty
         private final String at;
         @JsonProperty
         private final List<String> stackTrace;
 
         private ExceptionDto(Throwable throwable) {
+           this(throwable, false);
+        }
+
+        private ExceptionDto(Throwable throwable, boolean skipCause) {
             this.exception = throwable.getClass().getSimpleName();
             this.message = throwable.getMessage();
-            this.cause = throwable.getCause() != null ? throwable.getCause().getMessage() : "";
+            this.cause = throwable.getCause() != null ? new ExceptionDto(throwable.getCause(), true) : null;
             this.at = throwable.getStackTrace()[0].getFileName() + ":" + throwable.getStackTrace()[0].getLineNumber();
             this.stackTrace = Arrays.stream(throwable.getStackTrace()).map(s -> s.getClassName() + ", " + s.getMethodName() + "() in " + s.getFileName() + ":" + s.getLineNumber()).toList();
         }
@@ -71,7 +76,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         private ExceptionDto(String message, Throwable throwable) {
             this.exception = throwable.getClass().getSimpleName();
             this.message = message;
-            this.cause = "";
+            this.cause = null;
             this.at = throwable.getStackTrace()[0].getFileName() + ":" + throwable.getStackTrace()[0].getLineNumber();
             this.stackTrace = List.of();
         }

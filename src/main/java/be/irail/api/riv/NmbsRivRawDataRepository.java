@@ -147,13 +147,14 @@ public class NmbsRivRawDataRepository {
             log.debug("Fetching journey detail reference for vehicle {} on {}", journeyNumber, request.dateTime());
             // We need to find the vehicle so we can add the correct journey type, since a request can come in with or without it
             // We want to treat all requests identically to ensure correct responses in all cases
-            JourneyWithOriginAndDestination vehicle = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+            Optional<JourneyWithOriginAndDestination> optVehicle = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
                     journeyNumber, request.dateTime());
 
-            if (vehicle == null) {
+            if (optVehicle.isEmpty()) {
                 log.debug("Could not find vehicle {} in GTFS data for date {}", journeyNumber, request.dateTime());
                 return null;
             }
+            JourneyWithOriginAndDestination vehicle = optVehicle.get();
 
             String journeyDetailRef = findVehicleJourneyRefBetweenStops(request, vehicle);
 
