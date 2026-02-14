@@ -20,6 +20,7 @@ import be.irail.api.util.RequestParser;
 import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -110,9 +111,9 @@ public class JourneyPlanningV1Controller extends V1Controller {
             DataRoot dataRoot = cache.get(request, () -> loadJourneyPlanningResult(request));
             // Serialize to output format
             return v1Response(dataRoot, outputFormat);
-        } catch (Exception exception) {
+        } catch (UncheckedExecutionException | ExecutionException exception) {
             logger.error("Error fetching connections from {} to {}: {}", from, to, exception.getMessage(), exception);
-            if (exception instanceof IrailHttpException irailException) {
+            if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
             throw new InternalProcessingException("Error fetching connections: " + exception.getMessage(), exception);

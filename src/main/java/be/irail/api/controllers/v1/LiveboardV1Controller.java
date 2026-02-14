@@ -19,6 +19,7 @@ import com.codahale.metrics.Meter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -30,7 +31,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -126,7 +126,7 @@ public class LiveboardV1Controller extends V1Controller {
 
     private final class LiveboardLoader extends CacheLoader<LiveboardRequest, DataRoot> {
 
-        public DataRoot load(LiveboardRequest request) throws ExecutionException {
+        public DataRoot load(LiveboardRequest request) {
             log.debug("Loading fresh liveboard data for station {}", request.station().getIrailId());
             try {
                 // Fetch liveboard data
@@ -134,9 +134,9 @@ public class LiveboardV1Controller extends V1Controller {
                 log.debug("Found {} entries for liveboard at station {}",
                         liveboardResult.getStops().size(), request.station().getIrailId());
                 return LiveboardV1Converter.convert(request, liveboardResult);
-            } catch (Exception exception) {
+            } catch (UncheckedExecutionException exception) {
                 log.error("Error fetching liveboard for station {}: {}", request.station().getIrailId(), exception.getMessage(), exception);
-                if (exception instanceof IrailHttpException irailException) {
+                if (exception.getCause() instanceof IrailHttpException irailException) {
                     throw irailException; // Don't modify exceptions which have been caught/handled already
                 }
                 throw exception;

@@ -19,6 +19,7 @@ import be.irail.api.util.VehicleIdTools;
 import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -95,9 +96,9 @@ public class CompositionV1Controller extends V1Controller {
 
             // Serialize to output format
             return v1Response(dataRoot, outputFormat);
-        } catch (Exception exception) {
+        } catch (UncheckedExecutionException | ExecutionException exception) {
             log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
-            if (exception instanceof IrailHttpException irailException) {
+            if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
             throw new InternalProcessingException("Error fetching composition: " + exception.getMessage(), exception);

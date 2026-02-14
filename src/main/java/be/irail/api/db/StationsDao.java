@@ -102,7 +102,7 @@ public class StationsDao {
                 log.trace("Found {} stations for query {}: {}", resultStations.size(), query, resultStations.stream().map(Station::getName).collect(Collectors.joining(", ")));
                 return resultStations;
             });
-        } catch (ExecutionException | UncheckedExecutionException e) {
+        } catch (UncheckedExecutionException | ExecutionException e) {
             log.error("Failed to get stations for query {}", query, e);
             throw new InternalProcessingException(e);
         }
@@ -136,7 +136,7 @@ public class StationsDao {
                 // The keys in our map are 9-digit ids
                 return Optional.ofNullable(stationsById.get(irailId));
             }).orElse(null);
-        } catch (ExecutionException | UncheckedExecutionException e) {
+        } catch (UncheckedExecutionException | ExecutionException e) {
             log.error("Failed to get station for id {}", id, e);
             throw new InternalProcessingException(e.getCause());
         }

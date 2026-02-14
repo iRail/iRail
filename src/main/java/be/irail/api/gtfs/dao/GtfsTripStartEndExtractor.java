@@ -121,7 +121,7 @@ public class GtfsTripStartEndExtractor {
                 log.warn("Found no trip start and end station for trip {}", journeyNumber);
                 return Optional.empty();
             });
-        } catch (ExecutionException | UncheckedExecutionException e) {
+        } catch (UncheckedExecutionException | ExecutionException e) {
             throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
         }
     }

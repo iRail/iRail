@@ -21,7 +21,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Client for fetching and parsing NMBS Liveboard data.
@@ -49,7 +48,7 @@ public class NmbsRivLiveboardClient {
         this.occupancyDao = occupancyDao;
     }
 
-    public LiveboardSearchResult getLiveboard(LiveboardRequest request) throws ExecutionException {
+    public LiveboardSearchResult getLiveboard(LiveboardRequest request) {
         CachedData<JsonNode> cachedRawData = rivDataRepository.getLiveboardData(request);
         return parseNmbsRawData(request, cachedRawData);
     }

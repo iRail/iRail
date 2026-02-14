@@ -88,7 +88,7 @@ public class NmbsRivRawDataRepository {
         this.objectMapper = new ObjectMapper();
     }
 
-    public CachedData<JsonNode> getLiveboardData(LiveboardRequest request) throws ExecutionException {
+    public CachedData<JsonNode> getLiveboardData(LiveboardRequest request) {
         try (var timer = rivLiveboardTimer.time()) {
             String hafasId = request.station().getHafasId();
             int roundedSeconds = request.dateTime().getSecond() - request.dateTime().getSecond() % 30;
@@ -269,8 +269,7 @@ public class NmbsRivRawDataRepository {
                 "https://mobile-riv.api.belgianrail.be/api/v1/commercialtraincompositionsbetweenptcars", params);
     }
 
-    private CachedData<JsonNode> makeApiCallToMobileRivApi(String endpoint, Map<String, String> parameters) throws
-            ExecutionException {
+    private CachedData<JsonNode> makeApiCallToMobileRivApi(String endpoint, Map<String, String> parameters) {
         StringBuilder urlBuilder = new StringBuilder(endpoint).append("?");
         parameters.forEach((k, v) -> urlBuilder
                 .append(URLEncoder.encode(k, StandardCharsets.UTF_8))
@@ -300,11 +299,11 @@ public class NmbsRivRawDataRepository {
                     throw new UpstreamServerException("iRail could not read the data received from the remote server.", e);
                 }
             });
-        } catch (ExecutionException | UncheckedExecutionException e) {
+        } catch (UncheckedExecutionException | ExecutionException e) {
             if (e.getCause() instanceof IrailHttpException irailHttpException) {
                 throw irailHttpException;
             }
-            throw e;
+            throw new UpstreamServerException(e.getMessage(), e);
         }
     }
 

@@ -12,6 +12,7 @@ import be.irail.api.riv.NmbsRivVehicleJourneyClient;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
 import be.irail.api.util.RequestParser;
 import com.codahale.metrics.Meter;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Controller for V1 Vehicle (DatedVehicleJourney) API endpoint.
@@ -88,9 +90,9 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             // Serialize to output format
             return v1Response(dataRoot, outputFormat);
 
-        } catch (Throwable exception) {
+        } catch (UncheckedExecutionException | ExecutionException exception) {
             logger.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);
-            if (exception instanceof IrailHttpException irailException) {
+            if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
             throw new InternalProcessingException("Error fetching vehicle journey", exception);

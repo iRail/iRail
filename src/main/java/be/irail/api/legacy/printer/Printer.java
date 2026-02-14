@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * An abstract class for a printer. It prints a document.
@@ -29,7 +28,7 @@ public abstract class Printer {
      * Prints the body: The idea behind this is a reversed sax-parser.
      * It will create events which you will have to implement in your implementation of an output.
      */
-    public String getBody() throws Exception {
+    public String getBody() {
         StringBuilder result = new StringBuilder();
         Map<String, Object> hash = getObjectFields(documentRoot);
 
@@ -68,7 +67,7 @@ public abstract class Printer {
      * It will detect what kind of element the element is and will print it accordingly.
      * If it contains more elements it will print more recursively.
      */
-    protected String printElement(String key, Object val, boolean root) throws Exception {
+    protected String printElement(String key, Object val, boolean root) {
         StringBuilder result = new StringBuilder();
 
         if (val instanceof Collection<?> collection) {
@@ -119,12 +118,9 @@ public abstract class Printer {
         } else if (val != null) {
             result.append(startKeyVal(key, val));
             result.append(endElement(key));
-        } else if (val == null) {
-            // Do nothing
         } else {
-            throw new Exception(
-                    "Could not serialize the data correctly - please report this problem to https://github.com/irail/irail. Key/Val: " + key + "/" + val
-            );
+            log.warn("Encountered null value for key: " + key + " while printing v1 response.");
+            // Do nothing
         }
         return result.toString();
     }

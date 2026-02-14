@@ -12,6 +12,7 @@ import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.StationsV1Converter;
 import be.irail.api.util.RequestParser;
 import com.codahale.metrics.Meter;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -67,9 +68,9 @@ public class StationsV1Controller extends V1Controller {
             // Convert to V1 format
             DataRoot dataRoot = StationsV1Converter.convert(stations, language);
             return v1Response(dataRoot, outputFormat);
-        } catch (Exception exception) {
+        } catch (UncheckedExecutionException exception) {
             logger.error("Error fetching stations: {}", exception.getMessage(), exception);
-            if (exception instanceof IrailHttpException irailException) {
+            if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
             throw new InternalProcessingException("Error fetching stations: " + exception.getMessage(), exception);

@@ -57,7 +57,7 @@ public abstract class V1Controller {
         return LocalDateTime.of(localDate, localTime);
     }
 
-    protected Response v1Response(DataRoot dataRoot, Format outputFormat) throws Exception {
+    protected Response v1Response(DataRoot dataRoot, Format outputFormat) {
         try (Timer.Context ignored = serializeV1Timer.time()) {
             // Serialize to output format
             String body = serializeOutput(dataRoot, outputFormat);
@@ -72,7 +72,7 @@ public abstract class V1Controller {
                 : "application/xml;charset=UTF-8";
     }
 
-    private static String serializeOutput(DataRoot dataRoot, Format format) throws Exception {
+    private static String serializeOutput(DataRoot dataRoot, Format format) {
         if (format == Format.JSON) {
             return new V1JsonPrinter(dataRoot).getBody();
         } else {
