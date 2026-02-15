@@ -292,7 +292,7 @@ public class NmbsRivCompositionClient {
             return;
         }
 
-        for (int i = 0; i < units.size() - 1; i++) {
+        for (int i = 1; i < units.size() - 1; i++) { // First position can be a steering cabin, which doesnt need turning
             TrainCompositionUnit current = units.get(i);
             TrainCompositionUnit next = units.get(i + 1);
 
