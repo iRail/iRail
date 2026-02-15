@@ -4,7 +4,10 @@ import be.irail.api.db.OccupancyDao;
 import be.irail.api.db.OccupancyReport;
 import be.irail.api.dto.request.OccupancyReportRequestDTO;
 import be.irail.api.exception.request.BadRequestException;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.springframework.stereotype.Component;
@@ -52,7 +55,12 @@ public class OccupancyReportController {
 
         occupancyDao.handleReport(report);
 
-        return Response.ok(report).build();
+        return Response.ok(report)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                .header("Access-Control-Max-Age", "86400")
+                .header("Access-Control-Allow-Headers", "Content-Type, User-Agent")
+                .build();
     }
 
     private void validateRequest(OccupancyReportRequestDTO request) {

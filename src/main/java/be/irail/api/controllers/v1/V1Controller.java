@@ -62,7 +62,11 @@ public abstract class V1Controller {
             // Serialize to output format
             String body = serializeOutput(dataRoot, outputFormat);
             String contentType = getContentType(outputFormat);
-            return Response.ok(body, contentType).build();
+            return Response.ok(body, contentType)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+                    .header("Access-Control-Max-Age", "86400")
+                    .build();
         }
     }
 
