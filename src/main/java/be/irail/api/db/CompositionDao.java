@@ -128,7 +128,7 @@ public class CompositionDao {
             for (TrainComposition segment : result.getSegments()) {
                 storeCompositionSegment(segment);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Failed to store composition for vehicle {}: {}", vehicle.getId(), e.getMessage(), e);
         }
     }

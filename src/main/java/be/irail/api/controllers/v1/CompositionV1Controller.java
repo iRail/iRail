@@ -124,20 +124,30 @@ public class CompositionV1Controller extends V1Controller {
         List<TrainComposition> compositionSegments = compositionDao.getComposition(vehicle, request.date);
 
         if (compositionSegments.isEmpty()) {
-            log.debug("Composition for vehicle {} not found in database, fetching fresh data from RIV", request.journeyId());
-            VehicleCompositionSearchResult freshData = compositionClient.getComposition(vehicle);
-            if (freshData == null || freshData.getSegments().isEmpty()) {
-                throw new JourneyNotFoundException(request.journeyId(), request.date(), "No composition data found for vehicle.");
-            }
-            log.debug("Composition for vehicle {} fetched from RIV, {} segments", request.journeyId, freshData.getSegments().size());
-            compositionDao.storeComposition(vehicle, freshData);
-            compositionSegments = freshData.getSegments();
+            compositionSegments = getRivComposition(request, vehicle);
         } else {
             log.debug("Composition for vehicle {} found in database, {} segments", request.journeyId, compositionSegments.size());
         }
 
         // Convert to V1 format
         return new VehicleCompositionV1Converter(request.language).convert(compositionSegments);
+    }
+
+    private List<TrainComposition> getRivComposition(CompositionRequest request, Vehicle vehicle) throws ExecutionException {
+        List<TrainComposition> compositionSegments;
+        log.debug("Composition for vehicle {} not found in database, fetching fresh data from RIV", request.journeyId());
+        VehicleCompositionSearchResult freshData = compositionClient.getComposition(vehicle);
+        if (freshData == null || freshData.getSegments().isEmpty()) {
+            throw new JourneyNotFoundException(request.journeyId(), request.date(), "No composition data found for vehicle.");
+        }
+        log.debug("Composition for vehicle {} fetched from RIV, {} segments", request.journeyId, freshData.getSegments().size());
+        try {
+            compositionDao.storeComposition(vehicle, freshData);
+        } catch (Throwable e) {
+            log.error("Failed to store composition for vehicle {}: {}", request.journeyId, e.getMessage(), e);
+        }
+        compositionSegments = freshData.getSegments();
+        return compositionSegments;
     }
 
     private record CompositionRequest(String journeyId, LocalDate date, Language language) {

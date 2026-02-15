@@ -7,16 +7,17 @@ import be.irail.api.dto.Vehicle;
 import be.irail.api.dto.result.VehicleCompositionSearchResult;
 import be.irail.api.dto.vehiclecomposition.*;
 import be.irail.api.exception.CompositionNotFoundException;
+import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,45 +52,53 @@ public class NmbsRivCompositionClient {
     }
 
     public VehicleCompositionSearchResult getComposition(Vehicle journey) throws ExecutionException {
-        return cache.get(journey, () -> {
-            log.info("Fetching composition for vehicle {} from NMBS", journey.getId());
-            Optional<JourneyWithOriginAndDestination> journeyWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
-                    journey.getNumber(),
-                    journey.getJourneyStartDate().atStartOfDay()
-            );
+        try {
+            return cache.get(journey, () -> {
+                log.info("Fetching composition for vehicle {} from NMBS", journey.getId());
+                Optional<JourneyWithOriginAndDestination> journeyWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+                        journey.getNumber(),
+                        journey.getJourneyStartDate().atStartOfDay()
+                );
 
-            if (journeyWithOriginAndDestination.isEmpty()) {
-                throw new JourneyNotFoundException(journey.getId(), journey.getJourneyStartDate(), "Composition is only available from vehicle start. Vehicle is not active on the given date.");
-            }
+                if (journeyWithOriginAndDestination.isEmpty()) {
+                    throw new JourneyNotFoundException(journey.getId(), journey.getJourneyStartDate(), "Composition is only available from vehicle start. Vehicle is not active on the given date.");
+                }
 
-            CachedData<JsonNode> cachedData = rivRawDataRepository.getVehicleCompositionData(
-                    String.valueOf(journey.getNumber()),
-                    journeyWithOriginAndDestination.get().getOriginStopId().substring(0, 7),
-                    journeyWithOriginAndDestination.get().getDestinationStopId().substring(0, 7),
-                    journey.getJourneyStartDate()
-            );
+                CachedData<JsonNode> cachedData = rivRawDataRepository.getVehicleCompositionData(
+                        String.valueOf(journey.getNumber()),
+                        journeyWithOriginAndDestination.get().getOriginStopId().substring(0, 7),
+                        journeyWithOriginAndDestination.get().getDestinationStopId().substring(0, 7),
+                        journey.getJourneyStartDate()
+                );
 
-            JsonNode json = cachedData.getValue();
-            JsonNode compositionData = json.has("lastPlanned") ? json.get("lastPlanned") : json.get("commercialPlanned");
+                JsonNode json = cachedData.getValue();
+                JsonNode compositionData = json.has("lastPlanned") ? json.get("lastPlanned") : json.get("commercialPlanned");
 
-            if (compositionData == null || !compositionData.isArray()) {
-                throw new CompositionNotFoundException(journey.getName(), journey.getJourneyStartDate());
-            }
+                if (compositionData == null || !compositionData.isArray()) {
+                    throw new CompositionNotFoundException(journey.getName(), journey.getJourneyStartDate());
+                }
 
-            List<TrainComposition> segments = new ArrayList<>();
-            for (JsonNode segmentNode : compositionData) {
-                JsonNode materialUnits = segmentNode.get("materialUnits");
-                if (materialUnits != null && materialUnits.isArray() && materialUnits.size() > 1) {
-                    try {
-                        segments.add(parseOneSegmentWithCompositionData(journey, segmentNode));
-                    } catch (Exception e) {
-                        log.warn("Failed to parse composition segment: {}", e.getMessage());
+                List<TrainComposition> segments = new ArrayList<>();
+                for (JsonNode segmentNode : compositionData) {
+                    JsonNode materialUnits = segmentNode.get("materialUnits");
+                    if (materialUnits != null && materialUnits.isArray() && materialUnits.size() > 1) {
+                        try {
+                            segments.add(parseOneSegmentWithCompositionData(journey, segmentNode));
+                        } catch (Exception e) {
+                            log.warn("Failed to parse composition segment: {}", e.getMessage());
+                        }
                     }
                 }
-            }
 
-            return new VehicleCompositionSearchResult(journey, segments);
-        });
+                return new VehicleCompositionSearchResult(journey, segments);
+            });
+        } catch (ExecutionException | UncheckedExecutionException e) {
+            if (e.getCause() instanceof IrailHttpException irailHttpException) {
+                throw irailHttpException;
+            } else {
+                throw e;
+            }
+        }
     }
 
     private TrainComposition parseOneSegmentWithCompositionData(Vehicle vehicle, JsonNode segmentNode) {
