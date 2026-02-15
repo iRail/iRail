@@ -1,6 +1,5 @@
 package be.irail.api.controllers.v1;
 
-import be.irail.api.config.Metrics;
 import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
@@ -15,7 +14,6 @@ import be.irail.api.legacy.LiveboardV1Converter;
 import be.irail.api.riv.NmbsRivLiveboardClient;
 import be.irail.api.riv.requests.LiveboardRequest;
 import be.irail.api.util.RequestParser;
-import com.codahale.metrics.Meter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -33,6 +31,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import static be.irail.api.config.Metrics.V1_LIVEBOARD_REQUEST_METER;
+import static be.irail.api.config.Metrics.V1_LIVEBOARD_SUCCESS_REQUEST_METER;
+
 /**
  * Controller for V1 Liveboard API endpoint.
  */
@@ -47,9 +48,6 @@ public class LiveboardV1Controller extends V1Controller {
     private final StationsDao stationsDao;
     private final LoadingCache<LiveboardRequest, DataRoot> cache;
     private final LiveboardLoader loader;
-
-    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Liveboard");
-    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, Liveboard, Successful");
 
     @Autowired
     public LiveboardV1Controller(NmbsRivLiveboardClient liveboardClient, StationsDao stationsDao) {
@@ -82,7 +80,7 @@ public class LiveboardV1Controller extends V1Controller {
             @QueryParam("arrdep") @DefaultValue("departure") String arrdep,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) throws Exception {
-        requestMeter.mark();
+        V1_LIVEBOARD_REQUEST_METER.mark();
         TimeSelection timeSelection = RequestParser.parseV1TimeSelection(arrdep);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
@@ -99,7 +97,7 @@ public class LiveboardV1Controller extends V1Controller {
 
         // Convert to V1 format
         Response response = v1Response(result, outputFormat);
-        successRequestMeter.mark();
+        V1_LIVEBOARD_SUCCESS_REQUEST_METER.mark();
         return response;
     }
 

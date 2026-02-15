@@ -1,6 +1,5 @@
 package be.irail.api.controllers.v1;
 
-import be.irail.api.config.Metrics;
 import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.Format;
@@ -18,7 +17,6 @@ import be.irail.api.riv.NmbsRivJourneyPlanningClient;
 import be.irail.api.riv.TypeOfTransportFilter;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import be.irail.api.util.RequestParser;
-import com.codahale.metrics.Meter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
@@ -36,6 +34,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static be.irail.api.config.Metrics.V1_JOURNEYPLANNING_REQUEST_METER;
+import static be.irail.api.config.Metrics.V1_JOURNEYPLANNING_SUCCESS_REQUEST_METER;
+
 /**
  * Controller for V1 Journey Planning (Connections) API endpoint.
  */
@@ -52,9 +53,6 @@ public class JourneyPlanningV1Controller extends V1Controller {
             .build();
     private final NmbsRivJourneyPlanningClient journeyPlanningClient;
     private final StationsDao stationsDao;
-
-    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, JourneyPlanning");
-    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, JourneyPlanning, Successful");
 
     @Autowired
     public JourneyPlanningV1Controller(NmbsRivJourneyPlanningClient journeyPlanningClient, StationsDao stationsDao) {
@@ -86,7 +84,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             @QueryParam("typeOfTransport") @DefaultValue("automatic") String typeOfTransport,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
-        requestMeter.mark();
+        V1_JOURNEYPLANNING_REQUEST_METER.mark();
         TimeSelection timeSelection = RequestParser.parseV1TimeSelection(timesel);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
@@ -113,7 +111,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             DataRoot dataRoot = cache.get(request, () -> loadJourneyPlanningResult(request));
             // Serialize to output format
             Response response = v1Response(dataRoot, outputFormat);
-            successRequestMeter.mark();
+            V1_JOURNEYPLANNING_SUCCESS_REQUEST_METER.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
             if (exception.getCause() instanceof IrailNotFoundException nfe) {

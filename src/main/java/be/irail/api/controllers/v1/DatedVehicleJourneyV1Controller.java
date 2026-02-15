@@ -1,6 +1,5 @@
 package be.irail.api.controllers.v1;
 
-import be.irail.api.config.Metrics;
 import be.irail.api.dto.Format;
 import be.irail.api.dto.Language;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
@@ -12,7 +11,6 @@ import be.irail.api.legacy.DatedVehicleJourneyV1Converter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
 import be.irail.api.util.RequestParser;
-import com.codahale.metrics.Meter;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -28,6 +26,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
 
+import static be.irail.api.config.Metrics.V1_VEHICLE_REQUEST_METER;
+import static be.irail.api.config.Metrics.V1_VEHICLE_SUCCESS_REQUEST_METER;
+
 /**
  * Controller for V1 Vehicle (DatedVehicleJourney) API endpoint.
  */
@@ -39,8 +40,6 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
     private static final Logger log = LoggerFactory.getLogger(DatedVehicleJourneyV1Controller.class);
 
     private final NmbsRivVehicleJourneyClient vehicleJourneyClient;
-    private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Vehicle");
-    private final Meter successRequestMeter = Metrics.getRegistry().meter("Requests, Vehicle, Successful");
 
     @Autowired
     public DatedVehicleJourneyV1Controller(NmbsRivVehicleJourneyClient vehicleJourneyClient) {
@@ -63,7 +62,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             @QueryParam("date") String date,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
-        requestMeter.mark();
+        V1_VEHICLE_REQUEST_METER.mark();
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
 
@@ -91,7 +90,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
 
             // Serialize to output format
             Response response = v1Response(dataRoot, outputFormat);
-            successRequestMeter.mark();
+            V1_VEHICLE_SUCCESS_REQUEST_METER.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
             if (exception.getCause() instanceof IrailNotFoundException nfe) {

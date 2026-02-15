@@ -1,6 +1,8 @@
 package be.irail.api;
 
+import be.irail.api.config.HealthCheck;
 import be.irail.api.config.Metrics;
+import io.dropwizard.metrics.servlets.HealthCheckServlet;
 import io.dropwizard.metrics.servlets.MetricsServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,10 +22,17 @@ public class IrailJavaApplication {
     }
 
     @Bean
-    public ServletRegistrationBean servletRegistrationBean() {
+    public ServletRegistrationBean metricsServletRegistrationBean() {
         log.info("registering metrics servlet");
         MetricsServlet metricsServlet = new MetricsServlet(Metrics.getRegistry());
         return new ServletRegistrationBean(metricsServlet, "/metrics/*");
+    }
+
+    @Bean
+    public ServletRegistrationBean healthCheckServletRegistrationBean() {
+        log.info("registering metrics servlet");
+        HealthCheckServlet healthCheckServlet = new HealthCheckServlet(HealthCheck.HEALTHCHECKREGISTRY);
+        return new ServletRegistrationBean(healthCheckServlet, "/healthcheck/*");
     }
 
 }

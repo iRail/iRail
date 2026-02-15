@@ -27,27 +27,4 @@ public class StatusController {
         return Response.ok("OK").build();
     }
 
-    /**
-     * Warms up the GTFS cache.
-     *
-     * @return status of the warmup operation
-     */
-    @GET
-    @Path("/cache/loadGtfs")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response warmupGtfsCache() {
-        return Response.ok("Warmup triggered").build();
-    }
-
-    /**
-     * Resets the application cache.
-     *
-     * @return status of the reset operation
-     */
-    @GET
-    @Path("/cache/clear")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response resetCache() {
-        return Response.ok("Cache cleared").build();
-    }
 }
