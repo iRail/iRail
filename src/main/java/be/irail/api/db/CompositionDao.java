@@ -113,23 +113,7 @@ public class CompositionDao {
             List<StoredCompositionUnit> units = unitsByCompositionId.get(composition.getId());
             TrainComposition result = new TrainComposition(vehicle, origin, destination, "Cache",
                     units.stream().map(this::convertUnit).toList());
-            for (int i = 1; i < result.getUnits().size(); i++) {
-                TrainCompositionUnit unit = result.getUnits().get(i);
-                TrainCompositionUnit nextUnit = i < result.getUnits().size() - 1 ? result.getUnits().get(i + 1) : null;
-                if (nextUnit != null && nextUnit.getTractionPosition() > unit.getTractionPosition()) {
-                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
-                }
-                if (nextUnit != null
-                        && unit.getMaterialType().getParentType().startsWith("AM")
-                        && nextUnit.getMaterialType().getSubType().equals("a")) {
-                    // next unit is a "a" carriage, this unit is the end of an AM set
-                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
-                }
-                if (i == result.getUnits().size() - 1 && unit.getMaterialType().getParentType().startsWith("AM")) {
-                    // last unit of a multi-unit
-                    unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
-                }
-            }
+            fixOrientation(result);
             results.add(result);
         }
 
@@ -229,5 +213,30 @@ public class CompositionDao {
                 .setHasBikeSection(dbUnit.isHasBikeSection());
 
         return unit;
+    }
+
+    private static void fixOrientation(TrainComposition result) {
+        for (int i = 1; i < result.getUnits().size() - 1; i++) {
+            TrainCompositionUnit unit = result.getUnits().get(i);
+            TrainCompositionUnit nextUnit = result.getUnits().get(i + 1);
+
+            if (nextUnit != null && nextUnit.getTractionPosition() > unit.getTractionPosition()) {
+                unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+            }
+
+            if (nextUnit != null
+                    && unit.isMultipleUnitMotorCar()
+                    && Math.abs(nextUnit.getMaterialType().getSubType().charAt(0) - unit.getMaterialType().getSubType().charAt(0)) > 1) {
+                // next unit is a "a" carriage, this unit is the end of an AM set
+                unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+            }
+
+            if (nextUnit != null
+                    && unit.hasSteeringCabin()
+                    && nextUnit.hasSteeringCabin()) {
+                unit.getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
+            }
+        }
+        result.getUnits().getLast().getMaterialType().setOrientation(RollingMaterialOrientation.RIGHT);
     }
 }

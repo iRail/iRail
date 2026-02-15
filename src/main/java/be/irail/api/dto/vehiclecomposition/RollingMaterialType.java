@@ -53,4 +53,11 @@ public class RollingMaterialType {
         this.orientation = value;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "RollingMaterialType '" + parentType + '\'' +
+                ", '" + subType + '\'' +
+                ", " + orientation;
+    }
 }

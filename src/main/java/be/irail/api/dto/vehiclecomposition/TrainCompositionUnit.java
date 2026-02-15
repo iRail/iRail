@@ -230,4 +230,12 @@ public class TrainCompositionUnit {
         this.hasPriorityPlaces = hasPriorityPlaces;
         return this;
     }
+
+    public boolean hasSteeringCabin() {
+        return materialType.getSubType().contains("X") || tractionType.equals("HLE");
+    }
+
+    public boolean isMultipleUnitMotorCar() {
+        return materialType.getParentType().startsWith("AM");
+    }
 }
