@@ -119,7 +119,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
             if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
-            throw new InternalProcessingException("Error fetching connections: " + exception.getMessage(), exception);
+            throw new InternalProcessingException("Error fetching connections: " + exception.getCause().getMessage(), exception.getCause());
         }
     }
 

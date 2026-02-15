@@ -156,7 +156,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         end.setPlatform(new PlatformInfo(end.getStation().getId(), platform, platformChanged));
         end.setStatus(node.has("prognosisType") && "REPORTED".equals(node.get("prognosisType").asText()) ? DepartureArrivalState.REPORTED : null);
         // TODO switch departure specific method to a method handling both departure and arrival
-        end.setIsCancelled(isDepartureCanceledBasedOnState(node.get("prognosisType").asText()));
+        end.setIsCancelled(node.has("prognosisType") && isDepartureCanceledBasedOnState(node.get("prognosisType").asText()));
         return end;
     }
 
