@@ -232,7 +232,7 @@ public class TrainCompositionUnit {
     }
 
     public boolean hasSteeringCabin() {
-        return materialType.getSubType().contains("X") || tractionType.equals("HLE");
+        return materialType.getSubType().contains("X") || "HLE".equals(tractionType);
     }
 
     public boolean isMultipleUnitMotorCar() {
