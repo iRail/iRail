@@ -9,7 +9,8 @@ import be.irail.api.dto.result.VehicleCompositionSearchResult;
 import be.irail.api.dto.vehiclecomposition.TrainComposition;
 import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.IrailHttpException;
-import be.irail.api.exception.JourneyNotFoundException;
+import be.irail.api.exception.notfound.IrailNotFoundException;
+import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.VehicleCompositionV1Converter;
@@ -100,6 +101,11 @@ public class CompositionV1Controller extends V1Controller {
             successRequestMeter.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
+            if (exception.getCause() instanceof IrailNotFoundException nfe) {
+                // don't log these exceptions with a stack trace etc
+                log.info("Composition for vehicle {} not found: " + nfe.getMessage(), journeyId);
+                throw nfe;
+            }
             log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already

@@ -6,6 +6,7 @@ import be.irail.api.dto.Language;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
 import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.IrailHttpException;
+import be.irail.api.exception.notfound.IrailNotFoundException;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.DatedVehicleJourneyV1Converter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
@@ -35,7 +36,7 @@ import java.util.concurrent.ExecutionException;
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class DatedVehicleJourneyV1Controller extends V1Controller {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatedVehicleJourneyV1Controller.class);
+    private static final Logger log = LoggerFactory.getLogger(DatedVehicleJourneyV1Controller.class);
 
     private final NmbsRivVehicleJourneyClient vehicleJourneyClient;
     private final Meter requestMeter = Metrics.getRegistry().meter("Requests, Vehicle");
@@ -78,12 +79,12 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
         // Create vehicle journey request
         VehicleJourneyRequest request = new VehicleJourneyRequest(id, dateTime, null, language);
 
-        logger.debug("Fetching vehicle journey for {}", id);
+        log.debug("Fetching vehicle journey for {}", id);
 
         try {
             // Fetch vehicle journey data
             VehicleJourneySearchResult vehicleJourneyResult = vehicleJourneyClient.getDatedVehicleJourney(request);
-            logger.debug("Found {} stops for vehicle {}", vehicleJourneyResult.getStops().size(), id);
+            log.debug("Found {} stops for vehicle {}", vehicleJourneyResult.getStops().size(), id);
 
             // Convert to V1 format
             DataRoot dataRoot = DatedVehicleJourneyV1Converter.convert(vehicleJourneyResult);
@@ -93,7 +94,12 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             successRequestMeter.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
-            logger.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);
+            if (exception.getCause() instanceof IrailNotFoundException nfe) {
+                // don't log these exceptions with a stack trace etc
+                log.info("Vehicle {} not found: " + nfe.getMessage(), request.vehicleId());
+                throw nfe;
+            }
+            log.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }

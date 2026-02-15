@@ -6,7 +6,7 @@ import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.*;
 import be.irail.api.dto.result.LiveboardSearchResult;
-import be.irail.api.exception.JourneyNotFoundException;
+import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.riv.requests.LiveboardRequest;

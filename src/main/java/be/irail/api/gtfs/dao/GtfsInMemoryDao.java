@@ -1,7 +1,7 @@
 package be.irail.api.gtfs.dao;
 
 import be.irail.api.dto.Vehicle;
-import be.irail.api.exception.JourneyNotFoundException;
+import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.models.Call;
 import be.irail.api.gtfs.dao.models.Journey;
 import be.irail.api.gtfs.reader.GtfsReader;

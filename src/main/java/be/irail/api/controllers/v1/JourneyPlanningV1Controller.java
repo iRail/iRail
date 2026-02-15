@@ -9,6 +9,7 @@ import be.irail.api.dto.TimeSelection;
 import be.irail.api.dto.result.JourneyPlanningSearchResult;
 import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.IrailHttpException;
+import be.irail.api.exception.notfound.IrailNotFoundException;
 import be.irail.api.exception.request.BadRequestException;
 import be.irail.api.exception.request.RequestedStopNotFoundException;
 import be.irail.api.legacy.DataRoot;
@@ -24,9 +25,9 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class JourneyPlanningV1Controller extends V1Controller {
 
-    private static final Logger logger = LoggerFactory.getLogger(JourneyPlanningV1Controller.class);
+    private static final Logger log = LogManager.getLogger(JourneyPlanningV1Controller.class);
 
     private final Cache<JourneyPlanningRequest, DataRoot> cache = CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -115,7 +116,12 @@ public class JourneyPlanningV1Controller extends V1Controller {
             successRequestMeter.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
-            logger.error("Error fetching connections from {} to {}: {}", from, to, exception.getMessage(), exception);
+            if (exception.getCause() instanceof IrailNotFoundException nfe) {
+                // don't log these exceptions with a stack trace etc
+                log.info("Journey from {} to {} not found: " + nfe.getMessage(), request.from().getIrailId(), request.to().getIrailId());
+                throw nfe;
+            }
+            log.error("Error fetching connections from {} to {}: {}", from, to, exception.getMessage(), exception);
             if (exception.getCause() instanceof IrailHttpException irailException) {
                 throw irailException; // Don't modify exceptions which have been caught/handled already
             }
@@ -125,9 +131,9 @@ public class JourneyPlanningV1Controller extends V1Controller {
 
     private @NonNull DataRoot loadJourneyPlanningResult(JourneyPlanningRequest request) throws ExecutionException {
         // Fetch journey planning data
-        logger.debug("Fetching connections from {} to {}", request.from().getIrailId(), request.to().getIrailId());
+        log.debug("Fetching connections from {} to {}", request.from().getIrailId(), request.to().getIrailId());
         JourneyPlanningSearchResult journeyPlanningResult = journeyPlanningClient.getJourneyPlanning(request);
-        logger.debug("Found {} connections from {} to {}",
+        log.debug("Found {} connections from {} to {}",
                 journeyPlanningResult.getJourneys().size(), request.from().getIrailId(), request.to().getIrailId());
 
         // Convert to V1 format

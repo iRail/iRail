@@ -1,9 +1,9 @@
-package be.irail.api.exception;
+package be.irail.api.exception.notfound;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class JourneyNotFoundException extends IrailHttpException {
+public class JourneyNotFoundException extends IrailNotFoundException {
     public JourneyNotFoundException(String journeyId, LocalDate date) {
         super(404, "Could not find journey with id '" + journeyId + "' on date " + date);
     }

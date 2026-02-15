@@ -1,7 +1,7 @@
 package be.irail.api.gtfs.dao;
 
 import be.irail.api.exception.InternalProcessingException;
-import be.irail.api.exception.JourneyNotFoundException;
+import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.gtfs.reader.models.Route;
 import be.irail.api.gtfs.reader.models.StopTime;
 import be.irail.api.gtfs.reader.models.Trip;
