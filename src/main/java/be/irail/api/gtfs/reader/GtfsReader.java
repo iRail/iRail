@@ -48,7 +48,7 @@ public class GtfsReader {
         this.readDaysForward = readDaysForward;
     }
 
-    public GtfsData readGtfs() {
+    public GtfsData readGtfs() throws IOException {
         log.info("Fetching static GTFS from {}, requires around 1gb free memory, current heap usage/max heap usage: {}/{}",
                 gtfsStaticUrl, Runtime.getRuntime().totalMemory() / 1024 / 1024, Runtime.getRuntime().maxMemory() / 1024 / 1024);
         Path tempFile = null;
@@ -81,7 +81,7 @@ public class GtfsReader {
             return gtfsData;
         } catch (IOException e) {
             log.error("Failed to read GTFS data", e);
-            return null;
+            throw new IOException("Failed to read GTFS data", e);
         } finally {
             if (tempFile != null) {
                 try {
