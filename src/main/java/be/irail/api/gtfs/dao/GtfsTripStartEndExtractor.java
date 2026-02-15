@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class GtfsTripStartEndExtractor {
     private static final Logger log = LogManager.getLogger(GtfsTripStartEndExtractor.class);
     public static final int SECONDS_IN_DAY = 86400;
+    public static final int SERVICE_DAY_END_HOUR = 4;
 
     private record JourneyNumberAndDate(int journeyNumber, LocalDate date) {
     }
@@ -55,6 +56,43 @@ public class GtfsTripStartEndExtractor {
                 // By forcing a number to be passed, we ensure the type is stripped away
                 List<Trip> trips = dao.getTripsByJourneyNumber(journeyNumber);
 
+                // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
+                if (shouldConsiderTrainsFromPreviousServiceDaysForQuery(date)) {
+                    LocalDate yesterday = date.toLocalDate().minusDays(1);
+                    for (Trip trip : trips) {
+                        if (isServiceActiveOnDate(dao, trip.serviceId(), yesterday)) {
+                            List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
+                            if (stopTimes.isEmpty()) {
+                                continue;
+                            }
+
+                            StopTime first = stopTimes.getFirst();
+                            StopTime last = stopTimes.getLast();
+
+                            // Departure needs to be after 4, arrival needs to be past midnight,
+                            // to count as a desired midnight passing trip
+                            if (last.arrivalTime() < SECONDS_IN_DAY || first.departureTime() < SERVICE_DAY_END_HOUR * 3600) {
+                                continue; // Trip not active past midnight
+                            }
+
+                            Route route = dao.getRoute(trip.routeId());
+                            String vehicleType = (route != null) ? route.shortName() : "";
+                            log.info("Found trip start and end station for trip {} on day before", journeyNumber);
+                            return Optional.of(new JourneyWithOriginAndDestination(
+                                            trip.id(),
+                                            vehicleType,
+                                            journeyNumber,
+                                            first.stopId(),
+                                            first.departureTime(),
+                                            last.stopId(),
+                                            last.arrivalTime(),
+                                            Collections.emptyList()
+                                    )
+                            );
+                        }
+                    }
+                }
+
                 for (Trip trip : trips) {
                     if (isServiceActiveOnDate(dao, trip.serviceId(), date.toLocalDate())) {
                         List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
@@ -81,42 +119,6 @@ public class GtfsTripStartEndExtractor {
                         );
                     }
                 }
-                // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
-                if (date.getHour() < 4) {
-                    LocalDate dayBefore = date.toLocalDate().minusDays(1);
-                    for (Trip trip : trips) {
-                        if (isServiceActiveOnDate(dao, trip.serviceId(), dayBefore)) {
-                            List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
-                            if (stopTimes.isEmpty()) {
-                                continue;
-                            }
-
-                            StopTime first = stopTimes.getFirst();
-                            StopTime last = stopTimes.getLast();
-
-                            // Departure needs to be after 4, arrival needs to be past midnight,
-                            // to count as a desired midnight passing trip
-                            if (last.arrivalTime() < SECONDS_IN_DAY || first.departureTime() < 14400) {
-                                continue; // Trip not active past midnight
-                            }
-
-                            Route route = dao.getRoute(trip.routeId());
-                            String vehicleType = (route != null) ? route.shortName() : "";
-                            log.info("Found trip start and end station for trip {} on day before", journeyNumber);
-                            return Optional.of(new JourneyWithOriginAndDestination(
-                                            trip.id(),
-                                            vehicleType,
-                                            journeyNumber,
-                                            first.stopId(),
-                                            first.departureTime(),
-                                            last.stopId(),
-                                            last.arrivalTime(),
-                                            Collections.emptyList()
-                                    )
-                            );
-                        }
-                    }
-                }
 
                 log.warn("Found no trip start and end station for trip {}", journeyNumber);
                 return Optional.empty();
@@ -124,6 +126,10 @@ public class GtfsTripStartEndExtractor {
         } catch (UncheckedExecutionException | ExecutionException e) {
             throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
         }
+    }
+
+    private static boolean shouldConsiderTrainsFromPreviousServiceDaysForQuery(LocalDateTime date) {
+        return date.getHour() < SERVICE_DAY_END_HOUR && date.toLocalDate().equals(LocalDate.now());
     }
 
     private boolean isServiceActiveOnDate(GtfsInMemoryDao dao, Integer serviceId, LocalDate date) {
