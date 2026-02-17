@@ -238,6 +238,9 @@ public class NmbsRivCompositionClient {
                 } else if (subTypeName.startsWith("M6") || subTypeName.startsWith("M7")) {
                     parentType = subTypeName.substring(0, 2);
                     subType = subTypeName.substring(2);
+                } else if (subTypeName.startsWith("I10")) {
+                    parentType = subTypeName.substring(0, 3);
+                    subType = subTypeName.substring(3);
                 } else {
                     parentType = subTypeName;
                 }
