@@ -1,11 +1,13 @@
 package be.irail.api.gtfs.dao;
 
+import be.irail.api.gtfs.reader.DatedTripId;
 import be.irail.api.gtfs.reader.models.GtfsRtDelay;
 import com.google.common.collect.ArrayListMultimap;
 
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 /**
  * In-memory DAO for GTFS-Realtime delay data.
@@ -13,10 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GtfsRtInMemoryDao {
     private static final GtfsRtInMemoryDao INSTANCE = new GtfsRtInMemoryDao();
 
-    private final Map<String, List<GtfsRtDelay>> delaysByTripId = new ConcurrentHashMap<>();
-    private final Map<String, List<GtfsRtDelay>> delaysByStopId = new ConcurrentHashMap<>();
+    private ArrayListMultimap<String, GtfsRtDelay> delaysByStopId = ArrayListMultimap.create();
+    private ArrayListMultimap<String, GtfsRtDelay> updatesByStopId = ArrayListMultimap.create();
+    private Set<DatedTripId> canceledTrips = new HashSet<>();
 
-    private GtfsRtInMemoryDao() {}
+    private GtfsRtInMemoryDao() {
+    }
 
     public static GtfsRtInMemoryDao getInstance() {
         return INSTANCE;
@@ -24,9 +28,10 @@ public class GtfsRtInMemoryDao {
 
     /**
      * Updates the in-memory store with new GTFS-RT delay data.
+     *
      * @param delays the list of new delays
      */
-    public void update(List<GtfsRtDelay> delays) {
+    public void updateStopTimeUpdates(List<GtfsRtDelay> delays) {
         ArrayListMultimap<String, GtfsRtDelay> tripMap = ArrayListMultimap.create();
         ArrayListMultimap<String, GtfsRtDelay> stopMap = ArrayListMultimap.create();
 
@@ -36,20 +41,24 @@ public class GtfsRtInMemoryDao {
                 stopMap.put(delay.parentStopId(), delay);
             }
         }
-
         // Atomic update of the maps (replace content)
-        delaysByTripId.clear();
-        tripMap.asMap().forEach((k, v) -> delaysByTripId.put(k, (List<GtfsRtDelay>) v));
+        delaysByStopId = tripMap;
+        updatesByStopId = stopMap;
+    }
 
-        delaysByStopId.clear();
-        stopMap.asMap().forEach((k, v) -> delaysByStopId.put(k, (List<GtfsRtDelay>) v));
+    public void updateCanceledTrips(Set<DatedTripId> canceledTrips) {
+        this.canceledTrips = canceledTrips;
     }
 
     public List<GtfsRtDelay> getDelaysByTripId(String tripId) {
-        return delaysByTripId.getOrDefault(tripId, List.of());
+        return delaysByStopId.get(tripId);
+    }
+
+    public boolean isCanceled(String tripId, LocalDate startDate) {
+        return canceledTrips.contains(new DatedTripId(tripId, startDate));
     }
 
     public List<GtfsRtDelay> getDelaysByStopId(String stopId) {
-        return delaysByStopId.getOrDefault(stopId, List.of());
+        return updatesByStopId.get(stopId);
     }
 }

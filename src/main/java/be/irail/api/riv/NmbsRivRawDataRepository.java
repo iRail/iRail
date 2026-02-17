@@ -11,6 +11,7 @@ import be.irail.api.exception.upstream.UpstreamRateLimitException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.exception.upstream.UpstreamServerParameterException;
 import be.irail.api.exception.upstream.UpstreamServerUnavailableException;
+import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import be.irail.api.riv.requests.LiveboardRequest;
@@ -176,7 +177,13 @@ public class NmbsRivRawDataRepository {
                 log.debug("Cannot get journey detail ref for bus traffic, this doesn't work in the NMBS app either");
                 return null;
             }
+
             JourneyWithOriginAndDestination vehicle = optVehicle.get();
+            if (GtfsRtInMemoryDao.getInstance().isCanceled(vehicle.tripId(), request.dateTime().toLocalDate())) {
+                log.info("Vehicle {} on {} is cancelled, cannot retrieve journey detail ref", vehicle.tripId(), request.dateTime());
+                return null;
+            }
+
 
             String journeyDetailRef = findVehicleJourneyRefBetweenStops(request, vehicle);
 
@@ -206,8 +213,8 @@ public class NmbsRivRawDataRepository {
 
         Map<String, String> params = new HashMap<>();
         params.put("trainFilter", vehicleName);
-        params.put("originExtId", vehicle.getOriginStopId());
-        params.put("destExtId", vehicle.getDestinationStopId());
+        params.put("originExtId", vehicle.getOriginStopId().replaceAll("_\\d+", ""));
+        params.put("destExtId", vehicle.getDestinationStopId().replaceAll("_\\d+", ""));
         params.put("date", formattedDate);
 
         try {

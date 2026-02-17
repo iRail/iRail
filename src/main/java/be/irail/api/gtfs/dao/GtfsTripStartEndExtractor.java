@@ -58,6 +58,7 @@ public class GtfsTripStartEndExtractor {
 
                 // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
                 if (shouldConsiderTrainsFromPreviousServiceDaysForQuery(date)) {
+                    log.debug("Considering trains from previous service days for journey {} on {}", journeyNumber, date);
                     LocalDate yesterday = date.toLocalDate().minusDays(1);
                     for (Trip trip : trips) {
                         if (isServiceActiveOnDate(dao, trip.serviceId(), yesterday)) {
@@ -86,6 +87,7 @@ public class GtfsTripStartEndExtractor {
                                             first.departureTime(),
                                             last.stopId(),
                                             last.arrivalTime(),
+                                    last.stopSequence(),
                                             Collections.emptyList()
                                     )
                             );
@@ -93,6 +95,7 @@ public class GtfsTripStartEndExtractor {
                     }
                 }
 
+                List<JourneyWithOriginAndDestination> possibleMatches = new ArrayList<>();
                 for (Trip trip : trips) {
                     if (isServiceActiveOnDate(dao, trip.serviceId(), date.toLocalDate())) {
                         List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
@@ -106,7 +109,7 @@ public class GtfsTripStartEndExtractor {
                         Route route = dao.getRoute(trip.routeId());
                         String vehicleType = (route != null) ? route.shortName() : "";
 
-                        return Optional.of(new JourneyWithOriginAndDestination(
+                        possibleMatches.add(new JourneyWithOriginAndDestination(
                                         trip.id(),
                                         vehicleType,
                                         journeyNumber,
@@ -114,18 +117,62 @@ public class GtfsTripStartEndExtractor {
                                         first.departureTime(),
                                         last.stopId(),
                                         last.arrivalTime(),
-                                        Collections.emptyList()
+                                last.stopSequence(),
+                                new ArrayList<>()
                                 )
                         );
                     }
                 }
-
+                if (!possibleMatches.isEmpty()) {
+                    return multipleGtfsMatchesToSingleResult(journeyNumber, possibleMatches);
+                }
                 log.warn("Found no trip start and end station for trip {}", journeyNumber);
                 return Optional.empty();
             });
         } catch (UncheckedExecutionException | ExecutionException e) {
             throw new InternalProcessingException("Failed to get trip start and end station: " + e.getMessage(), e);
         }
+    }
+
+    private static Optional<JourneyWithOriginAndDestination> multipleGtfsMatchesToSingleResult(int journeyNumber, List<JourneyWithOriginAndDestination> possibleMatches) {
+        log.debug("Found {} trip start and end stops for trip {}", possibleMatches.size(), journeyNumber);
+        boolean containsTrain = possibleMatches.stream().anyMatch(journey -> !journey.getJourneyType().equals("BUS"));
+        boolean containsBus = possibleMatches.stream().anyMatch(journey -> journey.getJourneyType().equals("BUS"));
+        if (containsBus && containsTrain) {
+            possibleMatches.removeIf(journey -> journey.getJourneyType().equals("BUS"));
+        }
+        log.info("Found {}  trip start and end station for trip {} after filtering bus matches", possibleMatches.size(), journeyNumber);
+        if (possibleMatches.size() == 1) {
+            return Optional.of(possibleMatches.getFirst());
+        }
+
+        // Multiple versions of the same trip, with different lengths: use the longest, mark the shorter start as intermediate
+        JourneyWithOriginAndDestination longest = possibleMatches.stream().max(Comparator.comparingInt(JourneyWithOriginAndDestination::numberOfStops)).orElseThrow();
+        possibleMatches.remove(longest);
+        possibleMatches.stream()
+                .sorted(Comparator.comparing(JourneyWithOriginAndDestination::getOriginDepartureTimeOffset))
+                .forEach((otherJourney) -> {
+                    String longestOrigin = getBaseStop(longest.getOriginStopId());
+                    String longestDestination = getBaseStop(longest.getDestinationStopId());
+                    String otherOrigin = getBaseStop(otherJourney.getOriginStopId());
+                    String otherDestination = getBaseStop(otherJourney.getDestinationStopId());
+                    if (Objects.equals(otherDestination, longestDestination)) {
+                        longest.splitOrJoinStopIds().add(otherOrigin);
+                    } else {
+                        if (Objects.equals(otherOrigin, longestOrigin)) {
+                            longest.splitOrJoinStopIds().add(otherDestination);
+                        } else {
+                            longest.splitOrJoinStopIds().add(otherOrigin);
+                            longest.splitOrJoinStopIds().add(otherDestination);
+                        }
+                    }
+                });
+
+        return Optional.of(longest);
+    }
+
+    private static String getBaseStop(String stopId) {
+        return stopId.replaceAll("_\\d+", "");
     }
 
     private static boolean shouldConsiderTrainsFromPreviousServiceDaysForQuery(LocalDateTime date) {
@@ -172,6 +219,7 @@ public class GtfsTripStartEndExtractor {
                     prev.departureTime(),
                     curr.stopId(),
                     curr.arrivalTime(),
+                    curr.stopSequence(),
                     Collections.emptyList()
             ));
         }

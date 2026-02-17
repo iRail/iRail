@@ -10,6 +10,7 @@ public record JourneyWithOriginAndDestination(
     int originDepartureTime,
     String destinationStopId,
     int destinationArrivalTime,
+    int numberOfStops,
     List<String> splitOrJoinStopIds
 ) {
     public String getJourneyType() {
