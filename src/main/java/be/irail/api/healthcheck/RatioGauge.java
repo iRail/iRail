@@ -21,7 +21,7 @@ public class RatioGauge implements Gauge<Float> {
             return 100f;
         }
         success = succesMeter.getOneMinuteRate();
-        return Math.round(100 * success / total) / 100f;
+        return Math.round(10000 * success / total) / 10000f;
     }
 
     public double getDiff() {
