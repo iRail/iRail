@@ -1,11 +1,14 @@
 package be.irail.api.exception;
 
 import be.irail.api.config.Metrics;
+import be.irail.api.exception.upstream.UpstreamServerException;
+import be.irail.api.exception.upstream.UpstreamServerParameterException;
 import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -19,32 +22,47 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
     private final Meter irailBadRequestMeter = Metrics.getRegistry().meter("Exceptions, Irail, Bad request");
     private final Meter irailNotFoundMeter = Metrics.getRegistry().meter("Exceptions, Irail, Journey or station not found");
     private final Meter irailExceptionMeter = Metrics.getRegistry().meter("Exceptions, Irail");
+    private final Meter upstreamBadRequestExceptionMeter = Metrics.getRegistry().meter("Exceptions, Upstream, Bad request");
+    private final Meter upstreamExceptionMeter = Metrics.getRegistry().meter("Exceptions, Upstream");
     private final Meter exceptionMeter = Metrics.getRegistry().meter("Exceptions, unchecked");
     private final Meter notFoundMeter = Metrics.getRegistry().meter("404 Not found");
 
     @Override
+    @Produces("application/json")
     public Response toResponse(Throwable throwable) {
         while (throwable instanceof UncheckedExecutionException) {
             throwable = throwable.getCause();
         }
         if (throwable instanceof IrailHttpException exception) {
-            if (exception.getHttpCode() == 400) {
+            if (throwable instanceof UpstreamServerParameterException) {
+                // No full stack trace needed
+                upstreamBadRequestExceptionMeter.mark();
+                return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception.getMessage(), exception));
+            } else if (throwable instanceof UpstreamServerException) {
+                // No full stack trace needed
+                upstreamExceptionMeter.mark();
+                return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception.getMessage(), exception));
+            } else if (exception.getHttpCode() == 400) {
                 irailBadRequestMeter.mark();
-                return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
+                return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception.getMessage(), exception));
             } else if (exception.getHttpCode() == 404) {
                 irailNotFoundMeter.mark();
-                return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
+                return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception.getMessage(), exception));
             }
             irailExceptionMeter.mark();
-            return Response.status(exception.getHttpCode()).header("Content-Type", "application/json").entity(new ExceptionDto(exception)).build();
+            return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception));
         }
         if (throwable instanceof NotFoundException exception) {
             // Dont print a stacktrace for 404
             notFoundMeter.mark();
-            return Response.status(404).header("Content-Type", "application/json").entity(new ExceptionDto(exception.getMessage(), exception)).build();
+            return getJsonResponse(404, new ExceptionDto(exception.getMessage(), exception));
         }
         exceptionMeter.mark();
-        return Response.status(500).header("Content-Type", "application/json").entity(new ExceptionDto(throwable)).build();
+        return getJsonResponse(500, new ExceptionDto(throwable));
+    }
+
+    private static Response getJsonResponse(int exception, ExceptionDto exception1) {
+        return Response.status(exception).entity(exception1).build();
     }
 
 

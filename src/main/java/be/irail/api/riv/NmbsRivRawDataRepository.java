@@ -368,7 +368,7 @@ public class NmbsRivRawDataRepository {
                     throw new UpstreamServerParameterException(json.get("errorText").asText());
                 case "SVC_DATETIME_PERIOD":
                 case "SVC_DATATIME_PERIOD":
-                    throw new UpstreamServerException("Date outside of the timetable period. Check your query.");
+                    throw new UpstreamServerParameterException("Date outside of the timetable period. Check your query.");
                 default:
                     throw new UpstreamServerException("This request failed. Please check your query. Error code " + errorCode);
             }
