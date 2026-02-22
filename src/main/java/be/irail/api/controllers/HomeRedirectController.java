@@ -16,7 +16,7 @@ public class HomeRedirectController {
     private final Meter redirectMeter = Metrics.getRegistry().meter("root-docs-redirect");
 
     @GET
-    @Path("/stations")
+    @Path("/")
     public Response redirectStations() {
         redirectMeter.mark();
         return Response.seeOther(URI.create("https://docs.irail.be")).build();
