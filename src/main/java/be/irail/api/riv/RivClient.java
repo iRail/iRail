@@ -98,7 +98,7 @@ public abstract class RivClient {
 
         String platform = getFieldOrNull(rawStop, prefix.toLowerCase() + "Track");
         String realtimePlatform = getFieldOrNull(rawStop, "rt" + prefix + "Track");
-        boolean platformChanged = realtimePlatform != null && !realtimePlatform.equals(platform);
+        boolean platformChanged = realtimePlatform != null;
         platform = platformChanged ? realtimePlatform : platform;
 
         if (!isArrival) {
