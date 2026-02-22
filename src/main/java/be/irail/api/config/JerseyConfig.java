@@ -1,9 +1,6 @@
 package be.irail.api.config;
 
-import be.irail.api.controllers.LegacyRedirectController;
-import be.irail.api.controllers.OccupancyReportController;
-import be.irail.api.controllers.StatusController;
-import be.irail.api.controllers.V2Controller;
+import be.irail.api.controllers.*;
 import be.irail.api.controllers.v1.*;
 import be.irail.api.exception.IrailExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -32,6 +29,7 @@ public class JerseyConfig extends ResourceConfig {
         register(OccupancyReportController.class);
 
         register(V2Controller.class);
+        register(HomeRedirectController.class);
         register(StatusController.class);
         register(IrailExceptionMapper.class);
     }
