@@ -198,21 +198,20 @@ public class NmbsRivLiveboardClient {
                 stop.getScheduledDateTime().toLocalDate()
         );
 
-        OccupancyLevel official = OccupancyLevel.UNKNOWN;
-        OccupancyLevel spitsgids = OccupancyLevel.UNKNOWN;
+        OccupancyReport.OccupancyLevel official = null;
+        OccupancyReport.OccupancyLevel spitsgids = null;
 
         Integer stopId = extractNumericStopId(stop.getStation().getId());
 
         for (OccupancyReport report : reports) {
             if (report.getStopId().equals(stopId)) {
                 if (report.getSource() == OccupancyReport.OccupancyReportSource.NMBS) {
-                    official = mapOccupancyLevel(report.getOccupancy());
+                    official = report.getOccupancy();
                 } else if (report.getSource() == OccupancyReport.OccupancyReportSource.SPITSGIDS) {
-                    spitsgids = mapOccupancyLevel(report.getOccupancy());
+                    spitsgids = report.getOccupancy();
                 }
             }
         }
-
         return new OccupancyInfo(official, spitsgids);
     }
 
@@ -225,17 +224,6 @@ public class NmbsRivLiveboardClient {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private OccupancyLevel mapOccupancyLevel(OccupancyReport.OccupancyLevel dbLevel) {
-        if (dbLevel == null) {
-            return OccupancyLevel.UNKNOWN;
-        }
-        return switch (dbLevel) {
-            case LOW -> OccupancyLevel.LOW;
-            case MEDIUM -> OccupancyLevel.MEDIUM;
-            case HIGH -> OccupancyLevel.HIGH;
-        };
     }
 
     private StationDto convertToModelStation(Station dbStation, Language language) {

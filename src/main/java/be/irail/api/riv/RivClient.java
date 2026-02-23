@@ -164,23 +164,46 @@ public abstract class RivClient {
         return ldt;
     }
 
-    private OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop) {
+    protected OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop) {
+        return getOccupancy(occupancyDao, stop, (OccupancyReport.OccupancyLevel) null);
+    }
+
+    protected OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop, JsonNode hafasNode) {
+        OccupancyReport.OccupancyLevel official = null;
+        if (hafasNode.has("CommercialInfo") && hafasNode.get("CommercialInfo").has("Occupancy")) {
+            int level = hafasNode.get("CommercialInfo").get("Occupancy").get("Level").asInt();
+            official = OccupancyReport.OccupancyLevel.fromNmbsLevel(level);
+        }
+        return getOccupancy(occupancyDao, stop, official);
+    }
+
+    private OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop, OccupancyReport.OccupancyLevel official) {
+        if (official != null) {
+            occupancyDao.handleReport(
+                    new OccupancyReport(
+                            stop.getVehicle().getId(),
+                            Integer.parseInt(stop.getStation().getId()),
+                            stop.getScheduledDateTime().toLocalDate(),
+                            OccupancyReport.OccupancyReportSource.NMBS,
+                            official)
+            );
+        }
+
         List<OccupancyReport> reports = occupancyDao.getReportsForJourney(
                 stop.getVehicle().getId(),
                 stop.getScheduledDateTime().toLocalDate()
         );
 
-        OccupancyLevel official = OccupancyLevel.UNKNOWN;
-        OccupancyLevel spitsgids = OccupancyLevel.UNKNOWN;
+        OccupancyReport.OccupancyLevel spitsgids = null;
 
         Integer stopId = extractNumericStopId(stop.getStation().getId());
 
         for (OccupancyReport report : reports) {
             if (report.getStopId().equals(stopId)) {
                 if (report.getSource() == OccupancyReport.OccupancyReportSource.NMBS) {
-                    official = mapOccupancyLevel(report.getOccupancy());
+                    official = report.getOccupancy();
                 } else if (report.getSource() == OccupancyReport.OccupancyReportSource.SPITSGIDS) {
-                    spitsgids = mapOccupancyLevel(report.getOccupancy());
+                    spitsgids = report.getOccupancy();
                 }
             }
         }
@@ -198,18 +221,6 @@ public abstract class RivClient {
             return null;
         }
     }
-
-    private OccupancyLevel mapOccupancyLevel(OccupancyReport.OccupancyLevel dbLevel) {
-        if (dbLevel == null) {
-            return OccupancyLevel.UNKNOWN;
-        }
-        return switch (dbLevel) {
-            case LOW -> OccupancyLevel.LOW;
-            case MEDIUM -> OccupancyLevel.MEDIUM;
-            case HIGH -> OccupancyLevel.HIGH;
-        };
-    }
-
 
     protected StationDto convertToModelStation(Station dbStation, Language language) {
         if (dbStation == null) {

@@ -38,11 +38,11 @@ public abstract class V1Converter {
     protected static V1Occupancy convertOccupancy(OccupancyInfo occupancy) {
         if (occupancy == null) {
             V1Occupancy result = new V1Occupancy();
-            result.atId = OccupancyLevel.UNKNOWN.getUri();
+            result.atId = OccupancyLevelDTO.UNKNOWN.getUri();
             result.name = "unknown";
             return result;
         }
-        OccupancyLevel level = occupancy.getSpitsgidsLevel() != OccupancyLevel.UNKNOWN
+        OccupancyLevelDTO level = occupancy.getSpitsgidsLevel() != OccupancyLevelDTO.UNKNOWN
                 ? occupancy.getSpitsgidsLevel()
                 : occupancy.getOfficialLevel();
         V1Occupancy result = new V1Occupancy();

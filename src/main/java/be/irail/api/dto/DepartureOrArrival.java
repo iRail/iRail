@@ -1,7 +1,6 @@
 package be.irail.api.dto;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -181,7 +180,7 @@ public class DepartureOrArrival {
      * @return the occupancy info, or UNKNOWN if not set
      */
     public OccupancyInfo getOccupancy() {
-        return this.occupancy != null ? this.occupancy : new OccupancyInfo(OccupancyLevel.UNKNOWN, OccupancyLevel.UNKNOWN);
+        return this.occupancy != null ? this.occupancy : OccupancyInfo.UNKNOWN;
     }
 
     /**

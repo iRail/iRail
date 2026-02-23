@@ -1,12 +1,17 @@
 package be.irail.api.db;
 
 import jakarta.persistence.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "occupancy_reports", schema = "public")
 public class OccupancyReport {
+    private static final Logger log = LogManager.getLogger(OccupancyReport.class);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,29 +36,73 @@ public class OccupancyReport {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public OccupancyReport() {}
+    public OccupancyReport() {
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public OccupancyReport(String vehicleId, Integer stopId, LocalDate journeyStartDate, OccupancyReportSource source, OccupancyLevel occupancy) {
+        this.vehicleId = vehicleId;
+        this.stopId = stopId;
+        this.journeyStartDate = journeyStartDate;
+        this.source = source;
+        this.occupancy = occupancy;
+    }
 
-    public String getVehicleId() { return vehicleId; }
-    public void setVehicleId(String vehicleId) { this.vehicleId = vehicleId; }
+    public Long getId() {
+        return id;
+    }
 
-    public Integer getStopId() { return stopId; }
-    public void setStopId(Integer stopId) { this.stopId = stopId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public LocalDate getJourneyStartDate() { return journeyStartDate; }
-    public void setJourneyStartDate(LocalDate journeyStartDate) { this.journeyStartDate = journeyStartDate; }
+    public String getVehicleId() {
+        return vehicleId;
+    }
 
-    public OccupancyReportSource getSource() { return source; }
-    public void setSource(OccupancyReportSource source) { this.source = source; }
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
+    }
 
-    public OccupancyLevel getOccupancy() { return occupancy; }
-    public void setOccupancy(OccupancyLevel occupancy) { this.occupancy = occupancy; }
+    public Integer getStopId() {
+        return stopId;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
+    public void setStopId(Integer stopId) {
+        this.stopId = stopId;
+    }
+
+    public LocalDate getJourneyStartDate() {
+        return journeyStartDate;
+    }
+
+    public void setJourneyStartDate(LocalDate journeyStartDate) {
+        this.journeyStartDate = journeyStartDate;
+    }
+
+    public OccupancyReportSource getSource() {
+        return source;
+    }
+
+    public void setSource(OccupancyReportSource source) {
+        this.source = source;
+    }
+
+    public OccupancyLevel getOccupancy() {
+        return occupancy;
+    }
+
+    public void setOccupancy(OccupancyLevel occupancy) {
+        this.occupancy = occupancy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public enum OccupancyReportSource {
         NMBS("NMBS"),
         SPITSGIDS("SG");
@@ -77,7 +126,7 @@ public class OccupancyReport {
             throw new IllegalArgumentException("Unknown OccupancyReportSource code: " + code);
         }
     }
-    
+
     public enum OccupancyLevel {
         LOW(1),
         MEDIUM(2),
@@ -94,7 +143,9 @@ public class OccupancyReport {
         }
 
         public static OccupancyLevel fromValue(Integer value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             for (OccupancyLevel level : OccupancyLevel.values()) {
                 if (level.value == value) {
                     return level;
@@ -102,7 +153,27 @@ public class OccupancyReport {
             }
             throw new IllegalArgumentException("Unknown OccupancyLevel value: " + value);
         }
+
+
+        /**
+         * Converts an internal NMBS occupancy level (1-4) to an OccupancyLevel enum.
+         *
+         * @param level the NMBS level code
+         * @return the corresponding OccupancyLevel
+         */
+        public static OccupancyLevel fromNmbsLevel(int level) {
+            return switch (level) {
+                case 1 -> LOW;
+                case 2 -> MEDIUM;
+                case 3, 4 -> HIGH;
+                default -> {
+                    log.error("Unknown NMBS occupancy level {}", level);
+                    yield null;
+                }
+            };
+        }
     }
+
 
     @Converter(autoApply = true)
     public static class OccupancyReportSourceConverter implements AttributeConverter<OccupancyReportSource, String> {
