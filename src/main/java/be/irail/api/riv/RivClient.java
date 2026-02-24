@@ -117,6 +117,15 @@ public abstract class RivClient {
 
         part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
 
+        boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
+        if (isArrival) {
+            boolean rtAlighting = getBooleanOrDefault(rawStop, "rtAlighting", true);
+            part.setIsCancelled(cancelled || !rtAlighting);
+        } else {
+            boolean rtBoarding = getBooleanOrDefault(rawStop, "rtBoarding", true);
+            part.setIsCancelled(cancelled || !rtBoarding);
+        }
+
         // TODO: read alighting/boarding booleans, see international trains
         return part;
     }
@@ -151,9 +160,14 @@ public abstract class RivClient {
                 !status.equals("PARTIAL_FAILURE_AT_ARR");
     }
 
-    private static String getFieldOrNull(JsonNode rawStop, String field) {
+    protected static String getFieldOrNull(JsonNode rawStop, String field) {
         return rawStop.has(field) ? rawStop.get(field).asText() : null;
     }
+
+    protected static Boolean getBooleanOrDefault(JsonNode rawStop, String field, boolean defaultValue) {
+        return rawStop.has(field) ? rawStop.get(field).asBoolean() : defaultValue;
+    }
+
 
     private static @NonNull LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
         if (timeS.length() == 5 || timeS.length() == 7) {

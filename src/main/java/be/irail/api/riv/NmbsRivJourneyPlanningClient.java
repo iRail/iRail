@@ -158,6 +158,20 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         end.setStatus(node.has("prognosisType") && "REPORTED".equals(node.get("prognosisType").asText()) ? DepartureArrivalState.REPORTED : null);
         // TODO switch departure specific method to a method handling both departure and arrival
         end.setIsCancelled(node.has("prognosisType") && isDepartureCanceledBasedOnState(node.get("prognosisType").asText()));
+
+        // A different way cancelled trains can be presented
+        boolean cancelled = getBooleanOrDefault(node, "cancelled", false);
+        if (cancelled) {
+            end.setIsCancelled(true);
+        }
+        if (node.has("rtAlighting")) {
+            boolean rtAlighting = getBooleanOrDefault(node, "rtAlighting", true);
+            end.setIsCancelled(cancelled || !rtAlighting);
+        } else if (node.has("rtBoarding")) {
+            boolean rtBoarding = getBooleanOrDefault(node, "rtBoarding", true);
+            end.setIsCancelled(cancelled || !rtBoarding);
+        }
+
         return end;
     }
 
