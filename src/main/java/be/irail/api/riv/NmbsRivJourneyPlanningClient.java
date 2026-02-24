@@ -161,17 +161,18 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
 
         // A different way cancelled trains can be presented
         boolean cancelled = getBooleanOrDefault(node, "cancelled", false);
-        if (cancelled) {
-            end.setIsCancelled(true);
+        boolean rtAlighting = getBooleanOrDefault(node, "rtAlighting", true);
+        boolean rtBoarding = getBooleanOrDefault(node, "rtBoarding", true);
+        if (rtAlighting || rtBoarding) {
+            cancelled = false; // the cancelled flag is set even when only a departure or arrival is cancelled, fix this
         }
-        if (node.has("rtAlighting")) {
-            boolean rtAlighting = getBooleanOrDefault(node, "rtAlighting", true);
+        if (node.has("rtAlighting") || cancelled) {
+            // if alighting information is set, or completely cancelled
             end.setIsCancelled(cancelled || !rtAlighting);
         } else if (node.has("rtBoarding")) {
-            boolean rtBoarding = getBooleanOrDefault(node, "rtBoarding", true);
+            // if boarding information is set, or completely cancelled
             end.setIsCancelled(cancelled || !rtBoarding);
         }
-
         return end;
     }
 

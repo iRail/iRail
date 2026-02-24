@@ -118,11 +118,14 @@ public abstract class RivClient {
         part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
 
         boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
+        boolean rtAlighting = getBooleanOrDefault(rawStop, "rtAlighting", true);
+        boolean rtBoarding = getBooleanOrDefault(rawStop, "rtBoarding", true);
+        if (rtAlighting || rtBoarding) {
+            cancelled = false; // the cancelled flag is set even when only a departure or arrival is cancelled, fix this
+        }
         if (isArrival) {
-            boolean rtAlighting = getBooleanOrDefault(rawStop, "rtAlighting", true);
             part.setIsCancelled(cancelled || !rtAlighting);
         } else {
-            boolean rtBoarding = getBooleanOrDefault(rawStop, "rtBoarding", true);
             part.setIsCancelled(cancelled || !rtBoarding);
         }
 
