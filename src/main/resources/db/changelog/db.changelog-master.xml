@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="202601311840-1" author="junie">
+        <createTable tableName="stations" schemaName="public">
+            <column name="uri" type="varchar(50)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="alternative_fr" type="varchar(100)"/>
+            <column name="alternative_nl" type="varchar(100)"/>
+            <column name="alternative_de" type="varchar(100)"/>
+            <column name="alternative_en" type="varchar(100)"/>
+            <column name="taf_tap_code" type="varchar(8)">
+                <constraints unique="true" nullable="true"/>
+            </column>
+            <column name="telegraph_code" type="varchar(8)">
+                <constraints unique="true" nullable="true"/>
+            </column>
+            <column name="country_code" type="varchar(2)"/>
+            <column name="longitude" type="double precision">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="double precision">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avg_stop_times" type="double precision"/>
+            <column name="official_transfer_time" type="integer"/>
+        </createTable>
+
+        <setTableRemarks tableName="stations" schemaName="public" remarks="Station information table"/>
+
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="uri" remarks="The IRail URI for this station"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="name" remarks="The name of the station in the local language"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="alternative_fr" remarks="A French alternative name"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="alternative_nl" remarks="A Dutch alternative name"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="alternative_de" remarks="A German alternative name"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="alternative_en" remarks="An English alternative name"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="taf_tap_code" remarks="Taf Tap identifier for belgian stations"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="telegraph_code" remarks="A short unique letter combination for Belgian stations"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="country_code" remarks="2-letter ISO country code"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="avg_stop_times" remarks="Average number of stops at this station per day"/>
+        <setColumnRemarks tableName="stations" schemaName="public" columnName="official_transfer_time" remarks="Official transfer time between trains at this station, in minutes"/>
+    </changeSet>
+
+    <changeSet id="202601311900-1" author="junie">
+        <createTable tableName="occupancy_reports" schemaName="public">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="vehicle_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stop_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="journey_start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occupancy" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="occupancy_reports" columnNames="journey_start_date, vehicle_id, stop_id, source"/>
+        <setTableRemarks tableName="occupancy_reports" schemaName="public" remarks="A table containing all individual occupancy reports. There may be multiple reports for the same departure"/>
+        <setColumnRemarks tableName="occupancy_reports" schemaName="public" columnName="vehicle_id" remarks="The id of the vehicle for which occupancy was reported"/>
+        <setColumnRemarks tableName="occupancy_reports" schemaName="public" columnName="stop_id" remarks="The id of the stop at which this occupancy was reported"/>
+        <setColumnRemarks tableName="occupancy_reports" schemaName="public" columnName="journey_start_date" remarks="The date on which the vehicle started its journey"/>
+        <setColumnRemarks tableName="occupancy_reports" schemaName="public" columnName="source" remarks="The source, such as Spitsgids or NMBS"/>
+        <setColumnRemarks tableName="occupancy_reports" schemaName="public" columnName="occupancy" remarks="The reported occupancy level"/>
+    </changeSet>
+
+    <changeSet id="202601311900-2" author="junie">
+        <createTable tableName="composition_history" schemaName="public">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="journey_type" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="journey_number" type="integer"/>
+            <column name="journey_start_date" type="date"/>
+            <column name="from_station_id" type="varchar(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_station_id" type="varchar(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_material_type" type="varchar(16)"/>
+            <column name="passenger_unit_count" type="tinyint"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="composition_history" schemaName="public" columnNames="journey_type, journey_number, journey_start_date, from_station_id, to_station_id" constraintName="unique_journey_identifier"/>
+        <createIndex tableName="composition_history" schemaName="public" indexName="dated_vehicle_journey">
+            <column name="journey_type"/>
+            <column name="journey_number"/>
+            <column name="journey_start_date"/>
+        </createIndex>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="journey_type" remarks="The journey type, for example 'IC' in IC 513"/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="journey_number" remarks="The journey number, for example '513' in IC 513"/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="journey_start_date" remarks="The date on which this journey ran"/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="from_station_id" remarks="The id of the station from which this unit has the given position in the composition. Typically the first station of the journey, but might differ in case of trains which split."/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="to_station_id" remarks="The id of the station to which this unit has the given position in the composition. Typically the last station of the journey, but might differ in case of trains which split."/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="primary_material_type" remarks="The type of the majority of the used vehicles, such as I10, M6 or AM96"/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="passenger_unit_count" remarks="The number of units in which passengers can be seated"/>
+        <setColumnRemarks tableName="composition_history" schemaName="public" columnName="created_at" remarks="The time when this composition was recorded"/>
+    </changeSet>
+
+    <changeSet id="202601311900-3" author="junie">
+        <createTable tableName="composition_unit" schemaName="public">
+            <column name="uic_code" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="material_type_name" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="material_subtype_name" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="material_number" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_toilet" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_prm_toilet" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_airco" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_bike_section" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_prm_section" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seats_first_class" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seats_second_class" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="uic_code" remarks="For example '508826960330'"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="material_type_name" remarks="The vehicle type, for example 'M7'"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="material_subtype_name" remarks="The vehicle subtype, for example 'M7BUH'"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="material_number" remarks="The vehicle number, for example '72033'"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="has_toilet" remarks="Whether a toilet is available"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="has_prm_toilet" remarks="Whether a toilet accessible for passengers with reduced mobility is available"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="has_airco" remarks="Whether air conditioning is available"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="has_bike_section" remarks="Whether a section for bikes is present"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="has_prm_section" remarks="Whether a section for passengers with reduced mobility is present"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="seats_first_class" remarks="The number of seats in first class"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="seats_second_class" remarks="The number of seats in second class"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="created_at" remarks="The time when this unit was first seen"/>
+        <setColumnRemarks tableName="composition_unit" schemaName="public" columnName="updated_at" remarks="The time when this unit was last updated"/>
+    </changeSet>
+
+    <changeSet id="202601311900-4" author="junie">
+        <createTable tableName="composition_unit_usage" schemaName="public">
+            <column name="uic_code" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="historic_composition_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="composition_unit_usage" schemaName="public" columnNames="uic_code, historic_composition_id" constraintName="pk_composition_unit_usage"/>
+        <addForeignKeyConstraint baseTableName="composition_unit_usage" baseTableSchemaName="public" baseColumnNames="uic_code" constraintName="rolling_stock_reference" referencedTableName="composition_unit" referencedTableSchemaName="public" referencedColumnNames="uic_code" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="composition_unit_usage" baseTableSchemaName="public" baseColumnNames="historic_composition_id" constraintName="history_reference" referencedTableName="composition_history" referencedTableSchemaName="public" referencedColumnNames="id" onDelete="CASCADE"/>
+        <setColumnRemarks tableName="composition_unit_usage" schemaName="public" columnName="uic_code" remarks="The uic code of the unit"/>
+        <setColumnRemarks tableName="composition_unit_usage" schemaName="public" columnName="historic_composition_id" remarks="Reference to an entry in the CompositionHistory table, where the journey is described."/>
+        <setColumnRemarks tableName="composition_unit_usage" schemaName="public" columnName="position" remarks="The position of this unit in the composition on the specified segment of the specified journey"/>
+    </changeSet>
+
+</databaseChangeLog>

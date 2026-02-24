@@ -1,0 +1,160 @@
+package be.irail.api.controllers.v1;
+
+import be.irail.api.db.CompositionDao;
+import be.irail.api.dto.Format;
+import be.irail.api.dto.Language;
+import be.irail.api.dto.Vehicle;
+import be.irail.api.dto.result.VehicleCompositionSearchResult;
+import be.irail.api.dto.vehiclecomposition.TrainComposition;
+import be.irail.api.exception.InternalProcessingException;
+import be.irail.api.exception.IrailHttpException;
+import be.irail.api.exception.notfound.IrailNotFoundException;
+import be.irail.api.exception.notfound.JourneyNotFoundException;
+import be.irail.api.gtfs.dao.GtfsInMemoryDao;
+import be.irail.api.legacy.DataRoot;
+import be.irail.api.legacy.VehicleCompositionV1Converter;
+import be.irail.api.riv.NmbsRivCompositionClient;
+import be.irail.api.util.RequestParser;
+import be.irail.api.util.VehicleIdTools;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static be.irail.api.config.Metrics.V1_COMPOSITION_REQUEST_METER;
+import static be.irail.api.config.Metrics.V1_COMPOSITION_SUCCESS_REQUEST_METER;
+
+/**
+ * Controller for V1 Composition API endpoint.
+ */
+@Component
+@Path("/v1")
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+public class CompositionV1Controller extends V1Controller {
+    private static final Logger log = LogManager.getLogger(CompositionV1Controller.class);
+
+    private final CompositionDao compositionDao;
+    private final NmbsRivCompositionClient compositionClient;
+
+    private final Cache<CompositionRequest, DataRoot> cache = CacheBuilder.newBuilder()
+            .maximumSize(2000)
+            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .build();
+
+    @Autowired
+    public CompositionV1Controller(
+            CompositionDao compositionDao,
+            NmbsRivCompositionClient compositionClient
+    ) {
+        this.compositionDao = compositionDao;
+        this.compositionClient = compositionClient;
+    }
+
+    /**
+     * Gets the composition of a specific vehicle/train.
+     *
+     * @param journeyId the vehicle ID
+     * @param dateStr   the date (ddmmyy format)
+     * @param lang      the language for response data
+     * @param format    the response format
+     * @return the vehicle composition result
+     */
+    @GET
+    @Path("/composition")
+    public Response getComposition(
+            @QueryParam("id") String journeyId,
+            @QueryParam("date") String dateStr,
+            @QueryParam("lang") @DefaultValue("en") String lang,
+            @QueryParam("format") @DefaultValue("xml") String format) {
+
+        if (journeyId == null || journeyId.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing required parameter: id")
+                    .build();
+        }
+
+        V1_COMPOSITION_REQUEST_METER.mark();
+        Language language = RequestParser.parseLanguage(lang);
+        Format outputFormat = RequestParser.parseFormat(format);
+
+        try {
+            LocalDate date = parseDate(dateStr);
+            log.debug("Fetching composition for vehicle ID: " + journeyId + ", date: " + date);
+
+            DataRoot dataRoot = getCachedData(journeyId, date, language);
+
+            // Serialize to output format
+            Response response = v1Response(dataRoot, outputFormat);
+            V1_COMPOSITION_SUCCESS_REQUEST_METER.mark();
+            return response;
+        } catch (UncheckedExecutionException | ExecutionException exception) {
+            if (exception.getCause() instanceof IrailNotFoundException nfe) {
+                // don't log these exceptions with a stack trace etc
+                log.info("Composition for vehicle {} not found: " + nfe.getMessage(), journeyId);
+                throw nfe;
+            }
+            log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
+            if (exception.getCause() instanceof IrailHttpException irailException) {
+                throw irailException; // Don't modify exceptions which have been caught/handled already
+            }
+            throw new InternalProcessingException("Error fetching composition: " + exception.getMessage(), exception);
+        }
+    }
+
+    private @NonNull DataRoot getCachedData(String journeyId, LocalDate date, Language language) throws ExecutionException {
+        CompositionRequest request = new CompositionRequest(journeyId, date, language);
+        return cache.get(request, () -> getDataRoot(request));
+    }
+
+    private DataRoot getDataRoot(CompositionRequest request) throws ExecutionException {
+        log.debug("Fetching composition for vehicle ID: " + request.journeyId() + ", date: " + request.date() + " from database or RIV");
+        int journeyNumber = VehicleIdTools.extractTrainNumber(request.journeyId());
+
+        // Get journey type from GTFS
+        Vehicle vehicle = GtfsInMemoryDao.getInstance().getVehicle(journeyNumber, request.date);
+
+        // Get composition from database
+        List<TrainComposition> compositionSegments = compositionDao.getComposition(vehicle, request.date);
+
+        if (compositionSegments.isEmpty()) {
+            compositionSegments = getRivComposition(request, vehicle);
+        } else {
+            log.debug("Composition for vehicle {} found in database, {} segments", request.journeyId, compositionSegments.size());
+        }
+
+        // Convert to V1 format
+        return new VehicleCompositionV1Converter(request.language).convert(compositionSegments);
+    }
+
+    private List<TrainComposition> getRivComposition(CompositionRequest request, Vehicle vehicle) throws ExecutionException {
+        List<TrainComposition> compositionSegments;
+        log.debug("Composition for vehicle {} not found in database, fetching fresh data from RIV", request.journeyId());
+        VehicleCompositionSearchResult freshData = compositionClient.getComposition(vehicle);
+        if (freshData == null || freshData.getSegments().isEmpty()) {
+            throw new JourneyNotFoundException(request.journeyId(), request.date(), "No composition data found for vehicle.");
+        }
+        log.debug("Composition for vehicle {} fetched from RIV, {} segments", request.journeyId, freshData.getSegments().size());
+        try {
+            compositionDao.storeComposition(vehicle, freshData);
+        } catch (Throwable e) {
+            log.error("Failed to store composition for vehicle {}: {}", request.journeyId, e.getMessage(), e);
+        }
+        compositionSegments = freshData.getSegments();
+        return compositionSegments;
+    }
+
+    private record CompositionRequest(String journeyId, LocalDate date, Language language) {
+    }
+}
