@@ -6,6 +6,7 @@ import be.irail.api.dto.DepartureOrArrival;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
 
 import java.time.ZoneId;
+import java.util.List;
 
 /**
  * Converts VehicleJourneySearchResult to V1 DataRoot format for legacy API compatibility.
@@ -20,12 +21,12 @@ public class DatedVehicleJourneyV1Converter extends V1Converter {
      */
     public static DataRoot convert(VehicleJourneySearchResult vehicleJourney) {
         DataRoot result = new DataRoot("vehicleinformation");
-        var lastVisitedStop = vehicleJourney.getStops().stream()
+        List<DepartureAndArrival> visitedStops = vehicleJourney.getStops().stream()
                 .filter(stop ->
                         (stop.hasDeparture() && stop.getDeparture().getStatus() != null)
                                 || (stop.hasArrival() && stop.getArrival().getStatus() != null))
-                .toList()
-                .getLast();
+                .toList();
+        var lastVisitedStop = visitedStops.isEmpty() ? vehicleJourney.getStops().getFirst() : visitedStops.getLast();
         result.vehicle = convertVehicle(vehicleJourney.getVehicle(), lastVisitedStop.getStation());
         result.stop = vehicleJourney.getStops().stream()
                 .map(DatedVehicleJourneyV1Converter::convertStop)
