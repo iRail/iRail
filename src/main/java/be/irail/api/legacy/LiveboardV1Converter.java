@@ -1,6 +1,8 @@
 package be.irail.api.legacy;
 
-import be.irail.api.dto.*;
+import be.irail.api.dto.DepartureArrivalState;
+import be.irail.api.dto.DepartureOrArrival;
+import be.irail.api.dto.TimeSelection;
 import be.irail.api.dto.result.LiveboardSearchResult;
 import be.irail.api.riv.requests.LiveboardRequest;
 
@@ -42,7 +44,7 @@ public class LiveboardV1Converter extends V1Converter {
         result.canceled = departure.isCancelled() ? "1" : "0";
         result.left = departure.getStatus() == DepartureArrivalState.REPORTED ? "1" : "0";
         result.isExtra = departure.isExtra() ? "1" : "0";
-        result.vehicle = convertVehicle(departure.getVehicle());
+        result.vehicle = convertVehicle(departure.getVehicle(), null);
         result.platform = convertPlatform(departure.getPlatform());
         result.occupancy = convertOccupancy(departure.getOccupancy());
         result.departureConnection = departure.getDepartureUri();
@@ -57,7 +59,7 @@ public class LiveboardV1Converter extends V1Converter {
         result.canceled = arrival.isCancelled() ? "1" : "0";
         result.arrived = arrival.getStatus() == DepartureArrivalState.REPORTED ? "1" : "0";
         result.isExtra = arrival.isExtra() ? "1" : "0";
-        result.vehicle = convertVehicle(arrival.getVehicle());
+        result.vehicle = convertVehicle(arrival.getVehicle(), null);
         result.platform = convertPlatform(arrival.getPlatform());
         result.departureConnection = arrival.getDepartureUri();
         return result;

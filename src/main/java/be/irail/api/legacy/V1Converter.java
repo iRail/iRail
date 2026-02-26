@@ -23,14 +23,14 @@ public abstract class V1Converter {
         return result;
     }
 
-    protected static V1Vehicle convertVehicle(Vehicle vehicle) {
+    protected static V1Vehicle convertVehicle(Vehicle vehicle, StationDto lastVisitedStop) {
         V1Vehicle result = new V1Vehicle();
         result.name = "BE.NMBS." + vehicle.getType() + vehicle.getNumber();
         result.shortname = vehicle.getType() + " " + vehicle.getNumber();
         result.number = String.valueOf(vehicle.getNumber());
         result.type = vehicle.getType();
-        result.locationX = "0";
-        result.locationY = "0";
+        result.locationX = lastVisitedStop != null ? String.valueOf(lastVisitedStop.getLongitude()) : "0";
+        result.locationY = lastVisitedStop != null ? String.valueOf(lastVisitedStop.getLatitude()) : "0";
         result.atId = vehicle.getUri();
         return result;
     }

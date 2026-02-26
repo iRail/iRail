@@ -1,6 +1,8 @@
 package be.irail.api.legacy;
 
-import be.irail.api.dto.*;
+import be.irail.api.dto.DepartureAndArrival;
+import be.irail.api.dto.DepartureArrivalState;
+import be.irail.api.dto.DepartureOrArrival;
 import be.irail.api.dto.result.VehicleJourneySearchResult;
 
 import java.time.ZoneId;
@@ -18,7 +20,13 @@ public class DatedVehicleJourneyV1Converter extends V1Converter {
      */
     public static DataRoot convert(VehicleJourneySearchResult vehicleJourney) {
         DataRoot result = new DataRoot("vehicleinformation");
-        result.vehicle = convertVehicle(vehicleJourney.getVehicle());
+        var lastVisitedStop = vehicleJourney.getStops().stream()
+                .filter(stop ->
+                        (stop.hasDeparture() && stop.getDeparture().getStatus() != null)
+                                || (stop.hasArrival() && stop.getArrival().getStatus() != null))
+                .toList()
+                .getLast();
+        result.vehicle = convertVehicle(vehicleJourney.getVehicle(), lastVisitedStop.getStation());
         result.stop = vehicleJourney.getStops().stream()
                 .map(DatedVehicleJourneyV1Converter::convertStop)
                 .toArray();
@@ -53,7 +61,6 @@ public class DatedVehicleJourneyV1Converter extends V1Converter {
 
         return result;
     }
-
 
 
     // Inner classes for V1 output structure

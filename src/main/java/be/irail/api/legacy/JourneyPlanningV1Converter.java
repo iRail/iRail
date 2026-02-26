@@ -50,7 +50,7 @@ public class JourneyPlanningV1Converter extends V1Converter {
         result.station = convertStation(departure.getStation());
         result.time = departure.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.vehicle = departureLeg.getLegType() == JourneyLegType.JOURNEY
-                ? convertVehicle(departure.getVehicle())
+                ? convertVehicle(departure.getVehicle(), null)
                 : convertWalk();
         result.platform = convertPlatform(departure.getPlatform());
         result.canceled = departure.isCancelled() ? "1" : "0";
@@ -71,7 +71,7 @@ public class JourneyPlanningV1Converter extends V1Converter {
         result.station = convertStation(arrival.getStation());
         result.time = arrival.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.vehicle = arrivalLeg.getLegType() == JourneyLegType.JOURNEY
-                ? convertVehicle(arrival.getVehicle())
+                ? convertVehicle(arrival.getVehicle(), null)
                 : convertWalk();
         result.platform = convertPlatform(arrival.getPlatform());
         result.canceled = arrival.isCancelled() ? "1" : "0";
@@ -94,7 +94,7 @@ public class JourneyPlanningV1Converter extends V1Converter {
                     - arrivingLeg.getArrival().getRealtimeDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
             via.station = convertStation(arrivingLeg.getArrival().getStation());
             via.vehicle = departingLeg.getLegType() == JourneyLegType.JOURNEY
-                    ? convertVehicle(departingLeg.getVehicle())
+                    ? convertVehicle(departingLeg.getVehicle(), null)
                     : convertWalk();
             result.add(via);
         }
