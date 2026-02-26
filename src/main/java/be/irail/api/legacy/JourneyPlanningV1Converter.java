@@ -136,7 +136,7 @@ public class JourneyPlanningV1Converter extends V1Converter {
         V1Direction result = new V1Direction();
         if (departureOrArrival.getVehicle() != null && departureOrArrival.getVehicle().getDirection() != null) {
             StationDto station = departureOrArrival.getVehicle().getDirection().getStation();
-            result.name = station != null ? station.getStationName() : departureOrArrival.getVehicle().getDirection().getName();
+            result.name = station != null ? station.getLocalizedStationName() : departureOrArrival.getVehicle().getDirection().getName();
         } else {
             result.name = "Walk";
         }
