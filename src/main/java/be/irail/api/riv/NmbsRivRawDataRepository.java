@@ -37,6 +37,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -179,18 +180,23 @@ public class NmbsRivRawDataRepository {
             }
 
             JourneyWithOriginAndDestination vehicle = optVehicle.get();
-            if (GtfsRtInMemoryDao.getInstance().isCanceled(vehicle.tripId(), request.dateTime().toLocalDate())) {
+            if (GtfsRtInMemoryDao.getInstance().isCanceled(vehicle.tripId(), vehicle.tripStartDate())) {
                 log.info("Vehicle {} on {} is cancelled, cannot retrieve journey detail ref", vehicle.tripId(), request.dateTime());
                 return null;
             }
 
-
-            String journeyDetailRef = findVehicleJourneyRefBetweenStops(request, vehicle);
-
-            // If not found, the journey might have been partially cancelled. Try alternative segments.
-            if (journeyDetailRef == null) {
-                journeyDetailRef = getJourneyDetailRefAlt(request, vehicle);
+            String journeyDetailRef;
+            if (vehicle.tripStartDate().isBefore(LocalDate.now())) {
+                // Fix for NMBS ignoring date parameter, a bug present in their own app as well
+                journeyDetailRef = findVehicleJourneyRefPastMidnight(request, vehicle);
+            } else {
+                journeyDetailRef = queryVehicleJourneyRef(vehicle, LocalTime.ofSecondOfDay(vehicle.getOriginDepartureTimeOffset() % 86400));
+                // If not found, the journey might have been partially cancelled. Try alternative segments.
+                if (journeyDetailRef == null) {
+                    journeyDetailRef = getJourneyDetailRefAlt(request, vehicle);
+                }
             }
+
 
             if (journeyDetailRef != null) {
                 log.debug("Found journey detail ref: '{}' between {} and {}",
@@ -206,9 +212,9 @@ public class NmbsRivRawDataRepository {
     /**
      * Find the vehicle journey reference by searching between origin and destination stops.
      */
-    private String findVehicleJourneyRefBetweenStops(VehicleJourneyRequest request, JourneyWithOriginAndDestination
-            vehicle) {
-        String formattedDate = request.dateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    private String queryVehicleJourneyRef(JourneyWithOriginAndDestination vehicle, LocalTime queryTime) {
+        String formattedDate = vehicle.tripStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String formattedTime = queryTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         String vehicleName = vehicle.getJourneyType() + vehicle.getJourneyNumber();
 
         Map<String, String> params = new HashMap<>();
@@ -216,6 +222,7 @@ public class NmbsRivRawDataRepository {
         params.put("originExtId", vehicle.getOriginStopId().replaceAll("_\\d+", ""));
         params.put("destExtId", vehicle.getDestinationStopId().replaceAll("_\\d+", ""));
         params.put("date", formattedDate);
+        params.put("time", formattedTime);
 
         try {
             CachedData<JsonNode> response = makeApiCallToMobileRivApi("https://mobile-riv.api.belgianrail.be/riv/v1.0/journey", params);
@@ -230,6 +237,21 @@ public class NmbsRivRawDataRepository {
     }
 
     /**
+     * Get the journey detail reference by looking up the last two stops, with a query time before the next-last stop,
+     * to find a reference for a train that started running yesterday. Needed because the date parameter is ignored by the NMBS.
+     */
+    private String findVehicleJourneyRefPastMidnight(VehicleJourneyRequest request, JourneyWithOriginAndDestination vehicle) {
+        List<JourneyWithOriginAndDestination> alternatives = gtfsTripStartEndExtractor.getAlternativeVehicleWithOriginAndDestination(vehicle);
+        int i = 0;
+        JourneyWithOriginAndDestination alt = alternatives.getLast(); // Search between the last two stops
+        log.debug("Searching for vehicle {} using alternative segments: {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), i);
+        LocalTime queryTime = LocalTime.of(0, 0);
+        String journeyRef = queryVehicleJourneyRef(alt, queryTime);
+        return journeyRef;
+    }
+
+
+    /**
      * Get the journey detail reference by trying alternative origin-destination stretches,
      * to cope with cancelled origin/destination stops.
      */
@@ -241,14 +263,14 @@ public class NmbsRivRawDataRepository {
         while (journeyRef == null && i < alternatives.size() / 2) {
             JourneyWithOriginAndDestination alt = alternatives.get(i);
             log.debug("Searching for vehicle {} using alternative segments: {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), i);
-            journeyRef = findVehicleJourneyRefBetweenStops(request, alt);
+            journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
 
             if (journeyRef == null) {
                 // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
                 int j = (alternatives.size() - 1) - i;
                 log.debug("Searching for vehicle {} using alternative segments {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), j);
                 alt = alternatives.get(j);
-                journeyRef = findVehicleJourneyRefBetweenStops(request, alt);
+                journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
             }
             i++;
         }

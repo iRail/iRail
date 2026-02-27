@@ -1,17 +1,19 @@
 package be.irail.api.riv;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record JourneyWithOriginAndDestination(
-    String tripId,
-    String vehicleType,
-    int vehicleNumber,
-    String originStopId,
-    int originDepartureTime,
-    String destinationStopId,
-    int destinationArrivalTime,
-    int numberOfStops,
-    List<String> splitOrJoinStopIds
+        LocalDate tripStartDate,
+        String tripId,
+        String vehicleType,
+        int vehicleNumber,
+        String originStopId,
+        int originDepartureTime,
+        String destinationStopId,
+        int destinationArrivalTime,
+        int numberOfStops,
+        List<String> splitOrJoinStopIds
 ) {
     public String getJourneyType() {
         return vehicleType;

@@ -35,15 +35,7 @@ public class GtfsTripStartEndExtractor {
 
     public Optional<LocalDate> getStartDate(int journeyNumber, LocalDateTime plannedDateTime) throws JourneyNotFoundException {
         Optional<JourneyWithOriginAndDestination> journey = getVehicleWithOriginAndDestination(journeyNumber, plannedDateTime);
-        if (journey.isPresent()) {
-            // First stop departure time is in seconds from midnight of the start date
-            if (journey.get().getDestinationArrivalTimeOffset() > SECONDS_IN_DAY) {
-                return Optional.of(plannedDateTime.toLocalDate().minusDays(1));
-            } else {
-                return Optional.of(plannedDateTime.toLocalDate());
-            }
-        }
-        return Optional.empty();
+        return journey.map(JourneyWithOriginAndDestination::tripStartDate);
     }
 
     public Optional<JourneyWithOriginAndDestination> getVehicleWithOriginAndDestination(int journeyNumber, LocalDateTime date) throws JourneyNotFoundException {
@@ -80,6 +72,7 @@ public class GtfsTripStartEndExtractor {
                             String vehicleType = (route != null) ? route.shortName() : "";
                             log.info("Found trip start and end station for trip {} on day before", journeyNumber);
                             return Optional.of(new JourneyWithOriginAndDestination(
+                                    yesterday,
                                             trip.id(),
                                             vehicleType,
                                             journeyNumber,
@@ -97,7 +90,8 @@ public class GtfsTripStartEndExtractor {
 
                 List<JourneyWithOriginAndDestination> possibleMatches = new ArrayList<>();
                 for (Trip trip : trips) {
-                    if (isServiceActiveOnDate(dao, trip.serviceId(), date.toLocalDate())) {
+                    LocalDate activeDate = date.toLocalDate();
+                    if (isServiceActiveOnDate(dao, trip.serviceId(), activeDate)) {
                         List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
                         if (stopTimes.isEmpty()) {
                             continue;
@@ -110,6 +104,7 @@ public class GtfsTripStartEndExtractor {
                         String vehicleType = (route != null) ? route.shortName() : "";
 
                         possibleMatches.add(new JourneyWithOriginAndDestination(
+                                activeDate,
                                         trip.id(),
                                         vehicleType,
                                         journeyNumber,
@@ -212,6 +207,7 @@ public class GtfsTripStartEndExtractor {
             StopTime prev = passengerStops.get(i - 1);
             StopTime curr = passengerStops.get(i);
             results.add(new JourneyWithOriginAndDestination(
+                    originalJourney.tripStartDate(),
                     originalJourney.getTripId(),
                     originalJourney.getJourneyType(),
                     originalJourney.getJourneyNumber(),
