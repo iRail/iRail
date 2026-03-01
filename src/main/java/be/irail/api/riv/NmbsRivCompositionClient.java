@@ -9,7 +9,7 @@ import be.irail.api.dto.vehiclecomposition.*;
 import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.notfound.CompositionNotFoundException;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
-import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
+import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -34,7 +34,6 @@ public class NmbsRivCompositionClient {
 
     private final StationsDao stationsDao;
     private final NmbsRivRawDataRepository rivRawDataRepository;
-    private final GtfsTripStartEndExtractor gtfsTripStartEndExtractor;
 
     private final Cache<Vehicle, VehicleCompositionSearchResult> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
@@ -43,19 +42,17 @@ public class NmbsRivCompositionClient {
 
     public NmbsRivCompositionClient(
             StationsDao stationsDao,
-            NmbsRivRawDataRepository rivRawDataRepository,
-            GtfsTripStartEndExtractor gtfsTripStartEndExtractor
+            NmbsRivRawDataRepository rivRawDataRepository
     ) {
         this.stationsDao = stationsDao;
         this.rivRawDataRepository = rivRawDataRepository;
-        this.gtfsTripStartEndExtractor = gtfsTripStartEndExtractor;
     }
 
     public VehicleCompositionSearchResult getComposition(Vehicle journey) throws ExecutionException {
         try {
             return cache.get(journey, () -> {
                 log.info("Fetching composition for vehicle {} from NMBS", journey.getId());
-                Optional<JourneyWithOriginAndDestination> journeyWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+                Optional<JourneyWithOriginAndDestination> journeyWithOriginAndDestination = GtfsInMemoryDao.getInstance().getVehicleWithOriginAndDestination(
                         journey.getNumber(),
                         journey.getJourneyStartDate().atStartOfDay()
                 );

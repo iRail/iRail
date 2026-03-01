@@ -11,8 +11,8 @@ import be.irail.api.exception.upstream.UpstreamRateLimitException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.exception.upstream.UpstreamServerParameterException;
 import be.irail.api.exception.upstream.UpstreamServerUnavailableException;
+import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
-import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import be.irail.api.riv.requests.LiveboardRequest;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
@@ -54,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 public class NmbsRivRawDataRepository {
     private static final Logger log = LoggerFactory.getLogger(NmbsRivRawDataRepository.class);
 
-    private final GtfsTripStartEndExtractor gtfsTripStartEndExtractor;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private static final Cache<String, CachedData<JsonNode>> cache = CacheBuilder.newBuilder()
@@ -77,11 +76,9 @@ public class NmbsRivRawDataRepository {
     private final String apiKey;
 
     public NmbsRivRawDataRepository(
-            GtfsTripStartEndExtractor gtfsTripStartEndExtractor,
             @Value("${nmbs.riv.limitRpm:10}") int rateLimit,
             @Value("${nmbs.riv.key:}") String apiKey
     ) {
-        this.gtfsTripStartEndExtractor = gtfsTripStartEndExtractor;
         this.rateLimit = rateLimit;
         this.apiKey = apiKey;
         this.httpClient = HttpClient.newBuilder()
@@ -105,7 +102,7 @@ public class NmbsRivRawDataRepository {
         }
     }
 
-    public CachedData<JsonNode> getRoutePlanningData(JourneyPlanningRequest request) throws ExecutionException {
+    public CachedData<JsonNode> getRoutePlanningData(JourneyPlanningRequest request) {
         try (var timer = rivRouteplanningTimer.time()) {
             String fromId = request.from().getHafasId();
             String toId = request.to().getHafasId();
@@ -166,7 +163,7 @@ public class NmbsRivRawDataRepository {
             log.debug("Fetching journey detail reference for vehicle {} on {}", journeyNumber, request.dateTime());
             // We need to find the vehicle so we can add the correct journey type, since a request can come in with or without it
             // We want to treat all requests identically to ensure correct responses in all cases
-            Optional<JourneyWithOriginAndDestination> optVehicle = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+            Optional<JourneyWithOriginAndDestination> optVehicle = GtfsInMemoryDao.getInstance().getVehicleWithOriginAndDestination(
                     journeyNumber, request.dateTime());
 
             if (optVehicle.isEmpty()) {
@@ -241,13 +238,12 @@ public class NmbsRivRawDataRepository {
      * to find a reference for a train that started running yesterday. Needed because the date parameter is ignored by the NMBS.
      */
     private String findVehicleJourneyRefPastMidnight(VehicleJourneyRequest request, JourneyWithOriginAndDestination vehicle) {
-        List<JourneyWithOriginAndDestination> alternatives = gtfsTripStartEndExtractor.getAlternativeVehicleWithOriginAndDestination(vehicle);
+        List<JourneyWithOriginAndDestination> alternatives = GtfsInMemoryDao.getInstance().getAlternativeVehicleWithOriginAndDestination(vehicle);
         int i = 0;
         JourneyWithOriginAndDestination alt = alternatives.getLast(); // Search between the last two stops
         log.debug("Searching for vehicle {} using alternative segments: {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), i);
         LocalTime queryTime = LocalTime.of(0, 0);
-        String journeyRef = queryVehicleJourneyRef(alt, queryTime);
-        return journeyRef;
+        return queryVehicleJourneyRef(alt, queryTime);
     }
 
 
@@ -256,7 +252,7 @@ public class NmbsRivRawDataRepository {
      * to cope with cancelled origin/destination stops.
      */
     private String getJourneyDetailRefAlt(VehicleJourneyRequest request, JourneyWithOriginAndDestination vehicle) {
-        List<JourneyWithOriginAndDestination> alternatives = gtfsTripStartEndExtractor.getAlternativeVehicleWithOriginAndDestination(vehicle);
+        List<JourneyWithOriginAndDestination> alternatives = GtfsInMemoryDao.getInstance().getAlternativeVehicleWithOriginAndDestination(vehicle);
 
         int i = 0;
         String journeyRef = null;
@@ -277,8 +273,7 @@ public class NmbsRivRawDataRepository {
         return journeyRef;
     }
 
-    private CachedData<JsonNode> getJourneyDetailResponse(String journeyDetailRef, String language) throws
-            ExecutionException {
+    private CachedData<JsonNode> getJourneyDetailResponse(String journeyDetailRef, String language) {
         Map<String, String> params = new HashMap<>();
         params.put("id", journeyDetailRef);
         params.put("lang", language);

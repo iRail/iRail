@@ -8,7 +8,7 @@ import be.irail.api.dto.*;
 import be.irail.api.dto.result.LiveboardSearchResult;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.exception.upstream.UpstreamServerException;
-import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
+import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.riv.requests.LiveboardRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +31,6 @@ public class NmbsRivLiveboardClient {
 
     private final NmbsRivRawDataRepository rivDataRepository;
     private final StationsDao stationsDao;
-    private final GtfsTripStartEndExtractor gtfsTripStartEndExtractor;
     private final OccupancyDao occupancyDao;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -39,12 +38,10 @@ public class NmbsRivLiveboardClient {
     public NmbsRivLiveboardClient(
             NmbsRivRawDataRepository rivDataRepository,
             StationsDao stationsDao,
-            GtfsTripStartEndExtractor gtfsTripStartEndExtractor,
             OccupancyDao occupancyDao
     ) {
         this.rivDataRepository = rivDataRepository;
         this.stationsDao = stationsDao;
-        this.gtfsTripStartEndExtractor = gtfsTripStartEndExtractor;
         this.occupancyDao = occupancyDao;
     }
 
@@ -107,7 +104,7 @@ public class NmbsRivLiveboardClient {
         LocalDate journeyStartDate;
         try {
             if (!commercialType.equals("EUR") && !commercialType.equals("ICE")) {
-                journeyStartDate = gtfsTripStartEndExtractor.getStartDate(journeyNumber, plannedDateTime)
+                journeyStartDate = GtfsInMemoryDao.getInstance().getStartDate(journeyNumber, plannedDateTime)
                         .orElseThrow(() -> new JourneyNotFoundException(journeyNumber, plannedDateTime, "Failed to get journey start date from GTFS"));
             } else {
                 // Don't even try to lookup Eurostar and ICE trains in the GTFS data
@@ -180,7 +177,7 @@ public class NmbsRivLiveboardClient {
             return entry.get(key).asText();
         }
 
-        Optional<JourneyWithOriginAndDestination> gtfsJourney = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(
+        Optional<JourneyWithOriginAndDestination> gtfsJourney = GtfsInMemoryDao.getInstance().getVehicleWithOriginAndDestination(
                 entry.get("TrainNumber").asInt(),
                 plannedDateTime
         );

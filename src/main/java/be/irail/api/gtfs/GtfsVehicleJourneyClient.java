@@ -8,7 +8,6 @@ import be.irail.api.dto.result.VehicleJourneySearchResult;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
-import be.irail.api.gtfs.dao.GtfsTripStartEndExtractor;
 import be.irail.api.gtfs.reader.models.*;
 import be.irail.api.riv.JourneyWithOriginAndDestination;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Client for fetching and parsing NMBS Vehicle Journey data from their GTFS feed.
@@ -28,23 +26,20 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class GtfsVehicleJourneyClient {
     private static final Logger log = LogManager.getLogger(GtfsVehicleJourneyClient.class);
-    private final GtfsTripStartEndExtractor gtfsTripStartEndExtractor;
     private final StationsDao stationsDao;
     private final OccupancyDao occupancyDao;
 
     public GtfsVehicleJourneyClient(
-            GtfsTripStartEndExtractor gtfsTripStartEndExtractor,
             StationsDao stationsDao,
             OccupancyDao occupancyDao
     ) {
-        this.gtfsTripStartEndExtractor = gtfsTripStartEndExtractor;
         this.stationsDao = stationsDao;
         this.occupancyDao = occupancyDao;
     }
 
-    public VehicleJourneySearchResult getDatedVehicleJourney(VehicleJourneyRequest request) throws ExecutionException {
+    public VehicleJourneySearchResult getDatedVehicleJourney(VehicleJourneyRequest request) {
         int vehicleNumber = VehicleIdTools.extractTrainNumber(request.vehicleId());
-        Optional<JourneyWithOriginAndDestination> vehicleWithOriginAndDestination = gtfsTripStartEndExtractor.getVehicleWithOriginAndDestination(vehicleNumber, request.dateTime());
+        Optional<JourneyWithOriginAndDestination> vehicleWithOriginAndDestination = GtfsInMemoryDao.getInstance().getVehicleWithOriginAndDestination(vehicleNumber, request.dateTime());
         if (vehicleWithOriginAndDestination.isEmpty()) {
             throw new JourneyNotFoundException(request.vehicleId(), request.dateTime(), "Vehicle not found in GTFS data");
         }
