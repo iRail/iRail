@@ -12,12 +12,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Provider
 public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
+    private static final Logger log = LogManager.getLogger(IrailExceptionMapper.class);
 
     private final Meter irailBadRequestMeter = Metrics.getRegistry().meter("Exceptions, Irail, Bad request");
     private final Meter irailNotFoundMeter = Metrics.getRegistry().meter("Exceptions, Irail, Journey or station not found");
@@ -49,6 +52,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
                 irailNotFoundMeter.mark();
                 return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception.getMessage(), exception));
             }
+            log.error("Exception occurred during HTTP request: {}", throwable.getMessage(), throwable);
             irailExceptionMeter.mark();
             return getJsonResponse(exception.getHttpCode(), new ExceptionDto(exception));
         }
@@ -57,6 +61,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
             notFoundMeter.mark();
             return getJsonResponse(404, new ExceptionDto(exception.getMessage(), exception));
         }
+        log.error("Exception occurred during HTTP request: {}", throwable.getMessage(), throwable);
         exceptionMeter.mark();
         return getJsonResponse(500, new ExceptionDto(throwable));
     }
