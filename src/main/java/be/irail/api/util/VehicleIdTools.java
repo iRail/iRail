@@ -38,6 +38,7 @@ public class VehicleIdTools {
         // Handle S trains. For example, S5 3381 or S53381 should become 3381. Typically a number has 4 digits.
         id = id.replaceAll("BUS ?(\\d{3,5})", "$1"); // BUSS123, BUSS23456
         id = id.replaceAll("S[12]0 ?(\\d{4})", "$1"); // S10, S20
+        id = id.replaceAll("S19 ?(\\d{4})", "$1"); // S19
         id = id.replaceAll("S32 ?(4\\d{2})", "$1"); // S32 400
         id = id.replaceAll("S3[2345] ?(\\d{4})", "$1"); // S32, S33, S34
         id = id.replaceAll("S4[1234] ?(\\d{4})", "$1"); // S41, 42, 43, 44
