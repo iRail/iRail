@@ -193,15 +193,15 @@ public class NmbsRivLiveboardClient {
     }
 
     private OccupancyInfo getOccupancy(DepartureOrArrival stop) {
-        List<OccupancyReport> reports = occupancyDao.getReportsForJourney(
+        Integer stopId = extractNumericStopId(stop.getStation().getId());
+
+        List<OccupancyReport> reports = occupancyDao.getOccupancy(
                 stop.getVehicle().getId(),
                 stop.getScheduledDateTime().toLocalDate()
-        );
+        ).get(stopId);
 
         OccupancyReport.OccupancyLevel official = null;
         OccupancyReport.OccupancyLevel spitsgids = null;
-
-        Integer stopId = extractNumericStopId(stop.getStation().getId());
 
         for (OccupancyReport report : reports) {
             if (report.getStopId().equals(stopId)) {

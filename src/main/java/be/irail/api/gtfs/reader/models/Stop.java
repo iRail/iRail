@@ -13,4 +13,11 @@ public record Stop(String id, String code, String name, String desc, double lat,
     public String getName(Language language) {
         return localNames.getOrDefault(language, name);
     }
+
+    public String getHafasId() {
+        if (id.charAt(0) == 'S') {
+            return id.substring(1);
+        }
+        return id;
+    }
 }

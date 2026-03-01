@@ -18,7 +18,7 @@ public class PlatformInfo {
      */
     public PlatformInfo(String parentStopId, String designation, boolean hasChanged) {
         this.id = (parentStopId != null && designation != null) ? parentStopId + "#" + designation : null;
-        this.designation = designation;
+        this.designation = designation != null ? designation : "?";
         this.hasChanged = hasChanged;
     }
 

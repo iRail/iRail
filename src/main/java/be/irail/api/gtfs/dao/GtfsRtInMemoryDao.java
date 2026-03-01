@@ -1,13 +1,10 @@
 package be.irail.api.gtfs.dao;
 
 import be.irail.api.gtfs.reader.DatedTripId;
-import be.irail.api.gtfs.reader.models.GtfsRtDelay;
-import com.google.common.collect.ArrayListMultimap;
+import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * In-memory DAO for GTFS-Realtime delay data.
@@ -15,8 +12,8 @@ import java.util.Set;
 public class GtfsRtInMemoryDao {
     private static final GtfsRtInMemoryDao INSTANCE = new GtfsRtInMemoryDao();
 
-    private ArrayListMultimap<String, GtfsRtDelay> delaysByStopId = ArrayListMultimap.create();
-    private ArrayListMultimap<String, GtfsRtDelay> updatesByStopId = ArrayListMultimap.create();
+    private Map<String, Map<String, GtfsRtUpdate>> updatesByTripIdAndStop = new HashMap<>();
+    private Map<String, Map<String, GtfsRtUpdate>> updatesByStopIdAndTrip = new HashMap<>();
     private Set<DatedTripId> canceledTrips = new HashSet<>();
 
     private GtfsRtInMemoryDao() {
@@ -31,34 +28,38 @@ public class GtfsRtInMemoryDao {
      *
      * @param delays the list of new delays
      */
-    public void updateStopTimeUpdates(List<GtfsRtDelay> delays) {
-        ArrayListMultimap<String, GtfsRtDelay> tripMap = ArrayListMultimap.create();
-        ArrayListMultimap<String, GtfsRtDelay> stopMap = ArrayListMultimap.create();
+    public void updateStopTimeUpdates(List<GtfsRtUpdate> delays) {
+        Map<String, Map<String, GtfsRtUpdate>> tripMap = new HashMap<>();
+        Map<String, Map<String, GtfsRtUpdate>> stopMap = new HashMap<>();
 
-        for (GtfsRtDelay delay : delays) {
-            tripMap.put(delay.tripId(), delay);
-            if (delay.parentStopId() != null) {
-                stopMap.put(delay.parentStopId(), delay);
+        for (GtfsRtUpdate update : delays) {
+            tripMap.putIfAbsent(update.tripId(), new HashMap<>());
+            tripMap.get(update.tripId()).put(update.stopId(), update);
+            if (update.parentStopId() != null) {
+                // Remove the "S" prefix for station type stops
+                String stopId = update.parentStopId().substring(1);
+                stopMap.putIfAbsent(stopId, new HashMap<>());
+                stopMap.get(stopId).put(update.tripId(), update);
             }
         }
         // Atomic update of the maps (replace content)
-        delaysByStopId = tripMap;
-        updatesByStopId = stopMap;
+        updatesByTripIdAndStop = tripMap;
+        updatesByStopIdAndTrip = stopMap;
     }
 
     public void updateCanceledTrips(Set<DatedTripId> canceledTrips) {
         this.canceledTrips = canceledTrips;
     }
 
-    public List<GtfsRtDelay> getDelaysByTripId(String tripId) {
-        return delaysByStopId.get(tripId);
+    public Map<String, GtfsRtUpdate> getUpdatesByTripId(String tripId) {
+        return updatesByTripIdAndStop.getOrDefault(tripId, new HashMap<>());
+    }
+
+    public Map<String, GtfsRtUpdate> getUpdatesByHafasStopId(String stopId) {
+        return updatesByStopIdAndTrip.get(stopId);
     }
 
     public boolean isCanceled(String tripId, LocalDate startDate) {
         return canceledTrips.contains(new DatedTripId(tripId, startDate));
-    }
-
-    public List<GtfsRtDelay> getDelaysByStopId(String stopId) {
-        return updatesByStopId.get(stopId);
     }
 }

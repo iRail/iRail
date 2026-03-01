@@ -1,5 +1,8 @@
 package be.irail.api.db;
 
+import be.irail.api.dto.DepartureOrArrival;
+import be.irail.api.dto.OccupancyInfo;
+import com.google.common.collect.ArrayListMultimap;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,16 +24,12 @@ public class OccupancyDao {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static Map<JourneyKey, List<OccupancyReport>> reportsByJourney;
-    private static Map<StationKey, List<OccupancyReport>> reportsByStation;
+    private static Map<JourneyKey, ArrayListMultimap<Integer, OccupancyReport>> reportsByJourneyAndStation;
     private static Map<StationJourneyAndSourceKey, OccupancyReport> reportsByStationJourneyAndStartDate;
 
     private static final List<OccupancyReport> pendingUpdates = new ArrayList<>();
 
     private record JourneyKey(String journeyId, LocalDate startDate) {
-    }
-
-    private record StationKey(Integer stopId, LocalDate startDate) {
     }
 
     private record StationJourneyAndSourceKey(Integer stopId, String journeyId, LocalDate startDate,
@@ -42,39 +41,34 @@ public class OccupancyDao {
      *
      * @param journeyId the journey number (e.g. IC548)
      * @param startDate the start date of the journey
-     * @return a list of occupancy reports
+     * @return a multimap of stations and occupancy reports for them
      */
-    public List<OccupancyReport> getReportsForJourney(String journeyId, LocalDate startDate) {
+    public ArrayListMultimap<Integer, OccupancyReport> getOccupancy(String journeyId, LocalDate startDate) {
         initializeOccupancy();
-        return reportsByJourney.getOrDefault(new JourneyKey(journeyId, startDate), new ArrayList<>());
+        return reportsByJourneyAndStation.getOrDefault(new JourneyKey(journeyId, startDate), ArrayListMultimap.create());
     }
 
-    /**
-     * Returns all occupancy reports for a given station on a specific date.
-     *
-     * @param stationId the station ID (e.g. 008812005)
-     * @param startDate the date of the report
-     * @return a list of occupancy reports
-     */
-    public List<OccupancyReport> getReportsForStation(String stationId, LocalDate startDate) {
-        initializeOccupancy();
-        // The table has stop_id as integer. stationId might be a URI or a numeric string.
-        Integer stopId = extractStopId(stationId);
-        return reportsByStation.getOrDefault(new StationKey(stopId, startDate), new ArrayList<>());
-    }
+    public OccupancyInfo getOccupancy(DepartureOrArrival stop) {
+        Integer stopId = extractNumericStopId(stop.getStation().getId());
 
-    private Integer extractStopId(String stationId) {
-        if (stationId == null) {
-            return null;
+        List<OccupancyReport> reports = getOccupancy(
+                stop.getVehicle().getId(),
+                stop.getScheduledDateTime().toLocalDate()
+        ).get(stopId);
+
+        OccupancyReport.OccupancyLevel official = null;
+        OccupancyReport.OccupancyLevel spitsgids = null;
+
+        for (OccupancyReport report : reports) {
+            if (report.getStopId().equals(stopId)) {
+                if (report.getSource() == OccupancyReport.OccupancyReportSource.NMBS) {
+                    official = report.getOccupancy();
+                } else if (report.getSource() == OccupancyReport.OccupancyReportSource.SPITSGIDS) {
+                    spitsgids = report.getOccupancy();
+                }
+            }
         }
-        if (stationId.startsWith("http://irail.be/stations/NMBS/")) {
-            stationId = stationId.substring(30);
-        }
-        try {
-            return Integer.parseInt(stationId.replaceAll("\\D+", ""));
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return new OccupancyInfo(official, spitsgids);
     }
 
     /**
@@ -95,13 +89,9 @@ public class OccupancyDao {
 
             // Update journey cache
             JourneyKey journeyKey = new JourneyKey(report.getVehicleId(), report.getJourneyStartDate());
-            List<OccupancyReport> journeyReports = reportsByJourney.computeIfAbsent(journeyKey, k -> new ArrayList<>());
-            updateListCache(journeyReports, report);
-
-            // Update station cache
-            StationKey stationKey = new StationKey(report.getStopId(), report.getJourneyStartDate());
-            List<OccupancyReport> stationReports = reportsByStation.computeIfAbsent(stationKey, k -> new ArrayList<>());
-            updateListCache(stationReports, report);
+            ArrayListMultimap<Integer, OccupancyReport> journeyReports =
+                    reportsByJourneyAndStation.computeIfAbsent(journeyKey, k -> ArrayListMultimap.create());
+            updateReportsByStationCache(journeyReports, report);
 
             synchronized (pendingUpdates) {
                 pendingUpdates.add(report);
@@ -109,19 +99,30 @@ public class OccupancyDao {
         }
     }
 
-    private void updateListCache(List<OccupancyReport> reports, OccupancyReport newReport) {
-        // Remove existing report for the same vehicle and stop if it exists
-        reports.removeIf(r -> r.getStopId().equals(newReport.getStopId())
-                && r.getVehicleId().equals(newReport.getVehicleId())
-                && r.getSource().equals(newReport.getSource()));
-        reports.add(newReport);
+    private Integer extractNumericStopId(String stationId) {
+        if (stationId == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(stationId.replaceAll("\\D+", ""));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
-    /**
+    private void updateReportsByStationCache(ArrayListMultimap<Integer, OccupancyReport> reports, OccupancyReport newReport) {
+        // Remove existing report for the same vehicle and stop if it exists
+        reports.get(newReport.getStopId()).removeIf(r -> r.getStopId().equals(newReport.getStopId())
+                && r.getVehicleId().equals(newReport.getVehicleId())
+                && r.getSource().equals(newReport.getSource()));
+        reports.put(newReport.getStopId(), newReport);
+    }
+
+    /*
      * Reads all occupancy reports from the database and initializes in-memory maps.
      */
     private synchronized void initializeOccupancy() {
-        if (reportsByJourney != null) {
+        if (reportsByJourneyAndStation != null) {
             return;
         }
 
@@ -130,8 +131,7 @@ public class OccupancyDao {
                 .setParameter("earliestDate", earliestDateToLoad)
                 .getResultList();
 
-        Map<JourneyKey, List<OccupancyReport>> journeyMap = new HashMap<>();
-        Map<StationKey, List<OccupancyReport>> stationMap = new HashMap<>();
+        Map<JourneyKey, ArrayListMultimap<Integer, OccupancyReport>> journeyMap = new HashMap<>();
         Map<StationJourneyAndSourceKey, OccupancyReport> specificMap = new HashMap<>();
 
         for (OccupancyReport report : allReports) {
@@ -143,15 +143,10 @@ public class OccupancyDao {
 
             // Journey key
             JourneyKey journeyKey = new JourneyKey(report.getVehicleId(), report.getJourneyStartDate());
-            journeyMap.computeIfAbsent(journeyKey, k -> new ArrayList<>()).add(report);
-
-            // Station key
-            StationKey stationKey = new StationKey(report.getStopId(), report.getJourneyStartDate());
-            stationMap.computeIfAbsent(stationKey, k -> new ArrayList<>()).add(report);
+            journeyMap.computeIfAbsent(journeyKey, k -> ArrayListMultimap.create()).put(report.getStopId(), report);
         }
 
-        reportsByJourney = journeyMap;
-        reportsByStation = stationMap;
+        reportsByJourneyAndStation = journeyMap;
         reportsByStationJourneyAndStartDate = specificMap;
     }
 

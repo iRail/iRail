@@ -26,7 +26,7 @@ public abstract class RivClient {
         for (JsonNode rawStop : stopsNode) {
             DepartureAndArrival stop = parseHafasIntermediateStop(stationsDao, rawStop, vehicle, language);
             if (stop.hasDeparture()) {
-                stop.getDeparture().setOccupancy(getOccupancy(occupancyDao, stop.getDeparture()));
+                stop.getDeparture().setOccupancy(occupancyDao.getOccupancy(stop.getDeparture()));
             }
             stops.add(stop);
         }
@@ -181,20 +181,13 @@ public abstract class RivClient {
         return ldt;
     }
 
-    protected OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop) {
-        return getOccupancy(occupancyDao, stop, (OccupancyReport.OccupancyLevel) null);
-    }
-
-    protected OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop, JsonNode hafasNode) {
+    protected void registerOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop, JsonNode hafasNode) {
         OccupancyReport.OccupancyLevel official = null;
         if (hafasNode.has("CommercialInfo") && hafasNode.get("CommercialInfo").has("Occupancy")) {
             int level = hafasNode.get("CommercialInfo").get("Occupancy").get("Level").asInt();
             official = OccupancyReport.OccupancyLevel.fromNmbsLevel(level);
         }
-        return getOccupancy(occupancyDao, stop, official);
-    }
 
-    private OccupancyInfo getOccupancy(OccupancyDao occupancyDao, DepartureOrArrival stop, OccupancyReport.OccupancyLevel official) {
         if (official != null) {
             occupancyDao.handleReport(
                     new OccupancyReport(
@@ -205,27 +198,6 @@ public abstract class RivClient {
                             official)
             );
         }
-
-        List<OccupancyReport> reports = occupancyDao.getReportsForJourney(
-                stop.getVehicle().getId(),
-                stop.getScheduledDateTime().toLocalDate()
-        );
-
-        OccupancyReport.OccupancyLevel spitsgids = null;
-
-        Integer stopId = extractNumericStopId(stop.getStation().getId());
-
-        for (OccupancyReport report : reports) {
-            if (report.getStopId().equals(stopId)) {
-                if (report.getSource() == OccupancyReport.OccupancyReportSource.NMBS) {
-                    official = report.getOccupancy();
-                } else if (report.getSource() == OccupancyReport.OccupancyReportSource.SPITSGIDS) {
-                    spitsgids = report.getOccupancy();
-                }
-            }
-        }
-
-        return new OccupancyInfo(official, spitsgids);
     }
 
     private Integer extractNumericStopId(String stationId) {

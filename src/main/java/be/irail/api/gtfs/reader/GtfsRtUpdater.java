@@ -2,7 +2,7 @@ package be.irail.api.gtfs.reader;
 
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
-import be.irail.api.gtfs.reader.models.GtfsRtDelay;
+import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 import be.irail.api.gtfs.reader.models.Stop;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -55,7 +55,7 @@ public class GtfsRtUpdater {
             return;
         }
 
-        List<GtfsRtDelay> delays = new ArrayList<>();
+        List<GtfsRtUpdate> delays = new ArrayList<>();
         OffsetDateTime timestamp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(feed.getHeader().getTimestamp()), ZoneOffset.UTC);
         Set<DatedTripId> canceledTrips = new HashSet<>();
 
@@ -73,7 +73,12 @@ public class GtfsRtUpdater {
                     Stop stop = staticDao.getStop(stopId);
                     String parentStopId = (stop != null) ? stop.parentStation() : null;
 
-                    delays.add(new GtfsRtDelay(startDate, tripId, stopId, parentStopId, arrivalDelay, departureDelay, timestamp));
+                    // NMBS uses stop_id instead of stop_sequence
+                    delays.add(new GtfsRtUpdate(startDate, tripId, stopId, parentStopId,
+                            arrivalDelay, departureDelay,
+                            stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED,
+                            stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.UNSCHEDULED,
+                            timestamp));
                 }
                 if (tu.getTrip().getScheduleRelationship() == GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED) {
                     canceledTrips.add(new DatedTripId(tripId, startDate));
@@ -85,4 +90,5 @@ public class GtfsRtUpdater {
         GtfsRtInMemoryDao.getInstance().updateStopTimeUpdates(delays);
         log.info("Updated GTFS-RT with {} delay records", delays.size());
     }
+
 }

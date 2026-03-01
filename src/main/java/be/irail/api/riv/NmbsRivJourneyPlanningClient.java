@@ -123,9 +123,9 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         }
         vehicle.setDirection(new VehicleDirection(directionName, directionStation));
         parsedLeg.setVehicle(vehicle);
-
         // Set occupancy for departure
-        departure.setOccupancy(getOccupancy(occupancyDao, departure, legNode.get("Origin")));
+        registerOccupancy(occupancyDao, departure, legNode.get("Origin"));
+        departure.setOccupancy(occupancyDao.getOccupancy(departure));
 
         List<DepartureAndArrival> parsedStops = parseVehicleStops(stationsDao, occupancyDao, legNode, vehicle, request.language());
         List<DepartureAndArrival> intermediateStops = parsedStops.subList(1, parsedStops.size() - 1);

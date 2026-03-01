@@ -1,5 +1,7 @@
 package be.irail.api.riv;
 
+import be.irail.api.dto.Vehicle;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -45,5 +47,14 @@ public record JourneyWithOriginAndDestination(
 
     public List<String> getSplitOrJoinStopIds() {
         return splitOrJoinStopIds;
+    }
+
+    public Vehicle getVehicle() {
+        return Vehicle.fromTypeAndNumber(vehicleType, vehicleNumber, tripStartDate);
+    }
+
+    public boolean hasSuffixInTripId() {
+        // If the trip id ends on :0, :1 ,... it may be data shadowing another trip. These trips don't occur in the realtime data.
+        return getTripId().charAt(getTripId().length() - 2) == ':';
     }
 }

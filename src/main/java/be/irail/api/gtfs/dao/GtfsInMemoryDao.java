@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,14 +25,18 @@ public class GtfsInMemoryDao {
 
     private final Map<String, Agency> agencies;
     private final HashMultimap<Integer, LocalDate> calendarDatesByServiceId;
-    private final HashMultimap<LocalDate, String> tripIdsByDate;
+    private final HashMultimap<LocalDate, TripIdAndStartDate> tripIdsByDate;
+    private final HashMultimap<LocalDate, TripIdAndStartDate> tripsStartedAtPreviousDayByDate;
     private final Map<String, Route> routes;
     private final Map<String, Stop> stops;
     private final ArrayListMultimap<String, StopTime> stopTimesByTripId;
+    private final ArrayListMultimap<String, StopTime> stopTimesByStopId;
     private final ArrayListMultimap<Integer, Trip> tripsByShortName;
+    private final HashMap<String, Trip> tripsById;
 
     public GtfsInMemoryDao(GtfsReader.GtfsData data) {
         log.warn("Creating new GtfsInMemoryDao, this can be a memory intensive process");
+        log.info("Current heap memory usage {}", Runtime.getRuntime().totalMemory() / 1024 / 1024);
         this.agencies = new HashMap<>();
         data.agencies().forEach(a -> agencies.put(a.id(), a));
 
@@ -49,19 +54,38 @@ public class GtfsInMemoryDao {
 
         this.tripsByShortName = ArrayListMultimap.create();
         this.tripIdsByDate = HashMultimap.create();
+        this.tripsById = new HashMap<>();
         data.trips().forEach(t -> {
             tripsByShortName.put(t.shortName(), t);
-            calendarDatesByServiceId.get(t.serviceId()).forEach(date -> tripIdsByDate.put(date, t.id()));
+            calendarDatesByServiceId.get(t.serviceId()).forEach(date -> tripIdsByDate.put(date, new TripIdAndStartDate(t.id(), date)));
+            tripsById.put(t.id(), t);
         });
 
         this.stopTimesByTripId = ArrayListMultimap.create();
-        data.stopTimes().forEach(sto -> {
-            stopTimesByTripId.put(sto.tripId(), sto);
+        this.stopTimesByStopId = ArrayListMultimap.create();
+        this.tripsStartedAtPreviousDayByDate = HashMultimap.create();
+        data.stopTimes().forEach(stopTime -> {
+            stopTimesByTripId.put(stopTime.tripId(), stopTime);
+            Stop platformStop = stops.get(stopTime.stopId());
+            if (platformStop.parentStation() == null) {
+                // This happens for example at border stops, or stops which are not in use yet
+                // log.debug("Stop " + stopTime.stopId() + " (" + platformStop.name() + ") has no parent station");
+                return;
+            }
+            // Remove the "S" prefix for station type stops
+            String parentStopId = platformStop.parentStation().replaceAll("[^0-9]", "");
+            stopTimesByStopId.put(parentStopId, stopTime);
+            if (stopTime.arrivalOffsetSeconds() > 86400) {
+                calendarDatesByServiceId.get(tripsById.get(stopTime.tripId()).serviceId()).forEach(date -> {
+                    tripsStartedAtPreviousDayByDate.put(date.plusDays(1), new TripIdAndStartDate(stopTime.tripId(), date));
+                });
+            }
         });
 
         // Sort overrides by sequence
         stopTimesByTripId.keySet().forEach(key -> stopTimesByTripId.get(key).sort(Comparator.comparingInt(StopTime::stopSequence)));
         log.info("Created new GtfsInMemoryDao");
+        log.info("Current heap memory usage {}", Runtime.getRuntime().totalMemory() / 1024 / 1024);
     }
 
     public static GtfsInMemoryDao getInstance() {
@@ -104,8 +128,9 @@ public class GtfsInMemoryDao {
 
         // For now, just take the first one as this method seems to be used loosely
         Trip trip = matchingTrips.getFirst();
-        Set<String> activeTripIds = tripIdsByDate.get(date);
-        List<Trip> matchingTripsOnDate = matchingTrips.stream().filter(t -> activeTripIds.contains(t.id())).toList();
+        TripIdAndStartDate tripToLookUp = new TripIdAndStartDate(trip.id(), date);
+        Set<TripIdAndStartDate> activeTripIds = tripIdsByDate.get(date);
+        List<Trip> matchingTripsOnDate = matchingTrips.stream().filter(t -> activeTripIds.contains(tripToLookUp)).toList();
         if (matchingTripsOnDate.isEmpty()) {
             return null;
         }
@@ -143,4 +168,68 @@ public class GtfsInMemoryDao {
         }
         return Vehicle.fromTypeAndNumber(journeyByNumber.route().shortName(), journeyByNumber.trip().shortName(), date);
     }
+
+    public Trip getTrip(String tripId) {
+        return tripsById.get(tripId);
+    }
+
+    public Stop getStop(StopTime stopTime, LocalDate startDate) {
+        if (stopTime.stopIdOverridesByServiceId().isEmpty()) {
+            return stops.get(stopTime.stopId());
+        }
+
+        List<Integer> overridesOnDate = stopTime.stopIdOverridesByServiceId().keySet().stream().filter(serviceId -> getCalendarDates(serviceId).contains(startDate)).toList();
+        if (overridesOnDate.isEmpty()) {
+            return stops.get(stopTime.stopId());
+        }
+        if (overridesOnDate.size() > 1) {
+            log.warn("Multiple stop IDs on stop_time for trip {}, stop {}, total count {} on date {}", stopTime.tripId(), stopTime.stopId(), overridesOnDate.size(), startDate);
+        }
+        return stops.get(stopTime.stopIdOverridesByServiceId().get(overridesOnDate.getFirst()));
+    }
+
+    public List<CallAtStop> getCallsAtStop(String stopId, LocalDateTime startTime, LocalDateTime endTime, boolean timeFilterDepartures) {
+        List<StopTime> stopTimes = stopTimesByStopId.get(stopId);
+        Set<TripIdAndStartDate> activeTripIds = tripIdsByDate.get(startTime.toLocalDate());
+        for (LocalDate date = startTime.toLocalDate().plusDays(1); !date.isAfter(endTime.toLocalDate()); date = date.plusDays(1)) {
+            activeTripIds.addAll(tripIdsByDate.get(date));
+        }
+        activeTripIds.addAll(tripsStartedAtPreviousDayByDate.get(startTime.toLocalDate()));
+        List<CallAtStop> activeStopTimes = new ArrayList<>();
+        for (LocalDate date = startTime.toLocalDate().minusDays(1); !date.isAfter(endTime.toLocalDate()); date = date.plusDays(1)) {
+            for (StopTime stopTime : stopTimes) {
+                if (!stopTime.hasScheduledPassengerExchange()) {
+                    continue;
+                }
+                if (activeTripIds.contains(new TripIdAndStartDate(stopTime.tripId(), date))) {
+                    LocalDateTime departureTime = stopTime.getDepartureTime(date);
+                    LocalDateTime arrivalTime = stopTime.getArrivalTime(date);
+                    if ((timeFilterDepartures && !endTime.isBefore(departureTime) && !startTime.isAfter(departureTime))
+                            || (!timeFilterDepartures && !endTime.isBefore(arrivalTime) && !startTime.isAfter(arrivalTime))) {
+                        Trip trip = tripsById.get(stopTime.tripId());
+                        Route route = routes.get(trip.routeId());
+                        Stop originStop = stops.get(stopTimesByTripId.get(stopTime.tripId()).getFirst().stopId());
+                        Stop originParentStop = stops.get(originStop.parentStation());
+                        Stop destinationStop = stops.get(stopTimesByTripId.get(stopTime.tripId()).getLast().stopId());
+                        Stop destinationParentStop = stops.get(destinationStop.parentStation());
+                        Stop platform = getStop(stopTime, date);
+                        activeStopTimes.add(new CallAtStop(route, trip, platform, date, stopTime,
+                                originParentStop == null ? originStop : originParentStop,
+                                destinationParentStop == null ? destinationStop : destinationParentStop));
+                    }
+                }
+            }
+        }
+        return activeStopTimes;
+    }
+
+    public record CallAtStop(Route route, Trip trip, Stop platform, LocalDate startDate, StopTime stopTime,
+                             Stop originParentStop, Stop destinationParentStop) {
+
+    }
+
+    record TripIdAndStartDate(String tripId, LocalDate startDate) {
+
+    }
+
 }

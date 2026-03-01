@@ -145,8 +145,16 @@ public class GtfsReader {
 
         List<StopTime> stopTimes = dao.getAllStopTimes().stream()
                 .filter(st -> usedTripIds.contains(st.getTrip().getId().getId()))
-                .map(st -> new StopTime(st.getTrip().getId().getId(), st.getArrivalTime(), st.getDepartureTime(), st.getStop().getId().getId(), st.getStopSequence(), st.getStopHeadsign(), st.getPickupType(), st.getDropOffType()))
-                .toList();
+                .map(st -> new StopTime(
+                        st.getTrip().getId().getId(),
+                        st.getArrivalTime(),
+                        st.getDepartureTime(),
+                        st.getStop().getId().getId(),
+                        st.getStopSequence(),
+                        st.getStopHeadsign(),
+                        PickupDropoffType.fromCode(st.getPickupType()),
+                        PickupDropoffType.fromCode(st.getDropOffType())
+                )).toList();
         log.info("Read {} stop times, kept {} within date range", dao.getAllStopTimes().size(), stopTimes.size());
         Map<TripIdAndSequence, StopTime> stopTimesByTrip = stopTimes.stream().collect(Collectors.toMap(st -> new TripIdAndSequence(st.tripId(), st.stopSequence()), st -> st));
 

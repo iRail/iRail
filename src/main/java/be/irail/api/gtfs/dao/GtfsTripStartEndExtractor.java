@@ -47,44 +47,48 @@ public class GtfsTripStartEndExtractor {
                 }
                 // By forcing a number to be passed, we ensure the type is stripped away
                 List<Trip> trips = dao.getTripsByJourneyNumber(journeyNumber);
-
+                List<JourneyWithOriginAndDestination> matches = new ArrayList<>();
                 // TODO if a time is specified, should the time take precedence to find the correct train "right now"?
                 if (shouldConsiderTrainsFromPreviousServiceDaysForQuery(date)) {
                     log.debug("Considering trains from previous service days for journey {} on {}", journeyNumber, date);
                     LocalDate yesterday = date.toLocalDate().minusDays(1);
                     for (Trip trip : trips) {
-                        if (isServiceActiveOnDate(dao, trip.serviceId(), yesterday)) {
-                            List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
-                            if (stopTimes.isEmpty()) {
-                                continue;
-                            }
-
-                            StopTime first = stopTimes.getFirst();
-                            StopTime last = stopTimes.getLast();
-
-                            // Departure needs to be after 4, arrival needs to be past midnight,
-                            // to count as a desired midnight passing trip
-                            if (last.arrivalTime() < SECONDS_IN_DAY || first.departureTime() < SERVICE_DAY_END_HOUR * 3600) {
-                                continue; // Trip not active past midnight
-                            }
-
-                            Route route = dao.getRoute(trip.routeId());
-                            String vehicleType = (route != null) ? route.shortName() : "";
-                            log.info("Found trip start and end station for trip {} on day before", journeyNumber);
-                            return Optional.of(new JourneyWithOriginAndDestination(
-                                    yesterday,
-                                            trip.id(),
-                                            vehicleType,
-                                            journeyNumber,
-                                            first.stopId(),
-                                            first.departureTime(),
-                                            last.stopId(),
-                                            last.arrivalTime(),
-                                    last.stopSequence(),
-                                            Collections.emptyList()
-                                    )
-                            );
+                        if (!isServiceActiveOnDate(dao, trip.serviceId(), yesterday)) {
+                            continue;
                         }
+                        List<StopTime> stopTimes = dao.getStopTimesForTrip(trip.id());
+                        if (stopTimes.isEmpty()) {
+                            continue;
+                        }
+
+                        StopTime first = stopTimes.getFirst();
+                        StopTime last = stopTimes.getLast();
+
+                        // Departure needs to be after 4, arrival needs to be past midnight,
+                        // to count as a desired midnight passing trip
+                        if (last.arrivalOffsetSeconds() < SECONDS_IN_DAY || first.departureOffsetSeconds() < SERVICE_DAY_END_HOUR * 3600) {
+                            continue; // Trip not active past midnight
+                        }
+
+                        Route route = dao.getRoute(trip.routeId());
+                        String vehicleType = (route != null) ? route.shortName() : "";
+                        log.info("Found trip start and end station for trip {} on day before", journeyNumber);
+                        matches.add(new JourneyWithOriginAndDestination(
+                                        yesterday,
+                                        trip.id(),
+                                        vehicleType,
+                                        journeyNumber,
+                                        first.stopId(),
+                                        first.departureOffsetSeconds(),
+                                        last.stopId(),
+                                        last.arrivalOffsetSeconds(),
+                                        last.stopSequence(),
+                                        new ArrayList<>()
+                                )
+                        );
+                    }
+                    if (!matches.isEmpty()) {
+                        return multipleGtfsMatchesToSingleResult(journeyNumber, matches);
                     }
                 }
 
@@ -109,9 +113,9 @@ public class GtfsTripStartEndExtractor {
                                         vehicleType,
                                         journeyNumber,
                                         first.stopId(),
-                                        first.departureTime(),
+                                first.departureOffsetSeconds(),
                                         last.stopId(),
-                                        last.arrivalTime(),
+                                last.arrivalOffsetSeconds(),
                                 last.stopSequence(),
                                 new ArrayList<>()
                                 )
@@ -136,13 +140,21 @@ public class GtfsTripStartEndExtractor {
         if (containsBus && containsTrain) {
             possibleMatches.removeIf(journey -> journey.getJourneyType().equals("BUS"));
         }
-        log.info("Found {}  trip start and end station for trip {} after filtering bus matches", possibleMatches.size(), journeyNumber);
+        log.info("Found {} trip start and end station for trip {} after filtering bus matches", possibleMatches.size(), journeyNumber);
         if (possibleMatches.size() == 1) {
             return Optional.of(possibleMatches.getFirst());
         }
 
+        long suffixedIdCount = possibleMatches.stream()
+                .filter(journey -> journey.getTripId().charAt(journey.getTripId().length() - 2) == ':')
+                .count();
+
         // Multiple versions of the same trip, with different lengths: use the longest, mark the shorter start as intermediate
-        JourneyWithOriginAndDestination longest = possibleMatches.stream().max(Comparator.comparingInt(JourneyWithOriginAndDestination::numberOfStops)).orElseThrow();
+        // Favor trips without a suffix as the better option
+        JourneyWithOriginAndDestination longest = possibleMatches.stream()
+                .filter(journey -> suffixedIdCount == possibleMatches.size() || !journey.hasSuffixInTripId())
+                .max(Comparator.comparingInt(JourneyWithOriginAndDestination::numberOfStops))
+                .orElseThrow();
         possibleMatches.remove(longest);
         possibleMatches.stream()
                 .sorted(Comparator.comparing(JourneyWithOriginAndDestination::getOriginDepartureTimeOffset))
@@ -162,7 +174,7 @@ public class GtfsTripStartEndExtractor {
                         }
                     }
                 });
-
+        log.info("Selected trip id {} for vehicle {}", longest.tripId(), journeyNumber);
         return Optional.of(longest);
     }
 
@@ -199,7 +211,7 @@ public class GtfsTripStartEndExtractor {
 
         // Only search between stops where the train actually stops (pickupType or dropOffType == 0 means passenger exchange)
         List<StopTime> passengerStops = stops.stream()
-                .filter(stop -> stop.pickupType() == 0 || stop.dropOffType() == 0)
+                .filter(StopTime::hasScheduledPassengerExchange)
                 .toList();
 
         List<JourneyWithOriginAndDestination> results = new ArrayList<>();
@@ -212,9 +224,9 @@ public class GtfsTripStartEndExtractor {
                     originalJourney.getJourneyType(),
                     originalJourney.getJourneyNumber(),
                     prev.stopId(),
-                    prev.departureTime(),
+                    prev.departureOffsetSeconds(),
                     curr.stopId(),
-                    curr.arrivalTime(),
+                    curr.arrivalOffsetSeconds(),
                     curr.stopSequence(),
                     Collections.emptyList()
             ));
