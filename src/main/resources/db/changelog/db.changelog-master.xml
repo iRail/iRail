@@ -97,7 +97,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="primary_material_type" type="varchar(16)"/>
-            <column name="passenger_unit_count" type="tinyint"/>
+            <column name="passenger_unit_count" type="smallint"/>
             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
         <addUniqueConstraint tableName="composition_history" schemaName="public" columnNames="journey_type, journey_number, journey_start_date, from_station_id, to_station_id" constraintName="unique_journey_identifier"/>
@@ -181,7 +181,7 @@
             <column name="historic_composition_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="position" type="tinyint">
+            <column name="position" type="smallint">
                 <constraints nullable="false"/>
             </column>
         </createTable>
