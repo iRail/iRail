@@ -53,9 +53,6 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class NmbsRivRawDataRepository {
     private static final Logger log = LoggerFactory.getLogger(NmbsRivRawDataRepository.class);
-
-    private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
     private static final Cache<String, CachedData<JsonNode>> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -64,7 +61,8 @@ public class NmbsRivRawDataRepository {
             .maximumSize(1000)
             .expireAfterWrite(4, TimeUnit.HOURS)
             .build();
-
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
     private final Timer rivHttpRequestTimer = Metrics.getRegistry().timer("RIV-outgoing-requests");
     private final Timer rivLiveboardTimer = Metrics.getRegistry().timer("RIV-liveboard");
     private final Timer rivRouteplanningTimer = Metrics.getRegistry().timer("RIV-routeplanning");
@@ -355,6 +353,9 @@ public class NmbsRivRawDataRepository {
             log.debug("GET {}: {} in {}ms", url, response.statusCode(), duration);
             String body = response.body();
             log.trace(body);
+            if (response.statusCode() >= 500 && body.startsWith("ERROR reason : error : 9000")) {
+                throw new UpstreamServerUnavailableException();
+            }
             if (response.statusCode() >= 500) {
                 throw new UpstreamServerException("Upstream server error: " + response.statusCode() + "\nBody: '" + body + "'");
             }
