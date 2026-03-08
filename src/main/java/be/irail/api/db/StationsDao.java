@@ -170,7 +170,7 @@ public class StationsDao {
         query = query.replaceAll("\\s?\\(.*?\\)", "");
         query = query.replace("st-", "st ");
         query = query.replace("st.-", "st ");
-        query = query.replaceAll("(?i)st(\\s|$|\\.)", "(saint|st|sint) ");
+        query = query.replaceAll(" st(\\s|$|\\.)", "st ");
 
         String[] parts = query.split("/");
         return parts[0].trim();
@@ -260,13 +260,15 @@ public class StationsDao {
     }
 
     private boolean isQueryPartOfName(String query, String testStationName) {
-        return Pattern.compile(query, Pattern.CASE_INSENSITIVE).matcher(testStationName).find()
-                || Pattern.compile(query, Pattern.CASE_INSENSITIVE).matcher(testStationName.replace("'", " ")).find();
+        Pattern pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
+        return pattern.matcher(testStationName).find()
+                || pattern.matcher(testStationName.replace("'", " ")).find();
     }
 
     private boolean isEqualCaseInsensitive(String query, String testStationName) {
-        return Pattern.compile("^" + query + "$", Pattern.CASE_INSENSITIVE).matcher(testStationName).matches()
-                || Pattern.compile("^" + query + "$", Pattern.CASE_INSENSITIVE).matcher(testStationName.replace("'", " ")).matches();
+        Pattern pattern = Pattern.compile("^" + query + "$", Pattern.CASE_INSENSITIVE);
+        return pattern.matcher(testStationName).matches()
+                || pattern.matcher(testStationName.replace("'", " ")).matches();
     }
 
     private void putInFirstPlace(List<Station> list, Station value) {
