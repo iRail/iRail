@@ -80,12 +80,13 @@ public class JourneyPlanningV1Controller extends V1Controller {
             @QueryParam("to") String to,
             @QueryParam("date") String date,
             @QueryParam("time") String time,
-            @QueryParam("timeSel") @DefaultValue("departure") String timesel,
+            @QueryParam("timeSel") String timesel,
+            @QueryParam("timesel") String timeselLowercase,
             @QueryParam("typeOfTransport") @DefaultValue("automatic") String typeOfTransport,
             @QueryParam("lang") @DefaultValue("en") String lang,
             @QueryParam("format") @DefaultValue("xml") String format) {
         V1_JOURNEYPLANNING_REQUEST_METER.mark();
-        TimeSelection timeSelection = RequestParser.parseV1TimeSelection(timesel);
+        TimeSelection timeSelection = parseTimesel(timesel, timeselLowercase);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
         TypeOfTransportFilter transportFilter = parseTypeOfTransport(typeOfTransport);
@@ -125,6 +126,13 @@ public class JourneyPlanningV1Controller extends V1Controller {
             }
             throw new InternalProcessingException("Error fetching connections: " + exception.getCause().getMessage(), exception.getCause());
         }
+    }
+
+    private static TimeSelection parseTimesel(String timesel, String timeselLowercase) {
+        String caseInsensitiveTimeSel = timesel == null ? timeselLowercase : timesel;
+        String timeselOrDefault = caseInsensitiveTimeSel == null ? "departure" : caseInsensitiveTimeSel;
+        TimeSelection timeSelection = RequestParser.parseV1TimeSelection(timeselOrDefault);
+        return timeSelection;
     }
 
     private @NonNull DataRoot loadJourneyPlanningResult(JourneyPlanningRequest request) throws ExecutionException {
