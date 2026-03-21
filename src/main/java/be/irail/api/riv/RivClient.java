@@ -8,7 +8,6 @@ import be.irail.api.dto.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,7 +54,6 @@ public abstract class RivClient {
         return stops;
     }
 
-
     private DepartureAndArrival parseHafasIntermediateStop(StationsDao stationsDao, JsonNode rawStop, Vehicle vehicle, Language language) {
         String hafasId = rawStop.get("extId").asText();
         Station dbStation = stationsDao.getStationFromId("00" + hafasId);
@@ -101,34 +99,29 @@ public abstract class RivClient {
         boolean platformChanged = realtimePlatform != null;
         platform = platformChanged ? realtimePlatform : platform;
 
+        String departurePrognosis = getFieldOrNull(rawStop, "depPrognosisType");
+        String arrivalPrognosis = getFieldOrNull(rawStop, "arrPrognosisType");
+        boolean departureCancelled = departurePrognosis != null && isDepartureCanceledBasedOnState(departurePrognosis);
+        boolean arrivalCancelled = arrivalPrognosis != null && isArrivalCanceledBasedOnState(arrivalPrognosis);
         if (!isArrival) {
-            String depPrognosisType = getFieldOrNull(rawStop, "depPrognosisType");
-            if (depPrognosisType != null) {
-                part.setStatus("REPORTED".equals(depPrognosisType) ? DepartureArrivalState.REPORTED : null);
-                part.setIsCancelled(isDepartureCanceledBasedOnState(depPrognosisType));
+            if (departurePrognosis != null) {
+                part.setStatus("REPORTED".equals(departurePrognosis) ? DepartureArrivalState.REPORTED : null);
+                part.setIsCancelled(departureCancelled);
             }
-        } else {
-            String arrPrognosisType = getFieldOrNull(rawStop, "arrPrognosisType");
-            if (arrPrognosisType != null) {
-                part.setStatus("REPORTED".equals(arrPrognosisType) ? DepartureArrivalState.REPORTED : null);
-                part.setIsCancelled(isArrivalCanceledBasedOnState(arrPrognosisType));
-            }
+        } else if (arrivalPrognosis != null) {
+            part.setStatus("REPORTED".equals(arrivalPrognosis) ? DepartureArrivalState.REPORTED : null);
+            part.setIsCancelled(arrivalCancelled);
         }
-
         part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
 
-        boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
-        boolean rtAlighting = getBooleanOrDefault(rawStop, "rtAlighting", true);
-        boolean rtBoarding = getBooleanOrDefault(rawStop, "rtBoarding", true);
-        if (rtAlighting || rtBoarding) {
-            cancelled = false; // the cancelled flag is set even when only a departure or arrival is cancelled, fix this
+        if (!departureCancelled && !arrivalCancelled) {
+            // the cancelled flag is set even when only a departure or arrival is cancelled, only read it when not a partial cancellation
+            boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
+            part.setIsCancelled(cancelled);
         }
-        if (isArrival) {
-            part.setIsCancelled(cancelled || !rtAlighting);
-        } else {
-            part.setIsCancelled(cancelled || !rtBoarding);
+        if (getBooleanOrDefault(rawStop, "additional", false)) {
+            part.setIsExtra(true);
         }
-
         // TODO: read alighting/boarding booleans, see international trains
         return part;
     }
@@ -172,7 +165,7 @@ public abstract class RivClient {
     }
 
 
-    private static @NonNull LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
+    private static LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
         if (timeS.length() == 5 || timeS.length() == 7) {
             timeS = "0" + timeS;
         }
