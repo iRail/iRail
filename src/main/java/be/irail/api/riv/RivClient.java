@@ -11,8 +11,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class RivClient {
@@ -218,6 +221,72 @@ public abstract class RivClient {
         );
     }
 
+
+    protected List<Message> parseMessages(JsonNode node) {
+        if (!node.has("Messages") || !node.get("Messages").has("Message")) {
+            return Collections.emptyList();
+        }
+
+        List<Message> messages = new ArrayList<>();
+        for (JsonNode msgNode : node.get("Messages").get("Message")) {
+            try {
+                String id = msgNode.has("id") ? msgNode.get("id").asText() : null;
+                String head = msgNode.has("head") ? msgNode.get("head").asText() : null;
+                String text = msgNode.has("text") ? msgNode.get("text").asText() : null;
+                String company = msgNode.has("company") ? msgNode.get("company").asText() : null;
+
+                OffsetDateTime validFrom = parseHafasDateTime(msgNode, "sDate", "sTime");
+                OffsetDateTime validTo = parseHafasDateTime(msgNode, "eDate", "eTime");
+                OffsetDateTime lastModified = parseHafasDateTime(msgNode, "modDate", "modTime");
+
+                MessageType type = MessageType.INFO;
+                if (msgNode.has("icon")) {
+                    String icon = msgNode.get("icon").asText();
+                    if (icon.startsWith("HIM1") && icon.length() <= 5) {
+                        type = MessageType.WORKS;
+                    } else if (icon.startsWith("HIM2")) {
+                        type = MessageType.TROUBLE;
+                    }
+                }
+
+                List<MessageLink> links = parseMessageLinks(msgNode);
+
+                messages.add(new Message(id, validFrom, validTo, lastModified, type, head, head, text, company, links));
+            } catch (Exception e) {
+                log.warn("Failed to parse HIM message: {}", e.getMessage());
+            }
+        }
+        return messages;
+    }
+
+    private OffsetDateTime parseHafasDateTime(JsonNode node, String dateField, String timeField) {
+        if (!node.has(dateField) || !node.has(timeField)) {
+            return null;
+        }
+        String date = node.get(dateField).asText();
+        String time = node.get(timeField).asText();
+        LocalDateTime ldt = LocalDateTime.parse(date + time, DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss"));
+        return ldt.atZone(ZoneId.of("Europe/Brussels")).toOffsetDateTime();
+    }
+
+    private List<MessageLink> parseMessageLinks(JsonNode msgNode) {
+        List<MessageLink> links = new ArrayList<>();
+        if (!msgNode.has("channel")) {
+            return links;
+        }
+        for (JsonNode channel : msgNode.get("channel")) {
+            if (channel.has("url")) {
+                for (JsonNode urlNode : channel.get("url")) {
+                    String url = urlNode.has("url") ? urlNode.get("url").asText() : null;
+                    String name = urlNode.has("name") ? urlNode.get("name").asText() : null;
+                    if (url != null) {
+                        links.add(new MessageLink(url, name));
+                    }
+                }
+            }
+        }
+        return links;
+    }
 
     protected List<String> parseNotes(JsonNode tripNode) {
         List<String> notes = new ArrayList<>();
