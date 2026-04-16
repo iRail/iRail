@@ -1,0 +1,177 @@
+{
+  "Messages": {
+    "Message": [
+      {
+        "affectedStops": {
+          "StopLocation": [
+            {
+              "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+              "extId": "8882701",
+              "name": "Manage",
+              "lon": 4.234683,
+              "lat": 50.506109,
+              "products": 116
+            },
+            {
+              "LocationNotes": {
+                "LocationNote": [
+                  {
+                    "value": "LS - ?",
+                    "key": "LS",
+                    "type": "A"
+                  },
+                  {
+                    "value": "Light assistance",
+                    "key": "LA",
+                    "type": "A"
+                  },
+                  {
+                    "value": "FS - ?",
+                    "key": "FS",
+                    "type": "A"
+                  },
+                  {
+                    "value": "Full assistance",
+                    "key": "FA",
+                    "type": "A"
+                  },
+                  {
+                    "value": "crisis screen",
+                    "key": "CS",
+                    "type": "A"
+                  }
+                ]
+              },
+              "id": "A=1@O=Luttre@X=4384120@Y=50505857@U=80@L=8871308@",
+              "extId": "8871308",
+              "name": "Luttre",
+              "lon": 4.38412,
+              "lat": 50.505857,
+              "products": 116
+            }
+          ]
+        },
+        "validFromStop": {
+          "name": "Manage",
+          "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+          "extId": "8882701",
+          "lon": 4.234683,
+          "lat": 50.506109
+        },
+        "validToStop": {
+          "name": "Luttre",
+          "id": "A=1@O=Luttre@X=4384120@Y=50505857@U=80@L=8871308@",
+          "extId": "8871308",
+          "lon": 4.38412,
+          "lat": 50.505857
+        },
+        "channel": [
+          {
+            "name": "TIMETABLE",
+            "url": [
+              {
+                "name": "Meer info",
+                "url": "https://www.belgiantrain.be/nl/news/works-manage-luttre"
+              },
+              {
+                "name": "Plus d'infos",
+                "url": "https://www.belgiantrain.be/fr/news/works-manage-luttre"
+              },
+              {
+                "name": "O\u00f9 prendre mon bus ?",
+                "url": "https://www.belgianrail.be/jp/download/brail_him/1775028110643_FR_2604028_S.pdf"
+              },
+              {
+                "name": "Waar is mijn bushalte?",
+                "url": "https://www.belgianrail.be/jp/download/brail_him/1775028110657_NL_2604028_S.pdf"
+              }
+            ],
+            "validFromTime": "01:00:00",
+            "validFromDate": "2026-02-16",
+            "validToTime": "23:59:00",
+            "validToDate": "2026-04-26"
+          }
+        ],
+        "id": "105407",
+        "act": true,
+        "head": "Luttre",
+        "text": "Every day, from 16/03 to 26/04 Infrabel is working on the track.<br><br>An SNCB-NMBS bus replaces all trains between Manage and Luttre.<br><br>The travel planner takes these changes into account.",
+        "company": "SNCB",
+        "category": "1",
+        "priority": 50,
+        "products": 32,
+        "modTime": "09:21:51",
+        "modDate": "2026-04-01",
+        "icon": "HIM1",
+        "routeIdxFrom": 0,
+        "routeIdxTo": 4,
+        "sTime": "00:00:00",
+        "sDate": "2026-03-16",
+        "eTime": "23:59:00",
+        "eDate": "2026-04-26"
+      },
+      {
+        "affectedStops": {
+          "StopLocation": [
+            {
+              "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+              "extId": "8882701",
+              "name": "Manage",
+              "lon": 4.234683,
+              "lat": 50.506109,
+              "products": 116
+            },
+            {
+              "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+              "extId": "8882701",
+              "name": "Manage",
+              "lon": 4.234683,
+              "lat": 50.506109,
+              "products": 116
+            }
+          ]
+        },
+        "validFromStop": {
+          "name": "Manage",
+          "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+          "extId": "8882701",
+          "lon": 4.234683,
+          "lat": 50.506109
+        },
+        "validToStop": {
+          "name": "Manage",
+          "id": "A=1@O=Manage@X=4234683@Y=50506109@U=80@L=8882701@",
+          "extId": "8882701",
+          "lon": 4.234683,
+          "lat": 50.506109
+        },
+        "channel": [
+          {
+            "name": "TIMETABLE",
+            "validFromTime": "19:22:00",
+            "validFromDate": "2026-03-31",
+            "validToTime": "23:59:00",
+            "validToDate": "2026-04-03"
+          }
+        ],
+        "id": "107137",
+        "act": true,
+        "head": "Manage: SNCB-NMBS bus stop relocated",
+        "text": "From 31/03 to 3/04 the SNCB-NMBS replacement bus stop is at the temporary stop : arr\u00eat provisoire SNCB, avenue Albert 1er, 106 (dans le rond-point).<br><br>We advise you to allow enough time to reach the replacement bus stop.<br>",
+        "company": "SNCB",
+        "category": "11",
+        "priority": 75,
+        "products": 32,
+        "modTime": "19:23:34",
+        "modDate": "2026-03-31",
+        "icon": "HIM11",
+        "routeIdxFrom": 0,
+        "routeIdxTo": 0,
+        "sTime": "17:37:00",
+        "sDate": "2026-03-31",
+        "eTime": "23:59:00",
+        "eDate": "2026-04-03"
+      }
+    ]
+  }
+}

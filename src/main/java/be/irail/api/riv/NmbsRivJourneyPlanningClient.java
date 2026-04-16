@@ -78,7 +78,6 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
 
         journey.setLegs(legs);
         journey.setNotes(parseNotes(tripNode));
-        // Alerts could be parsed here if needed
 
         return journey;
     }
@@ -130,6 +129,7 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         List<DepartureAndArrival> parsedStops = parseVehicleStops(stationsDao, occupancyDao, legNode, vehicle, request.language());
         List<DepartureAndArrival> intermediateStops = parsedStops.subList(1, parsedStops.size() - 1);
         parsedLeg.setIntermediateStops(intermediateStops);
+        parsedLeg.setAlerts(parseMessages(legNode));
 
         return parsedLeg;
     }

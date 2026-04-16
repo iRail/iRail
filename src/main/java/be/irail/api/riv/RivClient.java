@@ -8,12 +8,14 @@ import be.irail.api.dto.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class RivClient {
@@ -54,7 +56,6 @@ public abstract class RivClient {
 
         return stops;
     }
-
 
     private DepartureAndArrival parseHafasIntermediateStop(StationsDao stationsDao, JsonNode rawStop, Vehicle vehicle, Language language) {
         String hafasId = rawStop.get("extId").asText();
@@ -101,34 +102,29 @@ public abstract class RivClient {
         boolean platformChanged = realtimePlatform != null;
         platform = platformChanged ? realtimePlatform : platform;
 
+        String departurePrognosis = getFieldOrNull(rawStop, "depPrognosisType");
+        String arrivalPrognosis = getFieldOrNull(rawStop, "arrPrognosisType");
+        boolean departureCancelled = departurePrognosis != null && isDepartureCanceledBasedOnState(departurePrognosis);
+        boolean arrivalCancelled = arrivalPrognosis != null && isArrivalCanceledBasedOnState(arrivalPrognosis);
         if (!isArrival) {
-            String depPrognosisType = getFieldOrNull(rawStop, "depPrognosisType");
-            if (depPrognosisType != null) {
-                part.setStatus("REPORTED".equals(depPrognosisType) ? DepartureArrivalState.REPORTED : null);
-                part.setIsCancelled(isDepartureCanceledBasedOnState(depPrognosisType));
+            if (departurePrognosis != null) {
+                part.setStatus("REPORTED".equals(departurePrognosis) ? DepartureArrivalState.REPORTED : null);
+                part.setIsCancelled(departureCancelled);
             }
-        } else {
-            String arrPrognosisType = getFieldOrNull(rawStop, "arrPrognosisType");
-            if (arrPrognosisType != null) {
-                part.setStatus("REPORTED".equals(arrPrognosisType) ? DepartureArrivalState.REPORTED : null);
-                part.setIsCancelled(isArrivalCanceledBasedOnState(arrPrognosisType));
-            }
+        } else if (arrivalPrognosis != null) {
+            part.setStatus("REPORTED".equals(arrivalPrognosis) ? DepartureArrivalState.REPORTED : null);
+            part.setIsCancelled(arrivalCancelled);
         }
-
         part.setPlatform(new PlatformInfo(station.getId(), platform, platformChanged));
 
-        boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
-        boolean rtAlighting = getBooleanOrDefault(rawStop, "rtAlighting", true);
-        boolean rtBoarding = getBooleanOrDefault(rawStop, "rtBoarding", true);
-        if (rtAlighting || rtBoarding) {
-            cancelled = false; // the cancelled flag is set even when only a departure or arrival is cancelled, fix this
+        if (!departureCancelled && !arrivalCancelled) {
+            // the cancelled flag is set even when only a departure or arrival is cancelled, only read it when not a partial cancellation
+            boolean cancelled = getBooleanOrDefault(rawStop, "cancelled", false);
+            part.setIsCancelled(cancelled);
         }
-        if (isArrival) {
-            part.setIsCancelled(cancelled || !rtAlighting);
-        } else {
-            part.setIsCancelled(cancelled || !rtBoarding);
+        if (getBooleanOrDefault(rawStop, "additional", false)) {
+            part.setIsExtra(true);
         }
-
         // TODO: read alighting/boarding booleans, see international trains
         return part;
     }
@@ -172,7 +168,7 @@ public abstract class RivClient {
     }
 
 
-    private static @NonNull LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
+    private static LocalDateTime parseTimeAndDateCombination(String timeS, String dateS) {
         if (timeS.length() == 5 || timeS.length() == 7) {
             timeS = "0" + timeS;
         }
@@ -225,6 +221,72 @@ public abstract class RivClient {
         );
     }
 
+
+    protected List<Message> parseMessages(JsonNode node) {
+        if (!node.has("Messages") || !node.get("Messages").has("Message")) {
+            return Collections.emptyList();
+        }
+
+        List<Message> messages = new ArrayList<>();
+        for (JsonNode msgNode : node.get("Messages").get("Message")) {
+            try {
+                String id = msgNode.has("id") ? msgNode.get("id").asText() : null;
+                String head = msgNode.has("head") ? msgNode.get("head").asText() : null;
+                String text = msgNode.has("text") ? msgNode.get("text").asText() : null;
+                String company = msgNode.has("company") ? msgNode.get("company").asText() : null;
+
+                OffsetDateTime validFrom = parseHafasDateTime(msgNode, "sDate", "sTime");
+                OffsetDateTime validTo = parseHafasDateTime(msgNode, "eDate", "eTime");
+                OffsetDateTime lastModified = parseHafasDateTime(msgNode, "modDate", "modTime");
+
+                MessageType type = MessageType.INFO;
+                if (msgNode.has("icon")) {
+                    String icon = msgNode.get("icon").asText();
+                    if (icon.startsWith("HIM1") && icon.length() <= 5) {
+                        type = MessageType.WORKS;
+                    } else if (icon.startsWith("HIM2")) {
+                        type = MessageType.TROUBLE;
+                    }
+                }
+
+                List<MessageLink> links = parseMessageLinks(msgNode);
+
+                messages.add(new Message(id, validFrom, validTo, lastModified, type, head, head, text, company, links));
+            } catch (Exception e) {
+                log.warn("Failed to parse HIM message: {}", e.getMessage());
+            }
+        }
+        return messages;
+    }
+
+    private OffsetDateTime parseHafasDateTime(JsonNode node, String dateField, String timeField) {
+        if (!node.has(dateField) || !node.has(timeField)) {
+            return null;
+        }
+        String date = node.get(dateField).asText();
+        String time = node.get(timeField).asText();
+        LocalDateTime ldt = LocalDateTime.parse(date + time, DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss"));
+        return ldt.atZone(ZoneId.of("Europe/Brussels")).toOffsetDateTime();
+    }
+
+    private List<MessageLink> parseMessageLinks(JsonNode msgNode) {
+        List<MessageLink> links = new ArrayList<>();
+        if (!msgNode.has("channel")) {
+            return links;
+        }
+        for (JsonNode channel : msgNode.get("channel")) {
+            if (channel.has("url")) {
+                for (JsonNode urlNode : channel.get("url")) {
+                    String url = urlNode.has("url") ? urlNode.get("url").asText() : null;
+                    String name = urlNode.has("name") ? urlNode.get("name").asText() : null;
+                    if (url != null) {
+                        links.add(new MessageLink(url, name));
+                    }
+                }
+            }
+        }
+        return links;
+    }
 
     protected List<String> parseNotes(JsonNode tripNode) {
         List<String> notes = new ArrayList<>();
