@@ -162,7 +162,13 @@ public class GtfsReader {
                 .filter(sto -> usedTripIds.contains(sto.getTripId()) && usedServiceIds.contains(Integer.parseInt(sto.getServiceId())))
                 .toList();
         for (StopTimeOverrideEntity sto : overrides) {
-            stopTimesByTrip.get(new TripIdAndSequence(sto.getTripId(), sto.getStopSequence())).addOverride(Integer.parseInt(sto.getServiceId()), sto.getStopId());
+            int serviceId = Integer.parseInt(sto.getServiceId());
+            StopTime stopTime = stopTimesByTrip.get(new TripIdAndSequence(sto.getTripId(), sto.getStopSequence()));
+            if (stopTime != null) {
+                stopTime.addOverride(serviceId, sto.getStopId());
+            } else {
+                log.error("Stop time override for nonexistent stoptime: " + sto.getTripId() + ", " + sto.getStopId() + ", " + sto.getStopSequence());
+            }
         }
         log.info("Read {} stop time overrides, kept {} within date range", dao.getAllEntitiesForType(StopTimeOverrideEntity.class).size(), overrides.size());
 
