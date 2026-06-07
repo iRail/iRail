@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -87,11 +85,7 @@ public class NmbsRivVehicleJourneyClient extends RivClient {
     }
 
     private List<Message> getAlerts(JsonNode json) {
-        if (!json.has("Messages")) {
-            return Collections.emptyList();
-        }
-        // TODO Implement parsing if Message model is fully understood, for now return empty
-        return new ArrayList<>();
+        return parseMessages(json);
     }
 
 }
