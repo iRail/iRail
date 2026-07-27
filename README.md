@@ -9,8 +9,6 @@ Our main site consists of a very easy mobile website to look up time schedules u
 
 Native applications using the iRail API and created or supported by the iRail team are named BeTrains and RailerApp.
 
-All information can be found on [our blog at hello.iRail.be](http://hello.irail.be/).
-
 ## API Documentation ##
 
 API Documentation can be found at [https://docs.irail.be]().
@@ -41,7 +39,6 @@ the [irail/stations](https://github.com/irail/stations) composer package.
 
 ## More links ##
 
-* Our mailing list: http://list.irail.be/
 * Our GTFS data dumps: http://gtfs.irail.be/
 * Issue tracker: https://github.com/iRail/iRail/issues
 * Just use our HTTP API: http://api.irail.be/
