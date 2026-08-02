@@ -4,7 +4,7 @@ import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
 
-@CsvFields(filename = "stop_time_overrides.txt")
+@CsvFields(filename = "stop_time_overrides.txt", required = false)
 public class StopTimeOverrideEntity extends IdentityBean<Integer> {
 
     private static final long serialVersionUID = 1L;
