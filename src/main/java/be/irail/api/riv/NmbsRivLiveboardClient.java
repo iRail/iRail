@@ -80,8 +80,12 @@ public class NmbsRivLiveboardClient {
     private DepartureOrArrival parseStopAtStation(LiveboardRequest request, StationDto currentStation, JsonNode entry) {
         boolean isArrivalBoard = request.timeSelection() == TimeSelection.ARRIVAL;
 
-        String plannedTimeStr = isArrivalBoard ? entry.get("PlannedArrival").asText() : entry.get("PlannedDeparture").asText();
-        LocalDateTime plannedDateTime = LocalDateTime.parse(plannedTimeStr, DATE_TIME_FORMATTER);
+        String plannedTimeKey = isArrivalBoard ? "PlannedArrival" : "PlannedDeparture";
+        if (!entry.hasNonNull(plannedTimeKey)) {
+            log.error("Liveboard entry without {}, skipping entry: {}", plannedTimeKey, entry);
+            return null;
+        }
+        LocalDateTime plannedDateTime = LocalDateTime.parse(entry.get(plannedTimeKey).asText(), DATE_TIME_FORMATTER);
         int delay = parseDelayInSeconds(entry, isArrivalBoard ? "ArrivalDelay" : "DepartureDelay");
 
         String platform = entry.has("Platform") ? entry.get("Platform").asText() : "?";
@@ -97,6 +101,10 @@ public class NmbsRivLiveboardClient {
             }
         }
 
+        if (!entry.hasNonNull("TrainNumber") || !entry.hasNonNull("CommercialType")) {
+            log.error("Liveboard entry without TrainNumber or CommercialType, skipping entry: {}", entry);
+            return null;
+        }
         int journeyNumber = entry.get("TrainNumber").asInt();
         String commercialType = entry.get("CommercialType").asText();
 
