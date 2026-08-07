@@ -11,6 +11,8 @@ import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 import be.irail.api.gtfs.reader.models.PickupDropoffType;
 import be.irail.api.gtfs.reader.models.Stop;
 import be.irail.api.riv.requests.LiveboardRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 @Service
 public class GtfsLiveboardClient {
+    private static final Logger log = LogManager.getLogger(GtfsLiveboardClient.class);
 
     private final StationsDao stationsDao;
     private final OccupancyDao occupancyDao;
@@ -62,11 +65,21 @@ public class GtfsLiveboardClient {
             if (request.timeSelection() == TimeSelection.DEPARTURE) {
                 departureOrArrival.setScheduledDateTime(call.stopTime().getDepartureTime(call.startDate()));
                 Station destinationStation = stationsDao.getStationFromId(call.destinationParentStop().getHafasId());
+                if (destinationStation == null) {
+                    log.error("Unknown destination station {} for trip {}, skipping call",
+                            call.destinationParentStop().getHafasId(), call.trip().id());
+                    continue;
+                }
                 vehicle.setDirection(new VehicleDirection(call.trip().headsign(), destinationStation.toDto(request.language())));
                 departureOrArrival.setOccupancy(occupancyDao.getOccupancy(departureOrArrival));
             } else {
                 departureOrArrival.setScheduledDateTime(call.stopTime().getArrivalTime(call.startDate()));
                 Station originStation = stationsDao.getStationFromId(call.originParentStop().getHafasId());
+                if (originStation == null) {
+                    log.error("Unknown origin station {} for trip {}, skipping call",
+                            call.originParentStop().getHafasId(), call.trip().id());
+                    continue;
+                }
                 vehicle.setDirection(new VehicleDirection(originStation.getName(request.language()), originStation.toDto(request.language())));
             }
 
@@ -80,9 +93,10 @@ public class GtfsLiveboardClient {
                 }
 
                 departureOrArrival.setIsCancelled(rtUpdate.cancelled());
-                String newPlatform = staticDao.getStop(rtUpdate.stopId()).platformCode();
                 if (!rtUpdate.stopId().equals(platform.id())) {
-                    departureOrArrival.setPlatform(new PlatformInfo(rtUpdate.parentStopId(), newPlatform, true));
+                    Stop newPlatform = staticDao.getStop(rtUpdate.stopId());
+                    departureOrArrival.setPlatform(new PlatformInfo(rtUpdate.parentStopId(),
+                            newPlatform != null ? newPlatform.platformCode() : null, true));
                 }
             }
             results.add(departureOrArrival);
