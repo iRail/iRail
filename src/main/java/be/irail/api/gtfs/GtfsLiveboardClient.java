@@ -11,6 +11,8 @@ import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 import be.irail.api.gtfs.reader.models.PickupDropoffType;
 import be.irail.api.gtfs.reader.models.Stop;
 import be.irail.api.riv.requests.LiveboardRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 @Service
 public class GtfsLiveboardClient {
+    private static final Logger log = LogManager.getLogger(GtfsLiveboardClient.class);
 
     private final StationsDao stationsDao;
     private final OccupancyDao occupancyDao;
@@ -80,9 +83,10 @@ public class GtfsLiveboardClient {
                 }
 
                 departureOrArrival.setIsCancelled(rtUpdate.cancelled());
-                String newPlatform = staticDao.getStop(rtUpdate.stopId()).platformCode();
                 if (!rtUpdate.stopId().equals(platform.id())) {
-                    departureOrArrival.setPlatform(new PlatformInfo(rtUpdate.parentStopId(), newPlatform, true));
+                    Stop newPlatform = staticDao.getStop(rtUpdate.stopId());
+                    departureOrArrival.setPlatform(new PlatformInfo(rtUpdate.parentStopId(),
+                            newPlatform != null ? newPlatform.platformCode() : null, true));
                 }
             }
             results.add(departureOrArrival);
@@ -97,6 +101,7 @@ public class GtfsLiveboardClient {
         if (station != null) {
             return station.toDto(language);
         }
+        log.warn("Unknown station {} in station database, using GTFS data", gtfsStop.id());
         String id = hafasId == null ? gtfsStop.id() : "00" + hafasId;
         String uri = hafasId == null ? null : "http://irail.be/stations/NMBS/" + id;
         return new StationDto(id, uri, gtfsStop.name(), gtfsStop.getName(language), gtfsStop.lon(), gtfsStop.lat());
