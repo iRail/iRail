@@ -6,6 +6,7 @@ import be.irail.api.db.Station;
 import be.irail.api.db.StationsDao;
 import be.irail.api.dto.*;
 import be.irail.api.dto.result.LiveboardSearchResult;
+import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.exception.upstream.UpstreamServerException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
@@ -61,17 +62,36 @@ public class NmbsRivLiveboardClient {
         StationDto currentStation = convertToModelStation(dbStation, request.language());
 
         List<DepartureOrArrival> departuresOrArrivals = new ArrayList<>();
+        int failedEntries = 0;
         JsonNode entries = rawData.get("entries");
         if (entries != null && entries.isArray()) {
             for (JsonNode entry : entries) {
                 if (isServiceTrain(entry)) {
                     continue;
                 }
-                DepartureOrArrival parsedStop = parseStopAtStation(request, currentStation, entry);
-                if (parsedStop != null) {
-                    departuresOrArrivals.add(parsedStop);
+                try {
+                    DepartureOrArrival parsedStop = parseStopAtStation(request, currentStation, entry);
+                    if (parsedStop != null) {
+                        departuresOrArrivals.add(parsedStop);
+                    }
+                } catch (IrailHttpException e) {
+                    // A deliberate HTTP failure carries its own status code and message,
+                    // so it must not be downgraded into a skipped entry.
+                    throw e;
+                } catch (RuntimeException e) {
+                    // One unparseable entry should cost one departure, not the whole liveboard.
+                    failedEntries++;
+                    log.error("Failed to parse liveboard entry for station {}, skipping it: {}",
+                            request.station().getIrailId(), entry, e);
                 }
             }
+        }
+
+        // Losing every single entry is not a liveboard with no departures, it is a failure.
+        // Reporting it as such keeps a systemic problem visible instead of serving an empty board.
+        if (failedEntries > 0 && departuresOrArrivals.isEmpty()) {
+            throw new UpstreamServerException(
+                    "Failed to parse all " + failedEntries + " entries returned by the server.");
         }
 
         return new LiveboardSearchResult(currentStation, departuresOrArrivals);
