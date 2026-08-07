@@ -2,6 +2,7 @@ package be.irail.api.legacy;
 
 import be.irail.api.dto.DepartureArrivalState;
 import be.irail.api.dto.DepartureOrArrival;
+import be.irail.api.dto.StationDto;
 import be.irail.api.dto.TimeSelection;
 import be.irail.api.dto.result.LiveboardSearchResult;
 import be.irail.api.riv.requests.LiveboardRequest;
@@ -38,7 +39,7 @@ public class LiveboardV1Converter extends V1Converter {
 
     private static V1Departure convertDeparture(DepartureOrArrival departure) {
         V1Departure result = new V1Departure();
-        result.station = convertStation(departure.getVehicle().getDirection().getStation());
+        result.station = convertDirectionStation(departure);
         result.time = departure.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.delay = departure.getDelay();
         result.canceled = departure.isCancelled() ? "1" : "0";
@@ -53,7 +54,7 @@ public class LiveboardV1Converter extends V1Converter {
 
     private static V1Arrival convertArrival(DepartureOrArrival arrival) {
         V1Arrival result = new V1Arrival();
-        result.station = convertStation(arrival.getVehicle().getDirection().getStation());
+        result.station = convertDirectionStation(arrival);
         result.time = arrival.getScheduledDateTime().atZone(ZoneId.systemDefault()).toEpochSecond();
         result.delay = arrival.getDelay();
         result.canceled = arrival.isCancelled() ? "1" : "0";
@@ -63,6 +64,21 @@ public class LiveboardV1Converter extends V1Converter {
         result.platform = convertPlatform(arrival.getPlatform());
         result.departureConnection = arrival.getDepartureUri();
         return result;
+    }
+
+    /**
+     * Converts the station a vehicle is heading to (or coming from), when it is known.
+     *
+     * @param departureOrArrival the departure or arrival to read the direction from
+     * @return the converted direction station, or null if the vehicle, its direction or the
+     *         direction's station is unknown
+     */
+    private static V1Station convertDirectionStation(DepartureOrArrival departureOrArrival) {
+        if (departureOrArrival.getVehicle() == null || departureOrArrival.getVehicle().getDirection() == null) {
+            return null;
+        }
+        StationDto station = departureOrArrival.getVehicle().getDirection().getStation();
+        return station != null ? convertStation(station) : null;
     }
 
     // Inner classes for V1 output structure
