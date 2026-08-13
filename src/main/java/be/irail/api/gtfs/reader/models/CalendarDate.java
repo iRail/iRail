@@ -5,5 +5,5 @@ import java.time.LocalDate;
 /**
  * Represents a GTFS Calendar Date.
  */
-public record CalendarDate(int serviceId, LocalDate date) {
+public record CalendarDate(String serviceId, LocalDate date) {
 }

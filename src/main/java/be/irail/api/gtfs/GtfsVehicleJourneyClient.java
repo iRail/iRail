@@ -66,16 +66,21 @@ public class GtfsVehicleJourneyClient {
 
             Stop platform = staticDao.getStop(stopTime, startDate);
             String parentStationId = platform.parentStation();
-            Station station;
-            if (parentStationId != null) {
-                // Remove the leading S for parent stops in the NMBS GTFS data
-                station = stationsDao.getStationFromId(parentStationId.substring(1));
-            } else {
+            String hafasStationId = Stop.getHafasId(parentStationId);
+            if (hafasStationId == null) {
+                // Name-based international parents cannot be mapped directly,
+                // but their platform identifier generally contains the UIC ID.
+                hafasStationId = platform.getHafasId();
+            }
+            if (parentStationId == null) {
                 // E.g border stops which are passed
                 log.warn("Stop " + stopTime.stopId() + " (" + platform.name() + ") for vehicle " + vehicle.getName() + " has no parent station");
-                station = stationsDao.getStationFromId(platform.id());
             }
-            StationDto stationDto = station.toDto(request.language());
+            Station station = hafasStationId == null ? null : stationsDao.getStationFromId(hafasStationId);
+            Stop gtfsStation = parentStationId == null ? platform : staticDao.getStop(parentStationId);
+            StationDto stationDto = station != null
+                    ? station.toDto(request.language())
+                    : gtfsStationDto(gtfsStation != null ? gtfsStation : platform, hafasStationId, request.language());
 
             DepartureOrArrival arrival = new DepartureOrArrival();
             arrival.setStation(stationDto);
@@ -126,6 +131,12 @@ public class GtfsVehicleJourneyClient {
 
         vehicle.setDirection(new VehicleDirection(route.longName(), stops.getLast().getStation()));
         return new VehicleJourneySearchResult(vehicle, stops, Collections.emptyList());
+    }
+
+    private StationDto gtfsStationDto(Stop stop, String hafasId, Language language) {
+        String id = hafasId == null ? stop.id() : "00" + hafasId;
+        String uri = hafasId == null ? null : "http://irail.be/stations/NMBS/" + id;
+        return new StationDto(id, uri, stop.name(), stop.getName(language), stop.lon(), stop.lat());
     }
 
 }

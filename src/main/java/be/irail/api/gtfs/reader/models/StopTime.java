@@ -14,7 +14,7 @@ import java.util.Map;
 public record StopTime(String tripId, int arrivalOffsetSeconds, int departureOffsetSeconds, String stopId,
                        int stopSequence,
                        String stopHeadsign, PickupDropoffType pickupType, PickupDropoffType dropOffType,
-                       Map<Integer, String> stopIdOverridesByServiceId) {
+                       Map<String, String> stopIdOverridesByServiceId) {
     private static final Logger log = LogManager.getLogger(StopTime.class);
 
     public StopTime(String tripId, int arrivalTime, int departureTime, String stopId, int stopSequence, String stopHeadsign,
@@ -26,7 +26,7 @@ public record StopTime(String tripId, int arrivalOffsetSeconds, int departureOff
         return pickupType() == PickupDropoffType.SCHEDULED || dropOffType() == PickupDropoffType.SCHEDULED;
     }
 
-    public void addOverride(Integer serviceId, String stopId) {
+    public void addOverride(String serviceId, String stopId) {
         String existingValue = stopIdOverridesByServiceId.put(serviceId, stopId);
         if (existingValue != null) {
             log.warn("Multiple overrides for service ID {}, already stored {} when discovering {}", serviceId, existingValue, stopId);

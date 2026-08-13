@@ -61,13 +61,13 @@ public class GtfsLiveboardClient {
             departureOrArrival.setVehicle(vehicle);
             if (request.timeSelection() == TimeSelection.DEPARTURE) {
                 departureOrArrival.setScheduledDateTime(call.stopTime().getDepartureTime(call.startDate()));
-                Station destinationStation = stationsDao.getStationFromId(call.destinationParentStop().getHafasId());
-                vehicle.setDirection(new VehicleDirection(call.trip().headsign(), destinationStation.toDto(request.language())));
+                StationDto destinationStation = stationDto(call.destinationParentStop(), request.language());
+                vehicle.setDirection(new VehicleDirection(call.trip().headsign(), destinationStation));
                 departureOrArrival.setOccupancy(occupancyDao.getOccupancy(departureOrArrival));
             } else {
                 departureOrArrival.setScheduledDateTime(call.stopTime().getArrivalTime(call.startDate()));
-                Station originStation = stationsDao.getStationFromId(call.originParentStop().getHafasId());
-                vehicle.setDirection(new VehicleDirection(originStation.getName(request.language()), originStation.toDto(request.language())));
+                StationDto originStation = stationDto(call.originParentStop(), request.language());
+                vehicle.setDirection(new VehicleDirection(originStation.getLocalizedStationName(), originStation));
             }
 
             GtfsRtUpdate rtUpdate = rtUpdates.getOrDefault(call.trip().id(), null);
@@ -89,6 +89,17 @@ public class GtfsLiveboardClient {
         }
 
         return new LiveboardSearchResult(stationDto, results);
+    }
+
+    private StationDto stationDto(Stop gtfsStop, Language language) {
+        String hafasId = gtfsStop.getHafasId();
+        Station station = hafasId == null ? null : stationsDao.getStationFromId(hafasId);
+        if (station != null) {
+            return station.toDto(language);
+        }
+        String id = hafasId == null ? gtfsStop.id() : "00" + hafasId;
+        String uri = hafasId == null ? null : "http://irail.be/stations/NMBS/" + id;
+        return new StationDto(id, uri, gtfsStop.name(), gtfsStop.getName(language), gtfsStop.lon(), gtfsStop.lat());
     }
 
 }

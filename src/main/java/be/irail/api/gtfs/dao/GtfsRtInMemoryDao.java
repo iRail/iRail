@@ -2,6 +2,7 @@ package be.irail.api.gtfs.dao;
 
 import be.irail.api.gtfs.reader.DatedTripId;
 import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
+import be.irail.api.gtfs.reader.models.Stop;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -35,9 +36,13 @@ public class GtfsRtInMemoryDao {
         for (GtfsRtUpdate update : delays) {
             tripMap.putIfAbsent(update.tripId(), new HashMap<>());
             tripMap.get(update.tripId()).put(update.stopId(), update);
-            if (update.parentStopId() != null) {
-                // Remove the "S" prefix for station type stops
-                String stopId = update.parentStopId().substring(1);
+            String stopId = Stop.getHafasId(update.parentStopId());
+            if (stopId == null) {
+                // International parent stops can be name-based; their platform
+                // stop often still carries the numeric station identifier.
+                stopId = Stop.getHafasId(update.stopId());
+            }
+            if (stopId != null) {
                 stopMap.putIfAbsent(stopId, new HashMap<>());
                 stopMap.get(stopId).put(update.tripId(), update);
             }

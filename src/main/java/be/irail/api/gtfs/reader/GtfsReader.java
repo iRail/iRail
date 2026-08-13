@@ -123,15 +123,15 @@ public class GtfsReader {
         LocalDate lastdate = LocalDate.now().plusDays(readDaysForward);
         List<CalendarDate> calendarDates = dao.getAllCalendarDates().stream()
                 .filter(cd -> cd.getExceptionType() == 1) // Only ADDED days
-                .map(cd -> new CalendarDate(Integer.parseInt(cd.getServiceId().getId()),
+                .map(cd -> new CalendarDate(cd.getServiceId().getId(),
                         LocalDate.of(cd.getDate().getYear(), cd.getDate().getMonth(), cd.getDate().getDay())))
                 .filter(cd -> !cd.date().isBefore(firstDate) && !cd.date().isAfter(lastdate))
                 .toList();
         log.info("Read {} calendar dates, kept {} within date range", dao.getAllCalendarDates().size(), calendarDates.size());
-        Set<Integer> usedServiceIds = calendarDates.stream().map(CalendarDate::serviceId).collect(java.util.stream.Collectors.toSet());
+        Set<String> usedServiceIds = calendarDates.stream().map(CalendarDate::serviceId).collect(java.util.stream.Collectors.toSet());
 
         List<Trip> trips = dao.getAllTrips().stream()
-                .map(t -> new Trip(t.getId().getId(), t.getRoute().getId().getId(), Integer.parseInt(t.getServiceId().getId()), t.getTripHeadsign(), Integer.parseInt(t.getTripShortName()), t.getDirectionId() != null ? Integer.parseInt(t.getDirectionId()) : 0, t.getBlockId()))
+                .map(t -> new Trip(t.getId().getId(), t.getRoute().getId().getId(), t.getServiceId().getId(), t.getTripHeadsign(), Integer.parseInt(t.getTripShortName()), t.getDirectionId() != null ? Integer.parseInt(t.getDirectionId()) : 0, t.getBlockId()))
                 .filter(t -> usedServiceIds.contains(t.serviceId()))
                 .toList();
         log.info("Read {} trips, kept {} within date range", dao.getAllTrips().size(), trips.size());
@@ -159,13 +159,12 @@ public class GtfsReader {
         Map<TripIdAndSequence, StopTime> stopTimesByTrip = stopTimes.stream().collect(Collectors.toMap(st -> new TripIdAndSequence(st.tripId(), st.stopSequence()), st -> st));
 
         List<StopTimeOverrideEntity> overrides = dao.getAllEntitiesForType(StopTimeOverrideEntity.class).stream()
-                .filter(sto -> usedTripIds.contains(sto.getTripId()) && usedServiceIds.contains(Integer.parseInt(sto.getServiceId())))
+                .filter(sto -> usedTripIds.contains(sto.getTripId()) && usedServiceIds.contains(sto.getServiceId()))
                 .toList();
         for (StopTimeOverrideEntity sto : overrides) {
-            int serviceId = Integer.parseInt(sto.getServiceId());
             StopTime stopTime = stopTimesByTrip.get(new TripIdAndSequence(sto.getTripId(), sto.getStopSequence()));
             if (stopTime != null) {
-                stopTime.addOverride(serviceId, sto.getStopId());
+                stopTime.addOverride(sto.getServiceId(), sto.getStopId());
             } else {
                 log.error("Stop time override for nonexistent stoptime: " + sto.getTripId() + ", " + sto.getStopId() + ", " + sto.getStopSequence());
             }

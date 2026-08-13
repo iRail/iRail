@@ -30,7 +30,7 @@ public class GtfsInMemoryDao {
     private static final int SERVICE_DAY_END_HOUR = 4;
     private static volatile GtfsInMemoryDao instance = null;
     private final Map<String, Agency> agencies;
-    private final HashMultimap<Integer, LocalDate> calendarDatesByServiceId;
+    private final HashMultimap<String, LocalDate> calendarDatesByServiceId;
     private final HashMultimap<LocalDate, TripIdAndStartDate> tripIdsByDate;
     private final HashMultimap<LocalDate, TripIdAndStartDate> tripsStartedAtPreviousDayByDate;
     private final Map<String, Route> routes;
@@ -77,14 +77,14 @@ public class GtfsInMemoryDao {
         data.stopTimes().forEach(stopTime -> {
             stopTimesByTripId.put(stopTime.tripId(), stopTime);
             Stop platformStop = stops.get(stopTime.stopId());
-            if (platformStop.parentStation() == null) {
-                // This happens for example at border stops, or stops which are not in use yet
-                // log.debug("Stop " + stopTime.stopId() + " (" + platformStop.name() + ") has no parent station");
+            if (platformStop == null) {
+                log.warn("Stop time references unknown GTFS stop {}", stopTime.stopId());
                 return;
             }
-            // Remove the "S" prefix for station type stops
-            String parentStopId = platformStop.parentStation().replaceAll("[^0-9]", "");
-            stopTimesByStopId.put(parentStopId, stopTime);
+            String hafasStopId = getHafasStationId(platformStop.id());
+            if (hafasStopId != null) {
+                stopTimesByStopId.put(hafasStopId, stopTime);
+            }
             if (stopTime.arrivalOffsetSeconds() > 86400) {
                 calendarDatesByServiceId.get(tripsById.get(stopTime.tripId()).serviceId()).forEach(date -> {
                     tripsStartedAtPreviousDayByDate.put(date.plusDays(1), new TripIdAndStartDate(stopTime.tripId(), date));
@@ -123,7 +123,7 @@ public class GtfsInMemoryDao {
         return stopTimesByTripId.get(tripId);
     }
 
-    public Set<LocalDate> getCalendarDates(Integer serviceId) {
+    public Set<LocalDate> getCalendarDates(String serviceId) {
         return calendarDatesByServiceId.get(serviceId);
     }
 
@@ -149,7 +149,7 @@ public class GtfsInMemoryDao {
             return stops.get(stopTime.stopId());
         }
 
-        List<Integer> overridesOnDate = stopTime.stopIdOverridesByServiceId().keySet().stream().filter(serviceId -> getCalendarDates(serviceId).contains(startDate)).toList();
+        List<String> overridesOnDate = stopTime.stopIdOverridesByServiceId().keySet().stream().filter(serviceId -> getCalendarDates(serviceId).contains(startDate)).toList();
         if (overridesOnDate.isEmpty()) {
             return stops.get(stopTime.stopId());
         }
@@ -185,8 +185,8 @@ public class GtfsInMemoryDao {
                         Stop destinationParentStop = stops.get(destinationStop.parentStation());
                         Stop platform = getStop(stopTime, date);
                         activeStopTimes.add(new CallAtStop(route, trip, platform, date, stopTime,
-                                originParentStop == null ? originStop : originParentStop,
-                                destinationParentStop == null ? destinationStop : destinationParentStop));
+                                stationStop(originStop, originParentStop),
+                                stationStop(destinationStop, destinationParentStop)));
                     }
                 }
             }
@@ -337,10 +337,16 @@ public class GtfsInMemoryDao {
 
     private String getHafasStationId(String platformStopId) {
         Stop platformStop = stops.get(platformStopId);
-        if (platformStop.parentStation() == null) {
-            return platformStop.getHafasId();
+        if (platformStop == null) {
+            return null;
         }
-        return stops.get(platformStop.parentStation()).getHafasId();
+        Stop parentStop = platformStop.parentStation() == null ? null : stops.get(platformStop.parentStation());
+        Stop stationStop = stationStop(platformStop, parentStop);
+        return stationStop.getHafasId();
+    }
+
+    private Stop stationStop(Stop platformStop, Stop parentStop) {
+        return parentStop != null && parentStop.getHafasId() != null ? parentStop : platformStop;
     }
 
     /**
