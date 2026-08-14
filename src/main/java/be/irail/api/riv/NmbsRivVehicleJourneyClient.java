@@ -65,7 +65,7 @@ public class NmbsRivVehicleJourneyClient extends RivClient {
         // Extract start date from ref or use request date
         String ref = json.get("ref").asText();
         LocalDate journeyStartDate = extractStartDate(ref);
-        journeyStartDate = Objects.requireNonNullElse(journeyStartDate, LocalDate.now());
+        journeyStartDate = Objects.requireNonNullElse(journeyStartDate, request.dateTime().toLocalDate());
 
         Vehicle vehicle = Vehicle.fromTypeAndNumber(trainType, trainNumber, journeyStartDate);
         setDirection(vehicle, json, request.language());

@@ -6,6 +6,7 @@ import be.irail.api.dto.result.VehicleJourneySearchResult;
 import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.notfound.IrailNotFoundException;
+import be.irail.api.gtfs.GtfsVehicleJourneyClient;
 import be.irail.api.legacy.DataRoot;
 import be.irail.api.legacy.DatedVehicleJourneyV1Converter;
 import be.irail.api.riv.NmbsRivVehicleJourneyClient;
@@ -39,11 +40,16 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
 
     private static final Logger log = LoggerFactory.getLogger(DatedVehicleJourneyV1Controller.class);
 
-    private final NmbsRivVehicleJourneyClient vehicleJourneyClient;
+    private final NmbsRivVehicleJourneyClient rivVehicleJourneyClient;
+    private final GtfsVehicleJourneyClient gtfsVehicleJourneyClient;
 
     @Autowired
-    public DatedVehicleJourneyV1Controller(NmbsRivVehicleJourneyClient vehicleJourneyClient) {
-        this.vehicleJourneyClient = vehicleJourneyClient;
+    public DatedVehicleJourneyV1Controller(
+            NmbsRivVehicleJourneyClient rivVehicleJourneyClient,
+            GtfsVehicleJourneyClient gtfsVehicleJourneyClient
+    ) {
+        this.rivVehicleJourneyClient = rivVehicleJourneyClient;
+        this.gtfsVehicleJourneyClient = gtfsVehicleJourneyClient;
     }
 
     /**
@@ -82,7 +88,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
 
         try {
             // Fetch vehicle journey data
-            VehicleJourneySearchResult vehicleJourneyResult = vehicleJourneyClient.getDatedVehicleJourney(request);
+            VehicleJourneySearchResult vehicleJourneyResult = getDatedVehicleJourney(request);
             log.debug("Found {} stops for vehicle {}", vehicleJourneyResult.getStops().size(), id);
 
             // Convert to V1 format
@@ -104,6 +110,17 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
             }
             throw new InternalProcessingException("Error fetching vehicle journey", exception);
         }
+    }
+
+    VehicleJourneySearchResult getDatedVehicleJourney(VehicleJourneyRequest request) throws ExecutionException {
+        if (usesGtfs(request.dateTime().toLocalDate(), LocalDate.now())) {
+            return gtfsVehicleJourneyClient.getDatedVehicleJourney(request);
+        }
+        return rivVehicleJourneyClient.getDatedVehicleJourney(request);
+    }
+
+    static boolean usesGtfs(LocalDate requestedDate, LocalDate currentDate) {
+        return !requestedDate.equals(currentDate);
     }
 
     /**
