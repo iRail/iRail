@@ -23,7 +23,6 @@ class GtfsInMemoryDaoTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of(),
                 List.of(new Trip("trip-id", "route-id", serviceId, "Brussels", 1234, 0, null))
         );
 

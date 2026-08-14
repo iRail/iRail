@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Service for reading static GTFS data.
@@ -156,20 +155,6 @@ public class GtfsReader {
                         PickupDropoffType.fromCode(st.getDropOffType())
                 )).toList();
         log.info("Read {} stop times, kept {} within date range", dao.getAllStopTimes().size(), stopTimes.size());
-        Map<TripIdAndSequence, StopTime> stopTimesByTrip = stopTimes.stream().collect(Collectors.toMap(st -> new TripIdAndSequence(st.tripId(), st.stopSequence()), st -> st));
-
-        List<StopTimeOverrideEntity> overrides = dao.getAllEntitiesForType(StopTimeOverrideEntity.class).stream()
-                .filter(sto -> usedTripIds.contains(sto.getTripId()) && usedServiceIds.contains(sto.getServiceId()))
-                .toList();
-        for (StopTimeOverrideEntity sto : overrides) {
-            StopTime stopTime = stopTimesByTrip.get(new TripIdAndSequence(sto.getTripId(), sto.getStopSequence()));
-            if (stopTime != null) {
-                stopTime.addOverride(sto.getServiceId(), sto.getStopId());
-            } else {
-                log.error("Stop time override for nonexistent stoptime: " + sto.getTripId() + ", " + sto.getStopId() + ", " + sto.getStopSequence());
-            }
-        }
-        log.info("Read {} stop time overrides, kept {} within date range", dao.getAllEntitiesForType(StopTimeOverrideEntity.class).size(), overrides.size());
 
         FeedInfo feedInfo = dao.getAllFeedInfos().stream()
                 .map(f -> new FeedInfo(f.getPublisherName(), f.getPublisherUrl(), f.getLang(),
@@ -186,15 +171,7 @@ public class GtfsReader {
                 })
                 .toList();
 
-        return new GtfsData(feedInfo, agencies, calendarDates, routes, stops, stopTimes, overrides, trips);
-    }
-
-    private int parseTime(String time) {
-        if (time == null || time.isBlank()) {
-            return -1;
-        }
-        String[] hms = time.split(":");
-        return Integer.parseInt(hms[0]) * 3600 + Integer.parseInt(hms[1]) * 60 + Integer.parseInt(hms[2]);
+        return new GtfsData(feedInfo, agencies, calendarDates, routes, stops, stopTimes, trips);
     }
 
     public record GtfsData(
@@ -204,12 +181,8 @@ public class GtfsReader {
             List<Route> routes,
             List<Stop> stops,
             List<StopTime> stopTimes,
-            List<StopTimeOverrideEntity> stopTimeOverrides,
             List<Trip> trips
     ) {
-    }
-
-    private record TripIdAndSequence(String tripId, int sequenceNr) {
     }
 
 }
