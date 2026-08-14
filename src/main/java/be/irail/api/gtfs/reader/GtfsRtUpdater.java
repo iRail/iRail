@@ -40,9 +40,9 @@ public class GtfsRtUpdater {
 
     /**
      * Periodically fetches and processes GTFS-Realtime TripUpdates.
-     * Runs every 15 seconds.
+     * Interval is configurable via gtfs.rt.pollMs (default 30s, matching the upstream refresh cadence).
      */
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRateString = "${gtfs.rt.pollMs:30000}")
     public void update() {
         GtfsInMemoryDao staticDao = GtfsInMemoryDao.getInstance();
         if (staticDao == null) {
