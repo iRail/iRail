@@ -67,6 +67,7 @@ public class GtfsRtUpdater {
 
         GtfsRtInMemoryDao.getInstance().updateCanceledTrips(canceledTrips);
         GtfsRtInMemoryDao.getInstance().updateStopTimeUpdates(delays);
+        GtfsRtInMemoryDao.getInstance().setFeedTimestamp(timestamp.toInstant());
         log.info("Updated GTFS-RT with {} delay records", delays.size());
     }
 
