@@ -10,6 +10,7 @@ import be.irail.api.exception.IrailHttpException;
 import be.irail.api.exception.notfound.CompositionNotFoundException;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
+import be.irail.api.gtfs.reader.models.Stop;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -64,8 +65,8 @@ public class NmbsRivCompositionClient {
 
                 CachedData<JsonNode> cachedData = rivRawDataRepository.getVehicleCompositionData(
                         String.valueOf(journey.getNumber()),
-                        journeyWithOriginAndDestination.get().getOriginStopId().substring(0, 7),
-                        journeyWithOriginAndDestination.get().getDestinationStopId().substring(0, 7),
+                        Stop.getHafasId(journeyWithOriginAndDestination.get().getOriginStopId()),
+                        Stop.getHafasId(journeyWithOriginAndDestination.get().getDestinationStopId()),
                         journey.getJourneyStartDate()
                 );
 
