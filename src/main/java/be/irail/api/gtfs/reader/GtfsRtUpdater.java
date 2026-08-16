@@ -61,34 +61,39 @@ public class GtfsRtUpdater {
 
         for (FeedEntity entity : feed.getEntityList()) {
             if (entity.hasTripUpdate()) {
-                TripUpdate tu = entity.getTripUpdate();
-                String tripId = tu.getTrip().getTripId();
-                LocalDate startDate = LocalDate.parse(tu.getTrip().getStartDate(), DATEFORMAT_YYYYMMDD);
-
-                for (TripUpdate.StopTimeUpdate stu : tu.getStopTimeUpdateList()) {
-                    String stopId = stu.getStopId();
-                    int arrivalDelay = stu.hasArrival() ? stu.getArrival().getDelay() : 0;
-                    int departureDelay = stu.hasDeparture() ? stu.getDeparture().getDelay() : 0;
-
-                    Stop stop = staticDao.getStop(stopId);
-                    String parentStopId = (stop != null) ? stop.parentStation() : null;
-
-                    // NMBS uses stop_id instead of stop_sequence
-                    delays.add(new GtfsRtUpdate(startDate, tripId, stopId, parentStopId,
-                            arrivalDelay, departureDelay,
-                            stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED,
-                            stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.UNSCHEDULED,
-                            timestamp));
-                }
-                if (tu.getTrip().getScheduleRelationship() == GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED) {
-                    canceledTrips.add(new DatedTripId(tripId, startDate));
-                }
+                handleOneTripUpdate(entity, staticDao, delays, timestamp, canceledTrips);
             }
         }
 
         GtfsRtInMemoryDao.getInstance().updateCanceledTrips(canceledTrips);
         GtfsRtInMemoryDao.getInstance().updateStopTimeUpdates(delays);
         log.info("Updated GTFS-RT with {} delay records", delays.size());
+    }
+
+    private static void handleOneTripUpdate(FeedEntity entity, GtfsInMemoryDao staticDao, List<GtfsRtUpdate> delays,
+                                            OffsetDateTime timestamp, Set<DatedTripId> canceledTrips) {
+        TripUpdate tu = entity.getTripUpdate();
+        String tripId = tu.getTrip().getTripId();
+        LocalDate startDate = LocalDate.parse(tu.getTrip().getStartDate(), DATEFORMAT_YYYYMMDD);
+
+        for (TripUpdate.StopTimeUpdate stu : tu.getStopTimeUpdateList()) {
+            String stopId = stu.getStopId();
+            int arrivalDelay = stu.hasArrival() ? stu.getArrival().getDelay() : 0;
+            int departureDelay = stu.hasDeparture() ? stu.getDeparture().getDelay() : 0;
+
+            Stop stop = staticDao.getStop(stopId);
+            String parentStopId = (stop != null) ? stop.parentStation() : null;
+
+            // NMBS uses stop_id instead of stop_sequence
+            delays.add(new GtfsRtUpdate(startDate, tripId, stopId, parentStopId,
+                    arrivalDelay, departureDelay,
+                    stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED,
+                    stu.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.UNSCHEDULED,
+                    timestamp));
+        }
+        if (tu.getTrip().getScheduleRelationship() == GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED) {
+            canceledTrips.add(new DatedTripId(tripId, startDate));
+        }
     }
 
 }
