@@ -49,6 +49,8 @@ public class StationsDao {
      * @return a list of stations
      */
     public List<Station> getStations(String query) {
+        initializeStations();
+
         if (query == null || query.isEmpty()) {
             return new ArrayList<>(this.stationsSortedBySize);
         }
