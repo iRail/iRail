@@ -143,18 +143,7 @@ public class GtfsInMemoryDao {
     }
 
     public Stop getStop(StopTime stopTime, LocalDate startDate) {
-        if (stopTime.stopIdOverridesByServiceId().isEmpty()) {
-            return stops.get(stopTime.stopId());
-        }
-
-        List<String> overridesOnDate = stopTime.stopIdOverridesByServiceId().keySet().stream().filter(serviceId -> getCalendarDates(serviceId).contains(startDate)).toList();
-        if (overridesOnDate.isEmpty()) {
-            return stops.get(stopTime.stopId());
-        }
-        if (overridesOnDate.size() > 1) {
-            log.warn("Multiple stop IDs on stop_time for trip {}, stop {}, total count {} on date {}", stopTime.tripId(), stopTime.stopId(), overridesOnDate.size(), startDate);
-        }
-        return stops.get(stopTime.stopIdOverridesByServiceId().get(overridesOnDate.getFirst()));
+        return stops.get(stopTime.stopId());
     }
 
     public List<CallAtStop> getCallsAtStop(String stopId, LocalDateTime startTime, LocalDateTime endTime, boolean timeFilterDepartures) {

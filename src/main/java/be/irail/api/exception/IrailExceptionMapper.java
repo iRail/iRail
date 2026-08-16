@@ -88,7 +88,7 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         private ExceptionDto(Throwable throwable) {
             this.exception = throwable.getClass().getSimpleName();
             this.message = throwable.getMessage();
-            this.cause = throwable.getCause() != null ? new ExceptionDto(throwable.getCause(), true) : null;
+            this.cause = throwable.getCause() != null ? new ExceptionDto(throwable.getCause()) : null;
             this.at = throwable.getStackTrace().length > 0 ? throwable.getStackTrace()[0].getFileName() + ":" + throwable.getStackTrace()[0].getLineNumber() : "";
             this.stackTrace = Arrays.stream(throwable.getStackTrace()).map(s -> s.getClassName() + ", " + s.getMethodName() + "() in " + s.getFileName() + ":" + s.getLineNumber()).toList();
         }
