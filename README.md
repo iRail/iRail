@@ -15,9 +15,6 @@ API Documentation can be found at [https://docs.irail.be]().
 
 ## Installation for development purposes ##
 
-_note: you'll also need to have [nodejs](https://nodejs.org), [composer](http://getcomposer.org) and the PHP extensions
-listed in [composer.json](composer.json) installed on your system_
-
 * Step 1: Clone this repo
 * Step 2: Set environment variables
     * `nmbs_riv_key` should contain a valid API key for the internal NMBS RIV API.
@@ -35,7 +32,8 @@ When using the docker image, use the `JAVA_TOOL_OPTIONS` environment variable to
 ## Update stations list ##
 
 Stations are stored in the stations database table. They can be filled with data from
-the [irail/stations](https://github.com/irail/stations) composer package.
+the [provided SQL file](data/irail-stations-20260401.sql). A complete list of stations can be found in
+the [irail/stations](https://github.com/irail/stations) repository.
 
 ## More links ##
 
