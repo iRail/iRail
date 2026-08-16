@@ -28,7 +28,10 @@ public class GtfsInMemoryDao {
     private static final Logger log = LogManager.getLogger(GtfsInMemoryDao.class);
     private static final int SECONDS_IN_DAY = 86400;
     private static final int SERVICE_DAY_END_HOUR = 4;
+    private static final int GTFS_LOCATION_TYPE_STATION = 1;
+
     private static volatile GtfsInMemoryDao instance = null;
+
     private final Map<String, Agency> agencies;
     private final HashMultimap<String, LocalDate> calendarDatesByServiceId;
     private final HashMultimap<LocalDate, TripIdAndStartDate> tripIdsByDate;
@@ -111,6 +114,15 @@ public class GtfsInMemoryDao {
 
     public Stop getStop(String stopId) {
         return stops.get(stopId);
+    }
+
+    /**
+     * Get all stops of the Station type.
+     *
+     * @return all stops of the Station type.
+     */
+    public List<Stop> getAllStations() {
+        return stops.values().stream().filter(stop -> stop.locationType() == GTFS_LOCATION_TYPE_STATION).toList();
     }
 
     public List<Trip> getTripsByJourneyNumber(Integer shortName) {

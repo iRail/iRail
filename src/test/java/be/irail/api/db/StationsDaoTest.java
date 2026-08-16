@@ -28,7 +28,7 @@ class StationsDaoTest {
 
     @BeforeEach
     void setUp() {
-        dao.forceInitializeStations();
+        dao.updateStationsFromDatabase();
     }
 
     @Test
@@ -84,6 +84,33 @@ class StationsDaoTest {
         Station station = dao.getStationFromId("008812005");
         assertNotNull(station);
         assertEquals("Brussel-Noord/Bruxelles-Nord", station.getName());
+    }
+
+
+    @Test
+    void memorizeExternalStop_normalCase_shouldAfterwardsBeFoundById() {
+        Station station = dao.getStationFromId("00123456");
+        assertNull(station);
+
+        dao.memorizeExternalStop(new Station("http://irail.be/stations/NMBS/00123456", "Test stop", 1d, 2d));
+
+        station = dao.getStationFromId("00123456");
+        assertNotNull(station);
+        assertEquals("123456", station.getHafasId());
+        assertEquals("Test stop", station.getName());
+    }
+
+    @Test
+    void memorizeExternalStop_normalCase_shouldAfterwardsBeFoundByName() {
+        List<Station> stations = dao.getStations("test");
+        assertEquals(0, stations.size());
+
+        dao.memorizeExternalStop(new Station("http://irail.be/stations/NMBS/00123456", "Test stop", 1d, 2d));
+
+        stations = dao.getStations("test");
+        assertEquals(1, stations.size());
+        assertEquals("00123456", stations.getFirst().getIrailId());
+        assertEquals("Test stop", stations.getFirst().getName());
     }
 
     @Test

@@ -1,12 +1,14 @@
 package be.irail.api.db;
-import java.util.List;
 
 import be.irail.api.dto.Language;
 import be.irail.api.dto.StationDto;
+import be.irail.api.gtfs.reader.models.Stop;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.util.List;
 
 /**
  * Model representing a station as stored in the database.
@@ -62,6 +64,10 @@ public class Station {
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
+    }
+
+    public static Station fromGtfsStop(Stop stop) {
+        return new Station("http://irail.be/stations/NMBS/" + Stop.getHafasId(stop.id()), stop.name(), stop.lon(), stop.lat());
     }
 
     public StationDto toDto(Language language) {
