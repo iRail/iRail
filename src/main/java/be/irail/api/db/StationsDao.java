@@ -65,33 +65,12 @@ public class StationsDao {
                 List<Station> resultStations = new ArrayList<>();
 
                 for (Station station : this.stationsSortedBySize) {
-                    boolean exactMatch = false;
-                    boolean partialMatch = false;
+                    StationMatchResult stationMatchResult = evaluateStationMatch(station, normalizedQuery);
 
-                    List<String> allNames = new ArrayList<>();
-                    allNames.add(station.getName());
-                    allNames.addAll(station.getLocalizedNames());
-                    // unique names
-                    allNames = allNames.stream().distinct().collect(Collectors.toList());
-
-                    for (String name : allNames) {
-                        String testStationName = normalize(normalizeAccents(name));
-                        testStationName = testStationName.replaceAll("([- ])+", " ");
-
-                        if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
-                            exactMatch = true;
-                            break;
-                        }
-
-                        if (isQueryPartOfName(normalizedQuery, testStationName)) {
-                            partialMatch = true;
-                        }
-                    }
-
-                    if (exactMatch) {
+                    if (stationMatchResult.exactMatch()) {
                         putInFirstPlace(resultStations, station);
                         count++;
-                    } else if (partialMatch) {
+                    } else if (stationMatchResult.partialMatch()) {
                         resultStations.add(station);
                         count++;
                     }
@@ -108,6 +87,36 @@ public class StationsDao {
             log.error("Failed to get stations for query {}", query, e);
             throw new InternalProcessingException(e);
         }
+    }
+
+    private static void sortStationResult(List<Station> resultStations) {
+        resultStations.sort(Comparator.comparing(Station::getAvgStopTimes, Comparator.nullsLast(Comparator.reverseOrder())));
+    }
+
+    private StationsDao.StationMatchResult evaluateStationMatch(Station station, String normalizedQuery) {
+        boolean exactMatch = false;
+        boolean partialMatch = false;
+
+        List<String> allNames = new ArrayList<>();
+        allNames.add(station.getName());
+        allNames.addAll(station.getLocalizedNames());
+        // unique names
+        allNames = allNames.stream().distinct().collect(Collectors.toList());
+
+        for (String name : allNames) {
+            String testStationName = normalize(normalizeAccents(name));
+            testStationName = testStationName.replaceAll("([- ])+", " ");
+
+            if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
+                exactMatch = true;
+                break;
+            }
+
+            if (isQueryPartOfName(normalizedQuery, testStationName)) {
+                partialMatch = true;
+            }
+        }
+        return new StationMatchResult(exactMatch, partialMatch);
     }
 
     private String normalize(String query) {
@@ -291,17 +300,28 @@ public class StationsDao {
     /**
      * Reads all stations from the stations table using HQL and initializes the stations map.
      */
-    private void initializeStations() {
+    public synchronized void initializeStations() {
         if (this.stationsById != null) {
             return;
         }
+        forceInitializeStations();
+    }
+
+    public synchronized void forceInitializeStations() {
         log.info("Loading stations from database");
         List<Station> allStations = entityManager.createQuery("SELECT s FROM Station s", Station.class).getResultList();
         stationsSortedBySize = allStations.stream()
-                .sorted(Comparator.comparing(Station::getAvgStopTimes, Comparator.nullsLast(Comparator.naturalOrder())))
+                .sorted(Comparator.comparing(Station::getAvgStopTimes, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
 
         this.stationsById = allStations.stream().collect(Collectors.toMap(Station::getIrailId, station -> station));
         log.info("Loaded {} stations from database", allStations.size());
     }
+
+    private record StationMatchResult(boolean exactMatch, boolean partialMatch) {
+    }
+
 }
+
+
+
