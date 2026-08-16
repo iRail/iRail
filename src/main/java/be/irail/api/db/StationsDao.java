@@ -112,7 +112,7 @@ public class StationsDao {
         // Dashes are the same as spaces
         query = query.replaceAll("([- ])+", " ");
         // Parentheses are removed
-        query = query.replaceAll("\\(.*?\\)", "");
+        query = query.replaceAll("\\([^)]*+\\)", "");
         query = query.replace(" am ", " ");
         query = query.replace("  ", " ");
         return query.trim();
