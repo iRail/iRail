@@ -69,7 +69,11 @@ public class VehicleCompositionV1Converter extends V1Converter {
         result.standingPlacesSecondClass = unit.getStandingPlacesSecondClass();
         result.lengthInMeter = unit.getLengthInMeter();
         result.hasSemiAutomaticInteriorDoors = unit.hasSemiAutomaticInteriorDoors();
-        result.materialSubTypeName = unit instanceof TrainCompositionUnitWithId ? ((TrainCompositionUnitWithId) unit).getMaterialSubTypeName() : null;
+        if (unit instanceof TrainCompositionUnitWithId trainCompositionUnitWithId) {
+            result.materialSubTypeName = trainCompositionUnitWithId.getMaterialSubTypeName();
+        } else {
+            result.materialSubTypeName = null;
+        }
         result.tractionPosition = unit.getTractionPosition();
         result.hasPrmSection = unit.hasPrmSection();
         result.hasPriorityPlaces = unit.hasPriorityPlaces();

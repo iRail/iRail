@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class NmbsRivCompositionClient {
     private static final Logger log = LogManager.getLogger(NmbsRivCompositionClient.class);
+    public static final String UNKNOWN_TYPE = "unknown";
 
     private final StationsDao stationsDao;
     private final NmbsRivRawDataRepository rivRawDataRepository;
@@ -138,7 +139,7 @@ public class NmbsRivCompositionClient {
             return new RollingMaterialType(parts[0], parts[1]);
         }
 
-        return new RollingMaterialType("unknown", "unknown");
+        return new RollingMaterialType(UNKNOWN_TYPE, UNKNOWN_TYPE);
     }
 
     private RollingMaterialType getAmMrMaterialType(JsonNode rawUnit, int position) {
@@ -178,7 +179,7 @@ public class NmbsRivCompositionClient {
                 case 0 -> "A";
                 case 1 -> "B";
                 case 2 -> "C";
-                default -> "unknown";
+                default -> UNKNOWN_TYPE;
             };
         }
 
@@ -188,11 +189,11 @@ public class NmbsRivCompositionClient {
                 case 1 -> "B";
                 case 2 -> "C";
                 case 3 -> "D";
-                default -> "unknown";
+                default -> UNKNOWN_TYPE;
             };
         }
 
-        return "unknown";
+        return UNKNOWN_TYPE;
     }
 
     private RollingMaterialType getHleMaterialType(JsonNode rawUnit) {
@@ -218,8 +219,8 @@ public class NmbsRivCompositionClient {
     }
 
     private RollingMaterialType getHvMaterialType(JsonNode rawUnit) {
-        String parentType = "unknown";
-        String subType = "unknown";
+        String parentType = UNKNOWN_TYPE;
+        String subType = UNKNOWN_TYPE;
 
         if (rawUnit.has("materialSubTypeName")) {
             String subTypeName = rawUnit.get("materialSubTypeName").asText();
@@ -231,7 +232,7 @@ public class NmbsRivCompositionClient {
                 if (subTypeName.contains("_")) {
                     String[] parts = subTypeName.split("_");
                     parentType = parts[0];
-                    subType = parts.length > 1 ? parts[1] : "unknown";
+                    subType = parts.length > 1 ? parts[1] : UNKNOWN_TYPE;
                 } else if (subTypeName.startsWith("M6") || subTypeName.startsWith("M7")) {
                     parentType = subTypeName.substring(0, 2);
                     subType = subTypeName.substring(2);
@@ -255,7 +256,7 @@ public class NmbsRivCompositionClient {
             TrainCompositionUnitWithId unitWithId = new TrainCompositionUnitWithId(materialType);
             unitWithId.setUicCode(object.get("uicCode").asLong()); // Note: UIC code might be larger than int, but model says int
             unitWithId.setMaterialNumber(object.has("materialNumber") ? object.get("materialNumber").asInt() : 0);
-            unitWithId.setMaterialSubTypeName(object.has("materialSubTypeName") ? object.get("materialSubTypeName").asText() : "unknown");
+            unitWithId.setMaterialSubTypeName(object.has("materialSubTypeName") ? object.get("materialSubTypeName").asText() : UNKNOWN_TYPE);
             unit = unitWithId;
         } else {
             unit = new TrainCompositionUnit(materialType);
@@ -271,7 +272,7 @@ public class NmbsRivCompositionClient {
         unit.setHasAirco(object.has("hasAirco") && object.get("hasAirco").asBoolean());
         unit.setHasPrmSection(object.has("hasPrmSection") && object.get("hasPrmSection").asBoolean());
         unit.setHasPriorityPlaces(object.has("hasPriorityPlaces") && object.get("hasPriorityPlaces").asBoolean());
-        unit.setTractionType(object.has("tractionType") ? object.get("tractionType").asText() : "unknown");
+        unit.setTractionType(object.has("tractionType") ? object.get("tractionType").asText() : UNKNOWN_TYPE);
         unit.setCanPassToNextUnit(object.has("canPassToNextUnit") && object.get("canPassToNextUnit").asBoolean());
         unit.setStandingPlacesSecondClass(object.has("standingPlacesSecondClass") ? object.get("standingPlacesSecondClass").asInt() : 0);
         unit.setStandingPlacesFirstClass(object.has("standingPlacesFirstClass") ? object.get("standingPlacesFirstClass").asInt() : 0);

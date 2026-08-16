@@ -101,7 +101,7 @@ public class NmbsRivRawDataRepository {
     }
 
     public CachedData<JsonNode> getRoutePlanningData(JourneyPlanningRequest request) {
-        try (var timer = rivRouteplanningTimer.time()) {
+        try (var _ = rivRouteplanningTimer.time()) {
             String fromId = request.from().getHafasId();
             String toId = request.to().getHafasId();
             String date = request.dateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

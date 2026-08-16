@@ -2,12 +2,14 @@ package be.irail.api.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Represents a service alert or informational message.
  * Provides details about the message validity, content (with HTML stripping capabilities), and links.
  */
 public class Message {
+    private static final Pattern HTML_ANCHOR_PATTERN = Pattern.compile("<a href=\".*?\">.*?</a>");
     private final String id;
     private final OffsetDateTime validFrom;
     private final OffsetDateTime validUpTo;
@@ -119,7 +121,10 @@ public class Message {
      * @return the cleanly stripped message text
      */
     public String getStrippedMessage() {
-        String messageWithoutLinks = this.message.replaceAll("<a href=\".*?\">.*?</a>", "");
+        if (message == null) {
+            return null;
+        }
+        String messageWithoutLinks = HTML_ANCHOR_PATTERN.matcher(this.message).replaceAll("");
         // Replace newline characters with a space to ensure no whitespace is removed.
         String stripped = stripTags(messageWithoutLinks.replace("<br>", " "));
         stripped = stripped.replace("  ", " "); // Remove double spaces

@@ -86,10 +86,6 @@ public class IrailExceptionMapper implements ExceptionMapper<Throwable> {
         private final ExceptionDto cause;
 
         private ExceptionDto(Throwable throwable) {
-            this(throwable, false);
-        }
-
-        private ExceptionDto(Throwable throwable, boolean skipCause) {
             this.exception = throwable.getClass().getSimpleName();
             this.message = throwable.getMessage();
             this.cause = throwable.getCause() != null ? new ExceptionDto(throwable.getCause(), true) : null;

@@ -21,10 +21,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Service for reading static GTFS data.
@@ -103,13 +100,13 @@ public class GtfsReader {
             if ("stops".equals(te.getTableName()) && "stop_name".equals(te.getFieldName())) {
                 Language lang = Language.fromString(te.getLanguage());
                 if (lang != null) {
-                    translationsByStopId.computeIfAbsent(te.getFieldValue(), k -> new HashMap<>()).put(lang, te.getTranslation());
+                    translationsByStopId.computeIfAbsent(te.getFieldValue(), k -> new EnumMap<>(Language.class)).put(lang, te.getTranslation());
                 }
             }
             if ("trips".equals(te.getTableName()) && "trip_headsign".equals(te.getFieldName())) {
                 Language lang = Language.fromString(te.getLanguage());
                 if (lang != null) {
-                    translationsByHeadsign.computeIfAbsent(te.getFieldValue(), k -> new HashMap<>()).put(lang, te.getTranslation());
+                    translationsByHeadsign.computeIfAbsent(te.getFieldValue(), k -> new EnumMap<>(Language.class)).put(lang, te.getTranslation());
                 }
             }
         }

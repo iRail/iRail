@@ -13,6 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
@@ -41,8 +42,6 @@ public class NmbsRssDisturbancesClient {
     private record LinkExtractionResult(String filteredDescription, List<MessageLink> links) {
     }
 
-    private final NmbsRivRawDataRepository rivDataRepository;
-
     private static final Map<Language, String> READ_MORE_STRINGS = Map.of(
             Language.NL, "Lees meer",
             Language.FR, "Lire plus",
@@ -50,8 +49,7 @@ public class NmbsRssDisturbancesClient {
             Language.DE, "Weiterlesen"
     );
 
-    public NmbsRssDisturbancesClient(NmbsRivRawDataRepository rivDataRepository) {
-        this.rivDataRepository = rivDataRepository;
+    public NmbsRssDisturbancesClient() {
         this.httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
@@ -88,6 +86,7 @@ public class NmbsRssDisturbancesClient {
             xml = xml.replace("/>>", "/>");
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
 

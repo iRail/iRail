@@ -101,7 +101,7 @@ public class DatedVehicleJourneyV1Controller extends V1Controller {
         } catch (UncheckedExecutionException | ExecutionException exception) {
             if (exception.getCause() instanceof IrailNotFoundException nfe) {
                 // don't log these exceptions with a stack trace etc
-                log.info("Vehicle {} not found: " + nfe.getMessage(), request.vehicleId());
+                log.info("Vehicle {} not found: {}", request.vehicleId(), nfe.getMessage());
                 throw nfe;
             }
             log.error("Error fetching vehicle journey for {}: {}", id, exception.getMessage(), exception);

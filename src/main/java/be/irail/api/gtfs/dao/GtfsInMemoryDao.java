@@ -52,9 +52,7 @@ public class GtfsInMemoryDao {
 
 
         this.calendarDatesByServiceId = HashMultimap.create();
-        data.calendarDates().forEach(cd -> {
-            calendarDatesByServiceId.put(cd.serviceId(), cd.date());
-        });
+        data.calendarDates().forEach(cd -> calendarDatesByServiceId.put(cd.serviceId(), cd.date()));
 
         this.routes = new HashMap<>();
         data.routes().forEach(r -> routes.put(r.id(), r));
@@ -362,13 +360,13 @@ public class GtfsInMemoryDao {
             return Collections.emptyList();
         }
 
-        List<StopTime> stops = dao.getStopTimesForTrip(originalJourney.getTripId());
-        if (stops == null || stops.isEmpty()) {
+        List<StopTime> stopsForTrip = dao.getStopTimesForTrip(originalJourney.getTripId());
+        if (stopsForTrip == null || stopsForTrip.isEmpty()) {
             return Collections.emptyList();
         }
 
         // Only search between stops where the train actually stops (pickupType or dropOffType == 0 means passenger exchange)
-        List<StopTime> passengerStops = stops.stream()
+        List<StopTime> passengerStops = stopsForTrip.stream()
                 .filter(StopTime::hasScheduledPassengerExchange)
                 .toList();
 

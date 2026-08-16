@@ -91,7 +91,7 @@ public class CompositionV1Controller extends V1Controller {
 
         try {
             LocalDate date = parseDate(dateStr);
-            log.debug("Fetching composition for vehicle ID: " + journeyId + ", date: " + date);
+            log.debug("Fetching composition for vehicle ID: {}, date: {}", journeyId, date);
 
             DataRoot dataRoot = getCachedData(journeyId, date, language);
 
@@ -102,7 +102,7 @@ public class CompositionV1Controller extends V1Controller {
         } catch (UncheckedExecutionException | ExecutionException exception) {
             if (exception.getCause() instanceof IrailNotFoundException nfe) {
                 // don't log these exceptions with a stack trace etc
-                log.info("Composition for vehicle {} not found: " + nfe.getMessage(), journeyId);
+                log.info("Composition for vehicle {} not found: {}", journeyId, nfe.getMessage());
                 throw nfe;
             }
             log.error("Error fetching composition for vehicle {}: {}", journeyId, exception.getMessage(), exception);
@@ -119,7 +119,8 @@ public class CompositionV1Controller extends V1Controller {
     }
 
     private DataRoot getDataRoot(CompositionRequest request) throws ExecutionException {
-        log.debug("Fetching composition for vehicle ID: " + request.journeyId() + ", date: " + request.date() + " from database or RIV");
+        log.debug("Fetching composition for vehicle ID: {}, date: {} from database or RIV",
+                request.journeyId(), request.date());
         int journeyNumber = VehicleIdTools.extractTrainNumber(request.journeyId());
 
         // Get journey type from GTFS

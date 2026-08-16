@@ -73,8 +73,7 @@ public class CompositionDao {
                 CompositionHistoryEntry.class
         ).setParameter("startDate", yesterday).getResultList();
 
-        historicCompositions.stream().forEach(c -> compositionsByJourneyKey.put(new DatedVehicleJourneyKey(c.getJourneyNumber(), c.getJourneyStartDate()), c));
-        historicCompositions.stream().collect(Collectors.groupingBy(CompositionHistoryEntry::getId));
+        historicCompositions.forEach(c -> compositionsByJourneyKey.put(new DatedVehicleJourneyKey(c.getJourneyNumber(), c.getJourneyStartDate()), c));
 
         List<StoredCompositionUnit> storedCompositionUnits = entityManager.createQuery("SELECT u FROM StoredCompositionUnit u", StoredCompositionUnit.class).getResultList();
         unitsByUicId.putAll(storedCompositionUnits.stream().collect(Collectors.toMap(StoredCompositionUnit::getUicCode, u -> u)));
@@ -122,7 +121,7 @@ public class CompositionDao {
 
     @Transactional
     public void storeComposition(Vehicle vehicle, VehicleCompositionSearchResult result) {
-        try (var timer = storeCompositionTimer.time()) {
+        try (var _ = storeCompositionTimer.time()) {
             log.debug("Storing composition for vehicle {} with {} segments", vehicle.getId(), result.getSegments().size());
 
             for (TrainComposition segment : result.getSegments()) {
@@ -135,7 +134,7 @@ public class CompositionDao {
 
     private void storeCompositionSegment(TrainComposition segment) {
         boolean isAnyUnitMissingId = segment.getUnits().stream()
-                .map(u -> u instanceof TrainCompositionUnitWithId)
+                .map(TrainCompositionUnitWithId.class::isInstance)
                 .anyMatch(hasId -> !hasId);
         if (isAnyUnitMissingId) {
             log.warn("Composition segment {} has usages with missing IDs, ignoring. Contained {} usages.",
