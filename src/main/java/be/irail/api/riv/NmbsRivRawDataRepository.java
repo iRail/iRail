@@ -356,7 +356,11 @@ public class NmbsRivRawDataRepository {
             if (response.statusCode() >= 500 && body.startsWith("ERROR reason : error : 9000")) {
                 throw new UpstreamServerUnavailableException();
             }
-            if (response.statusCode() >= 500) {
+            // Functional errors are reported by NMBS as HTTP 200 with an errorCode field, so any 4xx is an
+            // infrastructure or security-layer rejection, e.g. "7601 : _Threat.Requests : Enhanced Security
+            // request violation". Returning such a body would leave the caller with a response that parses
+            // fine but carries no journey data, which used to surface as an empty result set instead of an error.
+            if (response.statusCode() >= 400) {
                 throw new UpstreamServerException("Upstream server error: " + response.statusCode() + "\nBody: '" + body + "'");
             }
             return body;
