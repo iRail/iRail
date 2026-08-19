@@ -99,11 +99,12 @@ public class GtfsVehicleJourneyClient {
             departure.setOccupancy(occupancyDao.getOccupancy(departure));
 
             GtfsRtUpdate update = updatesForTripByStopId.getOrDefault(platform.id(), null);
-            if (update != null) {
+            LocalDateTime now = LocalDateTime.now();
+            if (update != null
+                    && GtfsRtInMemoryDao.isOverlayUsable(update.timestamp(), departure.getScheduledDateTime(), now)) {
                 arrival.setDelay(update.arrivalDelay());
                 departure.setDelay(update.departureDelay());
 
-                LocalDateTime now = LocalDateTime.now();
                 if (arrival.getScheduledDateTime().plusSeconds(update.arrivalDelay()).isBefore(now)) {
                     arrival.setStatus(DepartureArrivalState.REPORTED);
                 }

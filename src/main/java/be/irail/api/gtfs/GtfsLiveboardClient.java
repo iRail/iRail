@@ -74,10 +74,11 @@ public class GtfsLiveboardClient {
             }
 
             GtfsRtUpdate rtUpdate = rtUpdates.getOrDefault(call.trip().id(), null);
-            if (rtUpdate != null) {
+            LocalDateTime now = LocalDateTime.now();
+            if (rtUpdate != null
+                    && GtfsRtInMemoryDao.isOverlayUsable(rtUpdate.timestamp(), departureOrArrival.getScheduledDateTime(), now)) {
                 departureOrArrival.setDelay(request.timeSelection() == TimeSelection.DEPARTURE ? rtUpdate.departureDelay() : rtUpdate.arrivalDelay());
 
-                LocalDateTime now = LocalDateTime.now();
                 if (departureOrArrival.getScheduledDateTime().plusSeconds(departureOrArrival.getDelay()).isBefore(now)) {
                     departureOrArrival.setStatus(DepartureArrivalState.REPORTED);
                 }
