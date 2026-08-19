@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -59,22 +60,42 @@ public class GtfsRtUpdater {
         OffsetDateTime timestamp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(feed.getHeader().getTimestamp()), ZoneOffset.UTC);
         Set<DatedTripId> canceledTrips = new HashSet<>();
 
+        int matched = 0;
+        int unmatched = 0;
         for (FeedEntity entity : feed.getEntityList()) {
             if (entity.hasTripUpdate()) {
-                handleOneTripUpdate(entity, staticDao, delays, timestamp, canceledTrips);
+                if (handleOneTripUpdate(entity, staticDao, delays, timestamp, canceledTrips)) {
+                    matched++;
+                } else {
+                    unmatched++;
+                }
             }
         }
 
         GtfsRtInMemoryDao.getInstance().updateCanceledTrips(canceledTrips);
         GtfsRtInMemoryDao.getInstance().updateStopTimeUpdates(delays);
-        log.info("Updated GTFS-RT with {} delay records", delays.size());
+        log.info("Updated GTFS-RT with {} delay records from {} trips, {} realtime trips had no counterpart in the schedule",
+                delays.size(), matched, unmatched);
     }
 
-    private static void handleOneTripUpdate(FeedEntity entity, GtfsInMemoryDao staticDao, List<GtfsRtUpdate> delays,
-                                            OffsetDateTime timestamp, Set<DatedTripId> canceledTrips) {
+    /**
+     * Applies a single realtime TripUpdate to the collections being built for this refresh.
+     *
+     * @return whether the realtime trip could be matched to a trip in the GTFS schedule
+     */
+    private static boolean handleOneTripUpdate(FeedEntity entity, GtfsInMemoryDao staticDao, List<GtfsRtUpdate> delays,
+                                               OffsetDateTime timestamp, Set<DatedTripId> canceledTrips) {
         TripUpdate tu = entity.getTripUpdate();
-        String tripId = tu.getTrip().getTripId();
         LocalDate startDate = LocalDate.parse(tu.getTrip().getStartDate(), DATEFORMAT_YYYYMMDD);
+
+        // Realtime and static trip ids carry a different trailing date, so they have to be matched
+        // through the schedule rather than compared as strings.
+        Optional<String> scheduledTripId = staticDao.resolveTripIdForServiceDate(tu.getTrip().getTripId(), startDate);
+        if (scheduledTripId.isEmpty()) {
+            log.debug("No scheduled trip matches realtime trip {} on {}", tu.getTrip().getTripId(), startDate);
+            return false;
+        }
+        String tripId = scheduledTripId.get();
 
         for (TripUpdate.StopTimeUpdate stu : tu.getStopTimeUpdateList()) {
             String stopId = stu.getStopId();
@@ -94,6 +115,7 @@ public class GtfsRtUpdater {
         if (tu.getTrip().getScheduleRelationship() == GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED) {
             canceledTrips.add(new DatedTripId(tripId, startDate));
         }
+        return true;
     }
 
 }
