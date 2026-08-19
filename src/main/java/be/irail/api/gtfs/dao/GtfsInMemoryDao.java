@@ -29,6 +29,7 @@ public class GtfsInMemoryDao {
     private static final int SECONDS_IN_DAY = 86400;
     private static final int SERVICE_DAY_END_HOUR = 4;
     private static final int GTFS_LOCATION_TYPE_STATION = 1;
+    private static final String TRIP_ID_NAMESPACE_PREFIX = "gt:";
 
     private static volatile GtfsInMemoryDao instance = null;
 
@@ -42,6 +43,7 @@ public class GtfsInMemoryDao {
     private final ArrayListMultimap<String, StopTime> stopTimesByStopId;
     private final ArrayListMultimap<Integer, Trip> tripsByShortName;
     private final HashMap<String, Trip> tripsById;
+    private final HashMultimap<String, String> tripIdsByIdBody;
     private final Cache<JourneyNumberAndDate, Optional<JourneyWithOriginAndDestination>> cache = CacheBuilder.newBuilder()
             .maximumSize(2000)
             .expireAfterWrite(4, TimeUnit.HOURS)
@@ -66,10 +68,12 @@ public class GtfsInMemoryDao {
         this.tripsByShortName = ArrayListMultimap.create();
         this.tripIdsByDate = HashMultimap.create();
         this.tripsById = new HashMap<>();
+        this.tripIdsByIdBody = HashMultimap.create();
         data.trips().forEach(t -> {
             tripsByShortName.put(t.shortName(), t);
             calendarDatesByServiceId.get(t.serviceId()).forEach(date -> tripIdsByDate.put(date, new TripIdAndStartDate(t.id(), date)));
             tripsById.put(t.id(), t);
+            tripIdsByIdBody.put(tripIdMatchKey(t.id()), t.id());
         });
 
         this.stopTimesByTripId = ArrayListMultimap.create();
@@ -152,6 +156,71 @@ public class GtfsInMemoryDao {
 
     public Trip getTrip(String tripId) {
         return tripsById.get(tripId);
+    }
+
+    /**
+     * Strips the trailing date component from a GTFS trip id.
+     *
+     * <p>NMBS trip ids end in a date, e.g.
+     * {@code gt:nmbssncb:88____:UUU::8775100:8814001:8:1834:20260810}. That date is not the service
+     * date: the static feed uses it to tell apart service patterns of the same run, while
+     * GTFS-Realtime puts the actual service date there. The part before it is stable across both
+     * feeds, so it is what the two can be matched on.
+     *
+     * @param tripId a GTFS trip id
+     * @return the trip id without its trailing {@code :date} component, or the id unchanged if it has none
+     */
+    public static String tripIdBody(String tripId) {
+        int lastSeparator = tripId.lastIndexOf(':');
+        return lastSeparator < 0 ? tripId : tripId.substring(0, lastSeparator);
+    }
+
+    /**
+     * Builds the key on which realtime and scheduled trip ids can be compared.
+     *
+     * <p>On top of the trailing date (see {@link #tripIdBody(String)}) the two feeds disagree on the
+     * leading namespace: the Belgian Mobility feeds prefix ids with {@code gt:<agency>:} while the
+     * hafas feed at {@code sncb-opendata.hafas.de} omits it entirely. Dropping that prefix is what
+     * lets a realtime trip from either source be looked up in the same index.
+     *
+     * @param tripId a trip id from either feed
+     * @return the id without a leading {@code gt:<agency>:} namespace and without its trailing date
+     */
+    public static String tripIdMatchKey(String tripId) {
+        String withoutDate = tripIdBody(tripId);
+        if (!withoutDate.startsWith(TRIP_ID_NAMESPACE_PREFIX)) {
+            return withoutDate;
+        }
+        int agencySeparator = withoutDate.indexOf(':', TRIP_ID_NAMESPACE_PREFIX.length());
+        return agencySeparator < 0 ? withoutDate : withoutDate.substring(agencySeparator + 1);
+    }
+
+    /**
+     * Resolves a GTFS-Realtime trip id to the static trip id of the run operating on a given date.
+     *
+     * <p>Comparing realtime and static trip ids directly almost never matches, because the two feeds
+     * put different dates in the trailing component (see {@link #tripIdBody(String)}). Instead the
+     * candidates sharing a trip id body are narrowed down to the one whose service actually runs on
+     * {@code serviceDate}. In the current NMBS feed that leaves at most one candidate for all but a
+     * handful of the 14 408 bodies that have several; those remaining ties are broken on the lowest
+     * trip id so the result stays stable between feed refreshes.
+     *
+     * @param tripId      a trip id from either feed
+     * @param serviceDate the date the trip is running on
+     * @return the matching static trip id, or empty when no known trip runs that day
+     */
+    public Optional<String> resolveTripIdForServiceDate(String tripId, LocalDate serviceDate) {
+        if (tripsById.containsKey(tripId)) {
+            return Optional.of(tripId);
+        }
+        return tripIdsByIdBody.get(tripIdMatchKey(tripId)).stream()
+                .filter(candidate -> runsOn(candidate, serviceDate))
+                .min(Comparator.naturalOrder());
+    }
+
+    private boolean runsOn(String tripId, LocalDate serviceDate) {
+        Trip trip = tripsById.get(tripId);
+        return trip != null && calendarDatesByServiceId.get(trip.serviceId()).contains(serviceDate);
     }
 
     public Stop getStop(StopTime stopTime, LocalDate startDate) {
