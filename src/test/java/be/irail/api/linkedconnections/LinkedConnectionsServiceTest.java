@@ -73,6 +73,7 @@ class LinkedConnectionsServiceTest {
         JsonNode json = objectMapper.readTree(jsonLd);
 
         assertEquals("https://api.irail.be/graph?departureTime=2026-08-20T08:00:00.000Z", json.get("@id").asText());
+        assertEquals("2026-08-20T07:55:00.000Z", json.get("gtfsRtVersion").asText());
         assertEquals("2026-08-20T08:01:00.000Z", json.get("@graph").get(0).get("departureTime").asText());
         assertEquals(60, json.get("@graph").get(0).get("departureDelay").asInt());
         assertEquals("http://irail.be/stations/NMBS/008814001", json.get("@graph").get(0).get("departureStop").asText());
@@ -98,6 +99,8 @@ class LinkedConnectionsServiceTest {
                 NodeFactory.createURI(HYDRA + "search"), Node.ANY));
         assertTrue(dataset.asDatasetGraph().contains(Node.ANY, Node.ANY,
                 NodeFactory.createURI("http://purl.org/dc/terms/license"), Node.ANY));
+        assertTrue(dataset.asDatasetGraph().contains(Node.ANY, Node.ANY,
+                NodeFactory.createURI("http://irail.be/ns/gtfsRtVersion"), Node.ANY));
     }
 
     @Test

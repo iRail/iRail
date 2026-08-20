@@ -75,10 +75,10 @@ public class LinkedConnectionsService {
         Instant end = start.plus(pageDuration);
         LocalDateTime candidateStart = LocalDateTime.ofInstant(start.minus(REALTIME_LOOKAROUND), timetableZone);
         LocalDateTime candidateEnd = LocalDateTime.ofInstant(end.plus(REALTIME_LOOKAROUND), timetableZone);
-        GtfsRtInMemoryDao realtimeDao = GtfsRtInMemoryDao.getInstance();
+        GtfsRtInMemoryDao.Snapshot realtimeSnapshot = GtfsRtInMemoryDao.getInstance().getSnapshot();
 
         List<RenderedConnection> connections = staticDao.getConnections(candidateStart, candidateEnd).stream()
-                .map(connection -> render(connection, realtimeDao))
+            .map(connection -> render(connection, realtimeSnapshot))
                 .filter(connection -> !connection.departureTime().isBefore(start) && connection.departureTime().isBefore(end))
                 .sorted(Comparator.comparing(RenderedConnection::departureTime).thenComparing(RenderedConnection::id))
                 .toList();
@@ -91,6 +91,9 @@ public class LinkedConnectionsService {
         page.put("hydra:next", id(pageUri(graphUri, end)));
         page.put("hydra:search", searchControl(graphUri));
         page.put("dct:license", id(licenseUri.toString()));
+        page.put("gtfsRtVersion", realtimeSnapshot.version() == null
+            ? null
+            : formatInstant(realtimeSnapshot.version()));
         page.put("@graph", connections.stream().map(RenderedConnection::json).toList());
 
         try {
@@ -100,12 +103,12 @@ public class LinkedConnectionsService {
         }
     }
 
-    private RenderedConnection render(GtfsConnection connection, GtfsRtInMemoryDao realtimeDao) {
-        GtfsRtUpdate departureUpdate = matchingUpdate(realtimeDao, connection, connection.departureCall().stopId());
-        GtfsRtUpdate arrivalUpdate = matchingUpdate(realtimeDao, connection, connection.arrivalCall().stopId());
+    private RenderedConnection render(GtfsConnection connection, GtfsRtInMemoryDao.Snapshot realtimeSnapshot) {
+        GtfsRtUpdate departureUpdate = matchingUpdate(realtimeSnapshot, connection, connection.departureCall().stopId());
+        GtfsRtUpdate arrivalUpdate = matchingUpdate(realtimeSnapshot, connection, connection.arrivalCall().stopId());
         int departureDelay = departureUpdate == null ? 0 : departureUpdate.departureDelay();
         int arrivalDelay = arrivalUpdate == null ? 0 : arrivalUpdate.arrivalDelay();
-        boolean cancelled = realtimeDao.isCanceled(connection.trip().id(), connection.tripStartDate())
+        boolean cancelled = realtimeSnapshot.isCanceled(connection.trip().id(), connection.tripStartDate())
                 || departureUpdate != null && departureUpdate.cancelled()
                 || arrivalUpdate != null && arrivalUpdate.cancelled();
 
@@ -134,8 +137,8 @@ public class LinkedConnectionsService {
         return new RenderedConnection(connectionId, departureTime, json);
     }
 
-    private GtfsRtUpdate matchingUpdate(GtfsRtInMemoryDao realtimeDao, GtfsConnection connection, String stopId) {
-        GtfsRtUpdate update = realtimeDao.getUpdatesByTripId(connection.trip().id()).get(stopId);
+    private GtfsRtUpdate matchingUpdate(GtfsRtInMemoryDao.Snapshot realtimeSnapshot, GtfsConnection connection, String stopId) {
+        GtfsRtUpdate update = realtimeSnapshot.getUpdatesByTripId(connection.trip().id()).get(stopId);
         return update != null && connection.tripStartDate().equals(update.startDate()) ? update : null;
     }
 
@@ -148,6 +151,7 @@ public class LinkedConnectionsService {
         context.put("xsd", "http://www.w3.org/2001/XMLSchema#");
         context.put("Connection", "lc:Connection");
         context.put("CancelledConnection", "lc:CancelledConnection");
+        context.put("gtfsRtVersion", typedTerm("http://irail.be/ns/gtfsRtVersion", "xsd:dateTime"));
         context.put("departureStop", iriTerm("lc:departureStop"));
         context.put("arrivalStop", iriTerm("lc:arrivalStop"));
         context.put("departureTime", typedTerm("lc:departureTime", "xsd:dateTime"));
