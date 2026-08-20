@@ -27,6 +27,7 @@ public class JerseyConfig extends ResourceConfig {
         register(LogsV1Controller.class);
         register(LegacyRedirectController.class);
         register(OccupancyReportController.class);
+        register(LinkedConnectionsController.class);
 
         register(V2Controller.class);
         register(HomeRedirectController.class);
