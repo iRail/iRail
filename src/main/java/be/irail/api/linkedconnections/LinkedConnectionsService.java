@@ -117,7 +117,7 @@ public class LinkedConnectionsService {
 
         Map<String, Object> json = new LinkedHashMap<>();
         json.put("@id", connectionId);
-        json.put("@type", "Connection");
+        json.put("@type", cancelled ? "CancelledConnection" : "Connection");
         json.put("departureStop", stationUri(connection.departureStop()));
         json.put("arrivalStop", stationUri(connection.arrivalStop()));
         json.put("departureTime", formatInstant(departureTime));
@@ -147,6 +147,7 @@ public class LinkedConnectionsService {
         context.put("dct", "http://purl.org/dc/terms/");
         context.put("xsd", "http://www.w3.org/2001/XMLSchema#");
         context.put("Connection", "lc:Connection");
+        context.put("CancelledConnection", "lc:CancelledConnection");
         context.put("departureStop", iriTerm("lc:departureStop"));
         context.put("arrivalStop", iriTerm("lc:arrivalStop"));
         context.put("departureTime", typedTerm("lc:departureTime", "xsd:dateTime"));

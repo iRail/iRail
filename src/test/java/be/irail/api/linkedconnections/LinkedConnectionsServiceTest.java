@@ -2,6 +2,7 @@ package be.irail.api.linkedconnections;
 
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
+import be.irail.api.gtfs.reader.DatedTripId;
 import be.irail.api.gtfs.reader.GtfsReader;
 import be.irail.api.gtfs.reader.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -104,6 +105,25 @@ class LinkedConnectionsServiceTest {
         assertEquals(PAGE_START, service.pageStart(Instant.parse("2026-08-20T08:09:59Z")));
         assertEquals(Instant.parse("2026-08-20T07:50:00Z"), PAGE_START.minus(service.getPageDuration()));
     }
+
+        @Test
+        void usesCancelledConnectionTypeForCancelledTrips() throws Exception {
+                GtfsRtInMemoryDao.getInstance().updateCanceledTrips(Set.of(
+                                new DatedTripId("trip:123", SERVICE_DATE)));
+
+                String jsonLd = service.createPage(URI.create("https://api.irail.be/graph"), PAGE_START);
+                JsonNode connection = objectMapper.readTree(jsonLd).get("@graph").get(0);
+
+                assertEquals("CancelledConnection", connection.get("@type").asText());
+                assertEquals("gtfs:NotAvailable", connection.get("gtfs:pickupType").asText());
+                assertEquals("gtfs:NotAvailable", connection.get("gtfs:dropOffType").asText());
+
+                var dataset = DatasetFactory.createTxnMem();
+                RDFParser.fromString(jsonLd).lang(Lang.JSONLD11).parse(dataset.asDatasetGraph());
+                assertTrue(dataset.asDatasetGraph().contains(Node.ANY, Node.ANY,
+                                NodeFactory.createURI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+                                NodeFactory.createURI(LC + "CancelledConnection")));
+        }
 
     private Stop stop(String id, String parent, int locationType) {
         return new Stop(id, null, id, null, 0, 0, null, null, locationType, parent,
