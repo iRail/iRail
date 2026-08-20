@@ -32,5 +32,6 @@ public class JerseyConfig extends ResourceConfig {
         register(HomeRedirectController.class);
         register(StatusController.class);
         register(IrailExceptionMapper.class);
+        register(RequestLogFilter.class);
     }
 }
