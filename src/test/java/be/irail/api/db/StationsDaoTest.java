@@ -2,6 +2,8 @@ package be.irail.api.db;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,7 +30,7 @@ class StationsDaoTest {
 
     @BeforeEach
     void setUp() {
-        dao.forceInitializeStations();
+        dao.updateStationsFromDatabase();
     }
 
     @Test
@@ -79,11 +81,64 @@ class StationsDaoTest {
         assertEquals("Moûtiers-Salins-Brides-les-Bai", stations.getFirst().getName());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"Brussel)", "Brugge(", "Gent[", "Brussel+", "Li*ge", "Namur?", "\\\\Brussel"})
+    void getStations_queryContainingRegexCharacters_shouldNotFail(String query) {
+        // A station name is not a pattern. Compiling the query as one turned ordinary punctuation into a
+        // PatternSyntaxException, which surfaces as HTTP 500 on e.g. /v1/liveboard?station=Brussel)
+        // and /v1/connections?from=Brussel).
+        List<Station> stations = assertDoesNotThrow(() -> dao.getStations(query));
+        assertTrue(stations.isEmpty(), "No station name contains '" + query + "'");
+    }
+
+    @Test
+    void getStations_regexWildcardQuery_shouldBeMatchedLiterally() {
+        // ".*" is a valid pattern matching every name, so this used to report the first stations in the list
+        // as exact matches instead of returning nothing.
+        List<Station> stations = dao.getStations(".*");
+        assertTrue(stations.isEmpty(), "'.*' is not part of any station name");
+    }
+
+    @Test
+    void getStations_nameContainingRegexCharacters_shouldStillMatchLiterally() {
+        // Quoting must not break names that legitimately contain characters which are also metacharacters.
+        List<Station> stations = dao.getStations("Brussel-Zuid/Bruxelles-Midi");
+        assertEquals(1, stations.size());
+        assertEquals("008814001", stations.getFirst().getIrailId());
+    }
+
     @Test
     void getStationFromId() {
         Station station = dao.getStationFromId("008812005");
         assertNotNull(station);
         assertEquals("Brussel-Noord/Bruxelles-Nord", station.getName());
+    }
+
+
+    @Test
+    void memorizeExternalStop_normalCase_shouldAfterwardsBeFoundById() {
+        Station station = dao.getStationFromId("00123456");
+        assertNull(station);
+
+        dao.memorizeExternalStop(new Station("http://irail.be/stations/NMBS/00123456", "Test stop", 1d, 2d));
+
+        station = dao.getStationFromId("00123456");
+        assertNotNull(station);
+        assertEquals("123456", station.getHafasId());
+        assertEquals("Test stop", station.getName());
+    }
+
+    @Test
+    void memorizeExternalStop_normalCase_shouldAfterwardsBeFoundByName() {
+        List<Station> stations = dao.getStations("test");
+        assertEquals(0, stations.size());
+
+        dao.memorizeExternalStop(new Station("http://irail.be/stations/NMBS/00123456", "Test stop", 1d, 2d));
+
+        stations = dao.getStations("test");
+        assertEquals(1, stations.size());
+        assertEquals("00123456", stations.getFirst().getIrailId());
+        assertEquals("Test stop", stations.getFirst().getName());
     }
 
     @Test

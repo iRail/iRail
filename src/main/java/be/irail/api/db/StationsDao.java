@@ -24,23 +24,19 @@ import java.util.stream.Collectors;
 public class StationsDao {
 
     private static final Logger log = LoggerFactory.getLogger(StationsDao.class);
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    private Map<String, Station> stationsById;
-    private List<Station> stationsSortedBySize;
     private static final int STATION_SEARCH_RESULT_COUNT = 5;
-
     private final Cache<String, Optional<Station>> stationByIdCache = CacheBuilder.newBuilder()
             .maximumSize(3600)
             .expireAfterWrite(8, TimeUnit.HOURS)
             .build();
-
     private final Cache<String, List<Station>> stationByNameCache = CacheBuilder.newBuilder()
             .maximumSize(3600)
             .expireAfterWrite(4, TimeUnit.HOURS)
             .build();
+    @PersistenceContext
+    private EntityManager entityManager;
+    private Map<String, Station> stationsById;
+    private List<Station> stationsSortedBySize;
 
     /**
      * Gets you stations in a list ordered by relevance to the optional query.
@@ -61,11 +57,12 @@ public class StationsDao {
                 String normalizedQuery = standardizeQuery(query);
                 normalizedQuery = normalizeAccents(normalizedQuery);
                 normalizedQuery = normalize(normalizedQuery);
+                StationNameMatcher matcher = StationNameMatcher.forQuery(normalizedQuery);
                 int count = 0;
                 List<Station> resultStations = new ArrayList<>();
 
                 for (Station station : this.stationsSortedBySize) {
-                    StationMatchResult stationMatchResult = evaluateStationMatch(station, normalizedQuery);
+                    StationMatchResult stationMatchResult = evaluateStationMatch(station, matcher);
 
                     if (stationMatchResult.exactMatch()) {
                         putInFirstPlace(resultStations, station);
@@ -89,11 +86,31 @@ public class StationsDao {
         }
     }
 
-    private static void sortStationResult(List<Station> resultStations) {
-        resultStations.sort(Comparator.comparing(Station::getAvgStopTimes, Comparator.nullsLast(Comparator.reverseOrder())));
+    /**
+     * Add a (temporary) station to the list of stations, in case a station discovered from the GTFS data or
+     * API responses is missing in the database. Data is not persisted to the database to ensure data quality.
+     * <p>
+     * TODO: Store stations in a separate database table, with a way to accept or reject them. When accepted,
+     *       their data should be completed.
+     *
+     * @param station The station to store
+     */
+    public synchronized void memorizeExternalStop(Station station) {
+        initializeStations();
+        if (stationsById.containsKey(station.getIrailId())) {
+            log.error("Station {} already exists in database, not memorizing it", station.getName());
+        }
+        // Stops are only loaded at application startup, so in practice temporary stops will be memorized until a restart
+        log.warn("Adding station {} to stations list, will be forgotten on next reload from database", station.getName());
+        stationsSortedBySize.add(station);
+        stationsById.put(station.getIrailId(), station);
+        // Reset caches to ensure the new station is found in method calls after this one
+        log.warn("Invalidating caches after adding station {}", station.getName());
+        stationByIdCache.invalidateAll();
+        stationByNameCache.invalidateAll();
     }
 
-    private StationsDao.StationMatchResult evaluateStationMatch(Station station, String normalizedQuery) {
+    private StationsDao.StationMatchResult evaluateStationMatch(Station station, StationNameMatcher matcher) {
         boolean exactMatch = false;
         boolean partialMatch = false;
 
@@ -107,12 +124,12 @@ public class StationsDao {
             String testStationName = normalize(normalizeAccents(name));
             testStationName = testStationName.replaceAll("([- ])+", " ");
 
-            if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
+            if (matcher.isEqualCaseInsensitive(testStationName)) {
                 exactMatch = true;
                 break;
             }
 
-            if (isQueryPartOfName(normalizedQuery, testStationName)) {
+            if (matcher.isQueryPartOfName(testStationName)) {
                 partialMatch = true;
             }
         }
@@ -270,18 +287,6 @@ public class StationsDao {
         return str;
     }
 
-    private boolean isQueryPartOfName(String query, String testStationName) {
-        Pattern pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(testStationName).find()
-                || pattern.matcher(testStationName.replace("'", " ")).find();
-    }
-
-    private boolean isEqualCaseInsensitive(String query, String testStationName) {
-        Pattern pattern = Pattern.compile("^" + query + "$", Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(testStationName).matches()
-                || pattern.matcher(testStationName.replace("'", " ")).matches();
-    }
-
     private void putInFirstPlace(List<Station> list, Station value) {
         list.remove(value);
         list.addFirst(value);
@@ -304,18 +309,51 @@ public class StationsDao {
         if (this.stationsById != null) {
             return;
         }
-        forceInitializeStations();
+        updateStationsFromDatabase();
     }
 
-    public synchronized void forceInitializeStations() {
+    synchronized void updateStationsFromDatabase() {
         log.info("Loading stations from database");
         List<Station> allStations = entityManager.createQuery("SELECT s FROM Station s", Station.class).getResultList();
         stationsSortedBySize = allStations.stream()
                 .sorted(Comparator.comparing(Station::getAvgStopTimes, Comparator.nullsLast(Comparator.reverseOrder())))
-                .toList();
+                .collect(Collectors.toList());
 
-        this.stationsById = allStations.stream().collect(Collectors.toMap(Station::getIrailId, station -> station));
+        stationsById = new HashMap<>();
+        for (Station station : allStations) {
+            stationsById.put(station.getIrailId(), station);
+        }
         log.info("Loaded {} stations from database", allStations.size());
+    }
+
+    /**
+     * The compiled matchers for a single search query.
+     * <p>
+     * The query originates from a request parameter, so it is quoted before being compiled: a station name is never a
+     * regular expression, and treating it as one made {@code ?station=Brussel)} fail to compile while
+     * {@code ?station=.*} matched every station in the list.
+     * <p>
+     * Both patterns only depend on the query, so they are built once per search rather than once per station name.
+     */
+    private record StationNameMatcher(Pattern exactPattern, Pattern partialPattern) {
+
+        private static StationNameMatcher forQuery(String normalizedQuery) {
+            String literalQuery = Pattern.quote(normalizedQuery);
+            return new StationNameMatcher(
+                    Pattern.compile("^" + literalQuery + "$", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile(literalQuery, Pattern.CASE_INSENSITIVE)
+            );
+        }
+
+        private boolean isEqualCaseInsensitive(String testStationName) {
+            return exactPattern.matcher(testStationName).matches()
+                    || exactPattern.matcher(testStationName.replace("'", " ")).matches();
+        }
+
+        private boolean isQueryPartOfName(String testStationName) {
+            return partialPattern.matcher(testStationName).find()
+                    || partialPattern.matcher(testStationName.replace("'", " ")).find();
+        }
     }
 
     private record StationMatchResult(boolean exactMatch, boolean partialMatch) {
