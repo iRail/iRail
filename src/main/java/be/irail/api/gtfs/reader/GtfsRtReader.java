@@ -28,7 +28,9 @@ public class GtfsRtReader {
     private static final Logger log = LogManager.getLogger(GtfsRtReader.class);
 
     /** Fallback back-off when the upstream throttles without a Retry-After header. */
-    private static final long DEFAULT_COOLDOWN_SECONDS = 300;
+    private static final long DEFAULT_BACKOFF_SECONDS = 300;
+
+    private static final String USER_AGENT = "iRail-gtfs-rt";
 
     @Value("${gtfs.rt.url:https://sncb-opendata.hafas.de/gtfs/realtime/d22ad6759ee25bg84ddb6c818g4dc4de_TC}")
     private String gtfsRtUrl;
@@ -47,60 +49,63 @@ public class GtfsRtReader {
             .build();
 
     /** When throttled, do not fetch again before this instant. */
-    private volatile Instant cooldownUntil;
+    private Instant backoffUntil;
 
     /**
      * Fetches and parses the latest TripUpdates from the configured GTFS-Realtime endpoint.
      *
-     * @return the parsed FeedMessage, or null if in cooldown, throttled, or an error occurred
+     * @return the parsed FeedMessage, or null while backing off, when throttled, or on an error
      */
     public FeedMessage readTripUpdates() {
-        Instant until = cooldownUntil;
-        if (until != null && Instant.now().isBefore(until)) {
-            log.debug("GTFS-RT feed in cooldown until {}, skipping fetch", until);
-            return null;
+        FeedMessage feed = null;
+        if (isBackingOff()) {
+            log.debug("GTFS-RT feed backing off until {}, skipping fetch", backoffUntil);
+        } else {
+            log.info("Fetching GTFS-RT TripUpdates from {}", gtfsRtUrl);
+            try {
+                HttpResponse<byte[]> response = httpClient.send(buildRequest(), HttpResponse.BodyHandlers.ofByteArray());
+                int status = response.statusCode();
+                if (status == 200) {
+                    feed = FeedMessage.parseFrom(response.body());
+                } else if (status == 403 || status == 429) {
+                    startBackoff(response);
+                } else {
+                    log.error("GTFS-RT feed at {} returned unexpected status {}", gtfsRtUrl, status);
+                }
+            } catch (IOException e) {
+                log.error("Failed to read or parse GTFS-RT feed from {}", gtfsRtUrl, e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Interrupted while fetching GTFS-RT feed from {}", gtfsRtUrl, e);
+            }
         }
+        return feed;
+    }
 
+    private boolean isBackingOff() {
+        return backoffUntil != null && Instant.now().isBefore(backoffUntil);
+    }
+
+    private HttpRequest buildRequest() {
         HttpRequest.Builder request = HttpRequest.newBuilder()
                 .uri(URI.create(gtfsRtUrl))
                 .timeout(Duration.ofSeconds(20))
-                .header("User-Agent", "iRail/gtfs-rt (+https://api.irail.be)")
+                .header("User-Agent", USER_AGENT)
                 .GET();
         if (apiKey != null && !apiKey.isBlank()) {
             request.header(apiKeyHeader, apiKey);
         }
-
-        log.info("Fetching GTFS-RT TripUpdates from {}", gtfsRtUrl);
-        try {
-            HttpResponse<byte[]> response = httpClient.send(request.build(), HttpResponse.BodyHandlers.ofByteArray());
-            int status = response.statusCode();
-            if (status == 200) {
-                return FeedMessage.parseFrom(response.body());
-            }
-            if (status == 403 || status == 429) {
-                startCooldown(response);
-                return null;
-            }
-            log.error("GTFS-RT feed at {} returned unexpected status {}", gtfsRtUrl, status);
-            return null;
-        } catch (IOException e) {
-            log.error("Failed to read or parse GTFS-RT feed from {}", gtfsRtUrl, e);
-            return null;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Interrupted while fetching GTFS-RT feed from {}", gtfsRtUrl, e);
-            return null;
-        }
+        return request.build();
     }
 
     /** Starts a back-off window, honouring Retry-After (delta-seconds) when present. */
-    private void startCooldown(HttpResponse<byte[]> response) {
+    private void startBackoff(HttpResponse<byte[]> response) {
         long seconds = response.headers().firstValue("Retry-After")
                 .map(this::parseRetryAfterSeconds)
-                .orElse(DEFAULT_COOLDOWN_SECONDS);
-        cooldownUntil = Instant.now().plusSeconds(seconds);
+                .orElse(DEFAULT_BACKOFF_SECONDS);
+        backoffUntil = Instant.now().plusSeconds(seconds);
         log.warn("GTFS-RT feed at {} returned HTTP {} (quota/throttle); backing off {}s until {}",
-                gtfsRtUrl, response.statusCode(), seconds, cooldownUntil);
+                gtfsRtUrl, response.statusCode(), seconds, backoffUntil);
     }
 
     private long parseRetryAfterSeconds(String value) {
@@ -108,7 +113,7 @@ public class GtfsRtReader {
             return Math.max(0, Long.parseLong(value.trim()));
         } catch (NumberFormatException e) {
             // Retry-After may also be an HTTP-date; fall back rather than parse it precisely.
-            return DEFAULT_COOLDOWN_SECONDS;
+            return DEFAULT_BACKOFF_SECONDS;
         }
     }
 }
