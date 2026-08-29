@@ -124,6 +124,19 @@ class GtfsRtReaderTest {
     }
 
     @Test
+    void backsOffWhenTheKeyIsRejected() {
+        // A 401 is a key the gateway will not accept. Retrying it every 30s cannot succeed,
+        // and against a gateway that counts refusals it is the wrong thing to do.
+        responseStatus = 401;
+        GtfsRtReader reader = reader("a-stale-key");
+
+        assertNull(reader.readTripUpdates());
+        assertNull(reader.readTripUpdates());
+
+        assertEquals(1, receivedKeys.size(), "the second poll must not reach the gateway");
+    }
+
+    @Test
     void keepsPollingAfterAnUnexpectedStatus() {
         // A 500 is a transient upstream fault, not a quota decision, so it must not silence the
         // poller the way a 403 does.

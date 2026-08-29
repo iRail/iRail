@@ -19,8 +19,9 @@ import java.time.Instant;
  * Handles retrieval and parsing of TripUpdates in protobuf format. The source URL and,
  * when the upstream requires it, an API key header are configurable via application
  * properties or environment variables. Belgian Mobility (an Azure API Management gateway)
- * returns "403 Quota Exceeded" for unauthenticated or over-quota callers; on a 403 or 429
- * the reader honours Retry-After and backs off instead of hammering the endpoint.
+ * returns "403 Quota Exceeded" for unauthenticated or over-quota callers, and 401 for a key
+ * it does not accept; on a 401, 403 or 429 the reader honours Retry-After and backs off
+ * instead of hammering the endpoint.
  */
 @Service
 public class GtfsRtReader {
@@ -49,7 +50,7 @@ public class GtfsRtReader {
             .build();
 
     /** When throttled, do not fetch again before this instant. */
-    private Instant backoffUntil;
+    private volatile Instant backoffUntil;
 
     /**
      * Fetches and parses the latest TripUpdates from the configured GTFS-Realtime endpoint.
@@ -67,7 +68,7 @@ public class GtfsRtReader {
                 int status = response.statusCode();
                 if (status == 200) {
                     feed = FeedMessage.parseFrom(response.body());
-                } else if (status == 403 || status == 429) {
+                } else if (status == 401 || status == 403 || status == 429) {
                     startBackoff(response);
                 } else {
                     log.error("GTFS-RT feed at {} returned unexpected status {}", gtfsRtUrl, status);
@@ -104,8 +105,9 @@ public class GtfsRtReader {
                 .map(this::parseRetryAfterSeconds)
                 .orElse(DEFAULT_BACKOFF_SECONDS);
         backoffUntil = Instant.now().plusSeconds(seconds);
-        log.warn("GTFS-RT feed at {} returned HTTP {} (quota/throttle); backing off {}s until {}",
-                gtfsRtUrl, response.statusCode(), seconds, backoffUntil);
+        int status = response.statusCode();
+        log.warn("GTFS-RT feed at {} returned HTTP {} ({}); backing off {}s until {}",
+                gtfsRtUrl, status, status == 401 ? "rejected key" : "quota/throttle", seconds, backoffUntil);
     }
 
     private long parseRetryAfterSeconds(String value) {
