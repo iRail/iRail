@@ -7,6 +7,7 @@ import be.irail.api.gtfs.dao.models.GtfsConnection;
 import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 import be.irail.api.gtfs.reader.models.PickupDropoffType;
 import be.irail.api.gtfs.reader.models.Stop;
+import be.irail.api.util.IrailUri;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +26,7 @@ import java.util.*;
 public class LinkedConnectionsService {
     public static final String JSON_LD_MEDIA_TYPE = "application/ld+json";
     private static final String IRAIL_STATION_BASE = "http://irail.be/stations/NMBS/";
-    private static final String IRAIL_TRIP_BASE = "http://irail.be/vehicle/";
-    private static final String IRAIL_CONNECTION_BASE = "http://irail.be/connections/";
+    private static final String IRAIL_VEHICLE_BASE = "http://irail.be/vehicle/";
     private static final Duration REALTIME_LOOKAROUND = Duration.ofHours(24);
     private static final DateTimeFormatter INSTANT_FORMATTER = new DateTimeFormatterBuilder().appendInstant(3).toFormatter();
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
@@ -202,18 +202,24 @@ public class LinkedConnectionsService {
     }
 
     private String connectionUri(GtfsConnection connection) {
-        return IRAIL_CONNECTION_BASE + pathSegment(connection.trip().id()) + "/"
-                + DATE_FORMATTER.format(connection.tripStartDate()) + "/" + connection.departureCall().stopSequence();
+        String hafasId = connection.departureStop().getHafasId();
+        String stationId = hafasId == null ? connection.departureStop().id() : hafasId;
+        LocalDate departureDate = connection.departureCall().getDepartureTime(connection.tripStartDate()).toLocalDate();
+        return IrailUri.connection(stationId, departureDate, vehicleId(connection));
     }
 
     private String tripUri(GtfsConnection connection) {
-        String label = connection.route() == null ? "" : Objects.toString(connection.route().shortName(), "");
-        return IRAIL_TRIP_BASE + pathSegment(label + connection.trip().shortName()) + "/"
+        return IRAIL_VEHICLE_BASE + pathSegment(vehicleId(connection)) + "/"
                 + DATE_FORMATTER.format(connection.tripStartDate());
     }
 
     private String routeUri(GtfsConnection connection) {
-        return "http://irail.be/routes/" + pathSegment(connection.trip().routeId());
+        return IRAIL_VEHICLE_BASE + pathSegment(vehicleId(connection));
+    }
+
+    private String vehicleId(GtfsConnection connection) {
+        String label = connection.route() == null ? "" : Objects.toString(connection.route().shortName(), "");
+        return label + connection.trip().shortName();
     }
 
     private String stationUri(Stop stop) {

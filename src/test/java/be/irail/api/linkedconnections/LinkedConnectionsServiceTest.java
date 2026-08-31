@@ -76,7 +76,13 @@ class LinkedConnectionsServiceTest {
         assertEquals("2026-08-20T07:55:00.000Z", json.get("gtfsRtVersion").asText());
         assertEquals("2026-08-20T08:01:00.000Z", json.get("@graph").get(0).get("departureTime").asText());
         assertEquals(60, json.get("@graph").get(0).get("departureDelay").asInt());
+        assertEquals("http://irail.be/connections/8814001/20260820/IC123",
+                json.get("@graph").get(0).get("@id").asText());
         assertEquals("http://irail.be/stations/NMBS/008814001", json.get("@graph").get(0).get("departureStop").asText());
+        assertEquals("http://irail.be/vehicle/IC123/20260820",
+                json.get("@graph").get(0).get("gtfs:trip").asText());
+        assertEquals("http://irail.be/vehicle/IC123",
+                json.get("@graph").get(0).get("gtfs:route").asText());
 
         var dataset = DatasetFactory.createTxnMem();
         assertDoesNotThrow(() -> RDFParser.fromString(jsonLd).lang(Lang.JSONLD11).parse(dataset.asDatasetGraph()));

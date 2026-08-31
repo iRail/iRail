@@ -79,10 +79,11 @@ class LinkedConnectionsFeedServiceTest {
         assertEquals("PT1H", json.at("/ldes:retentionPolicy/fullLogDuration").asText());
         assertEquals(1, json.get("tree:member").size());
         JsonNode member = json.get("tree:member").get(0);
-        assertTrue(member.get("@id").asText().contains("?version="));
+        assertTrue(member.get("@id").asText()
+                .startsWith("http://irail.be/connections/8814001/20260820/IC123?version="));
         assertEquals("2026-08-20T07:55:00.000Z", member.get("modified").asText());
         assertEquals(60, member.get("departureDelay").asInt());
-        assertEquals("http://irail.be/connections/trip%3A123/20260820/1",
+        assertEquals("http://irail.be/connections/8814001/20260820/IC123",
                 member.get("isVersionOf").get("@id").asText());
 
         var dataset = DatasetFactory.createTxnMem();
