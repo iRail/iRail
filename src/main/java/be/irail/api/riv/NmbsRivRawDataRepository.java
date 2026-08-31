@@ -39,7 +39,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,18 +57,20 @@ public class NmbsRivRawDataRepository {
             .maximumSize(2000)
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-    /**
-     * Upper bound on the searches {@link #getJourneyDetailRefAlt} may make for a single vehicle.
-     * Every search is one outgoing RIV call, and the alternatives list holds one entry per pair of
-     * consecutive stops, so an unbounded search on a long journey spends more than a whole minute of
-     * the {@code nmbs.riv.limitRpm} budget on one vehicle and rate limits every other request behind
-     * it. The cancelled origin and destination stops this search exists for are found in its first
-     * few attempts.
-     */
-    private static final int MAX_ALTERNATIVE_JOURNEY_REF_SEARCHES = 6;
     private static final Cache<JourneyDetailRefKey, Optional<String>> journeyDetailRefCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(4, TimeUnit.HOURS)
+            .build();
+    /**
+     * Journey-ref lookups that failed for a reason which says nothing about the vehicle: a rate
+     * limit, a timeout, an upstream that is down. Like {@link #journeyDetailRefCache} this keeps
+     * retrying clients off an upstream that is already struggling, but over minutes rather than
+     * hours, because the answer it is holding on to is "we could not ask", not "there is no such
+     * journey" - and that stops being true as soon as the upstream recovers.
+     */
+    private static final Cache<JourneyDetailRefKey, IrailHttpException> journeyDetailRefFailureCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -141,9 +142,7 @@ public class NmbsRivRawDataRepository {
             int journeyNumber = VehicleIdTools.extractTrainNumber(request.vehicleId());
             var cacheKey = new JourneyDetailRefKey(journeyNumber, request.dateTime().toLocalDate());
 
-            Optional<String> journeyDetailRef = journeyDetailRefCache.get(cacheKey,
-                    () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
-            );
+            Optional<String> journeyDetailRef = lookupJourneyDetailRef(cacheKey, journeyNumber, request);
             String journeyDetailRefValue = journeyDetailRef
                     .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
             try {
@@ -152,14 +151,40 @@ public class NmbsRivRawDataRepository {
                 // A cached journeyDetailRef may no longer be valid
                 log.warn("JourneyDetailRef {} is no longer valid, fetching new one", journeyDetailRefValue);
                 journeyDetailRefCache.invalidate(cacheKey);
-                journeyDetailRef = journeyDetailRefCache.get(cacheKey,
-                        () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
-                );
+                journeyDetailRef = lookupJourneyDetailRef(cacheKey, journeyNumber, request);
                 journeyDetailRefValue = journeyDetailRef
                         .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
                 log.warn("Obtained new journey detail ref {}", journeyDetailRefValue);
                 return getJourneyDetailResponse(journeyDetailRefValue, language);
             }
+        }
+    }
+
+    /**
+     * Look up a journey detail reference, remembering both outcomes so a repeated request does not
+     * hit RIV again: a resolved or genuinely absent reference in {@link #journeyDetailRefCache}, a
+     * lookup that could not reach RIV in the shorter-lived {@link #journeyDetailRefFailureCache}.
+     *
+     * @throws IrailHttpException if this lookup, or a recent one for the same vehicle and date,
+     *                            could not reach RIV
+     */
+    private Optional<String> lookupJourneyDetailRef(JourneyDetailRefKey cacheKey, int journeyNumber, VehicleJourneyRequest request)
+            throws ExecutionException {
+        IrailHttpException recentFailure = journeyDetailRefFailureCache.getIfPresent(cacheKey);
+        if (recentFailure != null) {
+            log.debug("Not retrying journey ref for {} yet, the last attempt could not reach RIV", request.vehicleId());
+            throw recentFailure;
+        }
+        try {
+            return journeyDetailRefCache.get(cacheKey,
+                    () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
+            );
+        } catch (UncheckedExecutionException e) {
+            if (e.getCause() instanceof IrailHttpException cause) {
+                journeyDetailRefFailureCache.put(cacheKey, cause);
+                throw cause;
+            }
+            throw e;
         }
     }
 
@@ -246,9 +271,9 @@ public class NmbsRivRawDataRepository {
 
     /**
      * Whether a failed journey-ref search reflects an answer from RIV, rather than our inability to
-     * ask it one. Only a conclusive failure may be remembered by {@link #journeyDetailRefCache} or
-     * skipped past by {@link #getJourneyDetailRefAlt}: an inconclusive failure says nothing about
-     * the vehicle, so caching it pins that vehicle to 404 for the lifetime of the entry.
+     * ask it one. Only a conclusive failure may be skipped past by {@link #getJourneyDetailRefAlt}
+     * and remembered as "no such journey" in {@link #journeyDetailRefCache}; an inconclusive one
+     * goes to {@link #journeyDetailRefFailureCache} instead, which forgets it far sooner.
      */
     static boolean isConclusiveJourneyRefFailure(IrailHttpException e) {
         // Thrown when RIV returns an errorText for the stretch being searched - it answered, with
@@ -278,35 +303,23 @@ public class NmbsRivRawDataRepository {
     private String getJourneyDetailRefAlt(VehicleJourneyRequest request, JourneyWithOriginAndDestination vehicle) {
         List<JourneyWithOriginAndDestination> alternatives = GtfsInMemoryDao.getInstance().getAlternativeVehicleWithOriginAndDestination(vehicle);
 
-        for (int index : alternativeSearchOrder(alternatives.size(), MAX_ALTERNATIVE_JOURNEY_REF_SEARCHES)) {
-            JourneyWithOriginAndDestination alt = alternatives.get(index);
-            log.debug("Searching for vehicle {} using alternative segments: {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), index);
-            String journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
-            if (journeyRef != null) {
-                return journeyRef;
-            }
-        }
-        return null;
-    }
+        int i = 0;
+        String journeyRef = null;
+        while (journeyRef == null && i < alternatives.size() / 2) {
+            JourneyWithOriginAndDestination alt = alternatives.get(i);
+            log.debug("Searching for vehicle {} using alternative segments: {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), i);
+            journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
 
-    /**
-     * The alternative stretches to search, as indexes into the alternatives list, in the order they
-     * should be tried. Alternates between the front and the back of the journey, since cancelled
-     * first and last stops are the most common reason the plain search comes up empty.
-     *
-     * @param alternativeCount the number of available origin-destination stretches
-     * @param maxSearches      the most searches this lookup is allowed to make
-     * @return the indexes to search, at most {@code maxSearches} of them
-     */
-    static List<Integer> alternativeSearchOrder(int alternativeCount, int maxSearches) {
-        List<Integer> order = new ArrayList<>();
-        for (int i = 0; i < alternativeCount / 2 && order.size() < maxSearches; i++) {
-            order.add(i);
-            if (order.size() < maxSearches) {
-                order.add((alternativeCount - 1) - i);
+            if (journeyRef == null) {
+                // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
+                int j = (alternatives.size() - 1) - i;
+                alt = alternatives.get(j);
+                log.debug("Searching for vehicle {} using alternative segments {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), j);
+                journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
             }
+            i++;
         }
-        return order;
+        return journeyRef;
     }
 
     private CachedData<JsonNode> getJourneyDetailResponse(String journeyDetailRef, String language) {
