@@ -13,6 +13,17 @@ Native applications using the iRail API and created or supported by the iRail te
 
 API Documentation can be found at [https://docs.irail.be]().
 
+### Linked Connections change feed
+
+`GET /1.0/feed` publishes a single-page JSON-LD Linked Data Event Stream of
+realtime Linked Connections changes. Every member has an immutable,
+version-specific IRI and links to the stable connection with
+`dct:isVersionOf`. The feed retains all observed changes from the last hour;
+this sliding retention window is declared in the response as
+`ldes:retentionPolicy` with `ldes:fullLogDuration "PT1H"`. The in-memory
+history starts when the application starts and is rebuilt from subsequent
+GTFS-Realtime updates.
+
 ## Installation for development purposes ##
 
 * Step 1: Clone this repo
