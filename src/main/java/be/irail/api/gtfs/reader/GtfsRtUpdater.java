@@ -4,6 +4,7 @@ import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
 import be.irail.api.gtfs.reader.models.GtfsRtUpdate;
 import be.irail.api.gtfs.reader.models.Stop;
+import be.irail.api.linkedconnections.LinkedConnectionsEventLog;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -33,9 +34,11 @@ public class GtfsRtUpdater {
     public static final DateTimeFormatter DATEFORMAT_YYYYMMDD = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final GtfsRtReader gtfsRtReader;
+    private final LinkedConnectionsEventLog eventLog;
 
-    public GtfsRtUpdater(GtfsRtReader gtfsRtReader) {
+    public GtfsRtUpdater(GtfsRtReader gtfsRtReader, LinkedConnectionsEventLog eventLog) {
         this.gtfsRtReader = gtfsRtReader;
+        this.eventLog = eventLog;
     }
 
     /**
@@ -65,7 +68,10 @@ public class GtfsRtUpdater {
             }
         }
 
-        GtfsRtInMemoryDao.getInstance().update(delays, canceledTrips, timestamp.toInstant());
+        GtfsRtInMemoryDao realtimeDao = GtfsRtInMemoryDao.getInstance();
+        GtfsRtInMemoryDao.Snapshot previous = realtimeDao.getSnapshot();
+        realtimeDao.update(delays, canceledTrips, timestamp.toInstant());
+        eventLog.record(previous, realtimeDao.getSnapshot(), staticDao);
         log.info("Updated GTFS-RT with {} delay records", delays.size());
     }
 

@@ -202,6 +202,33 @@ public class GtfsInMemoryDao {
         return connections;
     }
 
+    /** Returns every adjacent stop pair for one active trip instance. */
+    public List<GtfsConnection> getConnectionsForTrip(String tripId, LocalDate startDate) {
+        Trip trip = tripsById.get(tripId);
+        if (trip == null || !calendarDatesByServiceId.get(trip.serviceId()).contains(startDate)) {
+            return List.of();
+        }
+
+        List<StopTime> calls = stopTimesByTripId.get(tripId);
+        if (calls.size() < 2) {
+            return List.of();
+        }
+
+        Route route = routes.get(trip.routeId());
+        List<GtfsConnection> connections = new ArrayList<>(calls.size() - 1);
+        for (int index = 0; index < calls.size() - 1; index++) {
+            StopTime departureCall = calls.get(index);
+            StopTime arrivalCall = calls.get(index + 1);
+            Stop departureStop = stationFor(departureCall.stopId());
+            Stop arrivalStop = stationFor(arrivalCall.stopId());
+            if (departureStop != null && arrivalStop != null) {
+                connections.add(new GtfsConnection(startDate, trip, route,
+                        departureCall, arrivalCall, departureStop, arrivalStop));
+            }
+        }
+        return List.copyOf(connections);
+    }
+
     private Stop stationFor(String stopId) {
         Stop stop = stops.get(stopId);
         if (stop == null || stop.parentStation() == null) {

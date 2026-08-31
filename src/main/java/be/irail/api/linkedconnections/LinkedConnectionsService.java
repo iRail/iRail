@@ -112,6 +112,11 @@ public class LinkedConnectionsService {
                 || departureUpdate != null && departureUpdate.cancelled()
                 || arrivalUpdate != null && arrivalUpdate.cancelled();
 
+        return render(connection, departureDelay, arrivalDelay, cancelled);
+    }
+
+    private RenderedConnection render(GtfsConnection connection, int departureDelay, int arrivalDelay,
+                                      boolean cancelled) {
         Instant departureTime = connection.departureCall().getDepartureTime(connection.tripStartDate())
                 .atZone(timetableZone).toInstant().plusSeconds(departureDelay);
         Instant arrivalTime = connection.arrivalCall().getArrivalTime(connection.tripStartDate())
@@ -135,6 +140,17 @@ public class LinkedConnectionsService {
         json.put("gtfs:pickupType", pickupDropoffUri(cancelled ? PickupDropoffType.NONE : connection.departureCall().pickupType()));
         json.put("gtfs:dropOffType", pickupDropoffUri(cancelled ? PickupDropoffType.NONE : connection.arrivalCall().dropOffType()));
         return new RenderedConnection(connectionId, departureTime, json);
+    }
+
+    Map<String, Object> renderVersion(LinkedConnectionsEventLog.ConnectionVersion version) {
+        LinkedConnectionsEventLog.RealtimeState state = version.state();
+        RenderedConnection rendered = render(version.connection(), state.departureDelay(), state.arrivalDelay(),
+                state.cancelled());
+        Map<String, Object> member = new LinkedHashMap<>(rendered.json());
+        member.put("@id", rendered.id() + "?version=" + pathSegment(formatInstant(version.timestamp())));
+        member.put("isVersionOf", id(rendered.id()));
+        member.put("modified", formatInstant(version.timestamp()));
+        return member;
     }
 
     private GtfsRtUpdate matchingUpdate(GtfsRtInMemoryDao.Snapshot realtimeSnapshot, GtfsConnection connection, String stopId) {
