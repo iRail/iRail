@@ -72,7 +72,7 @@ class LinkedConnectionsFeedServiceTest {
         GtfsRtInMemoryDao.Snapshot second = snapshot(Map.of(unchanged.stopId(), unchanged), unchangedVersion);
         eventLog.record(first, second, timetable);
 
-        String jsonLd = feedService.createFeed(URI.create("https://api.irail.be/1.0/feed"),
+        String jsonLd = feedService.createFeed(URI.create("https://api.irail.be/v1/feed"),
                 FIRST_VERSION.plusSeconds(30));
         JsonNode json = objectMapper.readTree(jsonLd);
 
@@ -102,7 +102,7 @@ class LinkedConnectionsFeedServiceTest {
         eventLog.record(snapshot(Map.of(), null),
                 snapshot(Map.of(delayed.stopId(), delayed), FIRST_VERSION), timetable);
 
-        String jsonLd = feedService.createFeed(URI.create("https://api.irail.be/1.0/feed"),
+        String jsonLd = feedService.createFeed(URI.create("https://api.irail.be/v1/feed"),
                 FIRST_VERSION.plus(Duration.ofHours(1)).plusNanos(1));
 
         assertTrue(objectMapper.readTree(jsonLd).get("tree:member").isEmpty());

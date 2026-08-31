@@ -13,7 +13,7 @@ import java.time.Instant;
 
 /** Publishes recent Linked Connections changes as a one-page LDES 1.0 feed. */
 @Component
-@Path("/1.0/feed")
+@Path("/v1/feed")
 public class LinkedConnectionsFeedController {
     private static final String CORS_HEADER = "Access-Control-Allow-Origin";
     private final LinkedConnectionsFeedService service;

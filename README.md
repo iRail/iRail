@@ -15,7 +15,7 @@ API Documentation can be found at [https://docs.irail.be]().
 
 ### Linked Connections change feed
 
-`GET /1.0/feed` publishes a single-page JSON-LD Linked Data Event Stream of
+`GET /v1/feed` publishes a single-page JSON-LD Linked Data Event Stream of
 realtime Linked Connections changes. Every member has an immutable,
 version-specific IRI and links to the stable connection with
 `dct:isVersionOf`. The feed retains all observed changes from the last hour;
