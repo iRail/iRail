@@ -61,6 +61,17 @@ public class NmbsRivRawDataRepository {
             .maximumSize(1000)
             .expireAfterWrite(4, TimeUnit.HOURS)
             .build();
+    /**
+     * Journey-ref lookups that failed for a reason which says nothing about the vehicle: a rate
+     * limit, a timeout, an upstream that is down. Like {@link #journeyDetailRefCache} this keeps
+     * retrying clients off an upstream that is already struggling, but over minutes rather than
+     * hours, because the answer it is holding on to is "we could not ask", not "there is no such
+     * journey" - and that stops being true as soon as the upstream recovers.
+     */
+    private static final Cache<JourneyDetailRefKey, IrailHttpException> journeyDetailRefFailureCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final Timer rivHttpRequestTimer = Metrics.getRegistry().timer("RIV-outgoing-requests");
@@ -131,9 +142,7 @@ public class NmbsRivRawDataRepository {
             int journeyNumber = VehicleIdTools.extractTrainNumber(request.vehicleId());
             var cacheKey = new JourneyDetailRefKey(journeyNumber, request.dateTime().toLocalDate());
 
-            Optional<String> journeyDetailRef = journeyDetailRefCache.get(cacheKey,
-                    () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
-            );
+            Optional<String> journeyDetailRef = lookupJourneyDetailRef(cacheKey, journeyNumber, request);
             String journeyDetailRefValue = journeyDetailRef
                     .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
             try {
@@ -142,14 +151,40 @@ public class NmbsRivRawDataRepository {
                 // A cached journeyDetailRef may no longer be valid
                 log.warn("JourneyDetailRef {} is no longer valid, fetching new one", journeyDetailRefValue);
                 journeyDetailRefCache.invalidate(cacheKey);
-                journeyDetailRef = journeyDetailRefCache.get(cacheKey,
-                        () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
-                );
+                journeyDetailRef = lookupJourneyDetailRef(cacheKey, journeyNumber, request);
                 journeyDetailRefValue = journeyDetailRef
                         .orElseThrow(() -> new JourneyNotFoundException(request.vehicleId(), request.dateTime().toLocalDate(), "JourneyDetailRef not found"));
                 log.warn("Obtained new journey detail ref {}", journeyDetailRefValue);
                 return getJourneyDetailResponse(journeyDetailRefValue, language);
             }
+        }
+    }
+
+    /**
+     * Look up a journey detail reference, remembering both outcomes so a repeated request does not
+     * hit RIV again: a resolved or genuinely absent reference in {@link #journeyDetailRefCache}, a
+     * lookup that could not reach RIV in the shorter-lived {@link #journeyDetailRefFailureCache}.
+     *
+     * @throws IrailHttpException if this lookup, or a recent one for the same vehicle and date,
+     *                            could not reach RIV
+     */
+    private Optional<String> lookupJourneyDetailRef(JourneyDetailRefKey cacheKey, int journeyNumber, VehicleJourneyRequest request)
+            throws ExecutionException {
+        IrailHttpException recentFailure = journeyDetailRefFailureCache.getIfPresent(cacheKey);
+        if (recentFailure != null) {
+            log.debug("Not retrying journey ref for {} yet, the last attempt could not reach RIV", request.vehicleId());
+            throw recentFailure;
+        }
+        try {
+            return journeyDetailRefCache.get(cacheKey,
+                    () -> Optional.ofNullable(getJourneyDetailRef(journeyNumber, request))
+            );
+        } catch (UncheckedExecutionException e) {
+            if (e.getCause() instanceof IrailHttpException cause) {
+                journeyDetailRefFailureCache.put(cacheKey, cause);
+                throw cause;
+            }
+            throw e;
         }
     }
 
@@ -225,10 +260,26 @@ public class NmbsRivRawDataRepository {
                 return null;
             }
             return response.getValue().path("Trip").path(0).path("LegList").path("Leg").path(0).path("JourneyDetailRef").path("ref").asText(null);
-        } catch (Exception e) {
+        } catch (IrailHttpException e) {
+            if (!isConclusiveJourneyRefFailure(e)) {
+                throw e;
+            }
             log.debug("Failed to find journey ref between stops: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Whether a failed journey-ref search reflects an answer from RIV, rather than our inability to
+     * ask it one. Only a conclusive failure may be skipped past by {@link #getJourneyDetailRefAlt}
+     * and remembered as "no such journey" in {@link #journeyDetailRefCache}; an inconclusive one
+     * goes to {@link #journeyDetailRefFailureCache} instead, which forgets it far sooner.
+     */
+    static boolean isConclusiveJourneyRefFailure(IrailHttpException e) {
+        // Thrown when RIV returns an errorText for the stretch being searched - it answered, with
+        // "no journey here". Rate limits, unavailability and timeouts mean the question never got
+        // through, and say nothing about whether the vehicle exists.
+        return e instanceof UpstreamServerParameterException;
     }
 
     /**
@@ -262,8 +313,8 @@ public class NmbsRivRawDataRepository {
             if (journeyRef == null) {
                 // Alternate searching from the front and the back, since cancelled first/last stops are the most common.
                 int j = (alternatives.size() - 1) - i;
-                log.debug("Searching for vehicle {} using alternative segments {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), j);
                 alt = alternatives.get(j);
+                log.debug("Searching for vehicle {} using alternative segments {} - {}, {}", request.vehicleId(), alt.getOriginStopId(), alt.getDestinationStopId(), j);
                 journeyRef = queryVehicleJourneyRef(alt, LocalTime.now());
             }
             i++;
