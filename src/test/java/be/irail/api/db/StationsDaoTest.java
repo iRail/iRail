@@ -2,6 +2,8 @@ package be.irail.api.db;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -77,6 +79,32 @@ class StationsDaoTest {
         assertNotNull(stations);
         assertEquals(1, stations.size());
         assertEquals("Moûtiers-Salins-Brides-les-Bai", stations.getFirst().getName());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Brussel)", "Brugge(", "Gent[", "Brussel+", "Li*ge", "Namur?", "\\\\Brussel"})
+    void getStations_queryContainingRegexCharacters_shouldNotFail(String query) {
+        // A station name is not a pattern. Compiling the query as one turned ordinary punctuation into a
+        // PatternSyntaxException, which surfaces as HTTP 500 on e.g. /v1/liveboard?station=Brussel)
+        // and /v1/connections?from=Brussel).
+        List<Station> stations = assertDoesNotThrow(() -> dao.getStations(query));
+        assertTrue(stations.isEmpty(), "No station name contains '" + query + "'");
+    }
+
+    @Test
+    void getStations_regexWildcardQuery_shouldBeMatchedLiterally() {
+        // ".*" is a valid pattern matching every name, so this used to report the first stations in the list
+        // as exact matches instead of returning nothing.
+        List<Station> stations = dao.getStations(".*");
+        assertTrue(stations.isEmpty(), "'.*' is not part of any station name");
+    }
+
+    @Test
+    void getStations_nameContainingRegexCharacters_shouldStillMatchLiterally() {
+        // Quoting must not break names that legitimately contain characters which are also metacharacters.
+        List<Station> stations = dao.getStations("Brussel-Zuid/Bruxelles-Midi");
+        assertEquals(1, stations.size());
+        assertEquals("008814001", stations.getFirst().getIrailId());
     }
 
     @Test

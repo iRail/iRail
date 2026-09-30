@@ -51,19 +51,44 @@ public class NmbsRivJourneyPlanningClient extends RivClient {
         if (json == null || json.isNull()) {
             throw new UpstreamServerException("The server did not return any data.");
         }
+        JsonNode trips = requireTripNode(json);
 
         JourneyPlanningSearchResult result = new JourneyPlanningSearchResult();
         result.setOriginStation(convertToModelStation(request.from(), request.language()));
         result.setDestinationStation(convertToModelStation(request.to(), request.language()));
 
         List<Journey> journeys = new ArrayList<>();
-        if (json.has("Trip") && json.get("Trip").isArray()) {
-            for (JsonNode tripNode : json.get("Trip")) {
+        if (trips.isArray()) {
+            for (JsonNode tripNode : trips) {
                 journeys.add(parseHafasTrip(request, tripNode));
             }
+        } else {
+            // A single result is not always wrapped in an array.
+            journeys.add(parseHafasTrip(request, trips));
         }
         result.setJourneys(journeys);
         return result;
+    }
+
+    /**
+     * Returns the Trip node of a journey planning response, or throws when it is absent.
+     * <p>
+     * A successful response always carries a Trip node, and "no journeys found" is reported upstream
+     * as errorCode SVC_NO_RESULT, which is raised before we get here. A response without Trip
+     * therefore means the upstream returned something we cannot interpret, such as the security
+     * layer's "7601 : _Threat.Requests : Enhanced Security request violation". Reporting that as an
+     * error beats returning an empty result set, which a client cannot tell apart from "there are
+     * genuinely no connections between these stations".
+     *
+     * @param json the parsed journey planning response
+     * @return the Trip node
+     */
+    static JsonNode requireTripNode(JsonNode json) {
+        JsonNode trips = json.get("Trip");
+        if (trips == null || trips.isNull()) {
+            throw new UpstreamServerException("The upstream server returned a response without journey planning data.");
+        }
+        return trips;
     }
 
     private Journey parseHafasTrip(JourneyPlanningRequest request, JsonNode tripNode) {

@@ -13,6 +13,7 @@ import be.irail.api.exception.upstream.UpstreamServerParameterException;
 import be.irail.api.exception.upstream.UpstreamServerUnavailableException;
 import be.irail.api.gtfs.dao.GtfsInMemoryDao;
 import be.irail.api.gtfs.dao.GtfsRtInMemoryDao;
+import be.irail.api.gtfs.reader.models.Stop;
 import be.irail.api.riv.requests.JourneyPlanningRequest;
 import be.irail.api.riv.requests.LiveboardRequest;
 import be.irail.api.riv.requests.VehicleJourneyRequest;
@@ -208,16 +209,10 @@ public class NmbsRivRawDataRepository {
      * Find the vehicle journey reference by searching between origin and destination stops.
      */
     private String queryVehicleJourneyRef(JourneyWithOriginAndDestination vehicle, LocalTime queryTime) {
-        String formattedDate = vehicle.tripStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedTime = queryTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-        String vehicleName = vehicle.getJourneyType() + vehicle.getJourneyNumber();
-
-        Map<String, String> params = new HashMap<>();
-        params.put("trainFilter", vehicleName);
-        params.put("originExtId", vehicle.getOriginStopId().replaceAll("_\\d+", ""));
-        params.put("destExtId", vehicle.getDestinationStopId().replaceAll("_\\d+", ""));
-        params.put("date", formattedDate);
-        params.put("time", formattedTime);
+        Map<String, String> params = journeyRefSearchParams(vehicle, queryTime);
+        if (params == null) {
+            return null;
+        }
 
         try {
             CachedData<JsonNode> response = makeApiCallToMobileRivApi("https://mobile-riv.api.belgianrail.be/riv/v1.0/journey", params);
@@ -229,6 +224,25 @@ public class NmbsRivRawDataRepository {
             log.debug("Failed to find journey ref between stops: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * The journey planner only accepts seven-digit HAFAS ids. Returns null when a stop has none
+     * (name-based international stops), since the search would be rejected anyway.
+     */
+    static Map<String, String> journeyRefSearchParams(JourneyWithOriginAndDestination vehicle, LocalTime queryTime) {
+        String originHafasId = Stop.getHafasId(vehicle.getOriginStopId());
+        String destinationHafasId = Stop.getHafasId(vehicle.getDestinationStopId());
+        if (originHafasId == null || destinationHafasId == null) {
+            return null;
+        }
+        Map<String, String> params = new HashMap<>();
+        params.put("trainFilter", vehicle.getJourneyType() + vehicle.getJourneyNumber());
+        params.put("originExtId", originHafasId);
+        params.put("destExtId", destinationHafasId);
+        params.put("date", vehicle.tripStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        params.put("time", queryTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        return params;
     }
 
     /**
@@ -356,7 +370,11 @@ public class NmbsRivRawDataRepository {
             if (response.statusCode() >= 500 && body.startsWith("ERROR reason : error : 9000")) {
                 throw new UpstreamServerUnavailableException();
             }
-            if (response.statusCode() >= 500) {
+            // Functional errors are reported by NMBS as HTTP 200 with an errorCode field, so any 4xx is an
+            // infrastructure or security-layer rejection, e.g. "7601 : _Threat.Requests : Enhanced Security
+            // request violation". Returning such a body would leave the caller with a response that parses
+            // fine but carries no journey data, which used to surface as an empty result set instead of an error.
+            if (response.statusCode() >= 400) {
                 throw new UpstreamServerException("Upstream server error: " + response.statusCode() + "\nBody: '" + body + "'");
             }
             return body;

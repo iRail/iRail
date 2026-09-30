@@ -122,4 +122,32 @@ public class Vehicle {
     public LocalDate getJourneyStartDate() {
         return this.journeyStartDate;
     }
+
+    /**
+     * Two vehicles describe the same dated journey when their type, number and start date match. The direction is
+     * excluded: it is metadata about the same journey, filled in later and from different sources depending on the
+     * endpoint, so including it would make otherwise identical journeys unequal.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Vehicle other)) {
+            return false;
+        }
+        return number == other.number
+                && Objects.equals(type, other.type)
+                && Objects.equals(journeyStartDate, other.journeyStartDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, number, journeyStartDate);
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " on " + journeyStartDate;
+    }
 }

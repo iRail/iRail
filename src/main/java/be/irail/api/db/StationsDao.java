@@ -57,11 +57,12 @@ public class StationsDao {
                 String normalizedQuery = standardizeQuery(query);
                 normalizedQuery = normalizeAccents(normalizedQuery);
                 normalizedQuery = normalize(normalizedQuery);
+                StationNameMatcher matcher = StationNameMatcher.forQuery(normalizedQuery);
                 int count = 0;
                 List<Station> resultStations = new ArrayList<>();
 
                 for (Station station : this.stationsSortedBySize) {
-                    StationMatchResult stationMatchResult = evaluateStationMatch(station, normalizedQuery);
+                    StationMatchResult stationMatchResult = evaluateStationMatch(station, matcher);
 
                     if (stationMatchResult.exactMatch()) {
                         putInFirstPlace(resultStations, station);
@@ -109,7 +110,7 @@ public class StationsDao {
         stationByNameCache.invalidateAll();
     }
 
-    private StationsDao.StationMatchResult evaluateStationMatch(Station station, String normalizedQuery) {
+    private StationsDao.StationMatchResult evaluateStationMatch(Station station, StationNameMatcher matcher) {
         boolean exactMatch = false;
         boolean partialMatch = false;
 
@@ -123,12 +124,12 @@ public class StationsDao {
             String testStationName = normalize(normalizeAccents(name));
             testStationName = testStationName.replaceAll("([- ])+", " ");
 
-            if (isEqualCaseInsensitive(normalizedQuery, testStationName)) {
+            if (matcher.isEqualCaseInsensitive(testStationName)) {
                 exactMatch = true;
                 break;
             }
 
-            if (isQueryPartOfName(normalizedQuery, testStationName)) {
+            if (matcher.isQueryPartOfName(testStationName)) {
                 partialMatch = true;
             }
         }
@@ -286,18 +287,6 @@ public class StationsDao {
         return str;
     }
 
-    private boolean isQueryPartOfName(String query, String testStationName) {
-        Pattern pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(testStationName).find()
-                || pattern.matcher(testStationName.replace("'", " ")).find();
-    }
-
-    private boolean isEqualCaseInsensitive(String query, String testStationName) {
-        Pattern pattern = Pattern.compile("^" + query + "$", Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(testStationName).matches()
-                || pattern.matcher(testStationName.replace("'", " ")).matches();
-    }
-
     private void putInFirstPlace(List<Station> list, Station value) {
         list.remove(value);
         list.addFirst(value);
@@ -335,6 +324,36 @@ public class StationsDao {
             stationsById.put(station.getIrailId(), station);
         }
         log.info("Loaded {} stations from database", allStations.size());
+    }
+
+    /**
+     * The compiled matchers for a single search query.
+     * <p>
+     * The query originates from a request parameter, so it is quoted before being compiled: a station name is never a
+     * regular expression, and treating it as one made {@code ?station=Brussel)} fail to compile while
+     * {@code ?station=.*} matched every station in the list.
+     * <p>
+     * Both patterns only depend on the query, so they are built once per search rather than once per station name.
+     */
+    private record StationNameMatcher(Pattern exactPattern, Pattern partialPattern) {
+
+        private static StationNameMatcher forQuery(String normalizedQuery) {
+            String literalQuery = Pattern.quote(normalizedQuery);
+            return new StationNameMatcher(
+                    Pattern.compile("^" + literalQuery + "$", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile(literalQuery, Pattern.CASE_INSENSITIVE)
+            );
+        }
+
+        private boolean isEqualCaseInsensitive(String testStationName) {
+            return exactPattern.matcher(testStationName).matches()
+                    || exactPattern.matcher(testStationName.replace("'", " ")).matches();
+        }
+
+        private boolean isQueryPartOfName(String testStationName) {
+            return partialPattern.matcher(testStationName).find()
+                    || partialPattern.matcher(testStationName.replace("'", " ")).find();
+        }
     }
 
     private record StationMatchResult(boolean exactMatch, boolean partialMatch) {

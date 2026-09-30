@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +72,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
      * @param typeOfTransport the type of transport filter
      * @param lang            the language for response data
      * @param format          the response format
+     * @param results         the maximum number of connections to return
      * @return the journey planning result
      */
     @GET
@@ -84,12 +86,14 @@ public class JourneyPlanningV1Controller extends V1Controller {
             @QueryParam("timesel") String timeselLowercase,
             @QueryParam("typeOfTransport") @DefaultValue("automatic") String typeOfTransport,
             @QueryParam("lang") @DefaultValue("en") String lang,
-            @QueryParam("format") @DefaultValue("xml") String format) {
+            @QueryParam("format") @DefaultValue("xml") String format,
+            @QueryParam("results") String results) {
         V1_JOURNEYPLANNING_REQUEST_METER.mark();
         TimeSelection timeSelection = parseTimesel(timesel, timeselLowercase);
         Language language = RequestParser.parseLanguage(lang);
         Format outputFormat = RequestParser.parseFormat(format);
         TypeOfTransportFilter transportFilter = parseTypeOfTransport(typeOfTransport);
+        Integer resultLimit = parseResults(results);
 
         Station fromDbStation = resolveStation(from, "from", "Missing required parameter 'from' for origin");
         Station toDbStation = resolveStation(to, "to", "Missing required parameter 'to' for destination");
@@ -111,7 +115,7 @@ public class JourneyPlanningV1Controller extends V1Controller {
         try {
             DataRoot dataRoot = cache.get(request, () -> loadJourneyPlanningResult(request));
             // Serialize to output format
-            Response response = v1Response(dataRoot, outputFormat);
+            Response response = v1Response(limitConnections(dataRoot, resultLimit), outputFormat);
             V1_JOURNEYPLANNING_SUCCESS_REQUEST_METER.mark();
             return response;
         } catch (UncheckedExecutionException | ExecutionException exception) {
@@ -126,6 +130,52 @@ public class JourneyPlanningV1Controller extends V1Controller {
             }
             throw new InternalProcessingException("Error fetching connections: " + exception.getCause().getMessage(), exception.getCause());
         }
+    }
+
+    /**
+     * Parses the optional 'results' parameter, which caps how many connections are returned.
+     *
+     * @param results the raw parameter value, may be null or empty
+     * @return the requested maximum, or null when the caller did not ask for a limit
+     */
+    static Integer parseResults(String results) {
+        if (results == null || results.isBlank()) {
+            return null;
+        }
+        int parsed;
+        try {
+            parsed = Integer.parseInt(results.trim());
+        } catch (NumberFormatException exception) {
+            throw new BadRequestException("Expected a positive whole number", "results", results);
+        }
+        if (parsed < 1) {
+            throw new BadRequestException("Expected a positive whole number", "results", results);
+        }
+        return parsed;
+    }
+
+    /**
+     * Limits the number of connections in the response.
+     * <p>
+     * Returns a copy rather than modifying the DataRoot in place: results are cached per journey
+     * planning request, and that cache is shared by callers asking for different numbers of results.
+     * Upstream is still queried for the full set, so a limited request reuses the same cache entry.
+     *
+     * @param dataRoot the full result
+     * @param limit    the maximum number of connections, or null for no limit
+     * @return a result with at most 'limit' connections
+     */
+    static DataRoot limitConnections(DataRoot dataRoot, Integer limit) {
+        if (limit == null
+                || !(dataRoot.connection instanceof Object[] connections)
+                || connections.length <= limit) {
+            return dataRoot;
+        }
+        DataRoot limited = new DataRoot(dataRoot.getRootName());
+        limited.version = dataRoot.version;
+        limited.timestamp = dataRoot.timestamp;
+        limited.connection = Arrays.copyOf(connections, limit);
+        return limited;
     }
 
     private static TimeSelection parseTimesel(String timesel, String timeselLowercase) {
