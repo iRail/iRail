@@ -32,16 +32,16 @@ public class GtfsReader {
     private static final Logger log = LogManager.getLogger(GtfsReader.class);
 
     private final String gtfsStaticUrl;
-    private final int readDaysBack;
-    private final int readDaysForward;
+    private final int readMonthsBack;
+    private final int readMonthsForward;
 
     @Autowired
     public GtfsReader(@Value("${gtfs.static.url}") String gtfsUrl,
-                      @Value("${gtfs.static.range.back}") int readDaysBack,
-                      @Value("${gtfs.static.range.forward}") int readDaysForward) {
+                      @Value("${gtfs.static.range.months.back:1}") int readMonthsBack,
+                      @Value("${gtfs.static.range.months.forward:4}") int readMonthsForward) {
         this.gtfsStaticUrl = gtfsUrl;
-        this.readDaysBack = readDaysBack;
-        this.readDaysForward = readDaysForward;
+        this.readMonthsBack = readMonthsBack;
+        this.readMonthsForward = readMonthsForward;
     }
 
     public GtfsData readGtfs() throws IOException {
@@ -56,7 +56,11 @@ public class GtfsReader {
                 in.transferTo(out);
             }
 
-            GtfsDaoImpl dao = new GtfsDaoImpl();
+            LocalDate today = LocalDate.now();
+            LocalDate firstDate = today.minusMonths(readMonthsBack);
+            LocalDate lastDate = today.plusMonths(readMonthsForward);
+            log.info("Keeping GTFS calendar dates from {} through {}", firstDate, lastDate);
+            GtfsDaoImpl dao = new DateFilteredGtfsDao(firstDate, lastDate);
             org.onebusaway.gtfs.serialization.GtfsReader reader = new org.onebusaway.gtfs.serialization.GtfsReader();
             reader.getEntityClasses().add(StopTimeOverrideEntity.class);
             reader.getEntityClasses().add(TranslationEntity.class);
@@ -115,15 +119,11 @@ public class GtfsReader {
                 .map(a -> new Agency(a.getId() != null ? a.getId() : "", a.getName(), a.getUrl(), a.getTimezone(), a.getLang(), a.getPhone(), a.getFareUrl(), null))
                 .toList();
 
-        LocalDate firstDate = LocalDate.now().minusDays(readDaysBack);
-        LocalDate lastdate = LocalDate.now().plusDays(readDaysForward);
         List<CalendarDate> calendarDates = dao.getAllCalendarDates().stream()
-                .filter(cd -> cd.getExceptionType() == 1) // Only ADDED days
                 .map(cd -> new CalendarDate(cd.getServiceId().getId(),
                         LocalDate.of(cd.getDate().getYear(), cd.getDate().getMonth(), cd.getDate().getDay())))
-                .filter(cd -> !cd.date().isBefore(firstDate) && !cd.date().isAfter(lastdate))
                 .toList();
-        log.info("Read {} calendar dates, kept {} within date range", dao.getAllCalendarDates().size(), calendarDates.size());
+        log.info("Read {} calendar dates within date range", calendarDates.size());
         Set<String> usedServiceIds = calendarDates.stream().map(CalendarDate::serviceId).collect(java.util.stream.Collectors.toSet());
 
         List<Trip> trips = dao.getAllTrips().stream()
