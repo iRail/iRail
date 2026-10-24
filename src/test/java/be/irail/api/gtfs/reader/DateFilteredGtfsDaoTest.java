@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DateFilteredGtfsDaoTest {
 
     @Test
-    void onlyStoresAddedDatesWithinInclusiveMonthWindow() {
+    void onlyStoresAddedDatesWithinInclusiveDayWindow() {
         LocalDate today = LocalDate.of(2026, 10, 31);
-        LocalDate firstDate = today.minusMonths(1);
-        LocalDate lastDate = today.plusMonths(4);
+        LocalDate firstDate = today.minusDays(2);
+        LocalDate lastDate = today.plusDays(62);
         DateFilteredGtfsDao dao = new DateFilteredGtfsDao(firstDate, lastDate);
 
         dao.saveEntity(calendarDate(1, firstDate.minusDays(1), ServiceCalendarDate.EXCEPTION_TYPE_ADD));

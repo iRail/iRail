@@ -40,10 +40,9 @@ iRail caches large amounts of data in memory. At least 2GB RAM is required.
 When using the docker image, use the `JAVA_TOOL_OPTIONS` environment variable to set memory flags, for example
 `-Xms1200M -Xmx1700M`.
 
-GTFS calendar dates are filtered during ingestion to keep one calendar month in the past through four months in the future,
-including both boundary dates. Configure this window with `gtfs.static.range.months.back` and
-`gtfs.static.range.months.forward` (replacing the former day-based `gtfs.static.range.back` and
-`gtfs.static.range.forward` settings). Trips and stop times without service in this window are excluded from the internal model.
+GTFS calendar dates are filtered during ingestion using `gtfs.static.range.back` and `gtfs.static.range.forward`,
+in days, including both boundary dates. These settings default to 2 days in the past and 62 days in the future.
+Trips and stop times without service in this window are excluded from the internal model.
 
 ## Update stations list ##
 

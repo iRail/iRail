@@ -32,16 +32,16 @@ public class GtfsReader {
     private static final Logger log = LogManager.getLogger(GtfsReader.class);
 
     private final String gtfsStaticUrl;
-    private final int readMonthsBack;
-    private final int readMonthsForward;
+    private final int readDaysBack;
+    private final int readDaysForward;
 
     @Autowired
     public GtfsReader(@Value("${gtfs.static.url}") String gtfsUrl,
-                      @Value("${gtfs.static.range.months.back:1}") int readMonthsBack,
-                      @Value("${gtfs.static.range.months.forward:4}") int readMonthsForward) {
+                      @Value("${gtfs.static.range.back:2}") int readDaysBack,
+                      @Value("${gtfs.static.range.forward:62}") int readDaysForward) {
         this.gtfsStaticUrl = gtfsUrl;
-        this.readMonthsBack = readMonthsBack;
-        this.readMonthsForward = readMonthsForward;
+        this.readDaysBack = readDaysBack;
+        this.readDaysForward = readDaysForward;
     }
 
     public GtfsData readGtfs() throws IOException {
@@ -57,8 +57,8 @@ public class GtfsReader {
             }
 
             LocalDate today = LocalDate.now();
-            LocalDate firstDate = today.minusMonths(readMonthsBack);
-            LocalDate lastDate = today.plusMonths(readMonthsForward);
+            LocalDate firstDate = today.minusDays(readDaysBack);
+            LocalDate lastDate = today.plusDays(readDaysForward);
             log.info("Keeping GTFS calendar dates from {} through {}", firstDate, lastDate);
             GtfsDaoImpl dao = new DateFilteredGtfsDao(firstDate, lastDate);
             org.onebusaway.gtfs.serialization.GtfsReader reader = new org.onebusaway.gtfs.serialization.GtfsReader();
