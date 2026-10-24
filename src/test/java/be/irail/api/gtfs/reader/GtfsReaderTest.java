@@ -37,6 +37,7 @@ class GtfsReaderTest {
             addFile(zip, "trips.txt", """
                     route_id,service_id,trip_id,trip_headsign,trip_short_name
                     route,%s,trip,Brussels,1234
+                    route,expired-service,expired-trip,Brussels,5678
                     """.formatted(serviceId));
             addFile(zip, "stops.txt", """
                     stop_id,stop_name,stop_lat,stop_lon
@@ -45,11 +46,16 @@ class GtfsReaderTest {
             addFile(zip, "stop_times.txt", """
                     trip_id,arrival_time,departure_time,stop_id,stop_sequence
                     trip,12:00:00,12:00:00,stop,1
+                    expired-trip,13:00:00,13:00:00,stop,1
                     """);
             addFile(zip, "calendar_dates.txt", """
                     service_id,date,exception_type
                     %s,%s,1
-                    """.formatted(serviceId, serviceDate));
+                    expired-service,%s,1
+                    expired-service,%s,1
+                    """.formatted(serviceId, serviceDate,
+                    LocalDate.now().minusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE),
+                    LocalDate.now().plusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE)));
             addFile(zip, "feed_info.txt", """
                     feed_publisher_name,feed_publisher_url,feed_lang
                     NMBS,https://www.belgiantrain.be,en
@@ -63,6 +69,10 @@ class GtfsReaderTest {
 
         assertEquals(serviceId, data.calendarDates().getFirst().serviceId());
         assertEquals(serviceId, data.trips().getFirst().serviceId());
+        assertEquals(1, data.calendarDates().size());
+        assertEquals(1, data.trips().size());
+        assertEquals(1, data.stopTimes().size());
+        assertEquals("trip", data.stopTimes().getFirst().tripId());
     }
 
     private void addFile(ZipOutputStream zip, String name, String content) throws IOException {
