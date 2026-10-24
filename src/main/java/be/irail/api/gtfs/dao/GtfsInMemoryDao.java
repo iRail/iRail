@@ -3,6 +3,7 @@ package be.irail.api.gtfs.dao;
 import be.irail.api.dto.Vehicle;
 import be.irail.api.exception.InternalProcessingException;
 import be.irail.api.exception.notfound.JourneyNotFoundException;
+import be.irail.api.gtfs.dao.models.GtfsConnection;
 import be.irail.api.gtfs.reader.GtfsReader;
 import be.irail.api.gtfs.reader.models.*;
 import be.irail.api.riv.JourneyWithOriginAndDestination;
@@ -156,6 +157,84 @@ public class GtfsInMemoryDao {
 
     public Stop getStop(StopTime stopTime, LocalDate startDate) {
         return stops.get(stopTime.stopId());
+    }
+
+    /**
+     * Returns all active, adjacent GTFS stop pairs with a scheduled departure in
+     * the half-open interval {@code [startTime, endTime)}.
+     */
+    public List<GtfsConnection> getConnections(LocalDateTime startTime, LocalDateTime endTime) {
+        if (!startTime.isBefore(endTime)) {
+            return List.of();
+        }
+
+        List<GtfsConnection> connections = new ArrayList<>();
+        for (LocalDate serviceDate = startTime.toLocalDate().minusDays(1);
+             !serviceDate.isAfter(endTime.toLocalDate());
+             serviceDate = serviceDate.plusDays(1)) {
+            // Copy the multimap view so this read can never mutate the timetable index.
+            Set<TripIdAndStartDate> activeTrips = new HashSet<>(tripIdsByDate.get(serviceDate));
+            for (TripIdAndStartDate activeTrip : activeTrips) {
+                List<StopTime> calls = stopTimesByTripId.get(activeTrip.tripId());
+                Trip trip = tripsById.get(activeTrip.tripId());
+                if (trip == null || calls.size() < 2) {
+                    continue;
+                }
+
+                Route route = routes.get(trip.routeId());
+                for (int index = 0; index < calls.size() - 1; index++) {
+                    StopTime departureCall = calls.get(index);
+                    StopTime arrivalCall = calls.get(index + 1);
+                    LocalDateTime departureTime = departureCall.getDepartureTime(activeTrip.startDate());
+                    if (departureTime.isBefore(startTime) || !departureTime.isBefore(endTime)) {
+                        continue;
+                    }
+
+                    Stop departureStop = stationFor(calls.get(index).stopId());
+                    Stop arrivalStop = stationFor(calls.get(index + 1).stopId());
+                    if (departureStop != null && arrivalStop != null) {
+                        connections.add(new GtfsConnection(activeTrip.startDate(), trip, route,
+                                departureCall, arrivalCall, departureStop, arrivalStop));
+                    }
+                }
+            }
+        }
+        return connections;
+    }
+
+    /** Returns every adjacent stop pair for one active trip instance. */
+    public List<GtfsConnection> getConnectionsForTrip(String tripId, LocalDate startDate) {
+        Trip trip = tripsById.get(tripId);
+        if (trip == null || !calendarDatesByServiceId.get(trip.serviceId()).contains(startDate)) {
+            return List.of();
+        }
+
+        List<StopTime> calls = stopTimesByTripId.get(tripId);
+        if (calls.size() < 2) {
+            return List.of();
+        }
+
+        Route route = routes.get(trip.routeId());
+        List<GtfsConnection> connections = new ArrayList<>(calls.size() - 1);
+        for (int index = 0; index < calls.size() - 1; index++) {
+            StopTime departureCall = calls.get(index);
+            StopTime arrivalCall = calls.get(index + 1);
+            Stop departureStop = stationFor(departureCall.stopId());
+            Stop arrivalStop = stationFor(arrivalCall.stopId());
+            if (departureStop != null && arrivalStop != null) {
+                connections.add(new GtfsConnection(startDate, trip, route,
+                        departureCall, arrivalCall, departureStop, arrivalStop));
+            }
+        }
+        return List.copyOf(connections);
+    }
+
+    private Stop stationFor(String stopId) {
+        Stop stop = stops.get(stopId);
+        if (stop == null || stop.parentStation() == null) {
+            return stop;
+        }
+        return stops.getOrDefault(stop.parentStation(), stop);
     }
 
     public List<CallAtStop> getCallsAtStop(String stopId, LocalDateTime startTime, LocalDateTime endTime, boolean timeFilterDepartures) {

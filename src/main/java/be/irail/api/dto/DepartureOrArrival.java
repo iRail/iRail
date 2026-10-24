@@ -1,7 +1,8 @@
 package be.irail.api.dto;
 
+import be.irail.api.util.IrailUri;
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Represents a vehicle stop, which can be either a departure from or an arrival at a station.
@@ -169,10 +170,7 @@ public class DepartureOrArrival {
         if (this.vehicle == null) {
             return null; // Not available on walking legs
         }
-        String dateStr = this.scheduledDateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String vehicleName = this.vehicle.getName().replace(" ", "");
-        return "http://irail.be/connections/" + this.station.getId().substring(2) + "/" +
-            dateStr + "/" + vehicleName;
+        return IrailUri.connection(this.station.getId(), this.scheduledDateTime.toLocalDate(), this.vehicle.getId());
     }
 
     /**
